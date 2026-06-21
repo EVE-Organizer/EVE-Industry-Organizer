@@ -4,6 +4,9 @@ function getAppRoot(): string {
   if (base.startsWith('/') && base !== '/') {
     return `${window.location.origin}${base}`
   }
+  if (base === './') {
+    return new URL('./', window.location.href).href
+  }
   return `${window.location.origin}/`
 }
 

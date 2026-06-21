@@ -28,12 +28,22 @@ pnpm run dev
 
 ## Build & deploy (GitHub Pages)
 
+Pushes to `main` deploy automatically via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+
+One-time setup in the repo on GitHub:
+
+1. **Settings → Pages → Build and deployment → Source:** GitHub Actions
+2. After the first successful run, the site is at  
+   https://eve-organizer.github.io/EVE-Industry-Organizer/
+
+Local production preview (same base path as Pages):
+
 ```bash
-pnpm run build
+VITE_BASE=/EVE-Industry-Organizer/ pnpm run build
 pnpm run preview
 ```
 
-Deploy the `dist/` folder. The app uses `base: './'` for relative asset paths on GitHub Pages.
+For local dev, `pnpm run dev` uses relative asset paths (`base: './'`).
 
 ## Fetch SDE and market data
 
