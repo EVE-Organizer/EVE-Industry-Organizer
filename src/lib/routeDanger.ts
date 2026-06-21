@@ -72,8 +72,16 @@ export interface RouteJumpDanger {
 
 export interface RouteDangerResult {
   jumps: RouteJumpDanger[]
+  /** Stargate transitions (ESI route is inclusive of origin and destination). */
+  gateJumps: number
   routeDanger: number
   band: DangerBand
+}
+
+/** ESI route arrays include origin and destination; gate jumps are edges between them. */
+export function routeGateJumps(routeSystemIds: number[]): number {
+  if (routeSystemIds.length <= 1) return 0
+  return routeSystemIds.length - 1
 }
 
 export function computeRouteDanger(
@@ -82,6 +90,7 @@ export function computeRouteDanger(
   securities: Map<number, number>,
   kills: Map<number, SystemKillStats>,
 ): RouteDangerResult {
+  const gateJumps = routeGateJumps(routeSystemIds)
   const jumps: RouteJumpDanger[] = routeSystemIds.map((systemId) => {
     const kill = kills.get(systemId)
     const security = securities.get(systemId) ?? 0
@@ -98,5 +107,5 @@ export function computeRouteDanger(
   })
 
   const routeDanger = jumps.length ? Math.max(...jumps.map((j) => j.danger)) : 0
-  return { jumps, routeDanger, band: dangerBand(routeDanger) }
+  return { jumps, gateJumps, routeDanger, band: dangerBand(routeDanger) }
 }

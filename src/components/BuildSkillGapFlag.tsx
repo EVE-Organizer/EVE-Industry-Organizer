@@ -1,6 +1,7 @@
 import type { MissingBuildSkill } from '@/lib/buildRequirements'
 import { formatSkillLevel } from '@/lib/skillFields'
 import { EveImage } from '@/components/EveImage'
+import { Tooltip } from '@/components/Tooltip'
 
 function buildSkillGapTooltip(missing: MissingBuildSkill[]): string {
   return missing
@@ -24,9 +25,10 @@ export function BuildSkillGapFlag({ missing, className = '', size = 14 }: BuildS
   const tooltip = buildSkillGapTooltip(missing)
 
   return (
-    <span
-      className={`tooltip tooltip-right inline-flex shrink-0 items-center before:max-w-xs before:text-left before:whitespace-normal before:content-[attr(data-tip)] ${className}`}
-      data-tip={tooltip}
+    <Tooltip
+      text={tooltip}
+      placement="right"
+      className={className}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
     >
@@ -42,6 +44,6 @@ export function BuildSkillGapFlag({ missing, className = '', size = 14 }: BuildS
           className="rounded-full"
         />
       </span>
-    </span>
+    </Tooltip>
   )
 }

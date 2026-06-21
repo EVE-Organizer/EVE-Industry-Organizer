@@ -1,4 +1,5 @@
 import type { HubConfig, StationRanking, SystemInfo } from '@/types'
+import { formatDecimal } from '@/lib/profit'
 
 export function rankStations(
   hubs: HubConfig[],
@@ -15,8 +16,8 @@ export function rankStations(
 
     const explanation =
       hub.id === 'jita'
-        ? `Build in ${hub.buildSystemName} (low cost index ~${(costIndex * 100).toFixed(1)}%), sell in ${hub.sellStationName}. Best liquidity in New Eden.`
-        : `Build and sell in ${hub.name}. Good regional hub with cost index ~${(costIndex * 100).toFixed(1)}%.`
+        ? `Build in ${hub.buildSystemName} (low cost index ~${formatDecimal(costIndex * 100, 1)}%), sell in ${hub.sellStationName}. Best liquidity in New Eden.`
+        : `Build and sell in ${hub.name}. Good regional hub with cost index ~${formatDecimal(costIndex * 100, 1)}%.`
 
     return {
       hub,

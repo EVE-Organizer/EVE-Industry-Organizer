@@ -4,7 +4,7 @@ import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
 import { buildTypeMap, buildPriceMap, getBlueprintForProduct, getBlueprintForBpo, getAllBlueprints, getHubMarket } from '@/services/data/sdeLoader'
 import { getMarketHistory, getPrice } from '@/services/market/marketService'
-import { filterHistoryByRange, formatIsk } from '@/lib/profit'
+import { filterHistoryByRange, formatIsk, formatDecimal } from '@/lib/profit'
 import { tierLabel } from '@/lib/blueprintGroups'
 import type { MarketHistoryEntry, TimeRange } from '@/types'
 import { PageHeader, LoadingState, LastUpdated } from '@/components/Layout'
@@ -164,7 +164,7 @@ export function ItemDetailPage() {
               valueClassName={productPrice && productPrice > 0 ? 'text-primary' : undefined}
             />
           ) : null}
-          <StatCard label="Volume (m³)" value={typeInfo.volume.toFixed(2)} />
+          <StatCard label="Volume (m³)" value={formatDecimal(typeInfo.volume, 2)} />
           {isBpoPage && manufacturedProduct ? (
             <StatCard
               label="Manufactures"
@@ -234,7 +234,7 @@ export function ItemDetailPage() {
           <>
             <div className="flex gap-4 text-sm mb-4">
               <span>Avg price: {formatIsk(avgPrice)}</span>
-              <span>Avg volume: {avgVolume.toFixed(1)}/day</span>
+              <span>Avg volume: {formatDecimal(avgVolume, 1)}/day</span>
               <span>{chartHistory.length} days</span>
             </div>
             <div className="overflow-x-auto max-h-80">

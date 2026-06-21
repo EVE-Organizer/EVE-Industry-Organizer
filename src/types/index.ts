@@ -82,6 +82,8 @@ export interface SystemInfo {
   name: string
   regionId: number
   security: number
+  /** Manufacturing cost index from ESI. Present only on active-industry systems. */
+  costIndex?: number
   hubId?: HubId
 }
 
@@ -146,8 +148,8 @@ export interface MarketHistoryEntry {
 
 export interface GlobalSettings {
   primaryHub: HubId
-  manufacturingRegionId: number
-  buildSystemId: number
+  /** Solar system ID where manufacturing jobs are run. Drives cost index and haul routes. */
+  manufacturingSystemId: number
   sellHubId: HubId
   meDefault: number
   teDefault: number
@@ -298,16 +300,22 @@ export interface SetupCostBreakdown {
   materialVolumeM3: number
   haulInIskPerM3: number
   haulIn: number
+  /** Haul costs left out of setup/profit when the ranking excludes hauling. */
+  haulExcluded?: boolean
   setupCost: number
 }
 
 /** How a blueprint's acquisition cost is charged into a batch. */
 export interface BlueprintCostBreakdown {
-  mode: 'bpo' | 'invention'
+  mode: 'bpo' | 'invention' | 'faction_bpc'
   /** Amortized (T1/faction) or consumable (T2) cost charged into this batch's profit. */
   charged: number
   /** Full cash to acquire the blueprint upfront for this batch. */
   upfront: number
+  /** Charge products (ammo, scripts) skip blueprint cost: one cheap BPO makes huge volume. */
+  chargeExcluded?: boolean
+  /** Hub has no sell order or history for this BPO; charged/upfront blueprint cost is 0. */
+  bpoPriceMissing?: boolean
   /** T1/faction (BPO). */
   bpoUnitPrice?: number
   researchFee?: number
@@ -356,6 +364,8 @@ export interface IphBreakdown {
   productVolumeM3: number
   haulOutIskPerM3: number
   haulOut: number
+  /** Haul costs left out of setup/profit when the ranking excludes hauling. */
+  haulExcluded?: boolean
   setupCost: number
   netProfit: number
   profitPerUnit: number
@@ -435,8 +445,7 @@ export interface StationRanking {
 
 export const DEFAULT_SETTINGS: GlobalSettings = {
   primaryHub: 'jita',
-  manufacturingRegionId: 10000002,
-  buildSystemId: 30000144,
+  manufacturingSystemId: 30000144,
   sellHubId: 'jita',
   meDefault: MAX_ME,
   teDefault: MAX_TE,

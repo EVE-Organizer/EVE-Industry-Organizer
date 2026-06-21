@@ -6,6 +6,7 @@ import { Panel } from '@/components/Panel'
 import { StatCard } from '@/components/StatCard'
 import { EveImage, CharacterAvatar, HubLogo, IskBadge } from '@/components/EveImage'
 import { PageHeader, LoadingState, formatIsk } from '@/components/Layout'
+import { formatNumber } from '@/lib/profit'
 import { NAV_TYPE_IDS } from '@/lib/eveImages'
 
 const QUICK_LINKS = [
@@ -61,7 +62,7 @@ export function DashboardPage() {
                 <span className="opacity-70">Goal {formatIsk(account.iskGoal)}</span>
               </div>
               <progress className="progress progress-warning w-full max-w-md h-2" value={iskProgress} max={100} />
-              <p className="text-xs opacity-60 mt-1">{iskProgress.toFixed(0)}% toward goal</p>
+              <p className="text-xs opacity-60 mt-1">{formatNumber(iskProgress, 0)}% toward goal</p>
             </div>
             <div className="hidden md:block shrink-0 opacity-80">
               <EveImage id={NAV_TYPE_IDS.dashboard} size={64} framed alt="" />

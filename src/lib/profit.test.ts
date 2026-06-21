@@ -1,5 +1,49 @@
-import { describe, expect, it } from 'vitest'
-import { formatIskInputUnit, parseIskInputUnit } from '@/lib/profit'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { MarketHistoryEntry } from '@/types'
+import { filterHistoryByRange, formatIskInputUnit, parseIskInputUnit, trimHistoryByDays } from '@/lib/profit'
+
+function historyEntry(date: string, average = 100): MarketHistoryEntry {
+  return { date, average, highest: average, lowest: average, volume: 10 }
+}
+
+describe('trimHistoryByDays', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('falls back to the latest trading day when ESI daily rows miss the rolling window', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-21T15:00:00Z'))
+
+    const history = [historyEntry('2026-06-19'), historyEntry('2026-06-20', 74_000)]
+
+    expect(trimHistoryByDays(history, 1)).toEqual([historyEntry('2026-06-20', 74_000)])
+  })
+
+  it('keeps rows inside the rolling window when they exist', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-21T15:00:00Z'))
+
+    const history = [historyEntry('2026-06-19'), historyEntry('2026-06-21', 80_000)]
+
+    expect(trimHistoryByDays(history, 1)).toEqual([historyEntry('2026-06-21', 80_000)])
+  })
+})
+
+describe('filterHistoryByRange', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('returns the latest trading day for 1d when ESI has not published today yet', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-21T15:00:00Z'))
+
+    const history = [historyEntry('2026-06-20', 74_000)]
+
+    expect(filterHistoryByRange(history, '1d')).toEqual([historyEntry('2026-06-20', 74_000)])
+  })
+})
 
 describe('formatIskInputUnit', () => {
   it('splits 5B into amount and unit for split input display', () => {

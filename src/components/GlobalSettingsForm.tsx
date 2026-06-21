@@ -10,6 +10,7 @@ import {
   MIN_BLUEPRINT_LIFETIME_RUNS,
   MAX_BLUEPRINT_LIFETIME_RUNS,
 } from '@/types'
+import { formatQuantity } from '@/lib/profit'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
@@ -98,7 +99,7 @@ export function GlobalSettingsForm({ settings, onChange, size = 'md' }: GlobalSe
             const hub = HUBS.find((h) => h.id === primaryHub)
             onChange({
               primaryHub,
-              ...(hub ? { manufacturingRegionId: hub.regionId } : {}),
+              ...(hub ? { manufacturingSystemId: hub.buildSystemId } : {}),
             })
           }}
         >
@@ -197,7 +198,7 @@ export function GlobalSettingsForm({ settings, onChange, size = 'md' }: GlobalSe
               label="BPO lifetime (runs)"
               tooltip={GLOBAL_SETTING_TOOLTIPS.blueprintLifetimeRuns}
               size={size}
-              valueLabel={settings.blueprintLifetimeRuns.toLocaleString()}
+              valueLabel={formatQuantity(settings.blueprintLifetimeRuns)}
             >
               <input
                 type="number"

@@ -105,9 +105,4 @@ export function LoadingState() {
   )
 }
 
-export function formatIsk(n: number) {
-  if (Math.abs(n) >= 1e9) return `${(n / 1e9).toFixed(2)}B`
-  if (Math.abs(n) >= 1e6) return `${(n / 1e6).toFixed(2)}M`
-  if (Math.abs(n) >= 1e3) return `${(n / 1e3).toFixed(1)}K`
-  return n.toFixed(0)
-}
+export { formatIsk } from '@/lib/profit'

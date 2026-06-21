@@ -11,10 +11,12 @@ import {
   buildTypeMap,
 } from '@/services/data/sdeLoader'
 import { ProductGroupPicker } from '@/components/ProductGroupPicker'
+import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
 import {
   defaultMaxSetupCost,
   defaultMinSetupCost,
   MAX_DAYS_TO_CLEAR,
+  TOP_N,
   rankBlueprintsFromMarket,
   setupBudgetFromSlider,
   setupBudgetToSlider,
@@ -116,6 +118,7 @@ export function BlueprintsPage() {
     setBudgetMaxSlider(maxSlider)
   }
   const [buildableOnly, setBuildableOnly] = useState(false)
+  const [includeHaulCost, setIncludeHaulCost] = useState(true)
   const [sortKey, setSortKey] = useState<BlueprintSortKey>('iph')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [haulRiskOpen, setHaulRiskOpen] = useState(false)
@@ -141,14 +144,14 @@ export function BlueprintsPage() {
   const {
     haulIn: haulInDanger,
     haulOut: haulOutDanger,
+    error: haulDangerError,
     loading: dangerLoading,
     labels: haulLabels,
   } = useHaulRouteRisk({
     sde,
     primaryHub: settings.primaryHub,
-    manufacturingRegionId: settings.manufacturingRegionId,
+    manufacturingSystemId: settings.manufacturingSystemId,
     hubName: activeHub?.name ?? settings.primaryHub,
-    regions: sde?.regions,
   })
 
   const rows = useMemo(() => {
@@ -165,12 +168,14 @@ export function BlueprintsPage() {
         minSetupCost,
         maxSetupCost,
         buildableOnly,
+        includeHaulCost,
         account: primaryAccount,
         tier,
         productGroup,
         sortBy: sortKey,
         sortDirection,
       },
+      sde.systems,
     )
   }, [
     sde,
@@ -180,6 +185,7 @@ export function BlueprintsPage() {
     debouncedMinSlider,
     debouncedMaxSlider,
     buildableOnly,
+    includeHaulCost,
     primaryAccount,
     tier,
     productGroup,
@@ -213,7 +219,7 @@ export function BlueprintsPage() {
     <div className="flex flex-col flex-1 min-h-0">
       <PageHeader
         title="Top Blueprints"
-        subtitle={`Top 30${productGroup !== 'all' ? ` in ${productGroup}` : ''} by ${SORT_LABELS[sortKey]} · sized to ${MAX_DAYS_TO_CLEAR} days of hub volume${marketUpdated ? ` · market ${marketUpdated}` : ''}`}
+        subtitle={`Top ${TOP_N}${productGroup !== 'all' ? ` in ${productGroup}` : ''} by ${SORT_LABELS[sortKey]} · sized to ${MAX_DAYS_TO_CLEAR} days of hub volume${marketUpdated ? ` · market ${marketUpdated}` : ''}`}
       />
 
       <div className="flex flex-wrap gap-2 mb-3 items-center">
@@ -224,11 +230,9 @@ export function BlueprintsPage() {
             value={settings.primaryHub}
             onChange={(e) => {
               const hub = HUBS.find((h) => h.id === e.target.value)
-              const region = sde?.regions.regions.find((r) => r.regionId === hub?.regionId)
               updateSettings({
                 primaryHub: e.target.value as typeof settings.primaryHub,
-                manufacturingRegionId: hub?.regionId ?? settings.manufacturingRegionId,
-                ...(region ? { buildSystemId: region.buildSystemId } : {}),
+                ...(hub ? { manufacturingSystemId: hub.buildSystemId } : {}),
               })
             }}
           >
@@ -240,27 +244,17 @@ export function BlueprintsPage() {
           </select>
         </label>
 
-        <label className="flex items-center gap-2 text-sm">
-          Mfg region
-          <select
-            className="select select-bordered select-sm max-w-[180px]"
-            value={settings.manufacturingRegionId}
-            onChange={(e) => {
-              const regionId = Number(e.target.value)
-              const region = sde?.regions.regions.find((r) => r.regionId === regionId)
-              updateSettings({
-                manufacturingRegionId: regionId,
-                ...(region ? { buildSystemId: region.buildSystemId } : {}),
-              })
-            }}
-          >
-            {sde?.regions.regions.map((r) => (
-              <option key={r.regionId} value={r.regionId}>
-                {r.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        {sde && (
+          <label className="flex items-center gap-2 text-sm">
+            Mfg system
+            <ManufacturingSystemPicker
+              value={settings.manufacturingSystemId}
+              onChange={(systemId) => updateSettings({ manufacturingSystemId: systemId })}
+              systems={sde.systems}
+              regions={sde.regions}
+            />
+          </label>
+        )}
 
         <span className="text-xs opacity-50">Window:</span>
         {(['1d', '1w', '1m', '1y', 'all'] as TimeRange[]).map((r) => (
@@ -297,7 +291,7 @@ export function BlueprintsPage() {
             onChange={setProductGroup}
             tree={productGroupTree}
           />
-          <InfoTooltip text="Search and pick a product group by category. Rankings reset to All groups when you change tier." />
+          <InfoTooltip text="Search by group, category, or item name. Rankings reset to All groups when you change tier." />
         </label>
       </div>
 
@@ -318,6 +312,17 @@ export function BlueprintsPage() {
           />
           <span className="label-text text-sm">Only buildable</span>
           <InfoTooltip text="Checks Industry and other skills you entered on your account." />
+        </label>
+
+        <label className="label cursor-pointer gap-2">
+          <input
+            type="checkbox"
+            className="checkbox checkbox-sm"
+            checked={includeHaulCost}
+            onChange={(e) => setIncludeHaulCost(e.target.checked)}
+          />
+          <span className="label-text text-sm">Include hauling</span>
+          <InfoTooltip text="Haul in (materials to build system) is added to setup cost; haul out (products to hub) is subtracted from profit. Turn off if you build and sell locally or haul on your own." />
         </label>
 
         <span className="text-xs opacity-60 ml-auto">{rows.length} shown</span>
@@ -395,9 +400,12 @@ export function BlueprintsPage() {
                     onOpenGraph={() => setGraphBlueprint(row.blueprint)}
                     onOpenSetup={() => setSetupDetailRow(row)}
                     onOpenIph={() => setIphDetailRow(row)}
-                    onOpenHaulRisk={() => setHaulRiskOpen(true)}
+                    onOpenHaulRisk={() => {
+                      if (!haulDangerError) setHaulRiskOpen(true)
+                    }}
                     haulIn={haulInDanger}
                     haulOut={haulOutDanger}
+                    haulError={haulDangerError}
                     dangerLoading={dangerLoading}
                   />
                 ))}
@@ -435,7 +443,7 @@ export function BlueprintsPage() {
                         </div>
                         <button
                           type="button"
-                          className="text-xs text-success link link-hover tabular-nums"
+                          className="text-xs link link-hover tabular-nums"
                           onClick={(e) => {
                             e.stopPropagation()
                             setIphDetailRow(row)
@@ -513,6 +521,7 @@ function BlueprintRow({
   onOpenHaulRisk,
   haulIn,
   haulOut,
+  haulError,
   dangerLoading,
 }: {
   row: RankedBlueprintRow
@@ -526,6 +535,7 @@ function BlueprintRow({
   onOpenHaulRisk: () => void
   haulIn: RouteDangerResult | null
   haulOut: RouteDangerResult | null
+  haulError: string | null
   dangerLoading: boolean
 }) {
   const missingSkills = getMissingBuildSkills(row.blueprint, account)
@@ -562,7 +572,7 @@ function BlueprintRow({
       <td className="whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
-          className="link link-hover tabular-nums text-success"
+          className="link link-hover tabular-nums"
           onClick={onOpenIph}
           aria-label={`ISK per hour breakdown for ${row.product.name}`}
         >
@@ -575,6 +585,7 @@ function BlueprintRow({
         <HaulRiskTrigger
           haulIn={haulIn}
           haulOut={haulOut}
+          error={haulError}
           loading={dangerLoading}
           onOpen={onOpenHaulRisk}
         />

@@ -185,9 +185,16 @@ function buildBlueprintRecords(tables) {
   }
 }
 
-function buildAllTypeRecords(types, groupById, categoryById) {
+function buildAllTypeRecords(types, groupById, categoryById, blueprintTypeIds = []) {
+  const includeTypeIds = new Set(
+    types.filter((type) => type.published === '1').map((type) => type.typeID),
+  )
+  for (const typeId of blueprintTypeIds) {
+    includeTypeIds.add(String(typeId))
+  }
+
   return types
-    .filter((type) => type.published === '1')
+    .filter((type) => includeTypeIds.has(type.typeID))
     .map((type) => {
       const typeId = num(type.typeID)
       const group = groupById.get(type.groupID)
@@ -239,6 +246,51 @@ function buildHubSystems(hubs, stations, systems) {
     })
     .filter(Boolean)
     .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/**
+ * Build the full industry-active systems list for systems.json.
+ * Includes every system with a manufacturing cost index from ESI, plus all hub
+ * sell/build systems. Hub systems without a cost index get costIndex = undefined.
+ */
+function buildIndustrySystems(hubs, stations, mapSolarSystems, costIndices) {
+  const stationById = new Map(stations.map((s) => [s.stationID, s]))
+  const systemById = new Map(mapSolarSystems.map((s) => [num(s.solarSystemID), s]))
+
+  const hubSystemIds = new Set(
+    hubs.flatMap((hub) => {
+      const sellSystemId = stationById.get(String(hub.sellStationId))?.solarSystemID
+      return [hub.buildSystemId, sellSystemId ? num(sellSystemId) : null].filter(Boolean)
+    }),
+  )
+
+  const hubIdBySystemId = new Map()
+  for (const hub of hubs) {
+    const sellSystemId = stationById.get(String(hub.sellStationId))?.solarSystemID
+    hubIdBySystemId.set(hub.buildSystemId, hub.hubId)
+    if (sellSystemId) hubIdBySystemId.set(num(sellSystemId), hub.hubId)
+  }
+
+  const systemIds = new Set([...costIndices.keys(), ...hubSystemIds])
+  const results = []
+
+  for (const systemId of systemIds) {
+    const raw = systemById.get(systemId)
+    if (!raw) continue
+    const entry = {
+      systemId,
+      name: raw.solarSystemName,
+      regionId: num(raw.regionID),
+      security: num(raw.security),
+    }
+    const costIndex = costIndices.get(systemId)
+    if (costIndex !== undefined) entry.costIndex = costIndex
+    const hubId = hubIdBySystemId.get(systemId)
+    if (hubId) entry.hubId = hubId
+    results.push(entry)
+  }
+
+  return results.sort((a, b) => a.name.localeCompare(b.name))
 }
 
 function buildHubStations(hubs, stations, systems, regions) {
@@ -356,8 +408,12 @@ async function main() {
           })
 
           ctx.blueprints = blueprints
-          ctx.typeRecords = buildAllTypeRecords(types, groupById, categoryById)
-          ctx.systems = buildHubSystems(HUBS, ctx.csvData.staStations, ctx.csvData.mapSolarSystems)
+          ctx.typeRecords = buildAllTypeRecords(
+            types,
+            groupById,
+            categoryById,
+            blueprints.map((bp) => bp.blueprintTypeId),
+          )
           ctx.stations = buildHubStations(
             HUBS,
             ctx.csvData.staStations,
@@ -376,7 +432,13 @@ async function main() {
             ctx.csvData.mapRegions,
             costIndices,
           )
-          task.title = `Cost indices and regions · ${ctx.regions.regions.length} regions`
+          ctx.systems = buildIndustrySystems(
+            HUBS,
+            ctx.csvData.staStations,
+            ctx.csvData.mapSolarSystems,
+            costIndices,
+          )
+          task.title = `Cost indices and regions · ${ctx.regions.regions.length} regions, ${ctx.systems.length} industry systems`
         },
       },
       createMarketBuildTask(ctx, {

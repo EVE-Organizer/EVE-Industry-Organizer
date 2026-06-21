@@ -13,6 +13,7 @@ import { StatCard } from '@/components/StatCard'
 import { PageHeader } from '@/components/Layout'
 import { EveImage } from '@/components/EveImage'
 import { SkillLevelSlider } from '@/components/SkillLevelSlider'
+import { formatNumber, formatDecimal } from '@/lib/profit'
 import { PATH_TYPE_IDS } from '@/lib/eveImages'
 import { ONBOARDING_SKILL_FIELDS, skillIdForKey, formatSkillLevel } from '@/lib/skillFields'
 
@@ -44,7 +45,7 @@ export function ProgressionPage() {
     <div>
       <PageHeader
         title="Skill Progression"
-        subtitle={`${account.name} · ${completion.toFixed(0)}% complete on ${path.name}`}
+        subtitle={`${account.name} · ${formatNumber(completion, 0)}% complete on ${path.name}`}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
@@ -63,7 +64,7 @@ export function ProgressionPage() {
                 <EveImage id={typeId} size={32} framed alt={p.name} />
                 <div className="min-w-0 flex-1">
                   <span className="font-semibold text-sm block truncate">{p.name}</span>
-                  <span className="text-xs opacity-60">{pct.toFixed(0)}% done</span>
+                  <span className="text-xs opacity-60">{formatNumber(pct, 0)}% done</span>
                 </div>
               </div>
               <progress className="progress progress-primary w-full h-1.5 mt-2" value={pct} max={100} />
@@ -85,7 +86,7 @@ export function ProgressionPage() {
       <div className="grid md:grid-cols-2 gap-4 mb-6">
         <StatCard
           label="Queue duration (est.)"
-          value={`${totalQueueDays(queue).toFixed(1)} days`}
+          value={`${formatDecimal(totalQueueDays(queue), 1)} days`}
           valueClassName="text-secondary text-2xl"
           accent="secondary"
           icon={<EveImage id={24625} size={32} framed alt="" />}
@@ -140,7 +141,7 @@ export function ProgressionPage() {
                 </p>
                 <div className="flex items-center gap-2 mb-3">
                   <progress className="progress progress-primary flex-1 h-2" value={sc.percent} max={100} />
-                  <span className="text-xs tabular-nums shrink-0 w-12 text-right">{sc.percent.toFixed(0)}%</span>
+                  <span className="text-xs tabular-nums shrink-0 w-12 text-right">{formatNumber(sc.percent, 0)}%</span>
                 </div>
                 <div className="rounded-lg border border-eve-border/50 bg-base-300/20 px-2">
                   {stage.skills.map((skill) => {

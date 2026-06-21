@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { RankedBlueprintRow, SetupCostBreakdown, TypeInfo } from '@/types'
-import { formatAvgVolume, formatIsk, formatPercent } from '@/lib/profit'
+import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
 
 interface IphBreakdownModalProps {
@@ -16,10 +16,10 @@ function typeName(typeMap: Map<number, TypeInfo>, typeId: number): string {
 }
 
 function formatDuration(seconds: number): string {
-  if (seconds >= 86400) return `${(seconds / 86400).toFixed(2)} days`
-  if (seconds >= 3600) return `${(seconds / 3600).toFixed(2)} hr`
-  if (seconds >= 60) return `${(seconds / 60).toFixed(1)} min`
-  return `${seconds.toFixed(0)} sec`
+  if (seconds >= 86400) return `${formatDecimal(seconds / 86400, 2)} days`
+  if (seconds >= 3600) return `${formatDecimal(seconds / 3600, 2)} hr`
+  if (seconds >= 60) return `${formatDecimal(seconds / 60, 1)} min`
+  return `${formatNumber(seconds, 0)} sec`
 }
 
 function PhaseHeader({ title, description }: { title: string; description: string }) {
@@ -98,7 +98,7 @@ function BatchSteps({ breakdown }: { breakdown: SetupCostBreakdown }) {
         </CalcStep>
         <CalcStep label="Output quantity">
           {runs} runs × {productQuantity} units/run ={' '}
-          <strong>{outputQty.toLocaleString()} units</strong>
+          <strong>{formatQuantity(outputQty)} units</strong>
         </CalcStep>
       </>
     )
@@ -121,7 +121,7 @@ function BatchSteps({ breakdown }: { breakdown: SetupCostBreakdown }) {
       </CalcStep>
       <CalcStep label="Output quantity">
         {runs} runs × {productQuantity} units/run ={' '}
-        <strong>{outputQty.toLocaleString()} units</strong>
+        <strong>{formatQuantity(outputQty)} units</strong>
       </CalcStep>
     </>
   )
@@ -202,7 +202,7 @@ export function IphBreakdownModal({
               step={2}
               title="Batch size"
               note="Runs are capped so output fits within 7 days of average hub volume."
-              result={`${iph.outputQty.toLocaleString()} units`}
+              result={`${formatQuantity(iph.outputQty)} units`}
               resultLabel="Units in this batch"
             >
               <BatchSteps breakdown={b} />
@@ -212,22 +212,22 @@ export function IphBreakdownModal({
               step={3}
               title="Job time"
               note="Longer jobs mean fewer units per day, which lowers ISK/hr even if batch profit is high."
-              result={`${formatDuration(iph.jobTimeSeconds)} (${jobHours.toFixed(2)} hr)`}
+              result={`${formatDuration(iph.jobTimeSeconds)} (${formatDecimal(jobHours, 2)} hr)`}
               resultLabel="Total job duration"
             >
               <CalcStep label="Base time per run">
                 {formatDuration(iph.baseTimePerRunSeconds)}
               </CalcStep>
               <CalcStep label="TE factor">
-                1 − ({iph.te} × 4%) = <strong>{iph.teTimeFactor.toFixed(4)}</strong>
+                1 − ({iph.te} × 4%) = <strong>{formatDecimal(iph.teTimeFactor, 4)}</strong>
               </CalcStep>
               <CalcStep label="Advanced Industry factor">
                 1 − ({iph.advancedIndustry} × 3%) ={' '}
-                <strong>{iph.advancedIndustryTimeFactor.toFixed(4)}</strong>
+                <strong>{formatDecimal(iph.advancedIndustryTimeFactor, 4)}</strong>
               </CalcStep>
               <CalcStep label="Multiply">
                 {formatDuration(iph.baseTimePerRunSeconds)} × {iph.runs} runs ×{' '}
-                {iph.teTimeFactor.toFixed(4)} × {iph.advancedIndustryTimeFactor.toFixed(4)}
+                {formatDecimal(iph.teTimeFactor, 4)} × {formatDecimal(iph.advancedIndustryTimeFactor, 4)}
               </CalcStep>
             </StepCard>
           </div>
@@ -246,7 +246,7 @@ export function IphBreakdownModal({
           >
             <CalcStep label="Gross sale">
               {formatIsk(iph.sellPricePerUnit)}/unit ({priceUnitLabel}) ×{' '}
-              {iph.outputQty.toLocaleString()} units = <strong>{formatIsk(iph.grossRevenue)}</strong>
+              {formatQuantity(iph.outputQty)} units = <strong>{formatIsk(iph.grossRevenue)}</strong>
             </CalcStep>
             {usesBuyOrders ? (
               <CalcStep label="Broker fee">
@@ -269,7 +269,31 @@ export function IphBreakdownModal({
           />
 
           <div className="space-y-4">
-            {iph.blueprintCost.mode === 'invention' ? (
+            {iph.blueprintCost.chargeExcluded ? (
+              <StepCard
+                step={5}
+                title="Blueprint (charge, excluded)"
+                note="Charges come from one cheap, reusable BPO that makes huge volume, so its cost is left out."
+                result={formatIsk(0)}
+                resultLabel="Blueprint cost"
+              >
+                <CalcStep label="Charged this batch">
+                  <strong>{formatIsk(0)}</strong>
+                </CalcStep>
+              </StepCard>
+            ) : iph.blueprintCost.mode === 'faction_bpc' ? (
+              <StepCard
+                step={5}
+                title="Blueprint (faction BPC)"
+                note="Faction blueprints are copies from NPC LP stores or contracts, not BPOs. The copy is paid in loyalty points, so no ISK acquisition cost is charged."
+                result={formatIsk(0)}
+                resultLabel="Blueprint cost"
+              >
+                <CalcStep label="Charged this batch">
+                  <strong>{formatIsk(0)}</strong>
+                </CalcStep>
+              </StepCard>
+            ) : iph.blueprintCost.mode === 'invention' ? (
               <StepCard
                 step={5}
                 title="Blueprint (BPC from invention)"
@@ -292,14 +316,14 @@ export function IphBreakdownModal({
               <StepCard
                 step={5}
                 title="Blueprint (BPO, amortized)"
-                note="T1/Faction reuse a BPO, so its price and research are spread over its lifetime."
+                note="T1 BPOs are reusable, so the price and research are spread over the blueprint lifetime."
                 result={formatIsk(iph.bpoCost)}
                 resultLabel="BPO cost"
               >
                 <CalcStep label="(Price + research) ÷ lifetime × runs">
                   ({formatIsk(iph.blueprintCost.bpoUnitPrice ?? 0)} +{' '}
                   {formatIsk(iph.blueprintCost.researchFee ?? 0)}) ÷{' '}
-                  {(iph.blueprintCost.lifetimeRuns ?? 0).toLocaleString()} × {iph.runs} ={' '}
+                  {formatQuantity(iph.blueprintCost.lifetimeRuns ?? 0)} × {iph.runs} ={' '}
                   <strong>{formatIsk(iph.bpoCost)}</strong>
                 </CalcStep>
               </StepCard>
@@ -328,9 +352,9 @@ export function IphBreakdownModal({
                       <tr key={line.typeId} className="text-sm">
                         <td className="max-w-[12rem] truncate">{typeName(typeMap, line.typeId)}</td>
                         <td className="text-right tabular-nums">
-                          {line.baseQtyPerRun.toLocaleString()}
+                          {formatQuantity(line.baseQtyPerRun)}
                         </td>
-                        <td className="text-right tabular-nums">{line.quantity.toLocaleString()}</td>
+                        <td className="text-right tabular-nums">{formatQuantity(line.quantity)}</td>
                         <td className="text-right tabular-nums whitespace-nowrap">
                           {formatIsk(line.unitPrice)}
                         </td>
@@ -351,33 +375,66 @@ export function IphBreakdownModal({
               resultLabel="Industry tax"
             >
               <CalcStep label="Material cost × system index">
-                {formatIsk(iph.materialCost)} × {iph.systemCostIndex.toFixed(4)} ={' '}
+                {formatIsk(iph.materialCost)} × {formatDecimal(iph.systemCostIndex, 4)} ={' '}
                 <strong>{formatIsk(iph.jobCost)}</strong>
               </CalcStep>
             </StepCard>
 
             <StepCard
               step={8}
-              title={`Haul in · ${haulInLabel}`}
+              title={`Haul in · ${haulInLabel}${iph.haulExcluded ? ' (excluded)' : ''}`}
+              note={
+                iph.haulExcluded
+                  ? 'Include hauling is off for this ranking. The estimate below is not counted in setup or profit.'
+                  : undefined
+              }
               result={formatIsk(iph.haulIn)}
               resultLabel="Haul in cost"
             >
               <CalcStep label="Material volume × route rate">
-                {iph.materialVolumeM3.toLocaleString(undefined, { maximumFractionDigits: 2 })} m³ ×{' '}
-                {formatIsk(iph.haulInIskPerM3)}/m³ = <strong>{formatIsk(iph.haulIn)}</strong>
+                {formatDecimal(iph.materialVolumeM3, 2)} m³ ×{' '}
+                {formatIsk(iph.haulInIskPerM3)}/m³ ={' '}
+                <strong>
+                  {formatIsk(
+                    iph.haulExcluded
+                      ? iph.materialVolumeM3 * iph.haulInIskPerM3
+                      : iph.haulIn,
+                  )}
+                </strong>
+                {iph.haulExcluded ? (
+                  <>
+                    {' '}
+                    → charged <strong>{formatIsk(0)}</strong>
+                  </>
+                ) : null}
               </CalcStep>
             </StepCard>
 
             <StepCard
               step={9}
               title="Setup cost"
-              note="Blueprint cost used for profit (amortized for BPO, full for BPC). Haul out is counted separately."
+              note={
+                iph.haulExcluded
+                  ? 'Blueprint cost used for profit (amortized for BPO, full for BPC). Haul in and haul out are excluded from this ranking.'
+                  : 'Blueprint cost used for profit (amortized for BPO, full for BPC). Haul out is counted separately.'
+              }
               result={formatIsk(iph.setupCost)}
               resultLabel="Total setup"
             >
-              <CalcStep label="Add blueprint, materials, job cost, haul in">
-                {formatIsk(iph.bpoCost)} + {formatIsk(iph.materialCost)} + {formatIsk(iph.jobCost)} +{' '}
-                {formatIsk(iph.haulIn)}
+              <CalcStep
+                label={
+                  iph.haulExcluded
+                    ? 'Add blueprint, materials, job cost'
+                    : 'Add blueprint, materials, job cost, haul in'
+                }
+              >
+                {formatIsk(iph.bpoCost)} + {formatIsk(iph.materialCost)} + {formatIsk(iph.jobCost)}
+                {iph.haulExcluded ? null : (
+                  <>
+                    {' '}
+                    + {formatIsk(iph.haulIn)}
+                  </>
+                )}
               </CalcStep>
               <CalcStep label="Upfront cash to start (budget filter)">
                 <strong>{formatIsk(iph.upfrontCapital)}</strong> = full blueprint + this batch
@@ -386,13 +443,26 @@ export function IphBreakdownModal({
 
             <StepCard
               step={10}
-              title={`Haul out · ${haulOutLabel}`}
+              title={`Haul out · ${haulOutLabel}${iph.haulExcluded ? ' (excluded)' : ''}`}
               result={formatIsk(iph.haulOut)}
               resultLabel="Haul out cost"
             >
               <CalcStep label="Product volume × route rate">
-                {iph.productVolumeM3.toLocaleString(undefined, { maximumFractionDigits: 2 })} m³ ×{' '}
-                {formatIsk(iph.haulOutIskPerM3)}/m³ = <strong>{formatIsk(iph.haulOut)}</strong>
+                {formatDecimal(iph.productVolumeM3, 2)} m³ ×{' '}
+                {formatIsk(iph.haulOutIskPerM3)}/m³ ={' '}
+                <strong>
+                  {formatIsk(
+                    iph.haulExcluded
+                      ? iph.productVolumeM3 * iph.haulOutIskPerM3
+                      : iph.haulOut,
+                  )}
+                </strong>
+                {iph.haulExcluded ? (
+                  <>
+                    {' '}
+                    → charged <strong>{formatIsk(0)}</strong>
+                  </>
+                ) : null}
               </CalcStep>
             </StepCard>
 
@@ -404,11 +474,12 @@ export function IphBreakdownModal({
               resultLabel="Profit per unit"
             >
               <CalcStep label="Revenue minus all costs">
-                {formatIsk(iph.netRevenue)} − {formatIsk(iph.setupCost)} − {formatIsk(iph.haulOut)} ={' '}
+                {formatIsk(iph.netRevenue)} − {formatIsk(iph.setupCost)}
+                {iph.haulExcluded ? null : <> − {formatIsk(iph.haulOut)}</>} ={' '}
                 <strong>{formatIsk(iph.netProfit)}</strong>
               </CalcStep>
               <CalcStep label="Divide by output">
-                {formatIsk(iph.netProfit)} ÷ {iph.outputQty.toLocaleString()} units
+                {formatIsk(iph.netProfit)} ÷ {formatQuantity(iph.outputQty)} units
               </CalcStep>
             </StepCard>
           </div>
@@ -427,7 +498,7 @@ export function IphBreakdownModal({
               resultLabel="Units produced per day"
             >
               <CalcStep label="Spread batch output across 24 hours">
-                {iph.outputQty.toLocaleString()} units ÷ {jobHours.toFixed(2)} hr × 24 hr/day
+                {formatQuantity(iph.outputQty)} units ÷ {formatDecimal(jobHours, 2)} hr × 24 hr/day
               </CalcStep>
             </StepCard>
 
@@ -454,23 +525,23 @@ export function IphBreakdownModal({
               step={14}
               title="Competition penalty"
               note="If your daily output is a large share of hub volume, profit is scaled down."
-              result={iph.competitionFactor.toFixed(4)}
+              result={formatDecimal(iph.competitionFactor, 4)}
               resultLabel="Competition factor"
             >
               {iph.avgVolume > 0 && iph.productionPerDay > 0 ? (
                 <>
                   <CalcStep label="Your share of daily hub volume">
                     {formatAvgVolume(iph.productionPerDay)} ÷ {formatAvgVolume(iph.avgVolume)} ={' '}
-                    <strong>{(iph.marketShare * 100).toFixed(1)}%</strong>
+                    <strong>{formatDecimal(iph.marketShare * 100, 1)}%</strong>
                   </CalcStep>
                   <CalcStep label="Penalty formula">
-                    1 ÷ (1 + {(iph.marketShare * 100).toFixed(1)}%) ={' '}
-                    <strong>{iph.competitionFactor.toFixed(4)}</strong>
+                    1 ÷ (1 + {formatDecimal(iph.marketShare * 100, 1)}%) ={' '}
+                    <strong>{formatDecimal(iph.competitionFactor, 4)}</strong>
                   </CalcStep>
                 </>
               ) : (
                 <CalcStep label="No volume penalty">
-                  Factor stays at <strong>{iph.competitionFactor.toFixed(4)}</strong>
+                  Factor stays at <strong>{formatDecimal(iph.competitionFactor, 4)}</strong>
                 </CalcStep>
               )}
             </StepCard>
@@ -484,7 +555,7 @@ export function IphBreakdownModal({
             >
               <CalcStep label="Daily profit at sellable rate">
                 {formatAvgVolume(iph.sellablePerDay)} units/day × {formatIsk(iph.profitPerUnit)}/unit
-                × {iph.competitionFactor.toFixed(4)} ={' '}
+                × {formatDecimal(iph.competitionFactor, 4)} ={' '}
                 <strong>{formatIsk(iph.realizedDailyProfit)}/day</strong>
               </CalcStep>
               <CalcStep label="Convert to hourly">

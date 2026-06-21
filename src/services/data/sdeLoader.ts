@@ -46,19 +46,43 @@ export function buildTypeMap(types: TypeInfo[]): Map<number, TypeInfo> {
   return new Map(types.map((t) => [t.typeId, t]))
 }
 
+/** Rankings skip types absent from types.json (unpublished products, unknown BPOs). */
+export function isRankableBlueprint(
+  blueprint: BlueprintInfo,
+  typeMap: Map<number, TypeInfo>,
+): boolean {
+  if (!typeMap.has(blueprint.productTypeId)) return false
+  if (blueprint.tier === 't1' && !typeMap.has(blueprint.blueprintTypeId)) return false
+  return true
+}
+
 export function buildRegionMap(regions: RegionsData): Map<number, RegionInfo> {
   return new Map(regions.regions.map((r) => [r.regionId, r]))
 }
 
-export function getAllBlueprints(registry: BlueprintRegistry): BlueprintInfo[] {
-  return registry.blueprints
+/**
+ * Resolve the build system ID and cost index for a given manufacturing system.
+ * Falls back: system.costIndex -> region costIndex -> hubMarket costIndex.
+ */
+export function resolveBuildSystem(
+  systems: SystemInfo[],
+  regions: RegionsData,
+  hubMarket: HubMarketData,
+  manufacturingSystemId: number,
+): { buildSystemId: number; costIndex: number } {
+  const system = systems.find((s) => s.systemId === manufacturingSystemId)
+  if (system) {
+    const costIndex =
+      system.costIndex ??
+      regions.regions.find((r) => r.regionId === system.regionId)?.costIndex ??
+      hubMarket.costIndex
+    return { buildSystemId: manufacturingSystemId, costIndex }
+  }
+  return { buildSystemId: manufacturingSystemId, costIndex: hubMarket.costIndex }
 }
 
-export function getBlueprintByProductId(
-  registry: BlueprintRegistry,
-  productTypeId: number,
-): BlueprintInfo | undefined {
-  return registry.blueprints.find((b) => b.productTypeId === productTypeId)
+export function getAllBlueprints(registry: BlueprintRegistry): BlueprintInfo[] {
+  return registry.blueprints
 }
 
 export function getBlueprintForProduct(
@@ -73,16 +97,6 @@ export function getBlueprintForBpo(
   blueprintTypeId: number,
 ): BlueprintInfo | undefined {
   return blueprints.find((b) => b.blueprintTypeId === blueprintTypeId)
-}
-
-export function buildBlueprintMap(blueprints: BlueprintInfo[]): Map<number, BlueprintInfo> {
-  const byProduct = new Map<number, BlueprintInfo>()
-  const byBpo = new Map<number, BlueprintInfo>()
-  for (const bp of blueprints) {
-    byProduct.set(bp.productTypeId, bp)
-    byBpo.set(bp.blueprintTypeId, bp)
-  }
-  return new Map([...byProduct, ...byBpo])
 }
 
 export function getHubMarket(market: MarketData, hub: HubId): HubMarketData | null {
@@ -121,23 +135,12 @@ export function filterBlueprints(
   return result
 }
 
-export function getProductGroups(blueprints: BlueprintInfo[]): string[] {
-  return [...new Set(blueprints.map((b) => b.productGroup))].sort()
-}
-
-export function getProductGroupsForTier(
-  blueprints: BlueprintInfo[],
-  tier: BlueprintFilterTier,
-): string[] {
-  return buildProductGroupTree(blueprints, tier, new Map()).flatMap((node) =>
-    node.groups.map((g) => g.name),
-  )
-}
-
 export interface ProductGroupEntry {
   name: string
   category: string
   iconTypeId: number
+  /** Product type names in this group (for search). */
+  itemNames: string[]
 }
 
 export interface ProductGroupCategoryNode {
@@ -153,15 +156,35 @@ export function buildProductGroupTree(
 ): ProductGroupCategoryNode[] {
   const filtered = filterBlueprints(blueprints, tier)
   const byGroup = new Map<string, ProductGroupEntry>()
+  const itemNamesByGroup = new Map<string, Set<string>>()
 
   for (const bp of filtered) {
-    if (byGroup.has(bp.productGroup)) continue
+    if (!isRankableBlueprint(bp, typeMap)) continue
+
     const type = typeMap.get(bp.productTypeId)
-    byGroup.set(bp.productGroup, {
-      name: bp.productGroup,
-      category: type?.category ?? 'Other',
-      iconTypeId: bp.productTypeId,
-    })
+    const productName = type?.name
+
+    if (!byGroup.has(bp.productGroup)) {
+      byGroup.set(bp.productGroup, {
+        name: bp.productGroup,
+        category: type?.category ?? 'Other',
+        iconTypeId: bp.productTypeId,
+        itemNames: [],
+      })
+    }
+
+    if (productName) {
+      const names = itemNamesByGroup.get(bp.productGroup) ?? new Set<string>()
+      names.add(productName)
+      itemNamesByGroup.set(bp.productGroup, names)
+    }
+  }
+
+  for (const [groupName, names] of itemNamesByGroup) {
+    const entry = byGroup.get(groupName)
+    if (entry) {
+      entry.itemNames = [...names].sort((a, b) => a.localeCompare(b))
+    }
   }
 
   const byCategory = new Map<string, ProductGroupEntry[]>()
@@ -181,8 +204,4 @@ export function buildProductGroupTree(
 
 export function buildSkillMap(skills: SkillInfo[]): Map<number, SkillInfo> {
   return new Map(skills.map((s) => [s.skillId, s]))
-}
-
-export function getSkillByName(skills: SkillInfo[], name: string): SkillInfo | undefined {
-  return skills.find((s) => s.name.toLowerCase() === name.toLowerCase())
 }

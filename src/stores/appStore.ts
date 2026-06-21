@@ -12,6 +12,7 @@ import {
   importUserDataJson,
   loadUserDataFromLocal,
   mergeUserData,
+  normalizeGlobalSettings,
   saveUserDataToLocal,
 } from '@/services/sync/types'
 import {
@@ -119,7 +120,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   updateSettings: (settings) => {
     const userData = {
       ...get().userData,
-      settings: { ...get().userData.settings, ...settings },
+      settings: normalizeGlobalSettings({ ...get().userData.settings, ...settings }),
       updatedAt: new Date().toISOString(),
     }
     get().setUserData(userData)

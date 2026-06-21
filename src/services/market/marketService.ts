@@ -1,19 +1,11 @@
 import type { HubId, MarketHistoryEntry, TimeRange } from '@/types'
 import { REGION_IDS } from '@/types'
-import { daysForRange, trimHistoryByDays } from '@/lib/profit'
+import { daysForRange, trimHistoryByDays, WIDER_TIME_RANGES } from '@/lib/profit'
 import { cacheKey, getCached, setCached, TTL } from '@/services/cache/cacheStore'
 import { batchProcess, dedupe, throttle } from '@/services/market/requestQueue'
 
 const ESI_BASE = 'https://esi.evetech.net/latest'
 const FUZZWORK_BASE = 'https://market.fuzzwork.co.uk/aggregates'
-
-const WIDER_RANGES: Record<TimeRange, TimeRange[]> = {
-  '1d': ['1w', '1m', '1y', 'all'],
-  '1w': ['1m', '1y', 'all'],
-  '1m': ['1y', 'all'],
-  '1y': ['all'],
-  all: [],
-}
 
 function trimHistoryForRange(history: MarketHistoryEntry[], range: TimeRange): MarketHistoryEntry[] {
   const days = daysForRange(range)
@@ -74,7 +66,7 @@ function tryHistoryFromWiderCache(
   regionId: number,
   range: TimeRange,
 ): { history: MarketHistoryEntry[]; source: string; fetchedAt: number } | null {
-  for (const wider of WIDER_RANGES[range]) {
+  for (const wider of WIDER_TIME_RANGES[range]) {
     const cached = getCached<MarketHistoryEntry[]>(historyCacheKey(typeId, regionId, wider))
     if (cached && !cached.stale) {
       return {
@@ -94,13 +86,6 @@ function findEtagForHistory(typeId: number, regionId: number): string | undefine
     if (cached?.etag) return cached.etag
   }
   return undefined
-}
-
-async function fetchEvetycoonPrice(_typeId: number, regionId: number): Promise<number> {
-  // EveTycoon has no public documented CORS API; use ESI/Fuzzwork as primary fetch path.
-  // Placeholder keeps marketService abstraction for future EveTycoon integration.
-  void regionId
-  throw new Error('EveTycoon unavailable')
 }
 
 export async function getPrice(
@@ -124,20 +109,15 @@ export async function getPrice(
     let source: string
 
     try {
-      price = await fetchEvetycoonPrice(typeId, regionId)
-      source = 'evetycoon'
+      price = await fetchEsiPrice(typeId, regionId)
+      source = 'esi'
     } catch {
       try {
-        price = await fetchEsiPrice(typeId, regionId)
-        source = 'esi'
+        price = await fetchFuzzworkPrice(typeId, regionId)
+        source = 'fuzzwork'
       } catch {
-        try {
-          price = await fetchFuzzworkPrice(typeId, regionId)
-          source = 'fuzzwork'
-        } catch {
-          if (cached) return { price: cached.data, source: 'cache-stale', fetchedAt: cached.fetchedAt }
-          return { price: 0, source: 'none', fetchedAt: Date.now() }
-        }
+        if (cached) return { price: cached.data, source: 'cache-stale', fetchedAt: cached.fetchedAt }
+        return { price: 0, source: 'none', fetchedAt: Date.now() }
       }
     }
 

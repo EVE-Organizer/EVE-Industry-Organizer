@@ -6,6 +6,8 @@ interface ScoreBarProps {
   className?: string
 }
 
+import { formatDecimal } from '@/lib/profit'
+
 export function ScoreBar({
   value,
   max,
@@ -19,7 +21,7 @@ export function ScoreBar({
       {label && (
         <div className="flex justify-between text-xs mb-1">
           <span className="opacity-60">{label}</span>
-          <span className="font-semibold tabular-nums">{value.toFixed(1)}</span>
+          <span className="font-semibold tabular-nums">{formatDecimal(value, 1)}</span>
         </div>
       )}
       <div className="h-2 rounded-full bg-base-300 overflow-hidden">

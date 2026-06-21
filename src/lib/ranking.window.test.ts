@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs'
 import { describe, expect, it } from 'vitest'
 import { applyME, estimateJobCost, materialCost } from '@/lib/cost'
+import { WIDER_TIME_RANGES } from '@/lib/profit'
 import { marketAwareIph, rankBlueprintsFromMarket } from '@/lib/ranking'
 import { buildPriceMap, buildTypeMap, getHubMarket } from '@/services/data/sdeLoader'
 import { DEFAULT_SETTINGS } from '@/types'
@@ -8,14 +9,6 @@ import type { BlueprintRegistry, MarketData, RegionsData, TimeRange, TypeInfo } 
 
 function loadFixture<T>(path: string): T {
   return JSON.parse(readFileSync(path, 'utf8')) as T
-}
-
-const WIDER_WINDOWS: Record<TimeRange, TimeRange[]> = {
-  '1d': ['1w', '1m', '1y', 'all'],
-  '1w': ['1m', '1y', 'all'],
-  '1m': ['1y', 'all'],
-  '1y': ['all'],
-  all: [],
 }
 
 function pickWindowAvg(
@@ -28,7 +21,7 @@ function pickWindowAvg(
   }
   const exact = tryWindow(window)
   if (exact) return exact
-  for (const wider of WIDER_WINDOWS[window]) {
+  for (const wider of WIDER_TIME_RANGES[window]) {
     const avg = tryWindow(wider)
     if (avg) return avg
   }
@@ -179,7 +172,7 @@ describe('market-aware blueprint ranking', () => {
   const PROJECTILE_AMMO = 178
   const CONDENSER_GALVASURGE = 54773
 
-  it('excludes blueprints without a hub BPO price', () => {
+  it('ranks charge blueprints even when hub BPO price is missing', () => {
     const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
     const rows = rankBlueprintsFromMarket(
       registry,
@@ -198,11 +191,65 @@ describe('market-aware blueprint ranking', () => {
       },
     )
 
-    expect(rows.find((r) => r.blueprint.productTypeId === CONDENSER_GALVASURGE)).toBeUndefined()
-    expect(rows.length).toBe(0)
+    const condenser = rows.find((r) => r.blueprint.productTypeId === CONDENSER_GALVASURGE)
+    expect(condenser).toBeDefined()
+    expect(condenser!.setupBreakdown.blueprintCost.chargeExcluded).toBe(true)
+    expect(condenser!.setupBreakdown.bpoCost).toBe(0)
   })
 
-  it('includes hub BPO price in setup cost when ranked', () => {
+  it('includes T1 ice compression BPOs once blueprint BPO types are in types.json', () => {
+    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const rows = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      'jita',
+      '1w',
+      settings,
+      {
+        minSetupCost: 0,
+        maxSetupCost: Number.MAX_SAFE_INTEGER,
+        buildableOnly: false,
+        tier: 't1',
+        productGroup: 'Ice',
+      },
+    )
+
+    const iceCompression = rows.find((r) => r.blueprint.blueprintTypeId === 28495)
+    expect(iceCompression).toBeDefined()
+    expect(iceCompression!.setupBreakdown.bpoUnitPrice).toBeGreaterThan(0)
+  })
+
+  it('excludes T1 blueprints with no hub BPO price when blueprint cost is included', () => {
+    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const rows = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      'jita',
+      '1w',
+      settings,
+      {
+        minSetupCost: 0,
+        maxSetupCost: Number.MAX_SAFE_INTEGER,
+        buildableOnly: false,
+        tier: 't1',
+        productGroup: 'all',
+      },
+    )
+
+    expect(rows.length).toBeGreaterThan(0)
+    for (const row of rows) {
+      expect(row.setupBreakdown.blueprintCost.bpoPriceMissing).toBeUndefined()
+      // Charges intentionally skip the BPO cost, so they may lack a hub BPO price.
+      if (row.setupBreakdown.blueprintCost.chargeExcluded) continue
+      expect(row.setupBreakdown.bpoUnitPrice).toBeGreaterThan(0)
+    }
+  })
+
+  it('excludes BPO cost for charges (huge volume from one reusable BPO)', () => {
     const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
     const rows = rankBlueprintsFromMarket(
       registry,
@@ -223,15 +270,90 @@ describe('market-aware blueprint ranking', () => {
 
     const ammo = rows.find((r) => r.blueprint.productTypeId === PROJECTILE_AMMO)
     expect(ammo).toBeDefined()
-    expect(ammo!.setupBreakdown.bpoCost).toBeGreaterThan(0)
+    expect(ammo!.setupBreakdown.bpoCost).toBe(0)
+    expect(ammo!.setupBreakdown.blueprintCost.chargeExcluded).toBe(true)
     expect(ammo!.setupCost).toBe(
       ammo!.setupBreakdown.materialCost +
         ammo!.setupBreakdown.jobCost +
-        ammo!.setupBreakdown.haulIn +
-        ammo!.setupBreakdown.bpoCost,
+        ammo!.setupBreakdown.haulIn,
     )
-    expect(ammo!.upfrontCapital).toBeGreaterThan(ammo!.setupCost)
+    expect(ammo!.upfrontCapital).toBe(ammo!.setupCost)
     expect(ammo!.setupBreakdown.blueprintCost.mode).toBe('bpo')
+  })
+
+  it('excludes haul cost when includeHaulCost is off', () => {
+    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const baseFilters = {
+      minSetupCost: 0,
+      maxSetupCost: Number.MAX_SAFE_INTEGER,
+      buildableOnly: false,
+      tier: 't1' as const,
+      productGroup: 'Projectile Ammo',
+    }
+
+    const rowsWithHaul = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      'jita',
+      '1w',
+      settings,
+      { ...baseFilters, includeHaulCost: true },
+    )
+    const rowsWithoutHaul = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      'jita',
+      '1w',
+      settings,
+      { ...baseFilters, includeHaulCost: false },
+    )
+
+    const withRow = rowsWithHaul.find((r) => r.blueprint.productTypeId === PROJECTILE_AMMO)
+    const withoutRow = rowsWithoutHaul.find((r) => r.blueprint.productTypeId === PROJECTILE_AMMO)
+    expect(withRow).toBeDefined()
+    expect(withoutRow).toBeDefined()
+    expect(withoutRow!.haulIn).toBe(0)
+    expect(withoutRow!.haulOut).toBe(0)
+    expect(withoutRow!.setupBreakdown.haulExcluded).toBe(true)
+    expect(withoutRow!.setupCost).toBeLessThan(withRow!.setupCost)
+    expect(withoutRow!.netProfit).toBeGreaterThan(withRow!.netProfit)
+  })
+
+  it('ranks faction blueprints as BPCs with no BPO acquisition cost', () => {
+    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const rows = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      'jita',
+      '1w',
+      settings,
+      {
+        minSetupCost: 0,
+        maxSetupCost: Number.MAX_SAFE_INTEGER,
+        buildableOnly: false,
+        tier: 'faction',
+        productGroup: 'all',
+      },
+    )
+    expect(rows.length).toBeGreaterThan(0)
+    for (const row of rows.slice(0, 5)) {
+      expect(row.blueprint.tier).toBe('faction')
+      expect(row.setupBreakdown.blueprintCost.mode).toBe('faction_bpc')
+      expect(row.setupBreakdown.bpoCost).toBe(0)
+      expect(row.setupBreakdown.blueprintCost.bpoPriceMissing).toBeUndefined()
+      // BPCs cannot be researched, so faction stays at ME0/TE0.
+      expect(row.iphBreakdown.me).toBe(0)
+      expect(row.iphBreakdown.te).toBe(0)
+      expect(row.upfrontCapital).toBe(
+        row.setupBreakdown.materialCost + row.setupBreakdown.jobCost + row.setupBreakdown.haulIn,
+      )
+    }
   })
 
   it('ranks T2 blueprints with invention cost and ME2/TE4', () => {

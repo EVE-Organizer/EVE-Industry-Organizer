@@ -1,5 +1,6 @@
 import type { TypeInfo } from '@/types'
 import type { RouteDangerResult, RouteJumpDanger } from '@/lib/routeDanger'
+import { formatDecimal } from '@/lib/profit'
 
 export type CampLevel = 'None' | 'Possible' | 'Likely'
 
@@ -75,13 +76,13 @@ export function explainCampLevel(ctx: CampLevelContext): string {
   }
   if (haulerKills2h >= 1) {
     if (isPipe && isLowsec) {
-      return `${haulerPhrase} in a known haul pipe (${security.toFixed(1)} sec). Recent haul loss on a common gank route.`
+      return `${haulerPhrase} in a known haul pipe (${formatDecimal(security, 1)} sec). Recent haul loss on a common gank route.`
     }
     if (isPipe) {
       return `${haulerPhrase} on a known haul pipe. Recent haul loss on a route where camps are common.`
     }
     if (isLowsec) {
-      return `${haulerPhrase} in lowsec (${security.toFixed(1)} sec). Haulers are common targets on lowsec gates.`
+      return `${haulerPhrase} in lowsec (${formatDecimal(security, 1)} sec). Haulers are common targets on lowsec gates.`
     }
     return `${haulerPhrase} on zKillboard. Worth watching, but not on a known pipe or lowsec gate.`
   }
@@ -89,7 +90,7 @@ export function explainCampLevel(ctx: CampLevelContext): string {
     return `Known haul pipe with ${shipKills24h} ship kills in 24h and no hauler kills in the last 2h. Activity may be scouts or non-haul PVP.`
   }
   if (isLowsec && shipKills24h >= 10) {
-    return `${shipKills24h} ship kills in 24h in lowsec (${security.toFixed(1)} sec) with no recent hauler kills. Heavy PVP can precede camping.`
+    return `${shipKills24h} ship kills in 24h in lowsec (${formatDecimal(security, 1)} sec) with no recent hauler kills. Heavy PVP can precede camping.`
   }
   if (security >= 0.45 && !isPipe) {
     return 'Highsec with no recent hauler kills in the last 2h. Gate camps are rare here.'

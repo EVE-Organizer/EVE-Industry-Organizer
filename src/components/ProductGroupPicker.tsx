@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ProductGroupCategoryNode } from '@/services/data/sdeLoader'
+import { CategoryBadge } from '@/components/CategoryBadge'
 import { EveImage } from '@/components/EveImage'
 import { NAV_TYPE_IDS } from '@/lib/eveImages'
 
@@ -16,7 +17,10 @@ function filterTree(
     .map(({ category, groups }) => ({
       category,
       groups: groups.filter(
-        (g) => g.name.toLowerCase().includes(q) || category.toLowerCase().includes(q),
+        (g) =>
+          g.name.toLowerCase().includes(q) ||
+          category.toLowerCase().includes(q) ||
+          g.itemNames.some((name) => name.toLowerCase().includes(q)),
       ),
     }))
     .filter((node) => node.groups.length > 0)
@@ -91,7 +95,7 @@ export function ProductGroupPicker({ value, onChange, tree, className = '' }: Pr
           role="combobox"
           aria-expanded={open}
           aria-autocomplete="list"
-          placeholder="Search groups…"
+          placeholder="Search groups or items…"
           value={open ? query : selectedLabel}
           onChange={(e) => {
             setQuery(e.target.value)
@@ -139,8 +143,8 @@ export function ProductGroupPicker({ value, onChange, tree, className = '' }: Pr
           ) : (
             filteredTree.map(({ category, groups }) => (
               <li key={category}>
-                <div className="sticky top-0 z-10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide opacity-50 bg-base-200 border-y border-eve-border/50">
-                  {category}
+                <div className="sticky top-0 z-10 px-3 py-1.5 bg-base-200 border-y border-eve-border/50">
+                  <CategoryBadge category={category} />
                 </div>
                 <ul>
                   {groups.map((group) => (

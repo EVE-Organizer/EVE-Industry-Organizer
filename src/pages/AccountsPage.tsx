@@ -8,6 +8,7 @@ import { PageHeader, formatIsk } from '@/components/Layout'
 import { CharacterAvatar, EveImage, IskBadge } from '@/components/EveImage'
 import { BpoImage, DEFAULT_BPO_TYPE_ID } from '@/components/BpoImage'
 import { MetricTile } from '@/components/MetricTile'
+import { formatDecimal, formatNumber } from '@/lib/profit'
 import { MINERAL_KEYS } from '@/lib/eveImages'
 import { MINERAL_TYPE_IDS } from '@/types'
 
@@ -104,7 +105,7 @@ export function AccountsPage() {
                 <div className="mt-3 max-w-md">
                   <div className="flex justify-between text-xs mb-1 opacity-70">
                     <span>ISK goal progress</span>
-                    <span>{iskProgress.toFixed(0)}%</span>
+                    <span>{formatNumber(iskProgress, 0)}%</span>
                   </div>
                   <progress className="progress progress-warning w-full h-2" value={iskProgress} max={100} />
                 </div>
@@ -179,7 +180,7 @@ function AccountOverview({
       </div>
       <StatCard
         label="Progress"
-        value={`${account.iskGoal > 0 ? ((account.iskCurrent / account.iskGoal) * 100).toFixed(0) : 0}%`}
+        value={`${account.iskGoal > 0 ? formatNumber((account.iskCurrent / account.iskGoal) * 100, 0) : 0}%`}
         description={`${formatIsk(account.iskCurrent)} / ${formatIsk(account.iskGoal)}`}
         valueClassName="text-warning text-xl"
         className="mt-2 !p-3"

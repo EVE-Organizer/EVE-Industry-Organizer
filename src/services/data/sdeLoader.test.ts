@@ -20,9 +20,10 @@ describe('buildProductGroupTree', () => {
     expect(tree.some((node) => node.category === 'Charge')).toBe(true)
 
     const charge = tree.find((node) => node.category === 'Charge')!
-    const rocket = charge.groups.find((g) => g.name === 'Rocket')
+    const rocket = charge.groups.find((g) => g.name === 'Rocket')!
     expect(rocket).toBeDefined()
     expect(rocket!.iconTypeId).toBeGreaterThan(0)
+    expect(rocket!.itemNames).toContain('Scourge Rocket')
 
     for (const node of tree) {
       expect(node.groups.length).toBeGreaterThan(0)

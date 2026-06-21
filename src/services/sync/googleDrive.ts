@@ -15,14 +15,6 @@ export function isGoogleConfigured(): boolean {
   return Boolean(getGoogleClientId())
 }
 
-export function getAccessToken(): string | null {
-  return accessToken
-}
-
-export function setAccessToken(token: string | null): void {
-  accessToken = token
-}
-
 async function driveFetch(path: string, init?: RequestInit): Promise<Response> {
   if (!accessToken) throw new Error('Not signed in to Google')
   return fetch(`https://www.googleapis.com/drive/v3${path}`, {
@@ -139,5 +131,3 @@ export function initGoogleSignIn(onToken: (token: string) => void): void {
 export function signOutGoogle(): void {
   accessToken = null
 }
-
-export { SCOPES }

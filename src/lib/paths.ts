@@ -1,5 +1,5 @@
 /** Site root for resolving public data and deep links (works on direct /item/... loads). */
-export function getAppRoot(): string {
+function getAppRoot(): string {
   const base = import.meta.env.BASE_URL
   if (base.startsWith('/') && base !== '/') {
     return `${window.location.origin}${base}`

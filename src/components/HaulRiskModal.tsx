@@ -2,7 +2,9 @@ import type { CampLevel } from '@/lib/routeCamp'
 import { campLevelBadgeClass, CAMP_COLUMN_TOOLTIP } from '@/lib/routeCamp'
 import type { DangerBand, RouteDangerResult } from '@/lib/routeDanger'
 import { dangerBand, dangerBandBadgeClass } from '@/lib/routeDanger'
+import { formatDecimal } from '@/lib/profit'
 import { InfoTooltip } from '@/components/InfoTooltip'
+import { Tooltip } from '@/components/Tooltip'
 
 interface HaulRiskModalProps {
   open: boolean
@@ -39,7 +41,7 @@ function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
             <th>
               <span className="inline-flex items-center gap-1">
                 Camp
-                <InfoTooltip text={CAMP_COLUMN_TOOLTIP} className="tooltip-top" />
+                <InfoTooltip text={CAMP_COLUMN_TOOLTIP} placement="top" />
               </span>
             </th>
           </tr>
@@ -48,7 +50,7 @@ function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
           {jumps.map((jump) => (
             <tr key={jump.systemId} className="text-sm">
               <td className="max-w-[10rem] truncate">{jump.systemName}</td>
-              <td className="tabular-nums">{jump.security.toFixed(1)}</td>
+              <td className="tabular-nums">{formatDecimal(jump.security, 1)}</td>
               <td className="tabular-nums whitespace-nowrap">
                 {jump.shipKills}s / {jump.podKills}p
               </td>
@@ -58,14 +60,18 @@ function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
                 </span>
               </td>
               <td>
-                <span
-                  className={`tooltip tooltip-left badge badge-xs ${campLevelBadgeClass(jump.campLevel ?? 'None')} before:max-w-xs before:text-left before:whitespace-normal before:content-[attr(data-tip)]`}
-                  data-tip={jump.campReason ?? 'No camp data for this system.'}
+                <Tooltip
+                  text={jump.campReason ?? 'No camp data for this system.'}
+                  placement="left"
                 >
-                  <span aria-label={jump.campReason} tabIndex={0}>
+                  <span
+                    className={`badge badge-xs ${campLevelBadgeClass(jump.campLevel ?? 'None')}`}
+                    aria-label={jump.campReason}
+                    tabIndex={0}
+                  >
                     {campLevelLabel(jump.campLevel)}
                   </span>
-                </span>
+                </Tooltip>
               </td>
             </tr>
           ))}
@@ -99,7 +105,7 @@ function RouteSummaryCard({
           </div>
         </div>
         <p className="text-[11px] opacity-50 shrink-0">
-          {route.jumps.length} jump{route.jumps.length === 1 ? '' : 's'} · worst jump sets route risk
+          {route.gateJumps} jump{route.gateJumps === 1 ? '' : 's'} · worst system sets route risk
         </p>
         <RouteJumpTable jumps={route.jumps} />
       </div>
@@ -142,7 +148,7 @@ export function HaulRiskModal({
 
           {!loading && (!haulIn || !haulOut) && (
             <div className="flex items-center justify-center py-16 text-sm opacity-60">
-              Route data unavailable for this hub and manufacturing region.
+              Route data unavailable for this hub and manufacturing system.
             </div>
           )}
 
@@ -173,6 +179,7 @@ export function HaulRiskModal({
 interface HaulRiskTriggerProps {
   haulIn: RouteDangerResult | null
   haulOut: RouteDangerResult | null
+  error?: string | null
   loading: boolean
   onOpen: () => void
 }
@@ -203,6 +210,14 @@ function HaulOutIcon({ className }: { className?: string }) {
   )
 }
 
+function HaulFailIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+      <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Zm.75 3.5a.75.75 0 0 0-1.5 0v4.25a.75.75 0 0 0 1.5 0V5Zm-.75 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+    </svg>
+  )
+}
+
 function RiskIcon({ direction, band }: { direction: 'in' | 'out'; band: DangerBand }) {
   const Icon = direction === 'in' ? HaulInIcon : HaulOutIcon
   const dirLabel = direction === 'in' ? 'Haul in' : 'Haul out'
@@ -218,9 +233,27 @@ function RiskIcon({ direction, band }: { direction: 'in' | 'out'; band: DangerBa
   )
 }
 
-export function HaulRiskTrigger({ haulIn, haulOut, loading, onOpen }: HaulRiskTriggerProps) {
+export function HaulRiskTrigger({ haulIn, haulOut, error, loading, onOpen }: HaulRiskTriggerProps) {
   if (loading) {
     return <span className="text-xs opacity-40">…</span>
+  }
+
+  if (error) {
+    return (
+      <Tooltip text={error} placement="left">
+        <span
+          className="inline-flex items-center gap-0.5 text-warning opacity-90"
+          aria-label={error}
+        >
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-warning/20">
+            <HaulFailIcon className="w-3.5 h-3.5" />
+          </span>
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-warning/20">
+            <HaulFailIcon className="w-3.5 h-3.5" />
+          </span>
+        </span>
+      </Tooltip>
+    )
   }
 
   if (!haulIn || !haulOut) {

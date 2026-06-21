@@ -114,7 +114,3 @@ export const HUB_FACTION_IDS: Record<HubId, number> = {
   rens: 500003,
   hek: 500003,
 }
-
-export function hubFactionLogoUrl(hubId: HubId, size = 64): string {
-  return corporationLogoUrl(HUB_FACTION_IDS[hubId], size)
-}

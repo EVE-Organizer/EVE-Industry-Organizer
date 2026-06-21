@@ -43,13 +43,12 @@ export function totalManufacturingCost(
   settings: GlobalSettings,
   me: number,
   systemCostIndex: number,
-  advancedIndustry = 0,
 ): { materialCost: number; jobCost: number; capital: number; jobTime: number } {
   const runs = settings.batchSize
   const mats = applyME(blueprint.materials, me, runs)
   const matCost = materialCost(mats, prices)
   const jobCost = estimateJobCost(matCost, systemCostIndex)
-  const jobTime = applyTE(blueprint.manufacturingTime, settings.teDefault, runs, advancedIndustry)
+  const jobTime = applyTE(blueprint.manufacturingTime, settings.teDefault, runs, 0)
   return {
     materialCost: matCost,
     jobCost,
@@ -70,26 +69,17 @@ export function revenueFromSale(
   return { gross, net: afterBroker - salesTax, brokerFee, salesTax }
 }
 
-export function profitPerBatch(
-  blueprint: BlueprintInfo,
-  prices: Map<number, number>,
-  settings: GlobalSettings,
-  me: number,
-  systemCostIndex: number,
-): number {
-  const productPrice = prices.get(blueprint.productTypeId) ?? 0
-  const { capital } = totalManufacturingCost(blueprint, prices, settings, me, systemCostIndex)
-  const outputQty = blueprint.productQuantity * settings.batchSize
-  const { net } = revenueFromSale(productPrice, outputQty, settings)
-  return net - capital
-}
-
-/** ME/TE used for a blueprint: T2 invented BPCs are fixed at ME2/TE4, others use the global default. */
+/**
+ * ME/TE used for a blueprint. T2 invented BPCs are fixed at ME2/TE4. Faction
+ * blueprints are BPCs that cannot be researched, so they stay at ME0/TE0 as
+ * acquired. T1 BPOs use the global researched default.
+ */
 export function blueprintMeTe(
   tier: BlueprintTier,
   settings: GlobalSettings,
 ): { me: number; te: number } {
   if (tier === 't2') return { me: T2_INVENTED_ME, te: T2_INVENTED_TE }
+  if (tier === 'faction') return { me: 0, te: 0 }
   return { me: settings.meDefault, te: settings.teDefault }
 }
 
@@ -140,24 +130,4 @@ export function inventionBlueprintCostPerRun({
   const expectedRunsPerAttempt = chance * runsPerBPC
   const costPerRun = expectedRunsPerAttempt > 0 ? attemptCost / expectedRunsPerAttempt : Infinity
   return { datacoreCost, attemptCost, chance, expectedRunsPerAttempt, costPerRun }
-}
-
-/** Spot margin for ranking only: raw blueprint materials, no ME or TE. */
-export function spotProfitPerBatch(
-  blueprint: BlueprintInfo,
-  prices: Map<number, number>,
-  settings: GlobalSettings,
-  systemCostIndex: number,
-): number {
-  const runs = settings.batchSize
-  const mats = blueprint.materials.map((m) => ({
-    typeId: m.typeId,
-    quantity: Math.max(1, Math.ceil(m.quantity * runs)),
-  }))
-  const matCost = materialCost(mats, prices)
-  const capital = matCost + estimateJobCost(matCost, systemCostIndex)
-  const productPrice = prices.get(blueprint.productTypeId) ?? 0
-  const outputQty = blueprint.productQuantity * runs
-  const { net } = revenueFromSale(productPrice, outputQty, settings)
-  return net - capital
 }

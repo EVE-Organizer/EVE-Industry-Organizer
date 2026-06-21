@@ -1,16 +1,5 @@
 import type { CharacterAccount, SkillPath, SkillPathStage } from '@/types'
 
-export const SKILL_KEY_MAP: Record<string, string> = {
-  industry: 'Industry',
-  massProduction: 'Mass Production',
-  advancedIndustry: 'Advanced Industry',
-  accounting: 'Accounting',
-  brokerRelations: 'Broker Relations',
-  metallurgy: 'Metallurgy',
-  science: 'Science',
-  research: 'Research',
-}
-
 export const SKILL_PATHS: SkillPath[] = [
   {
     id: 't1-ammo',

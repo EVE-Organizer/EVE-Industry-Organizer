@@ -11,8 +11,8 @@ const PREFIX = 'eveio:cache:'
 const MAX_ENTRIES = 500
 
 export function cacheKey(source: string, endpoint: string, params: Record<string, unknown>): string {
-  const hash = btoa(JSON.stringify(params)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 32)
-  return `${PREFIX}${source}:${endpoint}:${hash}`
+  const canonical = JSON.stringify(params, Object.keys(params).sort())
+  return `${PREFIX}${source}:${endpoint}:${canonical}`
 }
 
 export function getCached<T>(

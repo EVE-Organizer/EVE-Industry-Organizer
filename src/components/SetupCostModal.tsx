@@ -1,5 +1,5 @@
 import type { BlueprintCostBreakdown, RankedBlueprintRow, SetupCostBreakdown, TypeInfo } from '@/types'
-import { formatAvgVolume, formatIsk, formatPercent } from '@/lib/profit'
+import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
 
 interface SetupCostModalProps {
@@ -21,7 +21,7 @@ function RunsExplanation({ breakdown }: { breakdown: SetupCostBreakdown }) {
       <p className="text-sm">
         No volume history for this window, so rankings use your full batch setting:{' '}
         <strong>{runs}</strong> run{runs === 1 ? '' : 's'} × {productQuantity} ={' '}
-        <strong>{outputQty.toLocaleString()}</strong> units.
+        <strong>{formatQuantity(outputQty)}</strong> units.
       </p>
     )
   }
@@ -45,7 +45,7 @@ function RunsExplanation({ breakdown }: { breakdown: SetupCostBreakdown }) {
         Runs used: min({batchSizeSetting}, {maxRuns}) = <strong>{runs}</strong>
       </li>
       <li>
-        Output qty: {runs} × {productQuantity} = <strong>{outputQty.toLocaleString()}</strong>{' '}
+        Output qty: {runs} × {productQuantity} = <strong>{formatQuantity(outputQty)}</strong>{' '}
         units
       </li>
     </ol>
@@ -59,6 +59,46 @@ function BlueprintCostSection({
   breakdown: BlueprintCostBreakdown
   runs: number
 }) {
+  if (breakdown.chargeExcluded) {
+    return (
+      <section>
+        <h4 className="font-semibold text-sm mb-2">
+          2. Blueprint <span className="badge badge-ghost badge-xs align-middle">charge</span>
+        </h4>
+        <p className="text-xs opacity-60 mb-2">
+          Charges come from one cheap, reusable BPO that makes huge volume, so its cost is left out
+          of the batch.
+        </p>
+        <div className="font-mono text-xs sm:text-sm space-y-1 break-all">
+          <div>
+            Charged this batch: <strong>{formatIsk(0)}</strong>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (breakdown.mode === 'faction_bpc') {
+    return (
+      <section>
+        <h4 className="font-semibold text-sm mb-2">
+          2. Blueprint{' '}
+          <span className="badge badge-secondary badge-xs align-middle">faction BPC</span>
+        </h4>
+        <p className="text-xs opacity-60 mb-2">
+          Faction blueprints are copies bought from NPC LP stores or contracts, not BPOs. There is no
+          BPO to buy, and the copy cost is paid in loyalty points, so no ISK acquisition cost is
+          charged here.
+        </p>
+        <div className="font-mono text-xs sm:text-sm space-y-1 break-all">
+          <div>
+            Charged this batch: <strong>{formatIsk(0)}</strong>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   if (breakdown.mode === 'invention') {
     return (
       <section>
@@ -84,11 +124,11 @@ function BlueprintCostSection({
           <div>
             Expected runs: {formatPercent((breakdown.inventionChance ?? 0) * 100)} ×{' '}
             {breakdown.runsPerBPC ?? 0} ={' '}
-            <strong>{(breakdown.expectedRunsPerAttempt ?? 0).toFixed(2)}</strong>
+            <strong>{formatDecimal(breakdown.expectedRunsPerAttempt ?? 0, 2)}</strong>
           </div>
           <div>
             Cost per run: {formatIsk(breakdown.datacoreCost ?? 0)} ÷{' '}
-            {(breakdown.expectedRunsPerAttempt ?? 0).toFixed(2)} ={' '}
+            {formatDecimal(breakdown.expectedRunsPerAttempt ?? 0, 2)} ={' '}
             <strong>{formatIsk(breakdown.costPerRun ?? 0)}</strong>
           </div>
           <div>
@@ -106,7 +146,8 @@ function BlueprintCostSection({
         2. Blueprint <span className="badge badge-info badge-xs align-middle">BPO</span>
       </h4>
       <p className="text-xs opacity-60 mb-2">
-        T1 and Faction reuse a BPO, so its price and research are spread over its lifetime.
+        T1 BPOs are reusable, so the purchase price and research are spread over the blueprint
+        lifetime.
       </p>
       <div className="font-mono text-xs sm:text-sm space-y-1 break-all">
         <div>
@@ -116,11 +157,11 @@ function BlueprintCostSection({
           ME/TE research (one-time, est.): <strong>{formatIsk(breakdown.researchFee ?? 0)}</strong>
         </div>
         <div>
-          Lifetime: <strong>{(breakdown.lifetimeRuns ?? 0).toLocaleString()}</strong> runs
+          Lifetime: <strong>{formatQuantity(breakdown.lifetimeRuns ?? 0)}</strong> runs
         </div>
         <div>
           Charged this batch: ({formatIsk(breakdown.bpoUnitPrice ?? 0)} +{' '}
-          {formatIsk(breakdown.researchFee ?? 0)}) ÷ {(breakdown.lifetimeRuns ?? 0).toLocaleString()}{' '}
+          {formatIsk(breakdown.researchFee ?? 0)}) ÷ {formatQuantity(breakdown.lifetimeRuns ?? 0)}{' '}
           × {runs} = <strong>{formatIsk(breakdown.charged)}</strong>
         </div>
         {(breakdown.bpoUnitPrice ?? 0) <= 0 ? (
@@ -184,8 +225,8 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
                   {b.materials.map((line) => (
                     <tr key={line.typeId} className="text-sm">
                       <td className="max-w-[12rem] truncate">{typeName(typeMap, line.typeId)}</td>
-                      <td className="text-right tabular-nums">{line.baseQtyPerRun.toLocaleString()}</td>
-                      <td className="text-right tabular-nums">{line.quantity.toLocaleString()}</td>
+                      <td className="text-right tabular-nums">{formatQuantity(line.baseQtyPerRun)}</td>
+                      <td className="text-right tabular-nums">{formatQuantity(line.quantity)}</td>
                       <td className="text-right tabular-nums whitespace-nowrap">
                         {formatIsk(line.unitPrice)}
                       </td>
@@ -210,16 +251,33 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
           <section>
             <h4 className="font-semibold text-sm mb-2">4. Job cost (NPC station)</h4>
             <p className="text-sm font-mono text-xs sm:text-sm break-all">
-              {formatIsk(b.materialCost)} × {b.systemCostIndex.toFixed(4)} system cost index ={' '}
+              {formatIsk(b.materialCost)} × {formatDecimal(b.systemCostIndex, 4)} system cost index ={' '}
               <strong>{formatIsk(b.jobCost)}</strong>
             </p>
           </section>
 
           <section>
-            <h4 className="font-semibold text-sm mb-2">5. Haul in ({haulInLabel})</h4>
+            <h4 className="font-semibold text-sm mb-2">
+              5. Haul in ({haulInLabel})
+              {b.haulExcluded ? (
+                <span className="badge badge-ghost badge-xs align-middle ml-1">excluded</span>
+              ) : null}
+            </h4>
+            {b.haulExcluded ? (
+              <p className="text-xs opacity-60 mb-2">
+                Include hauling is off for this ranking. The estimate below is not counted in setup
+                or profit.
+              </p>
+            ) : null}
             <p className="text-sm font-mono text-xs sm:text-sm break-all">
-              {b.materialVolumeM3.toLocaleString(undefined, { maximumFractionDigits: 2 })} m³ ×{' '}
-              {formatIsk(b.haulInIskPerM3)}/m³ = <strong>{formatIsk(b.haulIn)}</strong>
+              {formatDecimal(b.materialVolumeM3, 2)} m³ ×{' '}
+              {formatIsk(b.haulInIskPerM3)}/m³ ={' '}
+              <strong>
+                {formatIsk(b.haulExcluded ? b.materialVolumeM3 * b.haulInIskPerM3 : b.haulIn)}
+              </strong>
+              {b.haulExcluded ? (
+                <span className="opacity-70"> → charged {formatIsk(0)}</span>
+              ) : null}
             </p>
           </section>
 
@@ -239,9 +297,12 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
 
         <div className="px-5 py-3 border-t border-eve-border bg-base-200/40 text-[11px] opacity-60 space-y-1">
           <p>
-            Setup = blueprint + materials + job cost + haul in. T1/Faction blueprint cost is
-            amortized over its lifetime; T2 charges the full invention cost per batch. Haul out (
-            {formatIsk(row.haulOut)}) is subtracted separately in profit, not included here.
+            Setup = blueprint + materials + job cost
+            {b.haulExcluded ? '' : ' + haul in'}. T1 blueprint cost is amortized over its lifetime; T2
+            charges the full invention cost per batch; faction BPCs carry no ISK acquisition cost.
+            {b.haulExcluded
+              ? ' Haul in and haul out are excluded from this ranking.'
+              : ` Haul out (${formatIsk(row.haulOut)}) is subtracted separately in profit, not included here.`}
           </p>
           <p>Material prices use the selected time window average when history exists; otherwise spot sell orders.</p>
         </div>

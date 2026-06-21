@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { loadSdeData } from '@/services/data/sdeLoader'
-import { queryKeys } from '@/services/queryKeys'
+
+const SDE_QUERY_KEY = ['sde'] as const
 
 export function useSdeData() {
   return useQuery({
-    queryKey: queryKeys.sde.all,
+    queryKey: SDE_QUERY_KEY,
     queryFn: loadSdeData,
     staleTime: Infinity,
   })

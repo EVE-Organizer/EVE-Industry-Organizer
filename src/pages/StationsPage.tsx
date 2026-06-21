@@ -6,6 +6,7 @@ import { PageHeader, LoadingState } from '@/components/Layout'
 import { EveImage, HubLogo } from '@/components/EveImage'
 import { MetricTile } from '@/components/MetricTile'
 import { ScoreBar } from '@/components/ScoreBar'
+import { formatDecimal } from '@/lib/profit'
 
 const RANK_LABELS = ['1st', '2nd', '3rd'] as const
 
@@ -84,7 +85,7 @@ export function StationsPage() {
                 />
                 <MetricTile
                   label="Cost index"
-                  value={`${(r.costIndex * 100).toFixed(2)}%`}
+                  value={`${formatDecimal(r.costIndex * 100, 2)}%`}
                   accent="warning"
                   icon={<EveImage id={688} variant="bp" productTypeId={12753} size={32} framed alt="" />}
                 />
@@ -96,7 +97,7 @@ export function StationsPage() {
                 />
                 <MetricTile
                   label="Security"
-                  value={r.buildSystem.security.toFixed(1)}
+                  value={formatDecimal(r.buildSystem.security, 1)}
                   accent={r.buildSystem.security >= 0.5 ? 'success' : 'warning'}
                   icon={
                     <span

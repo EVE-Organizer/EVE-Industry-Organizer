@@ -13,6 +13,7 @@ import type {
   RankedBlueprintRow,
   RegionsData,
   SetupCostBreakdown,
+  SystemInfo,
   TimeRange,
   TypeInfo,
 } from '@/types'
@@ -28,9 +29,17 @@ import {
   revenueFromSale,
 } from '@/lib/cost'
 import { meetsBuildRequirements } from '@/lib/buildRequirements'
-import { buildPriceMap, buildBuyPriceMap, filterBlueprints, getHubMarket } from '@/services/data/sdeLoader'
+import { WIDER_TIME_RANGES } from '@/lib/profit'
+import {
+  buildPriceMap,
+  buildBuyPriceMap,
+  filterBlueprints,
+  getHubMarket,
+  isRankableBlueprint,
+  resolveBuildSystem,
+} from '@/services/data/sdeLoader'
 
-const TOP_N = 30
+export const TOP_N = 50
 /** Rankings assume production up to this many days of average hub volume. */
 export const MAX_DAYS_TO_CLEAR = 7
 
@@ -58,6 +67,8 @@ export interface RankingFilters {
   minSetupCost: number
   maxSetupCost: number
   buildableOnly: boolean
+  /** When false, haul in/out are excluded from setup and profit. Defaults to true. */
+  includeHaulCost?: boolean
   account?: CharacterAccount
   tier?: BlueprintFilterTier
   productGroup?: string
@@ -103,10 +114,6 @@ function resolveHaulRate(
   return { iskPerM3: medianValidIskPerM3(haulRates), valid: true }
 }
 
-function meetsSkillRequirements(blueprint: BlueprintInfo, account?: CharacterAccount): boolean {
-  return meetsBuildRequirements(blueprint, account)
-}
-
 function hasValidPrices(
   blueprint: BlueprintInfo,
   spotPrices: Map<number, number>,
@@ -114,19 +121,13 @@ function hasValidPrices(
   avgPrice: number,
   settings: GlobalSettings,
   buyPrices: Map<number, number>,
-  hubMarket: HubMarketData,
-  window: TimeRange,
 ): boolean {
   const priceMethod = settings.priceMethod
-  if (settings.includeBlueprintCost) {
-    if (blueprint.tier === 't2') {
-      // T2 has no BPO market: needs invention data and datacore prices instead.
-      if (!blueprint.invention) return false
-      for (const d of blueprint.invention.datacores) {
-        if ((windowPrices.get(d.typeId) ?? 0) <= 0) return false
-      }
-    } else if (resolveBpoUnitPrice(blueprint.blueprintTypeId, hubMarket, spotPrices, window) <= 0) {
-      return false
+  if (settings.includeBlueprintCost && blueprint.tier === 't2') {
+    // T2 has no BPO market: needs invention data and datacore prices instead.
+    if (!blueprint.invention) return false
+    for (const d of blueprint.invention.datacores) {
+      if ((windowPrices.get(d.typeId) ?? 0) <= 0) return false
     }
   }
   if (priceMethod === 'buy_orders') {
@@ -161,14 +162,6 @@ function computeMaterialVolume(
   return mats.reduce((sum, m) => sum + m.quantity * (typeVolumes.get(m.typeId) ?? 0), 0)
 }
 
-const WIDER_WINDOWS: Record<TimeRange, TimeRange[]> = {
-  '1d': ['1w', '1m', '1y', 'all'],
-  '1w': ['1m', '1y', 'all'],
-  '1m': ['1y', 'all'],
-  '1y': ['all'],
-  all: [],
-}
-
 type WindowMetric = 'price' | 'volume'
 
 function pickHistoryWindow(
@@ -186,7 +179,7 @@ function pickHistoryWindow(
   const exact = tryWindow(window)
   if (exact) return exact
 
-  for (const wider of WIDER_WINDOWS[window]) {
+  for (const wider of WIDER_TIME_RANGES[window]) {
     const summary = tryWindow(wider)
     if (summary) return summary
   }
@@ -245,6 +238,15 @@ function resolveBpoUnitPrice(
   return 0
 }
 
+/**
+ * Charges (ammo, scripts, etc.) are produced in huge quantities from a single
+ * cheap, effectively reusable BPO, so amortizing its purchase price per batch
+ * is noise. We skip the BPO cost for these products.
+ */
+export function isChargeProduct(category: string | undefined): boolean {
+  return category === 'Charge'
+}
+
 /** Charged (into profit) and upfront (real cash) blueprint cost for one batch, tier-aware. */
 function computeBlueprintCost(
   blueprint: BlueprintInfo,
@@ -255,8 +257,9 @@ function computeBlueprintCost(
   regionCostIndex: number,
   runs: number,
   window: TimeRange,
+  isCharge: boolean,
 ): { charged: number; upfront: number; bpoUnitPrice: number; breakdown: BlueprintCostBreakdown } {
-  const include = settings.includeBlueprintCost
+  const include = settings.includeBlueprintCost && !isCharge
 
   if (blueprint.tier === 't2' && blueprint.invention) {
     const inv = blueprint.invention
@@ -276,6 +279,7 @@ function computeBlueprintCost(
         mode: 'invention',
         charged,
         upfront: charged,
+        chargeExcluded: isCharge,
         datacoreCost: r.datacoreCost,
         inventionChance: r.chance,
         runsPerBPC: inv.runsPerBPC,
@@ -285,13 +289,31 @@ function computeBlueprintCost(
     }
   }
 
+  if (blueprint.tier === 'faction') {
+    // Faction blueprints are BPCs bought from NPC LP stores or contracts, not BPOs.
+    // There is no BPO to buy and amortize, and a BPC cannot be researched. We have
+    // no LP/ISK price source for the copy, so no acquisition cost is charged.
+    return {
+      charged: 0,
+      upfront: 0,
+      bpoUnitPrice: 0,
+      breakdown: {
+        mode: 'faction_bpc',
+        charged: 0,
+        upfront: 0,
+        chargeExcluded: isCharge,
+      },
+    }
+  }
+
   const bpoUnitPrice = resolveBpoUnitPrice(blueprint.blueprintTypeId, hubMarket, spotPrices, window)
+  const bpoPriceMissing = include && bpoUnitPrice <= 0
   const baseRunMaterialValue = materialCost(blueprint.materials, windowPrices)
   const researchFee = estimateResearchFee(baseRunMaterialValue, regionCostIndex)
-  const charged = include
+  const charged = include && !bpoPriceMissing
     ? amortizedBpoCost(bpoUnitPrice, researchFee, settings.blueprintLifetimeRuns, runs)
     : 0
-  const upfront = include ? bpoUnitPrice : 0
+  const upfront = include && !bpoPriceMissing ? bpoUnitPrice : 0
   return {
     charged,
     upfront,
@@ -300,6 +322,8 @@ function computeBlueprintCost(
       mode: 'bpo',
       charged,
       upfront,
+      chargeExcluded: isCharge,
+      bpoPriceMissing: bpoPriceMissing || undefined,
       bpoUnitPrice,
       researchFee,
       lifetimeRuns: settings.blueprintLifetimeRuns,
@@ -318,6 +342,7 @@ function computeRow(
   regionCostIndex: number,
   haulInIskPerM3: number,
   haulOutIskPerM3: number,
+  includeHaulCost: boolean,
   typeVolumes: Map<number, number>,
   hubMarket: HubMarketData,
   window: TimeRange,
@@ -330,8 +355,6 @@ function computeRow(
       windowSummary.avgPrice,
       settings,
       buyPrices,
-      hubMarket,
-      window,
     )
   ) {
     return null
@@ -348,8 +371,9 @@ function computeRow(
   const outputQty = blueprint.productQuantity * runs
   const materialVolume = computeMaterialVolume(mats, typeVolumes)
   const productVolume = (typeVolumes.get(blueprint.productTypeId) ?? product.volume) * outputQty
-  const haulIn = materialVolume * haulInIskPerM3
-  const haulOut = productVolume * haulOutIskPerM3
+  const haulExcluded = !includeHaulCost
+  const haulIn = haulExcluded ? 0 : materialVolume * haulInIskPerM3
+  const haulOut = haulExcluded ? 0 : productVolume * haulOutIskPerM3
   const operatingCost = matCost + jobCost + haulIn
   const blueprintCostResult = computeBlueprintCost(
     blueprint,
@@ -360,7 +384,10 @@ function computeRow(
     regionCostIndex,
     runs,
     window,
+    isChargeProduct(product.category),
   )
+  // T1 BPO with no hub price means we cannot price the blueprint, so drop the row.
+  if (blueprintCostResult.breakdown.bpoPriceMissing) return null
   const blueprintCost = blueprintCostResult.breakdown
   const bpoUnitPrice = blueprintCostResult.bpoUnitPrice
   const bpoCost = blueprintCostResult.charged
@@ -400,6 +427,7 @@ function computeRow(
     materialVolumeM3: materialVolume,
     haulInIskPerM3,
     haulIn,
+    haulExcluded: haulExcluded || undefined,
     setupCost,
   }
   const advancedIndustry = 0
@@ -472,6 +500,7 @@ function computeRow(
     productVolumeM3: productVolume,
     haulOutIskPerM3,
     haulOut,
+    haulExcluded: haulExcluded || undefined,
     setupCost,
     netProfit,
     profitPerUnit,
@@ -537,23 +566,28 @@ export function rankBlueprintsFromMarket(
   window: TimeRange,
   settings: GlobalSettings,
   filters: RankingFilters,
+  systems: SystemInfo[] = [],
 ): RankedBlueprintRow[] {
   const hubMarket = getHubMarket(market, hub)
   if (!hubMarket) return []
 
-  const region =
-    regions.regions.find((r) => r.regionId === settings.manufacturingRegionId) ??
-    regions.regions.find((r) => r.regionId === hubMarket.regionId)
-  if (!region) return []
+  const { buildSystemId, costIndex: resolvedCostIndex } = resolveBuildSystem(
+    systems,
+    regions,
+    hubMarket,
+    settings.manufacturingSystemId,
+  )
 
   const spotPrices = buildPriceMap(hubMarket)
   const buyPrices = buildBuyPriceMap(hubMarket)
   const windowPrices = buildWindowPriceMap(hubMarket, window, spotPrices)
   const marketSystemId = hubMarket.marketSystemId
-  const buildSystemId = region.buildSystemId
-  const haulIn = resolveHaulRate(market.haulRates, marketSystemId, buildSystemId)
-  const haulOut = resolveHaulRate(market.haulRates, buildSystemId, marketSystemId)
-  if (!haulIn || !haulOut) return []
+  const includeHaulCost = filters.includeHaulCost ?? true
+  const haulInRate = resolveHaulRate(market.haulRates, marketSystemId, buildSystemId)
+  const haulOutRate = resolveHaulRate(market.haulRates, buildSystemId, marketSystemId)
+  const haulFallback = medianValidIskPerM3(market.haulRates)
+  const haulInIskPerM3 = haulInRate?.iskPerM3 ?? haulFallback
+  const haulOutIskPerM3 = haulOutRate?.iskPerM3 ?? haulFallback
 
   const typeVolumes = new Map<number, number>()
   for (const [id, type] of typeMap) {
@@ -566,9 +600,9 @@ export function rankBlueprintsFromMarket(
   const rows: RankedBlueprintRow[] = []
   for (const bp of blueprints) {
     if (isPlaceholderManufacturingBlueprint(bp)) continue
+    if (!isRankableBlueprint(bp, typeMap)) continue
 
-    const product = typeMap.get(bp.productTypeId)
-    if (!product) continue
+    const product = typeMap.get(bp.productTypeId)!
 
     let summary = resolveWindowSummary(hubMarket, bp.productTypeId, window, spotPrices)
     if (
@@ -588,9 +622,10 @@ export function rankBlueprintsFromMarket(
       windowPrices,
       buyPrices,
       settings,
-      region.costIndex,
-      haulIn.iskPerM3,
-      haulOut.iskPerM3,
+      resolvedCostIndex,
+      haulInIskPerM3,
+      haulOutIskPerM3,
+      includeHaulCost,
       typeVolumes,
       hubMarket,
       window,
@@ -598,7 +633,7 @@ export function rankBlueprintsFromMarket(
     if (!row) continue
     if (row.upfrontCapital < filters.minSetupCost) continue
     if (row.upfrontCapital > filters.maxSetupCost) continue
-    if (filters.buildableOnly && !meetsSkillRequirements(bp, filters.account)) continue
+    if (filters.buildableOnly && !meetsBuildRequirements(bp, filters.account)) continue
     rows.push(row)
   }
 
