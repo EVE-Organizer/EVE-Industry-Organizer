@@ -1,0 +1,63 @@
+[
+  {
+    "stationId": 60003760,
+    "name": "Jita 4 - Moon 4 - Caldari Navy Assembly Plant",
+    "systemId": 30000142,
+    "systemName": "Jita",
+    "regionId": 10000002,
+    "regionName": "The Forge",
+    "security": 0.945913,
+    "hubId": "jita"
+  },
+  {
+    "stationId": 60003754,
+    "name": "Perimeter 2 - Moon 1 - Caldari Navy Assembly Plant",
+    "systemId": 30000144,
+    "systemName": "Perimeter",
+    "regionId": 10000002,
+    "regionName": "The Forge",
+    "security": 0.949,
+    "hubId": "jita",
+    "isBuildHub": true
+  },
+  {
+    "stationId": 60008494,
+    "name": "Amarr VIII (Oris) - Emperor Family Academy",
+    "systemId": 30002187,
+    "systemName": "Amarr",
+    "regionId": 10000043,
+    "regionName": "Domain",
+    "security": 0.949,
+    "hubId": "amarr"
+  },
+  {
+    "stationId": 60011866,
+    "name": "Dodixie 9 - Moon 20 - Federation Navy Assembly Plant",
+    "systemId": 30002659,
+    "systemName": "Dodixie",
+    "regionId": 10000032,
+    "regionName": "Sinq Laison",
+    "security": 0.868407,
+    "hubId": "dodixie"
+  },
+  {
+    "stationId": 60004588,
+    "name": "Rens 6 - Moon 8 - Brutor Tribe Treasury",
+    "systemId": 30002510,
+    "systemName": "Rens",
+    "regionId": 10000030,
+    "regionName": "Heimatar",
+    "security": 0.894582,
+    "hubId": "rens"
+  },
+  {
+    "stationId": 60005686,
+    "name": "Hek 8 - Moon 12 - Boundless Creation Factory",
+    "systemId": 30002053,
+    "systemName": "Hek",
+    "regionId": 10000042,
+    "regionName": "Metropolis",
+    "security": 0.8,
+    "hubId": "hek"
+  }
+]

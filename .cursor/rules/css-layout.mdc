@@ -1,0 +1,129 @@
+---
+globs: src/**/*.tsx, src/**/*.css
+alwaysApply: false
+---
+# CSS layout (responsive)
+
+This project uses Tailwind CSS and DaisyUI. Layouts must adapt to viewport and container size. Use **flex** and **grid** with fluid sizing. Do not pin page structure to fixed pixel widths or heights.
+
+Sources: [Tailwind responsive design](https://tailwindcss.com/docs/responsive-design), [MDN min-width](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/min-width), CSS Flexbox spec (automatic minimum size).
+
+## Core rules
+
+1. **Grid for page structure, flex for components inside.** Grid handles 2D layout (rows + columns). Flex handles 1D layout (a row or a column).
+2. **Avoid fixed layout sizes.** No `w-[480px]`, `h-[32rem]`, or inline `width`/`height` for structure.
+3. **Prefer fluid sizing:** `w-full`, `max-w-*`, `flex-1`, `grow`, `shrink`, `fr`, `minmax(0, 1fr)`.
+4. **Mobile first.** Unprefixed classes = all screens (including mobile). `md:` means "768px and up", not "on mobile". Never use `sm:` alone to target phones.
+5. **Use `gap` for spacing** in flex/grid. Avoid margin hacks between siblings.
+6. Match patterns in `Layout.tsx` and `PageHeader` before inventing new systems.
+7. **Height chain stuck?** Try flex + `min-h-0` first. If still broken, use CSS variables with `calc()` (not fixed px/`rem` heights).
+
+## Flex vs grid
+
+| Use case | Tool | Tailwind example |
+|----------|------|------------------|
+| Nav, toolbar, title + action | flex | `flex flex-col sm:flex-row gap-4` |
+| Page shell, sidebar + main | flex | outer `flex flex-col`; main `flex-1 min-w-0` |
+| Card grids, dashboards, forms | grid | `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4` |
+| Auto-wrapping tiles (no breakpoints) | grid | `grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))]` |
+
+Combine both: grid for the page, flex inside each section/card.
+
+## Critical: `min-w-0` / `min-h-0`
+
+Flex items default to `min-width: auto`, so they refuse to shrink below content width. This breaks truncation, scroll regions, and nested flex layouts.
+
+Add `min-w-0` (or `min-h-0` on column flex) on any flex child that should shrink, scroll, or truncate. Chain it up the flex hierarchy if overflow persists.
+
+If height still will not chain correctly (nested cards, fixed headers/footers, virtual lists), do not fall back to raw pixel heights. Use **CSS variables + `calc()`** so the scroll region stays viewport-relative.
+
+```tsx
+// Parent defines measurable regions once
+<div
+  className="flex flex-col min-h-0"
+  style={
+    {
+      '--step-header': '5.5rem',
+      '--step-actions': '4rem',
+    } as React.CSSProperties
+  }
+>
+  <header className="shrink-0">…</header>
+  <div className="min-h-0 overflow-y-auto h-[calc(100dvh-var(--step-header)-var(--step-actions)-2rem)]">
+    …
+  </div>
+  <footer className="shrink-0">…</footer>
+</div>
+```
+
+Rules for CSS var + calc fallbacks:
+
+- Define vars on the nearest layout ancestor (`--header-h`, `--footer-h`, `--toolbar-h`).
+- Prefer `100dvh` / `100svh` over `100vh` on mobile.
+- Subtract padding and gaps in `calc()`, not as magic numbers in `height: 500`.
+- Keep vars in `rem` when tied to UI chrome; use `calc()` to compose the final size.
+- Try flex + `min-h-0` first; use vars + calc only when the height chain is still broken.
+
+```tsx
+<div className="flex min-w-0">
+  <div className="flex-1 min-w-0 truncate">…</div>
+</div>
+```
+
+## Container queries (reusable components)
+
+When the same component appears in a sidebar, main column, and modal, viewport breakpoints are wrong. Use container queries so the component responds to its parent width.
+
+```tsx
+<div className="@container">
+  <div className="flex flex-col @md:flex-row gap-4">…</div>
+</div>
+```
+
+Use viewport breakpoints for global layout (nav, page shell). Use `@container` for components reused in multiple regions.
+
+## Fixed sizes (sparingly)
+
+| OK | Avoid for layout |
+|----|------------------|
+| `max-w-7xl mx-auto w-full` (readability cap) | `w-[480px]`, `h-[32rem]` |
+| Icon/avatar sizes (`size-4`) | `height: 500` inline styles |
+| Small input widths (`w-28` on a filter) | Arbitrary `p-[37px]`, `gap-[13px]` |
+| Virtual-list scroll parent height | Fixed column widths on tables |
+| CSS vars + `calc()` for bounded scroll areas | Raw `height: 500`, `h-[32rem]` when flex chain fails |
+
+Prefer Tailwind scale tokens (`p-4`, `gap-4`, `text-sm`) over bracket values.
+
+For fluid type, prefer `text-sm md:text-base` or `clamp()` over fixed `text-[18px]`.
+
+## Common patterns
+
+```tsx
+// Page shell
+<div className="min-h-screen flex flex-col">
+  <main className="flex-1 min-w-0 w-full max-w-7xl mx-auto p-4 lg:p-8" />
+</div>
+
+// Responsive grid
+<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">…</div>
+
+// Intrinsic grid (wraps without breakpoints)
+<div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-4">…</div>
+
+// Scroll region in a flex card
+<div className="card-body flex flex-col min-h-0">
+  <div className="flex-1 min-h-0 overflow-y-auto">…</div>
+</div>
+
+// Tables on small screens
+<div className="overflow-x-auto">…</div>
+```
+
+## Before finishing
+
+- [ ] Structure uses flex or grid, not stacked divs with fixed dimensions
+- [ ] Flex children that scroll/truncate have `min-w-0` / `min-h-0`
+- [ ] Mobile layout uses unprefixed classes; larger screens add `sm:`/`md:`/`lg:`
+- [ ] Checked at 320px, 375px, 768px, and 1024px
+- [ ] Reusable components in varying contexts use `@container`, not only viewport breakpoints
+- [ ] If flex height chain fails, used CSS variables + `calc()` instead of fixed pixel heights

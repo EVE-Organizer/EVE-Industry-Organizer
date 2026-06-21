@@ -1,0 +1,89 @@
+---
+description: Extract repeated layout/section patterns into components instead of duplicating class strings
+globs: src/**/*.tsx
+alwaysApply: false
+---
+# Component primitives (avoid duplicated sections)
+
+Tailwind utilities belong in markup for one-offs. When the same **structure + classes** appear in more than one place, extract a React component. Do not copy-paste section wrappers across pages.
+
+This pairs with `css-layout.mdc` (flex/grid, responsive rules). That rule covers *how* to lay out; this rule covers *where* layout lives.
+
+Sources: [Tailwind: Extracting components](https://tailwindcss.com/docs/reusing-styles#extracting-components), [Tailwind: Avoiding premature abstraction](https://tailwindcss.com/docs/utility-first).
+
+## When to extract vs keep inline
+
+| Keep utilities inline | Extract a component |
+|-----------------------|---------------------|
+| Unique page layout used once | Same wrapper appears on 2+ pages or 2+ times on one page |
+| Small tweak on a single element | Card/panel shell, stat block, form field row, toolbar row |
+| DaisyUI defaults with no extra structure | Title + body + actions pattern (settings sections, account cards) |
+
+**Do not** create `@apply` CSS classes for UI sections. Prefer a component with utilities inside it. Reserve `@apply` for global base styles (see `index.css`).
+
+**Do not** extract too early: a one-off onboarding wizard step can stay inline. Extract when you copy the pattern or expect to reuse it.
+
+## Project patterns to centralize
+
+These strings are duplicated today. Use or add primitives in `src/components/` instead of re-declaring them:
+
+| Pattern | Repeated as | Prefer |
+|---------|-------------|--------|
+| Panel / section card | `card bg-base-200 border border-eve-border` (+ `card-body`, `card-title`) | `Panel` or `SectionCard` with `title`, `children`, optional `actions`, `className` |
+| Stat tile | `stat bg-base-200 rounded-lg border border-eve-border` | `StatCard` with `label`, `value`, optional `description` |
+| Page title row | inline flex header | existing `PageHeader` in `Layout.tsx` |
+| Loading / empty | spinner block | existing `LoadingState` |
+| Form label + control | `label.form-control` + `span.label-text` | extend `FormFieldLabel` or add `FormField` wrapper with a `control` slot |
+| Filter / toolbar row | `flex flex-wrap gap-2` + buttons | `Toolbar` or page-local subcomponent when the row is non-trivial |
+
+Before adding a new page section, search the codebase for an existing primitive or the same class combo.
+
+## How to write a primitive
+
+1. **Single source of truth** for the class string inside the component file.
+2. **`className` prop** on the outer element for page-specific spacing (`mb-6`, `lg:col-span-2`). Merge with a template literal or add `cn()` later if overrides get messy.
+3. **Semantic props** over layout props when possible: `title`, `compact`, `actions`, not `marginBottom={6}`.
+4. **Slots via `children`** for body content; optional `header`/`footer` only when the pattern repeats.
+5. **Colocate** in `src/components/` (feature-specific subcomponents stay next to their page until reused).
+
+```tsx
+// ❌ Duplicated on every settings section
+<section className="card bg-base-200 border border-eve-border">
+  <div className="card-body">
+    <h2 className="card-title text-base">{title}</h2>
+    {children}
+  </div>
+</section>
+
+// ✅ One component, many pages
+export function Panel({ title, children, className, actions }: PanelProps) {
+  return (
+    <section className={`card bg-base-200 border border-eve-border ${className ?? ''}`}>
+      <div className="card-body">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="card-title text-base">{title}</h2>
+          {actions}
+        </div>
+        {children}
+      </div>
+    </section>
+  )
+}
+```
+
+## Variants
+
+Start with inline classes and optional props (`size="sm"`, `compact`). Add `class-variance-authority` or `tailwind-variants` only when a primitive grows multiple variants (button-like complexity). This project does not use them yet; avoid new dependencies for a two-option prop.
+
+## File organization
+
+- **Shared UI primitives**: `src/components/Panel.tsx`, `StatCard.tsx`, etc.
+- **Page-only structure**: extract a named subcomponent in the same file (`AccountsPage.tsx` → `CharacterCard`) when the block is large but not reused elsewhere yet.
+- **Do not** put new layout primitives in `index.css` or duplicate them in every page file.
+
+## Before finishing
+
+- [ ] No new copy of `card bg-base-200 border border-eve-border` (or other repeated shell) without checking for an existing primitive
+- [ ] Page uses `PageHeader`, `LoadingState`, and shared form/panel components where they fit
+- [ ] Layout/responsive classes still follow `css-layout.mdc`
+- [ ] One-off markup stays inline; shared markup lives in `src/components/`

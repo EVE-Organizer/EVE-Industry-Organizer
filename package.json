@@ -1,0 +1,53 @@
+{
+  "name": "eve-industry-organizer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.app.json --noEmit && vite build",
+    "preview": "vite preview",
+    "fetch-data": "node scripts/fetch-sde-data.mjs",
+    "rebuild-market": "node scripts/rebuild-market.mjs",
+    "rebuild-market:hub": "node scripts/rebuild-market.mjs",
+    "rebuild-market:fast": "MARKET_SKIP_HISTORY=1 node scripts/rebuild-market.mjs",
+    "rebuild-market:dev": "MARKET_HISTORY_LIMIT=500 node scripts/rebuild-market.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.101.0",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.14.3",
+    "@xyflow/react": "^12.11.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.0",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "autoprefixer": "^10.5.0",
+    "daisyui": "^4.12.24",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.6.0",
+    "listr2": "^9.0.5",
+    "postcss": "^8.5.15",
+    "prettier": "^3.8.4",
+    "sass": "^1.101.0",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.61.1",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.9"
+  }
+}

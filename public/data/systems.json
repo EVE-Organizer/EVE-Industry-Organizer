@@ -1,0 +1,44 @@
+[
+  {
+    "systemId": 30002187,
+    "name": "Amarr",
+    "regionId": 10000043,
+    "security": 0.949,
+    "hubId": "amarr"
+  },
+  {
+    "systemId": 30002659,
+    "name": "Dodixie",
+    "regionId": 10000032,
+    "security": 0.868407,
+    "hubId": "dodixie"
+  },
+  {
+    "systemId": 30002053,
+    "name": "Hek",
+    "regionId": 10000042,
+    "security": 0.8,
+    "hubId": "hek"
+  },
+  {
+    "systemId": 30000142,
+    "name": "Jita",
+    "regionId": 10000002,
+    "security": 0.945913,
+    "hubId": "jita"
+  },
+  {
+    "systemId": 30000144,
+    "name": "Perimeter",
+    "regionId": 10000002,
+    "security": 0.949,
+    "hubId": "jita"
+  },
+  {
+    "systemId": 30002510,
+    "name": "Rens",
+    "regionId": 10000030,
+    "security": 0.894582,
+    "hubId": "rens"
+  }
+]

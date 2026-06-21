@@ -1,0 +1,7172 @@
+[
+  {
+    "skillId": 60381,
+    "name": "Abyssal Ore Processing",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/60381/icon?size=32"
+  },
+  {
+    "skillId": 3452,
+    "name": "Acceleration Control",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3452/icon?size=32"
+  },
+  {
+    "skillId": 16622,
+    "name": "Accounting",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3443,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/16622/icon?size=32"
+  },
+  {
+    "skillId": 89689,
+    "name": "Advanced Armor Layering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 5
+      },
+      {
+        "skillId": 33078,
+        "level": 4
+      },
+      {
+        "skillId": 3394,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/89689/icon?size=32"
+  },
+  {
+    "skillId": 16597,
+    "name": "Advanced Broker Relations",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 16622,
+        "level": 4
+      },
+      {
+        "skillId": 3446,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/16597/icon?size=32"
+  },
+  {
+    "skillId": 77725,
+    "name": "Advanced Capital Ship Construction",
+    "rank": 16,
+    "prerequisites": [
+      {
+        "skillId": 22242,
+        "level": 4
+      },
+      {
+        "skillId": 3398,
+        "level": 4
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/77725/icon?size=32"
+  },
+  {
+    "skillId": 73912,
+    "name": "Advanced Contracting",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 25235,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/73912/icon?size=32"
+  },
+  {
+    "skillId": 88377,
+    "name": "Advanced Doomsday Operation",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 24563,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/88377/icon?size=32"
+  },
+  {
+    "skillId": 23566,
+    "name": "Advanced Drone Avionics",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 5
+      },
+      {
+        "skillId": 3427,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/23566/icon?size=32"
+  },
+  {
+    "skillId": 81373,
+    "name": "Advanced Induction Efficiency",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 81372,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81373/icon?size=32"
+  },
+  {
+    "skillId": 3396,
+    "name": "Advanced Industrial Ship Construction",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 2
+      },
+      {
+        "skillId": 3380,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3396/icon?size=32"
+  },
+  {
+    "skillId": 3388,
+    "name": "Advanced Industry",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3380,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3388/icon?size=32"
+  },
+  {
+    "skillId": 33407,
+    "name": "Advanced Infomorph Psychology",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 24242,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33407/icon?size=32"
+  },
+  {
+    "skillId": 24624,
+    "name": "Advanced Laboratory Operation",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3406,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24624/icon?size=32"
+  },
+  {
+    "skillId": 3398,
+    "name": "Advanced Large Ship Construction",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3397,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3398/icon?size=32"
+  },
+  {
+    "skillId": 24625,
+    "name": "Advanced Mass Production",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3387,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24625/icon?size=32"
+  },
+  {
+    "skillId": 45749,
+    "name": "Advanced Mass Reactions",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 45748,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/45749/icon?size=32"
+  },
+  {
+    "skillId": 3397,
+    "name": "Advanced Medium Ship Construction",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 3
+      },
+      {
+        "skillId": 3395,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3397/icon?size=32"
+  },
+  {
+    "skillId": 2403,
+    "name": "Advanced Planetology",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 2406,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/2403/icon?size=32"
+  },
+  {
+    "skillId": 3395,
+    "name": "Advanced Small Ship Construction",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 1
+      },
+      {
+        "skillId": 3380,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3395/icon?size=32"
+  },
+  {
+    "skillId": 20342,
+    "name": "Advanced Spaceship Command",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20342/icon?size=32"
+  },
+  {
+    "skillId": 81371,
+    "name": "Advanced Studio Management",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 81370,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81371/icon?size=32"
+  },
+  {
+    "skillId": 3430,
+    "name": "Advanced Target Management",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3429,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3430/icon?size=32"
+  },
+  {
+    "skillId": 11207,
+    "name": "Advanced Weapon Upgrades",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3318,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11207/icon?size=32"
+  },
+  {
+    "skillId": 3450,
+    "name": "Afterburner",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3450/icon?size=32"
+  },
+  {
+    "skillId": 33095,
+    "name": "Amarr Battlecruiser",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3335,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33095/icon?size=32"
+  },
+  {
+    "skillId": 3339,
+    "name": "Amarr Battleship",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 4
+      },
+      {
+        "skillId": 33095,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3339/icon?size=32"
+  },
+  {
+    "skillId": 24311,
+    "name": "Amarr Carrier",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 4
+      },
+      {
+        "skillId": 3339,
+        "level": 3
+      },
+      {
+        "skillId": 3442,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24311/icon?size=32"
+  },
+  {
+    "skillId": 30539,
+    "name": "Amarr Core Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30539/icon?size=32"
+  },
+  {
+    "skillId": 3335,
+    "name": "Amarr Cruiser",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 2
+      },
+      {
+        "skillId": 33091,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3335/icon?size=32"
+  },
+  {
+    "skillId": 30532,
+    "name": "Amarr Defensive Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 5
+      },
+      {
+        "skillId": 3416,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30532/icon?size=32"
+  },
+  {
+    "skillId": 33091,
+    "name": "Amarr Destroyer",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3331,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33091/icon?size=32"
+  },
+  {
+    "skillId": 20525,
+    "name": "Amarr Dreadnought",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 3
+      },
+      {
+        "skillId": 3339,
+        "level": 3
+      },
+      {
+        "skillId": 22043,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20525/icon?size=32"
+  },
+  {
+    "skillId": 12484,
+    "name": "Amarr Drone Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12484/icon?size=32"
+  },
+  {
+    "skillId": 23087,
+    "name": "Amarr Encryption Methods",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 21718,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/23087/icon?size=32"
+  },
+  {
+    "skillId": 92397,
+    "name": "Amarr Fighter Specialization",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 23069,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/92397/icon?size=32"
+  },
+  {
+    "skillId": 20524,
+    "name": "Amarr Freighter",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 20342,
+        "level": 5
+      },
+      {
+        "skillId": 3343,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20524/icon?size=32"
+  },
+  {
+    "skillId": 3331,
+    "name": "Amarr Frigate",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3331/icon?size=32"
+  },
+  {
+    "skillId": 3343,
+    "name": "Amarr Hauler",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3343/icon?size=32"
+  },
+  {
+    "skillId": 30537,
+    "name": "Amarr Offensive Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 3436,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30537/icon?size=32"
+  },
+  {
+    "skillId": 30538,
+    "name": "Amarr Propulsion Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30538/icon?size=32"
+  },
+  {
+    "skillId": 11444,
+    "name": "Amarr Starship Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11444/icon?size=32"
+  },
+  {
+    "skillId": 30650,
+    "name": "Amarr Strategic Cruiser",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3335,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30650/icon?size=32"
+  },
+  {
+    "skillId": 34390,
+    "name": "Amarr Tactical Destroyer",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 33091,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/34390/icon?size=32"
+  },
+  {
+    "skillId": 3347,
+    "name": "Amarr Titan",
+    "rank": 16,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 5
+      },
+      {
+        "skillId": 3339,
+        "level": 3
+      },
+      {
+        "skillId": 3348,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3347/icon?size=32"
+  },
+  {
+    "skillId": 11584,
+    "name": "Anchoring",
+    "rank": 3,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/11584/icon?size=32"
+  },
+  {
+    "skillId": 13278,
+    "name": "Archaeology",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 3
+      },
+      {
+        "skillId": 3551,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/13278/icon?size=32"
+  },
+  {
+    "skillId": 33078,
+    "name": "Armor Layering",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33078/icon?size=32"
+  },
+  {
+    "skillId": 26253,
+    "name": "Armor Rigging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/26253/icon?size=32"
+  },
+  {
+    "skillId": 20494,
+    "name": "Armored Command",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20494/icon?size=32"
+  },
+  {
+    "skillId": 11569,
+    "name": "Armored Command Specialist",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      },
+      {
+        "skillId": 20494,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11569/icon?size=32"
+  },
+  {
+    "skillId": 12095,
+    "name": "Assault Frigates",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3413,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12095/icon?size=32"
+  },
+  {
+    "skillId": 3410,
+    "name": "Astrogeology",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 4
+      },
+      {
+        "skillId": 3386,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3410/icon?size=32"
+  },
+  {
+    "skillId": 25811,
+    "name": "Astrometric Acquisition",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3412,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25811/icon?size=32"
+  },
+  {
+    "skillId": 25810,
+    "name": "Astrometric Pinpointing",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3412,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25810/icon?size=32"
+  },
+  {
+    "skillId": 25739,
+    "name": "Astrometric Rangefinding",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25739/icon?size=32"
+  },
+  {
+    "skillId": 3412,
+    "name": "Astrometrics",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3412/icon?size=32"
+  },
+  {
+    "skillId": 11487,
+    "name": "Astronautic Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11487/icon?size=32"
+  },
+  {
+    "skillId": 26254,
+    "name": "Astronautics Rigging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/26254/icon?size=32"
+  },
+  {
+    "skillId": 3322,
+    "name": "Auto-Targeting Missiles",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3322/icon?size=32"
+  },
+  {
+    "skillId": 81377,
+    "name": "Basic Induction",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/81377/icon?size=32"
+  },
+  {
+    "skillId": 81375,
+    "name": "Batch Sequencing",
+    "rank": 3,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/81375/icon?size=32"
+  },
+  {
+    "skillId": 3405,
+    "name": "Biology",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3405/icon?size=32"
+  },
+  {
+    "skillId": 28656,
+    "name": "Black Ops",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 11579,
+        "level": 4
+      },
+      {
+        "skillId": 21611,
+        "level": 4
+      },
+      {
+        "skillId": 3327,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/28656/icon?size=32"
+  },
+  {
+    "skillId": 28073,
+    "name": "Bomb Deployment",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 12441,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/28073/icon?size=32"
+  },
+  {
+    "skillId": 86261,
+    "name": "Breacher Pod Clone Efficacity",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 86260,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/86261/icon?size=32"
+  },
+  {
+    "skillId": 86262,
+    "name": "Breacher Pod Clone Longevity",
+    "rank": 7,
+    "prerequisites": [
+      {
+        "skillId": 86260,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/86262/icon?size=32"
+  },
+  {
+    "skillId": 86260,
+    "name": "Breacher Pod Launcher Operation",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 3
+      },
+      {
+        "skillId": 24242,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/86260/icon?size=32"
+  },
+  {
+    "skillId": 86263,
+    "name": "Breacher Pod Projection",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 86260,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/86263/icon?size=32"
+  },
+  {
+    "skillId": 86264,
+    "name": "Breacher Pod Rapid Firing",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 86260,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/86264/icon?size=32"
+  },
+  {
+    "skillId": 3446,
+    "name": "Broker Relations",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3443,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3446/icon?size=32"
+  },
+  {
+    "skillId": 27911,
+    "name": "Burst Projector Operation",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3427,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/27911/icon?size=32"
+  },
+  {
+    "skillId": 33096,
+    "name": "Caldari Battlecruiser",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3334,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33096/icon?size=32"
+  },
+  {
+    "skillId": 3338,
+    "name": "Caldari Battleship",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 4
+      },
+      {
+        "skillId": 33096,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3338/icon?size=32"
+  },
+  {
+    "skillId": 24312,
+    "name": "Caldari Carrier",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 4
+      },
+      {
+        "skillId": 3338,
+        "level": 3
+      },
+      {
+        "skillId": 3442,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24312/icon?size=32"
+  },
+  {
+    "skillId": 30548,
+    "name": "Caldari Core Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30548/icon?size=32"
+  },
+  {
+    "skillId": 3334,
+    "name": "Caldari Cruiser",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 2
+      },
+      {
+        "skillId": 33092,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3334/icon?size=32"
+  },
+  {
+    "skillId": 30544,
+    "name": "Caldari Defensive Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3416,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30544/icon?size=32"
+  },
+  {
+    "skillId": 33092,
+    "name": "Caldari Destroyer",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3330,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33092/icon?size=32"
+  },
+  {
+    "skillId": 20530,
+    "name": "Caldari Dreadnought",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 3
+      },
+      {
+        "skillId": 3338,
+        "level": 3
+      },
+      {
+        "skillId": 22043,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20530/icon?size=32"
+  },
+  {
+    "skillId": 12487,
+    "name": "Caldari Drone Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12487/icon?size=32"
+  },
+  {
+    "skillId": 21790,
+    "name": "Caldari Encryption Methods",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 21718,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21790/icon?size=32"
+  },
+  {
+    "skillId": 92400,
+    "name": "Caldari Fighter Specialization",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 23069,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/92400/icon?size=32"
+  },
+  {
+    "skillId": 20526,
+    "name": "Caldari Freighter",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 20342,
+        "level": 5
+      },
+      {
+        "skillId": 3342,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20526/icon?size=32"
+  },
+  {
+    "skillId": 3330,
+    "name": "Caldari Frigate",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3330/icon?size=32"
+  },
+  {
+    "skillId": 3342,
+    "name": "Caldari Hauler",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3342/icon?size=32"
+  },
+  {
+    "skillId": 30549,
+    "name": "Caldari Offensive Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 5
+      },
+      {
+        "skillId": 3300,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30549/icon?size=32"
+  },
+  {
+    "skillId": 30552,
+    "name": "Caldari Propulsion Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30552/icon?size=32"
+  },
+  {
+    "skillId": 11454,
+    "name": "Caldari Starship Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11454/icon?size=32"
+  },
+  {
+    "skillId": 30651,
+    "name": "Caldari Strategic Cruiser",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3334,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30651/icon?size=32"
+  },
+  {
+    "skillId": 35680,
+    "name": "Caldari Tactical Destroyer",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 33092,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/35680/icon?size=32"
+  },
+  {
+    "skillId": 3346,
+    "name": "Caldari Titan",
+    "rank": 16,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 5
+      },
+      {
+        "skillId": 3338,
+        "level": 3
+      },
+      {
+        "skillId": 3348,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3346/icon?size=32"
+  },
+  {
+    "skillId": 3423,
+    "name": "Capacitor Emission Systems",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 3
+      },
+      {
+        "skillId": 3402,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3423/icon?size=32"
+  },
+  {
+    "skillId": 3418,
+    "name": "Capacitor Management",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3418/icon?size=32"
+  },
+  {
+    "skillId": 3417,
+    "name": "Capacitor Systems Operation",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3417/icon?size=32"
+  },
+  {
+    "skillId": 41404,
+    "name": "Capital Artillery Specialization",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 5
+      },
+      {
+        "skillId": 21667,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/41404/icon?size=32"
+  },
+  {
+    "skillId": 41403,
+    "name": "Capital Autocannon Specialization",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 5
+      },
+      {
+        "skillId": 21667,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/41403/icon?size=32"
+  },
+  {
+    "skillId": 41408,
+    "name": "Capital Beam Laser Specialization",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 5
+      },
+      {
+        "skillId": 20327,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/41408/icon?size=32"
+  },
+  {
+    "skillId": 41405,
+    "name": "Capital Blaster Specialization",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 5
+      },
+      {
+        "skillId": 21666,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/41405/icon?size=32"
+  },
+  {
+    "skillId": 24572,
+    "name": "Capital Capacitor Emission Systems",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 5
+      },
+      {
+        "skillId": 3423,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24572/icon?size=32"
+  },
+  {
+    "skillId": 92541,
+    "name": "Capital Disintegrator Specialization",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 5
+      },
+      {
+        "skillId": 52998,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/92541/icon?size=32"
+  },
+  {
+    "skillId": 20327,
+    "name": "Capital Energy Turret",
+    "rank": 7,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 3309,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20327/icon?size=32"
+  },
+  {
+    "skillId": 21666,
+    "name": "Capital Hybrid Turret",
+    "rank": 7,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 3307,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21666/icon?size=32"
+  },
+  {
+    "skillId": 28585,
+    "name": "Capital Industrial Reconfiguration",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 24625,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/28585/icon?size=32"
+  },
+  {
+    "skillId": 28374,
+    "name": "Capital Industrial Ships",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 20342,
+        "level": 5
+      },
+      {
+        "skillId": 29637,
+        "level": 3
+      },
+      {
+        "skillId": 20533,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/28374/icon?size=32"
+  },
+  {
+    "skillId": 83094,
+    "name": "Capital Jump Portal Generation",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 24562,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/83094/icon?size=32"
+  },
+  {
+    "skillId": 83464,
+    "name": "Capital Micro Jump Drive Operation",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 5
+      },
+      {
+        "skillId": 4385,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/83464/icon?size=32"
+  },
+  {
+    "skillId": 52998,
+    "name": "Capital Precursor Weapon",
+    "rank": 7,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 47872,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/52998/icon?size=32"
+  },
+  {
+    "skillId": 21667,
+    "name": "Capital Projectile Turret",
+    "rank": 7,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 3308,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21667/icon?size=32"
+  },
+  {
+    "skillId": 41407,
+    "name": "Capital Pulse Laser Specialization",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 5
+      },
+      {
+        "skillId": 20327,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/41407/icon?size=32"
+  },
+  {
+    "skillId": 41406,
+    "name": "Capital Railgun Specialization",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 5
+      },
+      {
+        "skillId": 21666,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/41406/icon?size=32"
+  },
+  {
+    "skillId": 24568,
+    "name": "Capital Remote Armor Repair Systems",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 16069,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24568/icon?size=32"
+  },
+  {
+    "skillId": 27936,
+    "name": "Capital Remote Hull Repair Systems",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 27902,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/27936/icon?size=32"
+  },
+  {
+    "skillId": 21803,
+    "name": "Capital Repair Systems",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 5
+      },
+      {
+        "skillId": 3394,
+        "level": 5
+      },
+      {
+        "skillId": 3393,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21803/icon?size=32"
+  },
+  {
+    "skillId": 24571,
+    "name": "Capital Shield Emission Systems",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 5
+      },
+      {
+        "skillId": 3422,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24571/icon?size=32"
+  },
+  {
+    "skillId": 21802,
+    "name": "Capital Shield Operation",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3419,
+        "level": 5
+      },
+      {
+        "skillId": 3416,
+        "level": 5
+      },
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21802/icon?size=32"
+  },
+  {
+    "skillId": 22242,
+    "name": "Capital Ship Construction",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 5
+      },
+      {
+        "skillId": 3380,
+        "level": 5
+      },
+      {
+        "skillId": 3388,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22242/icon?size=32"
+  },
+  {
+    "skillId": 62451,
+    "name": "Capital Shipboard Compression Technology",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 28585,
+        "level": 1
+      },
+      {
+        "skillId": 62450,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/62451/icon?size=32"
+  },
+  {
+    "skillId": 20533,
+    "name": "Capital Ships",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 20342,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20533/icon?size=32"
+  },
+  {
+    "skillId": 11579,
+    "name": "Cloaking",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11579/icon?size=32"
+  },
+  {
+    "skillId": 24606,
+    "name": "Cloning Facility Operation",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 20533,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24606/icon?size=32"
+  },
+  {
+    "skillId": 60378,
+    "name": "Coherent Ore Processing",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3385,
+        "level": 5
+      },
+      {
+        "skillId": 3402,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/60378/icon?size=32"
+  },
+  {
+    "skillId": 3354,
+    "name": "Command Burst Specialist",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3354/icon?size=32"
+  },
+  {
+    "skillId": 93983,
+    "name": "Command Carriers",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 4
+      },
+      {
+        "skillId": 3442,
+        "level": 5
+      },
+      {
+        "skillId": 21610,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/93983/icon?size=32"
+  },
+  {
+    "skillId": 2505,
+    "name": "Command Center Upgrades",
+    "rank": 4,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/2505/icon?size=32"
+  },
+  {
+    "skillId": 37615,
+    "name": "Command Destroyers",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 5
+      },
+      {
+        "skillId": 3354,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/37615/icon?size=32"
+  },
+  {
+    "skillId": 23950,
+    "name": "Command Ships",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 5
+      },
+      {
+        "skillId": 3354,
+        "level": 4
+      },
+      {
+        "skillId": 11574,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/23950/icon?size=32"
+  },
+  {
+    "skillId": 46153,
+    "name": "Common Moon Ore Processing",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/46153/icon?size=32"
+  },
+  {
+    "skillId": 60380,
+    "name": "Complex Ore Processing",
+    "rank": 11,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/60380/icon?size=32"
+  },
+  {
+    "skillId": 3359,
+    "name": "Connections",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3355,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3359/icon?size=32"
+  },
+  {
+    "skillId": 25235,
+    "name": "Contracting",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3355,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25235/icon?size=32"
+  },
+  {
+    "skillId": 3316,
+    "name": "Controlled Bursts",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3316/icon?size=32"
+  },
+  {
+    "skillId": 30325,
+    "name": "Core Subsystem Technology",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3403,
+        "level": 5
+      },
+      {
+        "skillId": 11433,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30325/icon?size=32"
+  },
+  {
+    "skillId": 25233,
+    "name": "Corporation Contracting",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 25235,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25233/icon?size=32"
+  },
+  {
+    "skillId": 3363,
+    "name": "Corporation Management",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3363/icon?size=32"
+  },
+  {
+    "skillId": 12093,
+    "name": "Covert Ops",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3432,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12093/icon?size=32"
+  },
+  {
+    "skillId": 3426,
+    "name": "CPU Management",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3426/icon?size=32"
+  },
+  {
+    "skillId": 3361,
+    "name": "Criminal Connections",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3355,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3361/icon?size=32"
+  },
+  {
+    "skillId": 20212,
+    "name": "Cruise Missile Specialization",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      },
+      {
+        "skillId": 3326,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20212/icon?size=32"
+  },
+  {
+    "skillId": 3326,
+    "name": "Cruise Missiles",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 5
+      },
+      {
+        "skillId": 3324,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3326/icon?size=32"
+  },
+  {
+    "skillId": 33467,
+    "name": "Customs Code Expertise",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3443,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33467/icon?size=32"
+  },
+  {
+    "skillId": 3411,
+    "name": "Cybernetics",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3411/icon?size=32"
+  },
+  {
+    "skillId": 21603,
+    "name": "Cynosural Field Theory",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21603/icon?size=32"
+  },
+  {
+    "skillId": 16595,
+    "name": "Daytrading",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3443,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/16595/icon?size=32"
+  },
+  {
+    "skillId": 11395,
+    "name": "Deep Core Mining",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3386,
+        "level": 5
+      },
+      {
+        "skillId": 3410,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11395/icon?size=32"
+  },
+  {
+    "skillId": 3323,
+    "name": "Defender Missiles",
+    "rank": 2,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3323/icon?size=32"
+  },
+  {
+    "skillId": 30324,
+    "name": "Defensive Subsystem Technology",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3403,
+        "level": 5
+      },
+      {
+        "skillId": 11442,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30324/icon?size=32"
+  },
+  {
+    "skillId": 3357,
+    "name": "Diplomacy",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3355,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3357/icon?size=32"
+  },
+  {
+    "skillId": 3368,
+    "name": "Diplomatic Relations",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3363,
+        "level": 2
+      },
+      {
+        "skillId": 3355,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3368/icon?size=32"
+  },
+  {
+    "skillId": 77739,
+    "name": "Disruptive Lance Operation",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 11433,
+        "level": 4
+      },
+      {
+        "skillId": 3421,
+        "level": 4
+      },
+      {
+        "skillId": 11207,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/77739/icon?size=32"
+  },
+  {
+    "skillId": 3894,
+    "name": "Distribution Connections",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3443,
+        "level": 3
+      },
+      {
+        "skillId": 3355,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3894/icon?size=32"
+  },
+  {
+    "skillId": 24563,
+    "name": "Doomsday Operation",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3421,
+        "level": 5
+      },
+      {
+        "skillId": 11207,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24563/icon?size=32"
+  },
+  {
+    "skillId": 41537,
+    "name": "Doomsday Rapid Firing",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 24563,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/41537/icon?size=32"
+  },
+  {
+    "skillId": 3437,
+    "name": "Drone Avionics",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3437/icon?size=32"
+  },
+  {
+    "skillId": 23618,
+    "name": "Drone Durability",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/23618/icon?size=32"
+  },
+  {
+    "skillId": 3442,
+    "name": "Drone Interfacing",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3442/icon?size=32"
+  },
+  {
+    "skillId": 12305,
+    "name": "Drone Navigation",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12305/icon?size=32"
+  },
+  {
+    "skillId": 23606,
+    "name": "Drone Sharpshooting",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/23606/icon?size=32"
+  },
+  {
+    "skillId": 3436,
+    "name": "Drones",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3436/icon?size=32"
+  },
+  {
+    "skillId": 26255,
+    "name": "Drones Rigging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/26255/icon?size=32"
+  },
+  {
+    "skillId": 26224,
+    "name": "Drug Manufacturing",
+    "rank": 2,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/26224/icon?size=32"
+  },
+  {
+    "skillId": 54794,
+    "name": "EDENCOM Battleship",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 5
+      },
+      {
+        "skillId": 55032,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/54794/icon?size=32"
+  },
+  {
+    "skillId": 55032,
+    "name": "EDENCOM Cruiser",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 2
+      },
+      {
+        "skillId": 55031,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/55032/icon?size=32"
+  },
+  {
+    "skillId": 55031,
+    "name": "EDENCOM Frigate",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/55031/icon?size=32"
+  },
+  {
+    "skillId": 11448,
+    "name": "Electromagnetic Physics",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3426,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11448/icon?size=32"
+  },
+  {
+    "skillId": 28615,
+    "name": "Electronic Attack Ships",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3428,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/28615/icon?size=32"
+  },
+  {
+    "skillId": 11453,
+    "name": "Electronic Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3426,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11453/icon?size=32"
+  },
+  {
+    "skillId": 26256,
+    "name": "Electronic Superiority Rigging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/26256/icon?size=32"
+  },
+  {
+    "skillId": 3427,
+    "name": "Electronic Warfare",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3427/icon?size=32"
+  },
+  {
+    "skillId": 3432,
+    "name": "Electronics Upgrades",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 2
+      },
+      {
+        "skillId": 3413,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3432/icon?size=32"
+  },
+  {
+    "skillId": 73910,
+    "name": "Elite Infomorph Psychology",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 33407,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/73910/icon?size=32"
+  },
+  {
+    "skillId": 22806,
+    "name": "EM Armor Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3394,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22806/icon?size=32"
+  },
+  {
+    "skillId": 12365,
+    "name": "EM Shield Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3416,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12365/icon?size=32"
+  },
+  {
+    "skillId": 3732,
+    "name": "Empire Control",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3731,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3732/icon?size=32"
+  },
+  {
+    "skillId": 3424,
+    "name": "Energy Grid Upgrades",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 2
+      },
+      {
+        "skillId": 3402,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3424/icon?size=32"
+  },
+  {
+    "skillId": 3421,
+    "name": "Energy Pulse Weapons",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 2
+      },
+      {
+        "skillId": 3402,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3421/icon?size=32"
+  },
+  {
+    "skillId": 26258,
+    "name": "Energy Weapon Rigging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/26258/icon?size=32"
+  },
+  {
+    "skillId": 90040,
+    "name": "Erratic Ore Processing",
+    "rank": 11,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/90040/icon?size=32"
+  },
+  {
+    "skillId": 3453,
+    "name": "Evasive Maneuvering",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3453/icon?size=32"
+  },
+  {
+    "skillId": 46156,
+    "name": "Exceptional Moon Ore Processing",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/46156/icon?size=32"
+  },
+  {
+    "skillId": 84220,
+    "name": "Executive Paragon Partnership",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 84218,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/84220/icon?size=32"
+  },
+  {
+    "skillId": 22551,
+    "name": "Exhumers",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 4
+      },
+      {
+        "skillId": 3380,
+        "level": 5
+      },
+      {
+        "skillId": 3410,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22551/icon?size=32"
+  },
+  {
+    "skillId": 89611,
+    "name": "Expedition Command",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/89611/icon?size=32"
+  },
+  {
+    "skillId": 89609,
+    "name": "Expedition Command Ships",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 5
+      },
+      {
+        "skillId": 3412,
+        "level": 5
+      },
+      {
+        "skillId": 89610,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/89609/icon?size=32"
+  },
+  {
+    "skillId": 89610,
+    "name": "Expedition Command Specialist",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      },
+      {
+        "skillId": 89611,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/89610/icon?size=32"
+  },
+  {
+    "skillId": 33856,
+    "name": "Expedition Frigates",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3432,
+        "level": 5
+      },
+      {
+        "skillId": 3380,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33856/icon?size=32"
+  },
+  {
+    "skillId": 22807,
+    "name": "Explosive Armor Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3394,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22807/icon?size=32"
+  },
+  {
+    "skillId": 12367,
+    "name": "Explosive Shield Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3416,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12367/icon?size=32"
+  },
+  {
+    "skillId": 3358,
+    "name": "Fast Talk",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3355,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3358/icon?size=32"
+  },
+  {
+    "skillId": 24613,
+    "name": "Fighter Hangar Management",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 23069,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24613/icon?size=32"
+  },
+  {
+    "skillId": 23069,
+    "name": "Fighters",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 3442,
+        "level": 5
+      },
+      {
+        "skillId": 3348,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/23069/icon?size=32"
+  },
+  {
+    "skillId": 47445,
+    "name": "Flag Cruisers",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 5
+      },
+      {
+        "skillId": 24764,
+        "level": 1
+      },
+      {
+        "skillId": 3430,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/47445/icon?size=32"
+  },
+  {
+    "skillId": 24764,
+    "name": "Fleet Command",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 11574,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24764/icon?size=32"
+  },
+  {
+    "skillId": 62453,
+    "name": "Fleet Compression Logistics",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 22552,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/62453/icon?size=32"
+  },
+  {
+    "skillId": 57318,
+    "name": "Fleet Coordination",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 5
+      },
+      {
+        "skillId": 57317,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/57318/icon?size=32"
+  },
+  {
+    "skillId": 57317,
+    "name": "Fleet Formations",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/57317/icon?size=32"
+  },
+  {
+    "skillId": 91017,
+    "name": "Freelancing",
+    "rank": 2,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/91017/icon?size=32"
+  },
+  {
+    "skillId": 19760,
+    "name": "Frequency Modulation",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 3
+      },
+      {
+        "skillId": 3427,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/19760/icon?size=32"
+  },
+  {
+    "skillId": 3451,
+    "name": "Fuel Conservation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 2
+      },
+      {
+        "skillId": 3450,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3451/icon?size=32"
+  },
+  {
+    "skillId": 33097,
+    "name": "Gallente Battlecruiser",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3332,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33097/icon?size=32"
+  },
+  {
+    "skillId": 3336,
+    "name": "Gallente Battleship",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 4
+      },
+      {
+        "skillId": 33097,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3336/icon?size=32"
+  },
+  {
+    "skillId": 24313,
+    "name": "Gallente Carrier",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 4
+      },
+      {
+        "skillId": 3336,
+        "level": 3
+      },
+      {
+        "skillId": 3442,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24313/icon?size=32"
+  },
+  {
+    "skillId": 30546,
+    "name": "Gallente Core Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30546/icon?size=32"
+  },
+  {
+    "skillId": 3332,
+    "name": "Gallente Cruiser",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 2
+      },
+      {
+        "skillId": 33093,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3332/icon?size=32"
+  },
+  {
+    "skillId": 30540,
+    "name": "Gallente Defensive Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 5
+      },
+      {
+        "skillId": 3416,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30540/icon?size=32"
+  },
+  {
+    "skillId": 33093,
+    "name": "Gallente Destroyer",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3328,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33093/icon?size=32"
+  },
+  {
+    "skillId": 20531,
+    "name": "Gallente Dreadnought",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 3
+      },
+      {
+        "skillId": 3336,
+        "level": 3
+      },
+      {
+        "skillId": 22043,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20531/icon?size=32"
+  },
+  {
+    "skillId": 12486,
+    "name": "Gallente Drone Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12486/icon?size=32"
+  },
+  {
+    "skillId": 23121,
+    "name": "Gallente Encryption Methods",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 21718,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/23121/icon?size=32"
+  },
+  {
+    "skillId": 92398,
+    "name": "Gallente Fighter Specialization",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 23069,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/92398/icon?size=32"
+  },
+  {
+    "skillId": 20527,
+    "name": "Gallente Freighter",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 20342,
+        "level": 5
+      },
+      {
+        "skillId": 3340,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20527/icon?size=32"
+  },
+  {
+    "skillId": 3328,
+    "name": "Gallente Frigate",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3328/icon?size=32"
+  },
+  {
+    "skillId": 3340,
+    "name": "Gallente Hauler",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3340/icon?size=32"
+  },
+  {
+    "skillId": 30550,
+    "name": "Gallente Offensive Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 3436,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30550/icon?size=32"
+  },
+  {
+    "skillId": 30553,
+    "name": "Gallente Propulsion Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30553/icon?size=32"
+  },
+  {
+    "skillId": 11450,
+    "name": "Gallente Starship Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11450/icon?size=32"
+  },
+  {
+    "skillId": 30652,
+    "name": "Gallente Strategic Cruiser",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3332,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30652/icon?size=32"
+  },
+  {
+    "skillId": 35685,
+    "name": "Gallente Tactical Destroyer",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 33093,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/35685/icon?size=32"
+  },
+  {
+    "skillId": 3344,
+    "name": "Gallente Titan",
+    "rank": 16,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 5
+      },
+      {
+        "skillId": 3336,
+        "level": 3
+      },
+      {
+        "skillId": 3348,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3344/icon?size=32"
+  },
+  {
+    "skillId": 25544,
+    "name": "Gas Cloud Harvesting",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3386,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25544/icon?size=32"
+  },
+  {
+    "skillId": 62452,
+    "name": "Gas Decompression Efficiency",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 62450,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/62452/icon?size=32"
+  },
+  {
+    "skillId": 33000,
+    "name": "Gravimetric Sensor Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33000/icon?size=32"
+  },
+  {
+    "skillId": 11446,
+    "name": "Graviton Physics",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11446/icon?size=32"
+  },
+  {
+    "skillId": 20312,
+    "name": "Guided Missile Precision",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20312/icon?size=32"
+  },
+  {
+    "skillId": 3300,
+    "name": "Gunnery",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3300/icon?size=32"
+  },
+  {
+    "skillId": 21718,
+    "name": "Hacking",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 3
+      },
+      {
+        "skillId": 3432,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21718/icon?size=32"
+  },
+  {
+    "skillId": 16591,
+    "name": "Heavy Assault Cruisers",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3424,
+        "level": 5
+      },
+      {
+        "skillId": 3318,
+        "level": 5
+      },
+      {
+        "skillId": 3327,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/16591/icon?size=32"
+  },
+  {
+    "skillId": 25718,
+    "name": "Heavy Assault Missile Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      },
+      {
+        "skillId": 25719,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25718/icon?size=32"
+  },
+  {
+    "skillId": 25719,
+    "name": "Heavy Assault Missiles",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 3
+      },
+      {
+        "skillId": 3321,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25719/icon?size=32"
+  },
+  {
+    "skillId": 3441,
+    "name": "Heavy Drone Operation",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3441/icon?size=32"
+  },
+  {
+    "skillId": 32339,
+    "name": "Heavy Fighters",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 23069,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/32339/icon?size=32"
+  },
+  {
+    "skillId": 28609,
+    "name": "Heavy Interdiction Cruisers",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3435,
+        "level": 5
+      },
+      {
+        "skillId": 11446,
+        "level": 4
+      },
+      {
+        "skillId": 3327,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/28609/icon?size=32"
+  },
+  {
+    "skillId": 20211,
+    "name": "Heavy Missile Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      },
+      {
+        "skillId": 3324,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20211/icon?size=32"
+  },
+  {
+    "skillId": 3324,
+    "name": "Heavy Missiles",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 3
+      },
+      {
+        "skillId": 3321,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3324/icon?size=32"
+  },
+  {
+    "skillId": 11433,
+    "name": "High Energy Physics",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11433/icon?size=32"
+  },
+  {
+    "skillId": 3454,
+    "name": "High Speed Maneuvering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 3
+      },
+      {
+        "skillId": 3450,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3454/icon?size=32"
+  },
+  {
+    "skillId": 81369,
+    "name": "Hub Algorithm Optimization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 81368,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81369/icon?size=32"
+  },
+  {
+    "skillId": 81368,
+    "name": "Hub Promotion",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/81368/icon?size=32"
+  },
+  {
+    "skillId": 3394,
+    "name": "Hull Upgrades",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3394/icon?size=32"
+  },
+  {
+    "skillId": 26259,
+    "name": "Hybrid Weapon Rigging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/26259/icon?size=32"
+  },
+  {
+    "skillId": 11443,
+    "name": "Hydromagnetic Physics",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11443/icon?size=32"
+  },
+  {
+    "skillId": 16281,
+    "name": "Ice Harvesting",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3386,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/16281/icon?size=32"
+  },
+  {
+    "skillId": 43702,
+    "name": "Ice Harvesting Drone Operation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 1
+      },
+      {
+        "skillId": 16281,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/43702/icon?size=32"
+  },
+  {
+    "skillId": 43703,
+    "name": "Ice Harvesting Drone Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 43702,
+        "level": 5
+      },
+      {
+        "skillId": 16281,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/43703/icon?size=32"
+  },
+  {
+    "skillId": 18025,
+    "name": "Ice Processing",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 11443,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/18025/icon?size=32"
+  },
+  {
+    "skillId": 81372,
+    "name": "Induction Efficiency",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 81377,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81372/icon?size=32"
+  },
+  {
+    "skillId": 29637,
+    "name": "Industrial Command Ships",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 5
+      },
+      {
+        "skillId": 3184,
+        "level": 3
+      },
+      {
+        "skillId": 22552,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/29637/icon?size=32"
+  },
+  {
+    "skillId": 58956,
+    "name": "Industrial Reconfiguration",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 24625,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/58956/icon?size=32"
+  },
+  {
+    "skillId": 81365,
+    "name": "Industrial Sequencing",
+    "rank": 9,
+    "prerequisites": [
+      {
+        "skillId": 81364,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81365/icon?size=32"
+  },
+  {
+    "skillId": 3380,
+    "name": "Industry",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3380/icon?size=32"
+  },
+  {
+    "skillId": 24242,
+    "name": "Infomorph Psychology",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/24242/icon?size=32"
+  },
+  {
+    "skillId": 33399,
+    "name": "Infomorph Synchronizing",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 24242,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33399/icon?size=32"
+  },
+  {
+    "skillId": 20495,
+    "name": "Information Command",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20495/icon?size=32"
+  },
+  {
+    "skillId": 3352,
+    "name": "Information Command Specialist",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      },
+      {
+        "skillId": 20495,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3352/icon?size=32"
+  },
+  {
+    "skillId": 12092,
+    "name": "Interceptors",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3453,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12092/icon?size=32"
+  },
+  {
+    "skillId": 12098,
+    "name": "Interdictors",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 4
+      },
+      {
+        "skillId": 11446,
+        "level": 1
+      },
+      {
+        "skillId": 3435,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12098/icon?size=32"
+  },
+  {
+    "skillId": 2495,
+    "name": "Interplanetary Consolidation",
+    "rank": 4,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/2495/icon?size=32"
+  },
+  {
+    "skillId": 44067,
+    "name": "Invulnerability Core Operation",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3420,
+        "level": 5
+      },
+      {
+        "skillId": 24571,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/44067/icon?size=32"
+  },
+  {
+    "skillId": 21611,
+    "name": "Jump Drive Calibration",
+    "rank": 9,
+    "prerequisites": [
+      {
+        "skillId": 3456,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21611/icon?size=32"
+  },
+  {
+    "skillId": 3456,
+    "name": "Jump Drive Operation",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 5
+      },
+      {
+        "skillId": 3455,
+        "level": 5
+      },
+      {
+        "skillId": 3402,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3456/icon?size=32"
+  },
+  {
+    "skillId": 29029,
+    "name": "Jump Freighters",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 3380,
+        "level": 5
+      },
+      {
+        "skillId": 20342,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/29029/icon?size=32"
+  },
+  {
+    "skillId": 21610,
+    "name": "Jump Fuel Conservation",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3456,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21610/icon?size=32"
+  },
+  {
+    "skillId": 24562,
+    "name": "Jump Portal Generation",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3412,
+        "level": 5
+      },
+      {
+        "skillId": 3456,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24562/icon?size=32"
+  },
+  {
+    "skillId": 26252,
+    "name": "Jury Rigging",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/26252/icon?size=32"
+  },
+  {
+    "skillId": 22808,
+    "name": "Kinetic Armor Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3394,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22808/icon?size=32"
+  },
+  {
+    "skillId": 12366,
+    "name": "Kinetic Shield Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3416,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12366/icon?size=32"
+  },
+  {
+    "skillId": 3406,
+    "name": "Laboratory Operation",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3406/icon?size=32"
+  },
+  {
+    "skillId": 33001,
+    "name": "Ladar Sensor Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33001/icon?size=32"
+  },
+  {
+    "skillId": 77738,
+    "name": "Lancer Dreadnoughts",
+    "rank": 16,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 4
+      },
+      {
+        "skillId": 22043,
+        "level": 4
+      },
+      {
+        "skillId": 11433,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/77738/icon?size=32"
+  },
+  {
+    "skillId": 12203,
+    "name": "Large Artillery Specialization",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 5
+      },
+      {
+        "skillId": 3308,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12203/icon?size=32"
+  },
+  {
+    "skillId": 12209,
+    "name": "Large Autocannon Specialization",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 5
+      },
+      {
+        "skillId": 3308,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12209/icon?size=32"
+  },
+  {
+    "skillId": 12205,
+    "name": "Large Beam Laser Specialization",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 5
+      },
+      {
+        "skillId": 3309,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12205/icon?size=32"
+  },
+  {
+    "skillId": 12212,
+    "name": "Large Blaster Specialization",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 5
+      },
+      {
+        "skillId": 3307,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12212/icon?size=32"
+  },
+  {
+    "skillId": 47875,
+    "name": "Large Disintegrator Specialization",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 5
+      },
+      {
+        "skillId": 47872,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/47875/icon?size=32"
+  },
+  {
+    "skillId": 3309,
+    "name": "Large Energy Turret",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 3306,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3309/icon?size=32"
+  },
+  {
+    "skillId": 3307,
+    "name": "Large Hybrid Turret",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 3304,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3307/icon?size=32"
+  },
+  {
+    "skillId": 47872,
+    "name": "Large Precursor Weapon",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 47871,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/47872/icon?size=32"
+  },
+  {
+    "skillId": 3308,
+    "name": "Large Projectile Turret",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 3305,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3308/icon?size=32"
+  },
+  {
+    "skillId": 12215,
+    "name": "Large Pulse Laser Specialization",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 5
+      },
+      {
+        "skillId": 3309,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12215/icon?size=32"
+  },
+  {
+    "skillId": 12207,
+    "name": "Large Railgun Specialization",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 5
+      },
+      {
+        "skillId": 3307,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12207/icon?size=32"
+  },
+  {
+    "skillId": 54826,
+    "name": "Large Vorton Projector",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 55033,
+        "level": 5
+      },
+      {
+        "skillId": 55035,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/54826/icon?size=32"
+  },
+  {
+    "skillId": 54829,
+    "name": "Large Vorton Specialization",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 54841,
+        "level": 5
+      },
+      {
+        "skillId": 54826,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/54829/icon?size=32"
+  },
+  {
+    "skillId": 11447,
+    "name": "Laser Physics",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11447/icon?size=32"
+  },
+  {
+    "skillId": 26260,
+    "name": "Launcher Rigging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/26260/icon?size=32"
+  },
+  {
+    "skillId": 3348,
+    "name": "Leadership",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3348/icon?size=32"
+  },
+  {
+    "skillId": 24241,
+    "name": "Light Drone Operation",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24241/icon?size=32"
+  },
+  {
+    "skillId": 40572,
+    "name": "Light Fighters",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 23069,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/40572/icon?size=32"
+  },
+  {
+    "skillId": 20210,
+    "name": "Light Missile Specialization",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      },
+      {
+        "skillId": 3321,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20210/icon?size=32"
+  },
+  {
+    "skillId": 3321,
+    "name": "Light Missiles",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3321/icon?size=32"
+  },
+  {
+    "skillId": 12096,
+    "name": "Logistics Cruisers",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3431,
+        "level": 5
+      },
+      {
+        "skillId": 3428,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12096/icon?size=32"
+  },
+  {
+    "skillId": 40328,
+    "name": "Logistics Frigates",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3431,
+        "level": 5
+      },
+      {
+        "skillId": 3428,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/40328/icon?size=32"
+  },
+  {
+    "skillId": 19759,
+    "name": "Long Distance Jamming",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      },
+      {
+        "skillId": 3427,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/19759/icon?size=32"
+  },
+  {
+    "skillId": 3428,
+    "name": "Long Range Targeting",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3428/icon?size=32"
+  },
+  {
+    "skillId": 32999,
+    "name": "Magnetometric Sensor Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/32999/icon?size=32"
+  },
+  {
+    "skillId": 28667,
+    "name": "Marauders",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3424,
+        "level": 5
+      },
+      {
+        "skillId": 11207,
+        "level": 5
+      },
+      {
+        "skillId": 3327,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/28667/icon?size=32"
+  },
+  {
+    "skillId": 16598,
+    "name": "Marketing",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3443,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/16598/icon?size=32"
+  },
+  {
+    "skillId": 3387,
+    "name": "Mass Production",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3380,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3387/icon?size=32"
+  },
+  {
+    "skillId": 45748,
+    "name": "Mass Reactions",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 45746,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/45748/icon?size=32"
+  },
+  {
+    "skillId": 81364,
+    "name": "Mass Sequencing",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 81375,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81364/icon?size=32"
+  },
+  {
+    "skillId": 11452,
+    "name": "Mechanical Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11452/icon?size=32"
+  },
+  {
+    "skillId": 3392,
+    "name": "Mechanics",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3392/icon?size=32"
+  },
+  {
+    "skillId": 12202,
+    "name": "Medium Artillery Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 4
+      },
+      {
+        "skillId": 3305,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12202/icon?size=32"
+  },
+  {
+    "skillId": 12208,
+    "name": "Medium Autocannon Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 4
+      },
+      {
+        "skillId": 3305,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12208/icon?size=32"
+  },
+  {
+    "skillId": 12204,
+    "name": "Medium Beam Laser Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 4
+      },
+      {
+        "skillId": 3306,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12204/icon?size=32"
+  },
+  {
+    "skillId": 12211,
+    "name": "Medium Blaster Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 4
+      },
+      {
+        "skillId": 3304,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12211/icon?size=32"
+  },
+  {
+    "skillId": 47874,
+    "name": "Medium Disintegrator Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 4
+      },
+      {
+        "skillId": 47871,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/47874/icon?size=32"
+  },
+  {
+    "skillId": 33699,
+    "name": "Medium Drone Operation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33699/icon?size=32"
+  },
+  {
+    "skillId": 3306,
+    "name": "Medium Energy Turret",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 3
+      },
+      {
+        "skillId": 3303,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3306/icon?size=32"
+  },
+  {
+    "skillId": 3304,
+    "name": "Medium Hybrid Turret",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 3
+      },
+      {
+        "skillId": 3301,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3304/icon?size=32"
+  },
+  {
+    "skillId": 47871,
+    "name": "Medium Precursor Weapon",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 3
+      },
+      {
+        "skillId": 47870,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/47871/icon?size=32"
+  },
+  {
+    "skillId": 3305,
+    "name": "Medium Projectile Turret",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 3
+      },
+      {
+        "skillId": 3302,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3305/icon?size=32"
+  },
+  {
+    "skillId": 12214,
+    "name": "Medium Pulse Laser Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 4
+      },
+      {
+        "skillId": 3306,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12214/icon?size=32"
+  },
+  {
+    "skillId": 12206,
+    "name": "Medium Railgun Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 4
+      },
+      {
+        "skillId": 3304,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12206/icon?size=32"
+  },
+  {
+    "skillId": 55035,
+    "name": "Medium Vorton Projector",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 55033,
+        "level": 3
+      },
+      {
+        "skillId": 55034,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/55035/icon?size=32"
+  },
+  {
+    "skillId": 54828,
+    "name": "Medium Vorton Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 54841,
+        "level": 4
+      },
+      {
+        "skillId": 55035,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/54828/icon?size=32"
+  },
+  {
+    "skillId": 3731,
+    "name": "Megacorp Management",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3363,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3731/icon?size=32"
+  },
+  {
+    "skillId": 85233,
+    "name": "Mercenary Den Management",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 11584,
+        "level": 3
+      },
+      {
+        "skillId": 3361,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/85233/icon?size=32"
+  },
+  {
+    "skillId": 12189,
+    "name": "Mercoxit Ore Processing",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12189/icon?size=32"
+  },
+  {
+    "skillId": 3409,
+    "name": "Metallurgy",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3409/icon?size=32"
+  },
+  {
+    "skillId": 4385,
+    "name": "Micro Jump Drive Operation",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 4
+      },
+      {
+        "skillId": 3455,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/4385/icon?size=32"
+  },
+  {
+    "skillId": 3386,
+    "name": "Mining",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3386/icon?size=32"
+  },
+  {
+    "skillId": 17940,
+    "name": "Mining Barge",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3410,
+        "level": 3
+      },
+      {
+        "skillId": 3380,
+        "level": 5
+      },
+      {
+        "skillId": 32918,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/17940/icon?size=32"
+  },
+  {
+    "skillId": 3893,
+    "name": "Mining Connections",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3380,
+        "level": 3
+      },
+      {
+        "skillId": 3355,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3893/icon?size=32"
+  },
+  {
+    "skillId": 89241,
+    "name": "Mining Destroyer",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3386,
+        "level": 4
+      },
+      {
+        "skillId": 32918,
+        "level": 3
+      },
+      {
+        "skillId": 3380,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/89241/icon?size=32"
+  },
+  {
+    "skillId": 22552,
+    "name": "Mining Director",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      },
+      {
+        "skillId": 22536,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22552/icon?size=32"
+  },
+  {
+    "skillId": 3438,
+    "name": "Mining Drone Operation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 1
+      },
+      {
+        "skillId": 3386,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3438/icon?size=32"
+  },
+  {
+    "skillId": 22541,
+    "name": "Mining Drone Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3438,
+        "level": 5
+      },
+      {
+        "skillId": 3386,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22541/icon?size=32"
+  },
+  {
+    "skillId": 90728,
+    "name": "Mining Exploitation",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3386,
+        "level": 5
+      },
+      {
+        "skillId": 90727,
+        "level": 4
+      },
+      {
+        "skillId": 3410,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/90728/icon?size=32"
+  },
+  {
+    "skillId": 22536,
+    "name": "Mining Foreman",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22536/icon?size=32"
+  },
+  {
+    "skillId": 32918,
+    "name": "Mining Frigate",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/32918/icon?size=32"
+  },
+  {
+    "skillId": 90727,
+    "name": "Mining Precision",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3386,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/90727/icon?size=32"
+  },
+  {
+    "skillId": 22578,
+    "name": "Mining Upgrades",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3386,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22578/icon?size=32"
+  },
+  {
+    "skillId": 33098,
+    "name": "Minmatar Battlecruiser",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3333,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33098/icon?size=32"
+  },
+  {
+    "skillId": 3337,
+    "name": "Minmatar Battleship",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 4
+      },
+      {
+        "skillId": 33098,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3337/icon?size=32"
+  },
+  {
+    "skillId": 24314,
+    "name": "Minmatar Carrier",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 4
+      },
+      {
+        "skillId": 3337,
+        "level": 3
+      },
+      {
+        "skillId": 3442,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24314/icon?size=32"
+  },
+  {
+    "skillId": 30547,
+    "name": "Minmatar Core Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30547/icon?size=32"
+  },
+  {
+    "skillId": 3333,
+    "name": "Minmatar Cruiser",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 2
+      },
+      {
+        "skillId": 33094,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3333/icon?size=32"
+  },
+  {
+    "skillId": 30545,
+    "name": "Minmatar Defensive Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 5
+      },
+      {
+        "skillId": 3416,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30545/icon?size=32"
+  },
+  {
+    "skillId": 33094,
+    "name": "Minmatar Destroyer",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3329,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33094/icon?size=32"
+  },
+  {
+    "skillId": 20532,
+    "name": "Minmatar Dreadnought",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 3
+      },
+      {
+        "skillId": 3337,
+        "level": 3
+      },
+      {
+        "skillId": 22043,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20532/icon?size=32"
+  },
+  {
+    "skillId": 12485,
+    "name": "Minmatar Drone Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12485/icon?size=32"
+  },
+  {
+    "skillId": 21791,
+    "name": "Minmatar Encryption Methods",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 21718,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21791/icon?size=32"
+  },
+  {
+    "skillId": 92399,
+    "name": "Minmatar Fighter Specialization",
+    "rank": 14,
+    "prerequisites": [
+      {
+        "skillId": 23069,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/92399/icon?size=32"
+  },
+  {
+    "skillId": 20528,
+    "name": "Minmatar Freighter",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 20342,
+        "level": 5
+      },
+      {
+        "skillId": 3341,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20528/icon?size=32"
+  },
+  {
+    "skillId": 3329,
+    "name": "Minmatar Frigate",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3329/icon?size=32"
+  },
+  {
+    "skillId": 3341,
+    "name": "Minmatar Hauler",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3341/icon?size=32"
+  },
+  {
+    "skillId": 30551,
+    "name": "Minmatar Offensive Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 5
+      },
+      {
+        "skillId": 3319,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30551/icon?size=32"
+  },
+  {
+    "skillId": 30554,
+    "name": "Minmatar Propulsion Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30554/icon?size=32"
+  },
+  {
+    "skillId": 11445,
+    "name": "Minmatar Starship Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11445/icon?size=32"
+  },
+  {
+    "skillId": 30653,
+    "name": "Minmatar Strategic Cruiser",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3333,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30653/icon?size=32"
+  },
+  {
+    "skillId": 34533,
+    "name": "Minmatar Tactical Destroyer",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 33094,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/34533/icon?size=32"
+  },
+  {
+    "skillId": 3345,
+    "name": "Minmatar Titan",
+    "rank": 16,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 5
+      },
+      {
+        "skillId": 3337,
+        "level": 3
+      },
+      {
+        "skillId": 3348,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3345/icon?size=32"
+  },
+  {
+    "skillId": 12441,
+    "name": "Missile Bombardment",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12441/icon?size=32"
+  },
+  {
+    "skillId": 3319,
+    "name": "Missile Launcher Operation",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3319/icon?size=32"
+  },
+  {
+    "skillId": 12442,
+    "name": "Missile Projection",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12442/icon?size=32"
+  },
+  {
+    "skillId": 11529,
+    "name": "Molecular Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11529/icon?size=32"
+  },
+  {
+    "skillId": 3312,
+    "name": "Motion Prediction",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3312/icon?size=32"
+  },
+  {
+    "skillId": 81367,
+    "name": "Multi-thread Sequencing",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 81366,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81367/icon?size=32"
+  },
+  {
+    "skillId": 81896,
+    "name": "Mutagenic Stabilization",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3405,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81896/icon?size=32"
+  },
+  {
+    "skillId": 60515,
+    "name": "Mutated Drone Specialization",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 5
+      },
+      {
+        "skillId": 12486,
+        "level": 1
+      },
+      {
+        "skillId": 12484,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/60515/icon?size=32"
+  },
+  {
+    "skillId": 11442,
+    "name": "Nanite Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3426,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11442/icon?size=32"
+  },
+  {
+    "skillId": 28880,
+    "name": "Nanite Interfacing",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 28879,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/28880/icon?size=32"
+  },
+  {
+    "skillId": 28879,
+    "name": "Nanite Operation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/28879/icon?size=32"
+  },
+  {
+    "skillId": 3449,
+    "name": "Navigation",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3449/icon?size=32"
+  },
+  {
+    "skillId": 3356,
+    "name": "Negotiation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3355,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3356/icon?size=32"
+  },
+  {
+    "skillId": 25538,
+    "name": "Neurotoxin Control",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 4
+      },
+      {
+        "skillId": 3405,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25538/icon?size=32"
+  },
+  {
+    "skillId": 25530,
+    "name": "Neurotoxin Recovery",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 25538,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25530/icon?size=32"
+  },
+  {
+    "skillId": 11451,
+    "name": "Nuclear Physics",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11451/icon?size=32"
+  },
+  {
+    "skillId": 30327,
+    "name": "Offensive Subsystem Technology",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3403,
+        "level": 5
+      },
+      {
+        "skillId": 11433,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30327/icon?size=32"
+  },
+  {
+    "skillId": 34327,
+    "name": "ORE Freighter",
+    "rank": 9,
+    "prerequisites": [
+      {
+        "skillId": 20342,
+        "level": 5
+      },
+      {
+        "skillId": 3184,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/34327/icon?size=32"
+  },
+  {
+    "skillId": 3184,
+    "name": "ORE Hauler",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3184/icon?size=32"
+  },
+  {
+    "skillId": 3400,
+    "name": "Outpost Construction",
+    "rank": 16,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 5
+      },
+      {
+        "skillId": 3380,
+        "level": 5
+      },
+      {
+        "skillId": 11584,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3400/icon?size=32"
+  },
+  {
+    "skillId": 84218,
+    "name": "Paragon Partnership",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 84217,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/84218/icon?size=32"
+  },
+  {
+    "skillId": 84217,
+    "name": "Paragon Relations",
+    "rank": 3,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/84217/icon?size=32"
+  },
+  {
+    "skillId": 81366,
+    "name": "Parallel Sequencing",
+    "rank": 2,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/81366/icon?size=32"
+  },
+  {
+    "skillId": 81374,
+    "name": "Peak Induction Acceleration",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 81373,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81374/icon?size=32"
+  },
+  {
+    "skillId": 2406,
+    "name": "Planetology",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 13279,
+        "level": 3
+      },
+      {
+        "skillId": 3402,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/2406/icon?size=32"
+  },
+  {
+    "skillId": 11441,
+    "name": "Plasma Physics",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11441/icon?size=32"
+  },
+  {
+    "skillId": 3413,
+    "name": "Power Grid Management",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3413/icon?size=32"
+  },
+  {
+    "skillId": 49743,
+    "name": "Precursor Battlecruiser",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 4
+      },
+      {
+        "skillId": 47868,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/49743/icon?size=32"
+  },
+  {
+    "skillId": 47869,
+    "name": "Precursor Battleship",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 5
+      },
+      {
+        "skillId": 49743,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/47869/icon?size=32"
+  },
+  {
+    "skillId": 47868,
+    "name": "Precursor Cruiser",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 4
+      },
+      {
+        "skillId": 49742,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/47868/icon?size=32"
+  },
+  {
+    "skillId": 49742,
+    "name": "Precursor Destroyer",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 47867,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/49742/icon?size=32"
+  },
+  {
+    "skillId": 52997,
+    "name": "Precursor Dreadnought",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 20533,
+        "level": 3
+      },
+      {
+        "skillId": 47869,
+        "level": 3
+      },
+      {
+        "skillId": 22043,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/52997/icon?size=32"
+  },
+  {
+    "skillId": 47867,
+    "name": "Precursor Frigate",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/47867/icon?size=32"
+  },
+  {
+    "skillId": 16594,
+    "name": "Procurement",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 16598,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/16594/icon?size=32"
+  },
+  {
+    "skillId": 26257,
+    "name": "Projectile Weapon Rigging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/26257/icon?size=32"
+  },
+  {
+    "skillId": 3435,
+    "name": "Propulsion Jamming",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 3
+      },
+      {
+        "skillId": 3449,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3435/icon?size=32"
+  },
+  {
+    "skillId": 30788,
+    "name": "Propulsion Subsystem Technology",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3403,
+        "level": 5
+      },
+      {
+        "skillId": 11446,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/30788/icon?size=32"
+  },
+  {
+    "skillId": 11455,
+    "name": "Quantum Physics",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3413,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11455/icon?size=32"
+  },
+  {
+    "skillId": 33002,
+    "name": "Radar Sensor Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/33002/icon?size=32"
+  },
+  {
+    "skillId": 3310,
+    "name": "Rapid Firing",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3310/icon?size=32"
+  },
+  {
+    "skillId": 21071,
+    "name": "Rapid Launch",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21071/icon?size=32"
+  },
+  {
+    "skillId": 46155,
+    "name": "Rare Moon Ore Processing",
+    "rank": 7,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/46155/icon?size=32"
+  },
+  {
+    "skillId": 45746,
+    "name": "Reactions",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/45746/icon?size=32"
+  },
+  {
+    "skillId": 22761,
+    "name": "Recon Ships",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 11579,
+        "level": 4
+      },
+      {
+        "skillId": 3431,
+        "level": 5
+      },
+      {
+        "skillId": 3327,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22761/icon?size=32"
+  },
+  {
+    "skillId": 16069,
+    "name": "Remote Armor Repair Systems",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 3
+      },
+      {
+        "skillId": 3393,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/16069/icon?size=32"
+  },
+  {
+    "skillId": 27902,
+    "name": "Remote Hull Repair Systems",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/27902/icon?size=32"
+  },
+  {
+    "skillId": 45750,
+    "name": "Remote Reactions",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 45746,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/45750/icon?size=32"
+  },
+  {
+    "skillId": 13279,
+    "name": "Remote Sensing",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/13279/icon?size=32"
+  },
+  {
+    "skillId": 3439,
+    "name": "Repair Drone Operation",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 5
+      },
+      {
+        "skillId": 23618,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3439/icon?size=32"
+  },
+  {
+    "skillId": 3393,
+    "name": "Repair Systems",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3393/icon?size=32"
+  },
+  {
+    "skillId": 3385,
+    "name": "Reprocessing",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3380,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3385/icon?size=32"
+  },
+  {
+    "skillId": 3389,
+    "name": "Reprocessing Efficiency",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3385,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3389/icon?size=32"
+  },
+  {
+    "skillId": 3403,
+    "name": "Research",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3403/icon?size=32"
+  },
+  {
+    "skillId": 12179,
+    "name": "Research Project Management",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3406,
+        "level": 5
+      },
+      {
+        "skillId": 3403,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12179/icon?size=32"
+  },
+  {
+    "skillId": 32797,
+    "name": "Resistance Phasing",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3394,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/32797/icon?size=32"
+  },
+  {
+    "skillId": 3444,
+    "name": "Retail",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3443,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3444/icon?size=32"
+  },
+  {
+    "skillId": 11449,
+    "name": "Rocket Science",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11449/icon?size=32"
+  },
+  {
+    "skillId": 20209,
+    "name": "Rocket Specialization",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      },
+      {
+        "skillId": 3320,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20209/icon?size=32"
+  },
+  {
+    "skillId": 3320,
+    "name": "Rockets",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3320/icon?size=32"
+  },
+  {
+    "skillId": 3440,
+    "name": "Salvage Drone Operation",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3436,
+        "level": 4
+      },
+      {
+        "skillId": 25863,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3440/icon?size=32"
+  },
+  {
+    "skillId": 57164,
+    "name": "Salvage Drone Specialization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3440,
+        "level": 5
+      },
+      {
+        "skillId": 25863,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/57164/icon?size=32"
+  },
+  {
+    "skillId": 25863,
+    "name": "Salvaging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3392,
+        "level": 3
+      },
+      {
+        "skillId": 3551,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/25863/icon?size=32"
+  },
+  {
+    "skillId": 3402,
+    "name": "Science",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3402/icon?size=32"
+  },
+  {
+    "skillId": 24270,
+    "name": "Scientific Networking",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3406,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24270/icon?size=32"
+  },
+  {
+    "skillId": 12196,
+    "name": "Scrapmetal Processing",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12196/icon?size=32"
+  },
+  {
+    "skillId": 3895,
+    "name": "Security Connections",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3355,
+        "level": 3
+      },
+      {
+        "skillId": 3348,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3895/icon?size=32"
+  },
+  {
+    "skillId": 3433,
+    "name": "Sensor Linking",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3433/icon?size=32"
+  },
+  {
+    "skillId": 23594,
+    "name": "Sentry Drone Interfacing",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3442,
+        "level": 4
+      },
+      {
+        "skillId": 23606,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/23594/icon?size=32"
+  },
+  {
+    "skillId": 3311,
+    "name": "Sharpshooter",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3311/icon?size=32"
+  },
+  {
+    "skillId": 3350,
+    "name": "Shield Command",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3350/icon?size=32"
+  },
+  {
+    "skillId": 3351,
+    "name": "Shield Command Specialist",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      },
+      {
+        "skillId": 3350,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3351/icon?size=32"
+  },
+  {
+    "skillId": 21059,
+    "name": "Shield Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3416,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21059/icon?size=32"
+  },
+  {
+    "skillId": 3422,
+    "name": "Shield Emission Systems",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 3
+      },
+      {
+        "skillId": 3402,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3422/icon?size=32"
+  },
+  {
+    "skillId": 3419,
+    "name": "Shield Management",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3419/icon?size=32"
+  },
+  {
+    "skillId": 3416,
+    "name": "Shield Operation",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3416/icon?size=32"
+  },
+  {
+    "skillId": 26261,
+    "name": "Shield Rigging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/26261/icon?size=32"
+  },
+  {
+    "skillId": 3425,
+    "name": "Shield Upgrades",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 2
+      },
+      {
+        "skillId": 3402,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3425/icon?size=32"
+  },
+  {
+    "skillId": 62450,
+    "name": "Shipboard Compression Technology",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 58956,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/62450/icon?size=32"
+  },
+  {
+    "skillId": 19761,
+    "name": "Signal Dispersion",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      },
+      {
+        "skillId": 3427,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/19761/icon?size=32"
+  },
+  {
+    "skillId": 19766,
+    "name": "Signal Suppression",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      },
+      {
+        "skillId": 3433,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/19766/icon?size=32"
+  },
+  {
+    "skillId": 3431,
+    "name": "Signature Analysis",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3431/icon?size=32"
+  },
+  {
+    "skillId": 19922,
+    "name": "Signature Focusing",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      },
+      {
+        "skillId": 19921,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/19922/icon?size=32"
+  },
+  {
+    "skillId": 4411,
+    "name": "Signature Masking",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/4411/icon?size=32"
+  },
+  {
+    "skillId": 60377,
+    "name": "Simple Ore Processing",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3385,
+        "level": 4
+      },
+      {
+        "skillId": 3402,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/60377/icon?size=32"
+  },
+  {
+    "skillId": 3349,
+    "name": "Skirmish Command",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3349/icon?size=32"
+  },
+  {
+    "skillId": 11572,
+    "name": "Skirmish Command Specialist",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 1
+      },
+      {
+        "skillId": 3349,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11572/icon?size=32"
+  },
+  {
+    "skillId": 3408,
+    "name": "Sleeper Encryption Methods",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      },
+      {
+        "skillId": 3403,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3408/icon?size=32"
+  },
+  {
+    "skillId": 21789,
+    "name": "Sleeper Technology",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 13278,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21789/icon?size=32"
+  },
+  {
+    "skillId": 12201,
+    "name": "Small Artillery Specialization",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 3
+      },
+      {
+        "skillId": 3302,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12201/icon?size=32"
+  },
+  {
+    "skillId": 11084,
+    "name": "Small Autocannon Specialization",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 3
+      },
+      {
+        "skillId": 3302,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11084/icon?size=32"
+  },
+  {
+    "skillId": 11083,
+    "name": "Small Beam Laser Specialization",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 3
+      },
+      {
+        "skillId": 3303,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11083/icon?size=32"
+  },
+  {
+    "skillId": 12210,
+    "name": "Small Blaster Specialization",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 3
+      },
+      {
+        "skillId": 3301,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12210/icon?size=32"
+  },
+  {
+    "skillId": 47873,
+    "name": "Small Disintegrator Specialization",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 3
+      },
+      {
+        "skillId": 47870,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/47873/icon?size=32"
+  },
+  {
+    "skillId": 3303,
+    "name": "Small Energy Turret",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3303/icon?size=32"
+  },
+  {
+    "skillId": 3301,
+    "name": "Small Hybrid Turret",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3301/icon?size=32"
+  },
+  {
+    "skillId": 47870,
+    "name": "Small Precursor Weapon",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/47870/icon?size=32"
+  },
+  {
+    "skillId": 3302,
+    "name": "Small Projectile Turret",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3302/icon?size=32"
+  },
+  {
+    "skillId": 12213,
+    "name": "Small Pulse Laser Specialization",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3312,
+        "level": 3
+      },
+      {
+        "skillId": 3303,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12213/icon?size=32"
+  },
+  {
+    "skillId": 11082,
+    "name": "Small Railgun Specialization",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3311,
+        "level": 3
+      },
+      {
+        "skillId": 3301,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11082/icon?size=32"
+  },
+  {
+    "skillId": 55034,
+    "name": "Small Vorton Projector",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 55033,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/55034/icon?size=32"
+  },
+  {
+    "skillId": 54827,
+    "name": "Small Vorton Specialization",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 54841,
+        "level": 3
+      },
+      {
+        "skillId": 55034,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/54827/icon?size=32"
+  },
+  {
+    "skillId": 3355,
+    "name": "Social",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3355/icon?size=32"
+  },
+  {
+    "skillId": 12241,
+    "name": "Sovereignty",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3732,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/12241/icon?size=32"
+  },
+  {
+    "skillId": 3327,
+    "name": "Spaceship Command",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3327/icon?size=32"
+  },
+  {
+    "skillId": 43728,
+    "name": "Spatial Phenomena Generation",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 24764,
+        "level": 1
+      },
+      {
+        "skillId": 3354,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/43728/icon?size=32"
+  },
+  {
+    "skillId": 3373,
+    "name": "Starbase Defense Management",
+    "rank": 7,
+    "prerequisites": [
+      {
+        "skillId": 11584,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3373/icon?size=32"
+  },
+  {
+    "skillId": 37797,
+    "name": "Structure Doomsday Operation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 1
+      },
+      {
+        "skillId": 11584,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/37797/icon?size=32"
+  },
+  {
+    "skillId": 37798,
+    "name": "Structure Electronic Systems",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 1
+      },
+      {
+        "skillId": 11584,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/37798/icon?size=32"
+  },
+  {
+    "skillId": 37799,
+    "name": "Structure Engineering Systems",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 1
+      },
+      {
+        "skillId": 11584,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/37799/icon?size=32"
+  },
+  {
+    "skillId": 37796,
+    "name": "Structure Missile Systems",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      },
+      {
+        "skillId": 11584,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/37796/icon?size=32"
+  },
+  {
+    "skillId": 81370,
+    "name": "Studio Management",
+    "rank": 2,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/81370/icon?size=32"
+  },
+  {
+    "skillId": 24268,
+    "name": "Supply Chain Management",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3387,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/24268/icon?size=32"
+  },
+  {
+    "skillId": 40573,
+    "name": "Support Fighters",
+    "rank": 12,
+    "prerequisites": [
+      {
+        "skillId": 23069,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/40573/icon?size=32"
+  },
+  {
+    "skillId": 3315,
+    "name": "Surgical Strike",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3315/icon?size=32"
+  },
+  {
+    "skillId": 3551,
+    "name": "Survey",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3551/icon?size=32"
+  },
+  {
+    "skillId": 27906,
+    "name": "Tactical Logistics Reconfiguration",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 12096,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/27906/icon?size=32"
+  },
+  {
+    "skillId": 3420,
+    "name": "Tactical Shield Manipulation",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3420/icon?size=32"
+  },
+  {
+    "skillId": 22043,
+    "name": "Tactical Weapon Reconfiguration",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 11207,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22043/icon?size=32"
+  },
+  {
+    "skillId": 23123,
+    "name": "Takmahl Technology",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 13278,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/23123/icon?size=32"
+  },
+  {
+    "skillId": 20433,
+    "name": "Talocan Technology",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 13278,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20433/icon?size=32"
+  },
+  {
+    "skillId": 3429,
+    "name": "Target Management",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3429/icon?size=32"
+  },
+  {
+    "skillId": 20314,
+    "name": "Target Navigation Prediction",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20314/icon?size=32"
+  },
+  {
+    "skillId": 19921,
+    "name": "Target Painting",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/19921/icon?size=32"
+  },
+  {
+    "skillId": 22809,
+    "name": "Thermal Armor Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3394,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/22809/icon?size=32"
+  },
+  {
+    "skillId": 11566,
+    "name": "Thermal Shield Compensation",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3416,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11566/icon?size=32"
+  },
+  {
+    "skillId": 28164,
+    "name": "Thermodynamics",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3413,
+        "level": 4
+      },
+      {
+        "skillId": 3418,
+        "level": 3
+      },
+      {
+        "skillId": 3402,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/28164/icon?size=32"
+  },
+  {
+    "skillId": 20213,
+    "name": "Torpedo Specialization",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      },
+      {
+        "skillId": 3325,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20213/icon?size=32"
+  },
+  {
+    "skillId": 3325,
+    "name": "Torpedoes",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 4
+      },
+      {
+        "skillId": 3324,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3325/icon?size=32"
+  },
+  {
+    "skillId": 3443,
+    "name": "Trade",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/3443/icon?size=32"
+  },
+  {
+    "skillId": 3317,
+    "name": "Trajectory Analysis",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3317/icon?size=32"
+  },
+  {
+    "skillId": 19719,
+    "name": "Transport Ships",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      },
+      {
+        "skillId": 3380,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/19719/icon?size=32"
+  },
+  {
+    "skillId": 52308,
+    "name": "Triglavian Encryption Methods",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      },
+      {
+        "skillId": 3403,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/52308/icon?size=32"
+  },
+  {
+    "skillId": 52307,
+    "name": "Triglavian Quantum Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/52307/icon?size=32"
+  },
+  {
+    "skillId": 18580,
+    "name": "Tycoon",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 16596,
+        "level": 5
+      },
+      {
+        "skillId": 16598,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/18580/icon?size=32"
+  },
+  {
+    "skillId": 46152,
+    "name": "Ubiquitous Moon Ore Processing",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/46152/icon?size=32"
+  },
+  {
+    "skillId": 46154,
+    "name": "Uncommon Moon Ore Processing",
+    "rank": 6,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/46154/icon?size=32"
+  },
+  {
+    "skillId": 90398,
+    "name": "Unrefined Minerals Processing",
+    "rank": 11,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 5
+      },
+      {
+        "skillId": 3409,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/90398/icon?size=32"
+  },
+  {
+    "skillId": 55025,
+    "name": "Upwell Encryption Methods",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 21718,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/55025/icon?size=32"
+  },
+  {
+    "skillId": 81044,
+    "name": "Upwell Freighter",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 20342,
+        "level": 5
+      },
+      {
+        "skillId": 81032,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81044/icon?size=32"
+  },
+  {
+    "skillId": 81032,
+    "name": "Upwell Hauler",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3327,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81032/icon?size=32"
+  },
+  {
+    "skillId": 81050,
+    "name": "Upwell Starship Engineering",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3402,
+        "level": 5
+      },
+      {
+        "skillId": 3392,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/81050/icon?size=32"
+  },
+  {
+    "skillId": 60379,
+    "name": "Variegated Ore Processing",
+    "rank": 9,
+    "prerequisites": [
+      {
+        "skillId": 3389,
+        "level": 4
+      },
+      {
+        "skillId": 3409,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/60379/icon?size=32"
+  },
+  {
+    "skillId": 3447,
+    "name": "Visibility",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 16594,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3447/icon?size=32"
+  },
+  {
+    "skillId": 55511,
+    "name": "Vorton Arc Extension",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 55033,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/55511/icon?size=32"
+  },
+  {
+    "skillId": 54841,
+    "name": "Vorton Arc Guidance",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 55033,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/54841/icon?size=32"
+  },
+  {
+    "skillId": 54840,
+    "name": "Vorton Power Amplification",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 55033,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/54840/icon?size=32"
+  },
+  {
+    "skillId": 55033,
+    "name": "Vorton Projector Operation",
+    "rank": 1,
+    "prerequisites": [],
+    "iconUrl": "https://images.evetech.net/types/55033/icon?size=32"
+  },
+  {
+    "skillId": 20315,
+    "name": "Warhead Upgrades",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/20315/icon?size=32"
+  },
+  {
+    "skillId": 3455,
+    "name": "Warp Drive Operation",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3449,
+        "level": 1
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3455/icon?size=32"
+  },
+  {
+    "skillId": 19767,
+    "name": "Weapon Destabilization",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 4
+      },
+      {
+        "skillId": 3434,
+        "level": 4
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/19767/icon?size=32"
+  },
+  {
+    "skillId": 3434,
+    "name": "Weapon Disruption",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 3
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3434/icon?size=32"
+  },
+  {
+    "skillId": 3318,
+    "name": "Weapon Upgrades",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3300,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/3318/icon?size=32"
+  },
+  {
+    "skillId": 16596,
+    "name": "Wholesale",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3444,
+        "level": 5
+      },
+      {
+        "skillId": 16598,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/16596/icon?size=32"
+  },
+  {
+    "skillId": 11574,
+    "name": "Wing Command",
+    "rank": 8,
+    "prerequisites": [
+      {
+        "skillId": 3348,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/11574/icon?size=32"
+  },
+  {
+    "skillId": 41410,
+    "name": "XL Cruise Missile Specialization",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      },
+      {
+        "skillId": 32435,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/41410/icon?size=32"
+  },
+  {
+    "skillId": 32435,
+    "name": "XL Cruise Missiles",
+    "rank": 7,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 5
+      },
+      {
+        "skillId": 3326,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/32435/icon?size=32"
+  },
+  {
+    "skillId": 41409,
+    "name": "XL Torpedo Specialization",
+    "rank": 10,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      },
+      {
+        "skillId": 21668,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/41409/icon?size=32"
+  },
+  {
+    "skillId": 21668,
+    "name": "XL Torpedoes",
+    "rank": 7,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 5
+      },
+      {
+        "skillId": 3325,
+        "level": 5
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/21668/icon?size=32"
+  },
+  {
+    "skillId": 23124,
+    "name": "Yan Jung Technology",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 13278,
+        "level": 2
+      }
+    ],
+    "iconUrl": "https://images.evetech.net/types/23124/icon?size=32"
+  }
+]

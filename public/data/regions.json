@@ -1,0 +1,1145 @@
+{
+  "generatedAt": "2026-06-21T09:05:39.465Z",
+  "regions": [
+    {
+      "regionId": 11000001,
+      "name": "A-R00001",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000007,
+      "buildSystemName": "J105443",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000007
+    },
+    {
+      "regionId": 11000002,
+      "name": "A-R00002",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000140,
+      "buildSystemName": "J125209",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000140
+    },
+    {
+      "regionId": 11000003,
+      "name": "A-R00003",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000293,
+      "buildSystemName": "J142136",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000293
+    },
+    {
+      "regionId": 10000019,
+      "name": "A821-A",
+      "securityClass": "nullsec",
+      "buildSystemId": 30001643,
+      "buildSystemName": "0IRK-R",
+      "buildSystemSecurity": -0.006288,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001643
+    },
+    {
+      "regionId": 12000001,
+      "name": "ADR01",
+      "securityClass": "nullsec",
+      "buildSystemId": 32000001,
+      "buildSystemName": "AD001",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 32000001
+    },
+    {
+      "regionId": 12000002,
+      "name": "ADR02",
+      "securityClass": "nullsec",
+      "buildSystemId": 32000041,
+      "buildSystemName": "AD041",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 32000041
+    },
+    {
+      "regionId": 12000003,
+      "name": "ADR03",
+      "securityClass": "nullsec",
+      "buildSystemId": 32000081,
+      "buildSystemName": "AD081",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 32000081
+    },
+    {
+      "regionId": 12000004,
+      "name": "ADR04",
+      "securityClass": "nullsec",
+      "buildSystemId": 32000121,
+      "buildSystemName": "AD121",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 32000121
+    },
+    {
+      "regionId": 12000005,
+      "name": "ADR05",
+      "securityClass": "nullsec",
+      "buildSystemId": 32000161,
+      "buildSystemName": "AD161",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 32000161
+    },
+    {
+      "regionId": 10000054,
+      "name": "Aridia",
+      "securityClass": "highsec",
+      "buildSystemId": 30004290,
+      "buildSystemName": "Zaveral",
+      "buildSystemSecurity": 0.61743,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004290
+    },
+    {
+      "regionId": 11000004,
+      "name": "B-R00004",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000355,
+      "buildSystemName": "J164417",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000355
+    },
+    {
+      "regionId": 11000005,
+      "name": "B-R00005",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000459,
+      "buildSystemName": "J103716",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000459
+    },
+    {
+      "regionId": 11000006,
+      "name": "B-R00006",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000561,
+      "buildSystemName": "J150807",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000561
+    },
+    {
+      "regionId": 11000007,
+      "name": "B-R00007",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000702,
+      "buildSystemName": "J150627",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000702
+    },
+    {
+      "regionId": 11000008,
+      "name": "B-R00008",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000752,
+      "buildSystemName": "J112505",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000752
+    },
+    {
+      "regionId": 10000069,
+      "name": "Black Rise",
+      "securityClass": "highsec",
+      "buildSystemId": 30045327,
+      "buildSystemName": "Tsuruma",
+      "buildSystemSecurity": 0.542633,
+      "costIndex": 0.0014,
+      "marketSystemId": 30045327
+    },
+    {
+      "regionId": 10000055,
+      "name": "Branch",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004338,
+      "buildSystemName": "NLPB-0",
+      "buildSystemSecurity": -0.06435,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004338
+    },
+    {
+      "regionId": 11000009,
+      "name": "C-R00009",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000880,
+      "buildSystemName": "J160650",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000880
+    },
+    {
+      "regionId": 11000010,
+      "name": "C-R00010",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000936,
+      "buildSystemName": "J165302",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000936
+    },
+    {
+      "regionId": 11000011,
+      "name": "C-R00011",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000987,
+      "buildSystemName": "J152143",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000987
+    },
+    {
+      "regionId": 11000012,
+      "name": "C-R00012",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001073,
+      "buildSystemName": "J121856",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001073
+    },
+    {
+      "regionId": 11000013,
+      "name": "C-R00013",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001178,
+      "buildSystemName": "J164338",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001178
+    },
+    {
+      "regionId": 11000014,
+      "name": "C-R00014",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001221,
+      "buildSystemName": "J105447",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001221
+    },
+    {
+      "regionId": 11000015,
+      "name": "C-R00015",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001317,
+      "buildSystemName": "J143614",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001317
+    },
+    {
+      "regionId": 10000007,
+      "name": "Cache",
+      "securityClass": "nullsec",
+      "buildSystemId": 30000613,
+      "buildSystemName": "D-6H64",
+      "buildSystemSecurity": -0.063389,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000613
+    },
+    {
+      "regionId": 10000014,
+      "name": "Catch",
+      "securityClass": "nullsec",
+      "buildSystemId": 30001196,
+      "buildSystemName": "Q-S7ZD",
+      "buildSystemSecurity": -0.03271,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001196
+    },
+    {
+      "regionId": 10000051,
+      "name": "Cloud Ring",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004041,
+      "buildSystemName": "QXW-PV",
+      "buildSystemSecurity": -0.002045,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004041
+    },
+    {
+      "regionId": 10000053,
+      "name": "Cobalt Edge",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004197,
+      "buildSystemName": "FV1-RQ",
+      "buildSystemSecurity": -0.086176,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004197
+    },
+    {
+      "regionId": 10000012,
+      "name": "Curse",
+      "securityClass": "nullsec",
+      "buildSystemId": 30001027,
+      "buildSystemName": "MDD-79",
+      "buildSystemSecurity": -0.005198,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001027
+    },
+    {
+      "regionId": 11000016,
+      "name": "D-R00016",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001375,
+      "buildSystemName": "J160225",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001375
+    },
+    {
+      "regionId": 11000017,
+      "name": "D-R00017",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001435,
+      "buildSystemName": "J224148",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001435
+    },
+    {
+      "regionId": 11000018,
+      "name": "D-R00018",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001460,
+      "buildSystemName": "J162226",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001460
+    },
+    {
+      "regionId": 11000019,
+      "name": "D-R00019",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001506,
+      "buildSystemName": "J143946",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001506
+    },
+    {
+      "regionId": 11000020,
+      "name": "D-R00020",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001600,
+      "buildSystemName": "J171225",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001600
+    },
+    {
+      "regionId": 11000021,
+      "name": "D-R00021",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001650,
+      "buildSystemName": "J162231",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001650
+    },
+    {
+      "regionId": 11000022,
+      "name": "D-R00022",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001765,
+      "buildSystemName": "J122728",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001765
+    },
+    {
+      "regionId": 11000023,
+      "name": "D-R00023",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001852,
+      "buildSystemName": "J225530",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001852
+    },
+    {
+      "regionId": 10000035,
+      "name": "Deklein",
+      "securityClass": "nullsec",
+      "buildSystemId": 30002894,
+      "buildSystemName": "R8S-1K",
+      "buildSystemSecurity": -0.057461,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002894
+    },
+    {
+      "regionId": 10000060,
+      "name": "Delve",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004717,
+      "buildSystemName": "AJI-MA",
+      "buildSystemSecurity": -0.009191,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004717
+    },
+    {
+      "regionId": 10000001,
+      "name": "Derelik",
+      "securityClass": "highsec",
+      "buildSystemId": 30000008,
+      "buildSystemName": "Nirbhi",
+      "buildSystemSecurity": 0.882116,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000008
+    },
+    {
+      "regionId": 10000005,
+      "name": "Detorid",
+      "securityClass": "nullsec",
+      "buildSystemId": 30000507,
+      "buildSystemName": "Q0J-RH",
+      "buildSystemSecurity": -0.135172,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000507
+    },
+    {
+      "regionId": 10000036,
+      "name": "Devoid",
+      "securityClass": "highsec",
+      "buildSystemId": 30002994,
+      "buildSystemName": "Hati",
+      "buildSystemSecurity": 0.849035,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002994
+    },
+    {
+      "regionId": 10000043,
+      "name": "Domain",
+      "securityClass": "highsec",
+      "buildSystemId": 30002190,
+      "buildSystemName": "Mabnen",
+      "buildSystemSecurity": 0.940368,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002187
+    },
+    {
+      "regionId": 11000024,
+      "name": "E-R00024",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001880,
+      "buildSystemName": "J152820",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001880
+    },
+    {
+      "regionId": 11000025,
+      "name": "E-R00025",
+      "securityClass": "nullsec",
+      "buildSystemId": 31001968,
+      "buildSystemName": "J143740",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31001968
+    },
+    {
+      "regionId": 11000026,
+      "name": "E-R00026",
+      "securityClass": "nullsec",
+      "buildSystemId": 31002061,
+      "buildSystemName": "J164900",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31002061
+    },
+    {
+      "regionId": 11000027,
+      "name": "E-R00027",
+      "securityClass": "nullsec",
+      "buildSystemId": 31002126,
+      "buildSystemName": "J162753",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31002126
+    },
+    {
+      "regionId": 11000028,
+      "name": "E-R00028",
+      "securityClass": "nullsec",
+      "buildSystemId": 31002194,
+      "buildSystemName": "J115644",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31002194
+    },
+    {
+      "regionId": 11000029,
+      "name": "E-R00029",
+      "securityClass": "nullsec",
+      "buildSystemId": 31002283,
+      "buildSystemName": "J171722",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31002283
+    },
+    {
+      "regionId": 10000039,
+      "name": "Esoteria",
+      "securityClass": "nullsec",
+      "buildSystemId": 30003146,
+      "buildSystemName": "Q1-R7K",
+      "buildSystemSecurity": -0.008621,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003146
+    },
+    {
+      "regionId": 10000064,
+      "name": "Essence",
+      "securityClass": "highsec",
+      "buildSystemId": 30005025,
+      "buildSystemName": "Derririntel",
+      "buildSystemSecurity": 0.818801,
+      "costIndex": 0.0014,
+      "marketSystemId": 30005025
+    },
+    {
+      "regionId": 10000027,
+      "name": "Etherium Reach",
+      "securityClass": "nullsec",
+      "buildSystemId": 30002371,
+      "buildSystemName": "WPV-JN",
+      "buildSystemSecurity": -0.000393,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002371
+    },
+    {
+      "regionId": 10000037,
+      "name": "Everyshore",
+      "securityClass": "highsec",
+      "buildSystemId": 30003026,
+      "buildSystemName": "Blameston",
+      "buildSystemSecurity": 0.949,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003026
+    },
+    {
+      "regionId": 10001004,
+      "name": "Exordium",
+      "securityClass": "highsec",
+      "buildSystemId": 30100033,
+      "buildSystemName": "Gallant",
+      "buildSystemSecurity": 1,
+      "costIndex": 0.0014,
+      "marketSystemId": 30100033
+    },
+    {
+      "regionId": 11000030,
+      "name": "F-R00030",
+      "securityClass": "nullsec",
+      "buildSystemId": 31002367,
+      "buildSystemName": "J104859",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31002367
+    },
+    {
+      "regionId": 10000046,
+      "name": "Fade",
+      "securityClass": "nullsec",
+      "buildSystemId": 30003683,
+      "buildSystemName": "O-CNPR",
+      "buildSystemSecurity": -0.234771,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003683
+    },
+    {
+      "regionId": 10000056,
+      "name": "Feythabolis",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004447,
+      "buildSystemName": "2UK4-N",
+      "buildSystemSecurity": -0.111597,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004447
+    },
+    {
+      "regionId": 10000058,
+      "name": "Fountain",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004552,
+      "buildSystemName": "XF-TQL",
+      "buildSystemSecurity": -0.011665,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004552
+    },
+    {
+      "regionId": 11000031,
+      "name": "G-R00031",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000005,
+      "buildSystemName": "Thera",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000005
+    },
+    {
+      "regionId": 10000029,
+      "name": "Geminate",
+      "securityClass": "nullsec",
+      "buildSystemId": 30002477,
+      "buildSystemName": "E-91FV",
+      "buildSystemSecurity": -0.015812,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002477
+    },
+    {
+      "regionId": 10000067,
+      "name": "Genesis",
+      "securityClass": "highsec",
+      "buildSystemId": 30005203,
+      "buildSystemName": "Ourapheh",
+      "buildSystemSecurity": 0.86196,
+      "costIndex": 0.0014,
+      "marketSystemId": 30005203
+    },
+    {
+      "regionId": 19000001,
+      "name": "GPMR-01",
+      "securityClass": "highsec",
+      "buildSystemId": 36000001,
+      "buildSystemName": "GPMS-01",
+      "buildSystemSecurity": 1,
+      "costIndex": 1,
+      "marketSystemId": 36000001
+    },
+    {
+      "regionId": 10000011,
+      "name": "Great Wildlands",
+      "securityClass": "nullsec",
+      "buildSystemId": 30000967,
+      "buildSystemName": "6WT-BE",
+      "buildSystemSecurity": -0.001181,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000967
+    },
+    {
+      "regionId": 11000032,
+      "name": "H-R00032",
+      "securityClass": "nullsec",
+      "buildSystemId": 31002580,
+      "buildSystemName": "J000895",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31002580
+    },
+    {
+      "regionId": 10000030,
+      "name": "Heimatar",
+      "securityClass": "highsec",
+      "buildSystemId": 30002524,
+      "buildSystemName": "Ivar",
+      "buildSystemSecurity": 0.949,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002510
+    },
+    {
+      "regionId": 10000025,
+      "name": "Immensea",
+      "securityClass": "nullsec",
+      "buildSystemId": 30002106,
+      "buildSystemName": "PPFB-U",
+      "buildSystemSecurity": -0.074166,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002106
+    },
+    {
+      "regionId": 10000031,
+      "name": "Impass",
+      "securityClass": "nullsec",
+      "buildSystemId": 30002611,
+      "buildSystemName": "A1BK-A",
+      "buildSystemSecurity": -0.048078,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002611
+    },
+    {
+      "regionId": 10000009,
+      "name": "Insmother",
+      "securityClass": "nullsec",
+      "buildSystemId": 30000767,
+      "buildSystemName": "QYD-WK",
+      "buildSystemSecurity": -0.044587,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000767
+    },
+    {
+      "regionId": 10000017,
+      "name": "J7HZ-F",
+      "securityClass": "nullsec",
+      "buildSystemId": 30001503,
+      "buildSystemName": "6-23NU",
+      "buildSystemSecurity": -0.008158,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001503
+    },
+    {
+      "regionId": 11000033,
+      "name": "K-R00033",
+      "securityClass": "nullsec",
+      "buildSystemId": 31000001,
+      "buildSystemName": "Sentinel MZ",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 31000001
+    },
+    {
+      "regionId": 10000052,
+      "name": "Kador",
+      "securityClass": "highsec",
+      "buildSystemId": 30004145,
+      "buildSystemName": "Hapala",
+      "buildSystemSecurity": 0.882674,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004145
+    },
+    {
+      "regionId": 10000049,
+      "name": "Khanid",
+      "securityClass": "highsec",
+      "buildSystemId": 30003858,
+      "buildSystemName": "Gousoviba",
+      "buildSystemSecurity": 0.901234,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003858
+    },
+    {
+      "regionId": 10000065,
+      "name": "Kor-Azor",
+      "securityClass": "highsec",
+      "buildSystemId": 30005043,
+      "buildSystemName": "Nakregde",
+      "buildSystemSecurity": 0.830615,
+      "costIndex": 0.0014,
+      "marketSystemId": 30005043
+    },
+    {
+      "regionId": 10000016,
+      "name": "Lonetrek",
+      "securityClass": "highsec",
+      "buildSystemId": 30001415,
+      "buildSystemName": "Kuoka",
+      "buildSystemSecurity": 0.576705,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001415
+    },
+    {
+      "regionId": 10000013,
+      "name": "Malpais",
+      "securityClass": "nullsec",
+      "buildSystemId": 30001136,
+      "buildSystemName": "2FL-5W",
+      "buildSystemSecurity": -0.024807,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001136
+    },
+    {
+      "regionId": 10000042,
+      "name": "Metropolis",
+      "securityClass": "highsec",
+      "buildSystemId": 30003403,
+      "buildSystemName": "Meimungen",
+      "buildSystemSecurity": 0.907195,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002053
+    },
+    {
+      "regionId": 10000028,
+      "name": "Molden Heath",
+      "securityClass": "highsec",
+      "buildSystemId": 30002399,
+      "buildSystemName": "Orien",
+      "buildSystemSecurity": 0.804725,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002399
+    },
+    {
+      "regionId": 10000040,
+      "name": "Oasa",
+      "securityClass": "nullsec",
+      "buildSystemId": 30003249,
+      "buildSystemName": "9G5J-1",
+      "buildSystemSecurity": -0.028074,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003249
+    },
+    {
+      "regionId": 10000062,
+      "name": "Omist",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004888,
+      "buildSystemName": "ZJG-7D",
+      "buildSystemSecurity": -0.082345,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004888
+    },
+    {
+      "regionId": 10000021,
+      "name": "Outer Passage",
+      "securityClass": "nullsec",
+      "buildSystemId": 30001760,
+      "buildSystemName": "TFPT-U",
+      "buildSystemSecurity": -0.01,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001760
+    },
+    {
+      "regionId": 10000057,
+      "name": "Outer Ring",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004539,
+      "buildSystemName": "BMU-V1",
+      "buildSystemSecurity": -0.000519,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004539
+    },
+    {
+      "regionId": 10000059,
+      "name": "Paragon Soul",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004681,
+      "buildSystemName": "8Q-UYU",
+      "buildSystemSecurity": -0.016629,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004681
+    },
+    {
+      "regionId": 10000063,
+      "name": "Period Basis",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004928,
+      "buildSystemName": "35-JWD",
+      "buildSystemSecurity": -0.016609,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004928
+    },
+    {
+      "regionId": 10000066,
+      "name": "Perrigen Falls",
+      "securityClass": "nullsec",
+      "buildSystemId": 30005127,
+      "buildSystemName": "B9N2-2",
+      "buildSystemSecurity": -0.061793,
+      "costIndex": 0.0014,
+      "marketSystemId": 30005127
+    },
+    {
+      "regionId": 10000048,
+      "name": "Placid",
+      "securityClass": "highsec",
+      "buildSystemId": 30003812,
+      "buildSystemName": "Osmallanais",
+      "buildSystemSecurity": 0.755543,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003812
+    },
+    {
+      "regionId": 10000070,
+      "name": "Pochven",
+      "securityClass": "nullsec",
+      "buildSystemId": 30000021,
+      "buildSystemName": "Kuharah",
+      "buildSystemSecurity": -1,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000021
+    },
+    {
+      "regionId": 10000047,
+      "name": "Providence",
+      "securityClass": "nullsec",
+      "buildSystemId": 30003779,
+      "buildSystemName": "TXJ-II",
+      "buildSystemSecurity": -0.021664,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003779
+    },
+    {
+      "regionId": 10000023,
+      "name": "Pure Blind",
+      "securityClass": "nullsec",
+      "buildSystemId": 30002041,
+      "buildSystemName": "DT-TCD",
+      "buildSystemSecurity": -0.021529,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002041
+    },
+    {
+      "regionId": 10000050,
+      "name": "Querious",
+      "securityClass": "nullsec",
+      "buildSystemId": 30003967,
+      "buildSystemName": "A-BO4V",
+      "buildSystemSecurity": -0.004645,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003967
+    },
+    {
+      "regionId": 10000008,
+      "name": "Scalding Pass",
+      "securityClass": "nullsec",
+      "buildSystemId": 30000702,
+      "buildSystemName": "A-80UA",
+      "buildSystemSecurity": -0.006942,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000702
+    },
+    {
+      "regionId": 10000032,
+      "name": "Sinq Laison",
+      "securityClass": "highsec",
+      "buildSystemId": 30002658,
+      "buildSystemName": "Agrallarier",
+      "buildSystemSecurity": 0.850284,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002659
+    },
+    {
+      "regionId": 10000044,
+      "name": "Solitude",
+      "securityClass": "highsec",
+      "buildSystemId": 30003592,
+      "buildSystemName": "Lazer",
+      "buildSystemSecurity": 0.790979,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003592
+    },
+    {
+      "regionId": 10000022,
+      "name": "Stain",
+      "securityClass": "nullsec",
+      "buildSystemId": 30001885,
+      "buildSystemName": "BF-FVB",
+      "buildSystemSecurity": -0.002907,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001885
+    },
+    {
+      "regionId": 10000041,
+      "name": "Syndicate",
+      "securityClass": "nullsec",
+      "buildSystemId": 30003348,
+      "buildSystemName": "5KS-AB",
+      "buildSystemSecurity": -0.002059,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003348
+    },
+    {
+      "regionId": 10000020,
+      "name": "Tash-Murkon",
+      "securityClass": "highsec",
+      "buildSystemId": 30001725,
+      "buildSystemName": "Nosodnis",
+      "buildSystemSecurity": 0.929034,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001725
+    },
+    {
+      "regionId": 10000045,
+      "name": "Tenal",
+      "securityClass": "nullsec",
+      "buildSystemId": 30003613,
+      "buildSystemName": "PNS7-J",
+      "buildSystemSecurity": -0.05072,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003613
+    },
+    {
+      "regionId": 10000061,
+      "name": "Tenerifis",
+      "securityClass": "nullsec",
+      "buildSystemId": 30004803,
+      "buildSystemName": "WB-AYY",
+      "buildSystemSecurity": -0.054353,
+      "costIndex": 0.0014,
+      "marketSystemId": 30004803
+    },
+    {
+      "regionId": 10000038,
+      "name": "The Bleak Lands",
+      "securityClass": "highsec",
+      "buildSystemId": 30003083,
+      "buildSystemName": "Junsen",
+      "buildSystemSecurity": 0.809591,
+      "costIndex": 0.0014,
+      "marketSystemId": 30003083
+    },
+    {
+      "regionId": 10000033,
+      "name": "The Citadel",
+      "securityClass": "highsec",
+      "buildSystemId": 30002761,
+      "buildSystemName": "Kassigainen",
+      "buildSystemSecurity": 0.915852,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002761
+    },
+    {
+      "regionId": 10000002,
+      "name": "The Forge",
+      "securityClass": "highsec",
+      "buildSystemId": 30000172,
+      "buildSystemName": "Otomainen",
+      "buildSystemSecurity": 0.479159,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000142
+    },
+    {
+      "regionId": 10000034,
+      "name": "The Kalevala Expanse",
+      "securityClass": "nullsec",
+      "buildSystemId": 30002845,
+      "buildSystemName": "EPCD-D",
+      "buildSystemSecurity": -0.012715,
+      "costIndex": 0.0014,
+      "marketSystemId": 30002845
+    },
+    {
+      "regionId": 10000018,
+      "name": "The Spire",
+      "securityClass": "nullsec",
+      "buildSystemId": 30001584,
+      "buildSystemName": "XR-ZL7",
+      "buildSystemSecurity": -0.084715,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001584
+    },
+    {
+      "regionId": 10000010,
+      "name": "Tribute",
+      "securityClass": "nullsec",
+      "buildSystemId": 30000884,
+      "buildSystemName": "Y-PZHM",
+      "buildSystemSecurity": -0.092418,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000884
+    },
+    {
+      "regionId": 10000004,
+      "name": "UUA-F4",
+      "securityClass": "nullsec",
+      "buildSystemId": 30000424,
+      "buildSystemName": "1TS-WN",
+      "buildSystemSecurity": -0.000001,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000424
+    },
+    {
+      "regionId": 10000003,
+      "name": "Vale of the Silent",
+      "securityClass": "nullsec",
+      "buildSystemId": 30000315,
+      "buildSystemName": "WMBZ-U",
+      "buildSystemSecurity": -0.086599,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000315
+    },
+    {
+      "regionId": 10000015,
+      "name": "Venal",
+      "securityClass": "nullsec",
+      "buildSystemId": 30001343,
+      "buildSystemName": "H-S5BM",
+      "buildSystemSecurity": -0.066827,
+      "costIndex": 0.0014,
+      "marketSystemId": 30001343
+    },
+    {
+      "regionId": 10000068,
+      "name": "Verge Vendor",
+      "securityClass": "highsec",
+      "buildSystemId": 30005303,
+      "buildSystemName": "Merolles",
+      "buildSystemSecurity": 0.884628,
+      "costIndex": 0.0014,
+      "marketSystemId": 30005303
+    },
+    {
+      "regionId": 14000001,
+      "name": "VR-01",
+      "securityClass": "nullsec",
+      "buildSystemId": 34000001,
+      "buildSystemName": "V-001",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 34000001
+    },
+    {
+      "regionId": 14000002,
+      "name": "VR-02",
+      "securityClass": "nullsec",
+      "buildSystemId": 34000041,
+      "buildSystemName": "V-041",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 34000041
+    },
+    {
+      "regionId": 14000003,
+      "name": "VR-03",
+      "securityClass": "nullsec",
+      "buildSystemId": 34000081,
+      "buildSystemName": "V-081",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 34000081
+    },
+    {
+      "regionId": 14000004,
+      "name": "VR-04",
+      "securityClass": "nullsec",
+      "buildSystemId": 34000121,
+      "buildSystemName": "V-121",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 34000121
+    },
+    {
+      "regionId": 14000005,
+      "name": "VR-05",
+      "securityClass": "nullsec",
+      "buildSystemId": 34000161,
+      "buildSystemName": "V-161",
+      "buildSystemSecurity": -0.99,
+      "costIndex": 1,
+      "marketSystemId": 34000161
+    },
+    {
+      "regionId": 10000006,
+      "name": "Wicked Creek",
+      "securityClass": "nullsec",
+      "buildSystemId": 30000550,
+      "buildSystemName": "C-62I5",
+      "buildSystemSecurity": -0.117561,
+      "costIndex": 0.0014,
+      "marketSystemId": 30000550
+    },
+    {
+      "regionId": 10001000,
+      "name": "Yasna Zakh",
+      "securityClass": "nullsec",
+      "buildSystemId": 30100000,
+      "buildSystemName": "Zarzakh",
+      "buildSystemSecurity": -1,
+      "costIndex": 0.0277,
+      "marketSystemId": 30100000
+    }
+  ]
+}

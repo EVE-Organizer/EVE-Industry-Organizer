@@ -1,0 +1,85 @@
+---
+description: EVE Online industry domain context for this app (terminology, formulas, data sources)
+alwaysApply: true
+---
+
+# EVE Online industry (domain context)
+
+This repo is **EVE Industry Organizer**: a frontend-only React app for EVE Online manufacturing planning. No EVE SSO login; users enter characters, skills, and BPOs manually. Prices come from public APIs; static game data from the SDE.
+
+## Game basics
+
+- **EVE Online**: sci-fi MMO with a player-driven economy. Currency is **ISK**.
+- **Manufacturing**: use a **BPO** (blueprint original) at a station to turn inputs into outputs over time.
+- **Runs**: one job produces `productQuantity × runs` items. This app defaults to batch runs of 100 (`batchSize`).
+- **ME** (Material Efficiency, 0–10): reduces input materials by 1% per level.
+- **TE** (Time Efficiency, 0–20): reduces job duration by 4% per level.
+- **Research**: ME/TE are raised via copy-time research jobs (tracked as timers in user data).
+
+## Blueprint data (this app)
+
+Static data is split:
+
+| File | Contents |
+|------|----------|
+| `public/data/blueprints.json` | Full manufacturing BPO registry: recipes, `tier`, `spaceClass`, `productGroup` |
+| `public/data/catalog.json` | Per-hub profit rankings (product type IDs only), nested by `spaceClass` then `tier` |
+
+## Blueprint tiers (`tier`)
+
+| Value | Meaning |
+|-------|---------|
+| `t1` | Tech I, Tech III, structures, abyssal, etc. (default meta groups) |
+| `t2` | Tech II (SDE meta group 2) |
+| `faction` | Storyline, faction, officer, deadspace meta groups |
+
+## Security space (`spaceClass`)
+
+| Value | Meaning |
+|-------|---------|
+| `highsec` | Default trade-hub manufacturing |
+| `lowsec` | e.g. structures with `anchoringSecurityLevelMax` below 0.45 |
+| `nullsec` | Sov structures, officer/deadspace meta, no-market items (non-WH) |
+| `wormhole` | Sleeper/T3/WH groups; no-market WH heuristics |
+
+Classification rules live in `scripts/lib/blueprint-groups.mjs`. Rankings use spot profit in `scripts/fetch-sde-data.mjs` / `rebuild-catalog.mjs`.
+
+## Cost & profit (match `src/lib/cost.ts`)
+
+- **Material cost**: sum of (quantity × hub price) after ME is applied.
+- **Job cost (NPC station)**: `materialCost × systemCostIndex`. Cost index comes from ESI `industry/systems`.
+- **Capital** = material cost + job cost.
+- **Revenue**: sell price × output qty, minus broker fee and sales tax (defaults 1% / 3.6%).
+- **Spot profit** (rankings only): raw SDE materials, no ME/TE, for fast catalog precompute in `scripts/fetch-sde-data.mjs`.
+- **Advanced Industry** skill: 3% time reduction per level (used in TE calc).
+
+Do not invent different ME/TE formulas unless fixing a known game-mechanics bug.
+
+## Trade hubs
+
+Five hubs: **Jita**, **Amarr**, **Dodixie**, **Rens**, **Hek** (`HubId` in `src/types/index.ts`). Each hub has a sell station (market prices) and a build system (cost index). Jita/Perimeter is the default primary hub.
+
+## Key skills (manual entry)
+
+Industry, Mass Production, Advanced Industry, Accounting, Broker Relations, Metallurgy, Science, Research. Skill IDs and keys live in `src/lib/skillFields.ts`. Progression paths are in `src/lib/progression.ts`.
+
+## Minerals (raw materials)
+
+Tritanium (34), Pyerite (35), Mexallon (36), Isogen (37), Nocxium (38), Zydrine (39), Megacyte (40). Supply chain leaves stop at minerals or when no sub-blueprint exists.
+
+## Data sources
+
+| Data | Where |
+|------|-------|
+| Types, blueprints, skills, stations | SDE JSON in `public/data/` (built by `pnpm run fetch-data` from Fuzzwork CSV) |
+| Live prices & history | ESI / Fuzzwork via `src/services/market/` |
+| System cost indices | ESI industry endpoints |
+| User characters, settings, watchlist | localStorage + optional Google Drive sync |
+
+## External references
+
+- [Fuzzwork SDE dump](https://www.fuzzwork.co.uk/dump/latest/csv/)
+- [ESI docs](https://esi.evetech.net/ui/)
+- [EVE Image Service](https://images.evetech.net) for item/skill icons
+
+When adding features, prefer existing types in `src/types/index.ts` and existing cost/profit helpers over re-deriving game logic.
