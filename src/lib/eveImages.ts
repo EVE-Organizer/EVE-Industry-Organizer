@@ -1,4 +1,4 @@
-import type { BlueprintFilterTier, BlueprintTier, HubId, MineralStock } from '@/types'
+import type { BlueprintTier, HubId, MineralStock } from '@/types'
 import { MINERAL_TYPE_IDS } from '@/types'
 
 /** EVE Image Service only accepts these sizes (see ESI image server docs). */
@@ -77,11 +77,10 @@ export const TIER_TYPE_IDS: Record<BlueprintTier, number> = {
   faction: 17888,
 }
 
-export const TIER_FILTER_LABELS: Record<BlueprintFilterTier, string> = {
+export const TIER_FILTER_LABELS: Record<BlueprintTier, string> = {
   t1: 'T1',
   t2: 'T2',
   faction: 'Faction',
-  all: 'All tiers',
 }
 
 /** Skill path cards on the Progression page. */

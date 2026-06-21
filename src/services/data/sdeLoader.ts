@@ -1,5 +1,5 @@
 import type {
-  BlueprintFilterTier,
+  BlueprintTier,
   BlueprintInfo,
   BlueprintRegistry,
   HubId,
@@ -122,12 +122,13 @@ export function buildBuyPriceMap(hubMarket: HubMarketData): Map<number, number> 
 
 export function filterBlueprints(
   blueprints: BlueprintInfo[],
-  tier: BlueprintFilterTier,
+  tiers: BlueprintTier[],
   productGroup?: string,
 ): BlueprintInfo[] {
   let result = blueprints
-  if (tier !== 'all') {
-    result = result.filter((b) => b.tier === tier)
+  if (tiers.length > 0) {
+    const allowed = new Set(tiers)
+    result = result.filter((b) => allowed.has(b.tier))
   }
   if (productGroup && productGroup !== 'all') {
     result = result.filter((b) => b.productGroup === productGroup)
@@ -151,10 +152,10 @@ export interface ProductGroupCategoryNode {
 /** Product groups for a tier, nested under SDE category with a representative icon per group. */
 export function buildProductGroupTree(
   blueprints: BlueprintInfo[],
-  tier: BlueprintFilterTier,
+  tiers: BlueprintTier[],
   typeMap: Map<number, TypeInfo>,
 ): ProductGroupCategoryNode[] {
-  const filtered = filterBlueprints(blueprints, tier)
+  const filtered = filterBlueprints(blueprints, tiers)
   const byGroup = new Map<string, ProductGroupEntry>()
   const itemNamesByGroup = new Map<string, Set<string>>()
 

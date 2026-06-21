@@ -7,7 +7,8 @@ export const MAX_BATCH_SIZE = 500
 export const BATCH_SIZE_STEP = 10
 
 export type BlueprintTier = 't1' | 't2' | 'faction'
-export type BlueprintFilterTier = BlueprintTier | 'all'
+
+export const BLUEPRINT_TIERS: BlueprintTier[] = ['t1', 't2', 'faction']
 
 export type TimeRange = '1d' | '1w' | '1m' | '1y' | 'all'
 

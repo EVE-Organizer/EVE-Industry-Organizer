@@ -1,25 +1,21 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useMemo, useRef, useState, type ReactNode } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import type { BlueprintFilterTier, CharacterAccount, RankedBlueprintRow, TimeRange } from '@/types'
+import type { CharacterAccount, RankedBlueprintRow } from '@/types'
 import { HUBS } from '@/types'
 import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
-import { useDebouncedValue } from '@/hooks/useDebouncedValue'
+import { useBlueprintQuery } from '@/hooks/useBlueprintQuery'
 import { useHaulRouteRisk } from '@/hooks/useHaulRouteRisk'
 import {
   buildProductGroupTree,
   buildTypeMap,
 } from '@/services/data/sdeLoader'
-import { ProductGroupPicker } from '@/components/ProductGroupPicker'
-import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
+import { BlueprintFilterBar } from '@/components/BlueprintFilterBar'
 import {
-  defaultMaxSetupCost,
-  defaultMinSetupCost,
   MAX_DAYS_TO_CLEAR,
   TOP_N,
   rankBlueprintsFromMarket,
   setupBudgetFromSlider,
-  setupBudgetToSlider,
   type BlueprintSortKey,
 } from '@/lib/ranking'
 import { formatAvgVolume, formatIsk, formatPercent } from '@/lib/profit'
@@ -28,14 +24,13 @@ import type { RouteDangerResult } from '@/lib/routeDanger'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { BlueprintGraphModal } from '@/components/BlueprintGraphModal'
 import { EveImage } from '@/components/EveImage'
-import { TIER_FILTER_LABELS, TIER_TYPE_IDS } from '@/lib/eveImages'
-import { SetupBudgetRange } from '@/components/SetupBudgetRange'
 import { BuildSkillGapFlag } from '@/components/BuildSkillGapFlag'
 import { HaulRiskModal, HaulRiskTrigger } from '@/components/HaulRiskModal'
 import { SetupCostModal } from '@/components/SetupCostModal'
 import { IphBreakdownModal } from '@/components/IphBreakdownModal'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { getMissingBuildSkills } from '@/lib/buildRequirements'
+
 
 const SORT_LABELS: Record<BlueprintSortKey, string> = {
   setupCost: 'Setup',
@@ -87,40 +82,13 @@ function SortableTh({
 
 export function BlueprintsPage() {
   const settings = useAppStore((s) => s.userData.settings)
-  const updateSettings = useAppStore((s) => s.updateSettings)
   const accounts = useAppStore((s) => s.userData.accounts)
   const toggleWatchlist = useAppStore((s) => s.toggleWatchlist)
   const watchlist = useAppStore((s) => s.userData.watchlist)
   const { data: sde, isLoading } = useSdeData()
 
-  const [tier, setTier] = useState<BlueprintFilterTier>('t1')
-  const [productGroup, setProductGroup] = useState<string>('all')
-  const [timeRange, setTimeRange] = useState<TimeRange>('1w')
-  const [budgetMinSlider, setBudgetMinSlider] = useState(() =>
-    setupBudgetToSlider(defaultMinSetupCost()),
-  )
-  const [budgetMaxSlider, setBudgetMaxSlider] = useState(() =>
-    setupBudgetToSlider(defaultMaxSetupCost()),
-  )
-  const debouncedMinSlider = useDebouncedValue(budgetMinSlider, 400)
-  const debouncedMaxSlider = useDebouncedValue(budgetMaxSlider, 400)
-  const minSetupCost = useMemo(
-    () => setupBudgetFromSlider(debouncedMinSlider),
-    [debouncedMinSlider],
-  )
-  const maxSetupCost = useMemo(
-    () => setupBudgetFromSlider(debouncedMaxSlider),
-    [debouncedMaxSlider],
-  )
+  const { query, setQuery } = useBlueprintQuery()
 
-  function setBudgetRange(minSlider: number, maxSlider: number) {
-    setBudgetMinSlider(minSlider)
-    setBudgetMaxSlider(maxSlider)
-  }
-  const [buildableOnly, setBuildableOnly] = useState(false)
-  const [includeHaulCost, setIncludeHaulCost] = useState(true)
-  const [sortKey, setSortKey] = useState<BlueprintSortKey>('iph')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [haulRiskOpen, setHaulRiskOpen] = useState(false)
   const [setupDetailRow, setSetupDetailRow] = useState<RankedBlueprintRow | null>(null)
   const [iphDetailRow, setIphDetailRow] = useState<RankedBlueprintRow | null>(null)
@@ -128,18 +96,14 @@ export function BlueprintsPage() {
 
   const parentRef = useRef<HTMLDivElement>(null)
   const primaryAccount = accounts[0]
-  const activeHub = HUBS.find((h) => h.id === settings.primaryHub)
+  const activeHub = HUBS.find((h) => h.id === query.hub)
 
   const typeMap = useMemo(() => (sde ? buildTypeMap(sde.types) : new Map()), [sde])
 
   const productGroupTree = useMemo(() => {
     if (!sde) return []
-    return buildProductGroupTree(sde.registry.blueprints, tier, typeMap)
-  }, [sde, tier, typeMap])
-
-  useEffect(() => {
-    setProductGroup('all')
-  }, [tier])
+    return buildProductGroupTree(sde.registry.blueprints, query.tiers, typeMap)
+  }, [sde, query.tiers, typeMap])
 
   const {
     haulIn: haulInDanger,
@@ -149,10 +113,19 @@ export function BlueprintsPage() {
     labels: haulLabels,
   } = useHaulRouteRisk({
     sde,
-    primaryHub: settings.primaryHub,
-    manufacturingSystemId: settings.manufacturingSystemId,
-    hubName: activeHub?.name ?? settings.primaryHub,
+    primaryHub: query.hub,
+    manufacturingSystemId: query.mfgSystem,
+    hubName: activeHub?.name ?? query.hub,
   })
+
+  const minSetupCost = useMemo(
+    () => setupBudgetFromSlider(query.budgetMinSlider),
+    [query.budgetMinSlider],
+  )
+  const maxSetupCost = useMemo(
+    () => setupBudgetFromSlider(query.budgetMaxSlider),
+    [query.budgetMaxSlider],
+  )
 
   const rows = useMemo(() => {
     if (!sde) return []
@@ -161,19 +134,20 @@ export function BlueprintsPage() {
       sde.market,
       sde.regions,
       typeMap,
-      settings.primaryHub,
-      timeRange,
+      query.hub,
+      query.window,
       settings,
       {
         minSetupCost,
         maxSetupCost,
-        buildableOnly,
-        includeHaulCost,
+        buildableOnly: query.buildableOnly,
+        includeHaulCost: query.includeHaul,
+        minVolume: query.minVolume,
         account: primaryAccount,
-        tier,
-        productGroup,
-        sortBy: sortKey,
-        sortDirection,
+        tiers: query.tiers,
+        productGroup: query.group,
+        sortBy: query.sortBy,
+        sortDirection: query.sortDir,
       },
       sde.systems,
     )
@@ -181,25 +155,26 @@ export function BlueprintsPage() {
     sde,
     typeMap,
     settings,
-    timeRange,
-    debouncedMinSlider,
-    debouncedMaxSlider,
-    buildableOnly,
-    includeHaulCost,
+    query.hub,
+    query.window,
+    minSetupCost,
+    maxSetupCost,
+    query.buildableOnly,
+    query.includeHaul,
+    query.minVolume,
     primaryAccount,
-    tier,
-    productGroup,
-    sortKey,
-    sortDirection,
+    query.tiers,
+    query.group,
+    query.sortBy,
+    query.sortDir,
   ])
 
   function handleSort(nextKey: BlueprintSortKey) {
-    if (nextKey === sortKey) {
-      setSortDirection((dir) => (dir === 'desc' ? 'asc' : 'desc'))
+    if (nextKey === query.sortBy) {
+      setQuery({ sortDir: query.sortDir === 'desc' ? 'asc' : 'desc' })
       return
     }
-    setSortKey(nextKey)
-    setSortDirection(nextKey === 'setupCost' ? 'asc' : 'desc')
+    setQuery({ sortBy: nextKey, sortDir: nextKey === 'setupCost' ? 'asc' : 'desc' })
   }
 
   const virtualizer = useVirtualizer({
@@ -219,119 +194,21 @@ export function BlueprintsPage() {
     <div className="flex flex-col flex-1 min-h-0">
       <PageHeader
         title="Top Blueprints"
-        subtitle={`Top ${TOP_N}${productGroup !== 'all' ? ` in ${productGroup}` : ''} by ${SORT_LABELS[sortKey]} · sized to ${MAX_DAYS_TO_CLEAR} days of hub volume${marketUpdated ? ` · market ${marketUpdated}` : ''}`}
+        subtitle={`Top ${TOP_N}${query.group !== 'all' ? ` in ${query.group}` : ''} by ${SORT_LABELS[query.sortBy]} · sized to ${MAX_DAYS_TO_CLEAR} days of hub volume${marketUpdated ? ` · market ${marketUpdated}` : ''}`}
       />
 
-      <div className="flex flex-wrap gap-2 mb-3 items-center">
-        <label className="flex items-center gap-2 text-sm">
-          Hub
-          <select
-            className="select select-bordered select-sm"
-            value={settings.primaryHub}
-            onChange={(e) => {
-              const hub = HUBS.find((h) => h.id === e.target.value)
-              updateSettings({
-                primaryHub: e.target.value as typeof settings.primaryHub,
-                ...(hub ? { manufacturingSystemId: hub.buildSystemId } : {}),
-              })
-            }}
-          >
-            {HUBS.map((h) => (
-              <option key={h.id} value={h.id}>
-                {h.name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {sde && (
-          <label className="flex items-center gap-2 text-sm">
-            Mfg system
-            <ManufacturingSystemPicker
-              value={settings.manufacturingSystemId}
-              onChange={(systemId) => updateSettings({ manufacturingSystemId: systemId })}
-              systems={sde.systems}
-              regions={sde.regions}
-            />
-          </label>
-        )}
-
-        <span className="text-xs opacity-50">Window:</span>
-        {(['1d', '1w', '1m', '1y', 'all'] as TimeRange[]).map((r) => (
-          <button
-            key={r}
-            type="button"
-            className={`btn btn-xs ${timeRange === r ? 'btn-secondary' : 'btn-ghost'}`}
-            onClick={() => setTimeRange(r)}
-          >
-            {r}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap gap-2 mb-3">
-        {(['t1', 't2', 'faction', 'all'] as BlueprintFilterTier[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            className={`category-chip ${tier === t ? 'btn-primary' : 'btn-ghost border border-eve-border'}`}
-            onClick={() => setTier(t)}
-          >
-            {t !== 'all' ? <EveImage id={TIER_TYPE_IDS[t]} size={20} framed alt="" /> : null}
-            {TIER_FILTER_LABELS[t]}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap gap-2 mb-3 items-center">
-        <label className="flex items-center gap-2 text-sm min-w-0">
-          Group
-          <ProductGroupPicker
-            value={productGroup}
-            onChange={setProductGroup}
-            tree={productGroupTree}
-          />
-          <InfoTooltip text="Search by group, category, or item name. Rankings reset to All groups when you change tier." />
-        </label>
-      </div>
-
-      <div className="flex flex-wrap gap-3 mb-4 items-center">
-        <SetupBudgetRange
-          minSlider={budgetMinSlider}
-          maxSlider={budgetMaxSlider}
-          onChange={setBudgetRange}
-          className="flex-1 min-w-[min(100%,20rem)] max-w-xl"
-        />
-
-        <label className="label cursor-pointer gap-2">
-          <input
-            type="checkbox"
-            className="checkbox checkbox-sm"
-            checked={buildableOnly}
-            onChange={(e) => setBuildableOnly(e.target.checked)}
-          />
-          <span className="label-text text-sm">Only buildable</span>
-          <InfoTooltip text="Checks Industry and other skills you entered on your account." />
-        </label>
-
-        <label className="label cursor-pointer gap-2">
-          <input
-            type="checkbox"
-            className="checkbox checkbox-sm"
-            checked={includeHaulCost}
-            onChange={(e) => setIncludeHaulCost(e.target.checked)}
-          />
-          <span className="label-text text-sm">Include hauling</span>
-          <InfoTooltip text="Haul in (materials to build system) is added to setup cost; haul out (products to hub) is subtracted from profit. Turn off if you build and sell locally or haul on your own." />
-        </label>
-
-        <span className="text-xs opacity-60 ml-auto">{rows.length} shown</span>
-      </div>
+      <BlueprintFilterBar
+        query={query}
+        onChange={setQuery}
+        sde={sde}
+        productGroupTree={productGroupTree}
+        resultCount={rows.length}
+      />
 
       {rows.length === 0 && (
         <p className="text-sm opacity-60 mb-4">
-          No blueprints match filters. Try widening the setup budget, changing hub/region, picking another group, relaxing tier filters
-          {timeRange !== 'all'
+          No blueprints match filters. Try widening the setup budget, lowering min volume, changing hub/region, picking another group, relaxing tier filters
+          {query.window !== 'all'
             ? ', or switch window to All to rank by current sell price when history is missing.'
             : '.'}
         </p>
@@ -348,22 +225,22 @@ export function BlueprintsPage() {
                   <SortableTh
                     label="Setup"
                     sortKey="setupCost"
-                    activeKey={sortKey}
-                    direction={sortDirection}
+                    activeKey={query.sortBy}
+                    direction={query.sortDir}
                     onSort={handleSort}
                   />
                   <SortableTh
                     label="Profit"
                     sortKey="netProfit"
-                    activeKey={sortKey}
-                    direction={sortDirection}
+                    activeKey={query.sortBy}
+                    direction={query.sortDir}
                     onSort={handleSort}
                   />
                   <SortableTh
                     label="ISK/hr"
                     sortKey="iph"
-                    activeKey={sortKey}
-                    direction={sortDirection}
+                    activeKey={query.sortBy}
+                    direction={query.sortDir}
                     onSort={handleSort}
                   >
                     <InfoTooltip text={`Profit and ISK/hr use min(production/day, market volume/day) × profit per unit, scaled down when your production share exceeds daily market volume (competition penalty). Batch runs are capped at ${MAX_DAYS_TO_CLEAR} days of average hub volume.`} />
@@ -371,15 +248,15 @@ export function BlueprintsPage() {
                   <SortableTh
                     label="Margin"
                     sortKey="margin"
-                    activeKey={sortKey}
-                    direction={sortDirection}
+                    activeKey={query.sortBy}
+                    direction={query.sortDir}
                     onSort={handleSort}
                   />
                   <SortableTh
                     label="Vol/day"
                     sortKey="avgVolume"
-                    activeKey={sortKey}
-                    direction={sortDirection}
+                    activeKey={query.sortBy}
+                    direction={query.sortDir}
                     onSort={handleSort}
                   >
                     <InfoTooltip text="Average daily traded volume for the selected time window. Shows — when only spot price is available (run fetch-data for full history)." />
@@ -475,7 +352,7 @@ export function BlueprintsPage() {
       {graphBlueprint && (
         <BlueprintGraphModal
           blueprint={graphBlueprint}
-          hub={settings.primaryHub}
+          hub={query.hub}
           settings={settings}
           onClose={() => setGraphBlueprint(null)}
         />

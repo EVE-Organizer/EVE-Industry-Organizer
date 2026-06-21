@@ -14,7 +14,7 @@ describe('buildProductGroupTree', () => {
     const types = Array.isArray(typesRaw) ? typesRaw : typesRaw.types ?? []
     const typeMap = buildTypeMap(types)
 
-    const tree = buildProductGroupTree(registry.blueprints, 't1', typeMap)
+    const tree = buildProductGroupTree(registry.blueprints, ['t1'], typeMap)
 
     expect(tree.length).toBeGreaterThan(0)
     expect(tree.some((node) => node.category === 'Charge')).toBe(true)

@@ -1,6 +1,6 @@
 import type {
   BlueprintCostBreakdown,
-  BlueprintFilterTier,
+  BlueprintTier,
   BlueprintInfo,
   BlueprintRegistry,
   CharacterAccount,
@@ -70,8 +70,10 @@ export interface RankingFilters {
   /** When false, haul in/out are excluded from setup and profit. Defaults to true. */
   includeHaulCost?: boolean
   account?: CharacterAccount
-  tier?: BlueprintFilterTier
+  tiers?: BlueprintTier[]
   productGroup?: string
+  /** Minimum avg daily hub volume for the selected window (0 = no filter). */
+  minVolume?: number
   sortBy?: BlueprintSortKey
   sortDirection?: SortDirection
 }
@@ -594,8 +596,8 @@ export function rankBlueprintsFromMarket(
     typeVolumes.set(id, type.volume)
   }
 
-  const tier = filters.tier ?? 'all'
-  const blueprints = filterBlueprints(registry.blueprints, tier, filters.productGroup)
+  const tiers = filters.tiers ?? []
+  const blueprints = filterBlueprints(registry.blueprints, tiers, filters.productGroup)
 
   const rows: RankedBlueprintRow[] = []
   for (const bp of blueprints) {
@@ -633,6 +635,7 @@ export function rankBlueprintsFromMarket(
     if (!row) continue
     if (row.upfrontCapital < filters.minSetupCost) continue
     if (row.upfrontCapital > filters.maxSetupCost) continue
+    if ((filters.minVolume ?? 0) > 0 && row.avgVolume < filters.minVolume!) continue
     if (filters.buildableOnly && !meetsBuildRequirements(bp, filters.account)) continue
     rows.push(row)
   }

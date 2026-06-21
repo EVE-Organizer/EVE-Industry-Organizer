@@ -95,7 +95,7 @@ describe('window-based material costs', () => {
             minSetupCost: 0,
             maxSetupCost: Number.MAX_SAFE_INTEGER,
             buildableOnly: false,
-            tier: 't1' as const,
+            tiers: ['t1'],
             productGroup: 'Projectile Ammo',
           },
         )
@@ -113,7 +113,7 @@ describe('window-based material costs', () => {
       minSetupCost: 0,
       maxSetupCost: Number.MAX_SAFE_INTEGER,
       buildableOnly: false,
-      tier: 't1' as const,
+      tiers: ['t1'],
       productGroup: 'Projectile Ammo',
     }
 
@@ -186,7 +186,7 @@ describe('market-aware blueprint ranking', () => {
         minSetupCost: 0,
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
-        tier: 't1',
+        tiers: ['t1'],
         productGroup: 'Condenser Pack',
       },
     )
@@ -211,7 +211,7 @@ describe('market-aware blueprint ranking', () => {
         minSetupCost: 0,
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
-        tier: 't1',
+        tiers: ['t1'],
         productGroup: 'Ice',
       },
     )
@@ -235,7 +235,7 @@ describe('market-aware blueprint ranking', () => {
         minSetupCost: 0,
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
-        tier: 't1',
+        tiers: ['t1'],
         productGroup: 'all',
       },
     )
@@ -263,7 +263,7 @@ describe('market-aware blueprint ranking', () => {
         minSetupCost: 0,
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
-        tier: 't1',
+        tiers: ['t1'],
         productGroup: 'Projectile Ammo',
       },
     )
@@ -287,7 +287,7 @@ describe('market-aware blueprint ranking', () => {
       minSetupCost: 0,
       maxSetupCost: Number.MAX_SAFE_INTEGER,
       buildableOnly: false,
-      tier: 't1' as const,
+      tiers: ['t1'],
       productGroup: 'Projectile Ammo',
     }
 
@@ -337,7 +337,7 @@ describe('market-aware blueprint ranking', () => {
         minSetupCost: 0,
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
-        tier: 'faction',
+        tiers: ['faction'],
         productGroup: 'all',
       },
     )
@@ -376,7 +376,7 @@ describe('market-aware blueprint ranking', () => {
         minSetupCost: 0,
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
-        tier: 't2',
+        tiers: ['t2'],
         productGroup: 'all',
       },
     )
