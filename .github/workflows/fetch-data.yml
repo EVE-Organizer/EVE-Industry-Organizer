@@ -1,0 +1,98 @@
+name: Update data
+
+on:
+  schedule:
+    # Daily at 04:00 UTC (SDE dump and ESI cost indices refresh overnight)
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+    inputs:
+      script:
+        description: npm script to run (see package.json)
+        type: choice
+        required: true
+        default: fetch-data
+        options:
+          - fetch-data
+          - rebuild-market
+          - rebuild-market:hub
+          - rebuild-market:fast
+          - rebuild-market:dev
+      hub_jita:
+        description: Hub · Jita (rebuild-market:hub only; none selected = all hubs)
+        type: boolean
+        default: false
+      hub_amarr:
+        description: Hub · Amarr (rebuild-market:hub only)
+        type: boolean
+        default: false
+      hub_dodixie:
+        description: Hub · Dodixie (rebuild-market:hub only)
+        type: boolean
+        default: false
+      hub_rens:
+        description: Hub · Rens (rebuild-market:hub only)
+        type: boolean
+        default: false
+      hub_hek:
+        description: Hub · Hek (rebuild-market:hub only)
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run data script
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            pnpm run fetch-data
+          elif [ "${{ inputs.script }}" = "rebuild-market:hub" ]; then
+            hubs=()
+            [ "${{ inputs.hub_jita }}" = "true" ] && hubs+=("jita")
+            [ "${{ inputs.hub_amarr }}" = "true" ] && hubs+=("amarr")
+            [ "${{ inputs.hub_dodixie }}" = "true" ] && hubs+=("dodixie")
+            [ "${{ inputs.hub_rens }}" = "true" ] && hubs+=("rens")
+            [ "${{ inputs.hub_hek }}" = "true" ] && hubs+=("hek")
+            if [ "${#hubs[@]}" -gt 0 ]; then
+              hub_list=$(IFS=,; echo "${hubs[*]}")
+              pnpm run rebuild-market:hub -- "$hub_list"
+            else
+              pnpm run rebuild-market:hub
+            fi
+          else
+            pnpm run "${{ inputs.script }}"
+          fi
+
+      - name: Commit and push data updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.nade.io"
+          git add public/data/
+          if git diff --staged --quiet; then
+            echo "No data changes to commit"
+          else
+            script="${{ github.event_name == 'schedule' && 'fetch-data' || inputs.script }}"
+            git commit -m "chore: update data ($script)"
+            git push
+          fi
