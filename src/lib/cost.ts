@@ -1,4 +1,4 @@
-import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings } from '@/types'
+import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings, StructureModifiers } from '@/types'
 import { T2_INVENTED_ME, T2_INVENTED_TE } from '@/types'
 
 const ME_BONUS = 0.01
@@ -11,18 +11,43 @@ const TE_BONUS = 0.04
  */
 const RESEARCH_FEE_FACTOR = 1
 
-export function applyME(materials: { typeId: number; quantity: number }[], me: number, runs: number) {
-  const factor = 1 - me * ME_BONUS
+export function resolveStructureModifiers(settings: GlobalSettings): StructureModifiers {
+  if (settings.structureType === 'npc') {
+    return { meBonusPercent: 0, teBonusPercent: 0, jobCostBonusPercent: 0, taxPercent: 0 }
+  }
+  return {
+    meBonusPercent: settings.structureMeBonusPercent,
+    teBonusPercent: settings.structureTeBonusPercent,
+    jobCostBonusPercent: settings.structureJobCostBonusPercent,
+    taxPercent: settings.structureTaxPercent,
+  }
+}
+
+export function applyME(
+  materials: { typeId: number; quantity: number }[],
+  me: number,
+  runs: number,
+  structureMeBonusPercent = 0,
+) {
+  const meFactor = 1 - me * ME_BONUS
+  const structFactor = 1 - structureMeBonusPercent / 100
   return materials.map((m) => ({
     typeId: m.typeId,
-    quantity: Math.max(1, Math.ceil(m.quantity * runs * factor)),
+    quantity: Math.max(1, Math.ceil(m.quantity * runs * meFactor * structFactor)),
   }))
 }
 
-export function applyTE(baseTimeSeconds: number, te: number, runs: number, advancedIndustry: number): number {
+export function applyTE(
+  baseTimeSeconds: number,
+  te: number,
+  runs: number,
+  advancedIndustry: number,
+  structureTeBonusPercent = 0,
+): number {
   const teFactor = 1 - te * TE_BONUS
+  const structFactor = 1 - structureTeBonusPercent / 100
   const advFactor = 1 - advancedIndustry * 0.03
-  return baseTimeSeconds * runs * teFactor * advFactor
+  return baseTimeSeconds * runs * teFactor * structFactor * advFactor
 }
 
 export function materialCost(
@@ -32,9 +57,21 @@ export function materialCost(
   return materials.reduce((sum, m) => sum + (prices.get(m.typeId) ?? 0) * m.quantity, 0)
 }
 
-export function estimateJobCost(materialCostIsk: number, systemCostIndex: number, structureTax = 0): number {
+export function estimateJobCost(
+  materialCostIsk: number,
+  systemCostIndex: number,
+  modifiers: Pick<StructureModifiers, 'jobCostBonusPercent' | 'taxPercent'> = {
+    jobCostBonusPercent: 0,
+    taxPercent: 0,
+  },
+): number {
   const eiv = materialCostIsk
-  return eiv * systemCostIndex * (1 + structureTax)
+  return (
+    eiv *
+    systemCostIndex *
+    (1 - modifiers.jobCostBonusPercent / 100) *
+    (1 + modifiers.taxPercent / 100)
+  )
 }
 
 export function totalManufacturingCost(
@@ -45,10 +82,17 @@ export function totalManufacturingCost(
   systemCostIndex: number,
 ): { materialCost: number; jobCost: number; capital: number; jobTime: number } {
   const runs = settings.batchSize
-  const mats = applyME(blueprint.materials, me, runs)
+  const structure = resolveStructureModifiers(settings)
+  const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const matCost = materialCost(mats, prices)
-  const jobCost = estimateJobCost(matCost, systemCostIndex)
-  const jobTime = applyTE(blueprint.manufacturingTime, settings.teDefault, runs, 0)
+  const jobCost = estimateJobCost(matCost, systemCostIndex, structure)
+  const jobTime = applyTE(
+    blueprint.manufacturingTime,
+    settings.teDefault,
+    runs,
+    0,
+    structure.teBonusPercent,
+  )
   return {
     materialCost: matCost,
     jobCost,

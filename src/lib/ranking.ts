@@ -26,6 +26,7 @@ import {
   estimateResearchFee,
   inventionBlueprintCostPerRun,
   materialCost,
+  resolveStructureModifiers,
   revenueFromSale,
 } from '@/lib/cost'
 import { meetsBuildRequirements } from '@/lib/buildRequirements'
@@ -367,9 +368,10 @@ function computeRow(
   if (runs === null) return null
 
   const { me, te } = blueprintMeTe(blueprint.tier, settings)
-  const mats = applyME(blueprint.materials, me, runs)
+  const structure = resolveStructureModifiers(settings)
+  const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const matCost = materialCost(mats, windowPrices)
-  const jobCost = estimateJobCost(matCost, regionCostIndex)
+  const jobCost = estimateJobCost(matCost, regionCostIndex, structure)
   const outputQty = blueprint.productQuantity * runs
   const materialVolume = computeMaterialVolume(mats, typeVolumes)
   const productVolume = (typeVolumes.get(blueprint.productTypeId) ?? product.volume) * outputQty
@@ -420,6 +422,11 @@ function computeRow(
     }),
     materialCost: matCost,
     systemCostIndex: regionCostIndex,
+    structureType: settings.structureType,
+    structureMeBonusPercent: structure.meBonusPercent,
+    structureTeBonusPercent: structure.teBonusPercent,
+    structureJobCostBonusPercent: structure.jobCostBonusPercent,
+    structureTaxPercent: structure.taxPercent,
     jobCost,
     bpoTypeId: blueprint.blueprintTypeId,
     bpoUnitPrice,
@@ -451,8 +458,15 @@ function computeRow(
   const margin = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
   const baseTimePerRunSeconds = blueprint.manufacturingTime
   const teTimeFactor = 1 - te * 0.04
+  const structureTeTimeFactor = 1 - structure.teBonusPercent / 100
   const advancedIndustryTimeFactor = 1 - advancedIndustry * 0.03
-  const jobTimeSeconds = applyTE(baseTimePerRunSeconds, te, runs, advancedIndustry)
+  const jobTimeSeconds = applyTE(
+    baseTimePerRunSeconds,
+    te,
+    runs,
+    advancedIndustry,
+    structure.teBonusPercent,
+  )
   const jobHours = jobTimeSeconds / 3600
   const daysToClear = avgVolume > 0 ? outputQty / avgVolume : Infinity
   const { iph, marketShare, competitionFactor } = marketAwareIph(
@@ -478,6 +492,7 @@ function computeRow(
     outputQty,
     baseTimePerRunSeconds,
     teTimeFactor,
+    structureTeTimeFactor,
     advancedIndustryTimeFactor,
     jobTimeSeconds,
     sellPricePerUnit,
@@ -490,6 +505,11 @@ function computeRow(
     netRevenue,
     materialCost: matCost,
     systemCostIndex: regionCostIndex,
+    structureType: settings.structureType,
+    structureMeBonusPercent: structure.meBonusPercent,
+    structureTeBonusPercent: structure.teBonusPercent,
+    structureJobCostBonusPercent: structure.jobCostBonusPercent,
+    structureTaxPercent: structure.taxPercent,
     jobCost,
     bpoTypeId: blueprint.blueprintTypeId,
     bpoUnitPrice,

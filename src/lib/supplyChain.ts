@@ -1,5 +1,5 @@
 import type { BlueprintInfo, GlobalSettings, SupplyChainNode, TypeInfo } from '@/types'
-import { applyME, materialCost, totalManufacturingCost } from '@/lib/cost'
+import { applyME, materialCost, resolveStructureModifiers, totalManufacturingCost } from '@/lib/cost'
 import { getBlueprintForProduct } from '@/services/data/sdeLoader'
 
 const MINERAL_IDS = new Set([34, 35, 36, 37, 38, 39, 40])
@@ -21,7 +21,8 @@ export function buildSupplyChain(
   modeOverrides: Map<number, 'buy' | 'build'> = new Map(),
 ): SupplyChainNode {
   const runs = settings.batchSize
-  const mats = applyME(blueprint.materials, me, runs)
+  const structure = resolveStructureModifiers(settings)
+  const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const product = typeMap.get(blueprint.productTypeId)
   const productPrice = prices.get(blueprint.productTypeId) ?? 0
   const buyTotal = materialCost(mats, prices)

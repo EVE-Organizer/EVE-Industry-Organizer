@@ -1,6 +1,8 @@
 import type { BlueprintCostBreakdown, RankedBlueprintRow, SetupCostBreakdown, TypeInfo } from '@/types'
 import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
+import { JobCostFormula, jobCostStepTitle } from '@/components/JobCostFormula'
+import { isPlayerStructure } from '@/lib/structureSettings'
 
 interface SetupCostModalProps {
   row: RankedBlueprintRow | null
@@ -205,10 +207,18 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
 
           <section>
             <h4 className="font-semibold text-sm mb-2">
-              3. Materials (ME {b.me}, 1% reduction per level)
+              3. Materials (ME {b.me}
+              {isPlayerStructure(b.structureType) && b.structureMeBonusPercent > 0
+                ? ` + ${formatDecimal(b.structureMeBonusPercent, 1)}% structure`
+                : ''}
+              )
             </h4>
             <p className="text-xs opacity-60 mb-2">
-              Per line: ceil(base qty × runs × (1 − ME × 1%)) × hub window price
+              Per line: ceil(base qty × runs × (1 − ME × 1%)
+              {isPlayerStructure(b.structureType) && b.structureMeBonusPercent > 0
+                ? ` × (1 − structure ${formatDecimal(b.structureMeBonusPercent, 1)}%)`
+                : ''}
+              ) × hub window price
             </p>
             <div className="overflow-x-auto border border-eve-border rounded-lg">
               <table className="table table-compact w-full">
@@ -249,11 +259,8 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
           </section>
 
           <section>
-            <h4 className="font-semibold text-sm mb-2">4. Job cost (NPC station)</h4>
-            <p className="text-sm font-mono text-xs sm:text-sm break-all">
-              {formatIsk(b.materialCost)} × {formatDecimal(b.systemCostIndex, 4)} system cost index ={' '}
-              <strong>{formatIsk(b.jobCost)}</strong>
-            </p>
+            <h4 className="font-semibold text-sm mb-2">{jobCostStepTitle(b)}</h4>
+            <JobCostFormula breakdown={b} />
           </section>
 
           <section>

@@ -147,6 +147,25 @@ export interface MarketHistoryEntry {
   volume: number
 }
 
+export type StructureType = 'npc' | 'raitaru' | 'azbel' | 'sotiyo' | 'custom'
+
+/** Upwell engineering complex role bonuses (percent reduction). Tax is set per structure. */
+export const STRUCTURE_PRESETS: Record<
+  Exclude<StructureType, 'npc' | 'custom'>,
+  { structureMeBonusPercent: number; structureTeBonusPercent: number; structureJobCostBonusPercent: number }
+> = {
+  raitaru: { structureMeBonusPercent: 1, structureTeBonusPercent: 15, structureJobCostBonusPercent: 3 },
+  azbel: { structureMeBonusPercent: 2, structureTeBonusPercent: 20, structureJobCostBonusPercent: 4 },
+  sotiyo: { structureMeBonusPercent: 3, structureTeBonusPercent: 25, structureJobCostBonusPercent: 5 },
+}
+
+export interface StructureModifiers {
+  meBonusPercent: number
+  teBonusPercent: number
+  jobCostBonusPercent: number
+  taxPercent: number
+}
+
 export interface GlobalSettings {
   primaryHub: HubId
   /** Solar system ID where manufacturing jobs are run. Drives cost index and haul routes. */
@@ -157,7 +176,15 @@ export interface GlobalSettings {
   batchSize: number
   brokerFeePercent: number
   salesTaxPercent: number
-  structureType: 'npc'
+  structureType: StructureType
+  /** Extra material reduction from structure role bonus (player structures only). */
+  structureMeBonusPercent: number
+  /** Extra job time reduction from structure role bonus (player structures only). */
+  structureTeBonusPercent: number
+  /** Job installation cost reduction from structure role bonus (player structures only). */
+  structureJobCostBonusPercent: number
+  /** Manufacturing tax charged by the structure owner (player structures only). */
+  structureTaxPercent: number
   priceMethod: 'sell_orders' | 'buy_orders'
   /** Runs a T1/faction BPO is assumed to live for, used to amortize its purchase + research cost. */
   blueprintLifetimeRuns: number
@@ -292,6 +319,11 @@ export interface SetupCostBreakdown {
   materials: SetupMaterialLine[]
   materialCost: number
   systemCostIndex: number
+  structureType: StructureType
+  structureMeBonusPercent: number
+  structureTeBonusPercent: number
+  structureJobCostBonusPercent: number
+  structureTaxPercent: number
   jobCost: number
   bpoTypeId: number
   bpoUnitPrice: number
@@ -341,6 +373,7 @@ export interface IphBreakdown {
   outputQty: number
   baseTimePerRunSeconds: number
   teTimeFactor: number
+  structureTeTimeFactor: number
   advancedIndustryTimeFactor: number
   jobTimeSeconds: number
   sellPricePerUnit: number
@@ -353,6 +386,11 @@ export interface IphBreakdown {
   netRevenue: number
   materialCost: number
   systemCostIndex: number
+  structureType: StructureType
+  structureMeBonusPercent: number
+  structureTeBonusPercent: number
+  structureJobCostBonusPercent: number
+  structureTaxPercent: number
   jobCost: number
   bpoTypeId: number
   bpoUnitPrice: number
@@ -454,6 +492,10 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   brokerFeePercent: 1,
   salesTaxPercent: 3.6,
   structureType: 'npc',
+  structureMeBonusPercent: 0,
+  structureTeBonusPercent: 0,
+  structureJobCostBonusPercent: 0,
+  structureTaxPercent: 0,
   priceMethod: 'sell_orders',
   blueprintLifetimeRuns: 1000,
   inventionSkillLevel: 4,

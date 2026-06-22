@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import type { RankedBlueprintRow, SetupCostBreakdown, TypeInfo } from '@/types'
 import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
+import { JobCostFormula, jobCostStepTitle } from '@/components/JobCostFormula'
+import { isPlayerStructure } from '@/lib/structureSettings'
 
 interface IphBreakdownModalProps {
   row: RankedBlueprintRow | null
@@ -77,7 +79,7 @@ function CalcStep({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-function SkillTile({ label, value, detail }: { label: string; value: number; detail: string }) {
+function SkillTile({ label, value, detail }: { label: string; value: number | string; detail: string }) {
   return (
     <div className="rounded-md border border-eve-border/50 bg-base-300/20 px-3 py-3 text-center">
       <p className="text-[11px] font-medium uppercase tracking-wide opacity-50">{label}</p>
@@ -196,6 +198,25 @@ export function IphBreakdownModal({
                   detail="3% faster jobs per level"
                 />
               </div>
+              {isPlayerStructure(iph.structureType) ? (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+                  <SkillTile
+                    label="Struct. ME"
+                    value={`${formatDecimal(iph.structureMeBonusPercent, 1)}%`}
+                    detail="Extra material reduction"
+                  />
+                  <SkillTile
+                    label="Struct. TE"
+                    value={`${formatDecimal(iph.structureTeBonusPercent, 1)}%`}
+                    detail="Extra job time reduction"
+                  />
+                  <SkillTile
+                    label="Owner tax"
+                    value={`${formatDecimal(iph.structureTaxPercent, 1)}%`}
+                    detail="Manufacturing tax on job fee"
+                  />
+                </div>
+              ) : null}
             </StepCard>
 
             <StepCard
@@ -221,13 +242,23 @@ export function IphBreakdownModal({
               <CalcStep label="TE factor">
                 1 − ({iph.te} × 4%) = <strong>{formatDecimal(iph.teTimeFactor, 4)}</strong>
               </CalcStep>
+              {isPlayerStructure(iph.structureType) && iph.structureTeBonusPercent > 0 ? (
+                <CalcStep label="Structure TE factor">
+                  1 − {formatDecimal(iph.structureTeBonusPercent, 1)}% ={' '}
+                  <strong>{formatDecimal(iph.structureTeTimeFactor, 4)}</strong>
+                </CalcStep>
+              ) : null}
               <CalcStep label="Advanced Industry factor">
                 1 − ({iph.advancedIndustry} × 3%) ={' '}
                 <strong>{formatDecimal(iph.advancedIndustryTimeFactor, 4)}</strong>
               </CalcStep>
               <CalcStep label="Multiply">
                 {formatDuration(iph.baseTimePerRunSeconds)} × {iph.runs} runs ×{' '}
-                {formatDecimal(iph.teTimeFactor, 4)} × {formatDecimal(iph.advancedIndustryTimeFactor, 4)}
+                {formatDecimal(iph.teTimeFactor, 4)}
+                {isPlayerStructure(iph.structureType) && iph.structureTeBonusPercent > 0
+                  ? ` × ${formatDecimal(iph.structureTeTimeFactor, 4)}`
+                  : ''}{' '}
+                × {formatDecimal(iph.advancedIndustryTimeFactor, 4)}
               </CalcStep>
             </StepCard>
           </div>
@@ -332,7 +363,11 @@ export function IphBreakdownModal({
             <StepCard
               step={6}
               title="Material cost"
-              note={`ME ${iph.me}: ceil(base qty × runs × (1 − ME × 1%)) × hub price`}
+              note={
+                isPlayerStructure(iph.structureType) && iph.structureMeBonusPercent > 0
+                  ? `ME ${iph.me} + ${formatDecimal(iph.structureMeBonusPercent, 1)}% structure: ceil(base qty × runs × (1 − ME × 1%) × (1 − structure bonus)) × hub price`
+                  : `ME ${iph.me}: ceil(base qty × runs × (1 − ME × 1%)) × hub price`
+              }
               result={formatIsk(iph.materialCost)}
               resultLabel="Material subtotal"
             >
@@ -370,14 +405,11 @@ export function IphBreakdownModal({
 
             <StepCard
               step={7}
-              title="NPC job cost"
+              title={jobCostStepTitle(iph)}
               result={formatIsk(iph.jobCost)}
               resultLabel="Industry tax"
             >
-              <CalcStep label="Material cost × system index">
-                {formatIsk(iph.materialCost)} × {formatDecimal(iph.systemCostIndex, 4)} ={' '}
-                <strong>{formatIsk(iph.jobCost)}</strong>
-              </CalcStep>
+              <JobCostFormula breakdown={iph} />
             </StepCard>
 
             <StepCard

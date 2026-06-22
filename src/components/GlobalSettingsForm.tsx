@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { GlobalSettings } from '@/types'
+import type { GlobalSettings, StructureType } from '@/types'
 import {
   HUBS,
   MAX_ME,
@@ -14,6 +14,7 @@ import { formatQuantity } from '@/lib/profit'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
+import { isPlayerStructure, patchStructureType, structureTypeLabel } from '@/lib/structureSettings'
 
 interface GlobalSettingsFormProps {
   settings: GlobalSettings
@@ -235,6 +236,117 @@ export function GlobalSettingsForm({ settings, onChange, size = 'md' }: GlobalSe
             </SettingField>
           </div>
         )}
+      </section>
+
+      <section className={`flex flex-col ${gap} border-t border-eve-border/50 pt-4`}>
+        <SettingField
+          label="Manufacturing location"
+          tooltip={GLOBAL_SETTING_TOOLTIPS.structureType}
+          size={size}
+        >
+          <select
+            className={selectClass}
+            value={settings.structureType}
+            onChange={(e) =>
+              onChange(patchStructureType(e.target.value as StructureType))
+            }
+          >
+            {(['npc', 'raitaru', 'azbel', 'sotiyo', 'custom'] as StructureType[]).map((type) => (
+              <option key={type} value={type}>
+                {structureTypeLabel(type)}
+              </option>
+            ))}
+          </select>
+        </SettingField>
+
+        {isPlayerStructure(settings.structureType) ? (
+          <>
+            <div className={`grid grid-cols-2 ${gap}`}>
+              <SettingField
+                label="Structure ME bonus %"
+                tooltip={GLOBAL_SETTING_TOOLTIPS.structureMeBonusPercent}
+                size={size}
+              >
+                <input
+                  type="number"
+                  min={0}
+                  max={10}
+                  step={0.1}
+                  className={inputClass}
+                  value={settings.structureMeBonusPercent}
+                  onChange={(e) => {
+                    onChange({
+                      structureType: 'custom',
+                      structureMeBonusPercent: Math.max(0, +e.target.value || 0),
+                    })
+                  }}
+                />
+              </SettingField>
+              <SettingField
+                label="Structure TE bonus %"
+                tooltip={GLOBAL_SETTING_TOOLTIPS.structureTeBonusPercent}
+                size={size}
+              >
+                <input
+                  type="number"
+                  min={0}
+                  max={50}
+                  step={0.1}
+                  className={inputClass}
+                  value={settings.structureTeBonusPercent}
+                  onChange={(e) => {
+                    onChange({
+                      structureType: 'custom',
+                      structureTeBonusPercent: Math.max(0, +e.target.value || 0),
+                    })
+                  }}
+                />
+              </SettingField>
+            </div>
+            <div className={`grid grid-cols-2 ${gap}`}>
+              <SettingField
+                label="Job cost bonus %"
+                tooltip={GLOBAL_SETTING_TOOLTIPS.structureJobCostBonusPercent}
+                size={size}
+              >
+                <input
+                  type="number"
+                  min={0}
+                  max={10}
+                  step={0.1}
+                  className={inputClass}
+                  value={settings.structureJobCostBonusPercent}
+                  onChange={(e) => {
+                    onChange({
+                      structureType: 'custom',
+                      structureJobCostBonusPercent: Math.max(0, +e.target.value || 0),
+                    })
+                  }}
+                />
+              </SettingField>
+              <SettingField
+                label="Owner tax %"
+                tooltip={GLOBAL_SETTING_TOOLTIPS.structureTaxPercent}
+                size={size}
+              >
+                <input
+                  type="number"
+                  min={0}
+                  max={50}
+                  step={0.1}
+                  className={inputClass}
+                  value={settings.structureTaxPercent}
+                  onChange={(e) => {
+                    onChange({
+                      structureType: 'custom',
+                      structureTaxPercent: Math.max(0, +e.target.value || 0),
+                    })
+                  }}
+                />
+              </SettingField>
+            </div>
+          </>
+        ) : null}
       </section>
 
       <div className={`grid grid-cols-2 ${gap}`}>
