@@ -112,4 +112,5 @@ export const HUB_FACTION_IDS: Record<HubId, number> = {
   dodixie: 500004,
   rens: 500003,
   hek: 500003,
+  xhq7v: 500002,
 }

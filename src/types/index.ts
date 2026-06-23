@@ -1,4 +1,4 @@
-export type HubId = 'jita' | 'amarr' | 'dodixie' | 'rens' | 'hek'
+export type HubId = 'jita' | 'amarr' | 'dodixie' | 'rens' | 'hek' | 'xhq7v'
 
 export const MAX_ME = 10
 export const MAX_TE = 20
@@ -587,6 +587,17 @@ export const HUBS: HubConfig[] = [
     buildSystemName: 'Hek',
     marketSystemId: 30002053,
   },
+  {
+    id: 'xhq7v',
+    name: 'XHQ-7V',
+    regionId: 10000047,
+    regionName: 'Providence',
+    sellStationId: 0,
+    sellStationName: 'XHQ-7V',
+    buildSystemId: 30003731,
+    buildSystemName: 'XHQ-7V',
+    marketSystemId: 30003731,
+  },
 ]
 
 export const REGION_IDS: Record<HubId, number> = {
@@ -595,6 +606,7 @@ export const REGION_IDS: Record<HubId, number> = {
   dodixie: 10000032,
   rens: 10000030,
   hek: 10000042,
+  xhq7v: 10000047,
 }
 
 export const MINERAL_TYPE_IDS: Record<keyof MineralStock, number> = {

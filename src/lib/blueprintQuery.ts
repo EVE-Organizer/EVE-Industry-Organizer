@@ -1,5 +1,5 @@
 import type { BlueprintTier, GlobalSettings, HubId, TimeRange } from '@/types'
-import { BLUEPRINT_TIERS } from '@/types'
+import { BLUEPRINT_TIERS, HUBS } from '@/types'
 import type { BlueprintSortKey, SortDirection } from '@/lib/ranking'
 import {
   defaultMinSetupCost,
@@ -28,7 +28,7 @@ const VALID_TIERS = new Set<string>(BLUEPRINT_TIERS)
 const VALID_WINDOWS: TimeRange[] = ['1d', '1w', '1m', '1y', 'all']
 const VALID_SORT_KEYS: BlueprintSortKey[] = ['setupCost', 'netProfit', 'iph', 'margin', 'avgVolume']
 const VALID_SORT_DIRS: SortDirection[] = ['asc', 'desc']
-const VALID_HUBS: HubId[] = ['jita', 'amarr', 'dodixie', 'rens', 'hek']
+const VALID_HUBS: HubId[] = HUBS.map((hub) => hub.id)
 
 export function defaultQuery(settings: GlobalSettings): BlueprintQuery {
   return {

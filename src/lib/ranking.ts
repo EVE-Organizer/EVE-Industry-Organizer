@@ -135,9 +135,8 @@ function hasValidPrices(
   }
   if (priceMethod === 'buy_orders') {
     if ((buyPrices.get(blueprint.productTypeId) ?? 0) <= 0) return false
-  } else {
-    if (!avgPrice || avgPrice <= 0) return false
-    if ((spotPrices.get(blueprint.productTypeId) ?? 0) <= 0) return false
+  } else if (!avgPrice || avgPrice <= 0) {
+    return false
   }
   for (const mat of blueprint.materials) {
     if ((windowPrices.get(mat.typeId) ?? 0) <= 0) return false

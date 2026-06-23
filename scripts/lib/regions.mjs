@@ -1,5 +1,9 @@
 /** Build regions.json from SDE: all regions with build system + security class. */
 
+import { HUB_MARKET_SYSTEMS, HUB_REGION_IDS } from './hubs.mjs'
+
+export { HUB_MARKET_SYSTEMS, HUB_REGION_IDS }
+
 function num(value) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : 0
@@ -9,23 +13,6 @@ function securityClass(security) {
   if (security >= 0.45) return 'highsec'
   if (security > 0) return 'lowsec'
   return 'nullsec'
-}
-
-/** Hub sell systems used as market anchors for haul routing. */
-export const HUB_MARKET_SYSTEMS = {
-  jita: 30000142,
-  amarr: 30002187,
-  dodixie: 30002659,
-  rens: 30002510,
-  hek: 30002053,
-}
-
-export const HUB_REGION_IDS = {
-  jita: 10000002,
-  amarr: 10000043,
-  dodixie: 10000032,
-  rens: 10000030,
-  hek: 10000042,
 }
 
 /**

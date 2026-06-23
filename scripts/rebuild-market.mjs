@@ -18,6 +18,7 @@
  *   MARKET_HISTORY_TTL_HOURS=24  skip refetch if cached within this window
  *   MARKET_PROGRESS_VERBOSE=1    log per-product history skip warnings
  *   MARKET_PROGRESS_PLAIN=1      force plain log output (no listr tree)
+ *   MARKET_PROGRESS_FORCE=1      force listr task tree (e.g. local non-TTY)
  */
 import { readFileSync } from 'fs'
 import { dirname, join } from 'path'
@@ -65,13 +66,19 @@ function readMarketOptions() {
   return { skipHistory, historyLimit, historyConcurrency, historyTtlMs }
 }
 
+function readHubIdsFromArgv() {
+  const args = process.argv.slice(2).filter((arg) => arg !== '--')
+  const raw = args.length ? args.join(',') : process.env.MARKET_HUB
+  return parseHubIds(raw)
+}
+
 async function main() {
   const blueprints = loadBlueprintRegistry()
   const regions = loadJson('regions.json')
   const stations = loadJson('stations.json')
   const existingMarket = loadExistingMarket(marketPath)
 
-  const hubIds = parseHubIds(process.argv[2] ?? process.env.MARKET_HUB)
+  const hubIds = readHubIdsFromArgv()
   const marketOptions = readMarketOptions()
 
   const configSummary = formatMarketConfigSummary({

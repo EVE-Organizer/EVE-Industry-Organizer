@@ -37,6 +37,10 @@ on:
         description: Hub · Hek (rebuild-market:hub only)
         type: boolean
         default: false
+      hub_xhq7v:
+        description: Hub · XHQ-7V (rebuild-market:hub only)
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -74,6 +78,7 @@ jobs:
             [ "${{ inputs.hub_dodixie }}" = "true" ] && hubs+=("dodixie")
             [ "${{ inputs.hub_rens }}" = "true" ] && hubs+=("rens")
             [ "${{ inputs.hub_hek }}" = "true" ] && hubs+=("hek")
+            [ "${{ inputs.hub_xhq7v }}" = "true" ] && hubs+=("xhq7v")
             if [ "${#hubs[@]}" -gt 0 ]; then
               hub_list=$(IFS=,; echo "${hubs[*]}")
               pnpm run rebuild-market:hub -- "$hub_list"

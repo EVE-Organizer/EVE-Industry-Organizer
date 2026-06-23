@@ -11,6 +11,7 @@ export function parseHubIds(raw) {
     .split(/[,+\s]+/)
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean)
+    .filter((id) => id !== '--')
   const invalid = ids.filter((id) => !REGION_IDS[id])
   if (invalid.length) {
     throw new Error(`Unknown hub(s): ${invalid.join(', ')}. Valid: ${MARKET_HUB_IDS.join(', ')}`)

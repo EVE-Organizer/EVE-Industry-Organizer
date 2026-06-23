@@ -25,20 +25,13 @@ import { fetchCostIndices } from './lib/market-prices.mjs'
 import { buildRegionsFile } from './lib/regions.mjs'
 import { buildMarketData, loadExistingMarket, writeMarketJson } from './lib/market-data.mjs'
 import { createMarketBuildTask, runListr } from './lib/run-progress.mjs'
+import { HUBS, resolveSellSystemId } from './lib/hubs.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outDir = join(__dirname, '../public/data')
 const SDE_BASE = 'https://www.fuzzwork.co.uk/dump/latest/csv'
 
 const MANUFACTURING_ACTIVITY = 1
-
-const HUBS = [
-  { hubId: 'jita', sellStationId: 60003760, buildSystemId: 30000144, isBuildHubSystem: true },
-  { hubId: 'amarr', sellStationId: 60008494, buildSystemId: 30002187 },
-  { hubId: 'dodixie', sellStationId: 60011866, buildSystemId: 30002659 },
-  { hubId: 'rens', sellStationId: 60004588, buildSystemId: 30002510 },
-  { hubId: 'hek', sellStationId: 60005686, buildSystemId: 30002053 },
-]
 
 const REQUIRED_CSVS = [
   'industryActivity',
@@ -220,8 +213,8 @@ function buildHubSystems(hubs, stations, systems) {
 
   return hubs
     .flatMap((hub) => {
-      const sellSystemId = stationById.get(String(hub.sellStationId))?.solarSystemID
-      return [sellSystemId, String(hub.buildSystemId)].filter(Boolean)
+      const sellSystemId = resolveSellSystemId(hub, stationById)
+      return [sellSystemId, hub.buildSystemId].filter(Boolean)
     })
     .filter((systemId) => {
       if (seen.has(systemId)) return false
@@ -234,7 +227,7 @@ function buildHubSystems(hubs, stations, systems) {
       const hub = hubs.find(
         (entry) =>
           entry.buildSystemId === num(systemId) ||
-          stationById.get(String(entry.sellStationId))?.solarSystemID === systemId,
+          resolveSellSystemId(entry, stationById) === num(systemId),
       )
       return {
         systemId: num(system.solarSystemID),
@@ -259,16 +252,16 @@ function buildIndustrySystems(hubs, stations, mapSolarSystems, costIndices) {
 
   const hubSystemIds = new Set(
     hubs.flatMap((hub) => {
-      const sellSystemId = stationById.get(String(hub.sellStationId))?.solarSystemID
-      return [hub.buildSystemId, sellSystemId ? num(sellSystemId) : null].filter(Boolean)
+      const sellSystemId = resolveSellSystemId(hub, stationById)
+      return [hub.buildSystemId, sellSystemId].filter(Boolean)
     }),
   )
 
   const hubIdBySystemId = new Map()
   for (const hub of hubs) {
-    const sellSystemId = stationById.get(String(hub.sellStationId))?.solarSystemID
+    const sellSystemId = resolveSellSystemId(hub, stationById)
     hubIdBySystemId.set(hub.buildSystemId, hub.hubId)
-    if (sellSystemId) hubIdBySystemId.set(num(sellSystemId), hub.hubId)
+    if (sellSystemId) hubIdBySystemId.set(sellSystemId, hub.hubId)
   }
 
   const systemIds = new Set([...costIndices.keys(), ...hubSystemIds])
@@ -300,7 +293,10 @@ function buildHubStations(hubs, stations, systems, regions) {
 
   return hubs
     .flatMap((hub) => {
-      const sellStation = stationById.get(String(hub.sellStationId))
+      const sellStation = hub.sellStationId
+        ? stationById.get(String(hub.sellStationId))
+        : null
+      const sellSystemId = resolveSellSystemId(hub, stationById)
       const buildSystem = systemById.get(String(hub.buildSystemId))
       const buildStation =
         [...stationById.values()].find(
@@ -310,7 +306,22 @@ function buildHubStations(hubs, stations, systems, regions) {
         ) ?? null
 
       const entries = []
-      if (sellStation) entries.push({ station: sellStation, hub, isBuildHub: false })
+      if (sellStation) {
+        entries.push({ station: sellStation, hub, isBuildHub: false })
+      } else if (sellSystemId) {
+        const system = systemById.get(String(sellSystemId))
+        entries.push({
+          station: {
+            stationID: '0',
+            stationName: hub.sellStationName ?? system?.solarSystemName ?? hub.hubId,
+            solarSystemID: String(sellSystemId),
+            regionID: String(hub.regionId ?? system?.regionID),
+            security: system?.security ?? '0',
+          },
+          hub,
+          isBuildHub: hub.buildSystemId === sellSystemId,
+        })
+      }
       if (buildStation && buildStation.stationID !== sellStation?.stationID) {
         entries.push({ station: buildStation, hub, isBuildHub: hub.isBuildHubSystem ?? false })
       } else if (buildSystem && hub.isBuildHubSystem && sellStation?.solarSystemID !== buildSystem.solarSystemID) {

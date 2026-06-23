@@ -391,4 +391,32 @@ describe('market-aware blueprint ranking', () => {
       expect(row.upfrontCapital).toBe(row.setupCost)
     }
   })
+
+  it('ranks xhq7v from history when Fuzzwork spot prices are zero', () => {
+    const hubMarket = getHubMarket(market, 'xhq7v')
+    expect(hubMarket).not.toBeNull()
+
+    const spot = buildPriceMap(hubMarket!)
+    expect(spot.get(34) ?? 0).toBe(0)
+    expect(hubMarket!.products['34']?.all?.avgPrice).toBeGreaterThan(0)
+
+    const rows = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      'xhq7v',
+      'all',
+      DEFAULT_SETTINGS,
+      {
+        minSetupCost: 0,
+        maxSetupCost: Number.MAX_SAFE_INTEGER,
+        buildableOnly: false,
+        tiers: ['t1'],
+        productGroup: 'all',
+      },
+    )
+
+    expect(rows.length).toBeGreaterThan(0)
+  })
 })

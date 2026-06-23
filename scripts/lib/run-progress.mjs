@@ -4,9 +4,26 @@ import { MARKET_HUB_IDS } from './market-data.mjs'
 const VERBOSE =
   process.env.MARKET_PROGRESS_VERBOSE === '1' || process.env.MARKET_PROGRESS_VERBOSE === 'true'
 
-/** @returns {boolean} */
+function isProgressForced() {
+  return process.env.MARKET_PROGRESS_FORCE === '1' || process.env.MARKET_PROGRESS_FORCE === 'true'
+}
+
+function isCiLog() {
+  return process.env.GITHUB_ACTIONS === 'true' || (process.env.CI === 'true' && !process.stdout.isTTY)
+}
+
+/** Use Listr task tree instead of plain log lines. */
 export function isInteractive() {
-  return Boolean(process.stdout.isTTY) && process.env.MARKET_PROGRESS_PLAIN !== '1'
+  if (process.env.MARKET_PROGRESS_PLAIN === '1') return false
+  if (isProgressForced() || isCiLog()) return true
+  return Boolean(process.stdout.isTTY)
+}
+
+/** Listr renderer: animated tree locally, line-by-line task updates in CI logs. */
+export function getListrRenderer() {
+  if (!isInteractive()) return SimpleRenderer
+  if (process.stdout.isTTY && !isCiLog()) return 'default'
+  return 'verbose'
 }
 
 /** @param {number} ms */
@@ -306,7 +323,7 @@ export async function runListr(tasks, options = {}) {
   const listr = new Listr(tasks, {
     concurrent: false,
     exitOnError: true,
-    renderer: isInteractive() ? 'default' : SimpleRenderer,
+    renderer: getListrRenderer(),
     rendererOptions: isInteractive() ? { collapse: false } : undefined,
   })
 

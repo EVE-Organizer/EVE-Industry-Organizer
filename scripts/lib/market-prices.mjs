@@ -1,13 +1,7 @@
+import { HUB_REGION_IDS as REGION_IDS } from './hubs.mjs'
+
 const FUZZWORK_BASE = 'https://market.fuzzwork.co.uk/aggregates'
 const ESI_BASE = 'https://esi.evetech.net/latest'
-
-const REGION_IDS = {
-  jita: 10000002,
-  amarr: 10000043,
-  dodixie: 10000032,
-  rens: 10000030,
-  hek: 10000042,
-}
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
