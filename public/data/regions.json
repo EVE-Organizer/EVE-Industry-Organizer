@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-23T07:40:14.166Z",
+  "generatedAt": "2026-06-24T07:33:21.901Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -869,7 +869,7 @@
       "buildSystemName": "TXJ-II",
       "buildSystemSecurity": -0.021664,
       "costIndex": 0.0014,
-      "marketSystemId": 30003779
+      "marketSystemId": 30003731
     },
     {
       "regionId": 10000023,
@@ -1138,7 +1138,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0283,
+      "costIndex": 0.029,
       "marketSystemId": 30100000
     }
   ]

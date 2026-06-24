@@ -59,5 +59,16 @@
     "regionName": "Metropolis",
     "security": 0.8,
     "hubId": "hek"
+  },
+  {
+    "stationId": 0,
+    "name": "XHQ-7V",
+    "systemId": 30003731,
+    "systemName": "XHQ-7V",
+    "regionId": 10000047,
+    "regionName": "Providence",
+    "security": -0.17165,
+    "hubId": "xhq7v",
+    "isBuildHub": true
   }
 ]
