@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-26T07:42:35.863Z",
+  "generatedAt": "2026-06-27T06:46:36.652Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -815,11 +815,11 @@
       "regionId": 10000059,
       "name": "Paragon Soul",
       "securityClass": "nullsec",
-      "buildSystemId": 30004681,
-      "buildSystemName": "8Q-UYU",
-      "buildSystemSecurity": -0.016629,
+      "buildSystemId": 30004683,
+      "buildSystemName": "S-KU8B",
+      "buildSystemSecurity": -0.03065,
       "costIndex": 0.0014,
-      "marketSystemId": 30004681
+      "marketSystemId": 30004683
     },
     {
       "regionId": 10000063,
@@ -1138,7 +1138,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0294,
+      "costIndex": 0.0292,
       "marketSystemId": 30100000
     }
   ]
