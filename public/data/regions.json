@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-27T06:46:36.652Z",
+  "generatedAt": "2026-06-28T07:43:43.983Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -95,11 +95,11 @@
       "regionId": 10000054,
       "name": "Aridia",
       "securityClass": "highsec",
-      "buildSystemId": 30004253,
-      "buildSystemName": "Pahineh",
-      "buildSystemSecurity": 0.751878,
+      "buildSystemId": 30004290,
+      "buildSystemName": "Zaveral",
+      "buildSystemSecurity": 0.61743,
       "costIndex": 0.0014,
-      "marketSystemId": 30004253
+      "marketSystemId": 30004290
     },
     {
       "regionId": 11000004,
@@ -1138,7 +1138,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0292,
+      "costIndex": 0.0295,
       "marketSystemId": 30100000
     }
   ]
