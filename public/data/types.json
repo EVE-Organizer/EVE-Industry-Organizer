@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-01T10:30:06.864Z",
+  "generatedAt": "2026-07-02T07:04:11.147Z",
   "types": [
     {
       "typeId": 18,
@@ -271082,8 +271082,98 @@
       "bpIconUrl": "https://images.evetech.net/types/95395/bp?size=32"
     },
     {
+      "typeId": 95396,
+      "name": "Defiant Latten Metallic - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95396/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95396/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95396/bp?size=32"
+    },
+    {
+      "typeId": 95397,
+      "name": "Defiant Latten Metallic - Unlimited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95397/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95397/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95397/bp?size=32"
+    },
+    {
+      "typeId": 95398,
+      "name": "Radiant Aureate Metallic - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95398/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95398/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95398/bp?size=32"
+    },
+    {
+      "typeId": 95399,
+      "name": "Radiant Aureate Metallic - Unlimited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95399/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95399/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95399/bp?size=32"
+    },
+    {
+      "typeId": 95400,
+      "name": "Defiant Ochre Matte - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95400/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95400/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95400/bp?size=32"
+    },
+    {
+      "typeId": 95401,
+      "name": "Defiant Latten Matte - Unlimited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95401/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95401/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95401/bp?size=32"
+    },
+    {
+      "typeId": 95402,
+      "name": "Avalon Aqua Gloss - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95402/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95402/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95402/bp?size=32"
+    },
+    {
+      "typeId": 95403,
+      "name": "Avalon Aqua Gloss - Unlimited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95403/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95403/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95403/bp?size=32"
+    },
+    {
+      "typeId": 95404,
+      "name": "Harmonic Alloy Metallic - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95404/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95404/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95404/bp?size=32"
+    },
+    {
       "typeId": 95405,
-      "name": "Violent Surge Metallic - Unlimited",
+      "name": "Harmonic Alloy Metallic - Unlimited",
       "group": "Ship SKIN Design Element",
       "category": "Personalization",
       "volume": 0.1,
@@ -271092,8 +271182,18 @@
       "bpIconUrl": "https://images.evetech.net/types/95405/bp?size=32"
     },
     {
+      "typeId": 95406,
+      "name": "Avalon Aqua Matte - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95406/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95406/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95406/bp?size=32"
+    },
+    {
       "typeId": 95407,
-      "name": "Resolve Stratos Matte - Unlimited",
+      "name": "Avalon Aqua Matte - Unlimited",
       "group": "Ship SKIN Design Element",
       "category": "Personalization",
       "volume": 0.1,
@@ -271102,8 +271202,18 @@
       "bpIconUrl": "https://images.evetech.net/types/95407/bp?size=32"
     },
     {
+      "typeId": 95408,
+      "name": "Arkombine Dawn Satin - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95408/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95408/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95408/bp?size=32"
+    },
+    {
       "typeId": 95409,
-      "name": "Reclaimed Dawn Satin - Unlimited",
+      "name": "Arkombine Dawn Satin - Unlimited",
       "group": "Ship SKIN Design Element",
       "category": "Personalization",
       "volume": 0.1,
@@ -271112,8 +271222,48 @@
       "bpIconUrl": "https://images.evetech.net/types/95409/bp?size=32"
     },
     {
+      "typeId": 95410,
+      "name": "Resonant Turf Gloss - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95410/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95410/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95410/bp?size=32"
+    },
+    {
+      "typeId": 95412,
+      "name": "Harmonius Bridge - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95412/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95412/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95412/bp?size=32"
+    },
+    {
+      "typeId": 95413,
+      "name": "Harmonius Bridge - Unlimited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95413/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95413/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95413/bp?size=32"
+    },
+    {
+      "typeId": 95415,
+      "name": "Rebel Cross - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95415/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95415/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95415/bp?size=32"
+    },
+    {
       "typeId": 95416,
-      "name": "Rebel Crest - Unlimited",
+      "name": "Rebel Cross - Unlimited",
       "group": "Ship SKIN Design Element",
       "category": "Personalization",
       "volume": 0.1,
@@ -271122,8 +271272,18 @@
       "bpIconUrl": "https://images.evetech.net/types/95416/bp?size=32"
     },
     {
+      "typeId": 95417,
+      "name": "Remnant Honor - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95417/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95417/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95417/bp?size=32"
+    },
+    {
       "typeId": 95418,
-      "name": "Remnant Dominion - Unlimited",
+      "name": "Remnant Honor - Unlimited",
       "group": "Ship SKIN Design Element",
       "category": "Personalization",
       "volume": 0.1,
@@ -271143,7 +271303,7 @@
     },
     {
       "typeId": 95445,
-      "name": "Shapash Corporation Emblem",
+      "name": "Defiant Latten Matte - Limited",
       "group": "Ship Emblems",
       "category": "Personalization",
       "volume": 0,
@@ -271170,6 +271330,16 @@
       "iconUrl": "https://images.evetech.net/types/95452/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95452/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95452/bp?size=32"
+    },
+    {
+      "typeId": 95458,
+      "name": "Operation Avalon Background",
+      "group": "Portrait Backgrounds",
+      "category": "Apparel",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95458/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95458/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95458/bp?size=32"
     },
     {
       "typeId": 95463,
@@ -271300,6 +271470,46 @@
       "iconUrl": "https://images.evetech.net/types/95501/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95501/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95501/bp?size=32"
+    },
+    {
+      "typeId": 95525,
+      "name": "Dragoon Navy Issue Forever Creative SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95525/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95525/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95525/bp?size=32"
+    },
+    {
+      "typeId": 95526,
+      "name": "Corax Navy Issue Forever Creative SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95526/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95526/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95526/bp?size=32"
+    },
+    {
+      "typeId": 95527,
+      "name": "Talwar Fleet Issue Forever Creative SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95527/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95527/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95527/bp?size=32"
+    },
+    {
+      "typeId": 95528,
+      "name": "Algos Navy Issue Forever Creative SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95528/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95528/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95528/bp?size=32"
     }
   ]
 }
