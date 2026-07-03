@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-02T07:04:11.147Z",
+  "generatedAt": "2026-07-03T09:24:06.614Z",
   "blueprints": [
     {
       "blueprintTypeId": 879,
@@ -173071,7 +173071,7 @@
       "manufacturingTime": 10800,
       "materials": [
         {
-          "typeId": 47783,
+          "typeId": 47835,
           "quantity": 1
         },
         {

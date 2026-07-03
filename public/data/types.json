@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-02T07:04:11.147Z",
+  "generatedAt": "2026-07-03T09:24:06.614Z",
   "types": [
     {
       "typeId": 18,
@@ -89733,7 +89733,7 @@
     },
     {
       "typeId": 28393,
-      "name": "Batch Compressed Crokite IV-Grade",
+      "name": "Batch Compressed Crokite II-Grade",
       "group": "Crokite",
       "category": "Asteroid",
       "volume": 7.81,
@@ -271073,7 +271073,7 @@
     },
     {
       "typeId": 95395,
-      "name": "Pyroxeres  0-Grade",
+      "name": "Pyroxeres 0-Grade",
       "group": "Pyroxeres",
       "category": "Asteroid",
       "volume": 0.3,
