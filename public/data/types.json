@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-03T09:24:06.614Z",
+  "generatedAt": "2026-07-04T06:44:32.336Z",
   "types": [
     {
       "typeId": 18,
@@ -271510,6 +271510,56 @@
       "iconUrl": "https://images.evetech.net/types/95528/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95528/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95528/bp?size=32"
+    },
+    {
+      "typeId": 95633,
+      "name": "Minmatar Pilot",
+      "group": "Standard Expert Systems",
+      "category": "Expert Systems",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95633/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95633/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95633/bp?size=32"
+    },
+    {
+      "typeId": 95657,
+      "name": "Liberation Day Celebration Crate",
+      "group": "Special Edition Commodities",
+      "category": "Special Edition Assets",
+      "volume": 4,
+      "iconUrl": "https://images.evetech.net/types/95657/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95657/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95657/bp?size=32"
+    },
+    {
+      "typeId": 95672,
+      "name": "Liberated Matar Background",
+      "group": "Portrait Backgrounds",
+      "category": "Apparel",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95672/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95672/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95672/bp?size=32"
+    },
+    {
+      "typeId": 95673,
+      "name": "Foundation Wisdom Background",
+      "group": "Portrait Backgrounds",
+      "category": "Apparel",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95673/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95673/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95673/bp?size=32"
+    },
+    {
+      "typeId": 95674,
+      "name": "Union Contemplation Background",
+      "group": "Portrait Backgrounds",
+      "category": "Apparel",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95674/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95674/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95674/bp?size=32"
     }
   ]
 }
