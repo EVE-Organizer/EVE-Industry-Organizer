@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-07T07:34:01.047Z",
+  "generatedAt": "2026-07-08T08:49:21.958Z",
   "blueprints": [
     {
       "blueprintTypeId": 879,
@@ -162890,6 +162890,32 @@
       "productRenderUrl": "https://images.evetech.net/types/60633/render?size=128"
     },
     {
+      "blueprintTypeId": 60769,
+      "productTypeId": 60766,
+      "productQuantity": 1,
+      "manufacturingTime": 21600,
+      "materials": [
+        {
+          "typeId": 2446,
+          "quantity": 1
+        },
+        {
+          "typeId": 21638,
+          "quantity": 1
+        }
+      ],
+      "requiredSkills": {
+        "Graviton Physics": 1,
+        "Electronic Engineering": 1,
+        "Industry": 5
+      },
+      "tier": "faction",
+      "productGroup": "Combat Drone",
+      "bpIconUrl": "https://images.evetech.net/types/60769/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/60766/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/60766/render?size=128"
+    },
+    {
       "blueprintTypeId": 61217,
       "productTypeId": 61197,
       "productQuantity": 1,
@@ -179845,6 +179871,26 @@
       "bpIconUrl": "https://images.evetech.net/types/94005/bp?size=32",
       "productIconUrl": "https://images.evetech.net/types/94010/icon?size=32",
       "productRenderUrl": "https://images.evetech.net/types/94010/render?size=128"
+    },
+    {
+      "blueprintTypeId": 95530,
+      "productTypeId": 95529,
+      "productQuantity": 1,
+      "manufacturingTime": 3600,
+      "materials": [
+        {
+          "typeId": 27198,
+          "quantity": 1
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "t1",
+      "productGroup": "Cyber Scanning",
+      "bpIconUrl": "https://images.evetech.net/types/95530/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/95529/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/95529/render?size=128"
     }
   ]
 }

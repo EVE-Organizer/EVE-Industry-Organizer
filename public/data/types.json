@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-07T07:34:01.047Z",
+  "generatedAt": "2026-07-08T08:49:21.958Z",
   "types": [
     {
       "typeId": 18,
@@ -215716,7 +215716,7 @@
       "name": "Aralez",
       "group": "Combat Drone",
       "category": "Drone",
-      "volume": 10,
+      "volume": 20,
       "iconUrl": "https://images.evetech.net/types/60766/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/60766/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/60766/bp?size=32"
@@ -271123,7 +271123,7 @@
     },
     {
       "typeId": 95400,
-      "name": "Defiant Ochre Matte - Limited",
+      "name": "Defiant Latten Matte - Limited",
       "group": "Ship SKIN Design Element",
       "category": "Personalization",
       "volume": 0.1,
@@ -271232,6 +271232,16 @@
       "bpIconUrl": "https://images.evetech.net/types/95410/bp?size=32"
     },
     {
+      "typeId": 95411,
+      "name": "Resonant Turf Gloss - Unlimited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95411/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95411/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95411/bp?size=32"
+    },
+    {
       "typeId": 95412,
       "name": "Harmonius Bridge - Limited",
       "group": "Ship SKIN Design Element",
@@ -271250,6 +271260,16 @@
       "iconUrl": "https://images.evetech.net/types/95413/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95413/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95413/bp?size=32"
+    },
+    {
+      "typeId": 95414,
+      "name": "Breach Control",
+      "group": "Damage Control",
+      "category": "Module",
+      "volume": 5,
+      "iconUrl": "https://images.evetech.net/types/95414/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95414/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95414/bp?size=32"
     },
     {
       "typeId": 95415,
@@ -271512,6 +271532,146 @@
       "bpIconUrl": "https://images.evetech.net/types/95528/bp?size=32"
     },
     {
+      "typeId": 95529,
+      "name": "Poteque 'Prospector' Salvaging SV-906",
+      "group": "Cyber Scanning",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95529/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95529/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95529/bp?size=32"
+    },
+    {
+      "typeId": 95530,
+      "name": "Poteque 'Prospector' Salvaging SV-906 Blueprint",
+      "group": "Implant Blueprints",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95530/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95530/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95530/bp?size=32"
+    },
+    {
+      "typeId": 95532,
+      "name": "Cavalry Clash Booster",
+      "group": "Booster",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95532/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95532/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95532/bp?size=32"
+    },
+    {
+      "typeId": 95533,
+      "name": "Astrograph Clash Booster",
+      "group": "Booster",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95533/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95533/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95533/bp?size=32"
+    },
+    {
+      "typeId": 95534,
+      "name": "SITREP Clash Booster",
+      "group": "Booster",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95534/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95534/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95534/bp?size=32"
+    },
+    {
+      "typeId": 95537,
+      "name": "Coherence Volatile Booster",
+      "group": "Booster",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95537/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95537/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95537/bp?size=32"
+    },
+    {
+      "typeId": 95538,
+      "name": "Upcycle Volatile Booster",
+      "group": "Booster",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95538/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95538/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95538/bp?size=32"
+    },
+    {
+      "typeId": 95539,
+      "name": "Requisition Volatile Booster",
+      "group": "Booster",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95539/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95539/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95539/bp?size=32"
+    },
+    {
+      "typeId": 95540,
+      "name": "Zero-In Volatile Booster",
+      "group": "Booster",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95540/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95540/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95540/bp?size=32"
+    },
+    {
+      "typeId": 95541,
+      "name": "Soaring Volatile Booster",
+      "group": "Booster",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95541/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95541/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95541/bp?size=32"
+    },
+    {
+      "typeId": 95542,
+      "name": "Hallowed Volatile Booster",
+      "group": "Booster",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95542/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95542/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95542/bp?size=32"
+    },
+    {
+      "typeId": 95543,
+      "name": "Tenacious Volatile Booster",
+      "group": "Booster",
+      "category": "Implant",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95543/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95543/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95543/bp?size=32"
+    },
+    {
+      "typeId": 95556,
+      "name": "Lorharyth’s Modified Inertial Stabilizer",
+      "group": "Inertial Stabilizer",
+      "category": "Module",
+      "volume": 5,
+      "iconUrl": "https://images.evetech.net/types/95556/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95556/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95556/bp?size=32"
+    },
+    {
+      "typeId": 95557,
+      "name": "Arkombine Arisen SKIN Crate",
+      "group": "Special Edition Commodities",
+      "category": "Special Edition Assets",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95557/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95557/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95557/bp?size=32"
+    },
+    {
       "typeId": 95633,
       "name": "Minmatar Pilot",
       "group": "Standard Expert Systems",
@@ -271520,6 +271680,116 @@
       "iconUrl": "https://images.evetech.net/types/95633/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95633/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95633/bp?size=32"
+    },
+    {
+      "typeId": 95640,
+      "name": "Vanguard Resonant Cypher",
+      "group": "Special Edition Commodities",
+      "category": "Special Edition Assets",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95640/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95640/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95640/bp?size=32"
+    },
+    {
+      "typeId": 95647,
+      "name": "Operation Avalon Booster Crate",
+      "group": "Special Edition Commodities",
+      "category": "Special Edition Assets",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95647/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95647/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95647/bp?size=32"
+    },
+    {
+      "typeId": 95648,
+      "name": "Cenotaph Arkombine Arisen SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95648/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95648/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95648/bp?size=32"
+    },
+    {
+      "typeId": 95649,
+      "name": "Probe Arkombine Arisen SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95649/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95649/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95649/bp?size=32"
+    },
+    {
+      "typeId": 95650,
+      "name": "Talwar Fleet Issue Arkombine Arisen SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95650/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95650/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95650/bp?size=32"
+    },
+    {
+      "typeId": 95651,
+      "name": "Corax Navy Issue Arkombine Arisen SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95651/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95651/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95651/bp?size=32"
+    },
+    {
+      "typeId": 95652,
+      "name": "Caracal Arkombine Arisen SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95652/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95652/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95652/bp?size=32"
+    },
+    {
+      "typeId": 95653,
+      "name": "Dragoon Navy Issue Arkombine Arisen SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95653/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95653/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95653/bp?size=32"
+    },
+    {
+      "typeId": 95654,
+      "name": "Aeon Arkombine Arisen SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95654/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95654/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95654/bp?size=32"
+    },
+    {
+      "typeId": 95655,
+      "name": "Salvation Arkombine Arisen SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95655/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95655/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95655/bp?size=32"
+    },
+    {
+      "typeId": 95656,
+      "name": "Algos Navy Issue Arkombine Arisen SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95656/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95656/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95656/bp?size=32"
     },
     {
       "typeId": 95657,
@@ -271560,6 +271830,16 @@
       "iconUrl": "https://images.evetech.net/types/95674/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95674/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95674/bp?size=32"
+    },
+    {
+      "typeId": 95716,
+      "name": "Ranking Vanguard Resonant Cypher",
+      "group": "Special Edition Commodities",
+      "category": "Special Edition Assets",
+      "volume": 0.1,
+      "iconUrl": "https://images.evetech.net/types/95716/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95716/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95716/bp?size=32"
     }
   ]
 }
