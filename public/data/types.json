@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-10T07:31:28.483Z",
+  "generatedAt": "2026-07-11T08:32:06.330Z",
   "types": [
     {
       "typeId": 18,
@@ -271840,6 +271840,86 @@
       "iconUrl": "https://images.evetech.net/types/95716/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95716/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95716/bp?size=32"
+    },
+    {
+      "typeId": 95720,
+      "name": "Loki Hrada-Oki Offender SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95720/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95720/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95720/bp?size=32"
+    },
+    {
+      "typeId": 95721,
+      "name": "Bifrost Hrada-Oki Offender SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95721/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95721/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95721/bp?size=32"
+    },
+    {
+      "typeId": 95722,
+      "name": "Stiletto Hrada-Oki Offender SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95722/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95722/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95722/bp?size=32"
+    },
+    {
+      "typeId": 95723,
+      "name": "Prowler Hrada-Oki Offender SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95723/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95723/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95723/bp?size=32"
+    },
+    {
+      "typeId": 95724,
+      "name": "Claymore Hrada-Oki Offender SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95724/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95724/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95724/bp?size=32"
+    },
+    {
+      "typeId": 95725,
+      "name": "Tempest Fleet Issue Hrada-Oki Offender SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95725/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95725/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95725/bp?size=32"
+    },
+    {
+      "typeId": 95726,
+      "name": "Ymir Hrada-Oki Offender SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95726/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95726/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95726/bp?size=32"
+    },
+    {
+      "typeId": 95727,
+      "name": "Nomad Hrada-Oki Offender SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95727/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95727/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95727/bp?size=32"
     }
   ]
 }
