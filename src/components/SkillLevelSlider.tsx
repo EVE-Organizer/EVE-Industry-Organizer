@@ -1,8 +1,10 @@
 import { formatSkillLevel, skillIconUrl } from '@/lib/skillFields'
+import { InfoTooltip } from '@/components/InfoTooltip'
 
 interface SkillLevelSliderProps {
   skillId: number
   label: string
+  tooltip?: string
   value: number
   onChange: (level: number) => void
   min?: number
@@ -12,6 +14,7 @@ interface SkillLevelSliderProps {
 export function SkillLevelSlider({
   skillId,
   label,
+  tooltip,
   value,
   onChange,
   min = 0,
@@ -29,7 +32,10 @@ export function SkillLevelSlider({
       />
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-center gap-2 mb-1">
-          <span className="text-sm font-medium truncate">{label}</span>
+          <span className="text-sm font-medium truncate inline-flex items-center gap-1 min-w-0">
+            <span className="truncate">{label}</span>
+            {tooltip ? <InfoTooltip text={tooltip} placement="top" /> : null}
+          </span>
           <span className="text-xs tabular-nums text-primary shrink-0" title={`Level ${value}`}>
             {formatSkillLevel(value)}
             <span className="opacity-50 ml-1">({value})</span>

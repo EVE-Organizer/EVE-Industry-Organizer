@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { MarketHistoryEntry } from '@/types'
-import { filterHistoryByRange, formatIskInputUnit, parseIskInputUnit, trimHistoryByDays } from '@/lib/profit'
+import { filterHistoryByRange, formatDuration, formatGraphQuantity, formatGraphUnitIsk, formatIskInputUnit, parseIskInputUnit, trimHistoryByDays } from '@/lib/profit'
 
 function historyEntry(date: string, average = 100): MarketHistoryEntry {
   return { date, average, highest: average, lowest: average, volume: 10 }
@@ -42,6 +42,33 @@ describe('filterHistoryByRange', () => {
     const history = [historyEntry('2026-06-20', 74_000)]
 
     expect(filterHistoryByRange(history, '1d')).toEqual([historyEntry('2026-06-20', 74_000)])
+  })
+})
+
+describe('formatGraphQuantity', () => {
+  it('prefixes quantity with x and comma-groups thousands', () => {
+    expect(formatGraphQuantity(1552)).toBe('x1,552')
+    expect(formatGraphQuantity(1)).toBe('x1')
+  })
+})
+
+describe('formatDuration', () => {
+  it('picks a readable unit for job time', () => {
+    expect(formatDuration(45)).toBe('45 sec')
+    expect(formatDuration(90)).toBe('1.5 min')
+    expect(formatDuration(7_200)).toBe('2.00 hr')
+    expect(formatDuration(172_800)).toBe('2.00 days')
+    expect(formatDuration(0)).toBe('—')
+  })
+})
+
+describe('formatGraphUnitIsk', () => {
+  it('formats compact unit prices with lowercase suffix and ISK', () => {
+    expect(formatGraphUnitIsk(4700)).toBe('4.7k ISK')
+    expect(formatGraphUnitIsk(5000)).toBe('5k ISK')
+    expect(formatGraphUnitIsk(842)).toBe('842 ISK')
+    expect(formatGraphUnitIsk(2_500_000)).toBe('2.5m ISK')
+    expect(formatGraphUnitIsk(0)).toBe('—')
   })
 })
 

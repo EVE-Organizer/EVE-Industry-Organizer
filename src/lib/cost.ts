@@ -1,4 +1,4 @@
-import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings, StructureModifiers } from '@/types'
+import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings, ManufacturingSettings, StructureModifiers } from '@/types'
 import { T2_INVENTED_ME, T2_INVENTED_TE } from '@/types'
 
 const ME_BONUS = 0.01
@@ -77,7 +77,7 @@ export function estimateJobCost(
 export function totalManufacturingCost(
   blueprint: BlueprintInfo,
   prices: Map<number, number>,
-  settings: GlobalSettings,
+  settings: ManufacturingSettings,
   me: number,
   systemCostIndex: number,
 ): { materialCost: number; jobCost: number; capital: number; jobTime: number } {
@@ -104,13 +104,14 @@ export function totalManufacturingCost(
 export function revenueFromSale(
   productPrice: number,
   productQty: number,
-  settings: GlobalSettings,
+  fees: { brokerFeePercent: number; salesTaxPercent: number },
+  options: { includeBrokerFee?: boolean } = {},
 ): { gross: number; net: number; brokerFee: number; salesTax: number } {
   const gross = productPrice * productQty
-  const brokerFee = gross * (settings.brokerFeePercent / 100)
-  const afterBroker = gross - brokerFee
-  const salesTax = afterBroker * (settings.salesTaxPercent / 100)
-  return { gross, net: afterBroker - salesTax, brokerFee, salesTax }
+  const brokerFee =
+    options.includeBrokerFee === false ? 0 : gross * (fees.brokerFeePercent / 100)
+  const salesTax = gross * (fees.salesTaxPercent / 100)
+  return { gross, net: gross - brokerFee - salesTax, brokerFee, salesTax }
 }
 
 /**

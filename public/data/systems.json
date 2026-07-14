@@ -36207,8 +36207,7 @@
     "name": "XHQ-7V",
     "regionId": 10000047,
     "security": -0.17165,
-    "costIndex": 0.0155,
-    "hubId": "xhq7v"
+    "costIndex": 0.0155
   },
   {
     "systemId": 30001973,
@@ -36642,7 +36641,8 @@
     "name": "Y-MPWL",
     "regionId": 10000047,
     "security": -0.094393,
-    "costIndex": 0.0014
+    "costIndex": 0.0014,
+    "hubId": "ympwl"
   },
   {
     "systemId": 30004898,

@@ -3,8 +3,7 @@ import type {
   BlueprintTier,
   BlueprintInfo,
   BlueprintRegistry,
-  CharacterAccount,
-  GlobalSettings,
+  ManufacturingSettings,
   HubId,
   HubMarketData,
   MarketData,
@@ -29,7 +28,13 @@ import {
   resolveStructureModifiers,
   revenueFromSale,
 } from '@/lib/cost'
+import {
+  lifetimeCategoryKeyFromProductCategory,
+  resolveBlueprintLifetimeRuns,
+} from '@/lib/bpoLifetime'
 import { meetsBuildRequirements } from '@/lib/buildRequirements'
+import { skillLevel } from '@/lib/skillFields'
+import { tradingFeeRates } from '@/lib/tradingFees'
 import { WIDER_TIME_RANGES } from '@/lib/profit'
 import {
   buildPriceMap,
@@ -43,6 +48,15 @@ import {
 export const TOP_N = 50
 /** Rankings assume production up to this many days of average hub volume. */
 export const MAX_DAYS_TO_CLEAR = 7
+
+/** Long price windows use a shorter volume window for liquidity (batch cap, IPH, filters). */
+const VOLUME_WINDOW_FOR_PRICE: Partial<Record<TimeRange, TimeRange>> = {
+  '1y': '1m',
+}
+
+export function volumeWindowForPrice(window: TimeRange): TimeRange {
+  return VOLUME_WINDOW_FOR_PRICE[window] ?? window
+}
 
 /** CCP placeholder recipes (e.g. Praxis, Gnosis): 1 Tritanium, not player manufacturing. */
 export function isPlaceholderManufacturingBlueprint(blueprint: BlueprintInfo): boolean {
@@ -70,10 +84,9 @@ export interface RankingFilters {
   buildableOnly: boolean
   /** When false, haul in/out are excluded from setup and profit. Defaults to true. */
   includeHaulCost?: boolean
-  account?: CharacterAccount
   tiers?: BlueprintTier[]
-  productGroup?: string
-  /** Minimum avg daily hub volume for the selected window (0 = no filter). */
+  productGroups?: string[]
+  /** Minimum avg daily hub volume (0 = no filter). Uses volumeWindowForPrice(window). */
   minVolume?: number
   sortBy?: BlueprintSortKey
   sortDirection?: SortDirection
@@ -122,7 +135,7 @@ function hasValidPrices(
   spotPrices: Map<number, number>,
   windowPrices: Map<number, number>,
   avgPrice: number,
-  settings: GlobalSettings,
+  settings: ManufacturingSettings,
   buyPrices: Map<number, number>,
 ): boolean {
   const priceMethod = settings.priceMethod
@@ -144,7 +157,7 @@ function hasValidPrices(
   return true
 }
 
-function buildWindowPriceMap(
+export function buildWindowPriceMap(
   hubMarket: HubMarketData,
   window: TimeRange,
   spot: Map<number, number>,
@@ -200,7 +213,11 @@ function resolveWindowSummary(
     const priceWindow = pickHistoryWindow(productHistory, window, 'price')
     if (!priceWindow) return null
 
-    const volumeWindow = pickHistoryWindow(productHistory, window, 'volume')
+    const volumeWindow = pickHistoryWindow(
+      productHistory,
+      volumeWindowForPrice(window),
+      'volume',
+    )
     return {
       avgPrice: priceWindow.avgPrice,
       avgVolume: volumeWindow?.avgVolume ?? 0,
@@ -252,13 +269,14 @@ export function isChargeProduct(category: string | undefined): boolean {
 /** Charged (into profit) and upfront (real cash) blueprint cost for one batch, tier-aware. */
 function computeBlueprintCost(
   blueprint: BlueprintInfo,
-  settings: GlobalSettings,
+  settings: ManufacturingSettings,
   hubMarket: HubMarketData,
   spotPrices: Map<number, number>,
   windowPrices: Map<number, number>,
   regionCostIndex: number,
   runs: number,
   window: TimeRange,
+  productCategory: string | undefined,
   isCharge: boolean,
 ): { charged: number; upfront: number; bpoUnitPrice: number; breakdown: BlueprintCostBreakdown } {
   const include = settings.includeBlueprintCost && !isCharge
@@ -312,8 +330,13 @@ function computeBlueprintCost(
   const bpoPriceMissing = include && bpoUnitPrice <= 0
   const baseRunMaterialValue = materialCost(blueprint.materials, windowPrices)
   const researchFee = estimateResearchFee(baseRunMaterialValue, regionCostIndex)
+  const lifetimeCategory = lifetimeCategoryKeyFromProductCategory(productCategory)
+  const lifetimeRuns = resolveBlueprintLifetimeRuns(
+    productCategory,
+    settings.blueprintLifetimeRunsByCategory,
+  )
   const charged = include && !bpoPriceMissing
-    ? amortizedBpoCost(bpoUnitPrice, researchFee, settings.blueprintLifetimeRuns, runs)
+    ? amortizedBpoCost(bpoUnitPrice, researchFee, lifetimeRuns, runs)
     : 0
   const upfront = include && !bpoPriceMissing ? bpoUnitPrice : 0
   return {
@@ -328,7 +351,8 @@ function computeBlueprintCost(
       bpoPriceMissing: bpoPriceMissing || undefined,
       bpoUnitPrice,
       researchFee,
-      lifetimeRuns: settings.blueprintLifetimeRuns,
+      lifetimeRuns,
+      lifetimeCategory,
     },
   }
 }
@@ -340,7 +364,7 @@ function computeRow(
   spotPrices: Map<number, number>,
   windowPrices: Map<number, number>,
   buyPrices: Map<number, number>,
-  settings: GlobalSettings,
+  settings: ManufacturingSettings,
   regionCostIndex: number,
   haulInIskPerM3: number,
   haulOutIskPerM3: number,
@@ -348,6 +372,8 @@ function computeRow(
   typeVolumes: Map<number, number>,
   hubMarket: HubMarketData,
   window: TimeRange,
+  advancedIndustry: number,
+  feeRates: ReturnType<typeof tradingFeeRates>,
 ): RankedBlueprintRow | null {
   if (
     !hasValidPrices(
@@ -387,6 +413,7 @@ function computeRow(
     regionCostIndex,
     runs,
     window,
+    product.category,
     isChargeProduct(product.category),
   )
   // T1 BPO with no hub price means we cannot price the blueprint, so drop the row.
@@ -438,21 +465,19 @@ function computeRow(
     haulExcluded: haulExcluded || undefined,
     setupCost,
   }
-  const advancedIndustry = 0
   const sellPricePerUnit =
     settings.priceMethod === 'buy_orders'
       ? (buyPrices.get(blueprint.productTypeId) ?? 0)
       : windowSummary.avgPrice
-  const revenueSettings =
-    settings.priceMethod === 'buy_orders'
-      ? { ...settings, brokerFeePercent: 0 }
-      : settings
+  const usesBuyOrders = settings.priceMethod === 'buy_orders'
   const {
     gross: grossRevenue,
     net: netRevenue,
     brokerFee,
     salesTax,
-  } = revenueFromSale(sellPricePerUnit, outputQty, revenueSettings)
+  } = revenueFromSale(sellPricePerUnit, outputQty, feeRates, {
+    includeBrokerFee: !usesBuyOrders,
+  })
   const netProfit = netRevenue - setupCost - haulOut
   const margin = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
   const baseTimePerRunSeconds = blueprint.manufacturingTime
@@ -497,9 +522,9 @@ function computeRow(
     sellPricePerUnit,
     priceMethod: settings.priceMethod,
     grossRevenue,
-    brokerFeePercent: revenueSettings.brokerFeePercent,
+    brokerFeePercent: usesBuyOrders ? 0 : feeRates.brokerFeePercent,
     brokerFee,
-    salesTaxPercent: settings.salesTaxPercent,
+    salesTaxPercent: feeRates.salesTaxPercent,
     salesTax,
     netRevenue,
     materialCost: matCost,
@@ -585,7 +610,7 @@ export function rankBlueprintsFromMarket(
   typeMap: Map<number, TypeInfo>,
   hub: HubId,
   window: TimeRange,
-  settings: GlobalSettings,
+  settings: ManufacturingSettings,
   filters: RankingFilters,
   systems: SystemInfo[] = [],
 ): RankedBlueprintRow[] {
@@ -616,7 +641,12 @@ export function rankBlueprintsFromMarket(
   }
 
   const tiers = filters.tiers ?? []
-  const blueprints = filterBlueprints(registry.blueprints, tiers, filters.productGroup)
+  const blueprints = filterBlueprints(registry.blueprints, tiers, filters.productGroups)
+  const advancedIndustry = skillLevel(settings.skills, 'advancedIndustry')
+  const feeRates = tradingFeeRates(
+    skillLevel(settings.skills, 'accounting'),
+    skillLevel(settings.skills, 'brokerRelations'),
+  )
 
   const rows: RankedBlueprintRow[] = []
   for (const bp of blueprints) {
@@ -650,12 +680,19 @@ export function rankBlueprintsFromMarket(
       typeVolumes,
       hubMarket,
       window,
+      advancedIndustry,
+      feeRates,
     )
     if (!row) continue
     if (row.upfrontCapital < filters.minSetupCost) continue
-    if (row.upfrontCapital > filters.maxSetupCost) continue
+    if (
+      Number.isFinite(filters.maxSetupCost) &&
+      row.upfrontCapital > filters.maxSetupCost
+    ) {
+      continue
+    }
     if ((filters.minVolume ?? 0) > 0 && row.avgVolume < filters.minVolume!) continue
-    if (filters.buildableOnly && !meetsBuildRequirements(bp, filters.account)) continue
+    if (filters.buildableOnly && !meetsBuildRequirements(bp, settings.skills)) continue
     rows.push(row)
   }
 
@@ -673,29 +710,40 @@ export function defaultMaxSetupCost(): number {
   return 100_000_000
 }
 
-/** Setup budget slider: 0 ISK at step 0, then log scale from 1 ISK to 500B. */
+/** Setup budget slider: 0 ISK at step 0, log scale from 1 ISK to 500B, then no limit at max step. */
 export const SETUP_BUDGET_MIN = 0
-export const SETUP_BUDGET_MAX = 500_000_000_000
+export const SETUP_BUDGET_MAX = Number.POSITIVE_INFINITY
+/** Highest finite value on the log-scale portion of the slider (step SETUP_BUDGET_SLIDER_STEPS - 1). */
+export const SETUP_BUDGET_SLIDER_CAP = 500_000_000_000
 export const SETUP_BUDGET_SLIDER_STEPS = 1000
 const SETUP_BUDGET_LOG_MIN = 1
+const SETUP_BUDGET_FINITE_STEPS = SETUP_BUDGET_SLIDER_STEPS - 1
 
 export function setupBudgetFromSlider(slider: number): number {
   if (slider <= 0) return 0
-  const t = Math.min(1, Math.max(0, (slider - 1) / (SETUP_BUDGET_SLIDER_STEPS - 1)))
+  if (slider >= SETUP_BUDGET_SLIDER_STEPS) return SETUP_BUDGET_MAX
+  const t = Math.min(
+    1,
+    Math.max(0, (slider - 1) / (SETUP_BUDGET_FINITE_STEPS - 1)),
+  )
   const logMin = Math.log(SETUP_BUDGET_LOG_MIN)
-  const logMax = Math.log(SETUP_BUDGET_MAX)
+  const logMax = Math.log(SETUP_BUDGET_SLIDER_CAP)
   return Math.round(Math.exp(logMin + t * (logMax - logMin)))
 }
 
 export function setupBudgetToSlider(value: number): number {
   const clamped = clampSetupBudget(value)
   if (clamped <= 0) return 0
+  if (!Number.isFinite(clamped)) return SETUP_BUDGET_SLIDER_STEPS
+  if (clamped >= SETUP_BUDGET_SLIDER_CAP) return SETUP_BUDGET_SLIDER_STEPS
   const logMin = Math.log(SETUP_BUDGET_LOG_MIN)
-  const logMax = Math.log(SETUP_BUDGET_MAX)
-  const t = (Math.log(Math.max(clamped, SETUP_BUDGET_LOG_MIN)) - logMin) / (logMax - logMin)
-  return Math.round(1 + t * (SETUP_BUDGET_SLIDER_STEPS - 1))
+  const logMax = Math.log(SETUP_BUDGET_SLIDER_CAP)
+  const t =
+    (Math.log(Math.max(clamped, SETUP_BUDGET_LOG_MIN)) - logMin) / (logMax - logMin)
+  return Math.round(1 + t * (SETUP_BUDGET_FINITE_STEPS - 1))
 }
 
 export function clampSetupBudget(value: number): number {
-  return Math.min(SETUP_BUDGET_MAX, Math.max(SETUP_BUDGET_MIN, Math.round(value)))
+  if (!Number.isFinite(value)) return SETUP_BUDGET_MAX
+  return Math.max(SETUP_BUDGET_MIN, Math.round(value))
 }

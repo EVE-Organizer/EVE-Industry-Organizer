@@ -1,11 +1,64 @@
-import type { BlueprintInfo, GlobalSettings, SupplyChainNode, TypeInfo } from '@/types'
+import type { BlueprintInfo, ManufacturingSettings, SupplyChainNode, TypeInfo } from '@/types'
 import { applyME, materialCost, resolveStructureModifiers, totalManufacturingCost } from '@/lib/cost'
 import { getBlueprintForProduct } from '@/services/data/sdeLoader'
 
 const MINERAL_IDS = new Set([34, 35, 36, 37, 38, 39, 40])
 
+export interface BuildTargetMaterial {
+  typeId: number
+  name: string
+  quantity: number
+}
+
+export interface BuildTargetDetail {
+  productTypeId: number
+  productName: string
+  blueprint: BlueprintInfo
+  /** Source material quantity per run (raw recipe). */
+  sourceInputQty: number
+  /** Product units per run (raw recipe). */
+  outputQty: number
+  /** Base manufacturing time per run in seconds. */
+  jobTimeSeconds: number
+  otherMaterials: BuildTargetMaterial[]
+}
+
 export function isRawMaterial(typeId: number): boolean {
   return MINERAL_IDS.has(typeId)
+}
+
+/** Downstream products that consume `materialTypeId`, with per-run recipe info. */
+export function findBuildTargetDetails(
+  blueprints: BlueprintInfo[],
+  materialTypeId: number,
+  typeMap: Map<number, TypeInfo>,
+): BuildTargetDetail[] {
+  const results: BuildTargetDetail[] = []
+
+  for (const bp of blueprints) {
+    const sourceMat = bp.materials.find((m) => m.typeId === materialTypeId)
+    if (!sourceMat) continue
+
+    const otherMaterials = bp.materials
+      .filter((m) => m.typeId !== materialTypeId)
+      .map((m) => ({
+        typeId: m.typeId,
+        name: typeMap.get(m.typeId)?.name ?? `Type ${m.typeId}`,
+        quantity: m.quantity,
+      }))
+
+    results.push({
+      productTypeId: bp.productTypeId,
+      productName: typeMap.get(bp.productTypeId)?.name ?? `Type ${bp.productTypeId}`,
+      blueprint: bp,
+      sourceInputQty: sourceMat.quantity,
+      outputQty: bp.productQuantity,
+      jobTimeSeconds: bp.manufacturingTime,
+      otherMaterials,
+    })
+  }
+
+  return results.sort((a, b) => a.productName.localeCompare(b.productName))
 }
 
 export function buildSupplyChain(
@@ -13,7 +66,7 @@ export function buildSupplyChain(
   blueprints: BlueprintInfo[],
   typeMap: Map<number, TypeInfo>,
   prices: Map<number, number>,
-  settings: GlobalSettings,
+  settings: ManufacturingSettings,
   me: number,
   systemCostIndex: number,
   depth = 0,
@@ -81,8 +134,8 @@ export function buildSupplyChain(
     }
   })
 
-  const rolledUp = children.reduce((s, c) => s + c.totalCost, 0) + (depth === 0 ? 0 : 0)
-  const jobPart = depth === 0 ? buildTotal - buyTotal : 0
+  const rolledUp = children.reduce((s, c) => s + c.totalCost, 0)
+  const jobPart = buildTotal - buyTotal
 
   const blueprintChild: SupplyChainNode | null =
     depth === 0
@@ -108,7 +161,7 @@ export function buildSupplyChain(
     name: product?.name ?? 'Product',
     quantity: blueprint.productQuantity * runs,
     unitPrice: productPrice,
-    totalCost: rolledUp + buyTotal + jobPart,
+    totalCost: rolledUp + jobPart,
     mode: 'build',
     buildCost: buildTotal,
     buyCost: blueprint.productQuantity * runs * productPrice,

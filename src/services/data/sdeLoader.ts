@@ -8,7 +8,6 @@ import type {
   RegionInfo,
   RegionsData,
   SkillInfo,
-  StationInfo,
   SystemInfo,
   TypeInfo,
 } from '@/types'
@@ -20,7 +19,6 @@ export interface SdeData {
   market: MarketData
   regions: RegionsData
   skills: SkillInfo[]
-  stations: StationInfo[]
   systems: SystemInfo[]
 }
 
@@ -28,17 +26,16 @@ let cache: SdeData | null = null
 
 export async function loadSdeData(): Promise<SdeData> {
   if (cache) return cache
-  const [typesRaw, registry, market, regions, skills, stations, systems] = await Promise.all([
+  const [typesRaw, registry, market, regions, skills, systems] = await Promise.all([
     fetch(publicDataUrl('types.json')).then((r) => r.json()),
     fetch(publicDataUrl('blueprints.json')).then((r) => r.json()),
     fetch(publicDataUrl('market.json')).then((r) => r.json()),
     fetch(publicDataUrl('regions.json')).then((r) => r.json()),
     fetch(publicDataUrl('skills.json')).then((r) => r.json()),
-    fetch(publicDataUrl('stations.json')).then((r) => r.json()),
     fetch(publicDataUrl('systems.json')).then((r) => r.json()),
   ])
   const types: TypeInfo[] = Array.isArray(typesRaw) ? typesRaw : typesRaw.types
-  cache = { types, registry, market, regions, skills, stations, systems }
+  cache = { types, registry, market, regions, skills, systems }
   return cache
 }
 
@@ -123,15 +120,16 @@ export function buildBuyPriceMap(hubMarket: HubMarketData): Map<number, number> 
 export function filterBlueprints(
   blueprints: BlueprintInfo[],
   tiers: BlueprintTier[],
-  productGroup?: string,
+  productGroups?: string[],
 ): BlueprintInfo[] {
   let result = blueprints
   if (tiers.length > 0) {
     const allowed = new Set(tiers)
     result = result.filter((b) => allowed.has(b.tier))
   }
-  if (productGroup && productGroup !== 'all') {
-    result = result.filter((b) => b.productGroup === productGroup)
+  if (productGroups && productGroups.length > 0) {
+    const allowed = new Set(productGroups)
+    result = result.filter((b) => allowed.has(b.productGroup))
   }
   return result
 }

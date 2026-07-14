@@ -5,18 +5,12 @@ export const GLOBAL_SETTING_TOOLTIPS = {
     'Assumed Material Efficiency (0-10) for blueprints you have not configured yet. Each BPO has its own ME in-game. Set per-blueprint ME on the blueprint detail page or in your character’s owned BPO list.',
   teDefault:
     'Assumed Time Efficiency (0-20) for job time estimates when a blueprint’s TE is unknown. Each BPO has its own TE in-game. This global value is a starting default only.',
-  batchSize:
-    'Default number of manufacturing runs per job used in profit and cost calculations across the app.',
-  brokerFeePercent:
-    'Broker fee charged when listing sell orders (before Accounting skill reductions). Default NPC rate is 1%.',
-  salesTaxPercent:
-    'Sales tax applied when sell orders complete (before Accounting skill reductions). Default NPC rate is 3.6%.',
   priceMethod:
     'How manufactured output is priced at the hub. Sell orders use window average or current sell listings (includes broker fee). Buy orders use the best buy order for an instant sale (no broker fee, lower price). Material costs always use sell-side prices.',
   includeBlueprintCost:
-    'Include the blueprint cost in profit and budget. T1 and Faction spread the BPO purchase plus research over its lifetime; T2 charges the full invention cost (datacores divided by success chance) every batch. Turn off to compare operating profit only.',
-  blueprintLifetimeRuns:
-    'How many runs a T1 or Faction BPO is assumed to produce over its life. The purchase price and research fee are divided by this number, so a larger value lowers the per-batch blueprint cost. Does not affect T2.',
+    'Include the blueprint cost in profit and budget. T1 spreads the BPO purchase plus research over a category-specific lifetime; T2 charges the full invention cost (datacores divided by success chance) every batch. Charges (ammo, scripts) are excluded. Turn off to compare operating profit only.',
+  blueprintLifetimeRunsByCategory:
+    'Assumed manufacturing runs per BPO over its useful life, by product type. Purchase price and research are divided by this number. Charges are excluded entirely. Does not affect T2.',
   inventionSkillLevel:
     'Assumed level (0-5) for your invention encryption and datacore skills. Higher levels raise the T2 success chance, which lowers the invention cost charged per run.',
   structureType:

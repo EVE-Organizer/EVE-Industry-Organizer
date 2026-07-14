@@ -2,9 +2,9 @@ import { readFileSync } from 'fs'
 import { describe, expect, it } from 'vitest'
 import { applyME, estimateJobCost, materialCost } from '@/lib/cost'
 import { WIDER_TIME_RANGES } from '@/lib/profit'
-import { marketAwareIph, rankBlueprintsFromMarket } from '@/lib/ranking'
+import { marketAwareIph, rankBlueprintsFromMarket, volumeWindowForPrice } from '@/lib/ranking'
 import { buildPriceMap, buildTypeMap, getHubMarket } from '@/services/data/sdeLoader'
-import { DEFAULT_SETTINGS } from '@/types'
+import { DEFAULT_SETTINGS, DEFAULT_BATCH_SIZE, type ManufacturingSettings } from '@/types'
 import type { BlueprintRegistry, MarketData, RegionsData, TimeRange, TypeInfo } from '@/types'
 
 function loadFixture<T>(path: string): T {
@@ -90,13 +90,13 @@ describe('window-based material costs', () => {
           typeMap,
           'jita',
           window,
-          { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 },
+          { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 } satisfies ManufacturingSettings,
           {
             minSetupCost: 0,
             maxSetupCost: Number.MAX_SAFE_INTEGER,
             buildableOnly: false,
             tiers: ['t1'],
-            productGroup: 'Projectile Ammo',
+            productGroups: ['Projectile Ammo'],
           },
         )
         const ammo = rows.find((r) => r.blueprint.productTypeId === 178)
@@ -108,13 +108,13 @@ describe('window-based material costs', () => {
     expect(volumeByWindow['1m']).not.toBeNull()
     expect(new Set(Object.values(volumeByWindow)).size).toBeGreaterThan(1)
 
-    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
     const filters = {
       minSetupCost: 0,
       maxSetupCost: Number.MAX_SAFE_INTEGER,
       buildableOnly: false,
       tiers: ['t1'],
-      productGroup: 'Projectile Ammo',
+      productGroups: ['Projectile Ammo'],
     }
 
     const ranked1w = rankBlueprintsFromMarket(
@@ -140,6 +140,23 @@ describe('window-based material costs', () => {
 
     expect(ranked1w.length).toBeGreaterThan(0)
     expect(ranked1y.length).toBeGreaterThan(0)
+
+    const ammo1mRow = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      'jita',
+      '1m',
+      settings,
+      filters,
+    ).find((r) => r.blueprint.productTypeId === 178)
+    const ammo1y = ranked1y.find((r) => r.blueprint.productTypeId === 178)
+    expect(ammo1mRow).toBeDefined()
+    expect(ammo1y).toBeDefined()
+    expect(volumeWindowForPrice('1y')).toBe('1m')
+    expect(ammo1y!.avgVolume).toBe(ammo1mRow!.avgVolume)
+    expect(ammo1y!.avgVolume).toBe(ammoHistory['1m']!.avgVolume)
   })
 })
 
@@ -173,7 +190,7 @@ describe('market-aware blueprint ranking', () => {
   const CONDENSER_GALVASURGE = 54773
 
   it('ranks charge blueprints even when hub BPO price is missing', () => {
-    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,
@@ -187,7 +204,7 @@ describe('market-aware blueprint ranking', () => {
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
         tiers: ['t1'],
-        productGroup: 'Condenser Pack',
+        productGroups: ['Condenser Pack'],
       },
     )
 
@@ -198,7 +215,7 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('includes T1 ice compression BPOs once blueprint BPO types are in types.json', () => {
-    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,
@@ -212,7 +229,7 @@ describe('market-aware blueprint ranking', () => {
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
         tiers: ['t1'],
-        productGroup: 'Ice',
+        productGroups: ['Ice'],
       },
     )
 
@@ -222,7 +239,7 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('excludes T1 blueprints with no hub BPO price when blueprint cost is included', () => {
-    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,
@@ -236,7 +253,6 @@ describe('market-aware blueprint ranking', () => {
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
         tiers: ['t1'],
-        productGroup: 'all',
       },
     )
 
@@ -250,7 +266,7 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('excludes BPO cost for charges (huge volume from one reusable BPO)', () => {
-    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,
@@ -264,7 +280,7 @@ describe('market-aware blueprint ranking', () => {
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
         tiers: ['t1'],
-        productGroup: 'Projectile Ammo',
+        productGroups: ['Projectile Ammo'],
       },
     )
 
@@ -282,13 +298,13 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('excludes haul cost when includeHaulCost is off', () => {
-    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
     const baseFilters = {
       minSetupCost: 0,
       maxSetupCost: Number.MAX_SAFE_INTEGER,
       buildableOnly: false,
       tiers: ['t1'],
-      productGroup: 'Projectile Ammo',
+      productGroups: ['Projectile Ammo'],
     }
 
     const rowsWithHaul = rankBlueprintsFromMarket(
@@ -324,7 +340,7 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('ranks faction blueprints as BPCs with no BPO acquisition cost', () => {
-    const settings = { ...DEFAULT_SETTINGS, batchSize: 100, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,
@@ -338,7 +354,6 @@ describe('market-aware blueprint ranking', () => {
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
         tiers: ['faction'],
-        productGroup: 'all',
       },
     )
     expect(rows.length).toBeGreaterThan(0)
@@ -357,9 +372,9 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('ranks T2 blueprints with invention cost and ME2/TE4', () => {
-    const settings = {
+    const settings: ManufacturingSettings = {
       ...DEFAULT_SETTINGS,
-      batchSize: 100,
+      batchSize: DEFAULT_BATCH_SIZE,
       meDefault: 10,
       teDefault: 20,
       inventionSkillLevel: 4,
@@ -377,7 +392,6 @@ describe('market-aware blueprint ranking', () => {
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
         tiers: ['t2'],
-        productGroup: 'all',
       },
     )
 
@@ -392,8 +406,8 @@ describe('market-aware blueprint ranking', () => {
     }
   })
 
-  it('ranks xhq7v from history when Fuzzwork spot prices are zero', () => {
-    const hubMarket = getHubMarket(market, 'xhq7v')
+  it('ranks ympwl from history when Fuzzwork spot prices are zero', () => {
+    const hubMarket = getHubMarket(market, 'ympwl')
     expect(hubMarket).not.toBeNull()
 
     const spot = buildPriceMap(hubMarket!)
@@ -405,15 +419,14 @@ describe('market-aware blueprint ranking', () => {
       market,
       regions,
       typeMap,
-      'xhq7v',
+      'ympwl',
       'all',
-      DEFAULT_SETTINGS,
+      { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE } satisfies ManufacturingSettings,
       {
         minSetupCost: 0,
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
         tiers: ['t1'],
-        productGroup: 'all',
       },
     )
 

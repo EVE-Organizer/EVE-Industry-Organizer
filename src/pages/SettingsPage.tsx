@@ -1,121 +1,150 @@
-import { useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import type { GlobalSettings } from '@/types'
 import { useAppStore } from '@/stores/appStore'
 import { getCacheStats } from '@/services/cache/cacheStore'
-import { isGoogleConfigured } from '@/services/sync/googleDrive'
-import { GlobalSettingsForm } from '@/components/GlobalSettingsForm'
+import {
+  BpoCostSettingsSection,
+  CommonSettingsSection,
+  ManufacturingSettingsSection,
+} from '@/components/GlobalSettingsForm'
+import { SkillLevelSlider } from '@/components/SkillLevelSlider'
+import { SKILL_FIELDS, skillLevel, type SkillFieldDef } from '@/lib/skillFields'
 import { Panel } from '@/components/Panel'
 import { PageHeader } from '@/components/Layout'
 
+const MANUFACTURING_SKILL_KEYS: SkillFieldDef['key'][] = ['industry', 'advancedIndustry', 'science']
+const MARKET_SKILL_KEYS: SkillFieldDef['key'][] = ['accounting', 'brokerRelations']
+
+function SkillGroup({
+  title,
+  keys,
+  settings,
+  onChange,
+}: {
+  title: string
+  keys: SkillFieldDef['key'][]
+  settings: GlobalSettings
+  onChange: (patch: Partial<GlobalSettings>) => void
+}) {
+  const fields = SKILL_FIELDS.filter((f) => keys.includes(f.key))
+  return (
+    <div>
+      <p className="text-[10px] font-medium uppercase tracking-wide opacity-50 mb-2">{title}</p>
+      {fields.map(({ key, skillId, label, tooltip }) => (
+        <SkillLevelSlider
+          key={key}
+          skillId={skillId}
+          label={label}
+          tooltip={tooltip}
+          value={skillLevel(settings.skills, key)}
+          onChange={(level) =>
+            onChange({ skills: { ...settings.skills, [key]: level } })
+          }
+        />
+      ))}
+    </div>
+  )
+}
+
 export function SettingsPage() {
-  const navigate = useNavigate()
   const userData = useAppStore((s) => s.userData)
-  const syncStatus = useAppStore((s) => s.syncStatus)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const resetAll = useAppStore((s) => s.resetAll)
-  const exportJson = useAppStore((s) => s.exportJson)
-  const importJson = useAppStore((s) => s.importJson)
-  const signInGoogle = useAppStore((s) => s.signInGoogle)
-  const signOutGoogle = useAppStore((s) => s.signOutGoogle)
-  const syncNow = useAppStore((s) => s.syncNow)
   const clearPriceCache = useAppStore((s) => s.clearPriceCache)
-  const fileRef = useRef<HTMLInputElement>(null)
   const cacheStats = getCacheStats()
   const settings = userData.settings
 
-  const handleImport = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = () => importJson(reader.result as string)
-    reader.readAsText(file)
-  }
-
   return (
-    <div>
-      <PageHeader title="Settings" subtitle="Global defaults, sync, and cache" />
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Settings"
+        subtitle="Market defaults, manufacturing, blueprint costs, and skills"
+      />
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <Panel title="Global defaults">
-          <GlobalSettingsForm
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Panel title="Common settings">
+          <p className="text-xs opacity-70 mb-3">
+            Trade hub, how output is priced, and default blueprint ME/TE for items you have not
+            configured yet.
+          </p>
+          <CommonSettingsSection
             size="sm"
             settings={settings}
             onChange={updateSettings}
           />
         </Panel>
 
-        <Panel title="Google Drive sync">
-          <p className="text-xs opacity-70">
-            Mode: {syncStatus.mode === 'drive' ? 'Google Drive' : 'Local only'} · Status:{' '}
-            {syncStatus.state}
-            {syncStatus.lastSyncedAt &&
-              ` · Last synced ${new Date(syncStatus.lastSyncedAt).toLocaleString()}`}
+        <Panel title="Manufacturing">
+          <p className="text-xs opacity-70 mb-3">
+            Where you run jobs. NPC stations use the system cost index only. Player structures add
+            role bonuses and owner tax.
           </p>
-          {syncStatus.message && <p className="text-xs text-warning">{syncStatus.message}</p>}
-          {isGoogleConfigured() ? (
-            <div className="flex flex-wrap gap-2 mt-2">
-              <button className="btn btn-primary btn-sm" onClick={signInGoogle}>
-                Sign in with Google
-              </button>
-              <button className="btn btn-ghost btn-sm" onClick={signOutGoogle}>
-                Sign out
-              </button>
-              <button className="btn btn-outline btn-sm" onClick={() => syncNow()}>
-                Sync now
-              </button>
-            </div>
-          ) : (
-            <p className="text-xs opacity-60 mt-2">
-              Set VITE_GOOGLE_CLIENT_ID in .env to enable Drive sync.
-            </p>
-          )}
+          <ManufacturingSettingsSection
+            size="sm"
+            settings={settings}
+            onChange={updateSettings}
+          />
         </Panel>
+      </div>
 
-        <Panel title="Backup">
-          <div className="flex flex-wrap gap-2">
-            <button
-              className="btn btn-outline btn-sm"
-              onClick={() => {
-                const blob = new Blob([exportJson()], { type: 'application/json' })
-                const a = document.createElement('a')
-                a.href = URL.createObjectURL(blob)
-                a.download = 'eve-industry-organizer-backup.json'
-                a.click()
-              }}
-            >
-              Export JSON
-            </button>
-            <button className="btn btn-outline btn-sm" onClick={() => fileRef.current?.click()}>
-              Import JSON
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".json"
-              className="hidden"
-              onChange={(e) => e.target.files?.[0] && handleImport(e.target.files[0])}
+      <Panel title="BPO cost">
+        <p className="text-xs opacity-70 mb-3">
+          Spread BPO purchase and research over assumed lifetime runs, or charge full T2 invention
+          per batch.
+        </p>
+        <BpoCostSettingsSection
+          size="sm"
+          settings={settings}
+          onChange={updateSettings}
+        />
+      </Panel>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Panel title="Skills">
+          <p className="text-xs opacity-70 mb-3">
+            Used in profit, IPH, and ranking calculations. Does not change blueprint requirements on
+            the buildable filter beyond Industry and Science.
+          </p>
+          <div className="flex flex-col gap-4">
+            <SkillGroup
+              title="Manufacturing"
+              keys={MANUFACTURING_SKILL_KEYS}
+              settings={settings}
+              onChange={updateSettings}
+            />
+            <SkillGroup
+              title="Market"
+              keys={MARKET_SKILL_KEYS}
+              settings={settings}
+              onChange={updateSettings}
             />
           </div>
         </Panel>
 
-        <Panel title="Price cache">
-          <p className="text-xs opacity-70">
-            {cacheStats.count} entries · ~{cacheStats.sizeKb} KB
-          </p>
-          <button className="btn btn-outline btn-sm mt-2" onClick={clearPriceCache}>
-            Clear price cache
-          </button>
-        </Panel>
+        <Panel title="Other">
+          <div className="flex flex-col gap-6">
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-wide opacity-50 mb-2">
+                Price cache
+              </p>
+              <p className="text-xs opacity-70">
+                {cacheStats.count} entries, about {cacheStats.sizeKb} KB stored locally.
+              </p>
+              <button className="btn btn-outline btn-sm mt-2" onClick={clearPriceCache}>
+                Clear price cache
+              </button>
+            </div>
 
-        <Panel title="Danger zone" titleClassName="text-base text-error" className="lg:col-span-2">
-          <div className="flex flex-wrap gap-2">
-            <button
-              className="btn btn-outline btn-sm"
-              onClick={() => {
-                resetAll()
-                navigate('/onboarding')
-              }}
-            >
-              Reset & re-run onboarding
-            </button>
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-error/80 mb-2">
+                Danger zone
+              </p>
+              <p className="text-xs opacity-70 mb-2">
+                Reset all settings and skill levels to defaults. Does not clear cached market prices.
+              </p>
+              <button className="btn btn-outline btn-sm btn-error" onClick={resetAll}>
+                Reset to defaults
+              </button>
+            </div>
           </div>
         </Panel>
       </div>

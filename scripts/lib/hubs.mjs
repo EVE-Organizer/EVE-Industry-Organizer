@@ -41,12 +41,12 @@ export const HUBS = [
     buildSystemId: 30002053,
   },
   {
-    hubId: 'xhq7v',
+    hubId: 'ympwl',
     regionId: 10000047,
-    marketSystemId: 30003731,
-    buildSystemId: 30003731,
-    sellSystemId: 30003731,
-    sellStationName: 'XHQ-7V',
+    marketSystemId: 30003726,
+    buildSystemId: 30003726,
+    sellSystemId: 30003726,
+    sellStationName: 'Y-MPWL',
   },
 ]
 

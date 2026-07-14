@@ -62,13 +62,13 @@
   },
   {
     "stationId": 0,
-    "name": "XHQ-7V",
-    "systemId": 30003731,
-    "systemName": "XHQ-7V",
+    "name": "Y-MPWL",
+    "systemId": 30003726,
+    "systemName": "Y-MPWL",
     "regionId": 10000047,
     "regionName": "Providence",
-    "security": -0.17165,
-    "hubId": "xhq7v",
+    "security": -0.094393,
+    "hubId": "ympwl",
     "isBuildHub": true
   }
 ]

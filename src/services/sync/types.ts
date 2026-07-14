@@ -1,14 +1,42 @@
-import type { HubId, UserData, GlobalSettings, CharacterAccount, CharacterSkills } from '@/types'
-import { DEFAULT_SETTINGS, DEFAULT_SKILLS, DEFAULT_MINERALS, HUBS } from '@/types'
+import type { HubId, UserData, GlobalSettings, SkillLevels } from '@/types'
+import { DEFAULT_SETTINGS, DEFAULT_SKILLS, HUBS } from '@/types'
+import { SKILL_FIELDS } from '@/lib/skillFields'
+import { normalizeBpoLifetimeRunsByCategory } from '@/lib/bpoLifetime'
 
-type LegacySettings = Partial<GlobalSettings> & {
+type LegacySettings = Partial<Omit<GlobalSettings, 'skills'>> & {
+  skills?: Partial<SkillLevels>
   buildSystemId?: number
   manufacturingRegionId?: number
+  brokerFeePercent?: number
+  salesTaxPercent?: number
+  batchSize?: number
+  /** Pre-category lifetime setting; migrated into blueprintLifetimeRunsByCategory.default. */
+  blueprintLifetimeRuns?: number
+}
+
+type LegacyUserData = Partial<UserData> & {
+  onboardingComplete?: boolean
+  accounts?: { skills?: Partial<SkillLevels> }[]
+}
+
+function migrateHubId(hub: HubId | 'xhq7v' | undefined): HubId | undefined {
+  if (hub === 'xhq7v') return 'ympwl'
+  return hub
+}
+
+/** Fill missing keys and upgrade legacy all-zero saves to current defaults. */
+export function normalizeSkillLevels(skills: Partial<SkillLevels> | undefined): SkillLevels {
+  const keys = SKILL_FIELDS.map((f) => f.key)
+  if (skills && keys.every((k) => (skills[k] ?? 0) === 0)) {
+    return { ...DEFAULT_SKILLS }
+  }
+  return { ...DEFAULT_SKILLS, ...(skills ?? {}) } as SkillLevels
 }
 
 /** Migrate region-level buildSystemId to hub default manufacturingSystemId. */
 export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings {
-  const primaryHub = (parsed.primaryHub ?? DEFAULT_SETTINGS.primaryHub) as HubId
+  const primaryHub = migrateHubId(parsed.primaryHub) ?? DEFAULT_SETTINGS.primaryHub
+  const sellHubId = migrateHubId(parsed.sellHubId) ?? DEFAULT_SETTINGS.sellHubId
   const hub = HUBS.find((h) => h.id === primaryHub)
   const hasLegacyRegionSettings =
     parsed.buildSystemId !== undefined || parsed.manufacturingRegionId !== undefined
@@ -21,46 +49,39 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     manufacturingSystemId = hub?.buildSystemId ?? manufacturingSystemId
   }
 
-  const { buildSystemId: _build, manufacturingRegionId: _region, ...rest } = parsed
+  const {
+    buildSystemId: _build,
+    manufacturingRegionId: _region,
+    brokerFeePercent: _bf,
+    salesTaxPercent: _st,
+    batchSize: _batchSize,
+    blueprintLifetimeRuns: legacyLifetimeRuns,
+    skills: parsedSkills,
+    ...rest
+  } = parsed
   return {
     ...DEFAULT_SETTINGS,
     ...rest,
     primaryHub,
+    sellHubId,
     manufacturingSystemId,
+    blueprintLifetimeRunsByCategory: normalizeBpoLifetimeRunsByCategory(
+      rest.blueprintLifetimeRunsByCategory,
+      legacyLifetimeRuns,
+    ),
+    skills: normalizeSkillLevels(parsedSkills),
   }
 }
 
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 export const USER_DATA_KEY = 'eveio:userData'
 
 export function createDefaultUserData(): UserData {
   return {
     schemaVersion: SCHEMA_VERSION,
     updatedAt: new Date().toISOString(),
-    onboardingComplete: false,
     settings: { ...DEFAULT_SETTINGS },
-    accounts: [],
     watchlist: [],
-    progressionState: {},
-  }
-}
-
-export function createCharacter(name: string, skills?: Partial<CharacterAccount['skills']>): CharacterAccount {
-  return {
-    id: crypto.randomUUID(),
-    name,
-    isOmega: true,
-    iskGoal: 100_000_000,
-    iskCurrent: 0,
-    skills: { ...DEFAULT_SKILLS, ...(skills ?? {}) } as CharacterSkills,
-    ownedBPOs: [],
-    runningJobs: [],
-    mineralStock: { ...DEFAULT_MINERALS },
-    sellOrders: [],
-    researchTimers: [],
-    skillProgress: {},
-    intelligence: 20,
-    memory: 20,
   }
 }
 
@@ -68,11 +89,16 @@ export function loadUserDataFromLocal(): UserData {
   try {
     const raw = localStorage.getItem(USER_DATA_KEY)
     if (!raw) return createDefaultUserData()
-    const parsed = JSON.parse(raw) as UserData
+    const parsed = JSON.parse(raw) as LegacyUserData
+    const legacySkills = parsed.accounts?.[0]?.skills
+    const { onboardingComplete: _onboarding, accounts: _accounts, ...rest } = parsed
     return {
       ...createDefaultUserData(),
-      ...parsed,
-      settings: normalizeGlobalSettings(parsed.settings ?? {}),
+      ...rest,
+      settings: normalizeGlobalSettings({
+        ...(parsed.settings ?? {}),
+        skills: parsed.settings?.skills ?? legacySkills,
+      }),
     }
   } catch {
     return createDefaultUserData()
@@ -82,46 +108,9 @@ export function loadUserDataFromLocal(): UserData {
 export function saveUserDataToLocal(data: UserData): void {
   const payload: UserData = {
     ...data,
+    schemaVersion: SCHEMA_VERSION,
     settings: normalizeGlobalSettings(data.settings),
     updatedAt: new Date().toISOString(),
   }
   localStorage.setItem(USER_DATA_KEY, JSON.stringify(payload))
-}
-
-export function mergeUserData(local: UserData, remote: UserData): UserData {
-  const localTime = new Date(local.updatedAt).getTime()
-  const remoteTime = new Date(remote.updatedAt).getTime()
-  if (remoteTime >= localTime) {
-    return {
-      ...createDefaultUserData(),
-      ...remote,
-      settings: normalizeGlobalSettings(remote.settings ?? {}),
-    }
-  }
-  return { ...local, settings: normalizeGlobalSettings(local.settings) }
-}
-
-export function exportUserDataJson(data: UserData): string {
-  return JSON.stringify(data, null, 2)
-}
-
-export function importUserDataJson(json: string): UserData {
-  const parsed = JSON.parse(json) as UserData
-  if (!parsed.settings || !Array.isArray(parsed.accounts)) {
-    throw new Error('Invalid user data file')
-  }
-  return {
-    ...createDefaultUserData(),
-    ...parsed,
-    settings: normalizeGlobalSettings(parsed.settings ?? {}),
-    updatedAt: new Date().toISOString(),
-  }
-}
-
-export function updateSettings(data: UserData, settings: Partial<GlobalSettings>): UserData {
-  return {
-    ...data,
-    settings: normalizeGlobalSettings({ ...data.settings, ...settings }),
-    updatedAt: new Date().toISOString(),
-  }
 }

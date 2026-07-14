@@ -4,7 +4,11 @@ import {
   useMemo,
   useRef,
   useState,
+  createContext,
+  useContext,
   type CSSProperties,
+  type ReactNode,
+  type Ref,
 } from 'react'
 import { createPortal } from 'react-dom'
 import {
@@ -12,35 +16,175 @@ import {
   Background,
   Handle,
   Position,
+  ReactFlowProvider,
   useEdgesState,
   useNodesState,
+  useReactFlow,
   type Node,
   type Edge,
+  type OnNodesChange,
+  type OnEdgesChange,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import type { BlueprintInfo, GlobalSettings, SupplyChainNode } from '@/types'
+import type { BlueprintInfo, GlobalSettings, ManufacturingSettings, RankedBlueprintRow, SupplyChainNode, TimeRange } from '@/types'
+import { HUBS } from '@/types'
 import { useSdeData } from '@/hooks/useSdeData'
 import {
   buildPriceMap,
+  buildBuyPriceMap,
   buildTypeMap,
   getAllBlueprints,
   getHubMarket,
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
-import { buildSupplyChain } from '@/lib/supplyChain'
-import { appRoute } from '@/lib/paths'
-import { formatIsk, formatQuantity } from '@/lib/profit'
+import { buildWindowPriceMap } from '@/lib/ranking'
+import { revenueFromSale, applyTE, resolveStructureModifiers } from '@/lib/cost'
+import { buildSupplyChain, findBuildTargetDetails, type BuildTargetDetail } from '@/lib/supplyChain'
+import { tierLabel } from '@/lib/blueprintGroups'
+import { tradingFeeRates } from '@/lib/tradingFees'
+import { appRoute, productionGraphRoute } from '@/lib/paths'
+import { formatGraphQuantity, formatGraphUnitIsk, formatDuration, formatIsk, formatPercent } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
 
 interface BlueprintGraphModalProps {
   blueprint: BlueprintInfo | null
+  rankedRow?: RankedBlueprintRow | null
   hub: GlobalSettings['primaryHub']
-  settings: GlobalSettings
+  priceWindow?: TimeRange
+  settings: ManufacturingSettings
   onClose: () => void
+  onProductChange?: (productTypeId: number) => void
+  /** Query string for share/open-page links (modal). Page variant uses the current URL. */
+  shareSearch?: string
+  onOpenPage?: (productTypeId: number) => void
+  variant?: 'modal' | 'page'
+}
+
+function graphShareHref(productTypeId: number, search: string): string {
+  const route = productionGraphRoute(productTypeId).replace(/^\//, '')
+  return appRoute(search ? `${route}?${search}` : route)
+}
+
+function GraphShareActions({
+  productTypeId,
+  search = '',
+  variant,
+  onOpenPage,
+}: {
+  productTypeId: number
+  search?: string
+  variant: 'modal' | 'page'
+  onOpenPage?: (productTypeId: number) => void
+}) {
+  const [copied, setCopied] = useState(false)
+  const shareHref = useMemo(() => graphShareHref(productTypeId, search), [productTypeId, search])
+
+  const copy = useCallback(async () => {
+    try {
+      const url = variant === 'page' ? window.location.href : shareHref
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopied(false)
+    }
+  }, [variant, shareHref])
+
+  return (
+    <>
+      {variant === 'modal' && onOpenPage ? (
+        <button
+          type="button"
+          className="btn btn-xs btn-ghost shrink-0"
+          onClick={() => onOpenPage(productTypeId)}
+        >
+          Open page
+        </button>
+      ) : null}
+      <button type="button" className="btn btn-xs btn-ghost shrink-0" onClick={() => void copy()}>
+        {copied ? 'Link copied' : 'Copy link'}
+      </button>
+    </>
+  )
+}
+
+const WINDOW_LABELS: Record<TimeRange, string> = {
+  '1d': '1-day',
+  '1w': '1-week',
+  '1m': '1-month',
+  '1y': '1-year',
+  all: 'all-time',
+}
+
+interface GraphPriceLabels {
+  hubName: string
+  materialPrice: string
+  outputPrice: string
+  buildSystemName: string
+  materialUnitLabel: string
+  outputUnitLabel: string
+}
+
+const GraphPriceContext = createContext<GraphPriceLabels | null>(null)
+
+interface GraphNavContextValue {
+  openGraphForType: (typeId: number) => void
+}
+
+const GraphNavContext = createContext<GraphNavContextValue | null>(null)
+
+type NodeInteraction = 'drag' | 'graph' | 'item'
+
+function buildGraphPriceLabels(
+  hub: GlobalSettings['primaryHub'],
+  window: TimeRange,
+  priceMethod: ManufacturingSettings['priceMethod'],
+  buildSystemName: string,
+): GraphPriceLabels {
+  const hubName = HUBS.find((h) => h.id === hub)?.name ?? hub
+  const windowLabel = WINDOW_LABELS[window]
+  const materialPrice = `${windowLabel} avg sell`
+  const outputPrice = priceMethod === 'buy_orders' ? 'Buy order' : `${windowLabel} avg sell`
+
+  return {
+    hubName,
+    materialPrice,
+    outputPrice,
+    buildSystemName,
+    materialUnitLabel: `${materialPrice} @ ${hubName}`,
+    outputUnitLabel: `${outputPrice} @ ${hubName}`,
+  }
+}
+
+function SourceChip({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 shrink-0">
+      <span className="text-[11px] opacity-50">{label}</span>
+      <span className="badge badge-sm border border-eve-border bg-base-300 font-semibold whitespace-nowrap px-2">
+        {value}
+      </span>
+    </span>
+  )
+}
+
+function GraphPriceSourceBar({ source }: { source: GraphPriceLabels }) {
+  return (
+    <div className="flex flex-nowrap items-center gap-x-2 gap-y-0 text-xs mb-3 shrink-0 min-w-0 overflow-x-auto scrollbar-thin">
+      <span className="shrink-0 font-medium opacity-60">Data from</span>
+      <SourceChip label="Hub" value={source.hubName} />
+      <SourceChip label="Materials" value={source.materialPrice} />
+      <SourceChip label="Revenue" value={source.outputPrice} />
+      <SourceChip label="Job cost" value={source.buildSystemName} />
+      <span className="shrink-0 opacity-30 ml-1" aria-hidden>
+        ·
+      </span>
+      <span className="shrink-0 opacity-40 whitespace-nowrap">hover · drag · click</span>
+    </div>
+  )
 }
 
 const COLUMN_GAP = 64
-const ROW_GAP = 18
+const ROW_GAP = 24
 const MAX_DEPTH_TIER = 4
 
 type NodeRole = 'root' | 'blueprint' | 'build' | 'buy'
@@ -50,13 +194,13 @@ interface NodeSize {
   height: number
 }
 
-/** Same depth = same box size; each level down is smaller. */
+/** Output node needs extra height for the financial summary block. */
 const DEPTH_SIZES: NodeSize[] = [
-  { width: 210, height: 82 },
-  { width: 182, height: 72 },
-  { width: 160, height: 62 },
-  { width: 142, height: 54 },
-  { width: 128, height: 48 },
+  { width: 288, height: 244 },
+  { width: 188, height: 76 },
+  { width: 164, height: 66 },
+  { width: 148, height: 60 },
+  { width: 136, height: 54 },
 ]
 
 interface DepthVisual {
@@ -70,31 +214,23 @@ interface DepthVisual {
 
 const DEPTH_VISUALS: DepthVisual[] = [
   {
-    iconSize: 34,
-    nameClass: 'text-sm font-bold',
-    metaClass: 'text-[10px]',
+    iconSize: 36,
+    nameClass: 'text-sm font-semibold',
+    metaClass: 'text-[11px]',
     badgeClass: 'badge-sm',
-    padding: 'px-2.5 py-2',
+    padding: 'px-3 py-2.5',
     nameLines: 2,
   },
   {
-    iconSize: 28,
-    nameClass: 'text-xs font-semibold',
-    metaClass: 'text-[10px]',
-    badgeClass: 'badge-sm',
-    padding: 'px-2 py-1.5',
-    nameLines: 2,
-  },
-  {
-    iconSize: 24,
+    iconSize: 26,
     nameClass: 'text-[11px] font-semibold',
     metaClass: 'text-[9px]',
     badgeClass: 'badge-xs',
-    padding: 'px-2 py-1',
+    padding: 'px-2 py-1.5',
     nameLines: 1,
   },
   {
-    iconSize: 20,
+    iconSize: 22,
     nameClass: 'text-[10px] font-medium',
     metaClass: 'text-[9px]',
     badgeClass: 'badge-xs',
@@ -102,8 +238,16 @@ const DEPTH_VISUALS: DepthVisual[] = [
     nameLines: 1,
   },
   {
-    iconSize: 18,
+    iconSize: 20,
     nameClass: 'text-[10px] font-medium',
+    metaClass: 'text-[8px]',
+    badgeClass: 'badge-xs',
+    padding: 'px-1.5 py-1',
+    nameLines: 1,
+  },
+  {
+    iconSize: 18,
+    nameClass: 'text-[9px] font-medium',
     metaClass: 'text-[8px]',
     badgeClass: 'badge-xs',
     padding: 'px-1.5 py-0.5',
@@ -123,9 +267,41 @@ function depthVisual(depth: number): DepthVisual {
   return DEPTH_VISUALS[depthTier(depth)]!
 }
 
+const PADDING_Y_BY_TIER = [20, 12, 8, 8, 4]
+
+function materialStatsLineCount(node: SupplyChainNode): number {
+  const role = nodeRole(node)
+  if (role === 'build' && node.savings != null && node.savings !== 0) return 3
+  return 2
+}
+
+/** Size each node to fit name, total, qty line, and optional build footnote. */
+function nodeContentHeight(node: SupplyChainNode, depth: number): number {
+  const tier = depthTier(depth)
+  if (tier === 0) return DEPTH_SIZES[0]!.height
+
+  const visual = depthVisual(depth)
+  const statsLines = materialStatsLineCount(node)
+  const paddingY = PADDING_Y_BY_TIER[tier] ?? 8
+
+  const nameLineH = tier === 1 ? 15 : 14
+  const totalLineH = tier <= 1 ? 18 : 15
+  const detailLineH = tier <= 1 ? 13 : 12
+  const lineGap = 2
+
+  let textH = nameLineH + totalLineH
+  if (statsLines > 1) {
+    textH += (statsLines - 1) * (detailLineH + lineGap)
+  }
+
+  const bodyH = Math.max(visual.iconSize, textH)
+  return Math.max(depthSize(depth).height, paddingY + bodyH + 2)
+}
+
 function rowGapAtDepth(depth: number): number {
-  if (depth >= 3) return 12
-  if (depth >= 2) return 14
+  if (depth >= 3) return 8
+  if (depth >= 2) return 10
+  if (depth >= 1) return 12
   return ROW_GAP
 }
 
@@ -142,11 +318,130 @@ interface SupplyNodeData extends Record<string, unknown> {
   mode: string
   role: NodeRole
   depth: number
+  outputSummary?: OutputSummary
+  canOpenGraph?: boolean
+}
+
+interface BuildTargetNodeData extends Record<string, unknown> {
+  target: BuildTargetDetail
+  sourceName: string
+}
+
+const BUILD_TARGET_CARD_WIDTH = 208
+const BUILD_TARGET_GAP = 12
+const BUILD_TARGET_MAX = 15
+
+function buildTargetCardHeight(): number {
+  return 88
+}
+
+interface OutputSummary {
+  runs: number
+  productQuantity: number
+  outputQty: number
+  sellPrice: number
+  grossRevenue: number
+  netRevenue: number
+  brokerFee: number
+  salesTax: number
+  setupCost: number
+  materialCost: number
+  bpoCost: number
+  jobCost: number
+  netProfit: number
+  marginPercent: number
+  buyFinishedCost: number
+  jobTimeSeconds: number
+}
+
+function buildOutputSummary(
+  root: SupplyChainNode,
+  blueprint: BlueprintInfo,
+  settings: ManufacturingSettings,
+  rankedRow?: RankedBlueprintRow | null,
+  buyPrices?: Map<number, number>,
+): OutputSummary {
+  if (rankedRow) {
+    const iph = rankedRow.iphBreakdown
+    return {
+      runs: iph.runs,
+      productQuantity: iph.productQuantity,
+      outputQty: iph.outputQty,
+      sellPrice: iph.sellPricePerUnit,
+      grossRevenue: iph.grossRevenue,
+      netRevenue: iph.netRevenue,
+      brokerFee: iph.brokerFee,
+      salesTax: iph.salesTax,
+      setupCost: iph.setupCost,
+      materialCost: iph.materialCost,
+      bpoCost: iph.bpoCost,
+      jobCost: iph.jobCost,
+      netProfit: iph.netProfit,
+      marginPercent: rankedRow.margin,
+      buyFinishedCost: root.buyCost ?? 0,
+      jobTimeSeconds: iph.jobTimeSeconds,
+    }
+  }
+
+  const runs = settings.batchSize
+  const productQuantity = blueprint.productQuantity
+  const outputQty = root.quantity
+  const sellPrice =
+    settings.priceMethod === 'buy_orders'
+      ? (buyPrices?.get(blueprint.productTypeId) ?? root.unitPrice)
+      : root.unitPrice
+
+  const bpoChild = root.children?.find((c) => c.mode === 'blueprint')
+  const materialChildren = root.children?.filter((c) => c.mode !== 'blueprint') ?? []
+  const bpoCost = bpoChild?.totalCost ?? 0
+  const materialCost = materialChildren.reduce((sum, child) => sum + child.totalCost, 0)
+  const setupCost = root.totalCost
+  const jobCost = Math.max(0, setupCost - bpoCost - materialCost)
+
+  const feeRates = tradingFeeRates(
+    settings.skills.accounting,
+    settings.skills.brokerRelations,
+  )
+  const usesBuyOrders = settings.priceMethod === 'buy_orders'
+  const { gross, net, brokerFee, salesTax } = revenueFromSale(sellPrice, outputQty, feeRates, {
+    includeBrokerFee: !usesBuyOrders,
+  })
+
+  const netProfit = net - setupCost
+  const marginPercent = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
+  const buyFinishedCost = root.buyCost ?? 0
+  const structure = resolveStructureModifiers(settings)
+  const jobTimeSeconds = applyTE(
+    blueprint.manufacturingTime,
+    settings.teDefault,
+    runs,
+    settings.skills.advancedIndustry,
+    structure.teBonusPercent,
+  )
+
+  return {
+    runs,
+    productQuantity,
+    outputQty,
+    sellPrice,
+    grossRevenue: gross,
+    netRevenue: net,
+    brokerFee,
+    salesTax,
+    setupCost,
+    materialCost,
+    bpoCost,
+    jobCost,
+    netProfit,
+    marginPercent,
+    buyFinishedCost,
+    jobTimeSeconds,
+  }
 }
 
 const edgeDefaults: Partial<Edge> = {
   type: 'step',
-  style: { strokeWidth: 1.5, stroke: '#94a3b8' },
+  style: { strokeWidth: 1.25, stroke: '#64748b', opacity: 0.65 },
 }
 
 function nodeRole(node: SupplyChainNode): NodeRole {
@@ -157,6 +452,7 @@ function nodeRole(node: SupplyChainNode): NodeRole {
 }
 
 function makeNode(node: SupplyChainNode, id: string, x: number, y: number, depth: number): Node {
+  const height = nodeContentHeight(node, depth)
   const size = depthSize(depth)
   return {
     id,
@@ -164,7 +460,7 @@ function makeNode(node: SupplyChainNode, id: string, x: number, y: number, depth
     data: nodeData(node),
     type: 'supplyNode',
     width: size.width,
-    height: size.height,
+    height,
   }
 }
 
@@ -222,7 +518,7 @@ function chainToFlow(root: SupplyChainNode): { nodes: Node[]; edges: Edge[] } {
     const cached = subtreeHeight.get(node)
     if (cached != null) return cached
 
-    const ownHeight = depthSize(depth).height
+    const ownHeight = nodeContentHeight(node, depth)
     const children = node.children ?? []
     let height = ownHeight
     if (children.length > 0) {
@@ -240,11 +536,11 @@ function chainToFlow(root: SupplyChainNode): { nodes: Node[]; edges: Edge[] } {
   // Pass 2: place each node centered inside the band reserved for its subtree.
   // Because bands never overlap, nodes never overlap regardless of tree size.
   function place(node: SupplyChainNode, depth: number, top: number, id: string) {
-    const size = depthSize(depth)
+    const nodeHeight = nodeContentHeight(node, depth)
     const x = columnX.get(depth) ?? 0
     const band = measure(node, depth)
 
-    nodes.push(makeNode(node, id, x, top + (band - size.height) / 2, depth))
+    nodes.push(makeNode(node, id, x, top + (band - nodeHeight) / 2, depth))
 
     const children = node.children ?? []
     if (children.length === 0) return
@@ -267,11 +563,97 @@ function chainToFlow(root: SupplyChainNode): { nodes: Node[]; edges: Edge[] } {
   return { nodes, edges }
 }
 
-const ROLE_STYLES: Record<NodeRole, { border: string }> = {
-  root: { border: 'border-primary/70 ring-1 ring-primary/20' },
-  build: { border: 'border-success/50' },
-  blueprint: { border: 'border-info/50' },
-  buy: { border: 'border-eve-border' },
+function attachBuildTargetNodes(
+  nodes: Node[],
+  edges: Edge[],
+  targets: BuildTargetDetail[],
+  sourceName: string,
+): { nodes: Node[]; edges: Edge[] } {
+  if (targets.length === 0) return { nodes, edges }
+
+  const outputNode = nodes.find((n) => (n.data as SupplyNodeData).role === 'root')
+  if (!outputNode) return { nodes, edges }
+
+  const capped = targets.slice(0, BUILD_TARGET_MAX)
+  const shift = BUILD_TARGET_CARD_WIDTH + COLUMN_GAP
+  const shiftedNodes = nodes.map((n) => ({
+    ...n,
+    position: { x: n.position.x + shift, y: n.position.y },
+  }))
+
+  const shiftedOutput = shiftedNodes.find((n) => n.id === outputNode.id)!
+  const outputHeight = shiftedOutput.height ?? depthSize(0).height
+  const totalHeight =
+    capped.length * buildTargetCardHeight() + BUILD_TARGET_GAP * Math.max(0, capped.length - 1)
+  const outputCenterY = shiftedOutput.position.y + outputHeight / 2
+  let cursorY = outputCenterY - totalHeight / 2
+
+  const targetNodes: Node[] = []
+  const targetEdges: Edge[] = []
+
+  for (const target of capped) {
+    const id = `build-target-${target.productTypeId}`
+    const height = buildTargetCardHeight()
+    targetNodes.push({
+      id,
+      type: 'buildTargetNode',
+      position: { x: 0, y: cursorY },
+      width: BUILD_TARGET_CARD_WIDTH,
+      height,
+      data: { target, sourceName },
+      draggable: false,
+      selectable: false,
+    })
+    targetEdges.push(makeEdge(id, outputNode.id))
+    cursorY += height + BUILD_TARGET_GAP
+  }
+
+  return {
+    nodes: [...shiftedNodes, ...targetNodes],
+    edges: [...edges, ...targetEdges],
+  }
+}
+
+function markNavigableNodes(
+  nodes: Node[],
+  blueprintByProduct: Map<number, BlueprintInfo>,
+): Node[] {
+  return nodes.map((node) => {
+    if (node.type === 'buildTargetNode') return node
+
+    const data = node.data as SupplyNodeData
+    if (data.role !== 'build' || !blueprintByProduct.has(data.typeId)) return node
+
+    return {
+      ...node,
+      draggable: false,
+      selectable: false,
+      data: { ...data, canOpenGraph: true },
+    }
+  })
+}
+
+const ROLE_STYLES: Record<NodeRole, { border: string; shell: string; accent: string }> = {
+  root: {
+    border: 'border-primary/50',
+    shell: 'bg-base-200/95 ring-1 ring-primary/10',
+    accent: 'bg-primary',
+  },
+  build: {
+    border: 'border-success/35',
+    shell: 'bg-base-200/95',
+    accent: 'bg-success',
+  },
+  blueprint: {
+    border: 'border-info/35',
+    shell: 'bg-base-200/95',
+    accent: 'bg-info',
+  },
+  buy: {
+    border: 'border-eve-border',
+    shell: 'bg-base-200/95',
+    accent: 'bg-warning',
+  },
 }
 
 const ROLE_BADGE: Record<NodeRole, { label: string; title: string; className: string }> = {
@@ -323,55 +705,470 @@ function DetailRow({ label, value, accent }: { label: string; value: string; acc
   )
 }
 
-function NodeDetailCard({ data }: { data: SupplyNodeData }) {
+function graphQtyPriceLabels(data: SupplyNodeData): { qty: string; price: string } {
   const isBlueprint = data.role === 'blueprint'
-  const hasComparison =
-    data.role === 'build' && data.buildCost != null && data.buyCost != null
+  const qty = isBlueprint ? 'x1' : formatGraphQuantity(data.quantity)
+  const price =
+    data.unitPrice > 0 ? formatGraphUnitIsk(data.unitPrice) : formatGraphUnitIsk(data.totalCost)
+  return { qty, price }
+}
+
+interface MaterialCardLines {
+  qty: string
+  unitPrice: string | null
+  totalCost: string
+  footnote: string | null
+  footnoteAccent?: string
+}
+
+function materialCardLines(data: SupplyNodeData): MaterialCardLines {
+  const isBlueprint = data.role === 'blueprint'
+  const qty = isBlueprint ? 'x1' : formatGraphQuantity(data.quantity)
+  const unitPrice = data.unitPrice > 0 ? formatGraphUnitIsk(data.unitPrice) : null
+  const totalCost = formatIsk(data.totalCost)
+
+  if (data.role === 'build' && data.savings != null && data.savings !== 0) {
+    const saving = data.savings > 0
+    return {
+      qty,
+      unitPrice,
+      totalCost,
+      footnote: saving
+        ? `save ${formatIsk(data.savings)} vs buy`
+        : `+${formatIsk(Math.abs(data.savings))} vs buy`,
+      footnoteAccent: saving ? 'text-success' : 'text-error',
+    }
+  }
+
+  return { qty, unitPrice, totalCost, footnote: null }
+}
+
+function MaterialQtyLine({ lines, className = '' }: { lines: MaterialCardLines; className?: string }) {
+  const unitPart = lines.unitPrice ? `@ ${lines.unitPrice}` : ''
+  return (
+    <p className={`tabular-nums opacity-55 leading-snug ${className}`}>
+      {lines.qty}
+      {unitPart ? ` ${unitPart}` : ''}
+    </p>
+  )
+}
+
+function OutputFinancials({
+  summary,
+  profitAccent,
+  className = '',
+}: {
+  summary: OutputSummary
+  profitAccent: string
+  className?: string
+}) {
+  return (
+    <div className={`shrink-0 rounded-md bg-base-300/50 px-2.5 py-2 ${className}`}>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="min-w-0">
+          <p className="text-[9px] uppercase tracking-wide font-semibold text-info leading-none">Job time</p>
+          <p className="text-lg font-bold tabular-nums text-info leading-tight mt-1">
+            {formatDuration(summary.jobTimeSeconds)}
+          </p>
+          <p className="text-[10px] tabular-nums opacity-50 mt-0.5 leading-tight">
+            {summary.runs} runs × {summary.productQuantity}
+          </p>
+        </div>
+        <div className="min-w-0 text-right">
+          <p className="text-[9px] uppercase tracking-wide opacity-45 leading-none">Profit</p>
+          <p className={`text-lg font-bold tabular-nums leading-tight mt-1 ${profitAccent}`}>
+            {formatIsk(summary.netProfit)}
+          </p>
+          <p className={`text-[10px] tabular-nums mt-0.5 ${profitAccent} opacity-75`}>
+            {formatPercent(summary.marginPercent)} margin
+          </p>
+        </div>
+      </div>
+      <div className="mt-2 pt-2 border-t border-base-content/10 flex items-baseline justify-between gap-2 text-[10px] tabular-nums opacity-60">
+        <span>
+          Rev <span className="font-medium text-base-content/75">{formatIsk(summary.netRevenue)}</span>
+        </span>
+        <span>
+          Setup <span className="font-medium text-base-content/75">{formatIsk(summary.setupCost)}</span>
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function MaterialCardStats({
+  lines,
+  compact = false,
+  className = '',
+}: {
+  lines: MaterialCardLines
+  compact?: boolean
+  className?: string
+}) {
+  if (compact) {
+    const unitPart = lines.unitPrice ? ` @ ${lines.unitPrice}` : ''
+    return (
+      <div className={`min-w-0 ${className}`}>
+        <p className="tabular-nums font-bold text-sm text-base-content leading-tight">{lines.totalCost}</p>
+        <p className="tabular-nums opacity-50 mt-0.5 leading-tight">
+          {lines.qty}
+          {unitPart}
+        </p>
+        {lines.footnote && (
+          <p
+            className={`tabular-nums mt-0.5 leading-tight ${lines.footnoteAccent ?? 'opacity-50'}`}
+            title={lines.footnote}
+          >
+            {lines.footnote}
+          </p>
+        )}
+      </div>
+    )
+  }
 
   return (
-    <div className="w-60 rounded-lg border border-eve-border bg-neutral text-neutral-content shadow-xl p-3 text-xs leading-snug">
-      <p className="font-semibold text-sm break-words">{data.label}</p>
-      <GraphRoleBadge role={data.role} className="mt-1 mb-2" />
+    <div className={`min-w-0 mt-auto ${className}`}>
+      <p className="tabular-nums leading-none font-bold text-sm text-base-content">{lines.totalCost}</p>
+      <MaterialQtyLine lines={lines} className="mt-0.5 text-[10px]" />
+      {lines.footnote && (
+        <p className={`tabular-nums mt-0.5 text-[9px] ${lines.footnoteAccent ?? 'opacity-50'}`}>
+          {lines.footnote}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function GraphViewportSync({
+  productTypeId,
+  nodeCount,
+}: {
+  productTypeId: number
+  nodeCount: number
+}) {
+  const { fitView } = useReactFlow()
+
+  useEffect(() => {
+    if (nodeCount === 0) return
+
+    const fit = () => {
+      void fitView({ padding: 0.15, duration: 0 })
+    }
+
+    const frame = window.requestAnimationFrame(fit)
+    return () => window.cancelAnimationFrame(frame)
+  }, [productTypeId, nodeCount, fitView])
+
+  return null
+}
+
+function BuildTargetDetailCard({
+  data,
+}: {
+  data: BuildTargetNodeData
+}) {
+  const { target, sourceName } = data
+
+  return (
+    <div className="w-72 rounded-xl border border-eve-border bg-neutral text-neutral-content shadow-xl p-3.5 text-xs leading-relaxed">
+      <div className="flex items-start gap-2 mb-2">
+        <EveImage id={target.productTypeId} variant="icon" size={32} framed alt="" />
+        <div className="min-w-0">
+          <p className="font-semibold text-sm break-words">{target.productName}</p>
+          <span className="badge badge-secondary badge-xs mt-1">{tierLabel(target.blueprint.tier)}</span>
+        </div>
+      </div>
       <div className="flex flex-col gap-1">
-        <DetailRow label="Quantity" value={isBlueprint ? '1 BPO' : formatQuantity(data.quantity)} />
-        {data.unitPrice > 0 && <DetailRow label="Unit price" value={formatIsk(data.unitPrice)} />}
-        {!isBlueprint && <DetailRow label="Total cost" value={formatIsk(data.totalCost)} />}
-        {hasComparison && (
-          <>
-            <div className="border-t border-neutral-content/15 my-1" />
-            <DetailRow label="Buy" value={formatIsk(data.buyCost!)} />
-            <DetailRow label="Build" value={formatIsk(data.buildCost!)} />
-            {data.savings != null && (
-              <DetailRow
-                label={data.savings >= 0 ? 'Savings (build)' : 'Extra cost'}
-                value={formatIsk(Math.abs(data.savings))}
-                accent={data.savings >= 0 ? 'text-success' : 'text-error'}
-              />
-            )}
-          </>
+        <DetailRow
+          label="Uses this item"
+          value={`${formatGraphQuantity(target.sourceInputQty)} per run`}
+        />
+        <DetailRow
+          label="Output"
+          value={`${formatGraphQuantity(target.outputQty)} per run`}
+        />
+        <DetailRow label="Job time" value={formatDuration(target.jobTimeSeconds)} />
+        <div className="border-t border-neutral-content/15 my-1" />
+        <p className="text-[10px] uppercase tracking-wide opacity-50">Other materials per run</p>
+        {target.otherMaterials.length === 0 ? (
+          <p className="opacity-60">None</p>
+        ) : (
+          target.otherMaterials.map((mat) => (
+            <DetailRow
+              key={mat.typeId}
+              label={mat.name}
+              value={formatGraphQuantity(mat.quantity)}
+            />
+          ))
         )}
+        <p className="opacity-50 text-[10px] mt-1">
+          Recipe for one run. {formatGraphQuantity(target.sourceInputQty)} {sourceName} required.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function BuildTargetNode({ data }: { data: BuildTargetNodeData }) {
+  const nav = useContext(GraphNavContext)
+  const { ref, cardStyle, showCard, hideCard } = useHoverCard()
+  const { target, sourceName } = data
+
+  return (
+    <>
+      <GraphNodeShell
+        shellRef={ref}
+        borderClass="border-secondary/40"
+        shellClass="bg-base-200/95"
+        accentClass="bg-secondary"
+        paddingClass="px-2 py-2"
+        interaction="graph"
+        onActivate={() => nav?.openGraphForType(target.productTypeId)}
+        onMouseEnter={showCard}
+        onMouseLeave={hideCard}
+        onMouseDown={hideCard}
+      >
+        <Handle type="source" position={Position.Right} className="opacity-0" />
+        <div className="flex gap-2 h-full min-h-0 overflow-hidden">
+          <EveImage
+            id={target.productTypeId}
+            variant="icon"
+            size={28}
+            framed
+            alt=""
+            className="shrink-0"
+          />
+          <div className="min-w-0 flex-1 flex flex-col gap-1 overflow-hidden">
+            <div className="min-w-0 shrink-0">
+              <p className="text-[11px] font-semibold leading-tight line-clamp-2" title={target.productName}>
+                {target.productName}
+              </p>
+              <span className="badge badge-secondary badge-xs mt-0.5">{tierLabel(target.blueprint.tier)}</span>
+            </div>
+            <div className="text-[10px] tabular-nums leading-snug opacity-70 min-h-0">
+              <p>
+                <span className="font-medium text-base-content">{formatGraphQuantity(target.sourceInputQty)}</span>
+                {' × '}
+                <span className="truncate">{sourceName}</span>
+              </p>
+              <p>
+                → <span className="font-medium text-base-content">{formatGraphQuantity(target.outputQty)}</span>
+                <span className="opacity-70"> per run</span>
+              </p>
+              <p className="text-info font-medium">{formatDuration(target.jobTimeSeconds)}</p>
+            </div>
+          </div>
+        </div>
+      </GraphNodeShell>
+      {cardStyle &&
+        createPortal(
+          <div className="pointer-events-none fixed z-[9999]" style={cardStyle}>
+            <BuildTargetDetailCard data={data} />
+          </div>,
+          document.body,
+        )}
+    </>
+  )
+}
+
+function GraphQtyPriceLine({
+  qty,
+  price,
+  className = '',
+}: {
+  qty: string
+  price: string
+  className?: string
+}) {
+  return (
+    <p className={`flex flex-wrap items-baseline gap-x-1.5 gap-y-0 min-w-0 leading-snug ${className}`}>
+      <span className="tabular-nums opacity-60">{qty}</span>
+      <span className="tabular-nums font-medium text-base-content/85">{price}</span>
+    </p>
+  )
+}
+
+function GraphNodeShell({
+  borderClass,
+  shellClass,
+  accentClass,
+  paddingClass,
+  className = '',
+  interaction = 'drag',
+  onActivate,
+  children,
+  shellRef,
+  onMouseEnter,
+  onMouseLeave,
+  onMouseDown,
+}: {
+  borderClass: string
+  shellClass: string
+  accentClass: string
+  paddingClass?: string
+  className?: string
+  interaction?: NodeInteraction
+  onActivate?: () => void
+  children: ReactNode
+  shellRef?: Ref<HTMLDivElement>
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
+  onMouseDown?: () => void
+}) {
+  const cursorClass =
+    interaction === 'graph' || interaction === 'item'
+      ? 'cursor-pointer'
+      : 'cursor-grab active:cursor-grabbing'
+
+  const baseClass = interaction === 'graph' ? 'ring-1 ring-secondary/25' : ''
+
+  const hoverClass =
+    interaction === 'graph'
+      ? 'hover:ring-2 hover:ring-secondary/70 hover:shadow-lg hover:shadow-secondary/20 hover:border-secondary/55'
+      : 'hover:shadow-lg hover:border-primary/50'
+
+  const handleClick = (event: React.MouseEvent) => {
+    if (interaction !== 'graph' && interaction !== 'item') return
+    event.stopPropagation()
+    onActivate?.()
+  }
+
+  return (
+    <div
+      ref={shellRef}
+      role={interaction === 'graph' || interaction === 'item' ? 'button' : undefined}
+      tabIndex={interaction === 'graph' || interaction === 'item' ? 0 : undefined}
+      className={`group relative h-full w-full overflow-hidden rounded-xl border shadow-sm ${cursorClass} ${baseClass} ${hoverClass} ${borderClass} ${shellClass} ${paddingClass ?? ''} ${className}`}
+      onClick={handleClick}
+      onKeyDown={(event) => {
+        if (interaction !== 'graph' && interaction !== 'item') return
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onActivate?.()
+        }
+      }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onMouseDown={onMouseDown}
+    >
+      {interaction === 'graph' ? (
+        <span className="pointer-events-none absolute top-1 right-1 z-10 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide bg-secondary text-secondary-content opacity-0 group-hover:opacity-100 shadow-sm">
+          View graph
+        </span>
+      ) : null}
+      <div className={`absolute inset-y-0 left-0 w-0.5 ${accentClass}`} aria-hidden />
+      <div className="relative h-full pl-0.5">{children}</div>
+    </div>
+  )
+}
+
+function OutputDetailCard({ data, summary }: { data: SupplyNodeData; summary: OutputSummary }) {
+  const priceLabels = useContext(GraphPriceContext)
+  const qty = formatGraphQuantity(summary.outputQty)
+  const price = formatGraphUnitIsk(summary.sellPrice)
+  const profitAccent = summary.netProfit >= 0 ? 'text-success' : 'text-error'
+
+  return (
+    <div className="w-72 rounded-xl border border-eve-border bg-neutral text-neutral-content shadow-xl p-3.5 text-xs leading-relaxed">
+      <p className="font-semibold text-sm break-words">{data.label}</p>
+      <GraphRoleBadge role="root" className="mt-1 mb-2" />
+      <GraphQtyPriceLine
+        qty={qty}
+        price={price}
+        className="text-sm mb-2 [&_span:last-child]:text-neutral-content"
+      />
+      {priceLabels ? (
+        <p className="text-[10px] opacity-50 mb-2 leading-snug">{priceLabels.outputUnitLabel}</p>
+      ) : null}
+      <div className="flex flex-col gap-1">
+        <DetailRow
+          label="Batch"
+          value={`${summary.runs} runs × ${summary.productQuantity}`}
+        />
+        <DetailRow label="Output" value={formatGraphQuantity(summary.outputQty)} />
+        <DetailRow
+          label="Job time"
+          value={formatDuration(summary.jobTimeSeconds)}
+          accent="text-info font-semibold"
+        />
+        <div className="border-t border-neutral-content/15 my-1" />
+        <DetailRow label="Gross revenue" value={formatIsk(summary.grossRevenue)} />
+        {summary.brokerFee > 0 && (
+          <DetailRow label="Broker fee" value={`−${formatIsk(summary.brokerFee)}`} />
+        )}
+        <DetailRow label="Sales tax" value={`−${formatIsk(summary.salesTax)}`} />
+        <DetailRow label="Net revenue" value={formatIsk(summary.netRevenue)} />
+        <div className="border-t border-neutral-content/15 my-1" />
+        <DetailRow label="Materials" value={formatIsk(summary.materialCost)} />
+        <DetailRow label="BPO" value={formatIsk(summary.bpoCost)} />
+        <DetailRow label="Job cost" value={formatIsk(summary.jobCost)} />
+        <DetailRow label="Setup cost" value={formatIsk(summary.setupCost)} />
+        <div className="border-t border-neutral-content/15 my-1" />
+        <DetailRow
+          label="Net profit"
+          value={formatIsk(summary.netProfit)}
+          accent={profitAccent}
+        />
+        <DetailRow
+          label="Margin"
+          value={formatPercent(summary.marginPercent)}
+          accent={profitAccent}
+        />
+        <DetailRow label="Buy finished" value={formatIsk(summary.buyFinishedCost)} />
       </div>
       <p className="opacity-50 mt-2 text-[10px]">Click to open item detail</p>
     </div>
   )
 }
 
-function SupplyNode({ data }: { data: SupplyNodeData }) {
+function NodeDetailCard({ data }: { data: SupplyNodeData }) {
+  const priceLabels = useContext(GraphPriceContext)
+  const lines = materialCardLines(data)
+  const hasComparison =
+    data.role === 'build' && data.buildCost != null && data.buyCost != null
+
+  return (
+    <div className="w-64 rounded-xl border border-eve-border bg-neutral text-neutral-content shadow-xl p-3.5 text-xs leading-relaxed">
+      <p className="font-semibold text-sm break-words">{data.label}</p>
+      <GraphRoleBadge role={data.role} className="mt-1 mb-2" />
+      <div className="flex flex-col gap-1 mb-1">
+        <DetailRow label="Quantity" value={lines.qty} />
+        {lines.unitPrice && <DetailRow label="Unit price" value={lines.unitPrice} />}
+        {lines.unitPrice && priceLabels ? (
+          <p className="text-[10px] opacity-50 -mt-0.5 mb-1 leading-snug pl-0.5">
+            {priceLabels.materialUnitLabel}
+          </p>
+        ) : null}
+        <DetailRow label="Line total" value={lines.totalCost} />
+      </div>
+      {hasComparison && (
+        <div className="flex flex-col gap-1">
+          <div className="border-t border-neutral-content/15 my-1" />
+          <DetailRow label="Buy from market" value={formatIsk(data.buyCost!)} />
+          <DetailRow label="Build sub-chain" value={formatIsk(data.buildCost!)} />
+          {data.savings != null && (
+            <DetailRow
+              label={data.savings >= 0 ? 'Build saves' : 'Build costs more'}
+              value={formatIsk(Math.abs(data.savings))}
+              accent={data.savings >= 0 ? 'text-success' : 'text-error'}
+            />
+          )}
+        </div>
+      )}
+      <p className="opacity-50 mt-2 text-[10px]">Click to open item detail</p>
+    </div>
+  )
+}
+
+function useHoverCard() {
   const ref = useRef<HTMLDivElement>(null)
   const [cardStyle, setCardStyle] = useState<CSSProperties | null>(null)
-
-  const isBlueprint = data.role === 'blueprint'
-  const roleStyle = ROLE_STYLES[data.role]
-  const visual = depthVisual(data.depth)
-  const qtyLabel = isBlueprint ? '1 BPO' : formatQuantity(data.quantity)
-  const costLabel =
-    data.unitPrice > 0 ? formatIsk(data.unitPrice) : isBlueprint ? '—' : formatIsk(data.totalCost)
 
   const showCard = useCallback(() => {
     const el = ref.current
     if (!el) return
     const rect = el.getBoundingClientRect()
-    const flipLeft = rect.right + 256 > window.innerWidth
+    const flipLeft = rect.right + 300 > window.innerWidth
     setCardStyle(
       flipLeft
         ? { top: rect.top, left: rect.left - 8, transform: 'translateX(-100%)' }
@@ -381,17 +1178,110 @@ function SupplyNode({ data }: { data: SupplyNodeData }) {
 
   const hideCard = useCallback(() => setCardStyle(null), [])
 
+  return { ref, cardStyle, showCard, hideCard }
+}
+
+function OutputNode({ data }: { data: SupplyNodeData }) {
+  const priceLabels = useContext(GraphPriceContext)
+  const summary = data.outputSummary
+  const { ref, cardStyle, showCard, hideCard } = useHoverCard()
+  const { qty, price } = summary
+    ? {
+        qty: formatGraphQuantity(summary.outputQty),
+        price: formatGraphUnitIsk(summary.sellPrice),
+      }
+    : graphQtyPriceLabels(data)
+  const roleStyle = ROLE_STYLES.root
+  const profitAccent = summary && summary.netProfit >= 0 ? 'text-success' : 'text-error'
+
   return (
     <>
-      <div
-        ref={ref}
-        className={`h-full w-full overflow-hidden bg-base-200 border ${roleStyle.border} rounded-lg ${visual.padding} shadow-md cursor-grab active:cursor-grabbing transition-colors hover:border-primary`}
+      <GraphNodeShell
+        shellRef={ref}
+        borderClass={roleStyle.border}
+        shellClass={roleStyle.shell}
+        accentClass={roleStyle.accent}
+        paddingClass="px-3 py-2.5"
+        interaction="drag"
         onMouseEnter={showCard}
         onMouseLeave={hideCard}
         onMouseDown={hideCard}
       >
         <Handle type="target" position={Position.Left} className="opacity-0" />
-        <div className="flex items-center gap-1.5 h-full min-h-0">
+        <div className="flex gap-2.5 h-full min-h-0 overflow-hidden">
+          <EveImage
+            id={data.typeId}
+            variant="icon"
+            size={36}
+            framed
+            alt=""
+            className="shrink-0"
+          />
+          <div className="min-w-0 flex-1 flex h-full min-h-0 flex-col gap-1.5 overflow-hidden">
+            <div className="shrink-0 min-w-0">
+              <p className="text-sm font-semibold leading-tight line-clamp-2" title={data.label}>
+                {data.label}
+              </p>
+              <GraphRoleBadge role="root" sizeClass="badge-xs" className="mt-1" />
+            </div>
+            {summary && (
+              <div className="shrink-0 text-[10px] tabular-nums opacity-50 leading-tight">
+                <GraphQtyPriceLine qty={qty} price={price} />
+                {priceLabels ? (
+                  <p className="opacity-80 truncate" title={priceLabels.outputUnitLabel}>
+                    {priceLabels.outputUnitLabel}
+                  </p>
+                ) : null}
+              </div>
+            )}
+            {summary && (
+              <OutputFinancials
+                summary={summary}
+                profitAccent={profitAccent ?? ''}
+                className="mt-auto"
+              />
+            )}
+          </div>
+        </div>
+        <Handle type="source" position={Position.Right} className="opacity-0" />
+      </GraphNodeShell>
+      {cardStyle &&
+        summary &&
+        createPortal(
+          <div className="pointer-events-none fixed z-[9999]" style={cardStyle}>
+            <OutputDetailCard data={data} summary={summary} />
+          </div>,
+          document.body,
+        )}
+    </>
+  )
+}
+
+function SupplyNode({ data }: { data: SupplyNodeData }) {
+  const nav = useContext(GraphNavContext)
+  const { ref, cardStyle, showCard, hideCard } = useHoverCard()
+  const isBlueprint = data.role === 'blueprint'
+  const roleStyle = ROLE_STYLES[data.role]
+  const visual = depthVisual(data.depth)
+  const lines = materialCardLines(data)
+  const compactStats = data.depth >= 1
+
+  return (
+    <>
+      <GraphNodeShell
+        shellRef={ref}
+        borderClass={roleStyle.border}
+        shellClass={roleStyle.shell}
+        accentClass={roleStyle.accent}
+        paddingClass={visual.padding}
+        interaction={data.canOpenGraph ? 'graph' : 'drag'}
+        onActivate={data.canOpenGraph ? () => nav?.openGraphForType(data.typeId) : undefined}
+        onMouseEnter={showCard}
+        onMouseLeave={hideCard}
+        onMouseDown={hideCard}
+      >
+        <Handle type="target" position={Position.Left} className="opacity-0" />
+        <div className="flex gap-1.5 h-full items-start py-px">
           <EveImage
             id={data.typeId}
             variant={isBlueprint ? 'bp' : 'icon'}
@@ -401,21 +1291,29 @@ function SupplyNode({ data }: { data: SupplyNodeData }) {
             alt=""
             className="shrink-0"
           />
-          <div className="min-w-0 flex-1 flex flex-col justify-center gap-0.5 overflow-hidden">
-            <p
-              className={`${visual.nameClass} leading-tight ${visual.nameLines === 1 ? 'truncate' : 'line-clamp-2'}`}
-              title={data.label}
-            >
-              {data.label}
-            </p>
-            <p className={`${visual.metaClass} opacity-60 leading-tight truncate`}>
-              {qtyLabel} · {costLabel}
-            </p>
-            <GraphRoleBadge role={data.role} sizeClass={visual.badgeClass} className="self-start" />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1 min-w-0">
+              <p
+                className={`${visual.nameClass} leading-tight min-w-0 flex-1 truncate`}
+                title={data.label}
+              >
+                {data.label}
+              </p>
+              <GraphRoleBadge
+                role={data.role}
+                sizeClass={visual.badgeClass}
+                className="shrink-0 mt-0"
+              />
+            </div>
+            <MaterialCardStats
+              lines={lines}
+              compact={compactStats}
+              className={visual.metaClass}
+            />
           </div>
         </div>
         <Handle type="source" position={Position.Right} className="opacity-0" />
-      </div>
+      </GraphNodeShell>
       {cardStyle &&
         createPortal(
           <div className="pointer-events-none fixed z-[9999]" style={cardStyle}>
@@ -427,13 +1325,162 @@ function SupplyNode({ data }: { data: SupplyNodeData }) {
   )
 }
 
-const nodeTypes = { supplyNode: SupplyNode }
+const nodeTypes = { supplyNode: SupplyNode, outputNode: OutputNode, buildTargetNode: BuildTargetNode }
 
-export function BlueprintGraphModal({ blueprint, hub, settings, onClose }: BlueprintGraphModalProps) {
+function attachOutputSummary(
+  nodes: Node[],
+  root: SupplyChainNode,
+  blueprint: BlueprintInfo,
+  settings: ManufacturingSettings,
+  rankedRow?: RankedBlueprintRow | null,
+  buyPrices?: Map<number, number>,
+): Node[] {
+  const summary = buildOutputSummary(root, blueprint, settings, rankedRow, buyPrices)
+  return nodes.map((node) => {
+    if ((node.data as SupplyNodeData).role !== 'root') return node
+    return {
+      ...node,
+      type: 'outputNode',
+      data: { ...(node.data as SupplyNodeData), outputSummary: summary },
+    }
+  })
+}
+
+function GraphFlowCanvas({
+  flowNodes,
+  flowEdges,
+  onNodesChange,
+  onEdgesChange,
+  onNodeClick,
+  productTypeId,
+}: {
+  flowNodes: Node[]
+  flowEdges: Edge[]
+  onNodesChange: OnNodesChange<Node>
+  onEdgesChange: OnEdgesChange<Edge>
+  onNodeClick: (_: React.MouseEvent, node: Node) => void
+  productTypeId: number
+}) {
+  return (
+    <div className="absolute inset-0">
+      <ReactFlow
+        nodes={flowNodes}
+        edges={flowEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        onNodeClick={onNodeClick}
+        nodesDraggable
+        nodesConnectable={false}
+        elementsSelectable={false}
+        panOnScroll
+        selectionOnDrag={false}
+        defaultEdgeOptions={edgeDefaults}
+        proOptions={{ hideAttribution: true }}
+        className="h-full w-full"
+      >
+        <GraphViewportSync productTypeId={productTypeId} nodeCount={flowNodes.length} />
+        <Background />
+      </ReactFlow>
+    </div>
+  )
+}
+
+export function BlueprintGraphModal({
+  blueprint,
+  rankedRow,
+  hub,
+  priceWindow = '1w',
+  settings,
+  onClose,
+  onProductChange,
+  shareSearch = '',
+  onOpenPage,
+  variant = 'modal',
+}: BlueprintGraphModalProps) {
   const { data: sde } = useSdeData()
+  const [activeBlueprint, setActiveBlueprint] = useState(blueprint)
+  const entryProductTypeIdRef = useRef(blueprint?.productTypeId)
+
+  useEffect(() => {
+    if (blueprint) {
+      setActiveBlueprint(blueprint)
+    }
+  }, [blueprint?.productTypeId, blueprint])
+
+  const activeRankedRow = useMemo(() => {
+    if (!rankedRow || !activeBlueprint || !blueprint) return null
+    return activeBlueprint.productTypeId === entryProductTypeIdRef.current ? rankedRow : null
+  }, [activeBlueprint, blueprint, rankedRow])
+
+  const activeProductName = useMemo(() => {
+    if (!sde || !activeBlueprint) return ''
+    return buildTypeMap(sde.types).get(activeBlueprint.productTypeId)?.name ?? ''
+  }, [sde, activeBlueprint])
+
+  const canGoBack =
+    Boolean(activeBlueprint) &&
+    entryProductTypeIdRef.current != null &&
+    activeBlueprint!.productTypeId !== entryProductTypeIdRef.current
+
+  const navigateToBlueprint = useCallback(
+    (bp: BlueprintInfo) => {
+      if (bp.productTypeId === activeBlueprint?.productTypeId) return
+      setActiveBlueprint(bp)
+      onProductChange?.(bp.productTypeId)
+    },
+    [activeBlueprint?.productTypeId, onProductChange],
+  )
+
+  const blueprintByProduct = useMemo(() => {
+    if (!sde) return new Map<number, BlueprintInfo>()
+    const map = new Map<number, BlueprintInfo>()
+    for (const bp of getAllBlueprints(sde.registry)) {
+      map.set(bp.productTypeId, bp)
+    }
+    return map
+  }, [sde])
+
+  const goBack = useCallback(() => {
+    if (!canGoBack) return
+    const entryId = entryProductTypeIdRef.current
+    const entry = entryId != null ? blueprintByProduct.get(entryId) : undefined
+    if (entry) navigateToBlueprint(entry)
+  }, [canGoBack, blueprintByProduct, navigateToBlueprint])
+
+  const openGraphForType = useCallback(
+    (typeId: number) => {
+      const bp = blueprintByProduct.get(typeId)
+      if (bp) navigateToBlueprint(bp)
+    },
+    [blueprintByProduct, navigateToBlueprint],
+  )
+
+  const graphNav = useMemo(
+    (): GraphNavContextValue => ({ openGraphForType }),
+    [openGraphForType],
+  )
+
+  const priceLabels = useMemo(() => {
+    if (!sde) return null
+    const hubMarket = getHubMarket(sde.market, hub)
+    if (!hubMarket) return null
+    const { buildSystemId } = resolveBuildSystem(
+      sde.systems,
+      sde.regions,
+      hubMarket,
+      settings.manufacturingSystemId,
+    )
+    const hubConfig = HUBS.find((h) => h.id === hub)
+    const buildSystemName =
+      sde.systems.find((s) => s.systemId === buildSystemId)?.name ??
+      hubConfig?.buildSystemName ??
+      'hub default'
+    return buildGraphPriceLabels(hub, priceWindow, settings.priceMethod, buildSystemName)
+  }, [sde, hub, priceWindow, settings.manufacturingSystemId, settings.priceMethod])
 
   const layout = useMemo(() => {
-    if (!sde || !blueprint) return { nodes: [], edges: [] }
+    if (!sde || !activeBlueprint) return { nodes: [], edges: [] }
     const hubMarket = getHubMarket(sde.market, hub)
     if (!hubMarket) return { nodes: [], edges: [] }
 
@@ -445,10 +1492,18 @@ export function BlueprintGraphModal({ blueprint, hub, settings, onClose }: Bluep
     )
 
     const typeMap = buildTypeMap(sde.types)
-    const prices = buildPriceMap(hubMarket)
+    const spotPrices = buildPriceMap(hubMarket)
+    const buyPrices = buildBuyPriceMap(hubMarket)
+    const prices = buildWindowPriceMap(hubMarket, priceWindow, spotPrices)
     const allBlueprints = getAllBlueprints(sde.registry)
+    const buildTargets = findBuildTargetDetails(
+      allBlueprints,
+      activeBlueprint.productTypeId,
+      typeMap,
+    )
+    const sourceName = typeMap.get(activeBlueprint.productTypeId)?.name ?? 'this item'
     const chain = buildSupplyChain(
-      blueprint,
+      activeBlueprint,
       allBlueprints,
       typeMap,
       prices,
@@ -456,8 +1511,21 @@ export function BlueprintGraphModal({ blueprint, hub, settings, onClose }: Bluep
       settings.meDefault,
       costIndex,
     )
-    return chainToFlow(chain)
-  }, [sde, blueprint, hub, settings])
+    const flow = chainToFlow(chain)
+    const withSummary = attachOutputSummary(
+      flow.nodes,
+      chain,
+      activeBlueprint,
+      settings,
+      activeRankedRow,
+      buyPrices,
+    )
+    const withTargets = attachBuildTargetNodes(withSummary, flow.edges, buildTargets, sourceName)
+    return {
+      nodes: markNavigableNodes(withTargets.nodes, blueprintByProduct),
+      edges: withTargets.edges,
+    }
+  }, [sde, activeBlueprint, hub, priceWindow, settings, activeRankedRow, blueprintByProduct])
 
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(layout.nodes)
   const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState(layout.edges)
@@ -468,52 +1536,81 @@ export function BlueprintGraphModal({ blueprint, hub, settings, onClose }: Bluep
   }, [layout, setFlowNodes, setFlowEdges])
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    const typeId = (node.data as { typeId: number }).typeId
-    window.open(appRoute(`item/${typeId}`), '_blank', 'noopener,noreferrer')
+    if (node.type === 'buildTargetNode') return
+    const data = node.data as SupplyNodeData
+    if (data.canOpenGraph) return
+    if (!data.typeId) return
+    window.open(appRoute(`item/${data.typeId}`), '_blank', 'noopener,noreferrer')
   }, [])
 
-  if (!blueprint) return null
+  if (!activeBlueprint) return null
 
-  return (
-    <dialog className="modal modal-open">
-      <div className="modal-box max-w-5xl w-full h-[80vh] flex flex-col">
-        <div className="flex items-center justify-between mb-2 shrink-0">
-          <h3 className="font-bold text-lg">Production graph</h3>
+  const shellClassName =
+    variant === 'page'
+      ? 'flex flex-col flex-1 min-h-0 w-full'
+      : 'flex flex-col h-full min-h-0'
+
+  const graphPanel = (
+    <div className={shellClassName}>
+      <div className="flex items-center justify-between mb-2 shrink-0 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          {canGoBack ? (
+            <button type="button" className="btn btn-xs btn-ghost shrink-0" onClick={goBack}>
+              ← Back
+            </button>
+          ) : null}
+          <div className="min-w-0">
+            <h3 className="font-bold text-lg leading-tight">Production graph</h3>
+            {activeProductName ? (
+              <p className="text-sm opacity-60 truncate">{activeProductName}</p>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <GraphShareActions
+            productTypeId={activeBlueprint.productTypeId}
+            search={shareSearch}
+            variant={variant}
+            onOpenPage={onOpenPage}
+          />
           <button type="button" className="btn btn-sm btn-circle btn-ghost" onClick={onClose}>
             ✕
           </button>
         </div>
-        <p className="text-xs opacity-60 mb-3 shrink-0">
-          Hover a node for details, drag to rearrange, click to open item detail in a new tab. Prices from static market data.
-        </p>
-        <div className="flex-1 min-h-0 border border-eve-border rounded-lg overflow-hidden">
-          {flowNodes.length > 0 ? (
-            <ReactFlow
-              nodes={flowNodes}
-              edges={flowEdges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              nodeTypes={nodeTypes}
-              onNodeClick={onNodeClick}
-              nodesDraggable
-              nodesConnectable={false}
-              elementsSelectable={false}
-              panOnScroll
-              selectionOnDrag={false}
-              defaultEdgeOptions={edgeDefaults}
-              fitView
-              fitViewOptions={{ padding: 0.15 }}
-              proOptions={{ hideAttribution: true }}
-            >
-              <Background />
-            </ReactFlow>
-          ) : (
-            <div className="flex items-center justify-center h-full text-sm opacity-60">
-              No supply chain data available.
-            </div>
-          )}
-        </div>
       </div>
+      {priceLabels ? <GraphPriceSourceBar source={priceLabels} /> : null}
+      <div className="relative flex-1 min-h-[24rem] border border-eve-border rounded-lg overflow-hidden">
+        {flowNodes.length > 0 ? (
+          <GraphPriceContext.Provider value={priceLabels}>
+            <GraphNavContext.Provider value={graphNav}>
+              <ReactFlowProvider>
+                <GraphFlowCanvas
+                  flowNodes={flowNodes}
+                  flowEdges={flowEdges}
+                  onNodesChange={onNodesChange}
+                  onEdgesChange={onEdgesChange}
+                  onNodeClick={onNodeClick}
+                  productTypeId={activeBlueprint.productTypeId}
+                />
+              </ReactFlowProvider>
+            </GraphNavContext.Provider>
+          </GraphPriceContext.Provider>
+        ) : (
+          <div className="flex items-center justify-center h-full text-sm opacity-60">
+            No supply chain data available.
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  if (variant === 'page') {
+    return graphPanel
+  }
+
+  return (
+    <dialog className="modal modal-open">
+      <div className="modal-box max-w-5xl w-full h-[80vh] flex flex-col">{graphPanel}</div>
       <form method="dialog" className="modal-backdrop">
         <button type="button" onClick={onClose}>
           close

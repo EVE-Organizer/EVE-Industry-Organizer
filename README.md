@@ -1,17 +1,13 @@
 # EVE Industry Organizer
 
-A frontend-only React app for organizing EVE Online industry: blueprint rankings, home station comparison, supply chains, account tracking, and skill progression.
+A frontend-only React app for EVE Online industry planning: blueprint profit rankings and supply chains.
 
 ## Features
 
 - **Top Blueprints**: static rankings from bundled market data (no fetch on list load), budget slider, tier filters, ISK/hr sort, live haul route danger
 - **Production graph**: click a blueprint row to open a supply-chain graph modal (`@xyflow/react`); click nodes to open item detail
 - **Item detail**: instant metadata from SDE types, live sell price and full market history from ESI
-- **Stations**: multi-hub ranking (Jita, Amarr, Dodixie, Rens, Hek) using static cost indices
-- **Accounts**: characters, ISK goals, minerals, sell orders, research timers, jobs
-- **Progression**: multiple skill paths with training queue estimates
-- **Onboarding**: blocking first-visit wizard (no EVE login)
-- **Google Drive sync**: optional auto-sync of user data (not price cache)
+- **Settings**: global defaults and character skills for buildability checks (no EVE login)
 - **Layered API caching**: TanStack Query + localStorage TTL + request throttling
 
 ## Stack
@@ -22,7 +18,6 @@ React · TypeScript · Vite · Tailwind CSS · DaisyUI · TanStack Query/Virtual
 
 ```bash
 pnpm install
-cp .env.example .env   # optional: set VITE_GOOGLE_CLIENT_ID for Drive sync
 pnpm run dev
 ```
 
@@ -79,17 +74,7 @@ MARKET_HISTORY_TTL_HOURS=48 pnpm run rebuild-market     # keep history cache lon
 | Rankings on Blueprints page | Client-side join of `blueprints.json` + `market.json` + user settings |
 | Haul route danger | Live ESI `system_kills` + `route` (cached, ~3 calls per hub/region change) |
 | Item detail price & history | Live ESI / Fuzzwork on `/item/:typeId` only |
-| Character settings & progress | Manual entry · localStorage · optional Google Drive |
-
-## Google Drive sync
-
-1. Create a Google Cloud project
-2. Enable Google Drive API
-3. Create OAuth 2.0 Web Client ID
-4. Add your origin (e.g. `http://localhost:5173`) to authorized origins
-5. Set `VITE_GOOGLE_CLIENT_ID` in `.env`
-
-Sign in from **Settings → Sign in with Google**. User data syncs to `EVE Industry Organizer/userData.json` in your Drive.
+| Character settings & progress | Manual entry · localStorage |
 
 ## License
 

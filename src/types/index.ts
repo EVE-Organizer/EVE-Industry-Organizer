@@ -1,10 +1,11 @@
-export type HubId = 'jita' | 'amarr' | 'dodixie' | 'rens' | 'hek' | 'xhq7v'
+export type HubId = 'jita' | 'amarr' | 'dodixie' | 'rens' | 'hek' | 'ympwl'
 
 export const MAX_ME = 10
 export const MAX_TE = 20
 export const MIN_BATCH_SIZE = 10
 export const MAX_BATCH_SIZE = 500
 export const BATCH_SIZE_STEP = 10
+export const DEFAULT_BATCH_SIZE = 100
 
 export type BlueprintTier = 't1' | 't2' | 'faction'
 
@@ -64,18 +65,6 @@ export interface SkillInfo {
   rank: number
   prerequisites: { skillId: number; level: number }[]
   iconUrl: string
-}
-
-export interface StationInfo {
-  stationId: number
-  name: string
-  systemId: number
-  systemName: string
-  regionId: number
-  regionName: string
-  security: number
-  hubId: HubId
-  isBuildHub?: boolean
 }
 
 export interface SystemInfo {
@@ -173,9 +162,6 @@ export interface GlobalSettings {
   sellHubId: HubId
   meDefault: number
   teDefault: number
-  batchSize: number
-  brokerFeePercent: number
-  salesTaxPercent: number
   structureType: StructureType
   /** Extra material reduction from structure role bonus (player structures only). */
   structureMeBonusPercent: number
@@ -186,37 +172,26 @@ export interface GlobalSettings {
   /** Manufacturing tax charged by the structure owner (player structures only). */
   structureTaxPercent: number
   priceMethod: 'sell_orders' | 'buy_orders'
-  /** Runs a T1/faction BPO is assumed to live for, used to amortize its purchase + research cost. */
-  blueprintLifetimeRuns: number
+  /** Per product-category assumed BPO lifetime runs for T1 amortization. */
+  blueprintLifetimeRunsByCategory: BpoLifetimeRunsByCategory
   /** Assumed level (0-5) for invention encryption + datacore skills, used to estimate T2 success chance. */
   inventionSkillLevel: number
   /** Include blueprint acquisition cost (amortized BPO / invention) in profit and budget. */
   includeBlueprintCost: boolean
+  /** Assumed manufacturing and market skill levels used in profit and ranking calculations. */
+  skills: SkillLevels
 }
 
-export interface CharacterSkills {
+/** Global settings plus per-job run count for manufacturing cost and profit math. */
+export type ManufacturingSettings = GlobalSettings & { batchSize: number }
+
+export interface SkillLevels {
   industry: number
-  massProduction: number
   advancedIndustry: number
+  science: number
   accounting: number
   brokerRelations: number
-  metallurgy: number
-  science: number
-  research: number
   [key: string]: number
-}
-
-export interface OwnedBPO {
-  blueprintTypeId: number
-  me: number
-  te: number
-}
-
-export interface RunningJob {
-  id: string
-  blueprintTypeId: number
-  runs: number
-  endDate: string
 }
 
 export interface MineralStock {
@@ -229,41 +204,6 @@ export interface MineralStock {
   megacyte: number
 }
 
-export interface SellOrder {
-  id: string
-  itemName: string
-  quantity: number
-  price: number
-  expiry: string
-}
-
-export interface ResearchTimer {
-  id: string
-  blueprintTypeId: number
-  type: 'me' | 'te'
-  targetLevel: number
-  endDate: string
-}
-
-export interface CharacterAccount {
-  id: string
-  name: string
-  isOmega: boolean
-  iskGoal: number
-  iskCurrent: number
-  skills: CharacterSkills
-  ownedBPOs: OwnedBPO[]
-  runningJobs: RunningJob[]
-  mineralStock: MineralStock
-  sellOrders: SellOrder[]
-  researchTimers: ResearchTimer[]
-  primaryPathId?: string
-  secondaryPathId?: string
-  skillProgress: Record<string, number>
-  intelligence: number
-  memory: number
-}
-
 export interface WatchlistItem {
   productTypeId: number
   addedAt: string
@@ -272,18 +212,8 @@ export interface WatchlistItem {
 export interface UserData {
   schemaVersion: number
   updatedAt: string
-  onboardingComplete: boolean
   settings: GlobalSettings
-  accounts: CharacterAccount[]
   watchlist: WatchlistItem[]
-  progressionState: Record<string, Record<string, number>>
-}
-
-export interface SyncStatus {
-  mode: 'local' | 'drive'
-  state: 'synced' | 'syncing' | 'offline' | 'error'
-  lastSyncedAt: string | null
-  message?: string
 }
 
 export interface HubConfig {
@@ -353,6 +283,7 @@ export interface BlueprintCostBreakdown {
   bpoUnitPrice?: number
   researchFee?: number
   lifetimeRuns?: number
+  lifetimeCategory?: BpoLifetimeCategoryKey
   /** T2 (invention). */
   datacoreCost?: number
   inventionChance?: number
@@ -457,29 +388,39 @@ export interface SupplyChainNode {
   productTypeId?: number
 }
 
-export interface SkillPathStage {
-  id: string
-  name: string
-  rationale: string
-  unlocks: string
-  skills: { skillKey: string; targetLevel: number }[]
+export const BPO_LIFETIME_CATEGORY_KEYS = [
+  'ship',
+  'module',
+  'drone',
+  'deployable',
+  'structure',
+  'default',
+] as const
+
+export type BpoLifetimeCategoryKey = (typeof BPO_LIFETIME_CATEGORY_KEYS)[number]
+
+export type BpoLifetimeRunsByCategory = Record<BpoLifetimeCategoryKey, number>
+
+export const DEFAULT_BPO_LIFETIME_RUNS_BY_CATEGORY: BpoLifetimeRunsByCategory = {
+  ship: 50,
+  module: 500,
+  drone: 2000,
+  deployable: 30,
+  structure: 20,
+  default: 500,
 }
 
-export interface SkillPath {
-  id: string
-  name: string
-  description: string
-  stages: SkillPathStage[]
-}
+export const MIN_BLUEPRINT_LIFETIME_RUNS = 1
+export const MAX_BLUEPRINT_LIFETIME_RUNS = 100_000
 
-export interface StationRanking {
-  hub: HubConfig
-  buildSystem: SystemInfo
-  liquidityScore: number
-  costIndex: number
-  haulDistance: number
-  totalScore: number
-  explanation: string
+export const DEFAULT_SKILL_LEVEL = 3
+
+export const DEFAULT_SKILLS: SkillLevels = {
+  industry: DEFAULT_SKILL_LEVEL,
+  advancedIndustry: DEFAULT_SKILL_LEVEL,
+  science: DEFAULT_SKILL_LEVEL,
+  accounting: DEFAULT_SKILL_LEVEL,
+  brokerRelations: DEFAULT_SKILL_LEVEL,
 }
 
 export const DEFAULT_SETTINGS: GlobalSettings = {
@@ -488,48 +429,21 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   sellHubId: 'jita',
   meDefault: MAX_ME,
   teDefault: MAX_TE,
-  batchSize: 100,
-  brokerFeePercent: 1,
-  salesTaxPercent: 3.6,
   structureType: 'npc',
   structureMeBonusPercent: 0,
   structureTeBonusPercent: 0,
   structureJobCostBonusPercent: 0,
   structureTaxPercent: 0,
   priceMethod: 'sell_orders',
-  blueprintLifetimeRuns: 1000,
+  blueprintLifetimeRunsByCategory: { ...DEFAULT_BPO_LIFETIME_RUNS_BY_CATEGORY },
   inventionSkillLevel: 4,
   includeBlueprintCost: true,
+  skills: { ...DEFAULT_SKILLS },
 }
-
-export const DEFAULT_BLUEPRINT_LIFETIME_RUNS = 1000
-export const MIN_BLUEPRINT_LIFETIME_RUNS = 1
-export const MAX_BLUEPRINT_LIFETIME_RUNS = 100_000
 
 /** T2 invented blueprint copy base efficiency without a decryptor. */
 export const T2_INVENTED_ME = 2
 export const T2_INVENTED_TE = 4
-
-export const DEFAULT_SKILLS: CharacterSkills = {
-  industry: 0,
-  massProduction: 0,
-  advancedIndustry: 0,
-  accounting: 0,
-  brokerRelations: 0,
-  metallurgy: 0,
-  science: 0,
-  research: 0,
-}
-
-export const DEFAULT_MINERALS: MineralStock = {
-  tritanium: 0,
-  pyerite: 0,
-  mexallon: 0,
-  isogen: 0,
-  nocxium: 0,
-  zydrine: 0,
-  megacyte: 0,
-}
 
 export const HUBS: HubConfig[] = [
   {
@@ -588,15 +502,15 @@ export const HUBS: HubConfig[] = [
     marketSystemId: 30002053,
   },
   {
-    id: 'xhq7v',
-    name: 'XHQ-7V',
+    id: 'ympwl',
+    name: 'Y-MPWL',
     regionId: 10000047,
     regionName: 'Providence',
     sellStationId: 0,
-    sellStationName: 'XHQ-7V',
-    buildSystemId: 30003731,
-    buildSystemName: 'XHQ-7V',
-    marketSystemId: 30003731,
+    sellStationName: 'Y-MPWL',
+    buildSystemId: 30003726,
+    buildSystemName: 'Y-MPWL',
+    marketSystemId: 30003726,
   },
 ]
 
@@ -606,7 +520,7 @@ export const REGION_IDS: Record<HubId, number> = {
   dodixie: 10000032,
   rens: 10000030,
   hek: 10000042,
-  xhq7v: 10000047,
+  ympwl: 10000047,
 }
 
 export const MINERAL_TYPE_IDS: Record<keyof MineralStock, number> = {

@@ -37,6 +37,7 @@ export function filterHistoryByRange(history: MarketHistoryEntry[], range: TimeR
 }
 
 export function formatIsk(value: number): string {
+  if (!Number.isFinite(value)) return '∞'
   if (Math.abs(value) >= 1_000_000_000) {
     return `${formatDecimal(value / 1_000_000_000, 2)}B`
   }
@@ -51,6 +52,7 @@ export function formatIsk(value: number): string {
 
 /** Compact amount + unit for setup budget inputs (M/B only). */
 export function formatIskInputUnit(value: number): { amount: string; unit: 'M' | 'B' } {
+  if (!Number.isFinite(value)) return { amount: '∞', unit: 'B' }
   if (Math.abs(value) >= 1_000_000_000) {
     const scaled = value / 1_000_000_000
     return { amount: trimInputAmount(scaled), unit: 'B' }
@@ -68,6 +70,7 @@ function trimInputAmount(n: number): string {
 export function parseIskInputUnit(raw: string, defaultUnit: 'M' | 'B' = 'M'): number | null {
   const cleaned = raw.replace(/,/g, '').trim()
   if (!cleaned) return null
+  if (/^∞$/.test(cleaned) || /^infinity$/i.test(cleaned)) return Number.POSITIVE_INFINITY
   const match = cleaned.match(/^([\d.]+)\s*([bB])?$/)
   if (!match) return null
   const num = Number(match[1])
@@ -102,4 +105,37 @@ export function formatAvgVolume(avgVolume: number): string {
 
 export function formatQuantity(value: number): string {
   return formatNumber(value, 0)
+}
+
+/** Production graph nodes: `x1,552`. */
+export function formatGraphQuantity(value: number): string {
+  return `x${formatNumber(value, 0)}`
+}
+
+/** Production graph nodes: `4.7k ISK` (lowercase suffix, explicit ISK). */
+export function formatGraphUnitIsk(value: number): string {
+  if (!Number.isFinite(value) || value <= 0) return '—'
+  if (Math.abs(value) >= 1_000_000_000) {
+    return `${trimCompactDecimal(value / 1_000_000_000, 1)}b ISK`
+  }
+  if (Math.abs(value) >= 1_000_000) {
+    return `${trimCompactDecimal(value / 1_000_000, 1)}m ISK`
+  }
+  if (Math.abs(value) >= 1_000) {
+    return `${trimCompactDecimal(value / 1_000, 1)}k ISK`
+  }
+  return `${formatNumber(value, 0)} ISK`
+}
+
+/** Job duration for UI: days, hr, min, or sec. */
+export function formatDuration(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds <= 0) return '—'
+  if (seconds >= 86_400) return `${formatDecimal(seconds / 86_400, 2)} days`
+  if (seconds >= 3_600) return `${formatDecimal(seconds / 3_600, 2)} hr`
+  if (seconds >= 60) return `${formatDecimal(seconds / 60, 1)} min`
+  return `${formatNumber(seconds, 0)} sec`
+}
+
+function trimCompactDecimal(value: number, decimals: number): string {
+  return formatDecimal(value, decimals).replace(/\.0$/, '')
 }

@@ -19,3 +19,8 @@ export function appRoute(path: string): string {
   const route = path.replace(/^\//, '')
   return new URL(route, getAppRoot()).href
 }
+
+/** Shareable production graph path (relative, for React Router). */
+export function productionGraphRoute(productTypeId: number): string {
+  return `/graph/${productTypeId}`
+}

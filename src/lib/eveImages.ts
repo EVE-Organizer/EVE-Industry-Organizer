@@ -72,9 +72,16 @@ export function imageUrlChain(
 
 /** Representative product type icons for blueprint tier filters. */
 export const TIER_TYPE_IDS: Record<BlueprintTier, number> = {
-  t1: 215,
-  t2: 2048,
-  faction: 17888,
+  t1: 587, // Rifter
+  t2: 2048, // Damage Control II
+  faction: 2050, // Gistum C-Type Multispectrum Shield Hardener
+}
+
+/** Render ships for visibility; modules use flat icons. */
+export const TIER_IMAGE_VARIANTS: Record<BlueprintTier, ImageVariant> = {
+  t1: 'render',
+  t2: 'icon',
+  faction: 'icon',
 }
 
 export const TIER_FILTER_LABELS: Record<BlueprintTier, string> = {
@@ -83,20 +90,9 @@ export const TIER_FILTER_LABELS: Record<BlueprintTier, string> = {
   faction: 'Faction',
 }
 
-/** Skill path cards on the Progression page. */
-export const PATH_TYPE_IDS: Record<string, number> = {
-  't1-ammo': 215,
-  't2-invention': 2048,
-  'trade-tax': 16622,
-  'mining-reprocess': 1230,
-}
-
-/** Dashboard / nav shortcut tiles. */
+/** Blueprint filter icon fallback. */
 export const NAV_TYPE_IDS = {
   blueprints: 3841,
-  accounts: 3380,
-  progression: 24625,
-  dashboard: 215,
 } as const
 
 export const MINERAL_KEYS = Object.keys(MINERAL_TYPE_IDS) as (keyof MineralStock)[]
@@ -112,5 +108,5 @@ export const HUB_FACTION_IDS: Record<HubId, number> = {
   dodixie: 500004,
   rens: 500003,
   hek: 500003,
-  xhq7v: 500002,
+  ympwl: 500002,
 }

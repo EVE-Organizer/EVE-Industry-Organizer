@@ -1,15 +1,25 @@
+import type { ReactNode } from 'react'
 import type { BlueprintTier, TimeRange } from '@/types'
-import { BLUEPRINT_TIERS } from '@/types'
-import { HUBS } from '@/types'
+import {
+  BATCH_SIZE_STEP,
+  BLUEPRINT_TIERS,
+  HUBS,
+  MAX_BATCH_SIZE,
+  MIN_BATCH_SIZE,
+} from '@/types'
 import type { SdeData, ProductGroupCategoryNode } from '@/services/data/sdeLoader'
 import { defaultQuery, type BlueprintQuery } from '@/lib/blueprintQuery'
 import { useAppStore } from '@/stores/appStore'
 import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
 import { ProductGroupPicker } from '@/components/ProductGroupPicker'
+import { RangeSlider } from '@/components/RangeSlider'
 import { SetupBudgetRange } from '@/components/SetupBudgetRange'
+import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { EveImage } from '@/components/EveImage'
-import { TIER_FILTER_LABELS, TIER_TYPE_IDS } from '@/lib/eveImages'
+import { Panel } from '@/components/Panel'
+import { TIER_FILTER_LABELS, TIER_IMAGE_VARIANTS, TIER_TYPE_IDS } from '@/lib/eveImages'
+import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 import { useEffect, useState } from 'react'
 
 const TIME_WINDOWS: TimeRange[] = ['1d', '1w', '1m', '1y', 'all']
@@ -20,6 +30,74 @@ interface BlueprintFilterBarProps {
   sde: SdeData | undefined
   productGroupTree: ProductGroupCategoryNode[]
   resultCount: number
+  resultPending?: boolean
+}
+
+function FilterSection({
+  title,
+  hint,
+  children,
+  className = '',
+}: {
+  title: string
+  hint: string
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <section
+      className={`rounded-lg border border-eve-border bg-base-300/15 p-4 flex flex-col gap-3 min-w-0 ${className}`}
+    >
+      <header className="min-w-0">
+        <h3 className="text-sm font-semibold leading-tight">{title}</h3>
+        <p className="text-xs opacity-50 mt-0.5">{hint}</p>
+      </header>
+      {children}
+    </section>
+  )
+}
+
+function LimitsTile({
+  children,
+  className = '',
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <div
+      className={`rounded-md border border-eve-border bg-base-300/10 p-3 flex flex-col gap-2 min-w-0 ${className}`}
+    >
+      {children}
+    </div>
+  )
+}
+
+function FilterChip({
+  active,
+  onClick,
+  children,
+  className = '',
+  tall = false,
+}: {
+  active: boolean
+  onClick: () => void
+  children: ReactNode
+  className?: string
+  tall?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      className={`category-chip ${active ? 'btn-primary' : 'btn-ghost border border-eve-border'} ${
+        tall ? 'flex-col gap-1.5 min-h-[4.5rem] py-2' : ''
+      } ${className}`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  )
 }
 
 export function BlueprintFilterBar({
@@ -28,6 +106,7 @@ export function BlueprintFilterBar({
   sde,
   productGroupTree,
   resultCount,
+  resultPending = false,
 }: BlueprintFilterBarProps) {
   const settings = useAppStore((s) => s.userData.settings)
   const [minVolumeDraft, setMinVolumeDraft] = useState(
@@ -54,171 +133,254 @@ export function BlueprintFilterBar({
     const tiers = active
       ? query.tiers.filter((t) => t !== tier)
       : [...query.tiers, tier]
-    onChange({ tiers, group: 'all' })
+    onChange({ tiers, groups: [] })
   }
 
   return (
-    <section className="card bg-base-200 border border-eve-border w-full min-w-0 mb-4 shrink-0">
-      <div className="card-body gap-0 p-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-eve-border">
-          <div className="flex items-center gap-2 min-w-0">
-            <h2 className="text-sm font-semibold shrink-0">Filters</h2>
-            <button type="button" className="btn btn-ghost btn-xs" onClick={handleReset}>
-              Reset
-            </button>
-          </div>
-          <span className="badge badge-ghost badge-sm self-start sm:self-auto tabular-nums">
-            {resultCount} shown
+    <Panel
+      title="Filters"
+      titleClassName="text-sm"
+      compact
+      className="w-full min-w-0 mb-4 shrink-0"
+      bodyClassName="gap-4"
+      actions={
+        <div className="flex items-center gap-2 shrink-0">
+          <button type="button" className="btn btn-ghost btn-xs" onClick={handleReset}>
+            Reset
+          </button>
+          <span className="badge badge-ghost badge-sm tabular-nums">
+            {resultPending ? 'Updating…' : `${resultCount} shown`}
           </span>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-x-8 min-w-0">
-          <div className="flex flex-col min-w-0 divide-y divide-eve-border">
-            <div className="flex flex-col gap-3 py-3 min-w-0">
-              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-                <label className="form-control w-full min-w-0 sm:flex-1 sm:min-w-[10rem]">
-                  <span className="label-text text-sm pb-1">Hub</span>
-                  <select
-                    className="select select-bordered select-sm w-full"
-                    value={query.hub}
-                    onChange={(e) => onChange({ hub: e.target.value as typeof query.hub })}
-                  >
-                    {HUBS.map((h) => (
-                      <option key={h.id} value={h.id}>
-                        {h.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                {sde && (
-                  <label className="form-control w-full min-w-0 sm:flex-1 sm:min-w-[10rem]">
-                    <span className="label-text text-sm pb-1">Mfg system</span>
-                    <ManufacturingSystemPicker
-                      value={query.mfgSystem}
-                      onChange={(systemId) => onChange({ mfgSystem: systemId })}
-                      systems={sde.systems}
-                      regions={sde.regions}
-                      className="w-full max-w-none"
-                    />
-                  </label>
-                )}
-              </div>
-
+      }
+    >
+      <div className="flex flex-col gap-4 min-w-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0 items-stretch">
+          <FilterSection
+            title="Where & prices"
+            hint="Hub, build system, market data, and availability"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="form-control w-full min-w-0">
-                <span className="label-text text-sm pb-1">Window</span>
-                <div
-                  role="group"
-                  aria-label="Time window"
-                  className="grid grid-cols-5 w-full min-w-0 rounded-lg border border-eve-border overflow-hidden divide-x divide-eve-border"
+                <FormFieldLabel label="Hub" size="sm" />
+                <select
+                  className="select select-bordered select-sm w-full"
+                  value={query.hub}
+                  onChange={(e) => onChange({ hub: e.target.value as typeof query.hub })}
                 >
-                  {TIME_WINDOWS.map((r) => {
-                    const active = query.window === r
-                    return (
-                      <button
-                        key={r}
-                        type="button"
-                        aria-pressed={active}
-                        className={`btn btn-sm rounded-none min-h-9 min-w-0 border-0 px-0 font-medium ${
-                          active
-                            ? 'btn-primary hover:btn-primary'
-                            : 'bg-base-200/50 hover:bg-base-300/70'
-                        }`}
-                        onClick={() => onChange({ window: r })}
-                      >
-                        {r}
-                      </button>
-                    )
-                  })}
-                </div>
+                  {HUBS.map((h) => (
+                    <option key={h.id} value={h.id}>
+                      {h.name}
+                    </option>
+                  ))}
+                </select>
               </label>
+
+              {sde && (
+                <label className="form-control w-full min-w-0">
+                  <FormFieldLabel label="Mfg system" size="sm" />
+                  <ManufacturingSystemPicker
+                    value={query.mfgSystem}
+                    onChange={(systemId) => onChange({ mfgSystem: systemId })}
+                    systems={sde.systems}
+                    regions={sde.regions}
+                    className="w-full max-w-none"
+                  />
+                </label>
+              )}
             </div>
 
-            <div className="flex flex-col gap-3 py-3 min-w-0">
-              <div className="flex flex-wrap gap-2">
-                {BLUEPRINT_TIERS.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    aria-pressed={query.tiers.includes(t)}
-                    className={`category-chip ${query.tiers.includes(t) ? 'btn-primary' : 'btn-ghost border border-eve-border'}`}
-                    onClick={() => toggleTier(t)}
+            <label className="form-control w-full min-w-0">
+              <FormFieldLabel
+                label="Price method"
+                tooltip={GLOBAL_SETTING_TOOLTIPS.priceMethod}
+                size="sm"
+              />
+              <select
+                className="select select-bordered select-sm w-full"
+                value={query.priceMethod}
+                onChange={(e) =>
+                  onChange({
+                    priceMethod: e.target.value as typeof query.priceMethod,
+                  })
+                }
+              >
+                <option value="sell_orders">Sell orders (list and average)</option>
+                <option value="buy_orders">Buy orders (instant sell)</option>
+              </select>
+            </label>
+
+            <div className="form-control w-full min-w-0">
+              <FormFieldLabel label="Price window" size="sm" />
+              <div
+                role="group"
+                aria-label="Price window"
+                className="grid grid-cols-5 gap-1.5 w-full min-w-0"
+              >
+                {TIME_WINDOWS.map((r) => (
+                  <FilterChip
+                    key={r}
+                    active={query.window === r}
+                    onClick={() => onChange({ window: r })}
+                    className="min-w-0 px-0"
                   >
-                    <EveImage id={TIER_TYPE_IDS[t]} size={20} framed alt="" />
-                    {TIER_FILTER_LABELS[t]}
-                  </button>
+                    {r}
+                  </FilterChip>
                 ))}
               </div>
+            </div>
 
-              <div className="flex items-center gap-2 min-w-0">
-                <ProductGroupPicker
-                  value={query.group}
-                  onChange={(group) => onChange({ group })}
-                  tree={productGroupTree}
-                  className="w-full max-w-none min-w-0"
-                />
-                <InfoTooltip text="Search by group, category, or item name. Rankings reset to All groups when you change tiers." />
+            <div className="form-control w-full min-w-0">
+              <FormFieldLabel label="Availability" size="sm" />
+              <div className="rounded-md border border-eve-border bg-base-300/10 px-3 py-2.5 flex flex-col gap-2">
+                <label className="label cursor-pointer gap-2 justify-start py-0 min-h-0">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-sm"
+                    checked={query.buildableOnly}
+                    onChange={(e) => onChange({ buildableOnly: e.target.checked })}
+                  />
+                  <span className="label-text text-sm inline-flex items-center gap-1.5">
+                    Only buildable
+                    <InfoTooltip text="Checks Industry and other skills you entered during setup or in Settings." />
+                  </span>
+                </label>
+
+                <label className="label cursor-pointer gap-2 justify-start py-0 min-h-0">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-sm"
+                    checked={query.includeHaul}
+                    onChange={(e) => onChange({ includeHaul: e.target.checked })}
+                  />
+                  <span className="label-text text-sm inline-flex items-center gap-1.5">
+                    Include hauling
+                    <InfoTooltip text="Haul in (materials to build system) is added to setup cost; haul out (products to hub) is subtracted from profit. Turn off if you build and sell locally or haul on your own." />
+                  </span>
+                </label>
               </div>
             </div>
-          </div>
+          </FilterSection>
 
-          <div className="flex flex-col gap-3 py-3 min-w-0 border-t border-eve-border lg:border-t-0 lg:border-l lg:pl-8">
+          <FilterSection
+            title="What to build"
+            hint="Blueprint tier and product group"
+            className="h-full"
+          >
+            <div className="shrink-0">
+              <FormFieldLabel label="Tier" size="sm" />
+              <div
+                role="group"
+                aria-label="Blueprint tier"
+                className="grid grid-cols-3 gap-2 w-full min-w-0 mt-1"
+              >
+                {BLUEPRINT_TIERS.map((t) => (
+                  <FilterChip
+                    key={t}
+                    active={query.tiers.includes(t)}
+                    onClick={() => toggleTier(t)}
+                    tall
+                    className="min-w-0 justify-center"
+                  >
+                    <span className="rounded-md bg-base-100/90 p-1 shadow-sm">
+                      <EveImage
+                        id={TIER_TYPE_IDS[t]}
+                        variant={TIER_IMAGE_VARIANTS[t]}
+                        size={40}
+                        framed
+                        alt=""
+                        lazy={false}
+                      />
+                    </span>
+                    <span className="text-xs font-medium">{TIER_FILTER_LABELS[t]}</span>
+                  </FilterChip>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 min-w-0">
+              <FormFieldLabel
+                label="Product group"
+                tooltip="Check groups to limit rankings. Leave none selected for all groups. Rankings reset when you change tiers."
+                size="sm"
+              />
+              <ProductGroupPicker
+                variant="panel"
+                value={query.groups}
+                onChange={(groups) => onChange({ groups })}
+                tree={productGroupTree}
+                className="w-full"
+              />
+            </div>
+          </FilterSection>
+        </div>
+
+        <FilterSection
+          title="Your limits"
+          hint="Budget, batch size, and volume"
+        >
+          <LimitsTile>
             <SetupBudgetRange
               minSlider={query.budgetMinSlider}
               maxSlider={query.budgetMaxSlider}
               onChange={(minSlider, maxSlider) =>
                 onChange({ budgetMinSlider: minSlider, budgetMaxSlider: maxSlider })
               }
-              className="w-full"
+              className="w-full !border-0 !bg-transparent !p-0"
             />
+          </LimitsTile>
 
-            <label className="form-control w-full min-w-0 sm:max-w-[12rem]">
-              <span className="label-text text-sm pb-1 inline-flex items-center gap-1">
-                Min vol/day
-                <InfoTooltip text="Hide blueprints whose average daily traded volume in the selected window is below this threshold. Uses the same Vol/day column as the table." />
-              </span>
-              <input
-                type="number"
-                min={0}
-                step={0.1}
-                className="input input-bordered input-sm w-full tabular-nums"
-                placeholder="Any"
-                value={minVolumeDraft}
-                aria-label="Minimum average daily volume"
-                onChange={(e) => setMinVolumeDraft(e.target.value)}
-                onBlur={commitMinVolume}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') e.currentTarget.blur()
-                }}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <LimitsTile>
+              <FormFieldLabel
+                label="Batch size (runs)"
+                tooltip="Number of manufacturing runs per job. Profit, setup cost, and ISK/hr use this value, capped by hub volume when listed."
+                valueLabel={query.batchSize}
+                size="sm"
               />
-            </label>
-
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <label className="label cursor-pointer gap-2 justify-start py-0">
-                <input
-                  type="checkbox"
-                  className="checkbox checkbox-sm"
-                  checked={query.buildableOnly}
-                  onChange={(e) => onChange({ buildableOnly: e.target.checked })}
+              <div className="flex flex-col justify-end min-h-[2.75rem]">
+                <RangeSlider
+                  min={MIN_BATCH_SIZE}
+                  max={MAX_BATCH_SIZE}
+                  step={BATCH_SIZE_STEP}
+                  value={query.batchSize}
+                  onChange={(batchSize) => onChange({ batchSize })}
+                  label="Batch size"
+                  className="w-full"
                 />
-                <span className="label-text text-sm">Only buildable</span>
-                <InfoTooltip text="Checks Industry and other skills you entered on your account." />
-              </label>
+                <div className="flex justify-between text-xs text-base-content/50 tabular-nums px-0.5 mt-1">
+                  <span>{MIN_BATCH_SIZE}</span>
+                  <span>{MAX_BATCH_SIZE}</span>
+                </div>
+              </div>
+            </LimitsTile>
 
-              <label className="label cursor-pointer gap-2 justify-start py-0">
+            <LimitsTile>
+              <FormFieldLabel
+                label="Min vol/day"
+                tooltip="Hide blueprints whose average daily traded volume is below this threshold. Uses the same Vol/day column as the table (1m volume when the price window is 1y)."
+                size="sm"
+              />
+              <div className="flex items-end min-h-[2.75rem]">
                 <input
-                  type="checkbox"
-                  className="checkbox checkbox-sm"
-                  checked={query.includeHaul}
-                  onChange={(e) => onChange({ includeHaul: e.target.checked })}
+                  type="number"
+                  min={0}
+                  step={0.1}
+                  className="input input-bordered input-sm w-full tabular-nums h-8"
+                  placeholder="Any"
+                  value={minVolumeDraft}
+                  aria-label="Minimum average daily volume"
+                  onChange={(e) => setMinVolumeDraft(e.target.value)}
+                  onBlur={commitMinVolume}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') e.currentTarget.blur()
+                  }}
                 />
-                <span className="label-text text-sm">Include hauling</span>
-                <InfoTooltip text="Haul in (materials to build system) is added to setup cost; haul out (products to hub) is subtracted from profit. Turn off if you build and sell locally or haul on your own." />
-              </label>
-            </div>
+              </div>
+            </LimitsTile>
           </div>
-        </div>
+        </FilterSection>
       </div>
-    </section>
+    </Panel>
   )
 }

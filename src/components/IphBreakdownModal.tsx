@@ -4,6 +4,7 @@ import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent,
 import { EveImage } from '@/components/EveImage'
 import { JobCostFormula, jobCostStepTitle } from '@/components/JobCostFormula'
 import { isPlayerStructure } from '@/lib/structureSettings'
+import { BPO_LIFETIME_CATEGORY_LABELS } from '@/lib/bpoLifetime'
 
 interface IphBreakdownModalProps {
   row: RankedBlueprintRow | null
@@ -187,7 +188,7 @@ export function IphBreakdownModal({
             <StepCard
               step={1}
               title="Blueprint skills"
-              note="From global settings. Per-BPO and character skills are not applied in rankings yet."
+              note="From global settings. Per-BPO ME/TE overrides are not applied in rankings."
             >
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <SkillTile label="ME" value={iph.me} detail="1% less material per level" />
@@ -289,8 +290,7 @@ export function IphBreakdownModal({
               </CalcStep>
             )}
             <CalcStep label="Sales tax">
-              {iph.salesTaxPercent}%
-              {usesBuyOrders ? ' of gross' : ' after broker'} = −{formatIsk(iph.salesTax)}
+              {iph.salesTaxPercent}% of gross = −{formatIsk(iph.salesTax)}
             </CalcStep>
           </StepCard>
 
@@ -354,8 +354,11 @@ export function IphBreakdownModal({
                 <CalcStep label="(Price + research) ÷ lifetime × runs">
                   ({formatIsk(iph.blueprintCost.bpoUnitPrice ?? 0)} +{' '}
                   {formatIsk(iph.blueprintCost.researchFee ?? 0)}) ÷{' '}
-                  {formatQuantity(iph.blueprintCost.lifetimeRuns ?? 0)} × {iph.runs} ={' '}
-                  <strong>{formatIsk(iph.bpoCost)}</strong>
+                  {formatQuantity(iph.blueprintCost.lifetimeRuns ?? 0)}
+                  {iph.blueprintCost.lifetimeCategory
+                    ? ` (${BPO_LIFETIME_CATEGORY_LABELS[iph.blueprintCost.lifetimeCategory]})`
+                    : ''}{' '}
+                  × {iph.runs} = <strong>{formatIsk(iph.bpoCost)}</strong>
                 </CalcStep>
               </StepCard>
             )}
@@ -599,8 +602,8 @@ export function IphBreakdownModal({
 
         <div className="px-5 py-3 border-t border-eve-border bg-base-200/40 text-[11px] opacity-60 space-y-1">
           <p>
-            Rankings use global ME/TE and fee settings. Character skills (Advanced Industry,
-            Accounting, Broker Relations) are not applied yet.
+            Rankings use global ME/TE defaults and skill levels from Settings (Advanced Industry,
+            Accounting, Broker Relations).
           </p>
         </div>
       </div>

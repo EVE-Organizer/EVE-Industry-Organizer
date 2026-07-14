@@ -1,6 +1,17 @@
 import type { GlobalSettings, StructureType } from '@/types'
 import { STRUCTURE_PRESETS } from '@/types'
 
+/** EVE type icons for manufacturing location options. */
+export const STRUCTURE_TYPE_IDS: Record<StructureType, number> = {
+  npc: 1529,
+  raitaru: 35825,
+  azbel: 35826,
+  sotiyo: 35827,
+  custom: 35832,
+}
+
+export const STRUCTURE_TYPES: StructureType[] = ['npc', 'raitaru', 'azbel', 'sotiyo', 'custom']
+
 /** Apply preset bonuses when the user picks a structure type. */
 export function patchStructureType(structureType: StructureType): Partial<GlobalSettings> {
   if (structureType === 'npc') {
@@ -35,6 +46,10 @@ export function structureTypeLabel(type: StructureType): string {
 
 export function isPlayerStructure(type: StructureType): boolean {
   return type !== 'npc'
+}
+
+export function isPresetPlayerStructure(type: StructureType): boolean {
+  return type === 'raitaru' || type === 'azbel' || type === 'sotiyo'
 }
 
 export function jobCostSectionTitle(type: StructureType): string {

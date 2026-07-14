@@ -3,14 +3,10 @@ import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Layout } from '@/components/Layout'
 import { useAppStore } from '@/stores/appStore'
-import { DashboardPage } from '@/pages/DashboardPage'
 import { BlueprintsPage } from '@/pages/BlueprintsPage'
+import { ProductionGraphPage } from '@/pages/ProductionGraphPage'
 import { ItemDetailPage } from '@/pages/ItemDetailPage'
-import { StationsPage } from '@/pages/StationsPage'
-import { AccountsPage } from '@/pages/AccountsPage'
-import { ProgressionPage } from '@/pages/ProgressionPage'
 import { SettingsPage } from '@/pages/SettingsPage'
-import { OnboardingPage } from '@/pages/OnboardingPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,9 +17,18 @@ const queryClient = new QueryClient({
   },
 })
 
-function RequireOnboarding({ children }: { children: React.ReactNode }) {
+function LegacyBlueprintRedirect() {
+  const { typeId } = useParams()
+  return <Navigate to={`/item/${typeId}`} replace />
+}
+
+function AppRoutes() {
+  const hydrate = useAppStore((s) => s.hydrate)
   const hydrated = useAppStore((s) => s.hydrated)
-  const complete = useAppStore((s) => s.userData.onboardingComplete)
+
+  useEffect(() => {
+    hydrate()
+  }, [hydrate])
 
   if (!hydrated) {
     return (
@@ -33,45 +38,20 @@ function RequireOnboarding({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (!complete) return <Navigate to="/onboarding" replace />
-  return <>{children}</>
-}
-
-function LegacyBlueprintRedirect() {
-  const { typeId } = useParams()
-  return <Navigate to={`/item/${typeId}`} replace />
-}
-
-function AppRoutes() {
-  const hydrate = useAppStore((s) => s.hydrate)
-  const complete = useAppStore((s) => s.userData.onboardingComplete)
-  const hydrated = useAppStore((s) => s.hydrated)
-
-  useEffect(() => {
-    hydrate()
-  }, [hydrate])
-
   return (
     <Routes>
-      <Route
-        path="/onboarding"
-        element={hydrated && complete ? <Navigate to="/" replace /> : <OnboardingPage />}
-      />
-      <Route
-        element={
-          <RequireOnboarding>
-            <Layout />
-          </RequireOnboarding>
-        }
-      >
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/blueprints" element={<BlueprintsPage />} />
+      <Route element={<Layout />}>
+        <Route path="/" element={<BlueprintsPage />} />
+        <Route path="/blueprints" element={<Navigate to="/" replace />} />
+        <Route path="/graph/:productTypeId" element={<ProductionGraphPage />} />
         <Route path="/item/:typeId" element={<ItemDetailPage />} />
         <Route path="/blueprints/:typeId" element={<LegacyBlueprintRedirect />} />
-        <Route path="/stations" element={<StationsPage />} />
-        <Route path="/accounts" element={<AccountsPage />} />
-        <Route path="/progression" element={<ProgressionPage />} />
+        <Route path="/stations" element={<Navigate to="/" replace />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
+        <Route path="/accounts" element={<Navigate to="/settings" replace />} />
+        <Route path="/progression" element={<Navigate to="/settings" replace />} />
+        <Route path="/onboarding" element={<Navigate to="/" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

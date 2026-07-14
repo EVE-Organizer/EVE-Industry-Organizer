@@ -3,6 +3,7 @@ import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent,
 import { EveImage } from '@/components/EveImage'
 import { JobCostFormula, jobCostStepTitle } from '@/components/JobCostFormula'
 import { isPlayerStructure } from '@/lib/structureSettings'
+import { BPO_LIFETIME_CATEGORY_LABELS } from '@/lib/bpoLifetime'
 
 interface SetupCostModalProps {
   row: RankedBlueprintRow | null
@@ -33,7 +34,7 @@ function RunsExplanation({ breakdown }: { breakdown: SetupCostBreakdown }) {
   return (
     <ol className="text-sm space-y-1 list-decimal list-inside">
       <li>
-        Settings batch size: <strong>{batchSizeSetting}</strong> runs
+        Batch size: <strong>{batchSizeSetting}</strong> runs
       </li>
       <li>
         Hub avg volume/day ({volumeCapDays}-day cap):{' '}
@@ -160,6 +161,9 @@ function BlueprintCostSection({
         </div>
         <div>
           Lifetime: <strong>{formatQuantity(breakdown.lifetimeRuns ?? 0)}</strong> runs
+          {breakdown.lifetimeCategory ? (
+            <span className="opacity-70"> ({BPO_LIFETIME_CATEGORY_LABELS[breakdown.lifetimeCategory]})</span>
+          ) : null}
         </div>
         <div>
           Charged this batch: ({formatIsk(breakdown.bpoUnitPrice ?? 0)} +{' '}

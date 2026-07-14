@@ -1,5 +1,5 @@
-import type { BlueprintInfo, CharacterAccount } from '@/types'
-import { ONBOARDING_SKILL_FIELDS } from '@/lib/skillFields'
+import type { BlueprintInfo, SkillLevels } from '@/types'
+import { SKILL_FIELDS, skillLevel } from '@/lib/skillFields'
 
 export interface MissingBuildSkill {
   skillName: string
@@ -8,19 +8,19 @@ export interface MissingBuildSkill {
   currentLevel: number
 }
 
-const nameToField = new Map(ONBOARDING_SKILL_FIELDS.map((f) => [f.label, f]))
+const nameToField = new Map(SKILL_FIELDS.map((f) => [f.label, f]))
 
 export function getMissingBuildSkills(
   blueprint: BlueprintInfo,
-  account?: CharacterAccount,
+  skills?: SkillLevels,
 ): MissingBuildSkill[] {
-  if (!account) return []
+  if (!skills) return []
 
   const missing: MissingBuildSkill[] = []
   for (const [skillName, requiredLevel] of Object.entries(blueprint.requiredSkills)) {
     const field = nameToField.get(skillName)
     if (!field) continue
-    const currentLevel = account.skills[field.key] ?? 0
+    const currentLevel = skillLevel(skills, field.key)
     if (currentLevel < requiredLevel) {
       missing.push({
         skillName,
@@ -35,7 +35,7 @@ export function getMissingBuildSkills(
 
 export function meetsBuildRequirements(
   blueprint: BlueprintInfo,
-  account?: CharacterAccount,
+  skills?: SkillLevels,
 ): boolean {
-  return getMissingBuildSkills(blueprint, account).length === 0
+  return getMissingBuildSkills(blueprint, skills).length === 0
 }
