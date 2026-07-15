@@ -78,10 +78,10 @@ export function ProductionGraphPage() {
     return (
       <div className="flex flex-col gap-4">
         <PageHeader
-          title="Production graph"
+          title={productName || 'Production graph'}
           subtitle={
             Number.isFinite(productTypeId)
-              ? `No manufacturing blueprint found for ${productName}.`
+              ? 'No manufacturing blueprint found for this item.'
               : 'Invalid product id in URL.'
           }
         />

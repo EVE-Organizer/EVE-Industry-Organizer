@@ -11,6 +11,7 @@ import {
   type Ref,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   ReactFlow,
   Background,
@@ -55,7 +56,7 @@ interface BlueprintGraphModalProps {
   settings: ManufacturingSettings
   onClose: () => void
   onProductChange?: (productTypeId: number) => void
-  /** Query string for share/open-page links (modal). Page variant uses the current URL. */
+  /** Query string for share links when not on the graph page URL. */
   shareSearch?: string
   onOpenPage?: (productTypeId: number) => void
   variant?: 'modal' | 'page'
@@ -66,19 +67,53 @@ function graphShareHref(productTypeId: number, search: string): string {
   return appRoute(search ? `${route}?${search}` : route)
 }
 
-function GraphShareActions({
+function CopyLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M6.25 5.75h5.5a1.25 1.25 0 0 1 1.25 1.25v5.5a1.25 1.25 0 0 1-1.25 1.25h-5.5A1.25 1.25 0 0 1 5 12.5v-5.5a1.25 1.25 0 0 1 1.25-1.25Z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M3.75 10.25V4.75A1.25 1.25 0 0 1 5 3.5h5.5"
+      />
+    </svg>
+  )
+}
+
+function MarketIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden>
+      <path strokeLinecap="round" strokeWidth="1.5" d="M2.5 12.5h11" />
+      <path strokeLinecap="round" strokeWidth="1.5" d="M4.5 12.5V8" />
+      <path strokeLinecap="round" strokeWidth="1.5" d="M8 12.5V4.5" />
+      <path strokeLinecap="round" strokeWidth="1.5" d="M11.5 12.5V6.5" />
+    </svg>
+  )
+}
+
+function GraphHeaderTitle({
+  productName,
   productTypeId,
   search = '',
   variant,
   onOpenPage,
 }: {
+  productName: string
   productTypeId: number
   search?: string
   variant: 'modal' | 'page'
   onOpenPage?: (productTypeId: number) => void
 }) {
+  const navigate = useNavigate()
   const [copied, setCopied] = useState(false)
   const shareHref = useMemo(() => graphShareHref(productTypeId, search), [productTypeId, search])
+  const displayName = productName || 'Production graph'
 
   const copy = useCallback(async () => {
     try {
@@ -91,21 +126,44 @@ function GraphShareActions({
     }
   }, [variant, shareHref])
 
+  const titleClass =
+    'font-bold text-base sm:text-lg leading-tight truncate min-w-0'
+
   return (
-    <>
+    <div className="min-w-0 flex-1 flex items-center gap-1">
       {variant === 'modal' && onOpenPage ? (
         <button
           type="button"
-          className="btn btn-xs btn-ghost shrink-0"
+          className={`${titleClass} text-left link link-hover link-primary`}
+          title={`Open ${displayName} on full page`}
           onClick={() => onOpenPage(productTypeId)}
         >
-          Open page
+          {displayName}
         </button>
-      ) : null}
-      <button type="button" className="btn btn-xs btn-ghost shrink-0" onClick={() => void copy()}>
-        {copied ? 'Link copied' : 'Copy link'}
+      ) : (
+        <h3 className={titleClass} title={productName || undefined}>
+          {displayName}
+        </h3>
+      )}
+      <button
+        type="button"
+        className="btn btn-xs btn-ghost btn-square shrink-0"
+        onClick={() => void copy()}
+        title={copied ? 'Link copied' : 'Copy link'}
+        aria-label={copied ? 'Link copied' : 'Copy link'}
+      >
+        <CopyLinkIcon className="size-3.5" />
       </button>
-    </>
+      <button
+        type="button"
+        className="btn btn-xs btn-ghost btn-square shrink-0"
+        onClick={() => navigate(`/item/${productTypeId}`)}
+        title="Open market page"
+        aria-label="Open market page"
+      >
+        <MarketIcon className="size-3.5" />
+      </button>
+    </div>
   )
 }
 
@@ -1735,20 +1793,15 @@ export function BlueprintGraphModal({
               ← Back
             </button>
           ) : null}
-          <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-base sm:text-lg leading-tight">Production graph</h3>
-            {activeProductName ? (
-              <p className="text-sm opacity-60 truncate">{activeProductName}</p>
-            ) : null}
-          </div>
-        </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <GraphShareActions
+          <GraphHeaderTitle
+            productName={activeProductName}
             productTypeId={activeBlueprint.productTypeId}
             search={shareSearch}
             variant={variant}
             onOpenPage={onOpenPage}
           />
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             className="btn btn-sm btn-circle btn-ghost"
