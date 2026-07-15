@@ -1,6 +1,11 @@
 import type { RankedBlueprintRow, SkillLevels } from '@/types'
-import { BlueprintRow, BlueprintUnrankedRow } from '@/components/BlueprintRow'
-import { BlueprintMobileCard, BlueprintUnrankedMobileCard } from '@/components/BlueprintMobileCard'
+import {
+  BlueprintRow,
+  BlueprintMobileRow,
+  BlueprintUnrankedRow,
+  BlueprintUnrankedMobileRow,
+  type BlueprintItemProps,
+} from '@/components/BlueprintRow'
 import type { RouteDangerResult } from '@/lib/routeDanger'
 
 export interface FavoriteEntry {
@@ -23,6 +28,37 @@ interface FavoriteItemsSectionProps {
   onOpenHaulRisk: () => void
 }
 
+function favoriteItemProps(
+  entry: FavoriteEntry,
+  skills: SkillLevels,
+  haulIn: RouteDangerResult | null,
+  haulOut: RouteDangerResult | null,
+  haulError: string | null,
+  dangerLoading: boolean,
+  onToggle: (productTypeId: number) => void,
+  onOpenGraph: (row: RankedBlueprintRow) => void,
+  onOpenSetup: (row: RankedBlueprintRow) => void,
+  onOpenIph: (row: RankedBlueprintRow) => void,
+  onOpenHaulRisk: () => void,
+): BlueprintItemProps | null {
+  if (!entry.row) return null
+  const row = entry.row
+  return {
+    row,
+    skills,
+    watched: true,
+    onWatch: () => onToggle(entry.productTypeId),
+    onOpenGraph: () => onOpenGraph(row),
+    onOpenSetup: () => onOpenSetup(row),
+    onOpenIph: () => onOpenIph(row),
+    onOpenHaulRisk,
+    haulIn,
+    haulOut,
+    haulError,
+    dangerLoading,
+  }
+}
+
 export function FavoriteItemsSection({
   entries,
   skills,
@@ -37,15 +73,15 @@ export function FavoriteItemsSection({
   onOpenHaulRisk,
 }: FavoriteItemsSectionProps) {
   return (
-    <div className="collapse collapse-arrow card bg-base-200 border border-eve-border mb-4 shrink-0">
+    <div className="collapse collapse-arrow card bg-base-200 border border-eve-border mb-4 shrink-0 min-w-0 overflow-hidden">
       <input type="checkbox" defaultChecked />
-      <div className="collapse-title text-sm font-semibold min-h-0 py-3 px-6">
+      <div className="collapse-title text-sm font-semibold min-h-0 py-3 px-4">
         Favorites
         <span className="badge badge-ghost badge-sm ml-2 tabular-nums">{entries.length}</span>
       </div>
-      <div className="collapse-content px-0 pb-4">
+      <div className="collapse-content !px-0 min-w-0 pb-4">
         {entries.length === 0 ? (
-          <p className="text-sm opacity-60 px-6">Star a blueprint below to add it here.</p>
+          <p className="text-sm opacity-60 px-4">Star a blueprint below to add it here.</p>
         ) : (
           <>
             <div className="hidden lg:block overflow-x-auto border-y border-eve-border">
@@ -64,24 +100,24 @@ export function FavoriteItemsSection({
                   </tr>
                 </thead>
                 <tbody>
-                  {entries.map((entry) =>
-                    entry.row ? (
-                      <BlueprintRow
-                        key={entry.productTypeId}
-                        row={entry.row}
-                        skills={skills}
-                        watched
-                        onWatch={() => onToggle(entry.productTypeId)}
-                        onOpenGraph={() => onOpenGraph(entry.row!)}
-                        onOpenSetup={() => onOpenSetup(entry.row!)}
-                        onOpenIph={() => onOpenIph(entry.row!)}
-                        onOpenHaulRisk={onOpenHaulRisk}
-                        haulIn={haulIn}
-                        haulOut={haulOut}
-                        haulError={haulError}
-                        dangerLoading={dangerLoading}
-                      />
-                    ) : (
+                  {entries.map((entry) => {
+                    const props = favoriteItemProps(
+                      entry,
+                      skills,
+                      haulIn,
+                      haulOut,
+                      haulError,
+                      dangerLoading,
+                      onToggle,
+                      onOpenGraph,
+                      onOpenSetup,
+                      onOpenIph,
+                      onOpenHaulRisk,
+                    )
+                    if (props) {
+                      return <BlueprintRow key={entry.productTypeId} {...props} />
+                    }
+                    return (
                       <BlueprintUnrankedRow
                         key={entry.productTypeId}
                         productTypeId={entry.productTypeId}
@@ -89,34 +125,40 @@ export function FavoriteItemsSection({
                         watched
                         onWatch={() => onToggle(entry.productTypeId)}
                       />
-                    ),
-                  )}
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
 
-            <div className="lg:hidden flex flex-col gap-2 px-4">
-              {entries.map((entry) =>
-                entry.row ? (
-                  <BlueprintMobileCard
-                    key={entry.productTypeId}
-                    row={entry.row}
-                    skills={skills}
-                    watched
-                    onWatch={() => onToggle(entry.productTypeId)}
-                    onOpenGraph={() => onOpenGraph(entry.row!)}
-                    onOpenIph={() => onOpenIph(entry.row!)}
-                  />
-                ) : (
-                  <BlueprintUnrankedMobileCard
+            <div className="lg:hidden flex flex-col gap-2 min-w-0">
+              {entries.map((entry) => {
+                const props = favoriteItemProps(
+                  entry,
+                  skills,
+                  haulIn,
+                  haulOut,
+                  haulError,
+                  dangerLoading,
+                  onToggle,
+                  onOpenGraph,
+                  onOpenSetup,
+                  onOpenIph,
+                  onOpenHaulRisk,
+                )
+                if (props) {
+                  return <BlueprintMobileRow key={entry.productTypeId} {...props} />
+                }
+                return (
+                  <BlueprintUnrankedMobileRow
                     key={entry.productTypeId}
                     productTypeId={entry.productTypeId}
                     name={entry.name}
                     watched
                     onWatch={() => onToggle(entry.productTypeId)}
                   />
-                ),
-              )}
+                )
+              })}
             </div>
           </>
         )}

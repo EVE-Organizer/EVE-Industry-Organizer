@@ -1,6 +1,5 @@
 import { memo, useCallback, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useVirtualizer, type Virtualizer } from '@tanstack/react-virtual'
 import type { RankedBlueprintRow, ManufacturingSettings, SkillLevels } from '@/types'
 import { HUBS } from '@/types'
 import { useAppStore } from '@/stores/appStore'
@@ -31,8 +30,7 @@ import { InfoTooltip } from '@/components/InfoTooltip'
 import { productionGraphRoute } from '@/lib/paths'
 import { BlueprintGraphModal } from '@/components/BlueprintGraphModal'
 import { FavoriteItemsSection } from '@/components/FavoriteItemsSection'
-import { BlueprintRow } from '@/components/BlueprintRow'
-import { BlueprintMobileCard } from '@/components/BlueprintMobileCard'
+import { BlueprintRow, BlueprintMobileRow } from '@/components/BlueprintRow'
 
 
 const SORT_LABELS: Record<BlueprintSortKey, string> = {
@@ -128,7 +126,6 @@ export function BlueprintsPage() {
     [navigate, searchParams, graphRow],
   )
 
-  const parentRef = useRef<HTMLDivElement>(null)
   const activeHub = HUBS.find((h) => h.id === rankingQuery.hub)
 
   const typeMap = useMemo(() => (sde ? buildTypeMap(sde.types) : new Map()), [sde])
@@ -256,13 +253,6 @@ export function BlueprintsPage() {
     })
   }
 
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 88,
-    overscan: 5,
-  })
-
   const marketUpdated = sde?.market.generatedAt
     ? new Date(sde.market.generatedAt).toLocaleString()
     : undefined
@@ -327,8 +317,6 @@ export function BlueprintsPage() {
           onOpenHaulRisk={() => {
             if (!haulDangerError) setHaulRiskOpen(true)
           }}
-          parentRef={parentRef}
-          virtualizer={virtualizer}
         />
       )}
 
@@ -390,8 +378,6 @@ const BlueprintResults = memo(function BlueprintResults({
   onOpenSetup,
   onOpenIph,
   onOpenHaulRisk,
-  parentRef,
-  virtualizer,
 }: {
   rows: RankedBlueprintRow[]
   rankingQuery: BlueprintQuery
@@ -407,8 +393,6 @@ const BlueprintResults = memo(function BlueprintResults({
   onOpenSetup: (row: RankedBlueprintRow) => void
   onOpenIph: (row: RankedBlueprintRow) => void
   onOpenHaulRisk: () => void
-  parentRef: React.RefObject<HTMLDivElement | null>
-  virtualizer: Virtualizer<HTMLDivElement, Element>
 }) {
   return (
     <>
@@ -484,28 +468,25 @@ const BlueprintResults = memo(function BlueprintResults({
         </table>
       </div>
 
-      <div className="lg:hidden flex-1 min-h-0 overflow-auto" ref={parentRef}>
-        <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
-          {virtualizer.getVirtualItems().map((v) => {
-            const row = rows[v.index]!
-            return (
-              <div
-                key={row.blueprint.blueprintTypeId}
-                className="absolute w-full"
-                style={{ transform: `translateY(${v.start}px)`, height: `${v.size}px` }}
-              >
-                <BlueprintMobileCard
-                  row={row}
-                  skills={settings.skills}
-                  watched={watchlistIds.has(row.blueprint.productTypeId)}
-                  onWatch={() => toggleWatchlist(row.blueprint.productTypeId)}
-                  onOpenGraph={() => onOpenGraph(row)}
-                  onOpenIph={() => onOpenIph(row)}
-                />
-              </div>
-            )
-          })}
-        </div>
+      <div className="lg:hidden flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 pb-4">
+        {rows.map((row, index) => (
+          <BlueprintMobileRow
+            key={row.blueprint.blueprintTypeId}
+            row={row}
+            rank={index + 1}
+            skills={settings.skills}
+            watched={watchlistIds.has(row.blueprint.productTypeId)}
+            onWatch={() => toggleWatchlist(row.blueprint.productTypeId)}
+            onOpenGraph={() => onOpenGraph(row)}
+            onOpenSetup={() => onOpenSetup(row)}
+            onOpenIph={() => onOpenIph(row)}
+            onOpenHaulRisk={onOpenHaulRisk}
+            haulIn={haulInDanger}
+            haulOut={haulOutDanger}
+            haulError={haulDangerError}
+            dangerLoading={dangerLoading}
+          />
+        ))}
       </div>
     </>
   )
