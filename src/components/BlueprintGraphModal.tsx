@@ -38,13 +38,14 @@ import {
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
 import { buildWindowPriceMap } from '@/lib/ranking'
-import { revenueFromSale, applyTE, resolveStructureModifiers } from '@/lib/cost'
+import { revenueFromSale, applyTE, resolveStructureModifiers, blueprintMeTe, runsForJobTime, clampGraphRuns } from '@/lib/cost'
 import { buildSupplyChain, findBuildTargetDetails, type BuildTargetDetail } from '@/lib/supplyChain'
 import { tierLabel } from '@/lib/blueprintGroups'
 import { tradingFeeRates } from '@/lib/tradingFees'
 import { appRoute, productionGraphRoute } from '@/lib/paths'
-import { formatGraphQuantity, formatGraphUnitIsk, formatDuration, formatIsk, formatPercent } from '@/lib/profit'
+import { formatGraphQuantity, formatGraphUnitIsk, formatDuration, formatIsk, formatPercent, formatDecimal } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
+import { InfoTooltip } from '@/components/InfoTooltip'
 
 interface BlueprintGraphModalProps {
   blueprint: BlueprintInfo | null
@@ -358,32 +359,10 @@ function buildOutputSummary(
   root: SupplyChainNode,
   blueprint: BlueprintInfo,
   settings: ManufacturingSettings,
-  rankedRow?: RankedBlueprintRow | null,
   buyPrices?: Map<number, number>,
 ): OutputSummary {
-  if (rankedRow) {
-    const iph = rankedRow.iphBreakdown
-    return {
-      runs: iph.runs,
-      productQuantity: iph.productQuantity,
-      outputQty: iph.outputQty,
-      sellPrice: iph.sellPricePerUnit,
-      grossRevenue: iph.grossRevenue,
-      netRevenue: iph.netRevenue,
-      brokerFee: iph.brokerFee,
-      salesTax: iph.salesTax,
-      setupCost: iph.setupCost,
-      materialCost: iph.materialCost,
-      bpoCost: iph.bpoCost,
-      jobCost: iph.jobCost,
-      netProfit: iph.netProfit,
-      marginPercent: rankedRow.margin,
-      buyFinishedCost: root.buyCost ?? 0,
-      jobTimeSeconds: iph.jobTimeSeconds,
-    }
-  }
-
   const runs = settings.batchSize
+  const { te } = blueprintMeTe(blueprint.tier, settings)
   const productQuantity = blueprint.productQuantity
   const outputQty = root.quantity
   const sellPrice =
@@ -413,7 +392,7 @@ function buildOutputSummary(
   const structure = resolveStructureModifiers(settings)
   const jobTimeSeconds = applyTE(
     blueprint.manufacturingTime,
-    settings.teDefault,
+    te,
     runs,
     settings.skills.advancedIndustry,
     structure.teBonusPercent,
@@ -1332,10 +1311,9 @@ function attachOutputSummary(
   root: SupplyChainNode,
   blueprint: BlueprintInfo,
   settings: ManufacturingSettings,
-  rankedRow?: RankedBlueprintRow | null,
   buyPrices?: Map<number, number>,
 ): Node[] {
-  const summary = buildOutputSummary(root, blueprint, settings, rankedRow, buyPrices)
+  const summary = buildOutputSummary(root, blueprint, settings, buyPrices)
   return nodes.map((node) => {
     if ((node.data as SupplyNodeData).role !== 'root') return node
     return {
@@ -1374,6 +1352,8 @@ function GraphFlowCanvas({
         nodesConnectable={false}
         elementsSelectable={false}
         panOnScroll
+        zoomOnPinch
+        zoomOnScroll={false}
         selectionOnDrag={false}
         defaultEdgeOptions={edgeDefaults}
         proOptions={{ hideAttribution: true }}
@@ -1383,6 +1363,150 @@ function GraphFlowCanvas({
         <Background />
       </ReactFlow>
     </div>
+  )
+}
+
+function GraphNumberField({
+  label,
+  tooltip,
+  displayValue,
+  onCommit,
+  min,
+  step,
+  adornment,
+}: {
+  label: string
+  tooltip: string
+  displayValue: string
+  onCommit: (parsed: number) => void
+  min?: number
+  step?: number
+  adornment?: ReactNode
+}) {
+  const [text, setText] = useState(displayValue)
+  const [editing, setEditing] = useState(false)
+
+  useEffect(() => {
+    if (!editing) setText(displayValue)
+  }, [displayValue, editing])
+
+  const commit = useCallback(() => {
+    const trimmed = text.trim()
+    if (trimmed === '') {
+      setText(displayValue)
+      return
+    }
+    const parsed = Number(trimmed)
+    if (!Number.isFinite(parsed)) {
+      setText(displayValue)
+      return
+    }
+    onCommit(parsed)
+  }, [text, displayValue, onCommit])
+
+  return (
+    <label className="flex flex-col gap-1 min-w-0">
+      <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold opacity-50">
+        {label}
+        <InfoTooltip text={tooltip} placement="top" />
+      </span>
+      <div className="flex items-center gap-1.5 min-w-0">
+        <input
+          type="number"
+          min={min}
+          step={step}
+          className="input input-bordered input-sm h-9 sm:h-8 w-full min-w-0 max-w-[5.5rem] tabular-nums px-2.5"
+          value={text}
+          onFocus={() => setEditing(true)}
+          onBlur={() => {
+            setEditing(false)
+            commit()
+          }}
+          onChange={(event) => setText(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') event.currentTarget.blur()
+          }}
+          aria-label={label}
+        />
+        {adornment}
+      </div>
+    </label>
+  )
+}
+
+function GraphProductionControls({
+  blueprint,
+  settings,
+  runs,
+  jobTimeSeconds,
+  onRunsChange,
+  onJobTimeChange,
+}: {
+  blueprint: BlueprintInfo
+  settings: ManufacturingSettings
+  runs: number
+  jobTimeSeconds: number
+  onRunsChange: (runs: number) => void
+  onJobTimeChange: (jobTimeSeconds: number) => void
+}) {
+  const { te } = blueprintMeTe(blueprint.tier, settings)
+  const structure = resolveStructureModifiers(settings)
+  const perRunSeconds = applyTE(
+    blueprint.manufacturingTime,
+    te,
+    1,
+    settings.skills.advancedIndustry,
+    structure.teBonusPercent,
+  )
+  const jobHours = jobTimeSeconds / 3600
+  const outputQty = blueprint.productQuantity * runs
+
+  return (
+    <section
+      className="rounded-lg border border-eve-border bg-base-200/50 px-3 py-2.5 mb-3 shrink-0 min-w-0"
+      aria-label="Production batch controls"
+    >
+      <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:flex sm:items-end sm:gap-4">
+        <GraphNumberField
+          label="Runs"
+          tooltip="Manufacturing runs. Materials, setup cost, and profit scale with runs."
+          displayValue={String(runs)}
+          min={10}
+          step={1}
+          onCommit={(value) => onRunsChange(clampGraphRuns(value))}
+        />
+        <GraphNumberField
+          label="Job time (hr)"
+          tooltip="Total job duration. TE, structure rigs, and Advanced Industry set time per run."
+          displayValue={formatDecimal(jobHours, 2)}
+          min={0}
+          step={0.01}
+          onCommit={(hours) => {
+            if (hours < 0) return
+            onJobTimeChange(hours * 3600)
+          }}
+          adornment={
+            <span className="hidden sm:inline-flex badge badge-sm border border-primary/30 bg-primary/10 text-primary font-semibold tabular-nums whitespace-nowrap shrink-0">
+              {formatDuration(jobTimeSeconds)}
+            </span>
+          }
+        />
+        <div className="col-span-2 sm:col-span-1 sm:ml-auto sm:max-w-[14rem] min-w-0 border-t border-eve-border/50 pt-2.5 sm:border-t-0 sm:pt-0 sm:text-right">
+          <p className="text-[11px] tabular-nums leading-snug sm:hidden text-primary font-medium mb-1">
+            {formatDuration(jobTimeSeconds)} total
+          </p>
+          <p className="text-[11px] tabular-nums leading-snug">
+            <span className="font-medium text-base-content/85">
+              {runs} × {blueprint.productQuantity}
+            </span>
+            <span className="opacity-50"> = {formatGraphQuantity(outputQty)}</span>
+          </p>
+          <p className="text-[10px] tabular-nums opacity-50 mt-0.5">
+            {formatDuration(perRunSeconds)} per run
+          </p>
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -1412,6 +1536,58 @@ export function BlueprintGraphModal({
     if (!rankedRow || !activeBlueprint || !blueprint) return null
     return activeBlueprint.productTypeId === entryProductTypeIdRef.current ? rankedRow : null
   }, [activeBlueprint, blueprint, rankedRow])
+
+  const initialGraphRuns = activeRankedRow?.iphBreakdown.runs ?? settings.batchSize
+  const [graphRuns, setGraphRuns] = useState(initialGraphRuns)
+
+  useEffect(() => {
+    setGraphRuns(activeRankedRow?.iphBreakdown.runs ?? settings.batchSize)
+  }, [activeBlueprint?.productTypeId, settings.batchSize, activeRankedRow])
+
+  const graphSettings = useMemo(
+    (): ManufacturingSettings => ({
+      ...settings,
+      batchSize: graphRuns,
+    }),
+    [settings, graphRuns],
+  )
+
+  const graphJobTiming = useMemo(() => {
+    if (!activeBlueprint) return { jobTimeSeconds: 0 }
+    const { te } = blueprintMeTe(activeBlueprint.tier, settings)
+    const structure = resolveStructureModifiers(settings)
+    const jobTimeSeconds = applyTE(
+      activeBlueprint.manufacturingTime,
+      te,
+      graphRuns,
+      settings.skills.advancedIndustry,
+      structure.teBonusPercent,
+    )
+    return { jobTimeSeconds }
+  }, [activeBlueprint, settings, graphRuns])
+
+  const handleRunsChange = useCallback((runs: number) => {
+    setGraphRuns(clampGraphRuns(runs))
+  }, [])
+
+  const handleJobTimeChange = useCallback(
+    (jobTimeSeconds: number) => {
+      if (!activeBlueprint) return
+      const { te } = blueprintMeTe(activeBlueprint.tier, settings)
+      const structure = resolveStructureModifiers(settings)
+      setGraphRuns(
+        runsForJobTime(
+          jobTimeSeconds,
+          activeBlueprint.manufacturingTime,
+          te,
+          settings.skills.advancedIndustry,
+          structure.teBonusPercent,
+          { step: 1, maxRuns: null },
+        ),
+      )
+    },
+    [activeBlueprint, settings],
+  )
 
   const activeProductName = useMemo(() => {
     if (!sde || !activeBlueprint) return ''
@@ -1502,13 +1678,14 @@ export function BlueprintGraphModal({
       typeMap,
     )
     const sourceName = typeMap.get(activeBlueprint.productTypeId)?.name ?? 'this item'
+    const { me } = blueprintMeTe(activeBlueprint.tier, settings)
     const chain = buildSupplyChain(
       activeBlueprint,
       allBlueprints,
       typeMap,
       prices,
-      settings,
-      settings.meDefault,
+      graphSettings,
+      me,
       costIndex,
     )
     const flow = chainToFlow(chain)
@@ -1516,8 +1693,7 @@ export function BlueprintGraphModal({
       flow.nodes,
       chain,
       activeBlueprint,
-      settings,
-      activeRankedRow,
+      graphSettings,
       buyPrices,
     )
     const withTargets = attachBuildTargetNodes(withSummary, flow.edges, buildTargets, sourceName)
@@ -1525,7 +1701,7 @@ export function BlueprintGraphModal({
       nodes: markNavigableNodes(withTargets.nodes, blueprintByProduct),
       edges: withTargets.edges,
     }
-  }, [sde, activeBlueprint, hub, priceWindow, settings, activeRankedRow, blueprintByProduct])
+  }, [sde, activeBlueprint, hub, priceWindow, graphSettings, settings, blueprintByProduct])
 
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(layout.nodes)
   const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState(layout.edges)
@@ -1547,20 +1723,20 @@ export function BlueprintGraphModal({
 
   const shellClassName =
     variant === 'page'
-      ? 'flex flex-col flex-1 min-h-0 w-full'
+      ? 'flex flex-col flex-1 w-full min-h-[calc(100dvh-11rem)] lg:min-h-0'
       : 'flex flex-col h-full min-h-0'
 
   const graphPanel = (
     <div className={shellClassName}>
-      <div className="flex items-center justify-between mb-2 shrink-0 gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+      <header className="flex items-start justify-between gap-2 mb-2 shrink-0 min-w-0">
+        <div className="flex items-start gap-2 min-w-0 flex-1">
           {canGoBack ? (
-            <button type="button" className="btn btn-xs btn-ghost shrink-0" onClick={goBack}>
+            <button type="button" className="btn btn-xs btn-ghost shrink-0 mt-0.5" onClick={goBack}>
               ← Back
             </button>
           ) : null}
-          <div className="min-w-0">
-            <h3 className="font-bold text-lg leading-tight">Production graph</h3>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-bold text-base sm:text-lg leading-tight">Production graph</h3>
             {activeProductName ? (
               <p className="text-sm opacity-60 truncate">{activeProductName}</p>
             ) : null}
@@ -1573,13 +1749,26 @@ export function BlueprintGraphModal({
             variant={variant}
             onOpenPage={onOpenPage}
           />
-          <button type="button" className="btn btn-sm btn-circle btn-ghost" onClick={onClose}>
+          <button
+            type="button"
+            className="btn btn-sm btn-circle btn-ghost"
+            onClick={onClose}
+            aria-label="Close production graph"
+          >
             ✕
           </button>
         </div>
-      </div>
+      </header>
       {priceLabels ? <GraphPriceSourceBar source={priceLabels} /> : null}
-      <div className="relative flex-1 min-h-[24rem] border border-eve-border rounded-lg overflow-hidden">
+      <GraphProductionControls
+        blueprint={activeBlueprint}
+        settings={settings}
+        runs={graphRuns}
+        jobTimeSeconds={graphJobTiming.jobTimeSeconds}
+        onRunsChange={handleRunsChange}
+        onJobTimeChange={handleJobTimeChange}
+      />
+      <div className="relative flex-1 min-h-0 min-h-[16rem] sm:min-h-[20rem] border border-eve-border rounded-lg overflow-hidden bg-base-300/20">
         {flowNodes.length > 0 ? (
           <GraphPriceContext.Provider value={priceLabels}>
             <GraphNavContext.Provider value={graphNav}>
@@ -1610,7 +1799,9 @@ export function BlueprintGraphModal({
 
   return (
     <dialog className="modal modal-open">
-      <div className="modal-box max-w-5xl w-full h-[80vh] flex flex-col">{graphPanel}</div>
+      <div className="modal-box w-full max-w-5xl h-[100dvh] max-h-[100dvh] sm:h-[80vh] sm:max-h-[calc(100dvh-2rem)] rounded-none sm:rounded-2xl p-3 sm:p-6 m-0 sm:m-auto flex flex-col">
+        {graphPanel}
+      </div>
       <form method="dialog" className="modal-backdrop">
         <button type="button" onClick={onClose}>
           close

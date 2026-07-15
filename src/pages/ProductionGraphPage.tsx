@@ -93,7 +93,7 @@ export function ProductionGraphPage() {
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 w-full self-stretch">
+    <div className="flex flex-col flex-1 min-h-0 w-full self-stretch min-h-[calc(100dvh-11rem)] lg:min-h-0 -mx-4 px-4 sm:mx-0 sm:px-0">
       <BlueprintGraphModal
         variant="page"
         blueprint={blueprint}

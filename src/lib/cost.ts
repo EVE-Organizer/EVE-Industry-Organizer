@@ -1,5 +1,12 @@
 import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings, ManufacturingSettings, StructureModifiers } from '@/types'
-import { T2_INVENTED_ME, T2_INVENTED_TE } from '@/types'
+import {
+  BATCH_SIZE_STEP,
+  DEFAULT_BATCH_SIZE,
+  MAX_BATCH_SIZE,
+  MIN_BATCH_SIZE,
+  T2_INVENTED_ME,
+  T2_INVENTED_TE,
+} from '@/types'
 
 const ME_BONUS = 0.01
 const TE_BONUS = 0.04
@@ -48,6 +55,77 @@ export function applyTE(
   const structFactor = 1 - structureTeBonusPercent / 100
   const advFactor = 1 - advancedIndustry * 0.03
   return baseTimeSeconds * runs * teFactor * structFactor * advFactor
+}
+
+export function manufacturingTimePerRun(
+  baseTimeSeconds: number,
+  te: number,
+  advancedIndustry: number,
+  structureTeBonusPercent = 0,
+): number {
+  return applyTE(baseTimeSeconds, te, 1, advancedIndustry, structureTeBonusPercent)
+}
+
+export function clampManufacturingRuns(value: number): number {
+  if (!Number.isFinite(value)) return DEFAULT_BATCH_SIZE
+  const stepped = Math.round(value / BATCH_SIZE_STEP) * BATCH_SIZE_STEP
+  return Math.min(MAX_BATCH_SIZE, Math.max(MIN_BATCH_SIZE, stepped))
+}
+
+export function clampGraphRuns(value: number): number {
+  if (!Number.isFinite(value)) return DEFAULT_BATCH_SIZE
+  return Math.max(MIN_BATCH_SIZE, Math.round(value))
+}
+
+function clampRunsToStep(value: number, step: number, maxRuns?: number | null): number {
+  const stepped = Math.round(value / step) * step
+  const minClamped = Math.max(MIN_BATCH_SIZE, stepped)
+  if (maxRuns == null) return minClamped
+  return Math.min(maxRuns, minClamped)
+}
+
+export function runsForJobTime(
+  jobTimeSeconds: number,
+  baseTimeSeconds: number,
+  te: number,
+  advancedIndustry: number,
+  structureTeBonusPercent = 0,
+  options?: { step?: number; maxRuns?: number | null },
+): number {
+  const perRun = manufacturingTimePerRun(
+    baseTimeSeconds,
+    te,
+    advancedIndustry,
+    structureTeBonusPercent,
+  )
+  if (!Number.isFinite(perRun) || perRun <= 0) return MIN_BATCH_SIZE
+  if (!Number.isFinite(jobTimeSeconds) || jobTimeSeconds <= 0) return MIN_BATCH_SIZE
+
+  const step = options?.step ?? BATCH_SIZE_STEP
+  const maxRuns = options && 'maxRuns' in options ? options.maxRuns : MAX_BATCH_SIZE
+  const exactRuns = jobTimeSeconds / perRun
+
+  if (maxRuns != null && exactRuns >= maxRuns) return maxRuns
+  if (exactRuns <= MIN_BATCH_SIZE) return MIN_BATCH_SIZE
+
+  const low = Math.floor(exactRuns / step) * step
+  const high = Math.ceil(exactRuns / step) * step
+  const candidates = new Set<number>([
+    clampRunsToStep(low, step, maxRuns),
+    clampRunsToStep(high, step, maxRuns),
+    clampRunsToStep(exactRuns, step, maxRuns),
+  ])
+
+  let best = MIN_BATCH_SIZE
+  let bestError = Infinity
+  for (const runs of candidates) {
+    const error = Math.abs(perRun * runs - jobTimeSeconds)
+    if (error < bestError) {
+      bestError = error
+      best = runs
+    }
+  }
+  return best
 }
 
 export function materialCost(
