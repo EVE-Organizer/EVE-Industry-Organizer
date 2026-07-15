@@ -20,12 +20,12 @@ describe('mapEsiSkillsToSkillLevels', () => {
     })
   })
 
-  it('keeps defaults for skills not on the character', () => {
+  it('uses zero for skills not on the character', () => {
     const skills = mapEsiSkillsToSkillLevels([
       { skill_id: 3380, trained_skill_level: 5, active_skill_level: 5 },
     ])
 
     expect(skills.industry).toBe(5)
-    expect(skills.advancedIndustry).toBe(3)
+    expect(skills.advancedIndustry).toBe(0)
   })
 })

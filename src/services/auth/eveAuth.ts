@@ -1,6 +1,7 @@
 import type { SkillLevels } from '@/types'
 import {
   clearAuthAccounts,
+  CHARACTER_SKILLS_SNAPSHOT_VERSION,
   getActiveStoredCharacter,
   getStoredCharacter,
   getStoredCharacters,
@@ -257,7 +258,8 @@ export function touchCharacterSync(
   characters[index] = {
     ...existing,
     lastSyncedAt: patch?.lastSyncedAt ?? new Date().toISOString(),
-    skills: patch?.skills ?? existing.skills,
+    skills: patch?.skills ? { ...patch.skills } : existing.skills,
+    skillsSnapshotVersion: CHARACTER_SKILLS_SNAPSHOT_VERSION,
   }
   saveAuthAccounts({ ...accounts, characters })
 }

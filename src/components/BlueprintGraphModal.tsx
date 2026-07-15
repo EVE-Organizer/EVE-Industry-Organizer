@@ -43,6 +43,7 @@ import { revenueFromSale, applyTE, resolveStructureModifiers, blueprintMeTe, run
 import { buildSupplyChain, findBuildTargetDetails, type BuildTargetDetail } from '@/lib/supplyChain'
 import { tierLabel } from '@/lib/blueprintGroups'
 import { tradingFeeRates } from '@/lib/tradingFees'
+import { skillLevel } from '@/lib/skillFields'
 import { appRoute, productionGraphRoute } from '@/lib/paths'
 import { formatGraphQuantity, formatGraphUnitIsk, formatDuration, formatIsk, formatPercent, formatDecimal } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
@@ -436,8 +437,8 @@ function buildOutputSummary(
   const jobCost = Math.max(0, setupCost - bpoCost - materialCost)
 
   const feeRates = tradingFeeRates(
-    settings.skills.accounting,
-    settings.skills.brokerRelations,
+    skillLevel(settings.skills, 'accounting'),
+    skillLevel(settings.skills, 'brokerRelations'),
   )
   const usesBuyOrders = settings.priceMethod === 'buy_orders'
   const { gross, net, brokerFee, salesTax } = revenueFromSale(sellPrice, outputQty, feeRates, {
@@ -452,7 +453,7 @@ function buildOutputSummary(
     blueprint.manufacturingTime,
     te,
     runs,
-    settings.skills.advancedIndustry,
+    skillLevel(settings.skills, 'advancedIndustry'),
     structure.teBonusPercent,
   )
 
@@ -1513,7 +1514,7 @@ function GraphProductionControls({
     blueprint.manufacturingTime,
     te,
     1,
-    settings.skills.advancedIndustry,
+    skillLevel(settings.skills, 'advancedIndustry'),
     structure.teBonusPercent,
   )
   const jobHours = jobTimeSeconds / 3600
@@ -1618,7 +1619,7 @@ export function BlueprintGraphModal({
       activeBlueprint.manufacturingTime,
       te,
       graphRuns,
-      settings.skills.advancedIndustry,
+      skillLevel(settings.skills, 'advancedIndustry'),
       structure.teBonusPercent,
     )
     return { jobTimeSeconds }
@@ -1638,7 +1639,7 @@ export function BlueprintGraphModal({
           jobTimeSeconds,
           activeBlueprint.manufacturingTime,
           te,
-          settings.skills.advancedIndustry,
+          skillLevel(settings.skills, 'advancedIndustry'),
           structure.teBonusPercent,
           { step: 1, maxRuns: null },
         ),

@@ -10,6 +10,7 @@ const links = [
 export function Layout() {
   return (
     <div className="min-h-screen flex flex-col">
+      <div className="sticky top-0 z-50">
       <header className="navbar bg-base-200 border-b border-eve-border px-4 lg:px-8">
         <div className="flex-1">
           <NavLink to="/" className="text-xl font-bold text-primary">
@@ -51,6 +52,7 @@ export function Layout() {
           </div>
           <EveNavAuth />
         </div>
+      </div>
       </div>
 
       <main className="flex-1 min-w-0 min-h-0 w-full max-w-7xl mx-auto p-4 lg:p-8 flex flex-col">

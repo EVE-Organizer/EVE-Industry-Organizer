@@ -1,6 +1,5 @@
 import type { SkillLevels } from '@/types'
-import { DEFAULT_SKILLS } from '@/types'
-import { SKILL_FIELDS } from '@/lib/skillFields'
+import { SKILL_FIELDS, normalizeImportedSkillLevels } from '@/lib/skillFields'
 import { ESI_BASE } from '@/services/auth/ssoMetadata'
 import { dedupe, throttle } from '@/services/market/requestQueue'
 
@@ -37,7 +36,7 @@ export async function fetchCharacterSkills(
 /** Map ESI skill rows to the five app skill keys used in profit and buildability. */
 export function mapEsiSkillsToSkillLevels(esiSkills: EsiSkill[] | undefined): SkillLevels {
   const byId = new Map((esiSkills ?? []).map((s) => [s.skill_id, s.trained_skill_level]))
-  const result = { ...DEFAULT_SKILLS }
+  const result = normalizeImportedSkillLevels({})
 
   for (const field of SKILL_FIELDS) {
     const level = byId.get(field.skillId)

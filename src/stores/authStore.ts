@@ -17,11 +17,33 @@ import {
   mapEsiSkillsToSkillLevels,
 } from '@/services/character/characterSkillsService'
 import { useAppStore } from '@/stores/appStore'
+import { normalizeImportedSkillLevels } from '@/lib/skillFields'
+import { ZERO_SKILLS, type SkillLevels } from '@/types'
 
-function applyCharacterSkills(character: EveCharacterSession | null): void {
-  if (character?.skills) {
-    useAppStore.getState().updateSettings({ skills: character.skills })
+function applySkillLevels(skills: SkillLevels): void {
+  useAppStore.getState().updateSettings({
+    skills: normalizeImportedSkillLevels(skills),
+  })
+}
+
+function applyZeroSkills(): void {
+  useAppStore.getState().updateSettings({
+    skills: { ...ZERO_SKILLS },
+    inventionSkillLevel: 0,
+  })
+}
+
+function activateCharacterSkills(
+  character: EveCharacterSession | null,
+  sync: (characterId: number) => void,
+): void {
+  if (!character) return
+  if (character.skills) {
+    applySkillLevels(character.skills)
+    return
   }
+  applyZeroSkills()
+  sync(character.characterId)
 }
 
 interface AuthStore {
@@ -71,7 +93,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       ...snapshot,
       hydrated: true,
     })
-    applyCharacterSkills(snapshot.character)
+    activateCharacterSkills(snapshot.character, (id) => {
+      void get().syncSkills(id).catch(() => {})
+    })
   },
 
   login: async () => {
@@ -96,6 +120,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         isBusy: false,
         error: null,
       })
+      applyZeroSkills()
 
       void get()
         .syncSkills(character.characterId)
@@ -114,17 +139,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   switchCharacter: (characterId) => {
-    const character = setActiveCharacter(characterId)
-    if (!character) return
+    if (!setActiveCharacter(characterId)) return
 
     const snapshot = readAuthSnapshot()
     set({ ...snapshot, error: null })
 
-    if (character.skills) {
-      applyCharacterSkills(character)
-    } else {
-      void get().syncSkills(characterId)
-    }
+    activateCharacterSkills(snapshot.character, (id) => {
+      void get().syncSkills(id).catch(() => {})
+    })
   },
 
   syncSkills: async (characterId) => {
@@ -156,7 +178,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({ ...snapshot, isBusy: false })
 
       if (snapshot.activeCharacterId === targetId) {
-        useAppStore.getState().updateSettings({ skills })
+        applySkillLevels(skills)
       }
     } catch (err) {
       set({
@@ -174,7 +196,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     removeCharacter(id)
     const snapshot = readAuthSnapshot()
     set({ ...snapshot, error: null })
-    applyCharacterSkills(snapshot.character)
+    activateCharacterSkills(snapshot.character, (nextId) => {
+      void get().syncSkills(nextId).catch(() => {})
+    })
   },
 
   logoutAll: () => {

@@ -423,6 +423,15 @@ export const DEFAULT_SKILLS: SkillLevels = {
   brokerRelations: DEFAULT_SKILL_LEVEL,
 }
 
+/** Untrained skill levels used when importing from ESI or before sync completes. */
+export const ZERO_SKILLS: SkillLevels = {
+  industry: 0,
+  advancedIndustry: 0,
+  science: 0,
+  accounting: 0,
+  brokerRelations: 0,
+}
+
 export const DEFAULT_SETTINGS: GlobalSettings = {
   primaryHub: 'jita',
   manufacturingSystemId: 30000144,

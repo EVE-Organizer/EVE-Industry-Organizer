@@ -1,5 +1,5 @@
 import type { HubId, UserData, GlobalSettings, SkillLevels } from '@/types'
-import { DEFAULT_SETTINGS, DEFAULT_SKILLS, HUBS } from '@/types'
+import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS } from '@/types'
 import { SKILL_FIELDS } from '@/lib/skillFields'
 import { normalizeBpoLifetimeRunsByCategory } from '@/lib/bpoLifetime'
 
@@ -24,13 +24,20 @@ function migrateHubId(hub: HubId | 'xhq7v' | undefined): HubId | undefined {
   return hub
 }
 
-/** Fill missing keys and upgrade legacy all-zero saves to current defaults. */
-export function normalizeSkillLevels(skills: Partial<SkillLevels> | undefined): SkillLevels {
+/** Fill missing keys. Legacy all-zero saves (pre-SSO) map to default 3. */
+export function normalizeSkillLevels(
+  skills: Partial<SkillLevels> | undefined,
+  options?: { legacyZeroMeansDefault?: boolean },
+): SkillLevels {
   const keys = SKILL_FIELDS.map((f) => f.key)
-  if (skills && keys.every((k) => (skills[k] ?? 0) === 0)) {
+  if (
+    options?.legacyZeroMeansDefault &&
+    skills &&
+    keys.every((k) => (skills[k] ?? 0) === 0)
+  ) {
     return { ...DEFAULT_SKILLS }
   }
-  return { ...DEFAULT_SKILLS, ...(skills ?? {}) } as SkillLevels
+  return { ...ZERO_SKILLS, ...(skills ?? {}) } as SkillLevels
 }
 
 /** Migrate region-level buildSystemId to hub default manufacturingSystemId. */
@@ -97,7 +104,9 @@ export function loadUserDataFromLocal(): UserData {
       ...rest,
       settings: normalizeGlobalSettings({
         ...(parsed.settings ?? {}),
-        skills: parsed.settings?.skills ?? legacySkills,
+        skills: normalizeSkillLevels(parsed.settings?.skills ?? legacySkills, {
+          legacyZeroMeansDefault: true,
+        }),
       }),
     }
   } catch {

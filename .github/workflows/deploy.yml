@@ -45,6 +45,7 @@ jobs:
         env:
           VITE_BASE: /EVE-Industry-Organizer/
           VITE_EVE_CLIENT_ID: ${{ secrets.VITE_EVE_CLIENT_ID }}
+          VITE_EVE_CALLBACK_URL: https://eve-organizer.github.io/EVE-Industry-Organizer/auth/callback
 
       - name: SPA fallback for client-side routes
         run: cp dist/index.html dist/404.html

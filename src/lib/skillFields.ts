@@ -1,5 +1,5 @@
 import type { SkillLevels } from '@/types'
-import { DEFAULT_SKILLS } from '@/types'
+import { ZERO_SKILLS } from '@/types'
 
 export interface SkillFieldDef {
   key: keyof SkillLevels
@@ -63,10 +63,15 @@ export function formatSkillLevel(level: number): string {
   return SKILL_LEVEL_ROMAN[Math.min(5, Math.max(0, level))] ?? String(level)
 }
 
+/** Merge an ESI or character snapshot onto zero defaults for every tracked skill. */
+export function normalizeImportedSkillLevels(skills: Partial<SkillLevels> | undefined): SkillLevels {
+  return { ...ZERO_SKILLS, ...(skills ?? {}) } as SkillLevels
+}
+
 export function skillLevel(
   skills: Partial<SkillLevels> | undefined,
   key: SkillFieldDef['key'],
 ): number {
   const level = skills?.[key]
-  return typeof level === 'number' ? level : DEFAULT_SKILLS[key]
+  return typeof level === 'number' ? level : ZERO_SKILLS[key]
 }
