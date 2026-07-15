@@ -44,6 +44,7 @@ jobs:
       - run: pnpm run build
         env:
           VITE_BASE: /EVE-Industry-Organizer/
+          VITE_EVE_CLIENT_ID: ${{ secrets.VITE_EVE_CLIENT_ID }}
 
       - name: SPA fallback for client-side routes
         run: cp dist/index.html dist/404.html

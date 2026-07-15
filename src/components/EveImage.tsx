@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { HubId } from '@/types'
 import {
+  characterPortraitUrl,
   HUB_FACTION_IDS,
   type ImageVariant,
   imageUrlChain,
@@ -94,26 +95,42 @@ export function HubLogo({
 }
 
 export function CharacterAvatar({
+  characterId,
   name,
   size = 48,
   isOmega,
   className = '',
 }: {
+  characterId?: number
   name: string
   size?: number
   isOmega?: boolean
   className?: string
 }) {
   const initial = name.trim().charAt(0).toUpperCase() || '?'
+  const portrait = characterId ? characterPortraitUrl(characterId, size) : null
+  const [portraitFailed, setPortraitFailed] = useState(false)
+
   return (
     <div className={`relative shrink-0 ${className}`} style={{ width: size, height: size }}>
-      <div
-        className="flex items-center justify-center rounded-full border-2 border-primary/40 bg-gradient-to-br from-base-300 to-base-100 font-bold text-primary"
-        style={{ width: size, height: size, fontSize: size * 0.38 }}
-        aria-hidden
-      >
-        {initial}
-      </div>
+      {portrait && !portraitFailed ? (
+        <img
+          src={portrait}
+          alt={name}
+          width={size}
+          height={size}
+          className="rounded-full border-2 border-primary/40 object-cover bg-base-300"
+          onError={() => setPortraitFailed(true)}
+        />
+      ) : (
+        <div
+          className="flex items-center justify-center rounded-full border-2 border-primary/40 bg-gradient-to-br from-base-300 to-base-100 font-bold text-primary"
+          style={{ width: size, height: size, fontSize: size * 0.38 }}
+          aria-hidden={!!portrait}
+        >
+          {initial}
+        </div>
+      )}
       {isOmega && (
         <span
           className="absolute -bottom-0.5 -right-0.5 badge badge-warning badge-xs px-1 min-h-0 h-4"

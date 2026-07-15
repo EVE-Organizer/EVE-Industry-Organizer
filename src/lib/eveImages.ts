@@ -31,6 +31,10 @@ export function corporationLogoUrl(corporationId: number, size = 64): string {
   return `https://images.evetech.net/corporations/${corporationId}/logo?size=${normalizeImageSize(size)}`
 }
 
+export function characterPortraitUrl(characterId: number, size = 128): string {
+  return `https://images.evetech.net/characters/${characterId}/portrait?size=${normalizeImageSize(size)}`
+}
+
 export type ImageVariant = 'icon' | 'render' | 'bp' | 'faction'
 
 /** Build a fallback chain from most to least preferred. */

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { EveNavAuth } from '@/components/EveNavAuth'
 
 const links = [
   { to: '/', label: 'Blueprints' },
@@ -15,7 +16,7 @@ export function Layout() {
             EVE Industry Organizer
           </NavLink>
         </div>
-        <nav className="flex-none hidden md:flex gap-1">
+        <div className="flex-none hidden md:flex items-center gap-1">
           {links.map((l) => (
             <NavLink
               key={l.to}
@@ -28,23 +29,27 @@ export function Layout() {
               {l.label}
             </NavLink>
           ))}
-        </nav>
+          <EveNavAuth />
+        </div>
       </header>
 
-      <div className="md:hidden bg-base-200 border-b border-eve-border overflow-x-auto">
-        <div className="flex gap-1 p-2">
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.to === '/'}
-              className={({ isActive }) =>
-                `btn btn-xs ${isActive ? 'btn-primary' : 'btn-ghost'}`
-              }
-            >
-              {l.label}
-            </NavLink>
-          ))}
+      <div className="md:hidden bg-base-200 border-b border-eve-border">
+        <div className="flex items-center justify-between gap-2 p-2">
+          <div className="flex gap-1 overflow-x-auto min-w-0">
+            {links.map((l) => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.to === '/'}
+                className={({ isActive }) =>
+                  `btn btn-xs shrink-0 ${isActive ? 'btn-primary' : 'btn-ghost'}`
+                }
+              >
+                {l.label}
+              </NavLink>
+            ))}
+          </div>
+          <EveNavAuth />
         </div>
       </div>
 

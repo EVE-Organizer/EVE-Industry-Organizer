@@ -9,6 +9,8 @@ import {
 import { SkillLevelSlider } from '@/components/SkillLevelSlider'
 import { SKILL_FIELDS, skillLevel, type SkillFieldDef } from '@/lib/skillFields'
 import { Panel } from '@/components/Panel'
+import { EveCharacterPanel } from '@/components/EveCharacterPanel'
+import { useAuthStore } from '@/stores/authStore'
 import { PageHeader } from '@/components/Layout'
 
 const MANUFACTURING_SKILL_KEYS: SkillFieldDef['key'][] = ['industry', 'advancedIndustry', 'science']
@@ -50,6 +52,19 @@ export function SettingsPage() {
   const updateSettings = useAppStore((s) => s.updateSettings)
   const resetAll = useAppStore((s) => s.resetAll)
   const clearPriceCache = useAppStore((s) => s.clearPriceCache)
+  const configured = useAuthStore((s) => s.configured)
+  const characters = useAuthStore((s) => s.characters)
+  const character = useAuthStore((s) => s.character)
+  const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const authBusy = useAuthStore((s) => s.isBusy)
+  const authError = useAuthStore((s) => s.error)
+  const login = useAuthStore((s) => s.login)
+  const switchCharacter = useAuthStore((s) => s.switchCharacter)
+  const syncSkills = useAuthStore((s) => s.syncSkills)
+  const logoutCharacter = useAuthStore((s) => s.logoutCharacter)
+  const logoutAll = useAuthStore((s) => s.logoutAll)
+  const clearAuthError = useAuthStore((s) => s.clearError)
   const cacheStats = getCacheStats()
   const settings = userData.settings
 
@@ -95,6 +110,28 @@ export function SettingsPage() {
           size="sm"
           settings={settings}
           onChange={updateSettings}
+        />
+      </Panel>
+
+      <Panel title="EVE characters">
+        <p className="text-xs opacity-70 mb-3">
+          Sign in with multiple characters and switch between them. Each character keeps their own
+          skill levels for profit calculations.
+        </p>
+        <EveCharacterPanel
+          configured={configured}
+          characters={characters}
+          character={character}
+          activeCharacterId={activeCharacterId}
+          isAuthenticated={isAuthenticated}
+          isBusy={authBusy}
+          error={authError}
+          onLogin={() => void login()}
+          onSwitch={switchCharacter}
+          onSync={() => void syncSkills()}
+          onLogoutCharacter={logoutCharacter}
+          onLogoutAll={logoutAll}
+          onClearError={clearAuthError}
         />
       </Panel>
 

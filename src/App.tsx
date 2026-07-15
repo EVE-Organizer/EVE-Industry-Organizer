@@ -7,6 +7,8 @@ import { BlueprintsPage } from '@/pages/BlueprintsPage'
 import { ProductionGraphPage } from '@/pages/ProductionGraphPage'
 import { ItemDetailPage } from '@/pages/ItemDetailPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { AuthCallbackPage } from '@/pages/AuthCallbackPage'
+import { useAuthStore } from '@/stores/authStore'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,12 +27,15 @@ function LegacyBlueprintRedirect() {
 function AppRoutes() {
   const hydrate = useAppStore((s) => s.hydrate)
   const hydrated = useAppStore((s) => s.hydrated)
+  const hydrateAuth = useAuthStore((s) => s.hydrate)
+  const authHydrated = useAuthStore((s) => s.hydrated)
 
   useEffect(() => {
     hydrate()
-  }, [hydrate])
+    hydrateAuth()
+  }, [hydrate, hydrateAuth])
 
-  if (!hydrated) {
+  if (!hydrated || !authHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <span className="loading loading-spinner loading-lg text-primary" />
@@ -40,6 +45,7 @@ function AppRoutes() {
 
   return (
     <Routes>
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route element={<Layout />}>
         <Route path="/" element={<BlueprintsPage />} />
         <Route path="/blueprints" element={<Navigate to="/" replace />} />
