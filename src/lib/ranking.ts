@@ -86,10 +86,14 @@ export interface RankingFilters {
   includeHaulCost?: boolean
   tiers?: BlueprintTier[]
   productGroups?: string[]
+  /** Rank only these product type IDs (ignores tier/group filters). */
+  productTypeIds?: number[]
   /** Minimum avg daily hub volume (0 = no filter). Uses volumeWindowForPrice(window). */
   minVolume?: number
   sortBy?: BlueprintSortKey
   sortDirection?: SortDirection
+  /** Max rows returned; defaults to TOP_N. */
+  limit?: number
 }
 
 export type BlueprintSortKey = 'setupCost' | 'netProfit' | 'iph' | 'margin' | 'avgVolume'
@@ -641,7 +645,13 @@ export function rankBlueprintsFromMarket(
   }
 
   const tiers = filters.tiers ?? []
-  const blueprints = filterBlueprints(registry.blueprints, tiers, filters.productGroups)
+  const productTypeFilter =
+    filters.productTypeIds && filters.productTypeIds.length > 0
+      ? new Set(filters.productTypeIds)
+      : null
+  const blueprints = productTypeFilter
+    ? registry.blueprints.filter((bp) => productTypeFilter.has(bp.productTypeId))
+    : filterBlueprints(registry.blueprints, tiers, filters.productGroups)
   const advancedIndustry = skillLevel(settings.skills, 'advancedIndustry')
   const feeRates = tradingFeeRates(
     skillLevel(settings.skills, 'accounting'),
@@ -699,7 +709,8 @@ export function rankBlueprintsFromMarket(
   const sortBy = filters.sortBy ?? 'iph'
   const sortDirection = filters.sortDirection ?? 'desc'
 
-  return sortBlueprintRows(rows, sortBy, sortDirection).slice(0, TOP_N)
+  const limit = filters.limit ?? TOP_N
+  return sortBlueprintRows(rows, sortBy, sortDirection).slice(0, limit)
 }
 
 export function defaultMinSetupCost(): number {

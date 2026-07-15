@@ -22,19 +22,17 @@ import {
   setupBudgetFromSlider,
   type BlueprintSortKey,
 } from '@/lib/ranking'
-import { formatAvgVolume, formatIsk, formatPercent } from '@/lib/profit'
-import { tierLabel } from '@/lib/blueprintGroups'
-import type { RouteDangerResult } from '@/lib/routeDanger'
 import { PageHeader, LoadingState } from '@/components/Layout'
-import { EveImage } from '@/components/EveImage'
-import { BuildSkillGapFlag } from '@/components/BuildSkillGapFlag'
-import { HaulRiskModal, HaulRiskTrigger } from '@/components/HaulRiskModal'
+import type { RouteDangerResult } from '@/lib/routeDanger'
+import { HaulRiskModal } from '@/components/HaulRiskModal'
 import { SetupCostModal } from '@/components/SetupCostModal'
 import { IphBreakdownModal } from '@/components/IphBreakdownModal'
 import { InfoTooltip } from '@/components/InfoTooltip'
-import { getMissingBuildSkills } from '@/lib/buildRequirements'
 import { productionGraphRoute } from '@/lib/paths'
 import { BlueprintGraphModal } from '@/components/BlueprintGraphModal'
+import { FavoriteItemsSection } from '@/components/FavoriteItemsSection'
+import { BlueprintRow } from '@/components/BlueprintRow'
+import { BlueprintMobileCard } from '@/components/BlueprintMobileCard'
 
 
 const SORT_LABELS: Record<BlueprintSortKey, string> = {
@@ -209,6 +207,44 @@ export function BlueprintsPage() {
     rankingQuery.sortDir,
   ])
 
+  const favoriteEntries = useMemo(() => {
+    if (!sde || watchlist.length === 0) return []
+    const productTypeIds = watchlist.map((w) => w.productTypeId)
+    const ranked = rankBlueprintsFromMarket(
+      sde.registry,
+      sde.market,
+      sde.regions,
+      typeMap,
+      rankingQuery.hub,
+      rankingQuery.window,
+      manufacturingSettings,
+      {
+        minSetupCost: 0,
+        maxSetupCost: Number.POSITIVE_INFINITY,
+        buildableOnly: false,
+        includeHaulCost: rankingQuery.includeHaul,
+        minVolume: 0,
+        productTypeIds,
+        limit: productTypeIds.length,
+      },
+      sde.systems,
+    )
+    const byProductId = new Map(ranked.map((r) => [r.blueprint.productTypeId, r]))
+    return [...watchlist].reverse().map((w) => ({
+      productTypeId: w.productTypeId,
+      name: typeMap.get(w.productTypeId)?.name ?? `Type ${w.productTypeId}`,
+      row: byProductId.get(w.productTypeId) ?? null,
+    }))
+  }, [
+    sde,
+    watchlist,
+    typeMap,
+    rankingQuery.hub,
+    rankingQuery.window,
+    rankingQuery.includeHaul,
+    manufacturingSettings,
+  ])
+
   function handleSort(nextKey: BlueprintSortKey) {
     if (nextKey === rankingQuery.sortBy) {
       filtersRef.current?.setQuery({ sortDir: rankingQuery.sortDir === 'desc' ? 'asc' : 'desc' })
@@ -246,6 +282,22 @@ export function BlueprintsPage() {
         productGroupTree={productGroupTree}
         resultCount={rows.length}
         onRankingQueryChange={handleRankingQueryChange}
+      />
+
+      <FavoriteItemsSection
+        entries={favoriteEntries}
+        skills={settings.skills}
+        haulIn={haulInDanger}
+        haulOut={haulOutDanger}
+        haulError={haulDangerError}
+        dangerLoading={dangerLoading}
+        onToggle={toggleWatchlist}
+        onOpenGraph={openGraph}
+        onOpenSetup={setSetupDetailRow}
+        onOpenIph={setIphDetailRow}
+        onOpenHaulRisk={() => {
+          if (!haulDangerError) setHaulRiskOpen(true)
+        }}
       />
 
       {rows.length === 0 && (
@@ -436,152 +488,25 @@ const BlueprintResults = memo(function BlueprintResults({
         <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
           {virtualizer.getVirtualItems().map((v) => {
             const row = rows[v.index]!
-            const watched = watchlistIds.has(row.blueprint.productTypeId)
-            const missingSkills = getMissingBuildSkills(row.blueprint, settings.skills)
             return (
               <div
                 key={row.blueprint.blueprintTypeId}
-                className="card bg-base-200 border border-eve-border absolute w-full"
+                className="absolute w-full"
                 style={{ transform: `translateY(${v.start}px)`, height: `${v.size}px` }}
               >
-                <div className="card-body py-3 flex-row gap-3 items-center">
-                  <EveImage
-                    id={row.blueprint.productTypeId}
-                    size={32}
-                    framed
-                    alt={row.product.name}
-                  />
-                  <button
-                    type="button"
-                    className="flex-1 min-w-0 text-left"
-                    onClick={() => onOpenGraph(row)}
-                  >
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <h3 className="font-semibold text-sm truncate">{row.product.name}</h3>
-                      <BuildSkillGapFlag missing={missingSkills} />
-                    </div>
-                    <button
-                      type="button"
-                      className="text-xs link link-hover tabular-nums"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onOpenIph(row)
-                      }}
-                      aria-label={`ISK per hour breakdown for ${row.product.name}`}
-                    >
-                      {formatIsk(row.iph)}/hr
-                    </button>
-                    <p className="text-xs opacity-70">
-                      {formatPercent(row.margin)} · {formatIsk(row.netProfit)}
-                    </p>
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn btn-ghost btn-sm ${watched ? 'text-primary' : ''}`}
-                    onClick={() => toggleWatchlist(row.blueprint.productTypeId)}
-                  >
-                    {watched ? '★' : '☆'}
-                  </button>
-                </div>
+                <BlueprintMobileCard
+                  row={row}
+                  skills={settings.skills}
+                  watched={watchlistIds.has(row.blueprint.productTypeId)}
+                  onWatch={() => toggleWatchlist(row.blueprint.productTypeId)}
+                  onOpenGraph={() => onOpenGraph(row)}
+                  onOpenIph={() => onOpenIph(row)}
+                />
               </div>
             )
           })}
         </div>
       </div>
     </>
-  )
-})
-
-const BlueprintRow = memo(function BlueprintRow({
-  row,
-  rank,
-  skills,
-  watched,
-  onWatch,
-  onOpenGraph,
-  onOpenSetup,
-  onOpenIph,
-  onOpenHaulRisk,
-  haulIn,
-  haulOut,
-  haulError,
-  dangerLoading,
-}: {
-  row: RankedBlueprintRow
-  rank: number
-  skills: SkillLevels
-  watched: boolean
-  onWatch: () => void
-  onOpenGraph: () => void
-  onOpenSetup: () => void
-  onOpenIph: () => void
-  onOpenHaulRisk: () => void
-  haulIn: RouteDangerResult | null
-  haulOut: RouteDangerResult | null
-  haulError: string | null
-  dangerLoading: boolean
-}) {
-  const missingSkills = getMissingBuildSkills(row.blueprint, skills)
-
-  return (
-    <tr className="hover:bg-base-200/80 cursor-pointer" onClick={onOpenGraph}>
-      <td>
-        <div className="flex items-center gap-1">
-          <span className="text-[10px] opacity-40 w-4 tabular-nums">{rank}</span>
-          <EveImage id={row.blueprint.productTypeId} size={32} framed alt={row.product.name} />
-        </div>
-      </td>
-      <td>
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="link link-hover truncate">{row.product.name}</span>
-          <BuildSkillGapFlag missing={missingSkills} />
-        </div>
-        <span className="text-[10px] opacity-50 block">
-          <span className="badge badge-xs badge-ghost mr-1">{tierLabel(row.blueprint.tier)}</span>
-          {row.product.group}
-        </span>
-      </td>
-      <td className="whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          className="link link-hover tabular-nums"
-          onClick={onOpenSetup}
-          aria-label={`Setup cost breakdown for ${row.product.name}`}
-        >
-          {formatIsk(row.setupCost)}
-        </button>
-      </td>
-      <td className={row.netProfit >= 0 ? 'text-success' : 'text-error'}>{formatIsk(row.netProfit)}</td>
-      <td className="whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          className="link link-hover tabular-nums"
-          onClick={onOpenIph}
-          aria-label={`ISK per hour breakdown for ${row.product.name}`}
-        >
-          {formatIsk(row.iph)}
-        </button>
-      </td>
-      <td>{formatPercent(row.margin)}</td>
-      <td>{formatAvgVolume(row.avgVolume)}</td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <HaulRiskTrigger
-          haulIn={haulIn}
-          haulOut={haulOut}
-          error={haulError}
-          loading={dangerLoading}
-          onOpen={onOpenHaulRisk}
-        />
-      </td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          className={`btn btn-ghost btn-xs ${watched ? 'text-primary' : ''}`}
-          onClick={onWatch}
-        >
-          {watched ? '★' : '☆'}
-        </button>
-      </td>
-    </tr>
   )
 })
