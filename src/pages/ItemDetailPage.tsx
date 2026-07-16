@@ -8,6 +8,7 @@ import { filterHistoryByRange, formatIsk, formatDecimal } from '@/lib/profit'
 import { tierLabel } from '@/lib/blueprintGroups'
 import type { MarketHistoryEntry, TimeRange } from '@/types'
 import { PageHeader, LoadingState, LastUpdated } from '@/components/Layout'
+import { textLinkClass } from '@/lib/textLink'
 import { EveImage } from '@/components/EveImage'
 import { Panel } from '@/components/Panel'
 import { StatCard } from '@/components/StatCard'
@@ -169,7 +170,7 @@ export function ItemDetailPage() {
             <StatCard
               label="Manufactures"
               value={
-                <Link className="link link-primary text-sm" to={`/item/${blueprint!.productTypeId}`}>
+                <Link className={textLinkClass('text-primary text-sm')} to={`/item/${blueprint!.productTypeId}`}>
                   {manufacturedProduct.name}
                 </Link>
               }
@@ -179,7 +180,7 @@ export function ItemDetailPage() {
             <StatCard
               label="Blueprint"
               value={
-                <Link className="link link-primary text-sm" to={`/item/${blueprint.blueprintTypeId}`}>
+                <Link className={textLinkClass('text-primary text-sm')} to={`/item/${blueprint.blueprintTypeId}`}>
                   View BPO
                 </Link>
               }
@@ -189,7 +190,7 @@ export function ItemDetailPage() {
             <StatCard
               label="Rankings"
               value={
-                <Link className="link link-primary text-sm" to="/blueprints">
+                <Link className={textLinkClass('text-primary text-sm')} to="/blueprints">
                   View rankings
                 </Link>
               }
@@ -220,7 +221,7 @@ export function ItemDetailPage() {
           <p className="text-sm opacity-60 mb-4">
             Many BPOs are not on the hub market API, so setup cost stays 0 ISK when there are no
             sell orders. The chart below is for{' '}
-            <Link className="link link-primary" to={`/item/${manufacturedProduct.typeId}`}>
+            <Link className={textLinkClass('text-primary')} to={`/item/${manufacturedProduct.typeId}`}>
               {manufacturedProduct.name}
             </Link>
             , not this blueprint.

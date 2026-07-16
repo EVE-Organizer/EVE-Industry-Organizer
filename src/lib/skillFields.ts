@@ -25,6 +25,20 @@ export const SKILL_FIELDS: SkillFieldDef[] = [
       'Cuts manufacturing job time by 3% per level. Higher levels raise IPH and profit per hour in rankings. Also required by some advanced blueprints.',
   },
   {
+    key: 'massProduction',
+    skillId: 3387,
+    label: 'Mass Production',
+    tooltip:
+      'Adds one concurrent manufacturing job per level (plus one base slot). Used for production plan timelines.',
+  },
+  {
+    key: 'advancedMassProduction',
+    skillId: 24624,
+    label: 'Advanced Mass Production',
+    tooltip:
+      'Adds one more concurrent manufacturing job per level on top of Mass Production. Max 11 slots at V/V.',
+  },
+  {
     key: 'science',
     skillId: 3403,
     label: 'Science',

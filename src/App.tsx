@@ -6,6 +6,7 @@ import { useAppStore } from '@/stores/appStore'
 import { BlueprintsPage } from '@/pages/BlueprintsPage'
 import { ProductionGraphPage } from '@/pages/ProductionGraphPage'
 import { ItemDetailPage } from '@/pages/ItemDetailPage'
+import { PlanPage } from '@/pages/PlanPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { AuthCallbackPage } from '@/pages/AuthCallbackPage'
 import { useAuthStore } from '@/stores/authStore'
@@ -53,6 +54,7 @@ function AppRoutes() {
         <Route path="/item/:typeId" element={<ItemDetailPage />} />
         <Route path="/blueprints/:typeId" element={<LegacyBlueprintRedirect />} />
         <Route path="/stations" element={<Navigate to="/" replace />} />
+        <Route path="/plan" element={<PlanPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/accounts" element={<Navigate to="/settings" replace />} />

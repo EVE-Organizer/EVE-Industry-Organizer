@@ -5,6 +5,20 @@
   }
 }
 
+// Animated underline on hover; use with text-inherit or text-primary as needed.
+.text-link {
+  @apply cursor-pointer pb-px bg-no-repeat transition-[background-size] duration-300 ease-out;
+  color: inherit;
+  text-decoration: none;
+  background-image: linear-gradient(to right, currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0% 100%;
+
+  &:hover {
+    background-size: 100% 1px;
+  }
+}
+
 .form-control {
   > .label {
     @apply py-1 min-h-0;
@@ -201,5 +215,138 @@
   &__table-scroll {
     @apply rounded-lg border border-eve-border overflow-y-auto min-h-0 shrink-0;
     height: 20rem;
+  }
+}
+
+.plan-template-rail {
+  @apply inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-eve-border bg-base-300/25 p-1;
+}
+
+.plan-template-btn {
+  @apply inline-flex min-w-0 items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm font-medium text-base-content/60 transition-colors;
+  @apply hover:bg-base-200/60 hover:text-base-content;
+
+  &--active {
+    @apply border-primary/30 bg-primary/10 text-primary shadow-sm;
+  }
+
+  &__count {
+    @apply inline-flex min-w-[1.25rem] items-center justify-center rounded-md bg-base-content/10 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums leading-none;
+  }
+
+  &--active &__count {
+    @apply bg-primary/20 text-primary;
+  }
+}
+
+.plan-detail-header {
+  @apply flex flex-col gap-4 rounded-xl border border-eve-border bg-gradient-to-br from-base-200/90 to-base-300/20 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5;
+}
+
+.plan-stat-chip {
+  @apply inline-flex items-baseline gap-1.5 rounded-lg border border-eve-border/70 bg-base-300/30 px-2.5 py-1.5;
+
+  &__label {
+    @apply text-[11px] font-medium uppercase tracking-wide text-base-content/40;
+  }
+
+  &__value {
+    @apply text-sm font-semibold tabular-nums text-base-content/90;
+  }
+}
+
+.plan-toolbar {
+  @apply inline-flex items-center gap-0.5 rounded-lg border border-eve-border/80 bg-base-300/30 p-0.5;
+}
+
+.plan-build-card {
+  @apply overflow-hidden rounded-xl border border-eve-border bg-base-200 shadow-sm;
+
+  &__header {
+    @apply flex flex-wrap items-center gap-2 border-b border-eve-border/80 bg-gradient-to-r from-primary/5 via-base-300/20 to-transparent px-4 py-3.5 sm:px-5;
+  }
+
+  &__title {
+    @apply text-base font-semibold tracking-tight;
+  }
+
+  &__badge {
+    @apply badge badge-primary badge-sm badge-outline border-primary/30 font-normal;
+  }
+
+  &__body {
+    @apply flex flex-col gap-0 p-4 sm:p-5;
+  }
+
+  &__search {
+    @apply pb-4;
+  }
+
+  &__hint {
+    @apply mt-2 text-[11px] leading-relaxed text-base-content/40;
+  }
+}
+
+.plan-search-wrap {
+  @apply relative w-full;
+
+  &__icon {
+    @apply pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40;
+  }
+
+  &__input {
+    @apply input input-bordered w-full bg-base-300/40 pl-9 text-sm;
+    @apply focus:border-primary/50 focus:bg-base-300/60;
+  }
+}
+
+.plan-view-tabs {
+  @apply overflow-hidden rounded-xl border border-eve-border bg-base-200 shadow-sm;
+
+  &__bar {
+    @apply flex flex-col gap-3 border-b border-eve-border/80 bg-base-300/25 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4;
+  }
+
+  &__list {
+    @apply inline-flex flex-wrap gap-1 rounded-lg border border-eve-border/60 bg-base-300/30 p-1;
+  }
+
+  &__tab {
+    @apply inline-flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm font-medium text-base-content/60 transition-colors;
+    @apply hover:bg-base-200/70 hover:text-base-content;
+
+    &--active {
+      @apply border-primary/30 bg-primary/10 text-primary shadow-sm;
+    }
+  }
+
+  &__panel {
+    @apply p-4 sm:p-5;
+  }
+}
+
+.plan-chain-embedded {
+  @apply -mx-4 border-t border-eve-border/70 sm:-mx-5;
+
+  &__header {
+    @apply flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-3 sm:px-5;
+  }
+
+  &__title {
+    @apply text-sm font-semibold leading-none text-base-content/90;
+  }
+
+  &__summary {
+    @apply text-[11px] leading-none text-base-content/50;
+  }
+}
+
+.plan-jobs-table {
+  thead tr {
+    @apply border-b border-eve-border/60;
+  }
+
+  tbody tr:hover {
+    @apply bg-base-300/25;
   }
 }

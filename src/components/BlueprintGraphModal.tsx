@@ -45,6 +45,7 @@ import { tierLabel } from '@/lib/blueprintGroups'
 import { tradingFeeRates } from '@/lib/tradingFees'
 import { skillLevel } from '@/lib/skillFields'
 import { appRoute, productionGraphRoute } from '@/lib/paths'
+import { textLinkClass } from '@/lib/textLink'
 import { formatGraphQuantity, formatGraphUnitIsk, formatDuration, formatIsk, formatPercent, formatDecimal } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
 import { InfoTooltip } from '@/components/InfoTooltip'
@@ -61,6 +62,8 @@ interface BlueprintGraphModalProps {
   shareSearch?: string
   onOpenPage?: (productTypeId: number) => void
   variant?: 'modal' | 'page'
+  /** Runs from an active manufacturing plan (supply chain / roots). */
+  getPlanRuns?: (productTypeId: number) => number | undefined
 }
 
 function graphShareHref(productTypeId: number, search: string): string {
@@ -135,7 +138,7 @@ function GraphHeaderTitle({
       {variant === 'modal' && onOpenPage ? (
         <button
           type="button"
-          className={`${titleClass} text-left link link-hover link-primary`}
+          className={`${titleClass} text-left ${textLinkClass('text-primary')}`}
           title={`Open ${displayName} on full page`}
           onClick={() => onOpenPage(productTypeId)}
         >
@@ -1582,6 +1585,7 @@ export function BlueprintGraphModal({
   shareSearch = '',
   onOpenPage,
   variant = 'modal',
+  getPlanRuns,
 }: BlueprintGraphModalProps) {
   const { data: sde } = useSdeData()
   const [activeBlueprint, setActiveBlueprint] = useState(blueprint)
@@ -1598,12 +1602,22 @@ export function BlueprintGraphModal({
     return activeBlueprint.productTypeId === entryProductTypeIdRef.current ? rankedRow : null
   }, [activeBlueprint, blueprint, rankedRow])
 
-  const initialGraphRuns = activeRankedRow?.iphBreakdown.runs ?? settings.batchSize
-  const [graphRuns, setGraphRuns] = useState(initialGraphRuns)
+  const resolveGraphRuns = useCallback(
+    (productTypeId: number | undefined): number => {
+      if (productTypeId != null) {
+        const planRuns = getPlanRuns?.(productTypeId)
+        if (planRuns != null && planRuns > 0) return planRuns
+      }
+      return activeRankedRow?.iphBreakdown.runs ?? settings.batchSize
+    },
+    [getPlanRuns, activeRankedRow, settings.batchSize],
+  )
+
+  const [graphRuns, setGraphRuns] = useState(() => resolveGraphRuns(blueprint?.productTypeId))
 
   useEffect(() => {
-    setGraphRuns(activeRankedRow?.iphBreakdown.runs ?? settings.batchSize)
-  }, [activeBlueprint?.productTypeId, settings.batchSize, activeRankedRow])
+    setGraphRuns(resolveGraphRuns(activeBlueprint?.productTypeId))
+  }, [activeBlueprint?.productTypeId, resolveGraphRuns])
 
   const graphSettings = useMemo(
     (): ManufacturingSettings => ({

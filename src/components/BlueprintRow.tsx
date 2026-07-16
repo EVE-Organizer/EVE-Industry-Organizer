@@ -7,6 +7,8 @@ import { formatAvgVolume, formatIsk, formatPercent } from '@/lib/profit'
 import { tierLabel } from '@/lib/blueprintGroups'
 import { getMissingBuildSkills } from '@/lib/buildRequirements'
 import type { RouteDangerResult } from '@/lib/routeDanger'
+import { AddToPlanMenu } from '@/components/plan/AddToPlanMenu'
+import { textLinkClass } from '@/lib/textLink'
 
 export interface BlueprintItemProps {
   row: RankedBlueprintRow
@@ -42,7 +44,7 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
       </td>
       <td>
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="link link-hover truncate">{row.product.name}</span>
+          <span className={textLinkClass('truncate')}>{row.product.name}</span>
           <BuildSkillGapFlag missing={missingSkills} />
         </div>
         <span className="text-[10px] opacity-50 block">
@@ -53,7 +55,7 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
       <td className="whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
-          className="link link-hover tabular-nums"
+          className={textLinkClass('tabular-nums')}
           onClick={onOpenSetup}
           aria-label={`Setup cost breakdown for ${row.product.name}`}
         >
@@ -64,7 +66,7 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
       <td className="whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
-          className="link link-hover tabular-nums"
+          className={textLinkClass('tabular-nums')}
           onClick={onOpenIph}
           aria-label={`ISK per hour breakdown for ${row.product.name}`}
         >
@@ -83,13 +85,16 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
         />
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          className={`btn btn-ghost btn-xs ${watched ? 'text-primary' : ''}`}
-          onClick={onWatch}
-        >
-          {watched ? '★' : '☆'}
-        </button>
+        <div className="flex items-center gap-0.5">
+          <AddToPlanMenu productTypeId={row.blueprint.productTypeId} />
+          <button
+            type="button"
+            className={`btn btn-ghost btn-xs ${watched ? 'text-primary' : ''}`}
+            onClick={onWatch}
+          >
+            {watched ? '★' : '☆'}
+          </button>
+        </div>
       </td>
     </tr>
   )
@@ -134,7 +139,7 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
         <EveImage id={row.blueprint.productTypeId} size={32} framed alt={row.product.name} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 min-w-0">
-            <span className="font-medium text-sm truncate">{row.product.name}</span>
+            <span className={textLinkClass('font-medium text-sm truncate')}>{row.product.name}</span>
             <BuildSkillGapFlag missing={missingSkills} />
           </div>
           <p className="text-[10px] opacity-50 truncate mt-0.5">
@@ -144,7 +149,7 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
         </div>
         <button
           type="button"
-          className={`btn btn-ghost btn-xs shrink-0 -mt-1 -mr-1 ${watched ? 'text-primary' : ''}`}
+          className={`btn btn-ghost btn-xs shrink-0 -mt-1 ${watched ? 'text-primary' : ''}`}
           onClick={(e) => {
             e.stopPropagation()
             onWatch()
@@ -153,6 +158,9 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
         >
           {watched ? '★' : '☆'}
         </button>
+        <div className="shrink-0 -mt-1" onClick={(e) => e.stopPropagation()}>
+          <AddToPlanMenu productTypeId={row.blueprint.productTypeId} />
+        </div>
       </div>
 
       <dl
@@ -162,7 +170,7 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
         <MobileStat label="Setup">
           <button
             type="button"
-            className="link link-hover"
+            className={textLinkClass()}
             onClick={onOpenSetup}
             aria-label={`Setup cost breakdown for ${row.product.name}`}
           >
@@ -177,7 +185,7 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
         <MobileStat label="ISK/hr">
           <button
             type="button"
-            className="link link-hover"
+            className={textLinkClass()}
             onClick={onOpenIph}
             aria-label={`ISK per hour breakdown for ${row.product.name}`}
           >

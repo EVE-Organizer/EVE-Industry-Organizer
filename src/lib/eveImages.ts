@@ -99,6 +99,9 @@ export const NAV_TYPE_IDS = {
   blueprints: 3841,
 } as const
 
+/** Small Standard Container — shared buy-list group header. */
+export const SHARED_MATERIALS_ICON_TYPE_ID = 3297
+
 export const MINERAL_KEYS = Object.keys(MINERAL_TYPE_IDS) as (keyof MineralStock)[]
 
 export function mineralIconUrl(key: keyof MineralStock, size = 32): string {

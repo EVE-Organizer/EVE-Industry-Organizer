@@ -1,4 +1,4 @@
-import type { HubId, UserData, GlobalSettings, SkillLevels } from '@/types'
+import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate } from '@/types'
 import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS } from '@/types'
 import { SKILL_FIELDS } from '@/lib/skillFields'
 import { normalizeBpoLifetimeRunsByCategory } from '@/lib/bpoLifetime'
@@ -80,7 +80,7 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
   }
 }
 
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 export const USER_DATA_KEY = 'eveio:userData'
 
 export function createDefaultUserData(): UserData {
@@ -89,6 +89,28 @@ export function createDefaultUserData(): UserData {
     updatedAt: new Date().toISOString(),
     settings: { ...DEFAULT_SETTINGS },
     watchlist: [],
+    planTemplates: [],
+  }
+}
+
+export function createPlanTemplateId(): string {
+  return `plan-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+}
+
+export function createDefaultPlanTemplate(name = 'New plan'): ManufacturingPlanTemplate {
+  const now = new Date().toISOString()
+  return {
+    id: createPlanTemplateId(),
+    name,
+    createdAt: now,
+    updatedAt: now,
+    productionWindowHours: 24,
+    slotSource: 'skills',
+    manufacturingSlots: 6,
+    defaultRunsPerBpc: 10,
+    roots: [],
+    modeOverrides: {},
+    nodeOverrides: {},
   }
 }
 
@@ -102,6 +124,7 @@ export function loadUserDataFromLocal(): UserData {
     return {
       ...createDefaultUserData(),
       ...rest,
+      planTemplates: parsed.planTemplates ?? [],
       settings: normalizeGlobalSettings({
         ...(parsed.settings ?? {}),
         skills: normalizeSkillLevels(parsed.settings?.skills ?? legacySkills, {
@@ -118,6 +141,7 @@ export function saveUserDataToLocal(data: UserData): void {
   const payload: UserData = {
     ...data,
     schemaVersion: SCHEMA_VERSION,
+    planTemplates: data.planTemplates ?? [],
     settings: normalizeGlobalSettings(data.settings),
     updatedAt: new Date().toISOString(),
   }

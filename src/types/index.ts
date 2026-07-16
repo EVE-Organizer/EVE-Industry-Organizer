@@ -191,6 +191,8 @@ export interface SkillLevels {
   science: number
   accounting: number
   brokerRelations: number
+  massProduction: number
+  advancedMassProduction: number
   [key: string]: number
 }
 
@@ -209,11 +211,97 @@ export interface WatchlistItem {
   addedAt: string
 }
 
+export type PlanSlotSource = 'skills' | 'manual'
+export type PlanBuildMode = 'buy' | 'build'
+
+export interface PlanRootEntry {
+  productTypeId: number
+  runs: number
+  productionDurationHours: number
+}
+
+export interface PlanNodeOverride {
+  runs?: number
+  copies?: number
+  runsPerBpc?: number
+  forceInclude?: boolean
+}
+
+export interface ManufacturingPlanTemplate {
+  id: string
+  name: string
+  createdAt: string
+  updatedAt: string
+  productionWindowHours: number
+  slotSource: PlanSlotSource
+  manufacturingSlots: number
+  defaultRunsPerBpc: number
+  roots: PlanRootEntry[]
+  modeOverrides: Record<number, PlanBuildMode>
+  nodeOverrides: Record<number, PlanNodeOverride>
+}
+
+/** Computed plan node (not persisted). */
+export interface PlanNode {
+  productTypeId: number
+  name: string
+  tier?: BlueprintTier
+  mode: PlanBuildMode
+  totalDemandQty: number
+  demandByParent: { parentProductTypeId: number; qty: number }[]
+  parentProductTypeIds: number[]
+  childProductTypeIds: number[]
+  runs: number
+  bpcCount: number
+  concurrentCopies: number
+  jobTimeSeconds: number
+  outputQty: number
+  isRoot: boolean
+  isLeaf: boolean
+  depth: number
+  /** Has a manufacturing blueprint and is not a raw mineral. */
+  canToggle: boolean
+  /** Hub sell price per unit (material buys). */
+  unitPrice?: number
+  /** Hub price × demand qty (buy from market). */
+  buyCost?: number
+  /** Rolled-up build cost for required runs (same logic as production graph). */
+  buildCost?: number
+  /** buyCost − buildCost; positive means build is cheaper. */
+  savings?: number
+  /** Cost-based suggestion before user overrides. */
+  recommendedMode?: PlanBuildMode
+}
+
+export interface PlanTimeBucket {
+  hour: number
+  supply: number
+  demand: number
+  inventory: number
+}
+
+export interface PlanNodeSimulation {
+  productTypeId: number
+  buckets: PlanTimeBucket[]
+  shortages: { startHour: number; endHour: number; deficit: number }[]
+}
+
+export interface ScheduledPlanJob {
+  productTypeId: number
+  name: string
+  slot: number
+  startHour: number
+  endHour: number
+  runs: number
+  outputQty: number
+}
+
 export interface UserData {
   schemaVersion: number
   updatedAt: string
   settings: GlobalSettings
   watchlist: WatchlistItem[]
+  planTemplates: ManufacturingPlanTemplate[]
 }
 
 export interface HubConfig {
@@ -420,7 +508,9 @@ export const DEFAULT_SKILLS: SkillLevels = {
   advancedIndustry: DEFAULT_SKILL_LEVEL,
   science: DEFAULT_SKILL_LEVEL,
   accounting: DEFAULT_SKILL_LEVEL,
-  brokerRelations: DEFAULT_SKILL_LEVEL,
+  brokerRelations: 0,
+  massProduction: DEFAULT_SKILL_LEVEL,
+  advancedMassProduction: DEFAULT_SKILL_LEVEL,
 }
 
 /** Untrained skill levels used when importing from ESI or before sync completes. */
@@ -430,6 +520,8 @@ export const ZERO_SKILLS: SkillLevels = {
   science: 0,
   accounting: 0,
   brokerRelations: 0,
+  massProduction: 0,
+  advancedMassProduction: 0,
 }
 
 export const DEFAULT_SETTINGS: GlobalSettings = {

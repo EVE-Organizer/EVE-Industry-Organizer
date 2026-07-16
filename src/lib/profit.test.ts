@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { MarketHistoryEntry } from '@/types'
-import { filterHistoryByRange, formatDuration, formatGraphQuantity, formatGraphUnitIsk, formatIskInputUnit, parseIskInputUnit, trimHistoryByDays } from '@/lib/profit'
+import { filterHistoryByRange, formatDuration, formatDurationHms, formatGraphQuantity, formatGraphUnitIsk, formatIsk, formatIskInputUnit, parseIskInputUnit, trimHistoryByDays } from '@/lib/profit'
 
 function historyEntry(date: string, average = 100): MarketHistoryEntry {
   return { date, average, highest: average, lowest: average, volume: 10 }
@@ -59,6 +59,27 @@ describe('formatDuration', () => {
     expect(formatDuration(7_200)).toBe('2.00 hr')
     expect(formatDuration(172_800)).toBe('2.00 days')
     expect(formatDuration(0)).toBe('—')
+  })
+})
+
+describe('formatDurationHms', () => {
+  it('formats seconds as hours:minutes:seconds', () => {
+    expect(formatDurationHms(45)).toBe('0:00:45')
+    expect(formatDurationHms(90)).toBe('0:01:30')
+    expect(formatDurationHms(7_200)).toBe('2:00:00')
+    expect(formatDurationHms(172_800)).toBe('48:00:00')
+    expect(formatDurationHms(3_665)).toBe('1:01:05')
+    expect(formatDurationHms(0)).toBe('—')
+  })
+})
+
+describe('formatIsk', () => {
+  it('formats compact values with suffix and ISK', () => {
+    expect(formatIsk(842)).toBe('842 ISK')
+    expect(formatIsk(5_000)).toBe('5.0K ISK')
+    expect(formatIsk(1_770_000)).toBe('1.77M ISK')
+    expect(formatIsk(2_500_000_000)).toBe('2.50B ISK')
+    expect(formatIsk(Number.POSITIVE_INFINITY)).toBe('∞')
   })
 })
 

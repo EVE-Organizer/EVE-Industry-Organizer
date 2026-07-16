@@ -13,7 +13,13 @@ import { EveCharacterPanel } from '@/components/EveCharacterPanel'
 import { useAuthStore } from '@/stores/authStore'
 import { PageHeader } from '@/components/Layout'
 
-const MANUFACTURING_SKILL_KEYS: SkillFieldDef['key'][] = ['industry', 'advancedIndustry', 'science']
+const MANUFACTURING_SKILL_KEYS: SkillFieldDef['key'][] = [
+  'industry',
+  'advancedIndustry',
+  'massProduction',
+  'advancedMassProduction',
+  'science',
+]
 const MARKET_SKILL_KEYS: SkillFieldDef['key'][] = ['accounting', 'brokerRelations']
 
 function SkillGroup({

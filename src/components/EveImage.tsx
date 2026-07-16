@@ -37,21 +37,53 @@ export function EveImage({
     setUrlIndex(0)
   }, [id, variant, productTypeId, size])
 
-  const frame = framed
-    ? 'rounded-md border border-eve-border bg-base-300/80 p-0.5 shadow-sm'
-    : 'rounded bg-base-300/60'
+  const frame =
+    'rounded-md border border-eve-border bg-base-300/80 p-0.5 shadow-sm'
 
   const src = urls[urlIndex]
 
   if (!src || urlIndex >= urls.length) {
+    if (framed) {
+      return (
+        <span
+          className={`inline-flex items-center justify-center shrink-0 aspect-square ${frame} ${className}`}
+          style={{ width: size, height: size }}
+          aria-hidden={!alt}
+          title={alt || undefined}
+        >
+          <span className="text-[10px] opacity-40 font-mono">?</span>
+        </span>
+      )
+    }
     return (
       <span
-        className={`inline-flex items-center justify-center shrink-0 ${frame} ${className}`}
+        className={`inline-flex items-center justify-center shrink-0 rounded bg-base-300/60 ${className}`}
         style={{ width: size, height: size }}
         aria-hidden={!alt}
         title={alt || undefined}
       >
         <span className="text-[10px] opacity-40 font-mono">?</span>
+      </span>
+    )
+  }
+
+  if (framed) {
+    return (
+      <span
+        className={`inline-flex items-center justify-center shrink-0 aspect-square overflow-hidden ${frame} ${className}`}
+        style={{ width: size, height: size }}
+      >
+        <img
+          key={src}
+          src={src}
+          alt={alt}
+          width={size}
+          height={size}
+          loading={lazy ? 'lazy' : 'eager'}
+          decoding="async"
+          className="h-full w-full object-contain"
+          onError={() => setUrlIndex((i) => i + 1)}
+        />
       </span>
     )
   }
@@ -65,7 +97,7 @@ export function EveImage({
       height={size}
       loading={lazy ? 'lazy' : 'eager'}
       decoding="async"
-      className={`shrink-0 object-contain ${frame} ${className}`}
+      className={`shrink-0 object-contain rounded bg-base-300/60 ${className}`}
       onError={() => setUrlIndex((i) => i + 1)}
     />
   )

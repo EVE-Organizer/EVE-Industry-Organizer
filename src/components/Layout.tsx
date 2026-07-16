@@ -4,6 +4,7 @@ import { EveNavAuth } from '@/components/EveNavAuth'
 
 const links = [
   { to: '/', label: 'Blueprints' },
+  { to: '/plan', label: 'Plan' },
   { to: '/settings', label: 'Settings' },
 ]
 

@@ -18,6 +18,8 @@ describe('skillFields', () => {
     expect(normalizeImportedSkillLevels({ industry: 5 })).toEqual({
       industry: 5,
       advancedIndustry: 0,
+      massProduction: 0,
+      advancedMassProduction: 0,
       science: 0,
       accounting: 0,
       brokerRelations: 0,

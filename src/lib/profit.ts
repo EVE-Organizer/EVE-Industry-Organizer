@@ -39,15 +39,15 @@ export function filterHistoryByRange(history: MarketHistoryEntry[], range: TimeR
 export function formatIsk(value: number): string {
   if (!Number.isFinite(value)) return '∞'
   if (Math.abs(value) >= 1_000_000_000) {
-    return `${formatDecimal(value / 1_000_000_000, 2)}B`
+    return `${formatDecimal(value / 1_000_000_000, 2)}B ISK`
   }
   if (Math.abs(value) >= 1_000_000) {
-    return `${formatDecimal(value / 1_000_000, 2)}M`
+    return `${formatDecimal(value / 1_000_000, 2)}M ISK`
   }
   if (Math.abs(value) >= 1_000) {
-    return `${formatNumber(value / 1_000, 1)}K`
+    return `${formatNumber(value / 1_000, 1)}K ISK`
   }
-  return formatNumber(value, 0)
+  return `${formatNumber(value, 0)} ISK`
 }
 
 /** Compact amount + unit for setup budget inputs (M/B only). */
@@ -134,6 +134,16 @@ export function formatDuration(seconds: number): string {
   if (seconds >= 3_600) return `${formatDecimal(seconds / 3_600, 2)} hr`
   if (seconds >= 60) return `${formatDecimal(seconds / 60, 1)} min`
   return `${formatNumber(seconds, 0)} sec`
+}
+
+/** Wall-clock job time as hours:minutes:seconds (minutes and seconds zero-padded). */
+export function formatDurationHms(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds <= 0) return '—'
+  const total = Math.floor(seconds)
+  const hours = Math.floor(total / 3_600)
+  const minutes = Math.floor((total % 3_600) / 60)
+  const secs = total % 60
+  return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 }
 
 function trimCompactDecimal(value: number, decimals: number): string {
