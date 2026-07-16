@@ -660,7 +660,8 @@ function markNavigableNodes(
     if (node.type === 'buildTargetNode') return node
 
     const data = node.data as SupplyNodeData
-    if (data.role !== 'build' || !blueprintByProduct.has(data.typeId)) return node
+    if (data.role === 'root' || data.role === 'blueprint') return node
+    if (!blueprintByProduct.has(data.typeId)) return node
 
     return {
       ...node,
@@ -765,7 +766,7 @@ function materialCardLines(data: SupplyNodeData): MaterialCardLines {
   const unitPrice = data.unitPrice > 0 ? formatGraphUnitIsk(data.unitPrice) : null
   const totalCost = formatIsk(data.totalCost)
 
-  if (data.role === 'build' && data.savings != null && data.savings !== 0) {
+  if (data.savings != null && data.savings !== 0) {
     const saving = data.savings > 0
     return {
       qty,
@@ -1162,8 +1163,7 @@ function OutputDetailCard({ data, summary }: { data: SupplyNodeData; summary: Ou
 function NodeDetailCard({ data }: { data: SupplyNodeData }) {
   const priceLabels = useContext(GraphPriceContext)
   const lines = materialCardLines(data)
-  const hasComparison =
-    data.role === 'build' && data.buildCost != null && data.buyCost != null
+  const hasComparison = data.buildCost != null && data.buyCost != null
 
   return (
     <div className="w-64 rounded-xl border border-eve-border bg-neutral text-neutral-content shadow-xl p-3.5 text-xs leading-relaxed">
@@ -1193,7 +1193,9 @@ function NodeDetailCard({ data }: { data: SupplyNodeData }) {
           )}
         </div>
       )}
-      <p className="opacity-50 mt-2 text-[10px]">Click to open item detail</p>
+      <p className="opacity-50 mt-2 text-[10px]">
+        {data.canOpenGraph ? 'Click to open production graph' : 'Click to open item detail'}
+      </p>
     </div>
   )
 }
