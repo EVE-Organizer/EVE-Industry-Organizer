@@ -31,7 +31,7 @@ import { resolveRunsFromPatch } from '@/lib/rootRunsDuration'
 import { productionGraphRoute } from '@/lib/paths'
 import { formatDecimal } from '@/lib/profit'
 import { DEFAULT_BATCH_SIZE } from '@/types'
-import type { PlanBuildMode } from '@/types'
+import type { ManufacturingSettings, PlanBuildMode } from '@/types'
 
 function IconBtn({
   label,
@@ -162,6 +162,14 @@ export function PlanPage() {
 
   const hubMarket = data ? getHubMarket(data.market, userData.settings.primaryHub) : null
   const systemCostIndex = hubMarket?.costIndex ?? 0.01
+
+  const manufacturingSettings = useMemo(
+    (): ManufacturingSettings => ({
+      ...userData.settings,
+      batchSize: DEFAULT_BATCH_SIZE,
+    }),
+    [userData.settings],
+  )
 
   const plan = useManufacturingPlan(
     template,
@@ -474,7 +482,7 @@ export function PlanPage() {
           variant="modal"
           blueprint={graphBlueprint}
           hub={userData.settings.primaryHub}
-          settings={userData.settings}
+          settings={manufacturingSettings}
           getPlanRuns={getPlanRuns}
           onClose={() => setGraphProductTypeId(null)}
           onOpenPage={openGraphPage}
