@@ -398,6 +398,7 @@ function computeRow(
 
   const { me, te } = blueprintMeTe(blueprint.tier, settings)
   const structure = resolveStructureModifiers(settings)
+  const industry = skillLevel(settings.skills, 'industry')
   const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const matCost = materialCost(mats, windowPrices)
   const jobCost = estimateJobCost(matCost, regionCostIndex, structure)
@@ -486,12 +487,14 @@ function computeRow(
   const margin = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
   const baseTimePerRunSeconds = blueprint.manufacturingTime
   const teTimeFactor = 1 - te * 0.04
+  const industryTimeFactor = 1 - industry * 0.04
   const structureTeTimeFactor = 1 - structure.teBonusPercent / 100
   const advancedIndustryTimeFactor = 1 - advancedIndustry * 0.03
   const jobTimeSeconds = applyTE(
     baseTimePerRunSeconds,
     te,
     runs,
+    industry,
     advancedIndustry,
     structure.teBonusPercent,
   )
@@ -511,6 +514,7 @@ function computeRow(
   const iphBreakdown: IphBreakdown = {
     me,
     te,
+    industry,
     advancedIndustry,
     batchSizeSetting: settings.batchSize,
     productQuantity: blueprint.productQuantity,
@@ -520,6 +524,7 @@ function computeRow(
     outputQty,
     baseTimePerRunSeconds,
     teTimeFactor,
+    industryTimeFactor,
     structureTeTimeFactor,
     advancedIndustryTimeFactor,
     jobTimeSeconds,

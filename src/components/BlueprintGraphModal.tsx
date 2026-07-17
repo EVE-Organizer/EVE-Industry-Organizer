@@ -456,6 +456,7 @@ function buildOutputSummary(
     blueprint.manufacturingTime,
     te,
     runs,
+    skillLevel(settings.skills, 'industry'),
     skillLevel(settings.skills, 'advancedIndustry'),
     structure.teBonusPercent,
   )
@@ -1519,6 +1520,7 @@ function GraphProductionControls({
     blueprint.manufacturingTime,
     te,
     1,
+    skillLevel(settings.skills, 'industry'),
     skillLevel(settings.skills, 'advancedIndustry'),
     structure.teBonusPercent,
   )
@@ -1635,6 +1637,7 @@ export function BlueprintGraphModal({
       activeBlueprint.manufacturingTime,
       te,
       graphRuns,
+      skillLevel(settings.skills, 'industry'),
       skillLevel(settings.skills, 'advancedIndustry'),
       structure.teBonusPercent,
     )
@@ -1655,6 +1658,7 @@ export function BlueprintGraphModal({
           jobTimeSeconds,
           activeBlueprint.manufacturingTime,
           te,
+          skillLevel(settings.skills, 'industry'),
           skillLevel(settings.skills, 'advancedIndustry'),
           structure.teBonusPercent,
           { step: 1, maxRuns: null },

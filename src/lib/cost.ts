@@ -10,6 +10,8 @@ import {
 
 const ME_BONUS = 0.01
 const TE_BONUS = 0.04
+/** Industry skill: 4% manufacturing time reduction per level (EVE SDE). */
+const INDUSTRY_BONUS = 0.04
 
 /**
  * Rough EIV fraction for full ME10 + TE20 research, charged once per BPO.
@@ -48,22 +50,25 @@ export function applyTE(
   baseTimeSeconds: number,
   te: number,
   runs: number,
+  industry: number,
   advancedIndustry: number,
   structureTeBonusPercent = 0,
 ): number {
   const teFactor = 1 - te * TE_BONUS
+  const industryFactor = 1 - industry * INDUSTRY_BONUS
   const structFactor = 1 - structureTeBonusPercent / 100
   const advFactor = 1 - advancedIndustry * 0.03
-  return baseTimeSeconds * runs * teFactor * structFactor * advFactor
+  return baseTimeSeconds * runs * teFactor * industryFactor * structFactor * advFactor
 }
 
 export function manufacturingTimePerRun(
   baseTimeSeconds: number,
   te: number,
+  industry: number,
   advancedIndustry: number,
   structureTeBonusPercent = 0,
 ): number {
-  return applyTE(baseTimeSeconds, te, 1, advancedIndustry, structureTeBonusPercent)
+  return applyTE(baseTimeSeconds, te, 1, industry, advancedIndustry, structureTeBonusPercent)
 }
 
 export function clampManufacturingRuns(value: number): number {
@@ -77,9 +82,13 @@ export function clampGraphRuns(value: number): number {
   return Math.max(MIN_BATCH_SIZE, Math.round(value))
 }
 
+function minRunsForStep(step: number): number {
+  return step === 1 ? 1 : MIN_BATCH_SIZE
+}
+
 function clampRunsToStep(value: number, step: number, maxRuns?: number | null): number {
   const stepped = Math.round(value / step) * step
-  const minClamped = Math.max(MIN_BATCH_SIZE, stepped)
+  const minClamped = Math.max(minRunsForStep(step), stepped)
   if (maxRuns == null) return minClamped
   return Math.min(maxRuns, minClamped)
 }
@@ -88,6 +97,7 @@ export function runsForJobTime(
   jobTimeSeconds: number,
   baseTimeSeconds: number,
   te: number,
+  industry: number,
   advancedIndustry: number,
   structureTeBonusPercent = 0,
   options?: { step?: number; maxRuns?: number | null },
@@ -95,18 +105,20 @@ export function runsForJobTime(
   const perRun = manufacturingTimePerRun(
     baseTimeSeconds,
     te,
+    industry,
     advancedIndustry,
     structureTeBonusPercent,
   )
-  if (!Number.isFinite(perRun) || perRun <= 0) return MIN_BATCH_SIZE
-  if (!Number.isFinite(jobTimeSeconds) || jobTimeSeconds <= 0) return MIN_BATCH_SIZE
-
   const step = options?.step ?? BATCH_SIZE_STEP
+  const minRuns = minRunsForStep(step)
+  if (!Number.isFinite(perRun) || perRun <= 0) return minRuns
+  if (!Number.isFinite(jobTimeSeconds) || jobTimeSeconds <= 0) return minRuns
+
   const maxRuns = options && 'maxRuns' in options ? options.maxRuns : MAX_BATCH_SIZE
   const exactRuns = jobTimeSeconds / perRun
 
   if (maxRuns != null && exactRuns >= maxRuns) return maxRuns
-  if (exactRuns <= MIN_BATCH_SIZE) return MIN_BATCH_SIZE
+  if (exactRuns <= minRuns) return minRuns
 
   const low = Math.floor(exactRuns / step) * step
   const high = Math.ceil(exactRuns / step) * step
@@ -116,7 +128,7 @@ export function runsForJobTime(
     clampRunsToStep(exactRuns, step, maxRuns),
   ])
 
-  let best = MIN_BATCH_SIZE
+  let best = minRuns
   let bestError = Infinity
   for (const runs of candidates) {
     const error = Math.abs(perRun * runs - jobTimeSeconds)
@@ -168,7 +180,8 @@ export function totalManufacturingCost(
     blueprint.manufacturingTime,
     settings.teDefault,
     runs,
-    0,
+    settings.skills.industry ?? 0,
+    settings.skills.advancedIndustry ?? 0,
     structure.teBonusPercent,
   )
   return {

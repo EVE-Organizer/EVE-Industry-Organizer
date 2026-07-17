@@ -11,19 +11,28 @@ import { MAX_BATCH_SIZE } from '@/types'
 describe('manufacturing run/time helpers', () => {
   const baseTime = 3600
   const te = 20
+  const industry = 5
   const advancedIndustry = 5
   const structureTeBonusPercent = 10
 
-  it('computes per-run time with TE, structure, and Advanced Industry', () => {
-    const perRun = manufacturingTimePerRun(baseTime, te, advancedIndustry, structureTeBonusPercent)
-    expect(perRun).toBe(applyTE(baseTime, te, 1, advancedIndustry, structureTeBonusPercent))
+  it('computes per-run time with TE, Industry, structure, and Advanced Industry', () => {
+    const perRun = manufacturingTimePerRun(
+      baseTime,
+      te,
+      industry,
+      advancedIndustry,
+      structureTeBonusPercent,
+    )
+    expect(perRun).toBe(
+      applyTE(baseTime, te, 1, industry, advancedIndustry, structureTeBonusPercent),
+    )
   })
 
   it('round-trips runs through job time', () => {
     const runs = 100
-    const jobTime = applyTE(baseTime, te, runs, advancedIndustry, structureTeBonusPercent)
+    const jobTime = applyTE(baseTime, te, runs, industry, advancedIndustry, structureTeBonusPercent)
     expect(
-      runsForJobTime(jobTime, baseTime, te, advancedIndustry, structureTeBonusPercent, {
+      runsForJobTime(jobTime, baseTime, te, industry, advancedIndustry, structureTeBonusPercent, {
         step: 1,
         maxRuns: null,
       }),
@@ -31,11 +40,17 @@ describe('manufacturing run/time helpers', () => {
   })
 
   it('picks closest runs when job time is between step boundaries', () => {
-    const perRun = manufacturingTimePerRun(baseTime, te, advancedIndustry, structureTeBonusPercent)
+    const perRun = manufacturingTimePerRun(
+      baseTime,
+      te,
+      industry,
+      advancedIndustry,
+      structureTeBonusPercent,
+    )
     const targetRuns = 47
     const targetTime = perRun * targetRuns + perRun * 0.4
     expect(
-      runsForJobTime(targetTime, baseTime, te, advancedIndustry, structureTeBonusPercent, {
+      runsForJobTime(targetTime, baseTime, te, industry, advancedIndustry, structureTeBonusPercent, {
         step: 1,
         maxRuns: null,
       }),
@@ -55,9 +70,9 @@ describe('manufacturing run/time helpers', () => {
 
   it('runsForJobTime with maxRuns null allows high run counts', () => {
     const runs = 750
-    const jobTime = applyTE(baseTime, te, runs, advancedIndustry, structureTeBonusPercent)
+    const jobTime = applyTE(baseTime, te, runs, industry, advancedIndustry, structureTeBonusPercent)
     expect(
-      runsForJobTime(jobTime, baseTime, te, advancedIndustry, structureTeBonusPercent, {
+      runsForJobTime(jobTime, baseTime, te, industry, advancedIndustry, structureTeBonusPercent, {
         step: 1,
         maxRuns: null,
       }),

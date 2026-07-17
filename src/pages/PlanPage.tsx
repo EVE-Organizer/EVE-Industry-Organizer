@@ -35,9 +35,8 @@ import { buildManufactureDisplayRows } from '@/lib/planManufactureDisplay'
 import {
   applyRootEntryPatch,
   createSyncedPlanRootEntry,
-  durationHoursFromRuns,
-  parallelLinesForRoot,
   resolveRunsFromPatch,
+  rootJobTimeHours,
   syncRootEntry,
 } from '@/lib/rootRunsDuration'
 import { createPlanRootId } from '@/services/sync/types'
@@ -266,18 +265,10 @@ export function PlanPage() {
       template.roots.map((root) => {
         const bp = getBlueprintForProduct(blueprints, root.productTypeId)
         const hours = bp
-          ? durationHoursFromRuns(
+          ? rootJobTimeHours(
+              root,
               bp,
               userData.settings,
-              root.runs,
-              parallelLinesForRoot(
-                bp,
-                root,
-                slots,
-                rootRunsTotal,
-                template.defaultRunsPerBpc,
-                template.nodeOverrides[root.productTypeId],
-              ),
               template.nodeOverrides[root.productTypeId],
             )
           : root.productionDurationHours
@@ -316,21 +307,12 @@ export function PlanPage() {
     const blueprint = getBlueprintForProduct(blueprints, root.productTypeId)
     if (!blueprint) return null
     const productName = typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`
-    const jobHours =
-      durationHoursFromRuns(
-        blueprint,
-        userData.settings,
-        root.runs,
-        parallelLinesForRoot(
-          blueprint,
-          root,
-          slots,
-          rootRunsTotal,
-          template.defaultRunsPerBpc,
-          template.nodeOverrides[root.productTypeId],
-        ),
-        template.nodeOverrides[root.productTypeId],
-      ) ?? root.productionDurationHours
+    const jobHours = rootJobTimeHours(
+      root,
+      blueprint,
+      userData.settings,
+      template.nodeOverrides[root.productTypeId],
+    )
     return computeRootProfitBreakdown(
       root,
       blueprint,
@@ -400,18 +382,10 @@ export function PlanPage() {
         name: typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`,
         runs: root.runs,
         jobTimeHours: bp
-          ? durationHoursFromRuns(
+          ? rootJobTimeHours(
+              root,
               bp,
               userData.settings,
-              root.runs,
-              parallelLinesForRoot(
-                bp,
-                root,
-                slots,
-                rootRunsTotal,
-                template.defaultRunsPerBpc,
-                template.nodeOverrides[root.productTypeId],
-              ),
               template.nodeOverrides[root.productTypeId],
             )
           : root.productionDurationHours,
@@ -465,16 +439,7 @@ export function PlanPage() {
         root,
         bp,
         userData.settings,
-        bp
-          ? parallelLinesForRoot(
-              bp,
-              root,
-              slots,
-              rootRunsTotal,
-              template.defaultRunsPerBpc,
-              template.nodeOverrides[root.productTypeId],
-            )
-          : 1,
+        undefined,
         template.nodeOverrides[root.productTypeId],
       )
       if (synced !== root) needsUpdate = true
@@ -498,18 +463,7 @@ export function PlanPage() {
     handledAddRef.current = key
     addRootToPlanTemplate(template.id, {
       id: createPlanRootId(),
-      ...createSyncedPlanRootEntry(
-        id,
-        bp,
-        userData.settings,
-        parallelLinesForRoot(
-          bp,
-          { id: '', productTypeId: id, runs: DEFAULT_BATCH_SIZE, productionDurationHours: 0 },
-          slots,
-          rootRunsTotal + DEFAULT_BATCH_SIZE,
-          template.defaultRunsPerBpc,
-        ),
-      ),
+      ...createSyncedPlanRootEntry(id, bp, userData.settings),
     })
     setSearchParams(
       (prev) => {
@@ -592,16 +546,7 @@ export function PlanPage() {
           root,
           bp,
           userData.settings,
-          bp
-            ? parallelLinesForRoot(
-                bp,
-                root,
-                slots,
-                rootRunsTotal,
-                template.defaultRunsPerBpc,
-                nextOverrides[productTypeId],
-              )
-            : 1,
+          undefined,
           nextOverrides[productTypeId],
         )
       })
@@ -655,18 +600,7 @@ export function PlanPage() {
     if (!bp) return
     addRootToPlanTemplate(template.id, {
       id: createPlanRootId(),
-      ...createSyncedPlanRootEntry(
-        productTypeId,
-        bp,
-        userData.settings,
-        parallelLinesForRoot(
-          bp,
-          { id: '', productTypeId, runs: DEFAULT_BATCH_SIZE, productionDurationHours: 0 },
-          slots,
-          rootRunsTotal + DEFAULT_BATCH_SIZE,
-          template.defaultRunsPerBpc,
-        ),
-      ),
+      ...createSyncedPlanRootEntry(productTypeId, bp, userData.settings),
     })
   }
 
@@ -756,6 +690,8 @@ export function PlanPage() {
                 profitByRootId={profitByRootId}
                 onOpenSetup={setSetupDetailRootId}
                 onOpenProfit={setProfitDetailRootId}
+                onOpenGraph={openGraph}
+                onOpenMeTe={openMeTe}
                 onChange={(rootId, productTypeId, patch) => {
                   if (!template) return
 
@@ -769,16 +705,7 @@ export function PlanPage() {
                           patch,
                           bp,
                           userData.settings,
-                          bp
-                            ? parallelLinesForRoot(
-                                bp,
-                                r,
-                                slots,
-                                rootRunsTotal,
-                                template.defaultRunsPerBpc,
-                                template.nodeOverrides[r.productTypeId],
-                              )
-                            : 1,
+                          undefined,
                           template.nodeOverrides[r.productTypeId],
                         )
                       }),

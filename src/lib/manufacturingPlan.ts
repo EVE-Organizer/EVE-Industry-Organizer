@@ -18,9 +18,8 @@ import {
 import {
   bpcCountForRuns,
   defaultRunsPerBpc,
-  durationHoursFromRuns,
+  inGameDurationHoursFromRuns,
   jobTimeSecondsForRuns,
-  parallelLinesForRoot,
   runsForDemand,
 } from '@/lib/rootRunsDuration'
 import { activeConcurrentCopies, duplicateRootCount, totalRootRuns } from '@/lib/supplyChainSlots'
@@ -492,22 +491,13 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
     expandMaterials(blueprint, root.runs, root.productTypeId, 0, input, nodeMap, modeOverrides, 10)
   }
 
-  const rootRunsTotal = totalRootRuns(template.roots.map((root) => root.runs))
   const windowFromRoots = template.roots.reduce((m, r) => {
     const blueprint = getBlueprintForProduct(input.blueprints, r.productTypeId)
     const hours = blueprint
-      ? durationHoursFromRuns(
+      ? inGameDurationHoursFromRuns(
           blueprint,
           settings,
           r.runs,
-          parallelLinesForRoot(
-            blueprint,
-            r,
-            slots,
-            rootRunsTotal,
-            template.defaultRunsPerBpc,
-            template.nodeOverrides[r.productTypeId],
-          ),
           template.nodeOverrides[r.productTypeId],
         )
       : r.productionDurationHours

@@ -139,7 +139,7 @@ describe('schedulePlanJobs', () => {
         depth: 0,
         runs: 20,
         concurrentCopies: 2,
-        jobTimeSeconds: 7200,
+        jobTimeSeconds: 3600,
         outputQty: 20,
         totalDemandQty: 20,
       }),
@@ -159,7 +159,7 @@ describe('schedulePlanJobs', () => {
         name: 'Split',
         runs: 20,
         concurrentCopies: 2,
-        jobTimeSeconds: 7200,
+        jobTimeSeconds: 3600,
       }),
     ]
     const jobs = schedulePlanJobs({ nodes, slots: 2, windowHours: 48 })

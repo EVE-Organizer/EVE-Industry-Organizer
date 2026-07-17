@@ -108,6 +108,9 @@ export function ensurePlanRootIds(roots: PlanRootEntry[] | undefined): PlanRootE
   return (roots ?? []).map((r) => ({
     ...r,
     id: r.id?.trim() ? r.id : createPlanRootId(),
+    productTypeId: Number(r.productTypeId),
+    runs: Math.max(1, Number(r.runs) || 1),
+    productionDurationHours: Number(r.productionDurationHours) || 0,
   }))
 }
 

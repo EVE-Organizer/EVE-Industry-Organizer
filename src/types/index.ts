@@ -398,6 +398,7 @@ export interface BlueprintCostBreakdown {
 export interface IphBreakdown {
   me: number
   te: number
+  industry: number
   advancedIndustry: number
   batchSizeSetting: number
   productQuantity: number
@@ -407,6 +408,7 @@ export interface IphBreakdown {
   outputQty: number
   baseTimePerRunSeconds: number
   teTimeFactor: number
+  industryTimeFactor: number
   structureTeTimeFactor: number
   advancedIndustryTimeFactor: number
   jobTimeSeconds: number

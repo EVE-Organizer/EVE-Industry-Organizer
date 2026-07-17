@@ -113,7 +113,6 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
   for (const node of byDepth) {
     let remainingRuns = node.runs
     const runsPerJob = Math.max(1, Math.ceil(node.runs / Math.max(1, node.concurrentCopies)))
-    const perRunSeconds = node.runs > 0 ? node.jobTimeSeconds / node.runs : 0
 
     while (remainingRuns > 0) {
       const slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
@@ -127,7 +126,8 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
         supplies,
         demands,
       )
-      const jobDurationHours = (perRunSeconds * runsThisJob) / 3600
+      const jobDurationHours =
+        runsPerJob > 0 ? (node.jobTimeSeconds * runsThisJob) / runsPerJob / 3600 : 0
       const endHour = startHour + jobDurationHours
       const outputQty = runsThisJob * (node.outputQty / Math.max(1, node.runs))
 

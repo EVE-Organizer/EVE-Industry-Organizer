@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Tooltip } from '@/components/Tooltip'
 import { PlanChainSection, PlanSectionExpandActions } from '@/components/plan/PlanChainSection'
+import { PlanBlueprintItemName } from '@/components/plan/PlanBlueprintItemName'
 import { PlanProductIcon, PLAN_ROW_ICON_SIZE } from '@/components/plan/PlanProductIcon'
 import {
   PlanExpandableLeading,
@@ -10,7 +11,7 @@ import {
   stopRowToggle,
 } from '@/components/plan/PlanTreeLines'
 import { expandableCollapseKeys, isExpandableRowVisible, type ExpandablePlanRow } from '@/lib/planTreeLines'
-import { formatDecimal, formatGraphQuantity, formatInputDecimal, formatIsk, formatPercent } from '@/lib/profit'
+import { formatDecimal, formatDurationHms, formatGraphQuantity, formatIsk, formatPercent, parseDurationHms } from '@/lib/profit'
 import type { RootProfitRow } from '@/lib/planProfit'
 import { textLinkClass } from '@/lib/textLink'
 
@@ -32,6 +33,8 @@ interface PlanRootListProps {
   profitByRootId?: Map<string, RootProfitRow>
   onOpenSetup?: (rootId: string) => void
   onOpenProfit?: (rootId: string) => void
+  onOpenGraph: (productTypeId: number) => void
+  onOpenMeTe?: (productTypeId: number) => void
   onChange: (
     rootId: string | undefined,
     productTypeId: number,
@@ -59,31 +62,77 @@ function RemoveIcon() {
   )
 }
 
-function JobTimeInput({
+function RunsInput({
+  runs,
+  onCommit,
+}: {
+  runs: number
+  onCommit: (runs: number) => void
+}) {
+  const [draft, setDraft] = useState<string | null>(null)
+  const display = draft ?? String(runs)
+
+  function commit() {
+    const parsed = parseInt(draft ?? String(runs), 10)
+    setDraft(null)
+    if (!Number.isFinite(parsed) || parsed < 1) return
+    if (parsed !== runs) onCommit(parsed)
+  }
+
+  return (
+    <input
+      type="number"
+      className="input input-bordered input-xs w-full max-w-[5.5rem] tabular-nums"
+      step={1}
+      min={1}
+      value={display}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          commit()
+          e.currentTarget.blur()
+        }
+        if (e.key === 'Escape') {
+          setDraft(null)
+          e.currentTarget.blur()
+        }
+      }}
+    />
+  )
+}
+
+function DurationInput({
   hours,
   onCommit,
 }: {
   hours: number
   onCommit: (hours: number) => void
 }) {
+  const seconds = Math.max(0, Math.round(hours * 3600))
   const [draft, setDraft] = useState<string | null>(null)
-  const display = draft ?? formatInputDecimal(hours, 2)
+  const display = draft ?? formatDurationHms(seconds)
 
   function commit() {
-    const parsed = parseFloat(draft ?? String(hours))
+    const parsedSeconds = parseDurationHms(draft ?? formatDurationHms(seconds))
     setDraft(null)
-    if (!Number.isFinite(parsed) || parsed <= 0) return
-    onCommit(parsed)
+    if (parsedSeconds == null) return
+    const nextHours = parsedSeconds / 3600
+    if (!Number.isFinite(nextHours) || nextHours <= 0) return
+    if (Math.abs(nextHours - hours) > 1 / 3600) onCommit(nextHours)
   }
 
   return (
     <input
-      type="number"
-      className="input input-bordered input-xs w-full tabular-nums"
-      min={0.01}
-      step={0.01}
+      type="text"
+      inputMode="numeric"
+      className="input input-bordered input-xs w-full tabular-nums text-info"
+      placeholder="H:MM:SS"
+      aria-label="Duration"
       value={display}
       onChange={(e) => setDraft(e.target.value)}
+      onFocus={() => setDraft(formatDurationHms(seconds))}
       onBlur={commit}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
@@ -103,9 +152,13 @@ function JobTimeInput({
 function ProductCell({
   row,
   expanded,
+  onOpenGraph,
+  onOpenMeTe,
 }: {
   row: BuildBlueprintRow
   expanded: boolean
+  onOpenGraph: (productTypeId: number) => void
+  onOpenMeTe?: (productTypeId: number) => void
 }) {
   if (row.kind === 'parent') {
     return (
@@ -124,9 +177,12 @@ function ProductCell({
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1 min-w-0 flex-wrap">
-            <span className="text-sm font-medium truncate" title={row.name}>
-              {row.name}
-            </span>
+            <PlanBlueprintItemName
+              node={row.node}
+              onOpenGraph={onOpenGraph}
+              onOpenMeTe={onOpenMeTe}
+              showMeTeSettings
+            />
             {row.isRoot ? (
               <span className="badge badge-primary badge-xs shrink-0">Root</span>
             ) : null}
@@ -148,13 +204,20 @@ function ProductCell({
         size={PLAN_ROW_ICON_SIZE}
         alt={row.name}
       />
-      <span className="text-sm font-medium truncate" title={row.name}>
-        {row.name}
-      </span>
-      {row.rootInstance != null && row.rootInstanceTotal != null && row.rootInstanceTotal > 1 ? (
-        <span className="badge badge-ghost badge-xs shrink-0 tabular-nums">#{row.rootInstance}</span>
-      ) : null}
-      {row.isRoot ? <span className="badge badge-primary badge-xs shrink-0">Root</span> : null}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1 flex-wrap min-w-0">
+          <PlanBlueprintItemName
+            node={row.node}
+            onOpenGraph={onOpenGraph}
+            onOpenMeTe={onOpenMeTe}
+            showMeTeSettings
+          />
+          {row.rootInstance != null && row.rootInstanceTotal != null && row.rootInstanceTotal > 1 ? (
+            <span className="badge badge-ghost badge-xs shrink-0 tabular-nums">#{row.rootInstance}</span>
+          ) : null}
+          {row.isRoot ? <span className="badge badge-primary badge-xs shrink-0">Root</span> : null}
+        </div>
+      </div>
     </div>
   )
 }
@@ -164,6 +227,8 @@ export function PlanRootList({
   profitByRootId,
   onOpenSetup,
   onOpenProfit,
+  onOpenGraph,
+  onOpenMeTe,
   onChange,
   onRemove,
 }: PlanRootListProps) {
@@ -179,7 +244,7 @@ export function PlanRootList({
   const summary = useMemo(() => {
     const totalRuns = rootRows.reduce((sum, row) => sum + row.runs, 0)
     const totalHours = rootRows.reduce((sum, row) => sum + row.jobTimeHours, 0)
-    return `${formatDecimal(totalRuns, 0)} runs · ${formatDecimal(totalHours, 1)} h scheduled`
+    return `${formatDecimal(totalRuns, 0)} runs · ${formatDurationHms(totalHours * 3600)} scheduled`
   }, [rootRows])
 
   function toggleCollapse(key: string) {
@@ -227,12 +292,9 @@ export function PlanRootList({
                   <span className="cursor-help border-b border-dotted border-current/40">Runs</span>
                 </Tooltip>
               </th>
-              <th className="plan-jobs-table__hours-col">
-                <Tooltip
-                  text="Wall-clock hours to finish this run count (matches the in-game industry timer for the same runs, TE, and structure bonuses)"
-                  placement="top"
-                >
-                  <span className="cursor-help border-b border-dotted border-current/40">Job time</span>
+              <th className="plan-jobs-table__duration-col">
+                <Tooltip text="Total job duration (hours:minutes:seconds)" placement="top">
+                  <span className="cursor-help border-b border-dotted border-current/40">Duration</span>
                 </Tooltip>
               </th>
               <th className="plan-jobs-table__money-col">Output</th>
@@ -263,31 +325,30 @@ export function PlanRootList({
                   {...rowToggle}
                 >
                   <td className="align-top py-2 min-w-0">
-                    <ProductCell row={row} expanded={expanded} />
+                    <ProductCell
+                      row={row}
+                      expanded={expanded}
+                      onOpenGraph={onOpenGraph}
+                      onOpenMeTe={onOpenMeTe}
+                    />
                   </td>
                   <td onClick={stopRowToggle}>
-                    <input
-                      type="number"
-                      className="input input-bordered input-xs w-full max-w-[5.5rem] tabular-nums"
-                      step={1}
-                      min={1}
-                      value={row.runs}
-                      onChange={(e) =>
-                        onChange(row.rootId, row.productTypeId, { runs: Number(e.target.value) })
+                    <RunsInput
+                      key={`${rowKey}-runs`}
+                      runs={row.runs}
+                      onCommit={(nextRuns) =>
+                        onChange(row.rootId, row.productTypeId, { runs: nextRuns })
                       }
                     />
                   </td>
-                  <td className="plan-jobs-table__hours-col" onClick={stopRowToggle}>
-                    <div className="flex items-center gap-1">
-                      <JobTimeInput
-                        key={rowKey}
-                        hours={row.jobTimeHours}
-                        onCommit={(productionDurationHours) =>
-                          onChange(row.rootId, row.productTypeId, { productionDurationHours })
-                        }
-                      />
-                      <span className="text-[10px] opacity-50 shrink-0">h</span>
-                    </div>
+                  <td className="plan-jobs-table__duration-col" onClick={stopRowToggle}>
+                    <DurationInput
+                      key={rowKey}
+                      hours={row.jobTimeHours}
+                      onCommit={(productionDurationHours) =>
+                        onChange(row.rootId, row.productTypeId, { productionDurationHours })
+                      }
+                    />
                   </td>
                   <td className="plan-jobs-table__money-col tabular-nums text-sm opacity-80">
                     {formatGraphQuantity(row.outputQty)}
@@ -366,8 +427,8 @@ export function PlanRootList({
         </div>
       )}
       <p className="text-[10px] text-base-content/40 px-4 pb-3 pt-2 sm:px-5">
-        Job time follows the shared slot schedule. Editing hours converts to runs using this BPO&apos;s
-        concurrent copies.
+        Duration matches the in-game industry timer. Editing duration or runs keeps the other field in
+        sync.
       </p>
     </PlanChainSection>
   )

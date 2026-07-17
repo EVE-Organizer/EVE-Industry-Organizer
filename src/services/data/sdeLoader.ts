@@ -86,7 +86,9 @@ export function getBlueprintForProduct(
   blueprints: BlueprintInfo[],
   productTypeId: number,
 ): BlueprintInfo | undefined {
-  return blueprints.find((b) => b.productTypeId === productTypeId)
+  const id = Number(productTypeId)
+  if (!Number.isFinite(id)) return undefined
+  return blueprints.find((b) => b.productTypeId === id)
 }
 
 export function getBlueprintForBpo(

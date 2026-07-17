@@ -243,6 +243,10 @@ export function IphBreakdownModal({
               <CalcStep label="TE factor">
                 1 − ({iph.te} × 4%) = <strong>{formatDecimal(iph.teTimeFactor, 4)}</strong>
               </CalcStep>
+              <CalcStep label="Industry factor">
+                1 − ({iph.industry} × 4%) ={' '}
+                <strong>{formatDecimal(iph.industryTimeFactor, 4)}</strong>
+              </CalcStep>
               {isPlayerStructure(iph.structureType) && iph.structureTeBonusPercent > 0 ? (
                 <CalcStep label="Structure TE factor">
                   1 − {formatDecimal(iph.structureTeBonusPercent, 1)}% ={' '}
@@ -255,7 +259,7 @@ export function IphBreakdownModal({
               </CalcStep>
               <CalcStep label="Multiply">
                 {formatDuration(iph.baseTimePerRunSeconds)} × {iph.runs} runs ×{' '}
-                {formatDecimal(iph.teTimeFactor, 4)}
+                {formatDecimal(iph.teTimeFactor, 4)} × {formatDecimal(iph.industryTimeFactor, 4)}
                 {isPlayerStructure(iph.structureType) && iph.structureTeBonusPercent > 0
                   ? ` × ${formatDecimal(iph.structureTeTimeFactor, 4)}`
                   : ''}{' '}

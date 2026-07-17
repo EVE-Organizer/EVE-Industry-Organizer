@@ -152,6 +152,36 @@ export function formatDurationHms(seconds: number): string {
   return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 }
 
+/** Parse H:MM:SS, M:SS, or plain seconds into total seconds. Returns null when invalid. */
+export function parseDurationHms(input: string): number | null {
+  const trimmed = input.trim()
+  if (!trimmed || trimmed === '—') return null
+
+  const hms = /^(\d+):(\d{1,2}):(\d{1,2})$/.exec(trimmed)
+  if (hms) {
+    const hours = Number(hms[1])
+    const minutes = Number(hms[2])
+    const secs = Number(hms[3])
+    if (!Number.isFinite(hours) || minutes >= 60 || secs >= 60) return null
+    const total = hours * 3_600 + minutes * 60 + secs
+    return total > 0 ? total : null
+  }
+
+  const ms = /^(\d+):(\d{1,2})$/.exec(trimmed)
+  if (ms) {
+    const minutes = Number(ms[1])
+    const secs = Number(ms[2])
+    if (!Number.isFinite(minutes) || secs >= 60) return null
+    const total = minutes * 60 + secs
+    return total > 0 ? total : null
+  }
+
+  const plain = Number(trimmed)
+  if (Number.isFinite(plain) && plain > 0) return Math.floor(plain)
+
+  return null
+}
+
 function trimCompactDecimal(value: number, decimals: number): string {
   return formatDecimal(value, decimals).replace(/\.0$/, '')
 }

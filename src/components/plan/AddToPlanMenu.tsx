@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
 import { createSyncedPlanRootEntry } from '@/lib/rootRunsDuration'
-import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { getAllBlueprints, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { createPlanRootId } from '@/services/sync/types'
 
@@ -14,7 +13,6 @@ export function AddToPlanMenu({ productTypeId }: { productTypeId: number }) {
   const addPlanTemplate = useAppStore((s) => s.addPlanTemplate)
   const addRootToPlanTemplate = useAppStore((s) => s.addRootToPlanTemplate)
   const setSelectedId = useAppStore((s) => s.setSelectedPlanTemplateId)
-  const slots = manufacturingSlotsFromSkills(settings.skills)
 
   function buildRootEntry() {
     const blueprint = data
@@ -30,7 +28,7 @@ export function AddToPlanMenu({ productTypeId }: { productTypeId: number }) {
     }
     return {
       id: createPlanRootId(),
-      ...createSyncedPlanRootEntry(productTypeId, blueprint, settings, slots),
+      ...createSyncedPlanRootEntry(productTypeId, blueprint, settings),
     }
   }
 

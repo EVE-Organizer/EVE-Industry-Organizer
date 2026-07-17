@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { MarketHistoryEntry } from '@/types'
-import { filterHistoryByRange, formatDuration, formatDurationHms, formatGraphQuantity, formatGraphUnitIsk, formatIsk, formatIskInputUnit, parseIskInputUnit, trimHistoryByDays } from '@/lib/profit'
+import { filterHistoryByRange, formatDuration, formatDurationHms, formatGraphQuantity, formatGraphUnitIsk, formatIsk, formatIskInputUnit, parseDurationHms, parseIskInputUnit, trimHistoryByDays } from '@/lib/profit'
 
 function historyEntry(date: string, average = 100): MarketHistoryEntry {
   return { date, average, highest: average, lowest: average, volume: 10 }
@@ -70,6 +70,21 @@ describe('formatDurationHms', () => {
     expect(formatDurationHms(172_800)).toBe('48:00:00')
     expect(formatDurationHms(3_665)).toBe('1:01:05')
     expect(formatDurationHms(0)).toBe('—')
+  })
+})
+
+describe('parseDurationHms', () => {
+  it('parses H:MM:SS and M:SS', () => {
+    expect(parseDurationHms('0:57:36')).toBe(3_456)
+    expect(parseDurationHms('1:01:05')).toBe(3_665)
+    expect(parseDurationHms('57:36')).toBe(3_456)
+    expect(parseDurationHms('3600')).toBe(3_600)
+  })
+
+  it('returns null for invalid input', () => {
+    expect(parseDurationHms('')).toBeNull()
+    expect(parseDurationHms('1:65:00')).toBeNull()
+    expect(parseDurationHms('abc')).toBeNull()
   })
 })
 

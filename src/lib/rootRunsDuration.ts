@@ -7,7 +7,18 @@ import {
   resolveStructureModifiers,
   runsForJobTime,
 } from '@/lib/cost'
+import { skillLevel } from '@/lib/skillFields'
 import { activeConcurrentCopies } from '@/lib/supplyChainSlots'
+
+/** One industry job = one in-game timer. Never multiply by Mass Production slots. */
+export const IN_GAME_JOB_LINES = 1
+
+function skillTimeLevels(settings: GlobalSettings): { industry: number; advancedIndustry: number } {
+  return {
+    industry: skillLevel(settings.skills, 'industry'),
+    advancedIndustry: skillLevel(settings.skills, 'advancedIndustry'),
+  }
+}
 
 /** Manufacturing runs needed to satisfy material demand (matches in-game run count). */
 export function runsForDemand(productQuantity: number, demandQty: number): number {
@@ -26,14 +37,15 @@ export function jobTimeSecondsForRuns(
   if (runs <= 0) return 0
   const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
   const structure = resolveStructureModifiers(settings)
-  const advanced = settings.skills.advancedIndustry ?? 0
+  const { industry, advancedIndustry } = skillTimeLevels(settings)
   const lines = Math.max(1, concurrentCopies)
   const runsPerJob = Math.max(1, Math.ceil(runs / Math.min(lines, runs)))
   return applyTE(
     blueprint.manufacturingTime,
     te,
     runsPerJob,
-    advanced,
+    industry,
+    advancedIndustry,
     structure.teBonusPercent,
   )
 }
@@ -47,7 +59,7 @@ export function runsFromDurationHours(
 ): number {
   const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
   const structure = resolveStructureModifiers(settings)
-  const advanced = settings.skills.advancedIndustry ?? 0
+  const { industry, advancedIndustry } = skillTimeLevels(settings)
   const availableSec = Math.max(0, durationHours) * 3600
   const lines = Math.max(1, parallelLines)
   if (availableSec <= 0) return 1
@@ -56,13 +68,31 @@ export function runsFromDurationHours(
     availableSec,
     blueprint.manufacturingTime,
     te,
-    advanced,
+    industry,
+    advancedIndustry,
     structure.teBonusPercent,
     { step: 1, maxRuns: null },
   )
   return Math.max(1, runsPerLine * lines)
 }
 
+/** Runs that fit in one in-game manufacturing job (single timer, one slot). */
+export function inGameRunsFromDurationHours(
+  blueprint: BlueprintInfo,
+  settings: GlobalSettings,
+  durationHours: number,
+  meTeOverride?: PlanNodeOverride,
+): number {
+  return runsFromDurationHours(
+    blueprint,
+    settings,
+    durationHours,
+    IN_GAME_JOB_LINES,
+    meTeOverride,
+  )
+}
+
+/** Wall-clock hours to finish `runs` manufacturing runs (matches in-game job timer × waves). */
 export function durationHoursFromRuns(
   blueprint: BlueprintInfo,
   settings: GlobalSettings,
@@ -72,20 +102,54 @@ export function durationHoursFromRuns(
 ): number {
   const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
   const structure = resolveStructureModifiers(settings)
-  const advanced = settings.skills.advancedIndustry ?? 0
+  const { industry, advancedIndustry } = skillTimeLevels(settings)
   const perRun = manufacturingTimePerRun(
     blueprint.manufacturingTime,
     te,
-    advanced,
+    industry,
+    advancedIndustry,
     structure.teBonusPercent,
   )
   if (perRun <= 0 || runs <= 0) return 0
 
   const effectiveLines = Math.max(1, parallelLines)
-  const runsPerJob = Math.ceil(runs / Math.min(effectiveLines, runs))
-  const jobTime = applyTE(blueprint.manufacturingTime, te, runsPerJob, advanced, structure.teBonusPercent)
+  const runsPerJob = Math.max(1, Math.ceil(runs / Math.min(effectiveLines, runs)))
+  const jobTime = applyTE(
+    blueprint.manufacturingTime,
+    te,
+    runsPerJob,
+    industry,
+    advancedIndustry,
+    structure.teBonusPercent,
+  )
   const waves = Math.ceil(runs / (runsPerJob * effectiveLines))
   return (jobTime * waves) / 3600
+}
+
+/** Root job time matching the in-game industry window (one job, one timer). */
+export function rootJobTimeHours(
+  root: PlanRootEntry,
+  blueprint: BlueprintInfo | undefined,
+  settings: GlobalSettings,
+  meTeOverride?: PlanNodeOverride,
+): number {
+  if (!blueprint || root.runs <= 0) return root.productionDurationHours
+  return durationHoursFromRuns(
+    blueprint,
+    settings,
+    root.runs,
+    IN_GAME_JOB_LINES,
+    meTeOverride,
+  )
+}
+
+export function inGameDurationHoursFromRuns(
+  blueprint: BlueprintInfo,
+  settings: GlobalSettings,
+  runs: number,
+  meTeOverride?: PlanNodeOverride,
+): number {
+  return durationHoursFromRuns(blueprint, settings, runs, IN_GAME_JOB_LINES, meTeOverride)
 }
 
 export function defaultRunsPerBpc(blueprint: BlueprintInfo, templateDefault: number): number {
@@ -110,20 +174,19 @@ export function parallelLinesForRoot(
   return activeConcurrentCopies(true, bpcCount, skillSlots, rootRunsTotal)
 }
 
-/** Recompute job time from runs using current skills and parallel lines. */
+/** Recompute job time from runs using current skills (in-game single job). */
 export function syncRootEntry(
   root: PlanRootEntry,
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
-  parallelLines: number,
+  _parallelLines = IN_GAME_JOB_LINES,
   meTeOverride?: PlanNodeOverride,
 ): PlanRootEntry {
   if (!blueprint) return root
-  const productionDurationHours = durationHoursFromRuns(
+  const productionDurationHours = inGameDurationHoursFromRuns(
     blueprint,
     settings,
     root.runs,
-    parallelLines,
     meTeOverride,
   )
   if (root.productionDurationHours === productionDurationHours) return root
@@ -135,51 +198,46 @@ export function createSyncedPlanRootEntry(
   productTypeId: number,
   blueprint: BlueprintInfo,
   settings: GlobalSettings,
-  parallelLines: number,
   runs: number = DEFAULT_BATCH_SIZE,
 ): Omit<PlanRootEntry, 'id'> {
   const { id: _id, ...synced } = syncRootEntry(
     { id: '', productTypeId, runs, productionDurationHours: 0 },
     blueprint,
     settings,
-    parallelLines,
   )
   return synced
 }
 
-/** Apply a runs or job-time edit and keep the other field in sync. */
+/** Apply a runs or job-time edit and keep the other field in sync (in-game single job). */
 export function applyRootEntryPatch(
   root: PlanRootEntry,
   patch: Partial<PlanRootEntry>,
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
-  parallelLines: number,
+  _parallelLines = IN_GAME_JOB_LINES,
   meTeOverride?: PlanNodeOverride,
 ): PlanRootEntry {
   const next = { ...root, ...patch }
   if (!blueprint) return next
 
   if (patch.productionDurationHours != null && patch.runs == null) {
-    next.runs = runsFromDurationHours(
+    next.runs = inGameRunsFromDurationHours(
       blueprint,
       settings,
       patch.productionDurationHours,
-      parallelLines,
       meTeOverride,
     )
-    next.productionDurationHours = durationHoursFromRuns(
+    next.productionDurationHours = inGameDurationHoursFromRuns(
       blueprint,
       settings,
       next.runs,
-      parallelLines,
       meTeOverride,
     )
   } else if (patch.runs != null && patch.productionDurationHours == null) {
-    next.productionDurationHours = durationHoursFromRuns(
+    next.productionDurationHours = inGameDurationHoursFromRuns(
       blueprint,
       settings,
       patch.runs,
-      parallelLines,
       meTeOverride,
     )
   }
@@ -198,16 +256,15 @@ export function resolveRunsFromPatch(
   patch: { runs?: number; productionDurationHours?: number },
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
-  concurrentCopies: number,
+  _concurrentCopies: number,
   meTeOverride?: PlanNodeOverride,
 ): number {
   if (patch.runs != null) return patch.runs
   if (patch.productionDurationHours != null && blueprint) {
-    return runsFromDurationHours(
+    return inGameRunsFromDurationHours(
       blueprint,
       settings,
       patch.productionDurationHours,
-      Math.max(1, concurrentCopies),
       meTeOverride,
     )
   }

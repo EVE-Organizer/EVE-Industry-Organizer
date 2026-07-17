@@ -3,6 +3,8 @@ import {
   applyRootEntryPatch,
   createSyncedPlanRootEntry,
   durationHoursFromRuns,
+  inGameDurationHoursFromRuns,
+  inGameRunsFromDurationHours,
   jobTimeSecondsForRuns,
   resolveRunsFromPatch,
   runsForDemand,
@@ -36,9 +38,9 @@ const root: PlanRootEntry = {
 
 describe('syncRootEntry', () => {
   it('recomputes job time from runs', () => {
-    const synced = syncRootEntry(root, blueprint, DEFAULT_SETTINGS, 1)
+    const synced = syncRootEntry(root, blueprint, DEFAULT_SETTINGS)
     expect(synced.productionDurationHours).toBe(
-      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, root.runs, 1),
+      inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, root.runs),
     )
     expect(synced.productionDurationHours).not.toBe(24)
   })
@@ -46,10 +48,10 @@ describe('syncRootEntry', () => {
 
 describe('createSyncedPlanRootEntry', () => {
   it('creates a root with matching runs and job time', () => {
-    const entry = createSyncedPlanRootEntry(100, blueprint, DEFAULT_SETTINGS, 1)
+    const entry = createSyncedPlanRootEntry(100, blueprint, DEFAULT_SETTINGS)
     expect(entry.runs).toBe(100)
     expect(entry.productionDurationHours).toBe(
-      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 100, 1),
+      inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 100),
     )
     expect('id' in entry).toBe(false)
   })
@@ -57,21 +59,18 @@ describe('createSyncedPlanRootEntry', () => {
 
 describe('applyRootEntryPatch', () => {
   it('snaps job time to actual wall-clock duration after hours input', () => {
-    const parallelLines = 1
     const next = applyRootEntryPatch(
       root,
       { productionDurationHours: 24 },
       blueprint,
       DEFAULT_SETTINGS,
-      parallelLines,
     )
 
-    const expectedRuns = runsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24, parallelLines)
-    const expectedHours = durationHoursFromRuns(
+    const expectedRuns = inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24)
+    const expectedHours = inGameDurationHoursFromRuns(
       blueprint,
       DEFAULT_SETTINGS,
       expectedRuns,
-      parallelLines,
     )
 
     expect(next.runs).toBe(expectedRuns)
@@ -85,11 +84,10 @@ describe('applyRootEntryPatch', () => {
       { productionDurationHours: 168 },
       blueprint,
       DEFAULT_SETTINGS,
-      1,
     )
 
     expect(next.productionDurationHours).toBeGreaterThan(160)
-    expect(next.productionDurationHours).toBeLessThanOrEqual(168)
+    expect(next.productionDurationHours).toBeLessThanOrEqual(168.01)
   })
 
   it('updates job time when runs change', () => {
@@ -98,18 +96,17 @@ describe('applyRootEntryPatch', () => {
       { runs: 200 },
       blueprint,
       DEFAULT_SETTINGS,
-      1,
     )
 
     expect(next.runs).toBe(200)
     expect(next.productionDurationHours).toBe(
-      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 200, 1),
+      inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 200),
     )
   })
 })
 
 describe('resolveRunsFromPatch', () => {
-  it('converts job time to runs using concurrent copies', () => {
+  it('converts job time to runs for one in-game job (ignores slot count)', () => {
     const runs = resolveRunsFromPatch(
       100,
       { productionDurationHours: 24 },
@@ -117,7 +114,8 @@ describe('resolveRunsFromPatch', () => {
       DEFAULT_SETTINGS,
       3,
     )
-    expect(runs).toBe(runsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24, 3))
+    expect(runs).toBe(inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24))
+    expect(runs).not.toBe(runsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24, 3))
   })
 
   it('returns explicit runs when provided', () => {
@@ -140,9 +138,71 @@ describe('jobTimeSecondsForRuns', () => {
         blueprint.manufacturingTime,
         DEFAULT_SETTINGS.teDefault,
         100,
+        DEFAULT_SETTINGS.skills.industry ?? 0,
         DEFAULT_SETTINGS.skills.advancedIndustry ?? 0,
       ),
     )
+  })
+})
+
+describe('Nova Heavy Missile (product 206)', () => {
+  const novaHeavyMissile: BlueprintInfo = {
+    blueprintTypeId: 807,
+    productTypeId: 206,
+    productQuantity: 100,
+    manufacturingTime: 600,
+    materials: [],
+    requiredSkills: {},
+    tier: 't1',
+    productGroup: 'Heavy Missile',
+    bpIconUrl: '',
+    productIconUrl: '',
+    productRenderUrl: '',
+  }
+
+  const noBonusSettings = {
+    ...DEFAULT_SETTINGS,
+    teDefault: 0,
+    meDefault: 0,
+    skills: { ...DEFAULT_SETTINGS.skills, industry: 0, advancedIndustry: 0 },
+  }
+
+  const industryOneSettings = {
+    ...noBonusSettings,
+    skills: { ...noBonusSettings.skills, industry: 1 },
+  }
+
+  it('6 runs ≈ 1 hr at TE 0 (not ~45 runs from slot multiplication)', () => {
+    const hours = inGameDurationHoursFromRuns(novaHeavyMissile, noBonusSettings, 6)
+    expect(hours).toBeCloseTo(1, 5)
+
+    const runsInOneHour = inGameRunsFromDurationHours(novaHeavyMissile, noBonusSettings, 1)
+    expect(runsInOneHour).toBe(6)
+    expect(runsInOneHour).not.toBeGreaterThan(10)
+  })
+
+  it('matches in-game 57:36 for 6 runs with Industry I', () => {
+    const seconds = jobTimeSecondsForRuns(novaHeavyMissile, industryOneSettings, 6, 1)
+    expect(seconds).toBeCloseTo(57 * 60 + 36, 0)
+  })
+
+  it('1091 runs × 10 min/run = 181.833… h (in-game job timer, no TE)', () => {
+    const hours = inGameDurationHoursFromRuns(novaHeavyMissile, noBonusSettings, 1091)
+    expect(hours).toBeCloseTo((1091 * 600) / 3600, 5)
+    expect(hours).toBeCloseTo(181.833333, 3)
+    expect(hours).not.toBe(24)
+  })
+
+  it('syncs job time when runs change from stale 24 h default', () => {
+    const staleRoot: PlanRootEntry = {
+      id: 'root-nova',
+      productTypeId: 206,
+      runs: 1091,
+      productionDurationHours: 24,
+    }
+    const synced = syncRootEntry(staleRoot, novaHeavyMissile, noBonusSettings)
+    expect(synced.productionDurationHours).toBeCloseTo(181.833333, 3)
+    expect(synced.productionDurationHours).not.toBe(24)
   })
 })
 
