@@ -45,7 +45,8 @@ import { computePlanProfitSummary, computeRootProfitBreakdown, computeRootSetupB
 import { HUBS } from '@/types'
 import { productionGraphRoute } from '@/lib/paths'
 import { formatDecimal } from '@/lib/profit'
-import type { PlanBuildMode, PlanNodeOverride } from '@/types'
+import { DEFAULT_BATCH_SIZE } from '@/types'
+import type { ManufacturingSettings, PlanBuildMode } from '@/types'
 
 function IconBtn({
   label,
@@ -201,6 +202,14 @@ export function PlanPage() {
           }
         : null,
     [template, data, blueprints, typeMap, prices, userData.settings, systemCostIndex],
+  )
+
+  const manufacturingSettings = useMemo(
+    (): ManufacturingSettings => ({
+      ...userData.settings,
+      batchSize: DEFAULT_BATCH_SIZE,
+    }),
+    [userData.settings],
   )
 
   const plan = useManufacturingPlan(
@@ -759,7 +768,7 @@ export function PlanPage() {
           variant="modal"
           blueprint={graphBlueprint}
           hub={userData.settings.primaryHub}
-          settings={userData.settings}
+          settings={manufacturingSettings}
           getPlanRuns={getPlanRuns}
           onClose={() => setGraphProductTypeId(null)}
           onOpenPage={openGraphPage}
