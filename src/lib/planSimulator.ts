@@ -102,36 +102,6 @@ export function simulatePlanFlow(input: SimulatePlanInput): Map<number, PlanNode
   return result
 }
 
-export interface PlanShortageRow {
-  productTypeId: number
-  name: string
-  startHour: number
-  endHour: number
-  deficit: number
-}
-
-/** All shortage windows across the plan, sorted by peak deficit then start hour. */
-export function collectPlanShortages(
-  simulations: Map<number, PlanNodeSimulation>,
-  nodes: PlanNode[],
-): PlanShortageRow[] {
-  const rows: PlanShortageRow[] = []
-
-  for (const node of nodes) {
-    const sim = simulations.get(node.productTypeId)
-    if (!sim || sim.shortages.length === 0) continue
-    for (const shortage of sim.shortages) {
-      rows.push({
-        productTypeId: node.productTypeId,
-        name: node.name,
-        ...shortage,
-      })
-    }
-  }
-
-  return rows.sort((a, b) => b.deficit - a.deficit || a.startHour - b.startHour)
-}
-
 /** Inventory remaining when the last scheduled job finishes. */
 export function inventoryAtPlanEnd(
   simulations: Map<number, PlanNodeSimulation>,

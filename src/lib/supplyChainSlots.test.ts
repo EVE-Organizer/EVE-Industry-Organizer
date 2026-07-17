@@ -21,6 +21,8 @@ describe('supplyChainSlots', () => {
     expect(activeConcurrentCopies(false, 4229, 5, 50)).toBe(5)
     expect(activeConcurrentCopies(false, 10, 5, 50)).toBe(1)
     expect(activeConcurrentCopies(true, 50, 5, 50)).toBe(1)
+    expect(activeConcurrentCopies(true, 50, 5, 50, 3)).toBe(3)
+    expect(activeConcurrentCopies(true, 50, 2, 50, 5)).toBe(2)
   })
 
   it('assigns lower active concurrency to light sub-builds', () => {

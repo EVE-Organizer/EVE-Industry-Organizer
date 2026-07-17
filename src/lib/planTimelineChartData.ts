@@ -1,4 +1,4 @@
-import type { PlanNode, PlanNodeSimulation, ScheduledPlanJob } from '@/types'
+import type { PlanNode, ScheduledPlanJob } from '@/types'
 
 export interface PlanSlotJobBar {
   id: string
@@ -20,13 +20,6 @@ export interface PlanSlotLane {
   jobCount: number
   busyHours: number
   endHour: number
-}
-
-export interface PlanStockPoint {
-  hour: number
-  supply: number
-  demand: number
-  inventory: number
 }
 
 const GANTT_COLORS = [
@@ -96,59 +89,6 @@ export function buildSlotLanes(
   }
 
   return lanes
-}
-
-export function buildStockSeries(sim: PlanNodeSimulation | undefined): PlanStockPoint[] {
-  if (!sim) return []
-  return sim.buckets.map((b) => ({
-    hour: b.hour,
-    supply: b.supply,
-    demand: b.demand,
-    inventory: b.inventory,
-  }))
-}
-
-/** Keep Recharts responsive when bucket count is large. */
-export function downsampleStockSeries(points: PlanStockPoint[], maxPoints = 240): PlanStockPoint[] {
-  if (points.length <= maxPoints) return points
-  const step = Math.ceil(points.length / maxPoints)
-  const sampled: PlanStockPoint[] = []
-  for (let i = 0; i < points.length; i += step) {
-    sampled.push(points[i]!)
-  }
-  const last = points[points.length - 1]!
-  if (sampled[sampled.length - 1]?.hour !== last.hour) sampled.push(last)
-  return sampled
-}
-
-/** Worst shortage build nodes only (cap for readable charts). */
-export function buildNodesForStockCharts(
-  nodes: PlanNode[],
-  jobs: ScheduledPlanJob[],
-  simulations: Map<number, PlanNodeSimulation>,
-  limit = 4,
-): PlanNode[] {
-  const jobIds = new Set(jobs.map((j) => j.productTypeId))
-  const withShort = nodes.filter(
-    (n) =>
-      n.mode === 'build' &&
-      jobIds.has(n.productTypeId) &&
-      (simulations.get(n.productTypeId)?.shortages.length ?? 0) > 0,
-  )
-
-  return [...withShort]
-    .sort((a, b) => {
-      const da = Math.max(
-        0,
-        ...(simulations.get(a.productTypeId)?.shortages.map((s) => s.deficit) ?? [0]),
-      )
-      const db = Math.max(
-        0,
-        ...(simulations.get(b.productTypeId)?.shortages.map((s) => s.deficit) ?? [0]),
-      )
-      return db - da || b.depth - a.depth
-    })
-    .slice(0, limit)
 }
 
 export function formatHourTick(hours: number): string {

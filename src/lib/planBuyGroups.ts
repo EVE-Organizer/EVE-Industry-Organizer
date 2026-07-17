@@ -20,6 +20,8 @@ export interface PlanBuyGroupRow {
   itemCount: number
   totalQty: number
   totalCost: number
+  /** Build/buy parents that consume materials in the shared group. */
+  consumerProductTypeIds?: number[]
 }
 
 export interface PlanBuyParentRow {
@@ -229,6 +231,21 @@ export function buildBuyGroups(allNodes: PlanNode[], buyNodes: PlanNode[]): Plan
   return groups
 }
 
+function sharedGroupConsumerIds(group: PlanBuyGroup, allNodes: PlanNode[]): number[] {
+  const byId = new Map(allNodes.map((n) => [n.productTypeId, n]))
+  const ids = new Set<number>()
+  for (const node of group.nodes) {
+    for (const d of node.demandByParent) {
+      ids.add(d.parentProductTypeId)
+    }
+  }
+  return [...ids].sort((a, b) => {
+    const na = byId.get(a)?.name ?? String(a)
+    const nb = byId.get(b)?.name ?? String(b)
+    return na.localeCompare(nb)
+  })
+}
+
 export function buildBuyTableRows(groups: PlanBuyGroup[], allNodes: PlanNode[]): PlanBuyTableRow[] {
   const rows: PlanBuyTableRow[] = []
 
@@ -243,6 +260,8 @@ export function buildBuyTableRows(groups: PlanBuyGroup[], allNodes: PlanNode[]):
       itemCount: group.nodes.length,
       totalQty,
       totalCost,
+      consumerProductTypeIds:
+        group.key === 'shared' ? sharedGroupConsumerIds(group, allNodes) : undefined,
     })
 
     rows.push(...flattenBuyGroupRows(group))

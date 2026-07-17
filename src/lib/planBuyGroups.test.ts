@@ -63,6 +63,30 @@ describe('buildBuyGroups', () => {
     expect(groups[0].nodes[0].name).toBe('Tritanium')
   })
 
+  it('lists consumer product ids on shared group table row', () => {
+    const all: PlanNode[] = [
+      mockNode({ productTypeId: 1, name: 'A', mode: 'build', depth: 0 }),
+      mockNode({ productTypeId: 2, name: 'B', mode: 'build', depth: 0 }),
+      mockNode({
+        productTypeId: 3,
+        name: 'Tritanium',
+        mode: 'buy',
+        depth: 1,
+        demandByParent: [
+          { parentProductTypeId: 1, qty: 10 },
+          { parentProductTypeId: 2, qty: 20 },
+        ],
+      }),
+    ]
+    const groups = buildBuyGroups(all, all.filter((n) => n.mode === 'buy'))
+    const rows = buildBuyTableRows(groups, all)
+    expect(rows[0]).toMatchObject({
+      kind: 'group',
+      key: 'shared',
+      consumerProductTypeIds: [1, 2],
+    })
+  })
+
   it('does not recurse on cyclic parent links', () => {
     const all: PlanNode[] = [
       mockNode({

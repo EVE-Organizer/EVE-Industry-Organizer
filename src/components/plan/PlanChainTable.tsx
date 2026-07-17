@@ -263,6 +263,8 @@ function LockIcon() {
   )
 }
 
+const CONSUMER_ICON_SIZE = 24
+
 function SharedGroupIcon() {
   return (
     <EveImage
@@ -272,6 +274,38 @@ function SharedGroupIcon() {
       alt=""
       className="shrink-0"
     />
+  )
+}
+
+function SharedConsumerIcons({
+  productTypeIds,
+  nodesById,
+  blueprintTypeIdByProduct,
+}: {
+  productTypeIds: number[]
+  nodesById: Map<number, PlanNode>
+  blueprintTypeIdByProduct: Map<number, number>
+}) {
+  if (productTypeIds.length === 0) return null
+
+  return (
+    <span className="inline-flex items-center gap-0.5 flex-wrap">
+      {productTypeIds.map((productTypeId) => {
+        const name = nodesById.get(productTypeId)?.name ?? String(productTypeId)
+        return (
+          <Tooltip key={productTypeId} text={name} placement="top">
+            <span className="inline-flex shrink-0">
+              <PlanProductIcon
+                productTypeId={productTypeId}
+                blueprintTypeId={blueprintTypeIdByProduct.get(productTypeId)}
+                size={CONSUMER_ICON_SIZE}
+                alt={name}
+              />
+            </span>
+          </Tooltip>
+        )
+      })}
+    </span>
   )
 }
 
@@ -593,6 +627,7 @@ function BuyTableRow({
   onToggleMode,
   onOpenGraph,
   blueprintTypeIdByProduct,
+  nodesById,
 }: {
   row: PlanBuyTableRow
   expanded: boolean
@@ -601,6 +636,7 @@ function BuyTableRow({
   onOpenGraph: (productTypeId: number) => void
   onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
+  nodesById: Map<number, PlanNode>
 }) {
   if (row.kind === 'group') {
     return (
@@ -624,7 +660,16 @@ function BuyTableRow({
               />
             ) : null}
             <div className="text-left min-w-0 flex-1">
-              <p className="text-sm font-medium truncate leading-snug">{row.parentName}</p>
+              <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                <p className="text-sm font-medium leading-snug shrink-0">{row.parentName}</p>
+                {row.key === 'shared' && row.consumerProductTypeIds ? (
+                  <SharedConsumerIcons
+                    productTypeIds={row.consumerProductTypeIds}
+                    nodesById={nodesById}
+                    blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+                  />
+                ) : null}
+              </div>
               <p className="text-[11px] opacity-50 tabular-nums mt-0.5 leading-snug">
                 {row.itemCount} materials
               </p>
@@ -719,6 +764,8 @@ function BuySection({
     return buildBuyTableRows(groups, allNodes)
   }, [allNodes, buyNodes])
 
+  const nodesById = useMemo(() => new Map(allNodes.map((n) => [n.productTypeId, n])), [allNodes])
+
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
   if (buyNodes.length === 0) return null
@@ -801,6 +848,7 @@ function BuySection({
               onToggleMode={onToggleMode}
               onOpenGraph={onOpenGraph}
               blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+              nodesById={nodesById}
             />
           ))}
         </tbody>

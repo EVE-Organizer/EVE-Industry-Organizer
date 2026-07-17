@@ -1,26 +1,10 @@
-import { useMemo } from 'react'
-import {
-  Bar,
-  Brush,
-  CartesianGrid,
-  ComposedChart,
-  Legend,
-  Line,
-  ReferenceArea,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Tooltip as UiTooltip, useAnchorTooltip } from '@/components/Tooltip'
+import { ManufacturingSlotsRow } from '@/components/plan/ManufacturingSlotRing'
 import { PlanProductIcon } from '@/components/plan/PlanProductIcon'
-import { collectPlanShortages } from '@/lib/planSimulator'
 import {
-  buildNodesForStockCharts,
   buildSlotLanes,
-  buildStockSeries,
   buildTimelineTicks,
-  downsampleStockSeries,
   formatHourTick,
   ganttBarColor,
   layoutLaneBars,
@@ -28,60 +12,11 @@ import {
   type PlanSlotBarLayout,
   type PlanSlotJobBar,
   type PlanSlotLane,
-  type PlanStockPoint,
 } from '@/lib/planTimelineChartData'
 import { formatDecimal } from '@/lib/profit'
-import type { PlanNode, PlanNodeSimulation, ScheduledPlanJob } from '@/types'
+import type { PlanNode, ScheduledPlanJob } from '@/types'
 
-const GRID_STROKE = 'rgba(48, 54, 61, 0.9)'
-const AXIS_TICK = { fill: 'rgba(230, 237, 243, 0.55)', fontSize: 11 }
-const SUPPLY_FILL = 'rgba(74, 158, 255, 0.75)' // eve blue
-const DEMAND_FILL = 'rgba(245, 166, 35, 0.75)' // eve orange
-const STOCK_STROKE = '#3fb950' // success
-const STOCK_STROKE_SHORT = '#f85149' // error
 const BAR_ICON = 20
-
-function StockTooltip({
-  active,
-  payload,
-  label,
-}: {
-  active?: boolean
-  payload?: ReadonlyArray<{ name?: string; value?: number }>
-  label?: string | number
-}) {
-  if (!active || !payload?.length) return null
-  const hour = typeof label === 'number' ? label : Number(label)
-
-  return (
-    <div className="rounded-lg border border-eve-border bg-base-200 px-3 py-2 text-xs shadow-lg">
-      <p className="font-medium text-base-content tabular-nums">{formatHourTick(hour)}</p>
-      {payload.map((entry) => (
-        <p key={entry.name} className="text-base-content/70 tabular-nums">
-          {entry.name}: {formatDecimal(Number(entry.value), 1)}
-        </p>
-      ))}
-    </div>
-  )
-}
-
-function shortageAreas(points: PlanStockPoint[]): { start: number; end: number }[] {
-  const areas: { start: number; end: number }[] = []
-  let start: number | null = null
-  for (let i = 0; i < points.length; i++) {
-    const p = points[i]!
-    const nextHour = points[i + 1]?.hour ?? p.hour + 1
-    if (p.inventory < 0 && start == null) start = p.hour
-    if (p.inventory >= 0 && start != null) {
-      areas.push({ start, end: p.hour })
-      start = null
-    }
-    if (i === points.length - 1 && start != null) {
-      areas.push({ start, end: nextHour })
-    }
-  }
-  return areas
-}
 
 function SlotJobBarDetails({
   bar,
@@ -169,10 +104,14 @@ function PlanSlotSchedule({
   lanes,
   windowHours,
   blueprintTypeIdByProduct,
+  focusedSlotIndex,
+  onLaneRef,
 }: {
   lanes: PlanSlotLane[]
   windowHours: number
   blueprintTypeIdByProduct: Map<number, number>
+  focusedSlotIndex: number | null
+  onLaneRef: (slotIndex: number, node: HTMLDivElement | null) => void
 }) {
   const ticks = useMemo(() => buildTimelineTicks(windowHours), [windowHours])
   const laneLayouts = useMemo(
@@ -212,43 +151,49 @@ function PlanSlotSchedule({
         <div className="plan-timeline__lanes">
           {lanes.map((lane, laneIndex) => {
             const { layouts, rowCount } = laneLayouts[laneIndex]!
+            const isFocused = focusedSlotIndex === lane.slot
             return (
-            <div key={lane.slot} className="plan-timeline__lane">
-              <div className="plan-timeline__lane-label">
-                <span className="font-medium">{lane.label}</span>
-                <span className="plan-timeline__lane-meta tabular-nums">
-                  {lane.jobCount} job{lane.jobCount === 1 ? '' : 's'} · ends {formatHourTick(lane.endHour)}
-                </span>
-              </div>
               <div
-                className="plan-timeline__lane-track"
-                style={{ ['--lane-rows' as string]: rowCount }}
+                key={lane.slot}
+                ref={(node) => onLaneRef(lane.slot, node)}
+                className={`plan-timeline__lane${isFocused ? ' plan-timeline__lane--focused' : ''}`}
+                id={`plan-timeline-lane-${lane.slot}`}
               >
-                {ticks.map((hour) => (
-                  <span
-                    key={hour}
-                    className="plan-timeline__lane-gridline"
-                    style={{ left: timelineTickPosition(hour, windowHours) }}
-                  />
-                ))}
-                {lane.jobs.length === 0 ? (
-                  <span className="plan-timeline__lane-empty">Idle</span>
-                ) : (
-                  lane.jobs.map((bar) => {
-                    const layout = layouts.get(bar.id)
-                    if (!layout) return null
-                    return (
-                    <SlotJobBar
-                      key={bar.id}
-                      bar={bar}
-                      layout={layout}
-                      blueprintTypeId={blueprintTypeIdByProduct.get(bar.productTypeId)}
+                <div className="plan-timeline__lane-label">
+                  <span className="font-medium">{lane.label}</span>
+                  <span className="plan-timeline__lane-meta tabular-nums">
+                    {lane.jobCount} job{lane.jobCount === 1 ? '' : 's'} · ends {formatHourTick(lane.endHour)}
+                  </span>
+                </div>
+                <div
+                  className="plan-timeline__lane-track"
+                  style={{ ['--lane-rows' as string]: rowCount }}
+                >
+                  {ticks.map((hour) => (
+                    <span
+                      key={hour}
+                      className="plan-timeline__lane-gridline"
+                      style={{ left: timelineTickPosition(hour, windowHours) }}
                     />
-                    )
-                  })
-                )}
+                  ))}
+                  {lane.jobs.length === 0 ? (
+                    <span className="plan-timeline__lane-empty">Idle</span>
+                  ) : (
+                    lane.jobs.map((bar) => {
+                      const layout = layouts.get(bar.id)
+                      if (!layout) return null
+                      return (
+                        <SlotJobBar
+                          key={bar.id}
+                          bar={bar}
+                          layout={layout}
+                          blueprintTypeId={blueprintTypeIdByProduct.get(bar.productTypeId)}
+                        />
+                      )
+                    })
+                  )}
+                </div>
               </div>
-            </div>
             )
           })}
         </div>
@@ -257,82 +202,9 @@ function PlanSlotSchedule({
   )
 }
 
-function PlanStockChart({
-  node,
-  points,
-  windowHours,
-}: {
-  node: PlanNode
-  points: PlanStockPoint[]
-  windowHours: number
-}) {
-  const areas = useMemo(() => shortageAreas(points), [points])
-  const hasShortage = areas.length > 0
-  const yMax = useMemo(() => {
-    let m = 1
-    for (const p of points) {
-      m = Math.max(m, p.supply, p.demand, Math.abs(p.inventory))
-    }
-    return m * 1.1
-  }, [points])
-
-  if (points.length === 0) return null
-
-  return (
-    <div className="plan-timeline__stock-chart">
-      <p className="plan-timeline__stock-title">
-        {node.name}
-        {hasShortage ? <span className="plan-timeline__stock-warn"> · short</span> : null}
-      </p>
-      <ResponsiveContainer width="100%" height={160}>
-        <ComposedChart data={points} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} />
-          <XAxis
-            dataKey="hour"
-            type="number"
-            domain={[0, Math.max(windowHours, 1)]}
-            tick={AXIS_TICK}
-            tickFormatter={(v) => formatHourTick(Number(v))}
-          />
-          <YAxis tick={AXIS_TICK} domain={[-yMax, yMax]} width={44} />
-          <Tooltip content={<StockTooltip />} />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
-          {areas.map((a) => (
-            <ReferenceArea
-              key={`${a.start}-${a.end}`}
-              x1={a.start}
-              x2={a.end}
-              fill="rgba(248, 81, 73, 0.14)"
-              strokeOpacity={0}
-            />
-          ))}
-          <Bar dataKey="supply" name="Supply" fill={SUPPLY_FILL} barSize={6} />
-          <Bar dataKey="demand" name="Demand" fill={DEMAND_FILL} barSize={6} />
-          <Line
-            type="monotone"
-            dataKey="inventory"
-            name="Stock"
-            stroke={hasShortage ? STOCK_STROKE_SHORT : STOCK_STROKE}
-            strokeWidth={2}
-            dot={false}
-          />
-          <Brush
-            dataKey="hour"
-            height={20}
-            stroke="rgba(245, 166, 35, 0.55)"
-            fill="rgba(245, 166, 35, 0.08)"
-            travellerWidth={8}
-          />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
-  )
-}
-
 export function PlanTimelinePanel({
   windowHours,
   nodes,
-  simulations,
   jobs,
   slots,
   blueprintTypeIdByProduct,
@@ -340,66 +212,75 @@ export function PlanTimelinePanel({
 }: {
   windowHours: number
   nodes: PlanNode[]
-  simulations: Map<number, PlanNodeSimulation>
   jobs: ScheduledPlanJob[]
   slots: number
   blueprintTypeIdByProduct: Map<number, number>
   embedded?: boolean
 }) {
-  const shortages = useMemo(
-    () => collectPlanShortages(simulations, nodes),
-    [simulations, nodes],
-  )
-
-  const uniqueShortCount = useMemo(
-    () => new Set(shortages.map((s) => s.productTypeId)).size,
-    [shortages],
-  )
-
   const lanes = useMemo(() => buildSlotLanes(jobs, nodes, slots), [jobs, nodes, slots])
+  const [focusedSlotIndex, setFocusedSlotIndex] = useState<number | null>(null)
+  const laneRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
-  const stockNodes = useMemo(
-    () => buildNodesForStockCharts(nodes, jobs, simulations, 4),
-    [nodes, jobs, simulations],
+  const handleLaneRef = useCallback((slotIndex: number, node: HTMLDivElement | null) => {
+    if (node) laneRefs.current.set(slotIndex, node)
+    else laneRefs.current.delete(slotIndex)
+  }, [])
+
+  const handleSelectSlot = useCallback((slotIndex: number) => {
+    setFocusedSlotIndex((prev) => (prev === slotIndex ? null : slotIndex))
+  }, [])
+
+  useEffect(() => {
+    if (focusedSlotIndex == null) return
+    const lane = laneRefs.current.get(focusedSlotIndex)
+    if (!lane) return
+    lane.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
+  }, [focusedSlotIndex, lanes])
+
+  const slotRingProps = useMemo(
+    () =>
+      lanes.map((lane) => ({
+        slotIndex: lane.slot,
+        active: lane.jobs.length > 0,
+        utilization: windowHours > 0 ? lane.busyHours / windowHours : 0,
+        productTypeId: lane.jobs[0]?.productTypeId,
+        blueprintTypeId: lane.jobs[0]
+          ? blueprintTypeIdByProduct.get(lane.jobs[0].productTypeId)
+          : undefined,
+        productName: lane.jobs[0]?.name,
+        idleMessage: 'Please install blueprint',
+      })),
+    [lanes, windowHours, blueprintTypeIdByProduct],
   )
 
   const body = (
     <>
       <div className="plan-timeline__hero">
-        <UiTooltip
-          text="Hour when the last scheduled job on this plan finishes, after packing work onto your industry slots. Not the ideal single-root job time."
-          placement="bottom"
-        >
-          <p className="plan-timeline__finish">
-            Finishes in{' '}
-            <span className="plan-timeline__finish-value">{formatDecimal(windowHours, 1)}h</span>
-          </p>
-        </UiTooltip>
-
-        <UiTooltip
-          text={
-            uniqueShortCount > 0
-              ? 'A component is short when its stock goes negative because a parent job starts before enough supply is ready. See charts below for the worst cases.'
-              : 'Every build node has enough supply when downstream jobs need it.'
-          }
-          placement="bottom"
-        >
-          <p
-            className={`plan-timeline__status ${uniqueShortCount > 0 ? 'plan-timeline__status--warn' : 'plan-timeline__status--ok'}`}
+        <div className="plan-timeline__hero-top">
+          <UiTooltip
+            text="Hour when the last scheduled job on this plan finishes, after packing work onto your industry slots. Not the ideal single-root job time."
+            placement="bottom"
           >
-            {uniqueShortCount > 0
-              ? `${uniqueShortCount} component${uniqueShortCount === 1 ? '' : 's'} short`
-              : 'On track'}
-          </p>
-        </UiTooltip>
+            <p className="plan-timeline__finish">
+              Finishes in{' '}
+              <span className="plan-timeline__finish-value">{formatDecimal(windowHours, 1)}h</span>
+            </p>
+          </UiTooltip>
+        </div>
 
         <UiTooltip
-          text={`${slots} concurrent industry ${slots === 1 ? 'slot' : 'slots'} from Mass Production and related skills.`}
+          text={`${slots} concurrent industry ${slots === 1 ? 'slot' : 'slots'} from Mass Production and related skills. Click a slot to highlight its row in the job schedule below.`}
           placement="bottom"
+          className="flex w-full min-w-0 self-stretch"
         >
-          <p className="plan-timeline__slots cursor-help tabular-nums text-sm text-base-content/60">
-            {slots} slot{slots === 1 ? '' : 's'}
-          </p>
+          <div className="plan-timeline__slots-panel">
+            <ManufacturingSlotsRow
+              slots={slotRingProps}
+              selectedSlotIndex={focusedSlotIndex}
+              onSelectSlot={handleSelectSlot}
+              emptyHint="Please install blueprint"
+            />
+          </div>
         </UiTooltip>
       </div>
 
@@ -407,30 +288,9 @@ export function PlanTimelinePanel({
         lanes={lanes}
         windowHours={windowHours}
         blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+        focusedSlotIndex={focusedSlotIndex}
+        onLaneRef={handleLaneRef}
       />
-
-      {stockNodes.length > 0 ? (
-        <div className="plan-timeline__chart-block">
-          <UiTooltip
-            text="Hourly supply, demand, and stock for the worst shortages. Red bands mark short windows."
-            placement="right"
-          >
-            <h3 className="plan-timeline__chart-title cursor-help">Component stock</h3>
-          </UiTooltip>
-          <div className="plan-timeline__stock-grid">
-            {stockNodes.map((node) => (
-              <PlanStockChart
-                key={node.productTypeId}
-                node={node}
-                points={downsampleStockSeries(buildStockSeries(simulations.get(node.productTypeId)))}
-                windowHours={windowHours}
-              />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p className="plan-timeline__on-track">Supply keeps up across the full plan.</p>
-      )}
     </>
   )
 

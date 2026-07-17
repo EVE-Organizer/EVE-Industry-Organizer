@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { expandManufacturingPlan } from '@/lib/manufacturingPlan'
+import { schedulePlanJobs } from '@/lib/planScheduler'
 import { durationHoursFromRuns } from '@/lib/rootRunsDuration'
 import { createDefaultPlanTemplate } from '@/services/sync/types'
 import { DEFAULT_SETTINGS } from '@/types'
@@ -82,7 +83,7 @@ describe('expandManufacturingPlan', () => {
       { id: 'root-b', productTypeId: 201, runs: 10, productionDurationHours: 48.5 },
     ]
 
-    const { windowHours, slots } = expandManufacturingPlan({
+    const { windowHours } = expandManufacturingPlan({
       template,
       blueprints,
       typeMap,
@@ -91,8 +92,8 @@ describe('expandManufacturingPlan', () => {
       systemCostIndex: 0.01,
     })
 
-    const hoursA = durationHoursFromRuns(shipA, DEFAULT_SETTINGS, 10, slots)
-    const hoursB = durationHoursFromRuns(shipB, DEFAULT_SETTINGS, 10, slots)
+    const hoursA = durationHoursFromRuns(shipA, DEFAULT_SETTINGS, 10, 1)
+    const hoursB = durationHoursFromRuns(shipB, DEFAULT_SETTINGS, 10, 1)
     expect(windowHours).toBe(Math.max(hoursA, hoursB, 1))
   })
 
@@ -116,6 +117,31 @@ describe('expandManufacturingPlan', () => {
     expect(ship?.isRoot).toBe(true)
     expect(ship?.runs).toBe(25)
     expect(ship?.outputQty).toBe(25)
+  })
+
+  it('schedules duplicate roots on separate industry slots', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [
+      { id: 'root-1', productTypeId: 200, runs: 10, productionDurationHours: 24 },
+      { id: 'root-2', productTypeId: 200, runs: 10, productionDurationHours: 24 },
+    ]
+
+    const { nodes, slots } = expandManufacturingPlan({
+      template,
+      blueprints,
+      typeMap,
+      prices,
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+    })
+
+    const ship = nodes.find((n) => n.productTypeId === 200)
+    expect(ship?.concurrentCopies).toBe(2)
+
+    const jobs = schedulePlanJobs({ nodes, slots, windowHours: 48 })
+    const rootJobs = jobs.filter((j) => j.productTypeId === 200)
+    expect(rootJobs.length).toBeGreaterThanOrEqual(2)
+    expect(new Set(rootJobs.map((j) => j.slot)).size).toBeGreaterThanOrEqual(2)
   })
 })
 

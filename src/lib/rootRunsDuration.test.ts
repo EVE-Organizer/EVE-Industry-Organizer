@@ -33,9 +33,9 @@ const root: PlanRootEntry = {
 
 describe('syncRootEntry', () => {
   it('recomputes job time from runs', () => {
-    const synced = syncRootEntry(root, blueprint, DEFAULT_SETTINGS, 6)
+    const synced = syncRootEntry(root, blueprint, DEFAULT_SETTINGS, 1)
     expect(synced.productionDurationHours).toBe(
-      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, root.runs, 6),
+      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, root.runs, 1),
     )
     expect(synced.productionDurationHours).not.toBe(24)
   })
@@ -43,10 +43,10 @@ describe('syncRootEntry', () => {
 
 describe('createSyncedPlanRootEntry', () => {
   it('creates a root with matching runs and job time', () => {
-    const entry = createSyncedPlanRootEntry(100, blueprint, DEFAULT_SETTINGS, 6)
+    const entry = createSyncedPlanRootEntry(100, blueprint, DEFAULT_SETTINGS, 1)
     expect(entry.runs).toBe(100)
     expect(entry.productionDurationHours).toBe(
-      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 100, 6),
+      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 100, 1),
     )
     expect('id' in entry).toBe(false)
   })
@@ -54,21 +54,39 @@ describe('createSyncedPlanRootEntry', () => {
 
 describe('applyRootEntryPatch', () => {
   it('snaps job time to actual wall-clock duration after hours input', () => {
-    const slots = 6
+    const parallelLines = 1
     const next = applyRootEntryPatch(
       root,
       { productionDurationHours: 24 },
       blueprint,
       DEFAULT_SETTINGS,
-      slots,
+      parallelLines,
     )
 
-    const expectedRuns = runsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24, slots)
-    const expectedHours = durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, expectedRuns, slots)
+    const expectedRuns = runsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24, parallelLines)
+    const expectedHours = durationHoursFromRuns(
+      blueprint,
+      DEFAULT_SETTINGS,
+      expectedRuns,
+      parallelLines,
+    )
 
     expect(next.runs).toBe(expectedRuns)
     expect(next.productionDurationHours).toBe(expectedHours)
     expect(next.productionDurationHours).not.toBe(24)
+  })
+
+  it('preserves long job time input for a single root line', () => {
+    const next = applyRootEntryPatch(
+      root,
+      { productionDurationHours: 168 },
+      blueprint,
+      DEFAULT_SETTINGS,
+      1,
+    )
+
+    expect(next.productionDurationHours).toBeGreaterThan(160)
+    expect(next.productionDurationHours).toBeLessThanOrEqual(168)
   })
 
   it('updates job time when runs change', () => {
@@ -77,12 +95,12 @@ describe('applyRootEntryPatch', () => {
       { runs: 200 },
       blueprint,
       DEFAULT_SETTINGS,
-      6,
+      1,
     )
 
     expect(next.runs).toBe(200)
     expect(next.productionDurationHours).toBe(
-      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 200, 6),
+      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 200, 1),
     )
   })
 })
@@ -101,5 +119,13 @@ describe('resolveRunsFromPatch', () => {
 
   it('returns explicit runs when provided', () => {
     expect(resolveRunsFromPatch(100, { runs: 150 }, blueprint, DEFAULT_SETTINGS, 3)).toBe(150)
+  })
+})
+
+describe('runsFromDurationHours', () => {
+  it('scales total runs with parallel lines for the same wall clock', () => {
+    const oneLine = runsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24, 1)
+    const threeLines = runsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24, 3)
+    expect(threeLines).toBeGreaterThan(oneLine)
   })
 })

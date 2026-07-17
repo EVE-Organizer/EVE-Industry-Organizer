@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { schedulePlanJobs, detectOverUnder, scheduledDurationHours, windowHoursFromJobs } from '@/lib/planScheduler'
-import { collectPlanShortages, simulatePlanFlow } from '@/lib/planSimulator'
+import { simulatePlanFlow } from '@/lib/planSimulator'
 import type { PlanNode } from '@/types'
 
 function mockNode(partial: Partial<PlanNode> & Pick<PlanNode, 'productTypeId' | 'name'>): PlanNode {
@@ -126,7 +126,30 @@ describe('schedulePlanJobs', () => {
     const jobs = schedulePlanJobs({ nodes, slots: 11, windowHours: Number.POSITIVE_INFINITY })
     const windowHours = Math.max(...jobs.map((j) => j.endHour))
     const simulations = simulatePlanFlow({ nodes, jobs, windowHours })
-    expect(collectPlanShortages(simulations, nodes)).toHaveLength(0)
+    const shortages = [...simulations.values()].flatMap((sim) => sim.shortages)
+    expect(shortages).toHaveLength(0)
+  })
+
+  it('schedules duplicate roots of the same product on separate slots in parallel', () => {
+    const nodes = [
+      mockNode({
+        productTypeId: 200,
+        name: 'Ship',
+        isRoot: true,
+        depth: 0,
+        runs: 20,
+        concurrentCopies: 2,
+        jobTimeSeconds: 7200,
+        outputQty: 20,
+        totalDemandQty: 20,
+      }),
+    ]
+    const jobs = schedulePlanJobs({ nodes, slots: 5, windowHours: 48 })
+    const rootJobs = jobs.filter((j) => j.productTypeId === 200)
+    expect(rootJobs).toHaveLength(2)
+    expect(new Set(rootJobs.map((j) => j.slot)).size).toBe(2)
+    expect(rootJobs[0].startHour).toBeCloseTo(0, 5)
+    expect(rootJobs[1].startHour).toBeCloseTo(0, 5)
   })
 
   it('scales job duration by runs per chunk when concurrent copies split runs', () => {

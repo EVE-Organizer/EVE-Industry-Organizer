@@ -287,6 +287,199 @@
   }
 }
 
+.manufacturing-slots {
+  @apply flex w-full flex-col gap-3 min-w-0;
+
+  &__hint {
+    @apply text-xs uppercase tracking-[0.12em] text-base-content/45;
+  }
+
+  &__row {
+    @apply grid w-full gap-3 sm:gap-4;
+    grid-template-columns: repeat(var(--slot-count, 1), minmax(0, 1fr));
+  }
+}
+
+.manufacturing-slot {
+  @apply flex w-full flex-col items-center gap-1.5 min-w-0 m-0 cursor-pointer border-0 bg-transparent p-0 text-inherit;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+
+    .manufacturing-slot__outer {
+      stroke: rgb(245 166 35 / 0.5);
+    }
+
+    .manufacturing-slot__bracket {
+      stroke: rgb(255 255 255 / 0.55);
+    }
+  }
+
+  &:focus-visible {
+    @apply outline-none;
+    transform: scale(1.05);
+
+    .manufacturing-slot__frame {
+      filter: drop-shadow(0 0 10px rgb(245 166 35 / 0.45));
+    }
+  }
+
+  &__frame {
+    @apply relative mx-auto aspect-square w-full;
+    max-width: var(--slot-size, 5.5rem);
+    transition:
+      filter 0.25s ease,
+      transform 0.2s ease;
+  }
+
+  &__svg {
+    @apply block h-full w-full;
+  }
+
+  &__outer {
+    fill: none;
+    stroke: rgb(255 255 255 / 0.08);
+    stroke-width: 1.5;
+  }
+
+  &__inner {
+    fill: rgb(0 0 0 / 0.35);
+    stroke: rgb(255 255 255 / 0.12);
+    stroke-width: 1;
+  }
+
+  &__spoke {
+    stroke: rgb(255 255 255 / 0.06);
+    stroke-width: 0.75;
+  }
+
+  &__progress {
+    fill: none;
+    stroke: rgb(245 166 35 / 0.55);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  &__bracket {
+    fill: none;
+    stroke: rgb(255 255 255 / 0.22);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+
+  &__center {
+    @apply absolute inset-0 flex items-center justify-center;
+  }
+
+  &__empty-icon {
+    @apply h-[38%] w-[38%] text-base-content/35;
+
+    rect,
+    path {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.25;
+    }
+  }
+
+  &__product {
+    @apply drop-shadow-sm;
+  }
+
+  &__caption {
+    @apply flex flex-col items-center gap-0.5 text-center min-w-0 max-w-[var(--slot-size,5.5rem)];
+  }
+
+  &__slot-label {
+    @apply text-[10px] font-medium uppercase tracking-wide text-base-content/50;
+  }
+
+  &__status {
+    @apply text-[11px] leading-tight text-base-content/70 truncate w-full;
+  }
+
+  &--sm {
+    --slot-size: 3.75rem;
+
+    .manufacturing-slot__caption {
+      @apply gap-0;
+    }
+
+    .manufacturing-slot__slot-label {
+      @apply text-[9px];
+    }
+  }
+
+  &--md {
+    --slot-size: 5.5rem;
+  }
+
+  &--active {
+    .manufacturing-slot__outer {
+      stroke: rgb(245 166 35 / 0.35);
+    }
+
+    .manufacturing-slot__bracket {
+      stroke: rgb(255 255 255 / 0.72);
+    }
+
+    .manufacturing-slot__bracket--top,
+    .manufacturing-slot__bracket--bottom {
+      animation: manufacturing-slot-bracket-pulse 2.4s ease-in-out infinite;
+    }
+
+    .manufacturing-slot__bracket--right,
+    .manufacturing-slot__bracket--left {
+      animation: manufacturing-slot-bracket-pulse 2.4s ease-in-out infinite 0.6s;
+    }
+  }
+
+  &--selected {
+    transform: scale(1.06);
+
+    .manufacturing-slot__frame {
+      filter: drop-shadow(0 0 14px rgb(245 166 35 / 0.45));
+    }
+
+    .manufacturing-slot__outer {
+      stroke: rgb(245 166 35 / 0.85);
+      stroke-width: 2;
+    }
+
+    .manufacturing-slot__bracket {
+      stroke: rgb(255 255 255 / 0.95);
+    }
+  }
+}
+
+@keyframes manufacturing-slot-bracket-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes plan-timeline-lane-focus {
+  0% {
+    box-shadow: 0 0 0 0 rgb(245 166 35 / 0.45);
+  }
+
+  70% {
+    box-shadow: 0 0 0 8px rgb(245 166 35 / 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 1px rgb(245 166 35 / 0.2);
+  }
+}
+
 .plan-search-wrap {
   @apply relative w-full;
 
@@ -331,7 +524,17 @@
   }
 
   &__hero {
+    @apply flex flex-col gap-4;
+  }
+
+  &__hero-top {
     @apply flex flex-wrap items-baseline gap-x-4 gap-y-1;
+  }
+
+  &__slots-panel {
+    @apply w-full rounded-xl border border-eve-border/60 bg-base-300/25 p-4 sm:p-5;
+    background-image: radial-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px);
+    background-size: 14px 14px;
   }
 
   &__finish {
@@ -340,22 +543,6 @@
 
   &__finish-value {
     @apply text-2xl font-semibold tabular-nums text-base-content;
-  }
-
-  &__status {
-    @apply text-sm font-medium cursor-help;
-
-    &--ok {
-      @apply text-success;
-    }
-
-    &--warn {
-      @apply text-error;
-    }
-  }
-
-  &__on-track {
-    @apply text-sm text-base-content/60;
   }
 
   &__chart-block {
@@ -396,6 +583,17 @@
 
   &__lane {
     @apply grid grid-cols-1 gap-2 rounded-lg border border-transparent p-2 text-left sm:grid-cols-[6.75rem_minmax(0,1fr)] sm:items-start;
+    scroll-margin: 0.75rem;
+    transition:
+      background-color 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+
+    &--focused {
+      @apply border-primary/45 bg-primary/10;
+      animation: plan-timeline-lane-focus 1.4s ease-out;
+      box-shadow: 0 0 0 1px rgb(245 166 35 / 0.2);
+    }
   }
 
   &__lane-label {
@@ -447,22 +645,6 @@
 
   &__bar-label {
     @apply min-w-0 truncate leading-8;
-  }
-
-  &__stock-grid {
-    @apply flex flex-col gap-4 max-h-[22rem] overflow-y-auto pr-1;
-  }
-
-  &__stock-chart {
-    @apply rounded-lg border border-eve-border/60 bg-base-300/20 p-2;
-  }
-
-  &__stock-title {
-    @apply text-xs font-medium text-base-content/80 mb-1 truncate;
-  }
-
-  &__stock-warn {
-    @apply text-error font-semibold;
   }
 }
 

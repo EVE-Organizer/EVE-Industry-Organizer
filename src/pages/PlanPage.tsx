@@ -36,6 +36,7 @@ import {
   applyRootEntryPatch,
   createSyncedPlanRootEntry,
   durationHoursFromRuns,
+  parallelLinesForRoot,
   resolveRunsFromPatch,
   syncRootEntry,
 } from '@/lib/rootRunsDuration'
@@ -242,6 +243,11 @@ export function PlanPage() {
 
   const slots = manufacturingSlotsFromSkills(skills)
 
+  const rootRunsTotal = useMemo(
+    () => (template ? template.roots.reduce((sum, r) => sum + r.runs, 0) : 0),
+    [template],
+  )
+
   const profitSummary = useMemo(() => {
     if (!template || !expandInput) {
       return {
@@ -264,7 +270,14 @@ export function PlanPage() {
               bp,
               userData.settings,
               root.runs,
-              slots,
+              parallelLinesForRoot(
+                bp,
+                root,
+                slots,
+                rootRunsTotal,
+                template.defaultRunsPerBpc,
+                template.nodeOverrides[root.productTypeId],
+              ),
               template.nodeOverrides[root.productTypeId],
             )
           : root.productionDurationHours
@@ -279,7 +292,7 @@ export function PlanPage() {
       buyPrices,
       jobTimeHoursByRootId,
     )
-  }, [template, expandInput, prices, buyPrices, blueprints, userData.settings, slots])
+  }, [template, expandInput, prices, buyPrices, blueprints, userData.settings, slots, rootRunsTotal])
 
   const profitByRootId = useMemo(
     () => new Map(profitSummary.rootRows.map((row) => [row.rootId, row])),
@@ -308,7 +321,14 @@ export function PlanPage() {
         blueprint,
         userData.settings,
         root.runs,
-        slots,
+        parallelLinesForRoot(
+          blueprint,
+          root,
+          slots,
+          rootRunsTotal,
+          template.defaultRunsPerBpc,
+          template.nodeOverrides[root.productTypeId],
+        ),
         template.nodeOverrides[root.productTypeId],
       ) ?? root.productionDurationHours
     return computeRootProfitBreakdown(
@@ -330,6 +350,7 @@ export function PlanPage() {
     buyPrices,
     userData.settings,
     slots,
+    rootRunsTotal,
   ])
 
   const favoriteProductIds = useMemo(
@@ -383,7 +404,14 @@ export function PlanPage() {
               bp,
               userData.settings,
               root.runs,
-              slots,
+              parallelLinesForRoot(
+                bp,
+                root,
+                slots,
+                rootRunsTotal,
+                template.defaultRunsPerBpc,
+                template.nodeOverrides[root.productTypeId],
+              ),
               template.nodeOverrides[root.productTypeId],
             )
           : root.productionDurationHours,
@@ -406,7 +434,7 @@ export function PlanPage() {
     }))
 
     return withTreeLineMeta([...rootRows, ...subRows])
-  }, [template, plan.nodes, plan.jobs, blueprints, typeMap, blueprintTypeIdByProduct, userData.settings, slots])
+  }, [template, plan.nodes, plan.jobs, blueprints, typeMap, blueprintTypeIdByProduct, userData.settings, slots, rootRunsTotal])
 
   const manufactureRows = useMemo(() => {
     if (!template) return []
@@ -437,7 +465,16 @@ export function PlanPage() {
         root,
         bp,
         userData.settings,
-        slots,
+        bp
+          ? parallelLinesForRoot(
+              bp,
+              root,
+              slots,
+              rootRunsTotal,
+              template.defaultRunsPerBpc,
+              template.nodeOverrides[root.productTypeId],
+            )
+          : 1,
         template.nodeOverrides[root.productTypeId],
       )
       if (synced !== root) needsUpdate = true
@@ -446,7 +483,7 @@ export function PlanPage() {
     if (needsUpdate) {
       updatePlanTemplate(template.id, { roots: nextRoots })
     }
-  }, [template, data, blueprints, userData.settings, slots, updatePlanTemplate])
+  }, [template, data, blueprints, userData.settings, slots, rootRunsTotal, updatePlanTemplate])
 
   useEffect(() => {
     if (!addProductId || !data || !template) return
@@ -461,7 +498,18 @@ export function PlanPage() {
     handledAddRef.current = key
     addRootToPlanTemplate(template.id, {
       id: createPlanRootId(),
-      ...createSyncedPlanRootEntry(id, bp, userData.settings, slots),
+      ...createSyncedPlanRootEntry(
+        id,
+        bp,
+        userData.settings,
+        parallelLinesForRoot(
+          bp,
+          { id: '', productTypeId: id, runs: DEFAULT_BATCH_SIZE, productionDurationHours: 0 },
+          slots,
+          rootRunsTotal + DEFAULT_BATCH_SIZE,
+          template.defaultRunsPerBpc,
+        ),
+      ),
     })
     setSearchParams(
       (prev) => {
@@ -479,6 +527,7 @@ export function PlanPage() {
     addRootToPlanTemplate,
     userData.settings,
     slots,
+    rootRunsTotal,
     setSearchParams,
   ])
 
@@ -543,7 +592,16 @@ export function PlanPage() {
           root,
           bp,
           userData.settings,
-          slots,
+          bp
+            ? parallelLinesForRoot(
+                bp,
+                root,
+                slots,
+                rootRunsTotal,
+                template.defaultRunsPerBpc,
+                nextOverrides[productTypeId],
+              )
+            : 1,
           nextOverrides[productTypeId],
         )
       })
@@ -553,7 +611,7 @@ export function PlanPage() {
         roots: nextRoots,
       })
     },
-    [template, blueprints, userData.settings, slots, updatePlanTemplate],
+    [template, blueprints, userData.settings, slots, rootRunsTotal, updatePlanTemplate],
   )
 
   const graphBlueprint = useMemo(() => {
@@ -597,7 +655,18 @@ export function PlanPage() {
     if (!bp) return
     addRootToPlanTemplate(template.id, {
       id: createPlanRootId(),
-      ...createSyncedPlanRootEntry(productTypeId, bp, userData.settings, slots),
+      ...createSyncedPlanRootEntry(
+        productTypeId,
+        bp,
+        userData.settings,
+        parallelLinesForRoot(
+          bp,
+          { id: '', productTypeId, runs: DEFAULT_BATCH_SIZE, productionDurationHours: 0 },
+          slots,
+          rootRunsTotal + DEFAULT_BATCH_SIZE,
+          template.defaultRunsPerBpc,
+        ),
+      ),
     })
   }
 
@@ -700,7 +769,16 @@ export function PlanPage() {
                           patch,
                           bp,
                           userData.settings,
-                          slots,
+                          bp
+                            ? parallelLinesForRoot(
+                                bp,
+                                r,
+                                slots,
+                                rootRunsTotal,
+                                template.defaultRunsPerBpc,
+                                template.nodeOverrides[r.productTypeId],
+                              )
+                            : 1,
                           template.nodeOverrides[r.productTypeId],
                         )
                       }),
@@ -737,7 +815,6 @@ export function PlanPage() {
           <PlanTimelinePanel
             windowHours={plan.windowHours}
             nodes={plan.nodes}
-            simulations={plan.simulations}
             jobs={plan.jobs}
             slots={slots}
             blueprintTypeIdByProduct={blueprintTypeIdByProduct}

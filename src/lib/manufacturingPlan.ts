@@ -20,9 +20,10 @@ import {
   bpcCountForRuns,
   defaultRunsPerBpc,
   durationHoursFromRuns,
+  parallelLinesForRoot,
   runsForDemand,
 } from '@/lib/rootRunsDuration'
-import { activeConcurrentCopies, totalRootRuns } from '@/lib/supplyChainSlots'
+import { activeConcurrentCopies, duplicateRootCount, totalRootRuns } from '@/lib/supplyChainSlots'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { getBlueprintForBpo, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { isRawMaterial } from '@/lib/supplyChain'
@@ -330,6 +331,13 @@ function finalizeNodes(
   const { blueprints, typeMap, prices, systemCostIndex } = input
   const nodes: PlanNode[] = []
   const rootRunsTotal = totalRootRuns(template.roots.map((r) => r.runs))
+  const rootDuplicateCounts = new Map<number, number>()
+  for (const root of template.roots) {
+    rootDuplicateCounts.set(
+      root.productTypeId,
+      (rootDuplicateCounts.get(root.productTypeId) ?? 0) + 1,
+    )
+  }
 
   for (const accum of nodeMap.values()) {
     const totalDemandQty = accum.demandByParent.reduce((s, d) => s + d.qty, 0)
@@ -354,7 +362,13 @@ function finalizeNodes(
     const concurrent =
       override?.copies ??
       (accum.mode === 'build'
-        ? activeConcurrentCopies(accum.isRoot, bpcCount, slots, rootRunsTotal)
+        ? activeConcurrentCopies(
+            accum.isRoot,
+            bpcCount,
+            slots,
+            rootRunsTotal,
+            rootDuplicateCounts.get(accum.productTypeId) ?? 1,
+          )
         : 0)
 
     const meTe = blueprint
@@ -475,6 +489,7 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
     expandMaterials(blueprint, root.runs, root.productTypeId, 0, input, nodeMap, modeOverrides, 10)
   }
 
+  const rootRunsTotal = totalRootRuns(template.roots.map((root) => root.runs))
   const windowFromRoots = template.roots.reduce((m, r) => {
     const blueprint = getBlueprintForProduct(input.blueprints, r.productTypeId)
     const hours = blueprint
@@ -482,7 +497,14 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
           blueprint,
           settings,
           r.runs,
-          slots,
+          parallelLinesForRoot(
+            blueprint,
+            r,
+            slots,
+            rootRunsTotal,
+            template.defaultRunsPerBpc,
+            template.nodeOverrides[r.productTypeId],
+          ),
           template.nodeOverrides[r.productTypeId],
         )
       : r.productionDurationHours

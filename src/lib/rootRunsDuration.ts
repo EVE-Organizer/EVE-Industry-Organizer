@@ -7,6 +7,7 @@ import {
   resolveStructureModifiers,
   runsForJobTime,
 } from '@/lib/cost'
+import { activeConcurrentCopies } from '@/lib/supplyChainSlots'
 
 export function runsForDemand(productQuantity: number, demandQty: number): number {
   if (productQuantity <= 0) return MIN_BATCH_SIZE
@@ -19,32 +20,32 @@ export function runsFromDurationHours(
   blueprint: BlueprintInfo,
   settings: GlobalSettings,
   durationHours: number,
-  slots: number,
+  parallelLines: number,
   meTeOverride?: PlanNodeOverride,
 ): number {
   const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
   const structure = resolveStructureModifiers(settings)
   const advanced = settings.skills.advancedIndustry ?? 0
   const availableSec = Math.max(0, durationHours) * 3600
-  if (slots <= 0 || availableSec <= 0) return MIN_BATCH_SIZE
+  const lines = Math.max(1, parallelLines)
+  if (availableSec <= 0) return MIN_BATCH_SIZE
 
-  const perSlotSec = availableSec / slots
-  const runsPerSlot = runsForJobTime(
-    perSlotSec,
+  const runsPerLine = runsForJobTime(
+    availableSec,
     blueprint.manufacturingTime,
     te,
     advanced,
     structure.teBonusPercent,
     { step: BATCH_SIZE_STEP, maxRuns: null },
   )
-  return Math.max(MIN_BATCH_SIZE, runsPerSlot * slots)
+  return Math.max(MIN_BATCH_SIZE, runsPerLine * lines)
 }
 
 export function durationHoursFromRuns(
   blueprint: BlueprintInfo,
   settings: GlobalSettings,
   runs: number,
-  slots: number,
+  parallelLines: number,
   meTeOverride?: PlanNodeOverride,
 ): number {
   const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
@@ -58,11 +59,10 @@ export function durationHoursFromRuns(
   )
   if (perRun <= 0 || runs <= 0) return 0
 
-  const effectiveSlots = Math.max(1, slots)
-  const jobs = Math.ceil(runs / Math.max(1, Math.floor(runs / effectiveSlots)))
-  const runsPerJob = Math.ceil(runs / Math.min(effectiveSlots, runs))
+  const effectiveLines = Math.max(1, parallelLines)
+  const runsPerJob = Math.ceil(runs / Math.min(effectiveLines, runs))
   const jobTime = applyTE(blueprint.manufacturingTime, te, runsPerJob, advanced, structure.teBonusPercent)
-  const waves = Math.ceil(runs / (runsPerJob * effectiveSlots))
+  const waves = Math.ceil(runs / (runsPerJob * effectiveLines))
   return (jobTime * waves) / 3600
 }
 
@@ -73,12 +73,27 @@ export function defaultRunsPerBpc(blueprint: BlueprintInfo, templateDefault: num
   return templateDefault
 }
 
-/** Recompute job time from runs using current skills and slot count. */
+/** Parallel industry lines for a root entry (always 1 unless copies override). */
+export function parallelLinesForRoot(
+  blueprint: BlueprintInfo,
+  root: PlanRootEntry,
+  skillSlots: number,
+  rootRunsTotal: number,
+  defaultRunsPerBpcTemplate: number,
+  nodeOverride?: PlanNodeOverride,
+): number {
+  if (nodeOverride?.copies != null) return nodeOverride.copies
+  const runsPerBpc = nodeOverride?.runsPerBpc ?? defaultRunsPerBpc(blueprint, defaultRunsPerBpcTemplate)
+  const bpcCount = bpcCountForRuns(root.runs, runsPerBpc)
+  return activeConcurrentCopies(true, bpcCount, skillSlots, rootRunsTotal)
+}
+
+/** Recompute job time from runs using current skills and parallel lines. */
 export function syncRootEntry(
   root: PlanRootEntry,
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
-  slots: number,
+  parallelLines: number,
   meTeOverride?: PlanNodeOverride,
 ): PlanRootEntry {
   if (!blueprint) return root
@@ -86,7 +101,7 @@ export function syncRootEntry(
     blueprint,
     settings,
     root.runs,
-    slots,
+    parallelLines,
     meTeOverride,
   )
   if (root.productionDurationHours === productionDurationHours) return root
@@ -98,14 +113,14 @@ export function createSyncedPlanRootEntry(
   productTypeId: number,
   blueprint: BlueprintInfo,
   settings: GlobalSettings,
-  slots: number,
+  parallelLines: number,
   runs: number = DEFAULT_BATCH_SIZE,
 ): Omit<PlanRootEntry, 'id'> {
   const { id: _id, ...synced } = syncRootEntry(
     { id: '', productTypeId, runs, productionDurationHours: 0 },
     blueprint,
     settings,
-    slots,
+    parallelLines,
   )
   return synced
 }
@@ -116,7 +131,7 @@ export function applyRootEntryPatch(
   patch: Partial<PlanRootEntry>,
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
-  slots: number,
+  parallelLines: number,
   meTeOverride?: PlanNodeOverride,
 ): PlanRootEntry {
   const next = { ...root, ...patch }
@@ -127,14 +142,14 @@ export function applyRootEntryPatch(
       blueprint,
       settings,
       patch.productionDurationHours,
-      slots,
+      parallelLines,
       meTeOverride,
     )
     next.productionDurationHours = durationHoursFromRuns(
       blueprint,
       settings,
       next.runs,
-      slots,
+      parallelLines,
       meTeOverride,
     )
   } else if (patch.runs != null && patch.productionDurationHours == null) {
@@ -142,7 +157,7 @@ export function applyRootEntryPatch(
       blueprint,
       settings,
       patch.runs,
-      slots,
+      parallelLines,
       meTeOverride,
     )
   }

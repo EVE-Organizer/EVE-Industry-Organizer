@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  buildNodesForStockCharts,
   buildSlotLanes,
-  buildStockSeries,
   buildTimelineTicks,
   formatHourTick,
   layoutLaneBars,
@@ -11,7 +9,7 @@ import {
   timelineVisualRatio,
   TIMELINE_MIN_BAR_WIDTH_PCT,
 } from '@/lib/planTimelineChartData'
-import type { PlanNode, PlanNodeSimulation, ScheduledPlanJob } from '@/types'
+import type { PlanNode, ScheduledPlanJob } from '@/types'
 
 describe('buildSlotLanes', () => {
   it('preserves job start and end hours on each lane', () => {
@@ -44,42 +42,6 @@ describe('buildSlotLanes', () => {
     expect(lanes[0]!.jobs[0]).toMatchObject({ startHour: 0, endHour: 1, durationHours: 1 })
     expect(lanes[0]!.jobs[1]).toMatchObject({ startHour: 3, endHour: 7, durationHours: 4 })
     expect(lanes[0]!.busyHours).toBe(5)
-  })
-})
-
-describe('buildStockSeries', () => {
-  it('copies bucket fields', () => {
-    const sim: PlanNodeSimulation = {
-      productTypeId: 1,
-      buckets: [{ hour: 0, supply: 5, demand: 2, inventory: 3 }],
-      shortages: [],
-    }
-    expect(buildStockSeries(sim)).toEqual([{ hour: 0, supply: 5, demand: 2, inventory: 3 }])
-  })
-})
-
-describe('buildNodesForStockCharts', () => {
-  it('returns only shortaged nodes up to limit', () => {
-    const nodes = [
-      { productTypeId: 1, mode: 'build', depth: 2, name: 'A' },
-      { productTypeId: 2, mode: 'build', depth: 1, name: 'B' },
-    ] as PlanNode[]
-    const jobs = [{ productTypeId: 1 }, { productTypeId: 2 }] as ScheduledPlanJob[]
-    const simulations = new Map<number, PlanNodeSimulation>([
-      [1, { productTypeId: 1, buckets: [], shortages: [] }],
-      [
-        2,
-        {
-          productTypeId: 2,
-          buckets: [],
-          shortages: [{ startHour: 0, endHour: 10, deficit: 50 }],
-        },
-      ],
-    ])
-
-    expect(buildNodesForStockCharts(nodes, jobs, simulations, 4).map((n) => n.productTypeId)).toEqual([
-      2,
-    ])
   })
 })
 
