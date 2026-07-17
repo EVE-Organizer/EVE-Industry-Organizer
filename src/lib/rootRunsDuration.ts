@@ -1,5 +1,5 @@
 import type { BlueprintInfo, GlobalSettings, PlanNodeOverride, PlanRootEntry } from '@/types'
-import { BATCH_SIZE_STEP, DEFAULT_BATCH_SIZE, MIN_BATCH_SIZE } from '@/types'
+import { DEFAULT_BATCH_SIZE } from '@/types'
 import {
   applyTE,
   manufacturingTimePerRun,
@@ -9,11 +9,33 @@ import {
 } from '@/lib/cost'
 import { activeConcurrentCopies } from '@/lib/supplyChainSlots'
 
+/** Manufacturing runs needed to satisfy material demand (matches in-game run count). */
 export function runsForDemand(productQuantity: number, demandQty: number): number {
-  if (productQuantity <= 0) return MIN_BATCH_SIZE
-  const exact = Math.ceil(demandQty / productQuantity)
-  const stepped = Math.max(MIN_BATCH_SIZE, Math.round(exact / BATCH_SIZE_STEP) * BATCH_SIZE_STEP)
-  return stepped
+  if (productQuantity <= 0 || demandQty <= 0) return 1
+  return Math.max(1, Math.ceil(demandQty / productQuantity))
+}
+
+/** In-game job timer for one manufacturing job at this node. */
+export function jobTimeSecondsForRuns(
+  blueprint: BlueprintInfo,
+  settings: GlobalSettings,
+  runs: number,
+  concurrentCopies: number,
+  meTeOverride?: PlanNodeOverride,
+): number {
+  if (runs <= 0) return 0
+  const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
+  const structure = resolveStructureModifiers(settings)
+  const advanced = settings.skills.advancedIndustry ?? 0
+  const lines = Math.max(1, concurrentCopies)
+  const runsPerJob = Math.max(1, Math.ceil(runs / Math.min(lines, runs)))
+  return applyTE(
+    blueprint.manufacturingTime,
+    te,
+    runsPerJob,
+    advanced,
+    structure.teBonusPercent,
+  )
 }
 
 export function runsFromDurationHours(
@@ -28,7 +50,7 @@ export function runsFromDurationHours(
   const advanced = settings.skills.advancedIndustry ?? 0
   const availableSec = Math.max(0, durationHours) * 3600
   const lines = Math.max(1, parallelLines)
-  if (availableSec <= 0) return MIN_BATCH_SIZE
+  if (availableSec <= 0) return 1
 
   const runsPerLine = runsForJobTime(
     availableSec,
@@ -36,9 +58,9 @@ export function runsFromDurationHours(
     te,
     advanced,
     structure.teBonusPercent,
-    { step: BATCH_SIZE_STEP, maxRuns: null },
+    { step: 1, maxRuns: null },
   )
-  return Math.max(MIN_BATCH_SIZE, runsPerLine * lines)
+  return Math.max(1, runsPerLine * lines)
 }
 
 export function durationHoursFromRuns(

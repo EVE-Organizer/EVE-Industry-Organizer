@@ -3,7 +3,6 @@ import type { BlueprintTier, TimeRange } from '@/types'
 import {
   BATCH_SIZE_STEP,
   BLUEPRINT_TIERS,
-  HUBS,
   MAX_BATCH_SIZE,
   MIN_BATCH_SIZE,
 } from '@/types'
@@ -158,37 +157,20 @@ export function BlueprintFilterBar({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0 items-stretch">
           <FilterSection
             title="Where & prices"
-            hint="Hub, build system, market data, and availability"
+            hint="Hub is in the navbar. Build system, market data, and availability below."
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {sde ? (
               <label className="form-control w-full min-w-0">
-                <FormFieldLabel label="Hub" size="sm" />
-                <select
-                  className="select select-bordered select-sm w-full"
-                  value={query.hub}
-                  onChange={(e) => onChange({ hub: e.target.value as typeof query.hub })}
-                >
-                  {HUBS.map((h) => (
-                    <option key={h.id} value={h.id}>
-                      {h.name}
-                    </option>
-                  ))}
-                </select>
+                <FormFieldLabel label="Mfg system" size="sm" />
+                <ManufacturingSystemPicker
+                  value={query.mfgSystem}
+                  onChange={(systemId) => onChange({ mfgSystem: systemId })}
+                  systems={sde.systems}
+                  regions={sde.regions}
+                  className="w-full max-w-none"
+                />
               </label>
-
-              {sde && (
-                <label className="form-control w-full min-w-0">
-                  <FormFieldLabel label="Mfg system" size="sm" />
-                  <ManufacturingSystemPicker
-                    value={query.mfgSystem}
-                    onChange={(systemId) => onChange({ mfgSystem: systemId })}
-                    systems={sde.systems}
-                    regions={sde.regions}
-                    className="w-full max-w-none"
-                  />
-                </label>
-              )}
-            </div>
+            ) : null}
 
             <label className="form-control w-full min-w-0">
               <FormFieldLabel

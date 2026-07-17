@@ -3,10 +3,13 @@ import {
   applyRootEntryPatch,
   createSyncedPlanRootEntry,
   durationHoursFromRuns,
+  jobTimeSecondsForRuns,
   resolveRunsFromPatch,
+  runsForDemand,
   runsFromDurationHours,
   syncRootEntry,
 } from '@/lib/rootRunsDuration'
+import { applyTE } from '@/lib/cost'
 import { DEFAULT_SETTINGS } from '@/types'
 import type { BlueprintInfo, PlanRootEntry } from '@/types'
 
@@ -119,6 +122,27 @@ describe('resolveRunsFromPatch', () => {
 
   it('returns explicit runs when provided', () => {
     expect(resolveRunsFromPatch(100, { runs: 150 }, blueprint, DEFAULT_SETTINGS, 3)).toBe(150)
+  })
+})
+
+describe('runsForDemand', () => {
+  it('uses exact ceil without batch stepping', () => {
+    expect(runsForDemand(1, 35)).toBe(35)
+    expect(runsForDemand(5, 12)).toBe(3)
+  })
+})
+
+describe('jobTimeSecondsForRuns', () => {
+  it('matches applyTE for a single parallel line', () => {
+    const seconds = jobTimeSecondsForRuns(blueprint, DEFAULT_SETTINGS, 100, 1)
+    expect(seconds).toBe(
+      applyTE(
+        blueprint.manufacturingTime,
+        DEFAULT_SETTINGS.teDefault,
+        100,
+        DEFAULT_SETTINGS.skills.advancedIndustry ?? 0,
+      ),
+    )
   })
 })
 

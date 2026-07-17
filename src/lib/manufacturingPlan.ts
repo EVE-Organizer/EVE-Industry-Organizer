@@ -9,7 +9,6 @@ import type {
 import { MIN_BATCH_SIZE } from '@/types'
 import {
   applyME,
-  applyTE,
   inventionBlueprintCostPerRun,
   materialCost,
   resolveBlueprintMeTe,
@@ -20,6 +19,7 @@ import {
   bpcCountForRuns,
   defaultRunsPerBpc,
   durationHoursFromRuns,
+  jobTimeSecondsForRuns,
   parallelLinesForRoot,
   runsForDemand,
 } from '@/lib/rootRunsDuration'
@@ -374,12 +374,15 @@ function finalizeNodes(
     const meTe = blueprint
       ? resolveBlueprintMeTe(blueprint.tier, settings, override)
       : { me: settings.meDefault, te: settings.teDefault, locked: false }
-    const { te } = meTe
-    const structure = resolveStructureModifiers(settings)
-    const advanced = settings.skills.advancedIndustry ?? 0
     const jobTimeSeconds =
       blueprint && accum.mode === 'build'
-        ? applyTE(blueprint.manufacturingTime, te, Math.max(1, runs), advanced, structure.teBonusPercent)
+        ? jobTimeSecondsForRuns(
+            blueprint,
+            settings,
+            runs,
+            concurrent,
+            override,
+          )
         : 0
 
     const outputQty = blueprint ? runs * blueprint.productQuantity : totalDemandQty

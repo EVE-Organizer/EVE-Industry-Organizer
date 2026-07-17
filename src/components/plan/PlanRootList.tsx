@@ -229,7 +229,7 @@ export function PlanRootList({
               </th>
               <th className="plan-jobs-table__hours-col">
                 <Tooltip
-                  text="Wall-clock hours after industry slots are shared across the plan"
+                  text="Wall-clock hours to finish this run count (matches the in-game industry timer for the same runs, TE, and structure bonuses)"
                   placement="top"
                 >
                   <span className="cursor-help border-b border-dotted border-current/40">Job time</span>
@@ -269,8 +269,8 @@ export function PlanRootList({
                     <input
                       type="number"
                       className="input input-bordered input-xs w-full max-w-[5.5rem] tabular-nums"
-                      step={10}
-                      min={10}
+                      step={1}
+                      min={1}
                       value={row.runs}
                       onChange={(e) =>
                         onChange(row.rootId, row.productTypeId, { runs: Number(e.target.value) })

@@ -1,10 +1,9 @@
-import { applyTE, resolveBlueprintMeTe, resolveStructureModifiers } from '@/lib/cost'
 import {
   flattenPlanNodesExpandable,
   withTreeLineMeta,
   type ExpandablePlanRow,
 } from '@/lib/planTreeLines'
-import { bpcCountForRuns, defaultRunsPerBpc } from '@/lib/rootRunsDuration'
+import { bpcCountForRuns, defaultRunsPerBpc, jobTimeSecondsForRuns } from '@/lib/rootRunsDuration'
 import { activeConcurrentCopies } from '@/lib/supplyChainSlots'
 import type { BlueprintInfo, GlobalSettings, PlanNode, PlanRootEntry } from '@/types'
 
@@ -25,20 +24,17 @@ export function rootDisplayPlanNode(
   meTeOverride?: { me?: number; te?: number },
 ): PlanNode {
   const runs = root.runs
-  const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
-  const structure = resolveStructureModifiers(settings)
-  const advanced = settings.skills.advancedIndustry ?? 0
   const runsPerBpc =
     runsPerBpcOverride ?? defaultRunsPerBpc(blueprint, defaultRunsPerBpcTemplate)
   const bpcCount = bpcCountForRuns(runs, runsPerBpc)
   const rootRunsTotal = runs
   const concurrent = activeConcurrentCopies(true, bpcCount, slots, rootRunsTotal)
-  const jobTimeSeconds = applyTE(
-    blueprint.manufacturingTime,
-    te,
-    Math.max(1, runs),
-    advanced,
-    structure.teBonusPercent,
+  const jobTimeSeconds = jobTimeSecondsForRuns(
+    blueprint,
+    settings,
+    runs,
+    concurrent,
+    meTeOverride,
   )
   const outputQty = runs * blueprint.productQuantity
 
