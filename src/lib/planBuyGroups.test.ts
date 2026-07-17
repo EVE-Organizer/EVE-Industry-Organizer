@@ -62,6 +62,22 @@ describe('buildBuyGroups', () => {
     expect(groups[0].key).toBe('shared')
     expect(groups[0].nodes[0].name).toBe('Tritanium')
   })
+
+  it('does not recurse on cyclic parent links', () => {
+    const all: PlanNode[] = [
+      mockNode({
+        productTypeId: 12238,
+        name: 'Reprocessing Array',
+        mode: 'buy',
+        depth: 0,
+        isRoot: true,
+        parentProductTypeIds: [12238],
+        demandByParent: [{ parentProductTypeId: 12238, qty: 100 }],
+      }),
+    ]
+    expect(() => buildBuyGroups(all, all)).not.toThrow()
+    expect(buildBuyGroups(all, all)[0]?.key).toBe('shared')
+  })
 })
 
 describe('buildBuyTableRows', () => {

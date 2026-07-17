@@ -7,7 +7,7 @@ interface CategoryBadgeProps {
 
 export function CategoryBadge({ category, className = '' }: CategoryBadgeProps) {
   return (
-    <span className={`badge badge-xs align-middle ${categoryBadgeClass(category)} ${className}`}>
+    <span className={`badge badge-xs ${categoryBadgeClass(category)} ${className}`}>
       {category}
     </span>
   )

@@ -1,4 +1,4 @@
-import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate } from '@/types'
+import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry } from '@/types'
 import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS } from '@/types'
 import { SKILL_FIELDS } from '@/lib/skillFields'
 import { normalizeBpoLifetimeRunsByCategory } from '@/lib/bpoLifetime'
@@ -97,6 +97,29 @@ export function createPlanTemplateId(): string {
   return `plan-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
 }
 
+export function createPlanRootId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return `root-${crypto.randomUUID()}`
+  }
+  return `root-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+}
+
+export function ensurePlanRootIds(roots: PlanRootEntry[] | undefined): PlanRootEntry[] {
+  return (roots ?? []).map((r) => ({
+    ...r,
+    id: r.id?.trim() ? r.id : createPlanRootId(),
+  }))
+}
+
+export function migratePlanTemplates(templates: ManufacturingPlanTemplate[] | undefined): ManufacturingPlanTemplate[] {
+  return (templates ?? []).map((t) => ({
+    ...t,
+    roots: ensurePlanRootIds(t.roots),
+    modeOverrides: t.modeOverrides ?? {},
+    nodeOverrides: t.nodeOverrides ?? {},
+  }))
+}
+
 export function createDefaultPlanTemplate(name = 'New plan'): ManufacturingPlanTemplate {
   const now = new Date().toISOString()
   return {
@@ -124,7 +147,7 @@ export function loadUserDataFromLocal(): UserData {
     return {
       ...createDefaultUserData(),
       ...rest,
-      planTemplates: parsed.planTemplates ?? [],
+      planTemplates: migratePlanTemplates(parsed.planTemplates ?? []),
       settings: normalizeGlobalSettings({
         ...(parsed.settings ?? {}),
         skills: normalizeSkillLevels(parsed.settings?.skills ?? legacySkills, {
@@ -141,7 +164,7 @@ export function saveUserDataToLocal(data: UserData): void {
   const payload: UserData = {
     ...data,
     schemaVersion: SCHEMA_VERSION,
-    planTemplates: data.planTemplates ?? [],
+    planTemplates: migratePlanTemplates(data.planTemplates ?? []),
     settings: normalizeGlobalSettings(data.settings),
     updatedAt: new Date().toISOString(),
   }

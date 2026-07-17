@@ -1,9 +1,9 @@
-import type { BlueprintInfo, GlobalSettings, PlanRootEntry } from '@/types'
-import { BATCH_SIZE_STEP, MIN_BATCH_SIZE } from '@/types'
+import type { BlueprintInfo, GlobalSettings, PlanNodeOverride, PlanRootEntry } from '@/types'
+import { BATCH_SIZE_STEP, DEFAULT_BATCH_SIZE, MIN_BATCH_SIZE } from '@/types'
 import {
   applyTE,
-  blueprintMeTe,
   manufacturingTimePerRun,
+  resolveBlueprintMeTe,
   resolveStructureModifiers,
   runsForJobTime,
 } from '@/lib/cost'
@@ -20,8 +20,9 @@ export function runsFromDurationHours(
   settings: GlobalSettings,
   durationHours: number,
   slots: number,
+  meTeOverride?: PlanNodeOverride,
 ): number {
-  const { te } = blueprintMeTe(blueprint.tier, settings)
+  const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
   const structure = resolveStructureModifiers(settings)
   const advanced = settings.skills.advancedIndustry ?? 0
   const availableSec = Math.max(0, durationHours) * 3600
@@ -44,8 +45,9 @@ export function durationHoursFromRuns(
   settings: GlobalSettings,
   runs: number,
   slots: number,
+  meTeOverride?: PlanNodeOverride,
 ): number {
-  const { te } = blueprintMeTe(blueprint.tier, settings)
+  const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
   const structure = resolveStructureModifiers(settings)
   const advanced = settings.skills.advancedIndustry ?? 0
   const perRun = manufacturingTimePerRun(
@@ -71,6 +73,43 @@ export function defaultRunsPerBpc(blueprint: BlueprintInfo, templateDefault: num
   return templateDefault
 }
 
+/** Recompute job time from runs using current skills and slot count. */
+export function syncRootEntry(
+  root: PlanRootEntry,
+  blueprint: BlueprintInfo | undefined,
+  settings: GlobalSettings,
+  slots: number,
+  meTeOverride?: PlanNodeOverride,
+): PlanRootEntry {
+  if (!blueprint) return root
+  const productionDurationHours = durationHoursFromRuns(
+    blueprint,
+    settings,
+    root.runs,
+    slots,
+    meTeOverride,
+  )
+  if (root.productionDurationHours === productionDurationHours) return root
+  if (Math.abs(root.productionDurationHours - productionDurationHours) < 0.005) return root
+  return { ...root, productionDurationHours }
+}
+
+export function createSyncedPlanRootEntry(
+  productTypeId: number,
+  blueprint: BlueprintInfo,
+  settings: GlobalSettings,
+  slots: number,
+  runs: number = DEFAULT_BATCH_SIZE,
+): Omit<PlanRootEntry, 'id'> {
+  const { id: _id, ...synced } = syncRootEntry(
+    { id: '', productTypeId, runs, productionDurationHours: 0 },
+    blueprint,
+    settings,
+    slots,
+  )
+  return synced
+}
+
 /** Apply a runs or job-time edit and keep the other field in sync. */
 export function applyRootEntryPatch(
   root: PlanRootEntry,
@@ -78,6 +117,7 @@ export function applyRootEntryPatch(
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
   slots: number,
+  meTeOverride?: PlanNodeOverride,
 ): PlanRootEntry {
   const next = { ...root, ...patch }
   if (!blueprint) return next
@@ -88,12 +128,14 @@ export function applyRootEntryPatch(
       settings,
       patch.productionDurationHours,
       slots,
+      meTeOverride,
     )
     next.productionDurationHours = durationHoursFromRuns(
       blueprint,
       settings,
       next.runs,
       slots,
+      meTeOverride,
     )
   } else if (patch.runs != null && patch.productionDurationHours == null) {
     next.productionDurationHours = durationHoursFromRuns(
@@ -101,6 +143,7 @@ export function applyRootEntryPatch(
       settings,
       patch.runs,
       slots,
+      meTeOverride,
     )
   }
 
@@ -119,6 +162,7 @@ export function resolveRunsFromPatch(
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
   concurrentCopies: number,
+  meTeOverride?: PlanNodeOverride,
 ): number {
   if (patch.runs != null) return patch.runs
   if (patch.productionDurationHours != null && blueprint) {
@@ -127,6 +171,7 @@ export function resolveRunsFromPatch(
       settings,
       patch.productionDurationHours,
       Math.max(1, concurrentCopies),
+      meTeOverride,
     )
   }
   return currentRuns

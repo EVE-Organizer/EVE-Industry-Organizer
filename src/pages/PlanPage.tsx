@@ -8,10 +8,14 @@ import { PlanTimelineChart } from '@/components/plan/PlanTimelineChart'
 import { PlanGraphView } from '@/components/plan/PlanGraphView'
 import { BlueprintSearchPicker } from '@/components/plan/BlueprintSearchPicker'
 import { PlanChainTable } from '@/components/plan/PlanChainTable'
+import { PlanMeTeModal } from '@/components/plan/PlanMeTeModal'
 import { PlanRootList } from '@/components/plan/PlanRootList'
 import { PlanViewTabs, type PlanViewTab } from '@/components/plan/PlanViewTabs'
 import { PlanTemplateBar } from '@/components/plan/PlanTemplateBar'
 import { PlanDetailHeader } from '@/components/plan/PlanDetailHeader'
+import { PlanProfitSummaryPanel } from '@/components/plan/PlanProfitSummaryPanel'
+import { PlanRootSetupModal } from '@/components/plan/PlanRootSetupModal'
+import { PlanRootProfitModal } from '@/components/plan/PlanRootProfitModal'
 import { PlanTimelineProvider } from '@/contexts/PlanTimelineContext'
 import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
@@ -22,16 +26,26 @@ import {
   getBlueprintForProduct,
   getHubMarket,
   buildPriceMap,
+  buildBuyPriceMap,
 } from '@/services/data/sdeLoader'
 import { buildWindowPriceMap } from '@/lib/ranking'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { scheduledDurationHours } from '@/lib/planScheduler'
-import { flattenPlanNodesExpandable } from '@/lib/planTreeLines'
-import { resolveRunsFromPatch } from '@/lib/rootRunsDuration'
+import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/lib/planTreeLines'
+import { buildManufactureDisplayRows } from '@/lib/planManufactureDisplay'
+import {
+  applyRootEntryPatch,
+  createSyncedPlanRootEntry,
+  durationHoursFromRuns,
+  resolveRunsFromPatch,
+  syncRootEntry,
+} from '@/lib/rootRunsDuration'
+import { createPlanRootId } from '@/services/sync/types'
+import { computePlanProfitSummary, computeRootProfitBreakdown, computeRootSetupBreakdown } from '@/lib/planProfit'
+import { HUBS } from '@/types'
 import { productionGraphRoute } from '@/lib/paths'
 import { formatDecimal } from '@/lib/profit'
-import { DEFAULT_BATCH_SIZE } from '@/types'
-import type { PlanBuildMode } from '@/types'
+import type { PlanBuildMode, PlanNodeOverride } from '@/types'
 
 function IconBtn({
   label,
@@ -146,6 +160,9 @@ export function PlanPage() {
 
   const [tab, setTab] = useState<PlanViewTab>('supply')
   const [graphProductTypeId, setGraphProductTypeId] = useState<number | null>(null)
+  const [meTeProductTypeId, setMeTeProductTypeId] = useState<number | null>(null)
+  const [setupDetailRootId, setSetupDetailRootId] = useState<string | null>(null)
+  const [profitDetailRootId, setProfitDetailRootId] = useState<string | null>(null)
   const [chainFullscreen, setChainFullscreen] = useState(false)
   const { skills } = usePlanSkills()
 
@@ -160,8 +177,31 @@ export function PlanPage() {
     return buildWindowPriceMap(hubMarket, '1w', buildPriceMap(hubMarket))
   }, [data, userData.settings.primaryHub])
 
+  const buyPrices = useMemo(() => {
+    if (!data) return new Map<number, number>()
+    const hubMarket = getHubMarket(data.market, userData.settings.primaryHub)
+    if (!hubMarket) return new Map<number, number>()
+    return buildBuyPriceMap(hubMarket)
+  }, [data, userData.settings.primaryHub])
+
   const hubMarket = data ? getHubMarket(data.market, userData.settings.primaryHub) : null
   const systemCostIndex = hubMarket?.costIndex ?? 0.01
+  const hubName = HUBS.find((h) => h.id === userData.settings.primaryHub)?.name ?? 'Hub'
+
+  const expandInput = useMemo(
+    () =>
+      template && data
+        ? {
+            template,
+            blueprints,
+            typeMap,
+            prices,
+            settings: userData.settings,
+            systemCostIndex,
+          }
+        : null,
+    [template, data, blueprints, typeMap, prices, userData.settings, systemCostIndex],
+  )
 
   const plan = useManufacturingPlan(
     template,
@@ -174,9 +214,99 @@ export function PlanPage() {
 
   const slots = manufacturingSlotsFromSkills(skills)
 
-  const rootIds = useMemo(
-    () => new Set(template?.roots.map((r) => r.productTypeId) ?? []),
-    [template],
+  const profitSummary = useMemo(() => {
+    if (!template || !expandInput) {
+      return {
+        setupCost: 0,
+        netRevenue: 0,
+        netProfit: 0,
+        margin: 0,
+        iph: 0,
+        jobHours: 0,
+        rootRows: [],
+        hasPrices: false,
+      }
+    }
+
+    const jobTimeHoursByRootId = new Map(
+      template.roots.map((root) => {
+        const bp = getBlueprintForProduct(blueprints, root.productTypeId)
+        const hours = bp
+          ? durationHoursFromRuns(
+              bp,
+              userData.settings,
+              root.runs,
+              slots,
+              template.nodeOverrides[root.productTypeId],
+            )
+          : root.productionDurationHours
+        return [root.id, hours] as const
+      }),
+    )
+
+    return computePlanProfitSummary(
+      template,
+      expandInput,
+      prices,
+      buyPrices,
+      jobTimeHoursByRootId,
+    )
+  }, [template, expandInput, prices, buyPrices, blueprints, userData.settings, slots])
+
+  const profitByRootId = useMemo(
+    () => new Map(profitSummary.rootRows.map((row) => [row.rootId, row])),
+    [profitSummary.rootRows],
+  )
+
+  const setupDetailBreakdown = useMemo(() => {
+    if (!setupDetailRootId || !template || !expandInput) return null
+    const root = template.roots.find((r) => r.id === setupDetailRootId)
+    if (!root) return null
+    const blueprint = getBlueprintForProduct(blueprints, root.productTypeId)
+    if (!blueprint) return null
+    const productName = typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`
+    return computeRootSetupBreakdown(root, blueprint, expandInput, productName)
+  }, [setupDetailRootId, template, expandInput, blueprints, typeMap])
+
+  const profitDetailBreakdown = useMemo(() => {
+    if (!profitDetailRootId || !template || !expandInput) return null
+    const root = template.roots.find((r) => r.id === profitDetailRootId)
+    if (!root) return null
+    const blueprint = getBlueprintForProduct(blueprints, root.productTypeId)
+    if (!blueprint) return null
+    const productName = typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`
+    const jobHours =
+      durationHoursFromRuns(
+        blueprint,
+        userData.settings,
+        root.runs,
+        slots,
+        template.nodeOverrides[root.productTypeId],
+      ) ?? root.productionDurationHours
+    return computeRootProfitBreakdown(
+      root,
+      blueprint,
+      expandInput,
+      prices,
+      buyPrices,
+      jobHours,
+      productName,
+    )
+  }, [
+    profitDetailRootId,
+    template,
+    expandInput,
+    blueprints,
+    typeMap,
+    prices,
+    buyPrices,
+    userData.settings,
+    slots,
+  ])
+
+  const favoriteProductIds = useMemo(
+    () => userData.watchlist.map((w) => w.productTypeId),
+    [userData.watchlist],
   )
 
   const blueprintTypeIdByProduct = useMemo(() => {
@@ -188,18 +318,80 @@ export function PlanPage() {
   }, [blueprints])
 
   const buildRows = useMemo(() => {
-    const buildNodes = plan.nodes.filter((n) => n.mode === 'build')
-    return flattenPlanNodesExpandable(buildNodes, 'build-blueprints').map((row) => ({
+    if (!template) return []
+
+    const nonRootBuild = plan.nodes.filter((n) => n.mode === 'build' && !n.isRoot)
+    const subExpandable = flattenPlanNodesExpandable(nonRootBuild, 'build-blueprints')
+
+    const rootCounts = new Map<number, number>()
+    for (const root of template.roots) {
+      rootCounts.set(root.productTypeId, (rootCounts.get(root.productTypeId) ?? 0) + 1)
+    }
+    const rootSeen = new Map<number, number>()
+
+    const rootRows = template.roots.flatMap((root) => {
+      const bp = getBlueprintForProduct(blueprints, root.productTypeId)
+      const node = plan.nodes.find((n) => n.productTypeId === root.productTypeId)
+      if (!bp || !node) return []
+
+      const instance = (rootSeen.get(root.productTypeId) ?? 0) + 1
+      rootSeen.set(root.productTypeId, instance)
+      const instanceTotal = rootCounts.get(root.productTypeId) ?? 1
+
+      return [{
+        kind: 'leaf' as const,
+        rootId: root.id,
+        rootInstance: instance,
+        rootInstanceTotal: instanceTotal,
+        node,
+        depth: 0,
+        ancestorCollapseKeys: [] as string[],
+        productTypeId: root.productTypeId,
+        blueprintTypeId: blueprintTypeIdByProduct.get(root.productTypeId),
+        name: typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`,
+        runs: root.runs,
+        jobTimeHours: bp
+          ? durationHoursFromRuns(
+              bp,
+              userData.settings,
+              root.runs,
+              slots,
+              template.nodeOverrides[root.productTypeId],
+            )
+          : root.productionDurationHours,
+        outputQty: root.runs * bp.productQuantity,
+        isRoot: true,
+      }]
+    })
+
+    const subRows = subExpandable.map((row) => ({
       ...row,
+      rootId: undefined as string | undefined,
       productTypeId: row.node.productTypeId,
       blueprintTypeId: blueprintTypeIdByProduct.get(row.node.productTypeId),
       name: row.node.name,
       runs: row.node.runs,
       jobTimeHours: scheduledDurationHours(plan.jobs, row.node.productTypeId),
       outputQty: row.node.outputQty,
-      isRoot: row.node.isRoot,
+      isRoot: false,
+      depth: row.depth + 1,
     }))
-  }, [plan.nodes, plan.jobs, blueprintTypeIdByProduct])
+
+    return withTreeLineMeta([...rootRows, ...subRows])
+  }, [template, plan.nodes, plan.jobs, blueprints, typeMap, blueprintTypeIdByProduct, userData.settings, slots])
+
+  const manufactureRows = useMemo(() => {
+    if (!template) return []
+    return buildManufactureDisplayRows(
+      plan.nodes,
+      template.roots,
+      (id) => getBlueprintForProduct(blueprints, id),
+      userData.settings,
+      slots,
+      template.defaultRunsPerBpc,
+      template.nodeOverrides,
+    )
+  }, [template, plan.nodes, blueprints, userData.settings, slots])
 
   useEffect(() => {
     if (templates.length === 0) return
@@ -209,18 +401,36 @@ export function PlanPage() {
   }, [templates, selectedId, setSelectedId])
 
   useEffect(() => {
+    if (!template || !data) return
+    const nextRoots = template.roots.map((root) => {
+      const bp = getBlueprintForProduct(blueprints, root.productTypeId)
+      return syncRootEntry(
+        root,
+        bp,
+        userData.settings,
+        slots,
+        template.nodeOverrides[root.productTypeId],
+      )
+    })
+    const changed = nextRoots.some(
+      (root, index) => root.productionDurationHours !== template.roots[index]?.productionDurationHours,
+    )
+    if (changed) {
+      updatePlanTemplate(template.id, { roots: nextRoots })
+    }
+  }, [template, data, blueprints, userData.settings, slots, updatePlanTemplate])
+
+  useEffect(() => {
     if (!addProductId || !data || !template) return
     const id = Number(addProductId)
     if (!Number.isFinite(id)) return
     const bp = getBlueprintForProduct(blueprints, id)
     if (!bp) return
-    if (template.roots.some((r) => r.productTypeId === id)) return
     addRootToPlanTemplate(template.id, {
-      productTypeId: id,
-      runs: DEFAULT_BATCH_SIZE,
-      productionDurationHours: 24,
+      id: createPlanRootId(),
+      ...createSyncedPlanRootEntry(id, bp, userData.settings, slots),
     })
-  }, [addProductId, data, template, blueprints, addRootToPlanTemplate])
+  }, [addProductId, data, template, blueprints, addRootToPlanTemplate, userData.settings, slots])
 
   useEffect(() => {
     if (!chainFullscreen) return
@@ -252,10 +462,68 @@ export function PlanPage() {
     setGraphProductTypeId(productTypeId)
   }, [])
 
+  const openMeTe = useCallback((productTypeId: number) => {
+    setMeTeProductTypeId(productTypeId)
+  }, [])
+
+  const saveMeTe = useCallback(
+    (productTypeId: number, patch: { me?: number; te?: number } | null) => {
+      if (!template) return
+
+      const current = template.nodeOverrides[productTypeId] ?? {}
+      let nextEntry: PlanNodeOverride
+      if (patch == null) {
+        const { me: _me, te: _te, ...rest } = current
+        nextEntry = rest
+      } else {
+        nextEntry = { ...current, ...patch }
+      }
+
+      const nextOverrides = { ...template.nodeOverrides }
+      if (Object.keys(nextEntry).length === 0) {
+        delete nextOverrides[productTypeId]
+      } else {
+        nextOverrides[productTypeId] = nextEntry
+      }
+
+      const nextRoots = template.roots.map((root) => {
+        if (root.productTypeId !== productTypeId) return root
+        const bp = getBlueprintForProduct(blueprints, root.productTypeId)
+        return syncRootEntry(
+          root,
+          bp,
+          userData.settings,
+          slots,
+          nextOverrides[productTypeId],
+        )
+      })
+
+      updatePlanTemplate(template.id, {
+        nodeOverrides: nextOverrides,
+        roots: nextRoots,
+      })
+    },
+    [template, blueprints, userData.settings, slots, updatePlanTemplate],
+  )
+
   const graphBlueprint = useMemo(() => {
     if (graphProductTypeId == null) return null
     return getBlueprintForProduct(blueprints, graphProductTypeId) ?? null
   }, [blueprints, graphProductTypeId])
+
+  const meTeBlueprint = useMemo(() => {
+    if (meTeProductTypeId == null) return null
+    return getBlueprintForProduct(blueprints, meTeProductTypeId) ?? null
+  }, [blueprints, meTeProductTypeId])
+
+  const meTeNodeName = useMemo(() => {
+    if (meTeProductTypeId == null) return ''
+    return (
+      plan.nodes.find((n) => n.productTypeId === meTeProductTypeId)?.name ??
+      typeMap.get(meTeProductTypeId)?.name ??
+      `Type ${meTeProductTypeId}`
+    )
+  }, [meTeProductTypeId, plan.nodes, typeMap])
 
   const openGraphPage = useCallback(
     (productTypeId: number) => {
@@ -275,11 +543,11 @@ export function PlanPage() {
 
   const addRoot = (productTypeId: number) => {
     if (!template) return
-    if (template.roots.some((r) => r.productTypeId === productTypeId)) return
+    const bp = getBlueprintForProduct(blueprints, productTypeId)
+    if (!bp) return
     addRootToPlanTemplate(template.id, {
-      productTypeId,
-      runs: DEFAULT_BATCH_SIZE,
-      productionDurationHours: 24,
+      id: createPlanRootId(),
+      ...createSyncedPlanRootEntry(productTypeId, bp, userData.settings, slots),
     })
   }
 
@@ -350,6 +618,8 @@ export function PlanPage() {
             }
           />
 
+          <PlanProfitSummaryPanel summary={profitSummary} hubName={hubName} />
+
           <section className="plan-build-card">
             <div className="plan-build-card__header">
               <h2 className="plan-build-card__title">Build blueprints</h2>
@@ -362,7 +632,7 @@ export function PlanPage() {
                 <BlueprintSearchPicker
                   blueprints={blueprints}
                   typeMap={typeMap}
-                  excludeIds={rootIds}
+                  favoriteIds={favoriteProductIds}
                   onSelect={addRoot}
                 />
                 <p className="plan-build-card__hint">
@@ -371,8 +641,30 @@ export function PlanPage() {
               </div>
               <PlanRootList
                 rows={buildRows}
-                onChange={(productTypeId, patch) => {
+                profitByRootId={profitByRootId}
+                onOpenSetup={setSetupDetailRootId}
+                onOpenProfit={setProfitDetailRootId}
+                onChange={(rootId, productTypeId, patch) => {
                   if (!template) return
+
+                  if (rootId) {
+                    updatePlanTemplate(template.id, {
+                      roots: template.roots.map((r) => {
+                        if (r.id !== rootId) return r
+                        const bp = getBlueprintForProduct(blueprints, r.productTypeId)
+                        return applyRootEntryPatch(
+                          r,
+                          patch,
+                          bp,
+                          userData.settings,
+                          slots,
+                          template.nodeOverrides[r.productTypeId],
+                        )
+                      }),
+                    })
+                    return
+                  }
+
                   const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
                   if (!node) return
                   const bp = getBlueprintForProduct(blueprints, productTypeId)
@@ -384,17 +676,6 @@ export function PlanPage() {
                     node.concurrentCopies,
                   )
 
-                  if (node.isRoot) {
-                    const root = template.roots.find((r) => r.productTypeId === productTypeId)
-                    if (!root) return
-                    updatePlanTemplate(template.id, {
-                      roots: template.roots.map((r) =>
-                        r.productTypeId === productTypeId ? { ...r, runs } : r,
-                      ),
-                    })
-                    return
-                  }
-
                   updatePlanTemplate(template.id, {
                     nodeOverrides: {
                       ...template.nodeOverrides,
@@ -405,7 +686,7 @@ export function PlanPage() {
                     },
                   })
                 }}
-                onRemove={(productTypeId) => removeRootFromPlanTemplate(template.id, productTypeId)}
+                onRemove={(rootId) => removeRootFromPlanTemplate(template.id, rootId)}
               />
             </div>
           </section>
@@ -424,8 +705,12 @@ export function PlanPage() {
             {tab === 'supply' ? (
               <PlanChainTable
                 nodes={plan.nodes}
+                manufactureRows={manufactureRows}
+                planRoots={template.roots}
+                skillSlots={slots}
                 onToggleMode={toggleMode}
                 onOpenGraph={openGraph}
+                onOpenMeTe={openMeTe}
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}
                 warnings={plan.warnings}
               />
@@ -480,6 +765,27 @@ export function PlanPage() {
           onOpenPage={openGraphPage}
         />
       ) : null}
+
+      {meTeBlueprint && meTeProductTypeId != null && template ? (
+        <PlanMeTeModal
+          blueprint={meTeBlueprint}
+          name={meTeNodeName}
+          settings={userData.settings}
+          nodeOverride={template.nodeOverrides[meTeProductTypeId]}
+          onChange={(patch) => saveMeTe(meTeProductTypeId, patch)}
+          onClose={() => setMeTeProductTypeId(null)}
+        />
+      ) : null}
+
+      <PlanRootSetupModal
+        breakdown={setupDetailBreakdown}
+        onClose={() => setSetupDetailRootId(null)}
+      />
+
+      <PlanRootProfitModal
+        breakdown={profitDetailBreakdown}
+        onClose={() => setProfitDetailRootId(null)}
+      />
     </div>
   )
 }

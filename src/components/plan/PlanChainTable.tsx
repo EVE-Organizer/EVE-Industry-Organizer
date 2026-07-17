@@ -12,18 +12,59 @@ import {
   type ExpandablePlanRow,
 } from '@/lib/planTreeLines'
 import { buildBuyGroups, buildBuyTableRows, buyTableCollapseKeys, isBuyTableRowVisible, type PlanBuyTableRow } from '@/lib/planBuyGroups'
+import { packagedBuyNodesFromPlan } from '@/lib/planPackagedBuy'
 import { planBuildVsBuyFootnote } from '@/lib/planBuildVsBuy'
 import { SHARED_MATERIALS_ICON_TYPE_ID } from '@/lib/eveImages'
 import { appRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
+import { supplySlotsForComponent } from '@/lib/supplyChainSlots'
 import { formatDecimal, formatDurationHms, formatGraphQuantity, formatIsk } from '@/lib/profit'
-import type { PlanNode } from '@/types'
+import type { ManufactureDisplayRow } from '@/lib/planManufactureDisplay'
+import type { PlanNode, PlanRootEntry } from '@/types'
 
 const ROW_ICON_SIZE = PLAN_ROW_ICON_SIZE
 const UNIT_COL_CLASS = 'w-28 text-right'
 const PRICE_COL_CLASS = 'w-32 text-right'
 const SOURCE_COL_CLASS = 'w-28 text-right'
 const DURATION_COL_CLASS = 'w-[6.5rem] text-right whitespace-nowrap'
+const SLOTS_COL_CLASS = 'w-[3.5rem] min-w-[3rem] text-right'
+
+function ConcurrentSlotsCell({
+  isRoot,
+  mode,
+  bpcCount,
+  activeSlots,
+  skillSlots,
+  totalRootRuns,
+}: {
+  isRoot: boolean
+  mode: PlanNode['mode']
+  bpcCount: number
+  activeSlots: number
+  skillSlots: number
+  totalRootRuns: number
+}) {
+  if (mode !== 'build' || bpcCount <= 0 || totalRootRuns <= 0) {
+    return <span className="text-sm opacity-40">—</span>
+  }
+
+  const supplySlots = isRoot ? 1 : supplySlotsForComponent(bpcCount, totalRootRuns)
+  const overSkill = !isRoot && supplySlots > skillSlots
+
+  const tooltip = isRoot
+    ? `Root build uses one manufacturing line for this ${totalRootRuns}-run batch`
+    : `Parallel BPC lines so this component keeps pace with ${totalRootRuns} root runs. Need ${supplySlots}; plan schedules ${activeSlots} on your ${skillSlots} industry slots.`
+
+  return (
+    <Tooltip text={tooltip} placement="top">
+      <span
+        className={`tabular-nums text-sm cursor-help border-b border-dotted border-current/40${overSkill ? ' text-warning' : ''}`}
+      >
+        {supplySlots}
+      </span>
+    </Tooltip>
+  )
+}
 
 function GraphIcon({ className }: { className?: string }) {
   return (
@@ -36,12 +77,27 @@ function GraphIcon({ className }: { className?: string }) {
   )
 }
 
+function MeTeSettingsIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden>
+      <path strokeLinecap="round" strokeWidth="1.5" d="M2 4.5h12M2 8h12M2 11.5h12" />
+      <circle cx="5" cy="4.5" r="1.25" fill="currentColor" stroke="none" />
+      <circle cx="10" cy="8" r="1.25" fill="currentColor" stroke="none" />
+      <circle cx="7" cy="11.5" r="1.25" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 function PlanItemName({
   node,
   onOpenGraph,
+  onOpenMeTe,
+  showMeTeSettings,
 }: {
   node: PlanNode
   onOpenGraph: (productTypeId: number) => void
+  onOpenMeTe?: (productTypeId: number) => void
+  showMeTeSettings?: boolean
 }) {
   const marketHref = appRoute(`item/${node.productTypeId}`)
 
@@ -72,6 +128,28 @@ function PlanItemName({
           </button>
         </Tooltip>
       ) : null}
+      {showMeTeSettings && onOpenMeTe ? (
+        <Tooltip
+          text={
+            node.me != null && node.te != null
+              ? `ME / TE settings (${node.me}/${node.te}${node.meTeLocked ? ', fixed' : ''})`
+              : 'ME / TE settings'
+          }
+          placement="top"
+        >
+          <button
+            type="button"
+            className="btn btn-ghost btn-xs btn-square shrink-0 min-h-0 h-6 w-6 opacity-70 hover:opacity-100"
+            aria-label={`ME and TE settings for ${node.name}`}
+            onClick={(e) => {
+              stopRowToggle(e)
+              onOpenMeTe(node.productTypeId)
+            }}
+          >
+            <MeTeSettingsIcon className="size-3.5" />
+          </button>
+        </Tooltip>
+      ) : null}
     </div>
   )
 }
@@ -80,12 +158,20 @@ function BuyMaterialLabel({
   node,
   subtitle,
   badgesBelow = true,
+  rootInstance,
+  rootInstanceTotal,
   onOpenGraph,
+  onOpenMeTe,
+  showMeTeSettings,
 }: {
   node: PlanNode
   subtitle?: ReactNode
   badgesBelow?: boolean
+  rootInstance?: number
+  rootInstanceTotal?: number
   onOpenGraph: (productTypeId: number) => void
+  onOpenMeTe?: (productTypeId: number) => void
+  showMeTeSettings?: boolean
 }) {
   const footnote = planBuildVsBuyFootnote(node)
   const badges: { label: string; className: string }[] = []
@@ -97,7 +183,27 @@ function BuyMaterialLabel({
 
   return (
     <div className="min-w-0">
-      <PlanItemName node={node} onOpenGraph={onOpenGraph} />
+      <div className="flex items-center gap-1 flex-wrap min-w-0">
+        <PlanItemName
+          node={node}
+          onOpenGraph={onOpenGraph}
+          onOpenMeTe={onOpenMeTe}
+          showMeTeSettings={showMeTeSettings}
+        />
+        {!badgesBelow && badges.length > 0
+          ? badges.map((b) => (
+              <span key={b.label} className={`badge badge-xs shrink-0 ${b.className}`}>
+                {b.label}
+              </span>
+            ))
+          : null}
+        {!badgesBelow &&
+        rootInstance != null &&
+        rootInstanceTotal != null &&
+        rootInstanceTotal > 1 ? (
+          <span className="badge badge-ghost badge-xs shrink-0 tabular-nums">#{rootInstance}</span>
+        ) : null}
+      </div>
       {badgesBelow && badges.length > 0 ? (
         <div className="flex flex-wrap items-center gap-1 mt-0.5">
           {badges.map((b) => (
@@ -124,8 +230,12 @@ function BuyMaterialLabel({
 
 interface PlanChainTableProps {
   nodes: PlanNode[]
+  manufactureRows?: ManufactureDisplayRow[]
+  planRoots?: PlanRootEntry[]
+  skillSlots: number
   onToggleMode: (productTypeId: number) => void
   onOpenGraph: (productTypeId: number) => void
+  onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
   warnings?: { productTypeId: number; message: string }[]
 }
@@ -192,6 +302,7 @@ function ItemCell({
 }: {
   node: PlanNode
   onOpenGraph: (productTypeId: number) => void
+  onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
   treeDepth: number
   isLast: boolean
@@ -201,7 +312,12 @@ function ItemCell({
     <div className="flex items-start gap-2 min-w-0 py-0.5">
       <PlanTreeLines depth={treeDepth} isLast={isLast} continues={continues} />
       <PlanRowIcon productTypeId={node.productTypeId} blueprintTypeIdByProduct={blueprintTypeIdByProduct} />
-      <BuyMaterialLabel node={node} badgesBelow={false} onOpenGraph={onOpenGraph} />
+      <BuyMaterialLabel
+        node={node}
+        badgesBelow={false}
+        onOpenGraph={onOpenGraph}
+        subtitle={node.packagedInput ? 'Packaged input from market' : undefined}
+      />
     </div>
   )
 }
@@ -238,14 +354,19 @@ function ManufactureItemCell({
   row,
   expanded,
   onOpenGraph,
+  onOpenMeTe,
   blueprintTypeIdByProduct,
 }: {
-  row: ExpandablePlanRow
+  row: ManufactureDisplayRow | ExpandablePlanRow
   expanded: boolean
   onOpenGraph: (productTypeId: number) => void
+  onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
 }) {
   const node = row.node
+  const rootInstance = 'rootInstance' in row ? row.rootInstance : undefined
+  const rootInstanceTotal = 'rootInstanceTotal' in row ? row.rootInstanceTotal : undefined
+
   if (row.kind === 'parent') {
     return (
       <div className="flex items-start gap-2 min-w-0 py-0.5">
@@ -256,38 +377,67 @@ function ManufactureItemCell({
           chevron={<ChevronIcon open={expanded} />}
         />
         <PlanRowIcon productTypeId={node.productTypeId} blueprintTypeIdByProduct={blueprintTypeIdByProduct} />
-        <BuyMaterialLabel node={node} badgesBelow={false} onOpenGraph={onOpenGraph} />
+        <BuyMaterialLabel
+          node={node}
+          badgesBelow={false}
+          rootInstance={rootInstance}
+          rootInstanceTotal={rootInstanceTotal}
+          onOpenGraph={onOpenGraph}
+          onOpenMeTe={onOpenMeTe}
+          showMeTeSettings
+        />
       </div>
     )
   }
 
   return (
-    <ItemCell
-      node={node}
-      onOpenGraph={onOpenGraph}
-      blueprintTypeIdByProduct={blueprintTypeIdByProduct}
-      treeDepth={row.depth}
-      isLast={row.isLast}
-      continues={row.continues}
-    />
+    <div className="flex items-start gap-2 min-w-0 py-0.5">
+      <PlanTreeLines depth={row.depth} isLast={row.isLast} continues={row.continues} />
+      <PlanRowIcon productTypeId={node.productTypeId} blueprintTypeIdByProduct={blueprintTypeIdByProduct} />
+      <BuyMaterialLabel
+        node={node}
+        badgesBelow={false}
+        rootInstance={rootInstance}
+        rootInstanceTotal={rootInstanceTotal}
+        onOpenGraph={onOpenGraph}
+        onOpenMeTe={onOpenMeTe}
+        showMeTeSettings
+      />
+    </div>
   )
 }
 
 function BuildSection({
   nodes,
+  manufactureRows,
+  planRoots,
+  skillSlots,
   onToggleMode,
   onOpenGraph,
+  onOpenMeTe,
   blueprintTypeIdByProduct,
 }: {
   nodes: PlanNode[]
+  manufactureRows?: ManufactureDisplayRow[]
+  planRoots?: PlanRootEntry[]
+  skillSlots: number
   onToggleMode: (productTypeId: number) => void
   onOpenGraph: (productTypeId: number) => void
+  onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
 }) {
-  const tableRows = useMemo(() => flattenPlanNodesExpandable(nodes, 'manufacture'), [nodes])
+  const tableRows = useMemo(
+    () => manufactureRows ?? flattenPlanNodesExpandable(nodes, 'manufacture'),
+    [manufactureRows, nodes],
+  )
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
   if (nodes.length === 0) return null
+
+  const rootCount = planRoots?.length ?? nodes.filter((n) => n.isRoot).length
+  const totalRuns =
+    planRoots?.reduce((sum, r) => sum + r.runs, 0) ??
+    nodes.filter((n) => n.isRoot).reduce((sum, n) => sum + n.runs, 0)
 
   function toggleCollapse(key: string) {
     setCollapsed((prev) => {
@@ -312,8 +462,8 @@ function BuildSection({
     <PlanChainSection
       tone="manufacture"
       title="Manufacture"
-      count={nodes.length}
-      summary={`${formatDecimal(nodes.reduce((sum, n) => sum + n.runs, 0), 0)} total runs`}
+      count={rootCount}
+      summary={`${formatDecimal(totalRuns, 0)} total runs`}
       actions={
         <PlanSectionExpandActions onExpandAll={expandAll} onCollapseAll={collapseAll} />
       }
@@ -338,6 +488,14 @@ function BuildSection({
                 <span className="cursor-help border-b border-dotted border-current/40">BPC</span>
               </Tooltip>
             </th>
+            <th className={SLOTS_COL_CLASS}>
+              <Tooltip
+                text="Parallel BPC lines so this component keeps pace with the root run count"
+                placement="top"
+              >
+                <span className="cursor-help border-b border-dotted border-current/40">Slots</span>
+              </Tooltip>
+            </th>
             <th className={DURATION_COL_CLASS}>
               <Tooltip text="Total job duration (hours:minutes:seconds)" placement="top">
                 <span className="cursor-help border-b border-dotted border-current/40">Duration</span>
@@ -355,9 +513,14 @@ function BuildSection({
               row.kind === 'parent'
                 ? expandableRowProps(expanded, node.name, () => toggleCollapse(row.collapseKey))
                 : null
+            const rowKey =
+              'rowKey' in row && typeof row.rowKey === 'string'
+                ? row.rowKey
+                : `manufacture/${node.productTypeId}`
+
             return (
               <tr
-                key={node.productTypeId}
+                key={rowKey}
                 className={`${planTableRowClass(isParentRow)}${row.kind === 'parent' ? ' cursor-pointer' : ''}`}
                 {...rowToggle}
               >
@@ -366,6 +529,7 @@ function BuildSection({
                     row={row}
                     expanded={expanded}
                     onOpenGraph={onOpenGraph}
+                    onOpenMeTe={onOpenMeTe}
                     blueprintTypeIdByProduct={blueprintTypeIdByProduct}
                   />
                 </td>
@@ -382,6 +546,16 @@ function BuildSection({
               </td>
               <td className="text-right tabular-nums text-sm align-top py-2">{node.runs}</td>
               <td className="text-right tabular-nums text-sm align-top py-2">{node.bpcCount}</td>
+              <td className={`${SLOTS_COL_CLASS} align-top py-2`}>
+                <ConcurrentSlotsCell
+                  isRoot={node.isRoot}
+                  mode={node.mode}
+                  bpcCount={node.bpcCount}
+                  activeSlots={node.concurrentCopies}
+                  skillSlots={skillSlots}
+                  totalRootRuns={totalRuns}
+                />
+              </td>
               <td className={`${DURATION_COL_CLASS} tabular-nums text-sm text-info align-top py-2`}>
                 {node.jobTimeSeconds > 0 ? formatDurationHms(node.jobTimeSeconds) : '—'}
               </td>
@@ -425,6 +599,7 @@ function BuyTableRow({
   onToggleCollapse: (key: string) => void
   onToggleMode: (productTypeId: number) => void
   onOpenGraph: (productTypeId: number) => void
+  onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
 }) {
   if (row.kind === 'group') {
@@ -567,6 +742,16 @@ function BuySection({
 
   const visibleRows = tableRows.filter((row) => isBuyTableRowVisible(row, collapsed))
 
+  const buyTotal = useMemo(
+    () => buyNodes.reduce((sum, n) => sum + (n.buyCost ?? 0), 0),
+    [buyNodes],
+  )
+
+  const totalUnits = useMemo(
+    () => buyNodes.reduce((sum, n) => sum + n.totalDemandQty, 0),
+    [buyNodes],
+  )
+
   function rowExpanded(row: PlanBuyTableRow): boolean {
     if (row.kind === 'group') return !collapsed.has(row.key)
     if (row.kind === 'parent') return !collapsed.has(row.collapseKey)
@@ -584,7 +769,7 @@ function BuySection({
       tone="buy"
       title="Buy from market"
       count={buyNodes.length}
-      summary={`${formatGraphQuantity(buyNodes.reduce((sum, n) => sum + n.totalDemandQty, 0))} units`}
+      summary={`${formatGraphQuantity(totalUnits)} units · ${formatIsk(buyTotal)} total`}
       actions={
         <PlanSectionExpandActions onExpandAll={expandAll} onCollapseAll={collapseAll} />
       }
@@ -619,6 +804,16 @@ function BuySection({
             />
           ))}
         </tbody>
+        <tfoot>
+          <tr className="border-t border-eve-border text-sm font-medium">
+            <td className="py-2 opacity-70">Total</td>
+            <td className={`${UNIT_COL_CLASS} tabular-nums py-2`}>
+              {formatGraphQuantity(totalUnits)}
+            </td>
+            <td className={`${PRICE_COL_CLASS} tabular-nums py-2 pr-1`}>{formatIsk(buyTotal)}</td>
+            <td className={SOURCE_COL_CLASS} />
+          </tr>
+        </tfoot>
       </table>
     </PlanChainSection>
   )
@@ -626,8 +821,12 @@ function BuySection({
 
 export function PlanChainTable({
   nodes,
+  manufactureRows,
+  planRoots,
+  skillSlots,
   onToggleMode,
   onOpenGraph,
+  onOpenMeTe,
   blueprintTypeIdByProduct,
   warnings = [],
 }: PlanChainTableProps) {
@@ -637,6 +836,11 @@ export function PlanChainTable({
 
   const buildNodes = nodes.filter((n) => n.mode === 'build')
   const buyNodes = nodes.filter((n) => n.mode === 'buy')
+  const packagedBuyNodes = useMemo(() => packagedBuyNodesFromPlan(nodes), [nodes])
+  const allBuyNodes = useMemo(
+    () => [...buyNodes, ...packagedBuyNodes],
+    [buyNodes, packagedBuyNodes],
+  )
 
   return (
     <div className="flex flex-col gap-4">
@@ -648,16 +852,20 @@ export function PlanChainTable({
       {buildNodes.length > 0 ? (
         <BuildSection
           nodes={buildNodes}
+          manufactureRows={manufactureRows}
+          planRoots={planRoots}
+          skillSlots={skillSlots}
           onToggleMode={onToggleMode}
           onOpenGraph={onOpenGraph}
+          onOpenMeTe={onOpenMeTe}
           blueprintTypeIdByProduct={blueprintTypeIdByProduct}
         />
       ) : null}
 
-      {buyNodes.length > 0 ? (
+      {allBuyNodes.length > 0 ? (
         <BuySection
           allNodes={nodes}
-          buyNodes={buyNodes}
+          buyNodes={allBuyNodes}
           onToggleMode={onToggleMode}
           onOpenGraph={onOpenGraph}
           blueprintTypeIdByProduct={blueprintTypeIdByProduct}

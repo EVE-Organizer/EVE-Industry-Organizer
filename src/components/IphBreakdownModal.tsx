@@ -52,7 +52,7 @@ function StepCard({
   return (
     <article className="rounded-lg border border-eve-border bg-base-200/40 overflow-hidden">
       <header className="flex items-start gap-3 px-4 py-3 border-b border-eve-border/70 bg-base-300/25">
-        <span className="badge badge-neutral badge-sm shrink-0 tabular-nums font-semibold">
+        <span className="badge badge-neutral badge-sm shrink-0 tabular-nums font-semibold mt-0.5">
           {step}
         </span>
         <div className="min-w-0">

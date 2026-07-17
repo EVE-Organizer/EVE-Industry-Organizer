@@ -1,3 +1,11 @@
 body {
   @apply bg-base-100 text-base-content min-h-screen;
 }
+
+@layer components {
+  /* DaisyUI badges default to inline-block; keep them centered with text and in flex rows. */
+  .badge {
+    @apply inline-flex items-center justify-center align-middle leading-none;
+    vertical-align: middle;
+  }
+}

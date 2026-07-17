@@ -47,8 +47,8 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
           <span className={textLinkClass('truncate')}>{row.product.name}</span>
           <BuildSkillGapFlag missing={missingSkills} />
         </div>
-        <span className="text-[10px] opacity-50 block">
-          <span className="badge badge-xs badge-ghost mr-1">{tierLabel(row.blueprint.tier)}</span>
+        <span className="text-[10px] opacity-50 flex items-center gap-1">
+          <span className="badge badge-xs badge-ghost">{tierLabel(row.blueprint.tier)}</span>
           {row.product.group}
         </span>
       </td>
@@ -142,8 +142,8 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
             <span className={textLinkClass('font-medium text-sm truncate')}>{row.product.name}</span>
             <BuildSkillGapFlag missing={missingSkills} />
           </div>
-          <p className="text-[10px] opacity-50 truncate mt-0.5">
-            <span className="badge badge-xs badge-ghost mr-1">{tierLabel(row.blueprint.tier)}</span>
+          <p className="text-[10px] opacity-50 flex items-center gap-1 truncate mt-0.5">
+            <span className="badge badge-xs badge-ghost shrink-0">{tierLabel(row.blueprint.tier)}</span>
             {row.product.group}
           </p>
         </div>

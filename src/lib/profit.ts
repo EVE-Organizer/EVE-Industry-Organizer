@@ -94,6 +94,12 @@ export function formatDecimal(value: number, decimals = 2): string {
   }).format(value)
 }
 
+/** Decimal string for HTML number inputs (no thousands separators). */
+export function formatInputDecimal(value: number, decimals = 2): string {
+  if (!Number.isFinite(value)) return ''
+  return value.toFixed(decimals)
+}
+
 export function formatPercent(value: number): string {
   return `${formatNumber(value, 1)}%`
 }

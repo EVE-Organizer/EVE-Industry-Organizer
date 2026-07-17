@@ -4,18 +4,25 @@ import type {
   ManufacturingPlanTemplate,
   PlanBuildMode,
   PlanNode,
+  PlanNodeOverride,
 } from '@/types'
 import { MIN_BATCH_SIZE } from '@/types'
 import {
   applyME,
   applyTE,
-  blueprintMeTe,
   inventionBlueprintCostPerRun,
   materialCost,
+  resolveBlueprintMeTe,
   resolveStructureModifiers,
   totalManufacturingCost,
 } from '@/lib/cost'
-import { bpcCountForRuns, defaultRunsPerBpc, runsForDemand } from '@/lib/rootRunsDuration'
+import {
+  bpcCountForRuns,
+  defaultRunsPerBpc,
+  durationHoursFromRuns,
+  runsForDemand,
+} from '@/lib/rootRunsDuration'
+import { activeConcurrentCopies, totalRootRuns } from '@/lib/supplyChainSlots'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { getBlueprintForBpo, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { isRawMaterial } from '@/lib/supplyChain'
@@ -33,6 +40,8 @@ interface NodeAccum {
   isRoot: boolean
   isLeaf: boolean
   depth: number
+  /** Packaged self-input bought from market (POS / structure kits). */
+  selfBuyQty: number
 }
 
 export interface ExpandPlanInput {
@@ -54,7 +63,8 @@ function modeOverridesMap(template: ManufacturingPlanTemplate): Map<number, Plan
   return new Map(Object.entries(template.modeOverrides).map(([k, v]) => [Number(k), v]))
 }
 
-function estimateBuildCostForRuns(
+/** Rolled-up build cost for a blueprint's runs using the plan's build/buy overrides. */
+export function computePlanBuildCostForRuns(
   blueprint: BlueprintInfo,
   runs: number,
   blueprints: BlueprintInfo[],
@@ -63,11 +73,16 @@ function estimateBuildCostForRuns(
   settings: GlobalSettings,
   systemCostIndex: number,
   modeOverrides: Map<number, PlanBuildMode>,
+  nodeOverrides: Record<number, PlanNodeOverride>,
   nodeMap: Map<number, NodeAccum>,
   depth: number,
   maxDepth: number,
 ): number {
-  const { me } = blueprintMeTe(blueprint.tier, settings)
+  const { me } = resolveBlueprintMeTe(
+    blueprint.tier,
+    settings,
+    nodeOverrides[blueprint.productTypeId],
+  )
   const structure = resolveStructureModifiers(settings)
   const mfgSettings = { ...settings, batchSize: runs }
   const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
@@ -84,6 +99,10 @@ function estimateBuildCostForRuns(
   for (const mat of mats) {
     const unitPrice = prices.get(mat.typeId) ?? 0
     const buyCost = unitPrice * mat.quantity
+    if (mat.typeId === blueprint.productTypeId) {
+      childBuild += buyCost
+      continue
+    }
     const subBp = getBlueprintForProduct(blueprints, mat.typeId)
     const override = modeOverrides.get(mat.typeId)
 
@@ -93,7 +112,7 @@ function estimateBuildCostForRuns(
     }
 
     const subRuns = runsForDemand(subBp.productQuantity, mat.quantity)
-    const subBuildCost = estimateBuildCostForRuns(
+    const subBuildCost = computePlanBuildCostForRuns(
       subBp,
       subRuns,
       blueprints,
@@ -102,6 +121,7 @@ function estimateBuildCostForRuns(
       settings,
       systemCostIndex,
       modeOverrides,
+      nodeOverrides,
       nodeMap,
       depth + 1,
       maxDepth,
@@ -133,6 +153,7 @@ function ensureNode(
       isRoot: false,
       isLeaf: true,
       depth: 0,
+      selfBuyQty: 0,
     }
     nodeMap.set(productTypeId, node)
   }
@@ -191,7 +212,7 @@ function expandInventionPrereqs(
   if (!t1Bp || maxDepth <= 0) return
 
   const t1Runs = attempts
-  const buildCost = estimateBuildCostForRuns(
+  const buildCost = computePlanBuildCostForRuns(
     t1Bp,
     t1Runs,
     blueprints,
@@ -200,6 +221,7 @@ function expandInventionPrereqs(
     settings,
     systemCostIndex,
     modeOverrides,
+    input.template.nodeOverrides,
     nodeMap,
     parentNode.depth + 1,
     maxDepth,
@@ -231,8 +253,12 @@ function expandMaterials(
   modeOverrides: Map<number, PlanBuildMode>,
   maxDepth: number,
 ): void {
-  const { settings, blueprints, typeMap, prices, systemCostIndex } = input
-  const { me } = blueprintMeTe(blueprint.tier, settings)
+  const { settings, blueprints, typeMap, prices, systemCostIndex, template } = input
+  const { me } = resolveBlueprintMeTe(
+    blueprint.tier,
+    settings,
+    template.nodeOverrides[blueprint.productTypeId],
+  )
   const structure = resolveStructureModifiers(settings)
   const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const parentNode = ensureNode(nodeMap, blueprint.productTypeId, typeMap, blueprint)
@@ -242,6 +268,11 @@ function expandMaterials(
   }
 
   for (const mat of mats) {
+    if (mat.typeId === blueprint.productTypeId) {
+      parentNode.selfBuyQty += mat.quantity
+      continue
+    }
+
     const subBp = getBlueprintForProduct(blueprints, mat.typeId)
     const unitPrice = prices.get(mat.typeId) ?? 0
     const buyCost = unitPrice * mat.quantity
@@ -249,7 +280,7 @@ function expandMaterials(
 
     if (!subBp || isRawMaterial(mat.typeId) || depth >= maxDepth) {
       const leaf = ensureNode(nodeMap, mat.typeId, typeMap)
-      leaf.mode = 'buy'
+      if (!leaf.isRoot) leaf.mode = 'buy'
       leaf.isLeaf = true
       addDemand(leaf, blueprint.productTypeId, mat.quantity, depth + 1)
       parentNode.childProductTypeIds.add(mat.typeId)
@@ -257,7 +288,7 @@ function expandMaterials(
     }
 
     const subRuns = runsForDemand(subBp.productQuantity, mat.quantity)
-    const buildCost = estimateBuildCostForRuns(
+    const subBuildCost = computePlanBuildCostForRuns(
       subBp,
       subRuns,
       blueprints,
@@ -266,13 +297,14 @@ function expandMaterials(
       settings,
       systemCostIndex,
       modeOverrides,
+      template.nodeOverrides,
       nodeMap,
       depth + 1,
       maxDepth,
     )
     const forceBuild = input.template.nodeOverrides[mat.typeId]?.forceInclude
     const mode: PlanBuildMode =
-      override ?? (forceBuild ? 'build' : buildCost <= buyCost ? 'build' : 'buy')
+      override ?? (forceBuild ? 'build' : subBuildCost <= buyCost ? 'build' : 'buy')
 
     const child = ensureNode(nodeMap, mat.typeId, typeMap, subBp)
     child.mode = mode
@@ -297,6 +329,7 @@ function finalizeNodes(
 ): PlanNode[] {
   const { blueprints, typeMap, prices, systemCostIndex } = input
   const nodes: PlanNode[] = []
+  const rootRunsTotal = totalRootRuns(template.roots.map((r) => r.runs))
 
   for (const accum of nodeMap.values()) {
     const totalDemandQty = accum.demandByParent.reduce((s, d) => s + d.qty, 0)
@@ -304,7 +337,9 @@ function finalizeNodes(
     const override = template.nodeOverrides[accum.productTypeId]
 
     let runs = accum.isRoot && blueprint
-      ? template.roots.find((r) => r.productTypeId === accum.productTypeId)?.runs ?? MIN_BATCH_SIZE
+      ? template.roots
+          .filter((r) => r.productTypeId === accum.productTypeId)
+          .reduce((s, r) => s + r.runs, 0) || MIN_BATCH_SIZE
       : blueprint
         ? runsForDemand(blueprint.productQuantity, totalDemandQty)
         : 0
@@ -318,9 +353,14 @@ function finalizeNodes(
     const bpcCount = blueprint && accum.mode === 'build' ? bpcCountForRuns(runs, runsPerBpc) : 0
     const concurrent =
       override?.copies ??
-      (accum.mode === 'build' ? Math.min(slots, Math.max(1, bpcCount)) : 0)
+      (accum.mode === 'build'
+        ? activeConcurrentCopies(accum.isRoot, bpcCount, slots, rootRunsTotal)
+        : 0)
 
-    const { te } = blueprint ? blueprintMeTe(blueprint.tier, settings) : { te: settings.teDefault }
+    const meTe = blueprint
+      ? resolveBlueprintMeTe(blueprint.tier, settings, override)
+      : { me: settings.meDefault, te: settings.teDefault, locked: false }
+    const { te } = meTe
     const structure = resolveStructureModifiers(settings)
     const advanced = settings.skills.advancedIndustry ?? 0
     const jobTimeSeconds =
@@ -340,7 +380,7 @@ function finalizeNodes(
 
     if (canToggle && blueprint && runs > 0) {
       buyCost = unitPrice * totalDemandQty
-      buildCost = estimateBuildCostForRuns(
+      buildCost = computePlanBuildCostForRuns(
         blueprint,
         runs,
         blueprints,
@@ -349,6 +389,7 @@ function finalizeNodes(
         settings,
         systemCostIndex,
         modeOverrides,
+        template.nodeOverrides,
         nodeMap,
         accum.depth,
         10,
@@ -382,10 +423,37 @@ function finalizeNodes(
       buildCost,
       savings,
       recommendedMode,
+      packagedBuyQty: accum.selfBuyQty > 0 ? accum.selfBuyQty : undefined,
+      me: blueprint && accum.mode === 'build' ? meTe.me : undefined,
+      te: blueprint && accum.mode === 'build' ? meTe.te : undefined,
+      meTeLocked: blueprint && accum.mode === 'build' ? meTe.locked : undefined,
     })
   }
 
   return nodes.sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name))
+}
+
+/** Rolled-up build cost for a plan root using template build/buy overrides. */
+export function computePlanRootBuildCost(
+  blueprint: BlueprintInfo,
+  runs: number,
+  input: ExpandPlanInput,
+): number {
+  const modeOverrides = modeOverridesMap(input.template)
+  return computePlanBuildCostForRuns(
+    blueprint,
+    runs,
+    input.blueprints,
+    input.typeMap,
+    input.prices,
+    input.settings,
+    input.systemCostIndex,
+    modeOverrides,
+    input.template.nodeOverrides,
+    new Map(),
+    0,
+    10,
+  )
 }
 
 export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResult {
@@ -407,7 +475,19 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
     expandMaterials(blueprint, root.runs, root.productTypeId, 0, input, nodeMap, modeOverrides, 10)
   }
 
-  const windowFromRoots = template.roots.reduce((m, r) => Math.max(m, r.productionDurationHours), 0)
+  const windowFromRoots = template.roots.reduce((m, r) => {
+    const blueprint = getBlueprintForProduct(input.blueprints, r.productTypeId)
+    const hours = blueprint
+      ? durationHoursFromRuns(
+          blueprint,
+          settings,
+          r.runs,
+          slots,
+          template.nodeOverrides[r.productTypeId],
+        )
+      : r.productionDurationHours
+    return Math.max(m, hours)
+  }, 0)
   const windowHours = Math.max(windowFromRoots, 1)
 
   return {

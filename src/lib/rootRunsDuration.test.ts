@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   applyRootEntryPatch,
+  createSyncedPlanRootEntry,
   durationHoursFromRuns,
   resolveRunsFromPatch,
   runsFromDurationHours,
+  syncRootEntry,
 } from '@/lib/rootRunsDuration'
 import { DEFAULT_SETTINGS } from '@/types'
 import type { BlueprintInfo, PlanRootEntry } from '@/types'
@@ -23,10 +25,32 @@ const blueprint: BlueprintInfo = {
 }
 
 const root: PlanRootEntry = {
+  id: 'root-1',
   productTypeId: 100,
   runs: 100,
   productionDurationHours: 24,
 }
+
+describe('syncRootEntry', () => {
+  it('recomputes job time from runs', () => {
+    const synced = syncRootEntry(root, blueprint, DEFAULT_SETTINGS, 6)
+    expect(synced.productionDurationHours).toBe(
+      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, root.runs, 6),
+    )
+    expect(synced.productionDurationHours).not.toBe(24)
+  })
+})
+
+describe('createSyncedPlanRootEntry', () => {
+  it('creates a root with matching runs and job time', () => {
+    const entry = createSyncedPlanRootEntry(100, blueprint, DEFAULT_SETTINGS, 6)
+    expect(entry.runs).toBe(100)
+    expect(entry.productionDurationHours).toBe(
+      durationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 100, 6),
+    )
+    expect('id' in entry).toBe(false)
+  })
+})
 
 describe('applyRootEntryPatch', () => {
   it('snaps job time to actual wall-clock duration after hours input', () => {

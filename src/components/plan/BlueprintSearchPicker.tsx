@@ -4,19 +4,40 @@ import type { BlueprintInfo, TypeInfo } from '@/types'
 
 const MAX_RESULTS = 12
 
+type PickerItem = {
+  productTypeId: number
+  blueprintTypeId: number
+  name: string
+  group: string
+}
+
 interface BlueprintSearchPickerProps {
   blueprints: BlueprintInfo[]
   typeMap: Map<number, TypeInfo>
-  excludeIds?: Set<number>
+  favoriteIds?: number[]
   onSelect: (productTypeId: number) => void
   className?: string
   placeholder?: string
 }
 
+function buildPickerItem(
+  bp: BlueprintInfo,
+  typeMap: Map<number, TypeInfo>,
+): PickerItem | null {
+  const name = typeMap.get(bp.productTypeId)?.name
+  if (!name) return null
+  return {
+    productTypeId: bp.productTypeId,
+    blueprintTypeId: bp.blueprintTypeId,
+    name,
+    group: bp.productGroup,
+  }
+}
+
 export function BlueprintSearchPicker({
   blueprints,
   typeMap,
-  excludeIds,
+  favoriteIds = [],
   onSelect,
   className = '',
   placeholder = 'Search blueprint by name…',
@@ -25,12 +46,29 @@ export function BlueprintSearchPicker({
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
 
+  const blueprintByProduct = useMemo(() => {
+    const map = new Map<number, BlueprintInfo>()
+    for (const bp of blueprints) map.set(bp.productTypeId, bp)
+    return map
+  }, [blueprints])
+
+  const favorites = useMemo(() => {
+    const items: PickerItem[] = []
+    for (const productTypeId of favoriteIds) {
+      const bp = blueprintByProduct.get(productTypeId)
+      if (!bp) continue
+      const item = buildPickerItem(bp, typeMap)
+      if (item) items.push(item)
+    }
+    items.sort((a, b) => a.name.localeCompare(b.name))
+    return items
+  }, [favoriteIds, blueprintByProduct, typeMap])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (q.length < 2) return []
-    const results: { productTypeId: number; blueprintTypeId: number; name: string; group: string }[] = []
+    const results: PickerItem[] = []
     for (const bp of blueprints) {
-      if (excludeIds?.has(bp.productTypeId)) continue
       const name = typeMap.get(bp.productTypeId)?.name ?? ''
       if (!name.toLowerCase().includes(q)) continue
       results.push({
@@ -43,7 +81,11 @@ export function BlueprintSearchPicker({
     }
     results.sort((a, b) => a.name.localeCompare(b.name))
     return results
-  }, [blueprints, typeMap, excludeIds, query])
+  }, [blueprints, typeMap, query])
+
+  const showFavorites = open && query.trim().length < 2 && favorites.length > 0
+  const showSearch = open && query.trim().length >= 2
+  const items = showFavorites ? favorites : filtered
 
   useEffect(() => {
     if (!open) return
@@ -92,12 +134,15 @@ export function BlueprintSearchPicker({
         }}
         onFocus={() => setOpen(true)}
       />
-      {open && query.trim().length >= 2 && (
+      {(showFavorites || showSearch) && (
         <ul className="absolute z-20 mt-1.5 w-full max-h-64 overflow-y-auto rounded-xl border border-eve-border bg-base-200 p-1 shadow-xl">
-          {filtered.length === 0 ? (
+          {showFavorites ? (
+            <li className="px-2.5 py-1.5 text-[10px] uppercase tracking-wide opacity-40">Favorites</li>
+          ) : null}
+          {items.length === 0 ? (
             <li className="px-3 py-2 text-xs opacity-50">No blueprints match</li>
           ) : (
-            filtered.map((item) => (
+            items.map((item) => (
               <li key={item.productTypeId}>
                 <button
                   type="button"

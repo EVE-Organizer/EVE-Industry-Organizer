@@ -46,12 +46,19 @@ export interface PlanBuyItemRow {
 
 export type PlanBuyTableRow = PlanBuyGroupRow | PlanBuyParentRow | PlanBuyItemRow
 
-function nearestBuildParentId(node: PlanNode, byId: Map<number, PlanNode>): number | null {
+function nearestBuildParentId(
+  node: PlanNode,
+  byId: Map<number, PlanNode>,
+  visited: Set<number> = new Set(),
+): number | null {
+  if (visited.has(node.productTypeId)) return null
+  visited.add(node.productTypeId)
+
   for (const parentId of node.parentProductTypeIds) {
     const parent = byId.get(parentId)
     if (!parent) continue
     if (parent.mode === 'build') return parentId
-    const up = nearestBuildParentId(parent, byId)
+    const up = nearestBuildParentId(parent, byId, visited)
     if (up != null) return up
   }
   for (const demand of node.demandByParent) {
@@ -65,8 +72,9 @@ function buyChildrenInGroup(node: PlanNode, groupNodes: PlanNode[]): PlanNode[] 
   return groupNodes
     .filter(
       (n) =>
-        n.parentProductTypeIds.includes(node.productTypeId) ||
-        n.demandByParent.some((d) => d.parentProductTypeId === node.productTypeId),
+        n.productTypeId !== node.productTypeId &&
+        (n.parentProductTypeIds.includes(node.productTypeId) ||
+          n.demandByParent.some((d) => d.parentProductTypeId === node.productTypeId)),
     )
     .sort((a, b) => a.name.localeCompare(b.name))
 }

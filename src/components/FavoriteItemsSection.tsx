@@ -75,9 +75,9 @@ export function FavoriteItemsSection({
   return (
     <div className="collapse collapse-arrow card bg-base-200 border border-eve-border mb-4 shrink-0 min-w-0 overflow-hidden">
       <input type="checkbox" defaultChecked />
-      <div className="collapse-title text-sm font-semibold min-h-0 py-3 px-4">
+      <div className="collapse-title flex items-center gap-2 text-sm font-semibold min-h-0 py-3 px-4">
         Favorites
-        <span className="badge badge-ghost badge-sm ml-2 tabular-nums">{entries.length}</span>
+        <span className="badge badge-ghost badge-sm tabular-nums">{entries.length}</span>
       </div>
       <div className="collapse-content !px-0 min-w-0 pb-4">
         {entries.length === 0 ? (

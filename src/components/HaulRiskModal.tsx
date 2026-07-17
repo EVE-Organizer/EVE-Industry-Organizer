@@ -93,7 +93,7 @@ function RouteSummaryCard({
   return (
     <section className="haul-risk-modal__route card bg-base-200/60 border border-eve-border flex flex-col min-h-0">
       <div className="card-body p-4 gap-3 flex flex-col min-h-0">
-        <div className="flex items-start justify-between gap-3 shrink-0">
+        <div className="flex items-center justify-between gap-3 shrink-0">
           <div className="min-w-0 flex-1">
             <h4 className="text-sm font-semibold">{title}</h4>
             <p className="haul-risk-modal__route-label text-xs opacity-60 mt-1">{routeLabel}</p>

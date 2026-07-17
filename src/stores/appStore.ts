@@ -3,8 +3,10 @@ import type { GlobalSettings, ManufacturingPlanTemplate, PlanRootEntry, UserData
 import {
   createDefaultPlanTemplate,
   createDefaultUserData,
+  createPlanRootId,
   createPlanTemplateId,
   loadUserDataFromLocal,
+  migratePlanTemplates,
   normalizeGlobalSettings,
   saveUserDataToLocal,
 } from '@/services/sync/types'
@@ -26,7 +28,7 @@ interface AppStore {
   deletePlanTemplate: (id: string) => void
   duplicatePlanTemplate: (id: string) => ManufacturingPlanTemplate | null
   addRootToPlanTemplate: (templateId: string, root: PlanRootEntry) => void
-  removeRootFromPlanTemplate: (templateId: string, productTypeId: number) => void
+  removeRootFromPlanTemplate: (templateId: string, rootId: string) => void
 }
 
 function touchTemplates(
@@ -35,7 +37,7 @@ function touchTemplates(
 ): UserData {
   return {
     ...userData,
-    planTemplates: updater(userData.planTemplates ?? []),
+    planTemplates: migratePlanTemplates(updater(userData.planTemplates ?? [])),
     updatedAt: new Date().toISOString(),
   }
 }
@@ -120,9 +122,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
       name: `${source.name} (copy)`,
       createdAt: now,
       updatedAt: now,
-      roots: source.roots.map((r) => ({ ...r })),
-      modeOverrides: { ...source.modeOverrides },
-      nodeOverrides: { ...source.nodeOverrides },
+      roots: (source.roots ?? []).map((r) => ({ ...r, id: createPlanRootId() })),
+      modeOverrides: { ...(source.modeOverrides ?? {}) },
+      nodeOverrides: { ...(source.nodeOverrides ?? {}) },
     }
     const userData = touchTemplates(get().userData, (templates) => [...templates, copy])
     get().setUserData(userData)
@@ -131,13 +133,13 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   addRootToPlanTemplate: (templateId, root) => {
+    const entry: PlanRootEntry = { ...root, id: root.id ?? createPlanRootId() }
     const userData = touchTemplates(get().userData, (templates) =>
       templates.map((t) => {
         if (t.id !== templateId) return t
-        if (t.roots.some((r) => r.productTypeId === root.productTypeId)) return t
         return {
           ...t,
-          roots: [...t.roots, root],
+          roots: [...(t.roots ?? []), entry],
           updatedAt: new Date().toISOString(),
         }
       }),
@@ -145,13 +147,13 @@ export const useAppStore = create<AppStore>((set, get) => ({
     get().setUserData(userData)
   },
 
-  removeRootFromPlanTemplate: (templateId, productTypeId) => {
+  removeRootFromPlanTemplate: (templateId, rootId) => {
     const userData = touchTemplates(get().userData, (templates) =>
       templates.map((t) =>
         t.id === templateId
           ? {
               ...t,
-              roots: t.roots.filter((r) => r.productTypeId !== productTypeId),
+              roots: (t.roots ?? []).filter((r) => r.id !== rootId),
               updatedAt: new Date().toISOString(),
             }
           : t,

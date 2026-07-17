@@ -215,6 +215,7 @@ export type PlanSlotSource = 'skills' | 'manual'
 export type PlanBuildMode = 'buy' | 'build'
 
 export interface PlanRootEntry {
+  id: string
   productTypeId: number
   runs: number
   productionDurationHours: number
@@ -225,6 +226,8 @@ export interface PlanNodeOverride {
   copies?: number
   runsPerBpc?: number
   forceInclude?: boolean
+  me?: number
+  te?: number
 }
 
 export interface ManufacturingPlanTemplate {
@@ -271,6 +274,16 @@ export interface PlanNode {
   savings?: number
   /** Cost-based suggestion before user overrides. */
   recommendedMode?: PlanBuildMode
+  /** Packaged self-product bought from market (structure / POS kits). */
+  packagedBuyQty?: number
+  /** Synthetic buy row derived from a build parent's packaged input. */
+  packagedInput?: boolean
+  /** Effective ME for this build node (after tier rules and overrides). */
+  me?: number
+  /** Effective TE for this build node (after tier rules and overrides). */
+  te?: number
+  /** T2 / faction BPOs use fixed ME/TE and cannot be overridden. */
+  meTeLocked?: boolean
 }
 
 export interface PlanTimeBucket {

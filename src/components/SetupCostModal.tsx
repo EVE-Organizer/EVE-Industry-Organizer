@@ -66,7 +66,7 @@ function BlueprintCostSection({
     return (
       <section>
         <h4 className="font-semibold text-sm mb-2">
-          2. Blueprint <span className="badge badge-ghost badge-xs align-middle">charge</span>
+          2. Blueprint <span className="badge badge-ghost badge-xs">charge</span>
         </h4>
         <p className="text-xs opacity-60 mb-2">
           Charges come from one cheap, reusable BPO that makes huge volume, so its cost is left out
@@ -86,7 +86,7 @@ function BlueprintCostSection({
       <section>
         <h4 className="font-semibold text-sm mb-2">
           2. Blueprint{' '}
-          <span className="badge badge-secondary badge-xs align-middle">faction BPC</span>
+          <span className="badge badge-secondary badge-xs">faction BPC</span>
         </h4>
         <p className="text-xs opacity-60 mb-2">
           Faction blueprints are copies bought from NPC LP stores or contracts, not BPOs. There is no
@@ -107,7 +107,7 @@ function BlueprintCostSection({
       <section>
         <h4 className="font-semibold text-sm mb-2">
           2. Blueprint{' '}
-          <span className="badge badge-warning badge-xs align-middle">BPC from invention</span>
+          <span className="badge badge-warning badge-xs">BPC from invention</span>
         </h4>
         <p className="text-xs opacity-60 mb-2">
           T2 has no reusable BPO. Each batch consumes invented copies, so the full invention cost is
@@ -146,7 +146,7 @@ function BlueprintCostSection({
   return (
     <section>
       <h4 className="font-semibold text-sm mb-2">
-        2. Blueprint <span className="badge badge-info badge-xs align-middle">BPO</span>
+        2. Blueprint <span className="badge badge-info badge-xs">BPO</span>
       </h4>
       <p className="text-xs opacity-60 mb-2">
         T1 BPOs are reusable, so the purchase price and research are spread over the blueprint
@@ -271,7 +271,7 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
             <h4 className="font-semibold text-sm mb-2">
               5. Haul in ({haulInLabel})
               {b.haulExcluded ? (
-                <span className="badge badge-ghost badge-xs align-middle ml-1">excluded</span>
+                <span className="badge badge-ghost badge-xs ml-1">excluded</span>
               ) : null}
             </h4>
             {b.haulExcluded ? (

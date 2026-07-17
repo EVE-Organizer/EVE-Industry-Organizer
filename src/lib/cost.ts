@@ -206,6 +206,28 @@ export function blueprintMeTe(
   return { me: settings.meDefault, te: settings.teDefault }
 }
 
+export interface MeTeOverride {
+  me?: number
+  te?: number
+}
+
+/** ME/TE for a blueprint, applying per-plan overrides on researchable T1 BPOs. */
+export function resolveBlueprintMeTe(
+  tier: BlueprintTier,
+  settings: GlobalSettings,
+  override?: MeTeOverride,
+): { me: number; te: number; locked: boolean } {
+  const base = blueprintMeTe(tier, settings)
+  if (tier === 't2' || tier === 'faction') {
+    return { me: base.me, te: base.te, locked: true }
+  }
+  return {
+    me: override?.me ?? base.me,
+    te: override?.te ?? base.te,
+    locked: false,
+  }
+}
+
 /** Approximate one-time research job fee (ME10 + TE20) from one base run's material value. */
 export function estimateResearchFee(baseRunMaterialValue: number, systemCostIndex: number): number {
   return baseRunMaterialValue * systemCostIndex * RESEARCH_FEE_FACTOR

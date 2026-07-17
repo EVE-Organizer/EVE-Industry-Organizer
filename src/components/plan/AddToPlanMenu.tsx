@@ -1,20 +1,41 @@
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/stores/appStore'
-import { DEFAULT_BATCH_SIZE } from '@/types'
+import { useSdeData } from '@/hooks/useSdeData'
+import { createSyncedPlanRootEntry } from '@/lib/rootRunsDuration'
+import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
+import { getAllBlueprints, getBlueprintForProduct } from '@/services/data/sdeLoader'
+import { createPlanRootId } from '@/services/sync/types'
 
 export function AddToPlanMenu({ productTypeId }: { productTypeId: number }) {
   const navigate = useNavigate()
+  const { data } = useSdeData()
+  const settings = useAppStore((s) => s.userData.settings)
   const templates = useAppStore((s) => s.userData.planTemplates ?? [])
   const addPlanTemplate = useAppStore((s) => s.addPlanTemplate)
   const addRootToPlanTemplate = useAppStore((s) => s.addRootToPlanTemplate)
   const setSelectedId = useAppStore((s) => s.setSelectedPlanTemplateId)
+  const slots = manufacturingSlotsFromSkills(settings.skills)
+
+  function buildRootEntry() {
+    const blueprint = data
+      ? getBlueprintForProduct(getAllBlueprints(data.registry), productTypeId)
+      : undefined
+    if (!blueprint) {
+      return {
+        id: createPlanRootId(),
+        productTypeId,
+        runs: 100,
+        productionDurationHours: 24,
+      }
+    }
+    return {
+      id: createPlanRootId(),
+      ...createSyncedPlanRootEntry(productTypeId, blueprint, settings, slots),
+    }
+  }
 
   const addToTemplate = (templateId: string) => {
-    addRootToPlanTemplate(templateId, {
-      productTypeId,
-      runs: DEFAULT_BATCH_SIZE,
-      productionDurationHours: 24,
-    })
+    addRootToPlanTemplate(templateId, buildRootEntry())
     setSelectedId(templateId)
     navigate('/plan')
   }
@@ -40,11 +61,7 @@ export function AddToPlanMenu({ productTypeId }: { productTypeId: number }) {
             type="button"
             onClick={() => {
               const t = addPlanTemplate()
-              addRootToPlanTemplate(t.id, {
-                productTypeId,
-                runs: DEFAULT_BATCH_SIZE,
-                productionDurationHours: 24,
-              })
+              addRootToPlanTemplate(t.id, buildRootEntry())
               navigate('/plan')
             }}
           >

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { expandManufacturingPlan } from '@/lib/manufacturingPlan'
+import { durationHoursFromRuns } from '@/lib/rootRunsDuration'
 import { createDefaultPlanTemplate } from '@/services/sync/types'
 import { DEFAULT_SETTINGS } from '@/types'
 import type { BlueprintInfo } from '@/types'
@@ -40,8 +41,8 @@ describe('expandManufacturingPlan', () => {
   it('merges shared intermediate from two roots', () => {
     const template = createDefaultPlanTemplate('test')
     template.roots = [
-      { productTypeId: 200, runs: 10, productionDurationHours: 24 },
-      { productTypeId: 201, runs: 10, productionDurationHours: 24 },
+      { id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 24 },
+      { id: 'root-b', productTypeId: 201, runs: 10, productionDurationHours: 24 },
     ]
 
     const { nodes } = expandManufacturingPlan({
@@ -77,11 +78,11 @@ describe('expandManufacturingPlan', () => {
     const template = createDefaultPlanTemplate('test')
     template.productionWindowHours = 999
     template.roots = [
-      { productTypeId: 200, runs: 10, productionDurationHours: 12 },
-      { productTypeId: 201, runs: 10, productionDurationHours: 48.5 },
+      { id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 12 },
+      { id: 'root-b', productTypeId: 201, runs: 10, productionDurationHours: 48.5 },
     ]
 
-    const { windowHours } = expandManufacturingPlan({
+    const { windowHours, slots } = expandManufacturingPlan({
       template,
       blueprints,
       typeMap,
@@ -90,7 +91,31 @@ describe('expandManufacturingPlan', () => {
       systemCostIndex: 0.01,
     })
 
-    expect(windowHours).toBe(48.5)
+    const hoursA = durationHoursFromRuns(shipA, DEFAULT_SETTINGS, 10, slots)
+    const hoursB = durationHoursFromRuns(shipB, DEFAULT_SETTINGS, 10, slots)
+    expect(windowHours).toBe(Math.max(hoursA, hoursB, 1))
+  })
+
+  it('sums runs from duplicate roots of the same product', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [
+      { id: 'root-1', productTypeId: 200, runs: 10, productionDurationHours: 24 },
+      { id: 'root-2', productTypeId: 200, runs: 15, productionDurationHours: 24 },
+    ]
+
+    const { nodes } = expandManufacturingPlan({
+      template,
+      blueprints,
+      typeMap,
+      prices,
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+    })
+
+    const ship = nodes.find((n) => n.productTypeId === 200)
+    expect(ship?.isRoot).toBe(true)
+    expect(ship?.runs).toBe(25)
+    expect(ship?.outputQty).toBe(25)
   })
 })
 

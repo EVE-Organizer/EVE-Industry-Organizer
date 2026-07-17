@@ -25,7 +25,7 @@ export function PlanTemplateBar({ templates, selectedId, onSelect }: PlanTemplat
             onClick={() => onSelect(t.id)}
           >
             <span className="truncate max-w-[12rem] sm:max-w-none">{t.name}</span>
-            <span className="plan-template-btn__count">{t.roots.length}</span>
+            <span className="plan-template-btn__count">{t.roots?.length ?? 0}</span>
           </button>
         )
       })}
