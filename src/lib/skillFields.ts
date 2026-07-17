@@ -1,11 +1,17 @@
 import type { SkillLevels } from '@/types'
 import { ZERO_SKILLS } from '@/types'
 
+export interface SkillPrerequisite {
+  key: keyof SkillLevels
+  level: number
+}
+
 export interface SkillFieldDef {
   key: keyof SkillLevels
   skillId: number
   label: string
   tooltip: string
+  prerequisites?: SkillPrerequisite[]
 }
 
 /** Manufacturing and market skills editable in Settings. */
@@ -19,10 +25,11 @@ export const SKILL_FIELDS: SkillFieldDef[] = [
   },
   {
     key: 'advancedIndustry',
-    skillId: 24625,
+    skillId: 3388,
     label: 'Advanced Industry',
     tooltip:
       'Cuts manufacturing job time by 3% per level. Higher levels raise IPH and profit per hour in rankings. Also required by some advanced blueprints.',
+    prerequisites: [{ key: 'industry', level: 3 }],
   },
   {
     key: 'massProduction',
@@ -30,13 +37,15 @@ export const SKILL_FIELDS: SkillFieldDef[] = [
     label: 'Mass Production',
     tooltip:
       'Adds one concurrent manufacturing job per level (plus one base slot). Used for production plan timelines.',
+    prerequisites: [{ key: 'industry', level: 3 }],
   },
   {
     key: 'advancedMassProduction',
-    skillId: 24624,
+    skillId: 24625,
     label: 'Advanced Mass Production',
     tooltip:
       'Adds one more concurrent manufacturing job per level on top of Mass Production. Max 11 slots at V/V.',
+    prerequisites: [{ key: 'massProduction', level: 5 }],
   },
   {
     key: 'science',
@@ -79,7 +88,7 @@ export function formatSkillLevel(level: number): string {
 
 /** Merge an ESI or character snapshot onto zero defaults for every tracked skill. */
 export function normalizeImportedSkillLevels(skills: Partial<SkillLevels> | undefined): SkillLevels {
-  return { ...ZERO_SKILLS, ...(skills ?? {}) } as SkillLevels
+  return enforceSkillPrerequisites({ ...ZERO_SKILLS, ...(skills ?? {}) } as SkillLevels)
 }
 
 export function skillLevel(
@@ -88,4 +97,51 @@ export function skillLevel(
 ): number {
   const level = skills?.[key]
   return typeof level === 'number' ? level : ZERO_SKILLS[key]
+}
+
+export function prerequisitesMet(
+  skills: Partial<SkillLevels> | undefined,
+  key: SkillFieldDef['key'],
+): boolean {
+  const field = SKILL_FIELDS.find((f) => f.key === key)
+  if (!field?.prerequisites?.length) return true
+  return field.prerequisites.every((req) => skillLevel(skills, req.key) >= req.level)
+}
+
+/** Highest level the slider allows (0 when prerequisites are not met). */
+export function maxTrainableSkillLevel(
+  skills: Partial<SkillLevels> | undefined,
+  key: SkillFieldDef['key'],
+): number {
+  return prerequisitesMet(skills, key) ? 5 : 0
+}
+
+/** Level that counts for profit, IPH, and plan slots (0 when locked). */
+export function effectiveSkillLevel(
+  skills: Partial<SkillLevels> | undefined,
+  key: SkillFieldDef['key'],
+): number {
+  if (!prerequisitesMet(skills, key)) return 0
+  return skillLevel(skills, key)
+}
+
+export function skillPrerequisiteLabel(key: SkillFieldDef['key']): string | undefined {
+  const field = SKILL_FIELDS.find((f) => f.key === key)
+  if (!field?.prerequisites?.length) return undefined
+  const parts = field.prerequisites.map((req) => {
+    const prereq = SKILL_FIELDS.find((f) => f.key === req.key)
+    return `${prereq?.label ?? req.key} ${formatSkillLevel(req.level)}`
+  })
+  return `Requires ${parts.join(' and ')}`
+}
+
+/** Zero dependent skills when their prerequisites are no longer met. */
+export function enforceSkillPrerequisites(skills: SkillLevels): SkillLevels {
+  const result = { ...skills }
+  for (const { key } of SKILL_FIELDS) {
+    if (!prerequisitesMet(result, key)) {
+      result[key] = 0
+    }
+  }
+  return result
 }

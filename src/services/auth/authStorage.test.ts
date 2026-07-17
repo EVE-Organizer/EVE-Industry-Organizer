@@ -53,13 +53,13 @@ describe('authStorage multi-character', () => {
           characterId: 1,
           characterName: 'Alpha',
           tokens: { accessToken: 'a', refreshToken: 'ra', expiresAt: 0 },
-          skillsSnapshotVersion: 1,
+          skillsSnapshotVersion: 2,
         },
         {
           characterId: 2,
           characterName: 'Bravo',
           tokens: { accessToken: 'b', refreshToken: 'rb', expiresAt: 0 },
-          skillsSnapshotVersion: 1,
+          skillsSnapshotVersion: 2,
         },
       ],
     })
@@ -94,5 +94,32 @@ describe('authStorage multi-character', () => {
     const state = loadAuthAccounts()
     expect(state.characters[0]?.skills).toBeUndefined()
     expect(getStoredCharacter()?.skills).toBeUndefined()
+  })
+
+  it('clears skill snapshots from an older snapshot version', () => {
+    saveAuthAccounts({
+      version: 1,
+      activeCharacterId: 1,
+      characters: [
+        {
+          characterId: 1,
+          characterName: 'Zoe Ross',
+          tokens: { accessToken: 'a', refreshToken: 'ra', expiresAt: 0 },
+          skillsSnapshotVersion: 1,
+          skills: {
+            industry: 5,
+            advancedIndustry: 5,
+            massProduction: 5,
+            advancedMassProduction: 5,
+            science: 0,
+            accounting: 0,
+            brokerRelations: 0,
+          },
+        },
+      ],
+    })
+
+    const state = loadAuthAccounts()
+    expect(state.characters[0]?.skills).toBeUndefined()
   })
 })

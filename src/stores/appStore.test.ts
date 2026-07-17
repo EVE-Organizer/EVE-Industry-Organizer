@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAppStore } from '@/stores/appStore'
-import { createDefaultUserData } from '@/services/sync/types'
+import { createDefaultUserData, createDefaultPlanTemplate } from '@/services/sync/types'
 
 describe('useAppStore plan templates', () => {
   beforeEach(() => {
@@ -22,7 +22,43 @@ describe('useAppStore plan templates', () => {
     const state = useAppStore.getState()
     expect(state.userData.planTemplates).toHaveLength(1)
     expect(state.selectedPlanTemplateId).toBe(created.id)
+    expect(state.userData.selectedPlanTemplateId).toBe(created.id)
     expect(state.userData.planTemplates[0].roots).toEqual([])
+  })
+
+  it('restores the last selected plan on hydrate', () => {
+    const planA = { ...createDefaultPlanTemplate('A'), id: 'plan-a' }
+    const planB = { ...createDefaultPlanTemplate('B'), id: 'plan-b' }
+    const stored = {
+      ...createDefaultUserData(),
+      planTemplates: [planA, planB],
+      selectedPlanTemplateId: 'plan-b',
+    }
+    vi.mocked(localStorage.getItem).mockReturnValue(JSON.stringify(stored))
+
+    useAppStore.getState().hydrate()
+
+    expect(useAppStore.getState().selectedPlanTemplateId).toBe('plan-b')
+  })
+
+  it('persists plan tab selection', () => {
+    const planA = { ...createDefaultPlanTemplate('A'), id: 'plan-a' }
+    const planB = { ...createDefaultPlanTemplate('B'), id: 'plan-b' }
+    useAppStore.setState({
+      userData: {
+        ...createDefaultUserData(),
+        planTemplates: [planA, planB],
+      },
+      hydrated: true,
+      selectedPlanTemplateId: 'plan-a',
+    })
+
+    useAppStore.getState().setSelectedPlanTemplateId('plan-b')
+
+    const state = useAppStore.getState()
+    expect(state.selectedPlanTemplateId).toBe('plan-b')
+    expect(state.userData.selectedPlanTemplateId).toBe('plan-b')
+    expect(localStorage.setItem).toHaveBeenCalled()
   })
 
   it('adds a plan when legacy templates are missing roots', () => {

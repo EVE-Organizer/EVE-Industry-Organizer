@@ -18,7 +18,7 @@ import {
 import '@xyflow/react/dist/style.css'
 import { PlanProductIcon } from '@/components/plan/PlanProductIcon'
 import { ScoreBar } from '@/components/ScoreBar'
-import { inventoryAtPlayhead, usePlanTimeline } from '@/contexts/PlanTimelineContext'
+import { inventoryAtPlanEnd } from '@/lib/planSimulator'
 import {
   PLAN_GRAPH_LAYER_GAP,
   planNodeHeight,
@@ -27,11 +27,13 @@ import {
 } from '@/lib/planGraphLayout'
 import { planBuildVsBuyFootnote, planBuildVsBuySummary } from '@/lib/planBuildVsBuy'
 import { formatDecimal, formatDuration, formatGraphQuantity } from '@/lib/profit'
-import type { PlanNode } from '@/types'
+import type { PlanNode, PlanNodeSimulation } from '@/types'
 
 const PlanGraphActionsContext = createContext<{
   onToggleMode: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
+  simulations: Map<number, PlanNodeSimulation>
+  windowHours: number
 } | null>(null)
 
 const NODE_STYLES = {
@@ -100,19 +102,19 @@ function PlanNodeBadges({ node }: { node: PlanNode }) {
 
 function PlanFlowNode({ data }: { data: PlanFlowNodeData }) {
   const actions = useContext(PlanGraphActionsContext)
-  const { playheadHours, simulations, viewportStart, viewportEnd } = usePlanTimeline()
   const node = data.planNode
   const style = NODE_STYLES[nodeStyleKey(node)]
-  const inventory = inventoryAtPlayhead(simulations, node.productTypeId, playheadHours)
+  const simulations = actions?.simulations ?? new Map<number, PlanNodeSimulation>()
+  const windowHours = actions?.windowHours ?? 0
+  const inventory = inventoryAtPlanEnd(simulations, node.productTypeId)
   const sim = simulations.get(node.productTypeId)
 
   const sparkProduce = useMemo(() => {
-    if (!sim) return 0
-    const visible = sim.buckets.filter((b) => b.hour >= viewportStart && b.hour <= viewportEnd)
-    const max = Math.max(1, ...visible.map((b) => b.supply))
-    const at = [...visible].reverse().find((b) => b.hour <= playheadHours) ?? visible[0]
-    return at ? (at.supply / max) * 100 : 0
-  }, [sim, viewportStart, viewportEnd, playheadHours])
+    if (!sim || sim.buckets.length === 0) return 0
+    const max = Math.max(1, ...sim.buckets.map((b) => b.supply))
+    const last = sim.buckets[sim.buckets.length - 1]!
+    return (last.supply / max) * 100
+  }, [sim])
 
   const sparkInv = Math.min(
     100,
@@ -201,7 +203,7 @@ function PlanFlowNode({ data }: { data: PlanFlowNodeData }) {
           <div className="mt-auto space-y-1 min-h-0">
             <ScoreBar label="Output" value={sparkProduce} max={100} accent="bg-primary" />
             <ScoreBar
-              label={`Stock @ ${formatDecimal(playheadHours, 0)}h`}
+              label={`Stock @ ${formatDecimal(windowHours, 0)}h`}
               value={sparkInv}
               max={100}
               accent={inventory < 0 ? 'bg-error' : 'bg-success'}
@@ -240,11 +242,15 @@ function PlanGraphCanvas({
   nodes,
   onToggleMode,
   blueprintTypeIdByProduct,
+  simulations,
+  windowHours,
   layoutKey,
 }: {
   nodes: PlanNode[]
   onToggleMode: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
+  simulations: Map<number, PlanNodeSimulation>
+  windowHours: number
   layoutKey?: string
 }) {
   const layout = useMemo(() => planNodesToFlow(nodes), [nodes])
@@ -257,8 +263,8 @@ function PlanGraphCanvas({
   }, [layout, setFlowNodes, setFlowEdges])
 
   const actions = useMemo(
-    () => ({ onToggleMode, blueprintTypeIdByProduct }),
-    [onToggleMode, blueprintTypeIdByProduct],
+    () => ({ onToggleMode, blueprintTypeIdByProduct, simulations, windowHours }),
+    [onToggleMode, blueprintTypeIdByProduct, simulations, windowHours],
   )
 
   if (nodes.length === 0) {
@@ -314,11 +320,15 @@ export function PlanGraphView({
   nodes,
   onToggleMode,
   blueprintTypeIdByProduct,
+  simulations,
+  windowHours,
   layout = 'embedded',
 }: {
   nodes: PlanNode[]
   onToggleMode: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
+  simulations: Map<number, PlanNodeSimulation>
+  windowHours: number
   layout?: 'embedded' | 'expanded'
 }) {
   const expanded = layout === 'expanded'
@@ -331,8 +341,8 @@ export function PlanGraphView({
     <div className={`flex flex-col min-h-0${expanded ? ' flex-1' : ''}`}>
       <p className="text-xs opacity-50 mb-2 shrink-0">
         Top to bottom: finished products → inputs. Drag to pan · scroll to zoom. Click buildable
-        items to switch Build / Buy (costs match the production graph). Bars follow the timeline
-        playhead.
+        items to switch Build / Buy (costs match the production graph). Stock bars show inventory
+        when the plan finishes.
       </p>
       <div
         className={`relative rounded-lg border border-eve-border bg-base-300/30 overflow-hidden min-h-0${expanded ? ' flex-1' : ' shrink-0'}`}
@@ -346,6 +356,8 @@ export function PlanGraphView({
             nodes={nodes}
             onToggleMode={onToggleMode}
             blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+            simulations={simulations}
+            windowHours={windowHours}
             layoutKey={layout}
           />
         </ReactFlowProvider>

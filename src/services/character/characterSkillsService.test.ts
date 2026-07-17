@@ -5,9 +5,9 @@ describe('mapEsiSkillsToSkillLevels', () => {
   it('maps tracked skill ids to app keys', () => {
     const skills = mapEsiSkillsToSkillLevels([
       { skill_id: 3380, trained_skill_level: 5, active_skill_level: 5 },
-      { skill_id: 24625, trained_skill_level: 4, active_skill_level: 4 },
+      { skill_id: 3388, trained_skill_level: 4, active_skill_level: 4 },
       { skill_id: 3387, trained_skill_level: 3, active_skill_level: 3 },
-      { skill_id: 24624, trained_skill_level: 2, active_skill_level: 2 },
+      { skill_id: 24625, trained_skill_level: 2, active_skill_level: 2 },
       { skill_id: 3403, trained_skill_level: 3, active_skill_level: 3 },
       { skill_id: 16622, trained_skill_level: 2, active_skill_level: 2 },
       { skill_id: 3443, trained_skill_level: 1, active_skill_level: 1 },

@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { Panel } from '@/components/Panel'
 import { Tooltip } from '@/components/Tooltip'
 import { BlueprintGraphModal } from '@/components/BlueprintGraphModal'
-import { PlanTimelineChart } from '@/components/plan/PlanTimelineChart'
+import { PlanTimelinePanel } from '@/components/plan/PlanTimelineChart'
 import { PlanGraphView } from '@/components/plan/PlanGraphView'
 import { BlueprintSearchPicker } from '@/components/plan/BlueprintSearchPicker'
 import { PlanChainTable } from '@/components/plan/PlanChainTable'
@@ -16,7 +16,6 @@ import { PlanDetailHeader } from '@/components/plan/PlanDetailHeader'
 import { PlanProfitSummaryPanel } from '@/components/plan/PlanProfitSummaryPanel'
 import { PlanRootSetupModal } from '@/components/plan/PlanRootSetupModal'
 import { PlanRootProfitModal } from '@/components/plan/PlanRootProfitModal'
-import { PlanTimelineProvider } from '@/contexts/PlanTimelineContext'
 import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
 import { useManufacturingPlan, usePlanSkills } from '@/hooks/useManufacturingPlan'
@@ -46,7 +45,11 @@ import { HUBS } from '@/types'
 import { productionGraphRoute } from '@/lib/paths'
 import { formatDecimal } from '@/lib/profit'
 import { DEFAULT_BATCH_SIZE } from '@/types'
-import type { ManufacturingSettings, PlanBuildMode } from '@/types'
+import type { ManufacturingSettings, PlanBuildMode, PlanNodeOverride } from '@/types'
+
+function parsePlanViewTab(raw: string | null): PlanViewTab {
+  return raw === 'graph' ? 'graph' : 'supply'
+}
 
 function IconBtn({
   label,
@@ -143,9 +146,25 @@ function ExitFullscreenIcon() {
 }
 
 export function PlanPage() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const addProductId = searchParams.get('add')
+  const tab = parsePlanViewTab(searchParams.get('view'))
+
+  const setTab = useCallback(
+    (next: PlanViewTab) => {
+      setSearchParams(
+        (prev) => {
+          const nextParams = new URLSearchParams(prev)
+          if (next === 'supply') nextParams.delete('view')
+          else nextParams.set('view', next)
+          return nextParams
+        },
+        { replace: true },
+      )
+    },
+    [setSearchParams],
+  )
 
   const { data, isLoading } = useSdeData()
   const userData = useAppStore((s) => s.userData)
@@ -159,12 +178,12 @@ export function PlanPage() {
   const addRootToPlanTemplate = useAppStore((s) => s.addRootToPlanTemplate)
   const removeRootFromPlanTemplate = useAppStore((s) => s.removeRootFromPlanTemplate)
 
-  const [tab, setTab] = useState<PlanViewTab>('supply')
   const [graphProductTypeId, setGraphProductTypeId] = useState<number | null>(null)
   const [meTeProductTypeId, setMeTeProductTypeId] = useState<number | null>(null)
   const [setupDetailRootId, setSetupDetailRootId] = useState<string | null>(null)
   const [profitDetailRootId, setProfitDetailRootId] = useState<string | null>(null)
   const [chainFullscreen, setChainFullscreen] = useState(false)
+  const handledAddRef = useRef<string | null>(null)
   const { skills } = usePlanSkills()
 
   const template = templates.find((t) => t.id === selectedId) ?? null
@@ -411,35 +430,57 @@ export function PlanPage() {
 
   useEffect(() => {
     if (!template || !data) return
+    let needsUpdate = false
     const nextRoots = template.roots.map((root) => {
       const bp = getBlueprintForProduct(blueprints, root.productTypeId)
-      return syncRootEntry(
+      const synced = syncRootEntry(
         root,
         bp,
         userData.settings,
         slots,
         template.nodeOverrides[root.productTypeId],
       )
+      if (synced !== root) needsUpdate = true
+      return synced
     })
-    const changed = nextRoots.some(
-      (root, index) => root.productionDurationHours !== template.roots[index]?.productionDurationHours,
-    )
-    if (changed) {
+    if (needsUpdate) {
       updatePlanTemplate(template.id, { roots: nextRoots })
     }
   }, [template, data, blueprints, userData.settings, slots, updatePlanTemplate])
 
   useEffect(() => {
     if (!addProductId || !data || !template) return
+    const key = `${template.id}:${addProductId}`
+    if (handledAddRef.current === key) return
+
     const id = Number(addProductId)
     if (!Number.isFinite(id)) return
     const bp = getBlueprintForProduct(blueprints, id)
     if (!bp) return
+
+    handledAddRef.current = key
     addRootToPlanTemplate(template.id, {
       id: createPlanRootId(),
       ...createSyncedPlanRootEntry(id, bp, userData.settings, slots),
     })
-  }, [addProductId, data, template, blueprints, addRootToPlanTemplate, userData.settings, slots])
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('add')
+        return next
+      },
+      { replace: true },
+    )
+  }, [
+    addProductId,
+    data,
+    template,
+    blueprints,
+    addRootToPlanTemplate,
+    userData.settings,
+    slots,
+    setSearchParams,
+  ])
 
   useEffect(() => {
     if (!chainFullscreen) return
@@ -566,7 +607,7 @@ export function PlanPage() {
     <div className="flex flex-col gap-5 flex-1 min-h-0">
       <PageHeader
         title="Manufacturing plan"
-        subtitle="Templates, build vs buy chain, and a timeline of supply vs demand"
+        subtitle="Templates, build vs buy chain, and when the plan finishes"
         action={
           <button type="button" className="btn btn-primary btn-sm" onClick={() => addPlanTemplate()}>
             New plan
@@ -590,14 +631,7 @@ export function PlanPage() {
           </button>
         </Panel>
       ) : (
-        <PlanTimelineProvider
-          windowHours={plan.windowHours}
-          nodes={plan.nodes}
-          simulations={plan.simulations}
-          defaultSupplierId={plan.defaultSupplierId}
-          defaultConsumerId={plan.defaultConsumerId}
-        >
-          <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5">
           <PlanDetailHeader
             name={template.name}
             stats={[
@@ -700,7 +734,14 @@ export function PlanPage() {
             </div>
           </section>
 
-          <PlanTimelineChart />
+          <PlanTimelinePanel
+            windowHours={plan.windowHours}
+            nodes={plan.nodes}
+            simulations={plan.simulations}
+            jobs={plan.jobs}
+            slots={slots}
+            blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+          />
 
           <PlanViewTabs
             active={tab}
@@ -730,6 +771,8 @@ export function PlanPage() {
                 nodes={plan.nodes}
                 onToggleMode={toggleMode}
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+                simulations={plan.simulations}
+                windowHours={plan.windowHours}
               />
             ) : null}
           </PlanViewTabs>
@@ -748,6 +791,8 @@ export function PlanPage() {
                   nodes={plan.nodes}
                   onToggleMode={toggleMode}
                   blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+                  simulations={plan.simulations}
+                  windowHours={plan.windowHours}
                 />
               </div>
               <form
@@ -760,7 +805,6 @@ export function PlanPage() {
             </dialog>
           ) : null}
           </div>
-        </PlanTimelineProvider>
       )}
 
       {graphBlueprint ? (

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { schedulePlanJobs, detectOverUnder, scheduledDurationHours, windowHoursFromJobs } from '@/lib/planScheduler'
+import { collectPlanShortages, simulatePlanFlow } from '@/lib/planSimulator'
 import type { PlanNode } from '@/types'
 
 function mockNode(partial: Partial<PlanNode> & Pick<PlanNode, 'productTypeId' | 'name'>): PlanNode {
@@ -41,15 +42,91 @@ describe('schedulePlanJobs', () => {
 
   it('schedules deeper nodes before parents', () => {
     const nodes = [
-      mockNode({ productTypeId: 1, name: 'Child', depth: 2 }),
-      mockNode({ productTypeId: 2, name: 'Parent', depth: 1 }),
+      mockNode({
+        productTypeId: 1,
+        name: 'Child',
+        depth: 2,
+        runs: 10,
+        jobTimeSeconds: 3600,
+        outputQty: 10,
+        demandByParent: [{ parentProductTypeId: 2, qty: 10 }],
+        parentProductTypeIds: [2],
+      }),
+      mockNode({
+        productTypeId: 2,
+        name: 'Parent',
+        depth: 1,
+        runs: 10,
+        jobTimeSeconds: 3600,
+        outputQty: 10,
+        totalDemandQty: 10,
+        childProductTypeIds: [1],
+      }),
     ]
     const jobs = schedulePlanJobs({ nodes, slots: 1, windowHours: 48 })
     const childFirst = jobs.find((j) => j.productTypeId === 1)
     const parent = jobs.find((j) => j.productTypeId === 2)
     expect(childFirst).toBeDefined()
     expect(parent).toBeDefined()
-    expect(childFirst!.startHour).toBeLessThanOrEqual(parent!.startHour)
+    expect(childFirst!.endHour).toBeLessThanOrEqual(parent!.startHour + 0.001)
+  })
+
+  it('waits for child supply before starting parent on another slot', () => {
+    const nodes = [
+      mockNode({
+        productTypeId: 1,
+        name: 'Child',
+        depth: 2,
+        runs: 10,
+        jobTimeSeconds: 7200,
+        outputQty: 10,
+        demandByParent: [{ parentProductTypeId: 2, qty: 10 }],
+        parentProductTypeIds: [2],
+      }),
+      mockNode({
+        productTypeId: 2,
+        name: 'Parent',
+        depth: 1,
+        runs: 10,
+        jobTimeSeconds: 3600,
+        outputQty: 10,
+        totalDemandQty: 10,
+        childProductTypeIds: [1],
+      }),
+    ]
+    const jobs = schedulePlanJobs({ nodes, slots: 2, windowHours: 48 })
+    const child = jobs.find((j) => j.productTypeId === 1)!
+    const parent = jobs.find((j) => j.productTypeId === 2)!
+    expect(parent.startHour).toBeGreaterThanOrEqual(child.endHour - 0.001)
+  })
+
+  it('keeps component inventory non-negative for a simple chain', () => {
+    const nodes = [
+      mockNode({
+        productTypeId: 1,
+        name: 'Child',
+        depth: 2,
+        runs: 20,
+        jobTimeSeconds: 7200,
+        outputQty: 20,
+        demandByParent: [{ parentProductTypeId: 2, qty: 20 }],
+        parentProductTypeIds: [2],
+      }),
+      mockNode({
+        productTypeId: 2,
+        name: 'Parent',
+        depth: 1,
+        runs: 10,
+        jobTimeSeconds: 3600,
+        outputQty: 10,
+        totalDemandQty: 10,
+        childProductTypeIds: [1],
+      }),
+    ]
+    const jobs = schedulePlanJobs({ nodes, slots: 11, windowHours: Number.POSITIVE_INFINITY })
+    const windowHours = Math.max(...jobs.map((j) => j.endHour))
+    const simulations = simulatePlanFlow({ nodes, jobs, windowHours })
+    expect(collectPlanShortages(simulations, nodes)).toHaveLength(0)
   })
 
   it('scales job duration by runs per chunk when concurrent copies split runs', () => {

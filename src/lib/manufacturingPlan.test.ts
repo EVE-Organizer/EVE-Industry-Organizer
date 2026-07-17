@@ -122,6 +122,19 @@ describe('expandManufacturingPlan', () => {
 describe('manufacturingSlotsFromSkills', () => {
   it('computes slots from mass production skills', async () => {
     const { manufacturingSlotsFromSkills } = await import('@/lib/manufacturingSlots')
-    expect(manufacturingSlotsFromSkills({ massProduction: 4, advancedMassProduction: 4 })).toBe(9)
+    expect(
+      manufacturingSlotsFromSkills({
+        industry: 5,
+        massProduction: 5,
+        advancedMassProduction: 3,
+      }),
+    ).toBe(9)
+    expect(
+      manufacturingSlotsFromSkills({
+        industry: 5,
+        massProduction: 5,
+        advancedMassProduction: 5,
+      }),
+    ).toBe(11)
   })
 })

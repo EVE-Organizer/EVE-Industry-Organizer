@@ -1,199 +1,450 @@
-import { useMemo, useRef, useState, type PointerEvent } from 'react'
-import { usePlanTimeline } from '@/contexts/PlanTimelineContext'
+import { useMemo } from 'react'
+import {
+  Bar,
+  Brush,
+  CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
+  ReferenceArea,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { Tooltip as UiTooltip, useAnchorTooltip } from '@/components/Tooltip'
+import { PlanProductIcon } from '@/components/plan/PlanProductIcon'
+import { collectPlanShortages } from '@/lib/planSimulator'
+import {
+  buildNodesForStockCharts,
+  buildSlotLanes,
+  buildStockSeries,
+  buildTimelineTicks,
+  downsampleStockSeries,
+  formatHourTick,
+  ganttBarColor,
+  layoutLaneBars,
+  timelineTickPosition,
+  type PlanSlotBarLayout,
+  type PlanSlotJobBar,
+  type PlanSlotLane,
+  type PlanStockPoint,
+} from '@/lib/planTimelineChartData'
 import { formatDecimal } from '@/lib/profit'
+import type { PlanNode, PlanNodeSimulation, ScheduledPlanJob } from '@/types'
 
-const CHART_HEIGHT = 160
-const BRUSH_HEIGHT = 48
+const GRID_STROKE = 'rgba(48, 54, 61, 0.9)'
+const AXIS_TICK = { fill: 'rgba(230, 237, 243, 0.55)', fontSize: 11 }
+const SUPPLY_FILL = 'rgba(74, 158, 255, 0.75)' // eve blue
+const DEMAND_FILL = 'rgba(245, 166, 35, 0.75)' // eve orange
+const STOCK_STROKE = '#3fb950' // success
+const STOCK_STROKE_SHORT = '#f85149' // error
+const BAR_ICON = 20
 
-export function PlanTimelineChart({ embedded = false }: { embedded?: boolean }) {
-  const {
-    windowHours,
-    viewportStart,
-    viewportEnd,
-    playheadHours,
-    pairBuckets,
-    setViewport,
-    setPlayheadHours,
-    selectedSupplierId,
-    selectedConsumerId,
-    nodes,
-    setSelectedPair,
-  } = usePlanTimeline()
+function StockTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean
+  payload?: ReadonlyArray<{ name?: string; value?: number }>
+  label?: string | number
+}) {
+  if (!active || !payload?.length) return null
+  const hour = typeof label === 'number' ? label : Number(label)
 
-  const brushRef = useRef<SVGSVGElement>(null)
-  const [draggingBrush, setDraggingBrush] = useState<'move' | 'left' | 'right' | null>(null)
-  const dragOrigin = useRef({ x: 0, start: 0, end: 0 })
+  return (
+    <div className="rounded-lg border border-eve-border bg-base-200 px-3 py-2 text-xs shadow-lg">
+      <p className="font-medium text-base-content tabular-nums">{formatHourTick(hour)}</p>
+      {payload.map((entry) => (
+        <p key={entry.name} className="text-base-content/70 tabular-nums">
+          {entry.name}: {formatDecimal(Number(entry.value), 1)}
+        </p>
+      ))}
+    </div>
+  )
+}
 
-  const visibleBuckets = useMemo(
-    () => pairBuckets.filter((b) => b.hour >= viewportStart && b.hour <= viewportEnd),
-    [pairBuckets, viewportStart, viewportEnd],
+function shortageAreas(points: PlanStockPoint[]): { start: number; end: number }[] {
+  const areas: { start: number; end: number }[] = []
+  let start: number | null = null
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i]!
+    const nextHour = points[i + 1]?.hour ?? p.hour + 1
+    if (p.inventory < 0 && start == null) start = p.hour
+    if (p.inventory >= 0 && start != null) {
+      areas.push({ start, end: p.hour })
+      start = null
+    }
+    if (i === points.length - 1 && start != null) {
+      areas.push({ start, end: nextHour })
+    }
+  }
+  return areas
+}
+
+function SlotJobBarDetails({
+  bar,
+  blueprintTypeId,
+}: {
+  bar: PlanSlotJobBar
+  blueprintTypeId?: number
+}) {
+  return (
+    <div className="plan-timeline__bar-tip flex flex-col gap-1.5">
+      <div className="flex items-start gap-2.5">
+        <PlanProductIcon
+          productTypeId={bar.productTypeId}
+          blueprintTypeId={blueprintTypeId}
+          size={32}
+          alt=""
+          className="plan-timeline__bar-tip-icon shrink-0"
+        />
+        <div className="min-w-0 flex flex-col gap-1">
+          <p className="font-semibold text-base-content leading-snug">{bar.name}</p>
+          <p className="tabular-nums text-base-content/75">
+            {formatHourTick(bar.startHour)} – {formatHourTick(bar.endHour)}
+            <span className="text-base-content/50"> · </span>
+            {formatDecimal(bar.durationHours, 1)}h job
+          </p>
+          <p className="tabular-nums text-base-content/75">
+            {formatDecimal(bar.runs, 0)} runs · {formatDecimal(bar.outputQty, 0)} output
+          </p>
+          {bar.isRoot ? (
+            <p className="text-[10px] uppercase tracking-wide text-primary/80">Root build</p>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SlotJobBar({
+  bar,
+  layout,
+  blueprintTypeId,
+}: {
+  bar: PlanSlotJobBar
+  layout: PlanSlotBarLayout
+  blueprintTypeId?: number
+}) {
+  const fill = ganttBarColor(bar.depth, bar.isRoot)
+  const { ref, triggerProps, TooltipPortal } = useAnchorTooltip('top')
+  const showLabel = layout.visualWidthPct >= 6 || bar.durationHours >= 2.5
+
+  return (
+    <>
+      <button
+        ref={ref}
+        type="button"
+        className={`plan-timeline__bar${showLabel ? '' : ' plan-timeline__bar--compact'}`}
+        style={{
+          left: layout.left,
+          width: layout.width,
+          maxWidth: layout.width,
+          ['--bar-row' as string]: layout.row,
+          backgroundColor: `${fill}33`,
+          borderColor: `${fill}99`,
+        }}
+        {...triggerProps}
+      >
+        <PlanProductIcon
+          productTypeId={bar.productTypeId}
+          blueprintTypeId={blueprintTypeId}
+          size={BAR_ICON}
+          alt=""
+          className="plan-timeline__bar-icon"
+        />
+        {showLabel ? <span className="plan-timeline__bar-label">{bar.name}</span> : null}
+      </button>
+      <TooltipPortal
+        content={<SlotJobBarDetails bar={bar} blueprintTypeId={blueprintTypeId} />}
+        className="max-w-sm"
+      />
+    </>
+  )
+}
+
+function PlanSlotSchedule({
+  lanes,
+  windowHours,
+  blueprintTypeIdByProduct,
+}: {
+  lanes: PlanSlotLane[]
+  windowHours: number
+  blueprintTypeIdByProduct: Map<number, number>
+}) {
+  const ticks = useMemo(() => buildTimelineTicks(windowHours), [windowHours])
+  const laneLayouts = useMemo(
+    () => lanes.map((lane) => layoutLaneBars(lane.jobs, windowHours)),
+    [lanes, windowHours],
   )
 
-  const maxVal = useMemo(() => {
+  if (lanes.every((l) => l.jobs.length === 0)) {
+    return <p className="text-sm text-base-content/60">No scheduled jobs yet.</p>
+  }
+
+  return (
+    <div className="plan-timeline__chart-block">
+      <UiTooltip
+        text="Each row is one industry slot. Labels show real hours (0 to finish). Short jobs use a minimum bar width; overlapping bars stack within the lane. Hover a bar for exact timing."
+        placement="right"
+      >
+        <h3 className="plan-timeline__chart-title cursor-help">Job schedule</h3>
+      </UiTooltip>
+
+      <div className="plan-timeline__gantt">
+        <div className="plan-timeline__gantt-axis" aria-hidden>
+          <div className="plan-timeline__gantt-axis-spacer" />
+          <div className="plan-timeline__gantt-axis-track">
+            {ticks.map((hour) => (
+              <span
+                key={hour}
+                className="plan-timeline__gantt-tick"
+                style={{ left: timelineTickPosition(hour, windowHours) }}
+              >
+                {formatHourTick(hour)}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="plan-timeline__lanes">
+          {lanes.map((lane, laneIndex) => {
+            const { layouts, rowCount } = laneLayouts[laneIndex]!
+            return (
+            <div key={lane.slot} className="plan-timeline__lane">
+              <div className="plan-timeline__lane-label">
+                <span className="font-medium">{lane.label}</span>
+                <span className="plan-timeline__lane-meta tabular-nums">
+                  {lane.jobCount} job{lane.jobCount === 1 ? '' : 's'} · ends {formatHourTick(lane.endHour)}
+                </span>
+              </div>
+              <div
+                className="plan-timeline__lane-track"
+                style={{ ['--lane-rows' as string]: rowCount }}
+              >
+                {ticks.map((hour) => (
+                  <span
+                    key={hour}
+                    className="plan-timeline__lane-gridline"
+                    style={{ left: timelineTickPosition(hour, windowHours) }}
+                  />
+                ))}
+                {lane.jobs.length === 0 ? (
+                  <span className="plan-timeline__lane-empty">Idle</span>
+                ) : (
+                  lane.jobs.map((bar) => {
+                    const layout = layouts.get(bar.id)
+                    if (!layout) return null
+                    return (
+                    <SlotJobBar
+                      key={bar.id}
+                      bar={bar}
+                      layout={layout}
+                      blueprintTypeId={blueprintTypeIdByProduct.get(bar.productTypeId)}
+                    />
+                    )
+                  })
+                )}
+              </div>
+            </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PlanStockChart({
+  node,
+  points,
+  windowHours,
+}: {
+  node: PlanNode
+  points: PlanStockPoint[]
+  windowHours: number
+}) {
+  const areas = useMemo(() => shortageAreas(points), [points])
+  const hasShortage = areas.length > 0
+  const yMax = useMemo(() => {
     let m = 1
-    for (const b of visibleBuckets) {
-      m = Math.max(m, b.supply, b.demand, Math.abs(b.inventory))
+    for (const p of points) {
+      m = Math.max(m, p.supply, p.demand, Math.abs(p.inventory))
     }
-    return m
-  }, [visibleBuckets])
+    return m * 1.1
+  }, [points])
 
-  const pairs = useMemo(() => {
-    const options: { supplierId: number; consumerId: number; label: string }[] = []
-    for (const node of nodes) {
-      for (const parentId of node.parentProductTypeIds) {
-        const parent = nodes.find((n) => n.productTypeId === parentId)
-        if (!parent) continue
-        options.push({
-          supplierId: node.productTypeId,
-          consumerId: parentId,
-          label: `${node.name} → ${parent.name}`,
-        })
-      }
-    }
-    return options
-  }, [nodes])
+  if (points.length === 0) return null
 
-  const onBrushPointerDown = (e: PointerEvent, mode: 'move' | 'left' | 'right') => {
-    e.preventDefault()
-    setDraggingBrush(mode)
-    dragOrigin.current = { x: e.clientX, start: viewportStart, end: viewportEnd }
-    ;(e.target as Element).setPointerCapture(e.pointerId)
-  }
+  return (
+    <div className="plan-timeline__stock-chart">
+      <p className="plan-timeline__stock-title">
+        {node.name}
+        {hasShortage ? <span className="plan-timeline__stock-warn"> · short</span> : null}
+      </p>
+      <ResponsiveContainer width="100%" height={160}>
+        <ComposedChart data={points} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} />
+          <XAxis
+            dataKey="hour"
+            type="number"
+            domain={[0, Math.max(windowHours, 1)]}
+            tick={AXIS_TICK}
+            tickFormatter={(v) => formatHourTick(Number(v))}
+          />
+          <YAxis tick={AXIS_TICK} domain={[-yMax, yMax]} width={44} />
+          <Tooltip content={<StockTooltip />} />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
+          {areas.map((a) => (
+            <ReferenceArea
+              key={`${a.start}-${a.end}`}
+              x1={a.start}
+              x2={a.end}
+              fill="rgba(248, 81, 73, 0.14)"
+              strokeOpacity={0}
+            />
+          ))}
+          <Bar dataKey="supply" name="Supply" fill={SUPPLY_FILL} barSize={6} />
+          <Bar dataKey="demand" name="Demand" fill={DEMAND_FILL} barSize={6} />
+          <Line
+            type="monotone"
+            dataKey="inventory"
+            name="Stock"
+            stroke={hasShortage ? STOCK_STROKE_SHORT : STOCK_STROKE}
+            strokeWidth={2}
+            dot={false}
+          />
+          <Brush
+            dataKey="hour"
+            height={20}
+            stroke="rgba(245, 166, 35, 0.55)"
+            fill="rgba(245, 166, 35, 0.08)"
+            travellerWidth={8}
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
 
-  const onBrushPointerMove = (e: PointerEvent) => {
-    if (!draggingBrush) return
-    const width = brushRef.current?.getBoundingClientRect().width ?? 1
-    const deltaHours = ((e.clientX - dragOrigin.current.x) / width) * windowHours
-    const { start, end } = dragOrigin.current
-    const viewSpan = end - start
+export function PlanTimelinePanel({
+  windowHours,
+  nodes,
+  simulations,
+  jobs,
+  slots,
+  blueprintTypeIdByProduct,
+  embedded = false,
+}: {
+  windowHours: number
+  nodes: PlanNode[]
+  simulations: Map<number, PlanNodeSimulation>
+  jobs: ScheduledPlanJob[]
+  slots: number
+  blueprintTypeIdByProduct: Map<number, number>
+  embedded?: boolean
+}) {
+  const shortages = useMemo(
+    () => collectPlanShortages(simulations, nodes),
+    [simulations, nodes],
+  )
 
-    if (draggingBrush === 'move') {
-      let newStart = start + deltaHours
-      newStart = Math.max(0, Math.min(windowHours - viewSpan, newStart))
-      setViewport(newStart, newStart + viewSpan)
-    } else if (draggingBrush === 'left') {
-      setViewport(Math.max(0, Math.min(start + deltaHours, end - 1)), end)
-    } else {
-      setViewport(start, Math.min(windowHours, Math.max(end + deltaHours, start + 1)))
-    }
-  }
+  const uniqueShortCount = useMemo(
+    () => new Set(shortages.map((s) => s.productTypeId)).size,
+    [shortages],
+  )
 
-  const onBrushPointerUp = () => setDraggingBrush(null)
+  const lanes = useMemo(() => buildSlotLanes(jobs, nodes, slots), [jobs, nodes, slots])
 
-  const playheadPct =
-    ((playheadHours - viewportStart) / Math.max(1, viewportEnd - viewportStart)) * 100
-
-  const shortages = visibleBuckets.filter((b) => b.inventory < 0)
+  const stockNodes = useMemo(
+    () => buildNodesForStockCharts(nodes, jobs, simulations, 4),
+    [nodes, jobs, simulations],
+  )
 
   const body = (
     <>
-      <div className="flex flex-wrap gap-2 mb-3 items-center">
-        <label className="text-xs opacity-70">Node pair</label>
-        <select
-          className="select select-bordered select-sm max-w-md"
-          value={
-            selectedSupplierId != null && selectedConsumerId != null
-              ? `${selectedSupplierId}:${selectedConsumerId}`
-              : ''
-          }
-          onChange={(e) => {
-            const [s, c] = e.target.value.split(':').map(Number)
-            if (s && c) setSelectedPair(s, c)
-          }}
+      <div className="plan-timeline__hero">
+        <UiTooltip
+          text="Hour when the last scheduled job on this plan finishes, after packing work onto your industry slots. Not the ideal single-root job time."
+          placement="bottom"
         >
-          <option value="" disabled>
-            Select supplier → consumer
-          </option>
-          {pairs.map((p) => (
-            <option key={`${p.supplierId}-${p.consumerId}`} value={`${p.supplierId}:${p.consumerId}`}>
-              {p.label}
-            </option>
-          ))}
-        </select>
-        <span className="text-xs opacity-60 ml-auto tabular-nums">
-          Playhead: {formatDecimal(playheadHours, 1)}h
-        </span>
+          <p className="plan-timeline__finish">
+            Finishes in{' '}
+            <span className="plan-timeline__finish-value">{formatDecimal(windowHours, 1)}h</span>
+          </p>
+        </UiTooltip>
+
+        <UiTooltip
+          text={
+            uniqueShortCount > 0
+              ? 'A component is short when its stock goes negative because a parent job starts before enough supply is ready. See charts below for the worst cases.'
+              : 'Every build node has enough supply when downstream jobs need it.'
+          }
+          placement="bottom"
+        >
+          <p
+            className={`plan-timeline__status ${uniqueShortCount > 0 ? 'plan-timeline__status--warn' : 'plan-timeline__status--ok'}`}
+          >
+            {uniqueShortCount > 0
+              ? `${uniqueShortCount} component${uniqueShortCount === 1 ? '' : 's'} short`
+              : 'On track'}
+          </p>
+        </UiTooltip>
+
+        <UiTooltip
+          text={`${slots} concurrent industry ${slots === 1 ? 'slot' : 'slots'} from Mass Production and related skills.`}
+          placement="bottom"
+        >
+          <p className="plan-timeline__slots cursor-help tabular-nums text-sm text-base-content/60">
+            {slots} slot{slots === 1 ? '' : 's'}
+          </p>
+        </UiTooltip>
       </div>
 
-      <svg
-        className="w-full touch-none"
-        style={{ height: CHART_HEIGHT }}
-        viewBox={`0 0 100 ${CHART_HEIGHT}`}
-        preserveAspectRatio="none"
-        onClick={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect()
-          const ratio = (e.clientX - rect.left) / rect.width
-          setPlayheadHours(viewportStart + ratio * (viewportEnd - viewportStart))
-        }}
-      >
-        {visibleBuckets.map((b, i) => {
-          const x = visibleBuckets.length > 1 ? (i / (visibleBuckets.length - 1)) * 100 : 50
-          const barH = (b.supply / maxVal) * (CHART_HEIGHT - 24)
-          return (
-            <g key={b.hour}>
-              <rect
-                x={x - 1}
-                y={CHART_HEIGHT - 12 - barH}
-                width={2}
-                height={barH}
-                className="fill-primary/70"
-                rx={0.5}
-              />
-              <circle
-                cx={x}
-                cy={CHART_HEIGHT - 12 - (Math.max(0, b.inventory) / maxVal) * (CHART_HEIGHT - 24)}
-                r={1.5}
-                className={b.inventory < 0 ? 'fill-error' : 'fill-secondary'}
-              />
-            </g>
-          )
-        })}
-        <line x1={playheadPct} x2={playheadPct} y1={0} y2={CHART_HEIGHT} className="stroke-primary" strokeWidth={0.5} />
-      </svg>
+      <PlanSlotSchedule
+        lanes={lanes}
+        windowHours={windowHours}
+        blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+      />
 
-      {shortages.length > 0 && (
-        <p className="text-xs text-error mt-2">
-          Short supply in view: {shortages.length} bucket(s). Upstream may not feed downstream in time.
-        </p>
+      {stockNodes.length > 0 ? (
+        <div className="plan-timeline__chart-block">
+          <UiTooltip
+            text="Hourly supply, demand, and stock for the worst shortages. Red bands mark short windows."
+            placement="right"
+          >
+            <h3 className="plan-timeline__chart-title cursor-help">Component stock</h3>
+          </UiTooltip>
+          <div className="plan-timeline__stock-grid">
+            {stockNodes.map((node) => (
+              <PlanStockChart
+                key={node.productTypeId}
+                node={node}
+                points={downsampleStockSeries(buildStockSeries(simulations.get(node.productTypeId)))}
+                windowHours={windowHours}
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p className="plan-timeline__on-track">Supply keeps up across the full plan.</p>
       )}
-
-      <svg
-        ref={brushRef}
-        className="w-full mt-2 touch-none"
-        style={{ height: BRUSH_HEIGHT }}
-        viewBox="0 0 100 40"
-        preserveAspectRatio="none"
-        onPointerMove={onBrushPointerMove}
-        onPointerUp={onBrushPointerUp}
-        onPointerLeave={onBrushPointerUp}
-      >
-        <rect width={100} height={40} className="fill-base-300" rx={2} />
-        <rect
-          x={(viewportStart / windowHours) * 100}
-          y={2}
-          width={((viewportEnd - viewportStart) / windowHours) * 100}
-          height={36}
-          className="fill-primary/20 stroke-primary/50"
-          strokeWidth={0.3}
-          rx={1}
-          onPointerDown={(e) => onBrushPointerDown(e, 'move')}
-        />
-      </svg>
-      <div className="flex justify-between text-[10px] opacity-50 tabular-nums mt-1">
-        <span>0h</span>
-        <span>{formatDecimal(windowHours, 0)}h</span>
-      </div>
     </>
   )
 
   if (embedded) return body
 
   return (
-    <section className="plan-build-card">
+    <section className="plan-build-card plan-timeline">
       <div className="plan-build-card__header">
-        <h2 className="plan-build-card__title">Timeline</h2>
+        <h2 className="plan-build-card__title">Plan timeline</h2>
       </div>
-      <div className="plan-build-card__body">{body}</div>
+      <div className="plan-build-card__body plan-timeline__body">{body}</div>
     </section>
   )
 }
+
+/** @deprecated Use PlanTimelinePanel */
+export const PlanTimelineChart = PlanTimelinePanel

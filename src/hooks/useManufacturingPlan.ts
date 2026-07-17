@@ -21,8 +21,6 @@ export function useManufacturingPlan(
         nodes: [],
         jobs: [],
         simulations: new Map(),
-        defaultSupplierId: null,
-        defaultConsumerId: null,
         slots: manufacturingSlotsFromSkills(settings.skills),
         windowHours: 1,
         warnings: [] as { productTypeId: number; message: string }[],
@@ -49,22 +47,10 @@ export function useManufacturingPlan(
       windowHours,
     })
 
-    let supplierId: number | null = null
-    let consumerId: number | null = null
-    for (const node of expanded.nodes) {
-      if (node.parentProductTypeIds.length > 0 && node.mode === 'build') {
-        supplierId = node.productTypeId
-        consumerId = node.parentProductTypeIds[0] ?? null
-        break
-      }
-    }
-
     return {
       nodes: expanded.nodes,
       jobs,
       simulations,
-      defaultSupplierId: supplierId,
-      defaultConsumerId: consumerId,
       slots: expanded.slots,
       windowHours,
       warnings: detectOverUnder(expanded.nodes),
@@ -76,14 +62,12 @@ export function usePlanSkills() {
   const settings = useAppStore((s) => s.userData.settings)
   const character = useAuthStore((s) => s.character)
 
-  return useMemo(() => {
-    if (character?.skills) {
-      return {
-        skills: { ...settings.skills, ...character.skills },
-        source: 'sso' as const,
-        name: character.characterName,
-      }
-    }
-    return { skills: settings.skills, source: 'settings' as const, name: null }
-  }, [settings.skills, character])
+  return useMemo(
+    () => ({
+      skills: settings.skills,
+      source: character ? ('sso' as const) : ('settings' as const),
+      name: character?.characterName ?? null,
+    }),
+    [settings.skills, character],
+  )
 }

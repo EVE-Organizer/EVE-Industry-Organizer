@@ -6,12 +6,15 @@ import {
   useState,
   type CSSProperties,
   type ReactNode,
+  type RefCallback,
 } from 'react'
 import { createPortal } from 'react-dom'
 
 export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left'
 
 const GAP = 8
+const TOOLTIP_CLASS =
+  'pointer-events-none fixed z-[9999] max-w-xs rounded-md border border-eve-border bg-base-200 px-3 py-2 text-left text-xs leading-snug text-base-content shadow-lg'
 
 function placementStyle(
   placement: TooltipPlacement,
@@ -44,6 +47,66 @@ function placementStyle(
         transform: 'translate(0, -50%)',
       }
   }
+}
+
+/** Attach a portal tooltip to any element without wrapping it in an extra box (keeps flex layouts intact). */
+export function useAnchorTooltip(placement: TooltipPlacement = 'top') {
+  const tooltipId = useId()
+  const anchorRef = useRef<HTMLElement | null>(null)
+  const [visible, setVisible] = useState(false)
+  const [style, setStyle] = useState<CSSProperties>({})
+
+  const updatePosition = useCallback(() => {
+    const anchor = anchorRef.current
+    if (!anchor) return
+    setStyle(placementStyle(placement, anchor.getBoundingClientRect()))
+  }, [placement])
+
+  useLayoutEffect(() => {
+    if (!visible) return
+    updatePosition()
+    window.addEventListener('scroll', updatePosition, true)
+    window.addEventListener('resize', updatePosition)
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true)
+      window.removeEventListener('resize', updatePosition)
+    }
+  }, [visible, updatePosition])
+
+  const ref: RefCallback<HTMLElement> = useCallback((node) => {
+    anchorRef.current = node
+  }, [])
+
+  const triggerProps = {
+    'aria-describedby': visible ? tooltipId : undefined,
+    onMouseEnter: () => setVisible(true),
+    onMouseLeave: () => setVisible(false),
+    onFocus: () => setVisible(true),
+    onBlur: () => setVisible(false),
+  }
+
+  function TooltipPortal({
+    content,
+    className = '',
+  }: {
+    content: ReactNode
+    className?: string
+  }) {
+    if (!visible) return null
+    return createPortal(
+      <div
+        id={tooltipId}
+        role="tooltip"
+        className={`${TOOLTIP_CLASS} ${className}`.trim()}
+        style={style}
+      >
+        {content}
+      </div>,
+      document.body,
+    )
+  }
+
+  return { ref, triggerProps, TooltipPortal }
 }
 
 interface TooltipProps {
@@ -108,7 +171,7 @@ export function Tooltip({
           <div
             id={tooltipId}
             role="tooltip"
-            className="pointer-events-none fixed z-[9999] max-w-xs rounded-md bg-neutral px-3 py-2 text-left text-xs leading-snug text-neutral-content shadow-lg"
+            className={TOOLTIP_CLASS}
             style={style}
           >
             {text}

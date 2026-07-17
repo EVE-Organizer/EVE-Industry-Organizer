@@ -9,6 +9,8 @@ interface SkillLevelSliderProps {
   onChange: (level: number) => void
   min?: number
   max?: number
+  disabled?: boolean
+  disabledReason?: string
 }
 
 export function SkillLevelSlider({
@@ -19,9 +21,15 @@ export function SkillLevelSlider({
   onChange,
   min = 0,
   max = 5,
+  disabled = false,
+  disabledReason,
 }: SkillLevelSliderProps) {
+  const hint = disabled ? disabledReason : undefined
+
   return (
-    <div className="flex gap-3 items-center py-2 border-b border-eve-border/50 last:border-0">
+    <div
+      className={`flex gap-3 items-center py-2 border-b border-eve-border/50 last:border-0${disabled ? ' opacity-50' : ''}`}
+    >
       <img
         src={skillIconUrl(skillId, 32)}
         alt=""
@@ -41,6 +49,7 @@ export function SkillLevelSlider({
             <span className="opacity-50 ml-1">({value})</span>
           </span>
         </div>
+        {hint ? <p className="text-[10px] opacity-60 mb-1">{hint}</p> : null}
         <input
           type="range"
           min={min}
@@ -48,6 +57,7 @@ export function SkillLevelSlider({
           step={1}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
+          disabled={disabled}
           className="range range-primary range-xs w-full"
           aria-label={`${label} level`}
         />

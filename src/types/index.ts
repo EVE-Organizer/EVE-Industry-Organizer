@@ -315,6 +315,8 @@ export interface UserData {
   settings: GlobalSettings
   watchlist: WatchlistItem[]
   planTemplates: ManufacturingPlanTemplate[]
+  /** Last selected plan template tab; restored on reload. */
+  selectedPlanTemplateId?: string | null
 }
 
 export interface HubConfig {

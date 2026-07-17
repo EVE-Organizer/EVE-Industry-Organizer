@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeImportedSkillLevels, skillLevel } from '@/lib/skillFields'
+import {
+  enforceSkillPrerequisites,
+  maxTrainableSkillLevel,
+  normalizeImportedSkillLevels,
+  prerequisitesMet,
+  skillLevel,
+} from '@/lib/skillFields'
+import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 
 describe('skillFields', () => {
   it('skillLevel returns 0 for missing keys', () => {
@@ -24,5 +31,38 @@ describe('skillFields', () => {
       accounting: 0,
       brokerRelations: 0,
     })
+  })
+
+  it('locks advanced mass production until mass production V', () => {
+    expect(prerequisitesMet({ industry: 5, massProduction: 4 }, 'advancedMassProduction')).toBe(false)
+    expect(maxTrainableSkillLevel({ industry: 5, massProduction: 4 }, 'advancedMassProduction')).toBe(0)
+    expect(
+      enforceSkillPrerequisites({
+        industry: 5,
+        advancedIndustry: 5,
+        massProduction: 4,
+        advancedMassProduction: 5,
+        science: 0,
+        accounting: 0,
+        brokerRelations: 0,
+      }).advancedMassProduction,
+    ).toBe(0)
+    expect(
+      manufacturingSlotsFromSkills({
+        industry: 5,
+        massProduction: 4,
+        advancedMassProduction: 5,
+      }),
+    ).toBe(5)
+  })
+
+  it('counts both mass production skills at V for plan slots', () => {
+    expect(
+      manufacturingSlotsFromSkills({
+        industry: 5,
+        massProduction: 5,
+        advancedMassProduction: 5,
+      }),
+    ).toBe(11)
   })
 })

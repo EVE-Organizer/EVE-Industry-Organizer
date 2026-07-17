@@ -7,7 +7,7 @@ import {
   ManufacturingSettingsSection,
 } from '@/components/GlobalSettingsForm'
 import { SkillLevelSlider } from '@/components/SkillLevelSlider'
-import { SKILL_FIELDS, skillLevel, type SkillFieldDef } from '@/lib/skillFields'
+import { SKILL_FIELDS, enforceSkillPrerequisites, maxTrainableSkillLevel, skillLevel, skillPrerequisiteLabel, type SkillFieldDef } from '@/lib/skillFields'
 import { Panel } from '@/components/Panel'
 import { EveCharacterPanel } from '@/components/EveCharacterPanel'
 import { useAuthStore } from '@/stores/authStore'
@@ -37,18 +37,30 @@ function SkillGroup({
   return (
     <div>
       <p className="text-[10px] font-medium uppercase tracking-wide opacity-50 mb-2">{title}</p>
-      {fields.map(({ key, skillId, label, tooltip }) => (
-        <SkillLevelSlider
-          key={key}
-          skillId={skillId}
-          label={label}
-          tooltip={tooltip}
-          value={skillLevel(settings.skills, key)}
-          onChange={(level) =>
-            onChange({ skills: { ...settings.skills, [key]: level } })
-          }
-        />
-      ))}
+      {fields.map(({ key, skillId, label, tooltip }) => {
+        const maxLevel = maxTrainableSkillLevel(settings.skills, key)
+        const locked = maxLevel === 0
+        const current = locked ? 0 : skillLevel(settings.skills, key)
+        return (
+          <SkillLevelSlider
+            key={key}
+            skillId={skillId}
+            label={label}
+            tooltip={tooltip}
+            value={current}
+            max={maxLevel}
+            disabled={locked}
+            disabledReason={locked ? skillPrerequisiteLabel(key) : undefined}
+            onChange={(level) => {
+              const nextSkills = enforceSkillPrerequisites({
+                ...settings.skills,
+                [key]: Math.min(level, maxLevel),
+              })
+              onChange({ skills: nextSkills })
+            }}
+          />
+        )
+      })}
     </div>
   )
 }

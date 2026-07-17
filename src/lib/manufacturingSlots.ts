@@ -1,10 +1,10 @@
 import type { ManufacturingPlanTemplate, SkillLevels } from '@/types'
-import { skillLevel } from '@/lib/skillFields'
+import { effectiveSkillLevel } from '@/lib/skillFields'
 
 /** EVE: 1 base + Mass Production + Advanced Mass Production (max 11 at V/V). */
 export function manufacturingSlotsFromSkills(skills: Partial<SkillLevels> | undefined): number {
-  const mass = skillLevel(skills, 'massProduction')
-  const advanced = skillLevel(skills, 'advancedMassProduction')
+  const mass = effectiveSkillLevel(skills, 'massProduction')
+  const advanced = effectiveSkillLevel(skills, 'advancedMassProduction')
   return 1 + mass + advanced
 }
 

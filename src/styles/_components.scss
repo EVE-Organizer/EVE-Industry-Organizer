@@ -325,6 +325,147 @@
   }
 }
 
+.plan-timeline {
+  &__body {
+    @apply flex flex-col gap-4;
+  }
+
+  &__hero {
+    @apply flex flex-wrap items-baseline gap-x-4 gap-y-1;
+  }
+
+  &__finish {
+    @apply text-sm text-base-content/70 cursor-help;
+  }
+
+  &__finish-value {
+    @apply text-2xl font-semibold tabular-nums text-base-content;
+  }
+
+  &__status {
+    @apply text-sm font-medium cursor-help;
+
+    &--ok {
+      @apply text-success;
+    }
+
+    &--warn {
+      @apply text-error;
+    }
+  }
+
+  &__on-track {
+    @apply text-sm text-base-content/60;
+  }
+
+  &__chart-block {
+    @apply flex flex-col gap-2;
+  }
+
+  &__chart-title {
+    @apply text-sm font-semibold text-base-content/90;
+  }
+
+  &__slots {
+    @apply ml-auto sm:ml-0;
+  }
+
+  &__gantt {
+    @apply flex flex-col gap-1 max-h-[22rem] overflow-x-hidden overflow-y-auto rounded-lg border border-eve-border/60 bg-base-300/20 p-3 pr-2 sm:p-4 sm:pr-3;
+  }
+
+  &__gantt-axis {
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-[6.75rem_minmax(0,1fr)] sm:items-end;
+  }
+
+  &__gantt-axis-spacer {
+    @apply hidden sm:block;
+  }
+
+  &__gantt-axis-track {
+    @apply relative h-5 border-b border-eve-border/50 min-w-0;
+  }
+
+  &__gantt-tick {
+    @apply absolute bottom-0 -translate-x-1/2 text-[10px] tabular-nums text-base-content/45 whitespace-nowrap;
+  }
+
+  &__lanes {
+    @apply flex flex-col gap-3;
+  }
+
+  &__lane {
+    @apply grid grid-cols-1 gap-2 rounded-lg border border-transparent p-2 text-left sm:grid-cols-[6.75rem_minmax(0,1fr)] sm:items-start;
+  }
+
+  &__lane-label {
+    @apply flex flex-col gap-0.5 min-w-0 text-left text-xs leading-tight px-0.5;
+  }
+
+  &__lane-meta {
+    @apply text-[10px] text-base-content/45;
+  }
+
+  &__lane-track {
+    --timeline-bar-h: 2rem;
+    --timeline-bar-gap: 0.125rem;
+    --timeline-row-h: calc(var(--timeline-bar-h) + var(--timeline-bar-gap));
+    --lane-rows: 1;
+    @apply relative rounded-md bg-base-300/40 min-w-0 overflow-hidden;
+    min-height: calc(0.75rem + var(--lane-rows) * var(--timeline-row-h));
+    padding: 0.375rem 0;
+  }
+
+  &__lane-gridline {
+    @apply absolute inset-y-0 w-px -translate-x-1/2 bg-eve-border/25 pointer-events-none;
+  }
+
+  &__lane-empty {
+    @apply absolute left-2 top-1/2 -translate-y-1/2 text-[11px] text-base-content/40;
+  }
+
+  &__bar {
+    @apply absolute box-border flex items-center gap-1 overflow-hidden rounded-md border px-1 text-left text-[10px] font-medium text-base-content;
+    top: calc(0.375rem + var(--bar-row, 0) * var(--timeline-row-h));
+    height: var(--timeline-bar-h);
+    max-width: 100%;
+    min-width: 0;
+    @apply hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60;
+
+    &--compact {
+      @apply justify-center px-0.5 z-[1];
+
+      &:hover {
+        @apply z-20 ring-1 ring-primary/40;
+      }
+    }
+  }
+
+  &__bar-icon {
+    @apply shrink-0 pointer-events-none;
+  }
+
+  &__bar-label {
+    @apply min-w-0 truncate leading-8;
+  }
+
+  &__stock-grid {
+    @apply flex flex-col gap-4 max-h-[22rem] overflow-y-auto pr-1;
+  }
+
+  &__stock-chart {
+    @apply rounded-lg border border-eve-border/60 bg-base-300/20 p-2;
+  }
+
+  &__stock-title {
+    @apply text-xs font-medium text-base-content/80 mb-1 truncate;
+  }
+
+  &__stock-warn {
+    @apply text-error font-semibold;
+  }
+}
+
 .plan-chain-embedded {
   @apply -mx-4 border-t border-eve-border/70 sm:-mx-5;
 

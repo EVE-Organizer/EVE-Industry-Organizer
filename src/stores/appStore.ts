@@ -42,6 +42,28 @@ function touchTemplates(
   }
 }
 
+function resolveSelectedPlanTemplateId(
+  templates: ManufacturingPlanTemplate[],
+  preferredId: string | null | undefined,
+): string | null {
+  if (preferredId && templates.some((t) => t.id === preferredId)) return preferredId
+  return templates[0]?.id ?? null
+}
+
+function persistSelectedPlanTemplateId(
+  get: () => AppStore,
+  set: (partial: Partial<AppStore>) => void,
+  id: string | null,
+) {
+  const userData = {
+    ...get().userData,
+    selectedPlanTemplateId: id,
+    updatedAt: new Date().toISOString(),
+  }
+  get().setUserData(userData)
+  set({ selectedPlanTemplateId: id })
+}
+
 export const useAppStore = create<AppStore>((set, get) => ({
   userData: createDefaultUserData(),
   hydrated: false,
@@ -49,8 +71,12 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
   hydrate: () => {
     const userData = loadUserDataFromLocal()
-    const firstId = userData.planTemplates?.[0]?.id ?? null
-    set({ userData, hydrated: true, selectedPlanTemplateId: firstId })
+    const templates = userData.planTemplates ?? []
+    const selectedPlanTemplateId = resolveSelectedPlanTemplateId(
+      templates,
+      userData.selectedPlanTemplateId,
+    )
+    set({ userData, hydrated: true, selectedPlanTemplateId })
   },
 
   setUserData: (data) => {
@@ -85,13 +111,13 @@ export const useAppStore = create<AppStore>((set, get) => ({
     clearPriceCacheStorage()
   },
 
-  setSelectedPlanTemplateId: (id) => set({ selectedPlanTemplateId: id }),
+  setSelectedPlanTemplateId: (id) => persistSelectedPlanTemplateId(get, set, id),
 
   addPlanTemplate: (name) => {
     const template = createDefaultPlanTemplate(name)
     const userData = touchTemplates(get().userData, (templates) => [...templates, template])
     get().setUserData(userData)
-    set({ selectedPlanTemplateId: template.id })
+    persistSelectedPlanTemplateId(get, set, template.id)
     return template
   },
 
@@ -108,7 +134,11 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const userData = touchTemplates(get().userData, (templates) => templates.filter((t) => t.id !== id))
     get().setUserData(userData)
     if (get().selectedPlanTemplateId === id) {
-      set({ selectedPlanTemplateId: userData.planTemplates[0]?.id ?? null })
+      persistSelectedPlanTemplateId(
+        get,
+        set,
+        resolveSelectedPlanTemplateId(userData.planTemplates, null),
+      )
     }
   },
 
@@ -128,7 +158,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     }
     const userData = touchTemplates(get().userData, (templates) => [...templates, copy])
     get().setUserData(userData)
-    set({ selectedPlanTemplateId: copy.id })
+    persistSelectedPlanTemplateId(get, set, copy.id)
     return copy
   },
 

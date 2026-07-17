@@ -1,6 +1,6 @@
 import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry } from '@/types'
 import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS } from '@/types'
-import { SKILL_FIELDS } from '@/lib/skillFields'
+import { SKILL_FIELDS, enforceSkillPrerequisites } from '@/lib/skillFields'
 import { normalizeBpoLifetimeRunsByCategory } from '@/lib/bpoLifetime'
 
 type LegacySettings = Partial<Omit<GlobalSettings, 'skills'>> & {
@@ -37,7 +37,7 @@ export function normalizeSkillLevels(
   ) {
     return { ...DEFAULT_SKILLS }
   }
-  return { ...ZERO_SKILLS, ...(skills ?? {}) } as SkillLevels
+  return enforceSkillPrerequisites({ ...ZERO_SKILLS, ...(skills ?? {}) } as SkillLevels)
 }
 
 /** Migrate region-level buildSystemId to hub default manufacturingSystemId. */
