@@ -75,13 +75,15 @@ export function buildManufactureDisplayRows(
   }
   const rootSeen = new Map<number, number>()
 
-  const rootRows: Array<
-    ExpandablePlanRow & {
-      rowKey: string
-      rootInstance?: number
-      rootInstanceTotal?: number
-    }
-  > = []
+  const rootRows: Array<{
+    kind: 'leaf'
+    node: PlanNode
+    depth: number
+    ancestorCollapseKeys: string[]
+    rowKey: string
+    rootInstance: number
+    rootInstanceTotal: number
+  }> = []
 
   for (const root of roots) {
     const merged = buildNodes.find((n) => n.productTypeId === root.productTypeId && n.isRoot)
