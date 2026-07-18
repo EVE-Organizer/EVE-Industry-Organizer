@@ -4,7 +4,7 @@ export const GLOBAL_SETTING_TOOLTIPS = {
   meDefault:
     'Assumed Material Efficiency (0-10) for blueprints you have not configured yet. Each BPO has its own ME in-game. Set per-blueprint ME on the blueprint detail page or in your character’s owned BPO list.',
   teDefault:
-    'Assumed Time Efficiency (0-20) for job time estimates when a blueprint’s TE is unknown. Each BPO has its own TE in-game. This global value is a starting default only.',
+    'Assumed Time Efficiency (0-20) for job time estimates when a blueprint’s TE is unknown. Each TE point cuts job time by 1% (TE 20 = −20%). Each BPO has its own TE in-game. This global value is a starting default only.',
   priceMethod:
     'How manufactured output is priced at the hub. Sell orders use window average or current sell listings (includes broker fee). Buy orders use the best buy order for an instant sale (no broker fee, lower price). Material costs always use sell-side prices.',
   includeBlueprintCost:

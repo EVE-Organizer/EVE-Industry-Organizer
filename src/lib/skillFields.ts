@@ -21,7 +21,7 @@ export const SKILL_FIELDS: SkillFieldDef[] = [
     skillId: 3380,
     label: 'Industry',
     tooltip:
-      'Required by most manufacturing blueprints. Your level is checked against each blueprint\'s Industry requirement for the "Only buildable" filter and skill gap flags.',
+      'Cuts manufacturing job time by 4% per level. Required by most manufacturing blueprints. Your level is also checked against each blueprint\'s Industry requirement for the "Only buildable" filter and skill gap flags.',
   },
   {
     key: 'advancedIndustry',

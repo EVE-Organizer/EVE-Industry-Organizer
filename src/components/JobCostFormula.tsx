@@ -2,23 +2,25 @@ import type { SetupCostBreakdown } from '@/types'
 import { formatDecimal, formatIsk } from '@/lib/profit'
 import { baseJobCostFromIndex, isPlayerStructure, jobCostSectionTitle } from '@/lib/structureSettings'
 
-export function JobCostFormula({ breakdown }: { breakdown: Pick<
+type JobCostFields = Pick<
   SetupCostBreakdown,
-  | 'materialCost'
+  | 'estimatedItemValue'
   | 'systemCostIndex'
   | 'structureType'
   | 'structureJobCostBonusPercent'
   | 'structureTaxPercent'
   | 'jobCost'
-> }) {
-  const baseJobCost = baseJobCostFromIndex(breakdown.materialCost, breakdown.systemCostIndex)
+>
+
+export function JobCostFormula({ breakdown }: { breakdown: JobCostFields }) {
+  const baseJobCost = baseJobCostFromIndex(breakdown.estimatedItemValue, breakdown.systemCostIndex)
   const playerStructure = isPlayerStructure(breakdown.structureType)
 
   return (
     <div className="space-y-1 text-sm font-mono text-xs sm:text-sm break-all">
       <p>
-        {formatIsk(breakdown.materialCost)} × {formatDecimal(breakdown.systemCostIndex, 4)} system cost
-        index = <strong>{formatIsk(baseJobCost)}</strong>
+        {formatIsk(breakdown.estimatedItemValue)} EIV × {formatDecimal(breakdown.systemCostIndex, 4)}{' '}
+        system cost index = <strong>{formatIsk(baseJobCost)}</strong>
       </p>
       {playerStructure ? (
         <>

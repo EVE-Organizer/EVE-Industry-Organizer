@@ -351,6 +351,8 @@ export interface SetupCostBreakdown {
   me: number
   materials: SetupMaterialLine[]
   materialCost: number
+  /** Base (ME 0) material value used for job installation fees. */
+  estimatedItemValue: number
   systemCostIndex: number
   structureType: StructureType
   structureMeBonusPercent: number
@@ -421,6 +423,8 @@ export interface IphBreakdown {
   salesTax: number
   netRevenue: number
   materialCost: number
+  /** Base (ME 0) material value used for job installation fees. */
+  estimatedItemValue: number
   systemCostIndex: number
   structureType: StructureType
   structureMeBonusPercent: number

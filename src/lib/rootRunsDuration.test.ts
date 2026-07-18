@@ -186,6 +186,16 @@ describe('Nova Heavy Missile (product 206)', () => {
     expect(seconds).toBeCloseTo(57 * 60 + 36, 0)
   })
 
+  it('TE 20 cuts time by 20% (not 80%)', () => {
+    const te20Settings = {
+      ...noBonusSettings,
+      teDefault: 20,
+    }
+    const hours = inGameDurationHoursFromRuns(novaHeavyMissile, te20Settings, 6)
+    // 600 * 6 * 0.8 / 3600 = 0.8 h
+    expect(hours).toBeCloseTo(0.8, 5)
+  })
+
   it('1091 runs × 10 min/run = 181.833… h (in-game job timer, no TE)', () => {
     const hours = inGameDurationHoursFromRuns(novaHeavyMissile, noBonusSettings, 1091)
     expect(hours).toBeCloseTo((1091 * 600) / 3600, 5)

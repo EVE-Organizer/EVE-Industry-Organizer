@@ -13,7 +13,7 @@ This repo is **EVE Industry Organizer**: a frontend-only React app for EVE Onlin
 - **Manufacturing**: use a **BPO** (blueprint original) at a station to turn inputs into outputs over time.
 - **Runs**: one job produces `productQuantity × runs` items. This app defaults to batch runs of 100 (`batchSize`).
 - **ME** (Material Efficiency, 0–10): reduces input materials by 1% per level.
-- **TE** (Time Efficiency, 0–20): reduces job duration by 4% per level.
+- **TE** (Time Efficiency, 0–20): each point reduces job duration by 1% (TE 20 = −20%). Research has 10 steps of 2% each.
 - **Research**: ME/TE are raised via copy-time research jobs (tracked as timers in user data).
 
 ## Blueprint data (this app)
@@ -46,12 +46,13 @@ Classification rules live in `scripts/lib/blueprint-groups.mjs`. Rankings use sp
 
 ## Cost & profit (match `src/lib/cost.ts`)
 
-- **Material cost**: sum of (quantity × hub price) after ME is applied.
-- **Job cost (NPC station)**: `materialCost × systemCostIndex`. Cost index comes from ESI `industry/systems`.
+- **Material cost**: sum of (quantity × hub price) after ME. ME uses `max(runs, ceil(round(baseQty × runs × modifiers, 2)))`.
+- **Job cost (NPC station)**: `EIV × systemCostIndex`. EIV is base (ME 0) material qty × hub price × runs (in-game uses adjusted prices; this app approximates with market prices). Cost index comes from ESI `industry/systems`.
 - **Capital** = material cost + job cost.
 - **Revenue**: sell price × output qty, minus broker fee and sales tax (defaults 1% / 3.6%).
 - **Spot profit** (rankings only): raw SDE materials, no ME/TE, for fast catalog precompute in `scripts/fetch-sde-data.mjs`.
-- **Advanced Industry** skill: 3% time reduction per level (used in TE calc).
+- **Industry** skill: 4% time reduction per level. **Advanced Industry**: 3% per level.
+- **Job time**: `baseTime × runs × (1 − TE×1%) × (1 − Industry×4%) × (1 − AdvIndustry×3%) × structure TE`.
 
 Do not invent different ME/TE formulas unless fixing a known game-mechanics bug.
 

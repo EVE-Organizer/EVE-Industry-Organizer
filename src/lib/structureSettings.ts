@@ -56,7 +56,7 @@ export function jobCostSectionTitle(type: StructureType): string {
   return isPlayerStructure(type) ? 'Job cost (player structure)' : 'Job cost (NPC station)'
 }
 
-/** Base job cost before structure role bonus and owner tax. */
-export function baseJobCostFromIndex(materialCost: number, systemCostIndex: number): number {
-  return materialCost * systemCostIndex
+/** Base job cost before structure role bonus and owner tax (EIV × system cost index). */
+export function baseJobCostFromIndex(estimatedItemValue: number, systemCostIndex: number): number {
+  return estimatedItemValue * systemCostIndex
 }

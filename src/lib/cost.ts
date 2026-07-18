@@ -9,9 +9,15 @@ import {
 } from '@/types'
 
 const ME_BONUS = 0.01
-const TE_BONUS = 0.04
+/**
+ * Blueprint TE is stored as the in-game display value 0–20 (TE 20 = −20% time).
+ * Each point is 1% reduction; research steps are 2% each across 10 levels.
+ */
+const TE_BONUS = 0.01
 /** Industry skill: 4% manufacturing time reduction per level (EVE SDE). */
 const INDUSTRY_BONUS = 0.04
+/** Advanced Industry: 3% manufacturing time reduction per level. */
+const ADVANCED_INDUSTRY_BONUS = 0.03
 
 /**
  * Rough EIV fraction for full ME10 + TE20 research, charged once per BPO.
@@ -32,18 +38,42 @@ export function resolveStructureModifiers(settings: GlobalSettings): StructureMo
   }
 }
 
+/** TE time multiplier for display and breakdowns (TE 20 → 0.80). */
+export function teTimeFactor(te: number): number {
+  return 1 - te * TE_BONUS
+}
+
+export function industryTimeFactor(industry: number): number {
+  return 1 - industry * INDUSTRY_BONUS
+}
+
+export function advancedIndustryTimeFactor(advancedIndustry: number): number {
+  return 1 - advancedIndustry * ADVANCED_INDUSTRY_BONUS
+}
+
+/**
+ * Materials for a manufacturing job after ME and structure bonuses.
+ * EVE: max(runs, ceil(round(baseQty * runs * modifiers, 2))).
+ */
 export function applyME(
   materials: { typeId: number; quantity: number }[],
   me: number,
   runs: number,
   structureMeBonusPercent = 0,
 ) {
+  if (runs <= 0) {
+    return materials.map((m) => ({ typeId: m.typeId, quantity: 0 }))
+  }
   const meFactor = 1 - me * ME_BONUS
   const structFactor = 1 - structureMeBonusPercent / 100
-  return materials.map((m) => ({
-    typeId: m.typeId,
-    quantity: Math.max(1, Math.ceil(m.quantity * runs * meFactor * structFactor)),
-  }))
+  return materials.map((m) => {
+    const raw = m.quantity * runs * meFactor * structFactor
+    const rounded = Math.round(raw * 100) / 100
+    return {
+      typeId: m.typeId,
+      quantity: Math.max(runs, Math.ceil(rounded)),
+    }
+  })
 }
 
 export function applyTE(
@@ -54,11 +84,15 @@ export function applyTE(
   advancedIndustry: number,
   structureTeBonusPercent = 0,
 ): number {
-  const teFactor = 1 - te * TE_BONUS
-  const industryFactor = 1 - industry * INDUSTRY_BONUS
   const structFactor = 1 - structureTeBonusPercent / 100
-  const advFactor = 1 - advancedIndustry * 0.03
-  return baseTimeSeconds * runs * teFactor * industryFactor * structFactor * advFactor
+  return (
+    baseTimeSeconds *
+    runs *
+    teTimeFactor(te) *
+    industryTimeFactor(industry) *
+    structFactor *
+    advancedIndustryTimeFactor(advancedIndustry)
+  )
 }
 
 export function manufacturingTimePerRun(
@@ -147,15 +181,31 @@ export function materialCost(
   return materials.reduce((sum, m) => sum + (prices.get(m.typeId) ?? 0) * m.quantity, 0)
 }
 
+/**
+ * Estimated Item Value for job installation fees: base (ME 0) material qty × price × runs.
+ * In-game EIV uses adjusted prices; this app approximates with hub market prices.
+ */
+export function estimatedItemValue(
+  materials: { typeId: number; quantity: number }[],
+  runs: number,
+  prices: Map<number, number>,
+): number {
+  if (runs <= 0) return 0
+  return materials.reduce(
+    (sum, m) => sum + (prices.get(m.typeId) ?? 0) * m.quantity * runs,
+    0,
+  )
+}
+
+/** Job installation fee from EIV (base materials), system cost index, and structure modifiers. */
 export function estimateJobCost(
-  materialCostIsk: number,
+  eiv: number,
   systemCostIndex: number,
   modifiers: Pick<StructureModifiers, 'jobCostBonusPercent' | 'taxPercent'> = {
     jobCostBonusPercent: 0,
     taxPercent: 0,
   },
 ): number {
-  const eiv = materialCostIsk
   return (
     eiv *
     systemCostIndex *
@@ -175,7 +225,8 @@ export function totalManufacturingCost(
   const structure = resolveStructureModifiers(settings)
   const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const matCost = materialCost(mats, prices)
-  const jobCost = estimateJobCost(matCost, systemCostIndex, structure)
+  const eiv = estimatedItemValue(blueprint.materials, runs, prices)
+  const jobCost = estimateJobCost(eiv, systemCostIndex, structure)
   const jobTime = applyTE(
     blueprint.manufacturingTime,
     settings.teDefault,

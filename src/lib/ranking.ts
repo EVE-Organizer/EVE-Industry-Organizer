@@ -17,16 +17,20 @@ import type {
   TypeInfo,
 } from '@/types'
 import {
+  advancedIndustryTimeFactor,
   amortizedBpoCost,
   applyME,
   applyTE,
   blueprintMeTe,
+  estimatedItemValue,
   estimateJobCost,
   estimateResearchFee,
+  industryTimeFactor,
   inventionBlueprintCostPerRun,
   materialCost,
   resolveStructureModifiers,
   revenueFromSale,
+  teTimeFactor,
 } from '@/lib/cost'
 import {
   lifetimeCategoryKeyFromProductCategory,
@@ -401,7 +405,8 @@ function computeRow(
   const industry = skillLevel(settings.skills, 'industry')
   const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const matCost = materialCost(mats, windowPrices)
-  const jobCost = estimateJobCost(matCost, regionCostIndex, structure)
+  const eiv = estimatedItemValue(blueprint.materials, runs, windowPrices)
+  const jobCost = estimateJobCost(eiv, regionCostIndex, structure)
   const outputQty = blueprint.productQuantity * runs
   const materialVolume = computeMaterialVolume(mats, typeVolumes)
   const productVolume = (typeVolumes.get(blueprint.productTypeId) ?? product.volume) * outputQty
@@ -452,6 +457,7 @@ function computeRow(
       }
     }),
     materialCost: matCost,
+    estimatedItemValue: eiv,
     systemCostIndex: regionCostIndex,
     structureType: settings.structureType,
     structureMeBonusPercent: structure.meBonusPercent,
@@ -486,10 +492,10 @@ function computeRow(
   const netProfit = netRevenue - setupCost - haulOut
   const margin = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
   const baseTimePerRunSeconds = blueprint.manufacturingTime
-  const teTimeFactor = 1 - te * 0.04
-  const industryTimeFactor = 1 - industry * 0.04
-  const structureTeTimeFactor = 1 - structure.teBonusPercent / 100
-  const advancedIndustryTimeFactor = 1 - advancedIndustry * 0.03
+  const teFactor = teTimeFactor(te)
+  const industryFactor = industryTimeFactor(industry)
+  const structureTeFactor = 1 - structure.teBonusPercent / 100
+  const advancedIndustryFactor = advancedIndustryTimeFactor(advancedIndustry)
   const jobTimeSeconds = applyTE(
     baseTimePerRunSeconds,
     te,
@@ -523,10 +529,10 @@ function computeRow(
     runs,
     outputQty,
     baseTimePerRunSeconds,
-    teTimeFactor,
-    industryTimeFactor,
-    structureTeTimeFactor,
-    advancedIndustryTimeFactor,
+    teTimeFactor: teFactor,
+    industryTimeFactor: industryFactor,
+    structureTeTimeFactor: structureTeFactor,
+    advancedIndustryTimeFactor: advancedIndustryFactor,
     jobTimeSeconds,
     sellPricePerUnit,
     priceMethod: settings.priceMethod,
@@ -537,6 +543,7 @@ function computeRow(
     salesTax,
     netRevenue,
     materialCost: matCost,
+    estimatedItemValue: eiv,
     systemCostIndex: regionCostIndex,
     structureType: settings.structureType,
     structureMeBonusPercent: structure.meBonusPercent,

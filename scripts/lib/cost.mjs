@@ -1,5 +1,7 @@
 const ME_BONUS = 0.01
-const TE_BONUS = 0.04
+/** Blueprint TE display value 0–20: each point is 1% time reduction. */
+const TE_BONUS = 0.01
+const ADVANCED_INDUSTRY_BONUS = 0.03
 
 export function resolveStructureModifiers(settings) {
   if (settings.structureType === 'npc') {
@@ -13,19 +15,27 @@ export function resolveStructureModifiers(settings) {
   }
 }
 
+/** EVE: max(runs, ceil(round(baseQty * runs * modifiers, 2))). */
 export function applyME(materials, me, runs, structureMeBonusPercent = 0) {
+  if (runs <= 0) {
+    return materials.map((m) => ({ typeId: m.typeId, quantity: 0 }))
+  }
   const meFactor = 1 - me * ME_BONUS
   const structFactor = 1 - structureMeBonusPercent / 100
-  return materials.map((m) => ({
-    typeId: m.typeId,
-    quantity: Math.max(1, Math.ceil(m.quantity * runs * meFactor * structFactor)),
-  }))
+  return materials.map((m) => {
+    const raw = m.quantity * runs * meFactor * structFactor
+    const rounded = Math.round(raw * 100) / 100
+    return {
+      typeId: m.typeId,
+      quantity: Math.max(runs, Math.ceil(rounded)),
+    }
+  })
 }
 
 export function applyTE(baseTimeSeconds, te, runs, advancedIndustry = 0, structureTeBonusPercent = 0) {
   const teFactor = 1 - te * TE_BONUS
   const structFactor = 1 - structureTeBonusPercent / 100
-  const advFactor = 1 - advancedIndustry * 0.03
+  const advFactor = 1 - advancedIndustry * ADVANCED_INDUSTRY_BONUS
   return baseTimeSeconds * runs * teFactor * structFactor * advFactor
 }
 
@@ -33,13 +43,22 @@ export function materialCost(materials, prices) {
   return materials.reduce((sum, m) => sum + (prices.get(m.typeId) ?? 0) * m.quantity, 0)
 }
 
+/** EIV: base (ME 0) material qty × price × runs. */
+export function estimatedItemValue(materials, runs, prices) {
+  if (runs <= 0) return 0
+  return materials.reduce(
+    (sum, m) => sum + (prices.get(m.typeId) ?? 0) * m.quantity * runs,
+    0,
+  )
+}
+
 export function estimateJobCost(
-  materialCostIsk,
+  eiv,
   systemCostIndex,
   modifiers = { jobCostBonusPercent: 0, taxPercent: 0 },
 ) {
   return (
-    materialCostIsk *
+    eiv *
     systemCostIndex *
     (1 - modifiers.jobCostBonusPercent / 100) *
     (1 + modifiers.taxPercent / 100)
@@ -51,7 +70,8 @@ export function totalManufacturingCost(blueprint, prices, settings, me, systemCo
   const structure = resolveStructureModifiers(settings)
   const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const matCost = materialCost(mats, prices)
-  const jobCost = estimateJobCost(matCost, systemCostIndex, structure)
+  const eiv = estimatedItemValue(blueprint.materials, runs, prices)
+  const jobCost = estimateJobCost(eiv, systemCostIndex, structure)
   const jobTime = applyTE(
     blueprint.manufacturingTime,
     settings.teDefault,
@@ -83,10 +103,11 @@ export function spotProfitPerBatch(blueprint, prices, settings, systemCostIndex)
   const runs = settings.batchSize
   const mats = blueprint.materials.map((m) => ({
     typeId: m.typeId,
-    quantity: Math.max(1, Math.ceil(m.quantity * runs)),
+    quantity: Math.max(runs, Math.ceil(m.quantity * runs)),
   }))
   const matCost = materialCost(mats, prices)
   const structure = resolveStructureModifiers(settings)
+  // Spot uses ME0 materials, so matCost equals EIV.
   const capital = matCost + estimateJobCost(matCost, systemCostIndex, structure)
   const productPrice = prices.get(blueprint.productTypeId) ?? 0
   const outputQty = blueprint.productQuantity * runs

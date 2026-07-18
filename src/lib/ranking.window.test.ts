@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs'
 import { describe, expect, it } from 'vitest'
-import { applyME, estimateJobCost, materialCost } from '@/lib/cost'
+import { applyME, estimateJobCost, estimatedItemValue, materialCost } from '@/lib/cost'
 import { WIDER_TIME_RANGES } from '@/lib/profit'
 import { marketAwareIph, rankBlueprintsFromMarket, volumeWindowForPrice } from '@/lib/ranking'
 import { buildPriceMap, buildTypeMap, getHubMarket } from '@/services/data/sdeLoader'
@@ -49,7 +49,8 @@ function setupCostForAmmoWindow(
 
   const mats = applyME(blueprint.materials, me, runs)
   const matCost = materialCost(mats, windowPrices)
-  const jobCost = estimateJobCost(matCost, region.costIndex)
+  const eiv = estimatedItemValue(blueprint.materials, runs, windowPrices)
+  const jobCost = estimateJobCost(eiv, region.costIndex)
   return matCost + jobCost
 }
 

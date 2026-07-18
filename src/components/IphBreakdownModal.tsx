@@ -192,7 +192,7 @@ export function IphBreakdownModal({
             >
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <SkillTile label="ME" value={iph.me} detail="1% less material per level" />
-                <SkillTile label="TE" value={iph.te} detail="4% faster jobs per level" />
+                <SkillTile label="TE" value={iph.te} detail="1% faster jobs per TE point (0–20)" />
                 <SkillTile
                   label="Adv. Industry"
                   value={iph.advancedIndustry}
@@ -241,7 +241,7 @@ export function IphBreakdownModal({
                 {formatDuration(iph.baseTimePerRunSeconds)}
               </CalcStep>
               <CalcStep label="TE factor">
-                1 − ({iph.te} × 4%) = <strong>{formatDecimal(iph.teTimeFactor, 4)}</strong>
+                1 − ({iph.te} × 1%) = <strong>{formatDecimal(iph.teTimeFactor, 4)}</strong>
               </CalcStep>
               <CalcStep label="Industry factor">
                 1 − ({iph.industry} × 4%) ={' '}

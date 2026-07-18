@@ -138,7 +138,7 @@ describe('expandManufacturingPlan', () => {
     const ship = nodes.find((n) => n.productTypeId === 200)
     expect(ship?.concurrentCopies).toBe(2)
 
-    const jobs = schedulePlanJobs({ nodes, slots, windowHours: 48 })
+    const jobs = schedulePlanJobs({ nodes, slots, windowHours: 500 })
     const rootJobs = jobs.filter((j) => j.productTypeId === 200)
     expect(rootJobs.length).toBeGreaterThanOrEqual(2)
     expect(new Set(rootJobs.map((j) => j.slot)).size).toBeGreaterThanOrEqual(2)

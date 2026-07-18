@@ -29,7 +29,6 @@ import {
 } from '@/services/data/sdeLoader'
 import { buildWindowPriceMap } from '@/lib/ranking'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
-import { scheduledDurationHours } from '@/lib/planScheduler'
 import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/lib/planTreeLines'
 import { buildManufactureDisplayRows } from '@/lib/planManufactureDisplay'
 import {
@@ -401,7 +400,7 @@ export function PlanPage() {
       blueprintTypeId: blueprintTypeIdByProduct.get(row.node.productTypeId),
       name: row.node.name,
       runs: row.node.runs,
-      jobTimeHours: scheduledDurationHours(plan.jobs, row.node.productTypeId),
+      jobTimeHours: row.node.jobTimeSeconds / 3600,
       outputQty: row.node.outputQty,
       isRoot: false,
       depth: row.depth + 1,
