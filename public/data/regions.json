@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T06:03:51.831Z",
+  "generatedAt": "2026-07-18T05:56:59.159Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -385,11 +385,11 @@
       "regionId": 10000060,
       "name": "Delve",
       "securityClass": "nullsec",
-      "buildSystemId": 30004717,
-      "buildSystemName": "AJI-MA",
-      "buildSystemSecurity": -0.009191,
+      "buildSystemId": 30004706,
+      "buildSystemName": "UHKL-N",
+      "buildSystemSecurity": -0.005241,
       "costIndex": 0.0014,
-      "marketSystemId": 30004717
+      "marketSystemId": 30004706
     },
     {
       "regionId": 10000001,
@@ -945,11 +945,11 @@
       "regionId": 10000020,
       "name": "Tash-Murkon",
       "securityClass": "highsec",
-      "buildSystemId": 30001725,
-      "buildSystemName": "Nosodnis",
-      "buildSystemSecurity": 0.929034,
+      "buildSystemId": 30001727,
+      "buildSystemName": "Rand",
+      "buildSystemSecurity": 0.866089,
       "costIndex": 0.0014,
-      "marketSystemId": 30001725
+      "marketSystemId": 30001727
     },
     {
       "regionId": 10000045,
@@ -1138,7 +1138,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0304,
+      "costIndex": 0.0307,
       "marketSystemId": 30100000
     }
   ]
