@@ -12,6 +12,8 @@ export interface EsiCorpStructure {
   type_id: number
   system_id: number
   state: string
+  name?: string
+  corporation_id?: number
 }
 
 export interface EsiUniverseStructure {
@@ -38,10 +40,11 @@ export async function fetchCorporationStructures(
   accessToken: string,
   options?: EsiFetchOptions<EsiCorpStructure[]>,
 ): Promise<EsiCorpStructure[]> {
-  return esiAuthGet<EsiCorpStructure[]>(
+  return esiAuthGetAllPages<EsiCorpStructure>(
     `/corporations/${corporationId}/structures/`,
     accessToken,
-    { cacheKey: `esi:corp-structures:${corporationId}`, forbiddenFallback: [], ...options },
+    `esi:corp-structures:${corporationId}`,
+    { forbiddenFallback: [], ...options },
   )
 }
 

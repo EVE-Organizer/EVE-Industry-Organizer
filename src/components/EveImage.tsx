@@ -103,6 +103,32 @@ export function EveImage({
   )
 }
 
+export function CorpLogo({
+  corporationId,
+  size = 24,
+  className = '',
+  alt = '',
+  framed = true,
+}: {
+  corporationId: number
+  size?: number
+  className?: string
+  alt?: string
+  framed?: boolean
+}) {
+  if (!corporationId) return null
+  return (
+    <EveImage
+      id={corporationId}
+      variant="faction"
+      size={size}
+      alt={alt}
+      className={className}
+      framed={framed}
+    />
+  )
+}
+
 export function HubLogo({
   hubId,
   size = 48,

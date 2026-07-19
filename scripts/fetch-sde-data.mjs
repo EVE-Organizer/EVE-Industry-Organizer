@@ -5,7 +5,7 @@
  * Run: node scripts/fetch-sde-data.mjs
  * Then: node scripts/rebuild-market.mjs  (or set MARKET_HISTORY_LIMIT for faster dev)
  */
-import { writeFileSync, mkdirSync } from 'fs'
+import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import {
@@ -20,9 +20,12 @@ import { buildMarketData, loadExistingMarket, writeMarketJson } from './lib/mark
 import { createMarketBuildTask, runListr, updateTaskProgress, startElapsedTicker, formatDuration } from './lib/run-progress.mjs'
 import { HUBS, resolveSellSystemId } from './lib/hubs.mjs'
 import { buildAllTypeRecords } from './lib/type-records.mjs'
+import { buildMapData, systemsFromSdeJsonl } from './lib/map-data.mjs'
+import { loadMapSolarSystemsJsonl } from './lib/sde-jsonl.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outDir = join(__dirname, '../public/data')
+const localSdeZip = join(__dirname, '../tmp-sde-jsonl.zip')
 const SDE_BASE = 'https://www.fuzzwork.co.uk/dump/latest/csv'
 
 const REQUIRED_CSVS = [
@@ -37,6 +40,7 @@ const REQUIRED_CSVS = [
   'invMetaTypes',
   'dgmTypeAttributes',
   'mapSolarSystems',
+  'mapSolarSystemJumps',
   'mapRegions',
   'staStations',
 ]
@@ -339,6 +343,11 @@ async function main() {
             ctx.csvData.mapSolarSystems,
             costIndices,
           )
+          ctx.mapSolarSystemsJsonl = await loadMapSolarSystemsJsonl({
+            zipPath: existsSync(localSdeZip) ? localSdeZip : undefined,
+          })
+          ctx.mapSystems = systemsFromSdeJsonl(ctx.mapSolarSystemsJsonl)
+          ctx.mapData = buildMapData(ctx.mapSystems, ctx.csvData.mapSolarSystemJumps)
           task.title = `Cost indices and regions · ${ctx.regions.regions.length} regions, ${ctx.systems.length} industry systems`
           } finally {
             stopElapsed()
@@ -373,6 +382,7 @@ async function main() {
             ['skills.json', ctx.skills],
             ['systems.json', ctx.systems],
             ['stations.json', ctx.stations],
+            ['map.json', ctx.mapData],
           ]
           const startedAt = Date.now()
           for (let i = 0; i < outputs.length; i++) {

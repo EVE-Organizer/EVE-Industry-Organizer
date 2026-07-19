@@ -9,6 +9,8 @@ interface CacheEntry<T> {
 
 const PREFIX = 'eveio:cache:'
 const MAX_ENTRIES = 500
+/** Evict these sources first when over the entry cap. */
+const PRUNE_FIRST_SOURCES = new Set(['price', 'history', 'route', 'costIndex'])
 
 export function cacheKey(source: string, endpoint: string, params: Record<string, unknown>): string {
   const canonical = JSON.stringify(params, Object.keys(params).sort())
@@ -82,7 +84,7 @@ export function getCacheStats(): { count: number; sizeKb: number } {
 }
 
 function pruneCache(): void {
-  const entries: { key: string; fetchedAt: number }[] = []
+  const entries: { key: string; fetchedAt: number; source: string }[] = []
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i)
     if (!key?.startsWith(PREFIX)) continue
@@ -91,15 +93,30 @@ function pruneCache(): void {
       if (Date.now() > entry.maxStaleAt) {
         localStorage.removeItem(key)
       } else {
-        entries.push({ key, fetchedAt: entry.fetchedAt })
+        entries.push({ key, fetchedAt: entry.fetchedAt, source: entry.source })
       }
     } catch {
       localStorage.removeItem(key!)
     }
   }
   if (entries.length <= MAX_ENTRIES) return
-  entries.sort((a, b) => a.fetchedAt - b.fetchedAt)
-  entries.slice(0, entries.length - MAX_ENTRIES).forEach((e) => localStorage.removeItem(e.key))
+
+  const byAge = (a: { fetchedAt: number }, b: { fetchedAt: number }) => a.fetchedAt - b.fetchedAt
+  const evictOldest = (list: typeof entries, count: number) => {
+    list.sort(byAge)
+    list.slice(0, count).forEach((e) => localStorage.removeItem(e.key))
+  }
+
+  const overflow = entries.length - MAX_ENTRIES
+  const disposable = entries.filter((e) => PRUNE_FIRST_SOURCES.has(e.source))
+  const protectedEntries = entries.filter((e) => !PRUNE_FIRST_SOURCES.has(e.source))
+
+  if (disposable.length >= overflow) {
+    evictOldest(disposable, overflow)
+    return
+  }
+  evictOldest(disposable, disposable.length)
+  evictOldest(protectedEntries, overflow - disposable.length)
 }
 
 export const TTL = {
@@ -108,8 +125,9 @@ export const TTL = {
   costIndex: { fresh: 24 * 60 * 60 * 1000, stale: 7 * 24 * 60 * 60 * 1000 },
   systemKills: { fresh: 10 * 60 * 1000, stale: 60 * 60 * 1000 },
   route: { fresh: 24 * 60 * 60 * 1000, stale: 7 * 24 * 60 * 60 * 1000 },
-  zkillCamp: { fresh: 8 * 60 * 1000, stale: 30 * 60 * 1000 },
+  zkillCamp: { fresh: 60 * 60 * 1000, stale: 60 * 60 * 1000 },
   failed: { fresh: 5 * 60 * 1000, stale: 5 * 60 * 1000 },
   characterData: { fresh: 10 * 60 * 1000, stale: 24 * 60 * 60 * 1000 },
   universeLocation: { fresh: 24 * 60 * 60 * 1000, stale: 7 * 24 * 60 * 60 * 1000 },
+  warOverlay: { fresh: 10 * 60 * 1000, stale: 4 * 60 * 60 * 1000 },
 } as const

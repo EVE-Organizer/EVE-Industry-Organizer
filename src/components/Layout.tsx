@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { EveNavAuth } from '@/components/EveNavAuth'
 import { NavbarHubSelect } from '@/components/NavbarHubSelect'
 import { NavbarItemSearch } from '@/components/NavbarItemSearch'
@@ -8,6 +8,7 @@ import { NavbarMobileShell } from '@/components/NavbarMobileShell'
 const links = [
   { to: '/', label: 'Blueprints' },
   { to: '/plan', label: 'Plan' },
+  { to: '/map', label: 'Map' },
   { to: '/jobs', label: 'Jobs' },
   { to: '/settings', label: 'Settings' },
 ]
@@ -52,9 +53,14 @@ function NavbarNav() {
 }
 
 export function Layout() {
+  const { pathname } = useLocation()
+  const isMapPage = pathname === '/map'
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="app-navbar">
+    <div
+      className={`flex flex-col ${isMapPage ? 'h-dvh max-h-dvh overflow-hidden' : 'min-h-screen'}`}
+    >
+      <header className="app-navbar shrink-0">
         <div className="app-navbar__inner app-navbar__inner--desktop">
           <NavbarBrand />
           <NavbarTools />
@@ -70,7 +76,13 @@ export function Layout() {
         <NavbarMobileShell links={links} />
       </header>
 
-      <main className="flex-1 min-w-0 min-h-0 w-full max-w-7xl mx-auto p-3 sm:p-4 lg:p-8 flex flex-col">
+      <main
+        className={
+          isMapPage
+            ? 'flex-1 min-h-0 min-w-0 w-full overflow-hidden flex flex-col'
+            : 'flex-1 min-w-0 min-h-0 w-full max-w-7xl mx-auto p-3 sm:p-4 lg:p-8 flex flex-col'
+        }
+      >
         <Outlet />
       </main>
     </div>

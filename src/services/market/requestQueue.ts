@@ -1,6 +1,8 @@
 const inFlight = new Map<string, Promise<unknown>>()
-const timestamps: number[] = []
-const MAX_PER_MINUTE = 20
+const esiTimestamps: number[] = []
+const zkillTimestamps: number[] = []
+const MAX_ESI_PER_MINUTE = 20
+const MAX_ZKILL_PER_MINUTE = 40
 
 let pauseUntil = 0
 
@@ -30,18 +32,30 @@ export function noteEsiResponse(res: Response): void {
   pauseEsiRequests(Number.isFinite(reset) ? reset * 1000 : 60_000)
 }
 
-function throttle(): Promise<void> {
+function throttleBucket(timestamps: number[], maxPerMinute: number): Promise<void> {
   const now = Date.now()
   if (now < pauseUntil) {
-    return new Promise((r) => setTimeout(r, pauseUntil - now + 50)).then(() => throttle())
+    return new Promise((r) => setTimeout(r, pauseUntil - now + 50)).then(() =>
+      throttleBucket(timestamps, maxPerMinute),
+    )
   }
   while (timestamps.length && timestamps[0]! < now - 60_000) timestamps.shift()
-  if (timestamps.length < MAX_PER_MINUTE) {
+  if (timestamps.length < maxPerMinute) {
     timestamps.push(now)
     return Promise.resolve()
   }
   const wait = 60_000 - (now - timestamps[0]!) + 50
-  return new Promise((r) => setTimeout(r, wait)).then(() => throttle())
+  return new Promise((r) => setTimeout(r, wait)).then(() =>
+    throttleBucket(timestamps, maxPerMinute),
+  )
+}
+
+function throttle(): Promise<void> {
+  return throttleBucket(esiTimestamps, MAX_ESI_PER_MINUTE)
+}
+
+function throttleZkill(): Promise<void> {
+  return throttleBucket(zkillTimestamps, MAX_ZKILL_PER_MINUTE)
 }
 
 export async function dedupe<T>(key: string, fn: () => Promise<T>): Promise<T> {
@@ -57,11 +71,12 @@ export async function batchProcess<T, R>(
   batchSize: number,
   delayMs: number,
   processor: (item: T) => Promise<R>,
+  throttleFn: () => Promise<void> = throttle,
 ): Promise<R[]> {
   const results: R[] = []
   for (let i = 0; i < items.length; i += batchSize) {
     const batch = items.slice(i, i + batchSize)
-    await throttle()
+    await throttleFn()
     const batchResults = await Promise.all(batch.map(processor))
     results.push(...batchResults)
     if (i + batchSize < items.length) {
@@ -71,4 +86,4 @@ export async function batchProcess<T, R>(
   return results
 }
 
-export { throttle }
+export { throttle, throttleZkill }

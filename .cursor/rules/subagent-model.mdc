@@ -1,0 +1,17 @@
+---
+description: Force Composer 2.5 for all Task subagents
+alwaysApply: true
+---
+
+# Subagent model
+
+When launching any subagent via the Task tool, always set:
+
+```
+model: "composer-2.5"
+```
+
+- Do this for every `subagent_type` (explore, generalPurpose, shell, bugbot, security-review, etc.).
+- Do not omit `model` (omitting inherits the parent model).
+- Do not use other model slugs unless the user explicitly names a different model in that message.
+- Prefer `composer-2.5` over `composer-2.5-fast` unless the user asks for fast.
