@@ -72,12 +72,26 @@ export function layoutLaneBarsFromNormalized(
     layouts.set(bar.id, {
       left: `${leftPct}%`,
       width: `${widthPct}%`,
+      leftPct,
+      widthPct,
       visualWidthPct: widthPct,
       row,
     })
   }
 
   return { layouts, rowCount: Math.max(1, rowIntervals.length) }
+}
+
+/** Fill ratio (0–1) so the progress edge meets the now marker on the lane track. */
+export function barProgressFillRatio(
+  bar: Pick<GanttBar, 'start' | 'end'>,
+  nowRatio: number,
+  leftPct: number,
+  widthPct: number,
+): number {
+  if (widthPct <= 0) return 0
+  const nowVisualPct = timelineVisualRatio(nowRatio, 1) * 100
+  return Math.min(1, Math.max(0, (nowVisualPct - leftPct) / widthPct))
 }
 
 export function planHoursToNormalizedBar(

@@ -47,7 +47,7 @@ export function ManufacturingSlotRing({
   const clampedUtil = Math.max(0, Math.min(1, utilization))
   const progressDeg = clampedUtil * 360
   const hasProduct = active && productTypeId != null
-  const iconSize = size === 'sm' ? 22 : 30
+  const iconSize = size === 'sm' ? 32 : 46
   const label = `Slot ${slotIndex + 1}${productName ? `: ${productName}` : ''}`
 
   return (

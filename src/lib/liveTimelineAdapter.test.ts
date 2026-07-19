@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildLiveTimelineWindow, liveJobsToGanttLanes } from '@/lib/liveTimelineAdapter'
+import { buildLiveTimelineWindow, liveJobProgress, liveJobsToGanttLanes } from '@/lib/liveTimelineAdapter'
 import type { LiveIndustryJob } from '@/types'
 
 const baseJob: LiveIndustryJob = {
@@ -38,5 +38,27 @@ describe('liveTimelineAdapter', () => {
     expect(bar?.label).toBe('Rifter')
     expect(bar?.start).toBeGreaterThanOrEqual(0)
     expect(bar?.end).toBeLessThanOrEqual(1)
+  })
+
+  it('computes live job progress from start and end times', () => {
+    const now = Date.parse('2026-01-01T11:00:00Z')
+    const progress = liveJobProgress(baseJob, now)
+    expect(progress.ratio).toBe(0.5)
+    expect(progress.remainingMs).toBe(3_600_000)
+    expect(progress.animating).toBe(true)
+  })
+
+  it('stops animating paused and finished jobs', () => {
+    const now = Date.parse('2026-01-01T11:00:00Z')
+    expect(liveJobProgress({ ...baseJob, status: 'paused' }, now).animating).toBe(false)
+    expect(liveJobProgress({ ...baseJob, status: 'ready' }, now).ratio).toBe(1)
+    expect(liveJobProgress(baseJob, Date.parse(baseJob.endAt)).animating).toBe(false)
+  })
+
+  it('reports remaining time for in-flight jobs', () => {
+    const now = Date.parse('2026-01-01T11:00:00Z')
+    const progress = liveJobProgress(baseJob, now)
+    expect(progress.remainingMs).toBe(3_600_000)
+    expect(progress.animating).toBe(true)
   })
 })

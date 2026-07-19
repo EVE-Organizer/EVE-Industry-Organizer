@@ -208,7 +208,7 @@ export function JobsPage() {
   const timelineJobs = useMemo(() => timelineJobsFromDisplay(tabJobs), [tabJobs])
 
   useEffect(() => {
-    const timer = globalThis.setInterval(() => setNowMs(Date.now()), 30_000)
+    const timer = globalThis.setInterval(() => setNowMs(Date.now()), 1_000)
     return () => globalThis.clearInterval(timer)
   }, [])
 
@@ -462,45 +462,14 @@ export function JobsPage() {
           id={`jobs-tabpanel-${activeTab}`}
           aria-labelledby={`jobs-tab-${activeTab}`}
         >
-          <Panel
-            title={activeTab === 'manufacturing' ? 'Manufacturing stats' : 'Research stats'}
-            actions={
-              <button type="button" className="btn btn-ghost btn-xs" disabled={isFetching} onClick={() => void refetch()}>
-                {isFetching ? 'Refreshing…' : 'Refresh'}
-              </button>
-            }
-          >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-              <div>
-                <p className="text-[11px] uppercase opacity-50">Active jobs</p>
-                <p className="text-lg font-semibold tabular-nums">{activeTabJobs.length}</p>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase opacity-50">
-                  {activeTab === 'manufacturing' ? 'Industry slots' : 'Lab slots'}
-                </p>
-                <p className="text-lg font-semibold tabular-nums">{slots}</p>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase opacity-50">Slots in use</p>
-                <p className="text-lg font-semibold tabular-nums">
-                  {lanes.filter((lane) => lane.jobCount > 0).length}
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase opacity-50">Ready to deliver</p>
-                <p className="text-lg font-semibold tabular-nums">
-                  {tabJobs.filter((j) => j.status === 'ready').length}
-                </p>
-              </div>
-            </div>
-          </Panel>
-
           <section ref={timelineRef} className="plan-build-card plan-timeline">
             <div className="plan-build-card__header">
               <h2 className="plan-build-card__title">
                 {activeTab === 'manufacturing' ? 'Manufacturing timeline' : 'Research timeline'}
               </h2>
+              <button type="button" className="btn btn-ghost btn-xs ml-auto" disabled={isFetching} onClick={() => void refetch()}>
+                {isFetching ? 'Refreshing…' : 'Refresh'}
+              </button>
             </div>
             <div className="plan-build-card__body plan-timeline__body">
               <div className="plan-timeline__hero">
@@ -526,6 +495,7 @@ export function JobsPage() {
                 focusedLaneId={focusedLaneId}
                 onFocusedLaneChange={handleFocusedLaneChange}
                 nowRatio={nowRatio}
+                nowMs={nowMs}
                 emptyMessage={
                   activeTab === 'manufacturing'
                     ? 'No active manufacturing jobs for this character.'

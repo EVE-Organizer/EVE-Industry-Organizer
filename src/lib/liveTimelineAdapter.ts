@@ -101,6 +101,40 @@ export function formatLiveTick(ratio: number, window: LiveTimelineWindow): strin
   })
 }
 
+export interface LiveJobProgress {
+  ratio: number
+  remainingMs: number
+  animating: boolean
+}
+
+export function liveJobProgress(job: LiveIndustryJob, nowMs: number): LiveJobProgress {
+  const startMs = Date.parse(job.startAt)
+  const endMs = Date.parse(job.endAt)
+  const spanMs = endMs - startMs
+  if (spanMs <= 0) {
+    return { ratio: 1, remainingMs: 0, animating: false }
+  }
+
+  if (job.status === 'ready' || nowMs >= endMs) {
+    return { ratio: 1, remainingMs: 0, animating: false }
+  }
+  if (nowMs <= startMs) {
+    return {
+      ratio: 0,
+      remainingMs: endMs - nowMs,
+      animating: false,
+    }
+  }
+
+  const ratio = Math.min(1, Math.max(0, (nowMs - startMs) / spanMs))
+  const remainingMs = Math.max(0, endMs - nowMs)
+  return {
+    ratio,
+    remainingMs,
+    animating: job.status === 'active' && remainingMs > 0,
+  }
+}
+
 export function formatCountdown(endAt: string, nowMs = Date.now()): string {
   const remainingMs = Date.parse(endAt) - nowMs
   if (remainingMs <= 0) return 'Ready'

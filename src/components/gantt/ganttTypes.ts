@@ -22,6 +22,10 @@ export interface GanttLane {
 export interface GanttBarLayout {
   left: string
   width: string
+  /** Rendered left edge on the lane track (%). */
+  leftPct: number
+  /** Rendered bar width on the lane track (%), may exceed true visual span. */
+  widthPct: number
   visualWidthPct: number
   row: number
 }

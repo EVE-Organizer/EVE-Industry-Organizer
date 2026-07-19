@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Tooltip as UiTooltip, useAnchorTooltip } from '@/components/Tooltip'
+import { useAnchorTooltip } from '@/components/Tooltip'
 import { PlanProductIcon } from '@/components/plan/PlanProductIcon'
 import {
+  barProgressFillRatio,
   buildTimelineTicks,
   layoutLaneBarsFromNormalized,
   timelineTickPositionFromNormalized,
 } from '@/lib/ganttLayout'
+import { liveJobProgress } from '@/lib/liveTimelineAdapter'
+import type { LiveIndustryJob } from '@/types'
 import type { GanttBar, GanttBarLayout, GanttLane } from '@/components/gantt/ganttTypes'
 
 const BAR_ICON = 20
@@ -19,8 +22,51 @@ export interface SlotGanttChartProps {
   emptyMessage?: string
   title?: string
   nowRatio?: number | null
+  nowMs?: number | null
   focusedLaneId?: string | null
   onFocusedLaneChange?: (laneId: string | null) => void
+}
+
+function barProgressRatio(
+  bar: GanttBar,
+  layout: GanttBarLayout,
+  nowMs: number,
+  nowRatio: number | null | undefined,
+): number {
+  if (nowRatio != null) {
+    return barProgressFillRatio(bar, nowRatio, layout.leftPct, layout.widthPct)
+  }
+  const job = bar.meta?.job as LiveIndustryJob | undefined
+  if (!job) return 0
+  return liveJobProgress(job, nowMs).ratio
+}
+
+function LiveBarProgress({
+  bar,
+  layout,
+  fill,
+  nowMs,
+  nowRatio,
+}: {
+  bar: GanttBar
+  layout: GanttBarLayout
+  fill: string
+  nowMs: number
+  nowRatio: number | null | undefined
+}) {
+  const ratio = barProgressRatio(bar, layout, nowMs, nowRatio)
+  if (ratio <= 0) return null
+
+  return (
+    <span
+      className="plan-timeline__bar-progress"
+      style={{
+        width: `${ratio * 100}%`,
+        backgroundColor: `${fill}55`,
+      }}
+      aria-hidden
+    />
+  )
 }
 
 function GanttBarButton({
@@ -29,33 +75,45 @@ function GanttBarButton({
   blueprintTypeId,
   formatBarRange,
   formatBarMeta,
+  nowMs,
+  nowRatio,
 }: {
   bar: GanttBar
   layout: GanttBarLayout
   blueprintTypeId?: number
   formatBarRange?: (bar: GanttBar) => string
   formatBarMeta?: (bar: GanttBar) => string
+  nowMs?: number | null
+  nowRatio?: number | null
 }) {
   const fill = bar.color ?? '#4a9eff'
   const { ref, triggerProps, TooltipPortal } = useAnchorTooltip('top')
   const showLabel = layout.visualWidthPct >= 6 || bar.duration >= 2.5
+  const job = bar.meta?.job as LiveIndustryJob | undefined
+  const isLive = job != null && nowMs != null
+  const isAnimating = isLive && job != null && liveJobProgress(job, nowMs).animating
 
   return (
     <>
       <button
         ref={ref}
         type="button"
-        className={`plan-timeline__bar${showLabel ? '' : ' plan-timeline__bar--compact'}`}
+        className={`plan-timeline__bar${showLabel ? '' : ' plan-timeline__bar--compact'}${isLive ? ' plan-timeline__bar--live' : ''}`}
         style={{
           left: layout.left,
           width: layout.width,
           maxWidth: layout.width,
           ['--bar-row' as string]: layout.row,
-          backgroundColor: `${fill}33`,
+          ['--bar-color' as string]: fill,
+          backgroundColor: isLive ? `${fill}1a` : `${fill}33`,
           borderColor: `${fill}99`,
         }}
         {...triggerProps}
       >
+        {isLive && job ? (
+          <LiveBarProgress bar={bar} layout={layout} fill={fill} nowMs={nowMs} nowRatio={nowRatio} />
+        ) : null}
+        {isAnimating ? <span className="plan-timeline__bar-sweep" style={{ color: fill }} aria-hidden /> : null}
         {bar.productTypeId ? (
           <PlanProductIcon
             productTypeId={bar.productTypeId}
@@ -94,9 +152,11 @@ export function SlotGanttChart({
   emptyMessage = 'No scheduled jobs yet.',
   title = 'Job schedule',
   nowRatio = null,
+  nowMs = null,
   focusedLaneId: focusedLaneIdProp,
   onFocusedLaneChange,
 }: SlotGanttChartProps) {
+  const isLiveTimeline = nowMs != null
   const ticks = useMemo(() => buildTimelineTicks(1), [])
   const laneLayouts = useMemo(
     () => lanes.map((lane) => layoutLaneBarsFromNormalized(lane.bars)),
@@ -181,7 +241,7 @@ export function SlotGanttChart({
                   ))}
                   {nowRatio != null && nowRatio >= 0 && nowRatio <= 1 ? (
                     <span
-                      className="plan-timeline__now-marker"
+                      className={`plan-timeline__now-marker${isLiveTimeline ? ' plan-timeline__now-marker--live' : ''}`}
                       style={{ left: timelineTickPositionFromNormalized(nowRatio) }}
                       aria-hidden
                     />
@@ -204,6 +264,8 @@ export function SlotGanttChart({
                           }
                           formatBarRange={formatBarRange}
                           formatBarMeta={formatBarMeta}
+                          nowMs={nowMs}
+                          nowRatio={nowRatio}
                         />
                       )
                     })

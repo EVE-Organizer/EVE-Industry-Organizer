@@ -561,6 +561,29 @@
   }
 }
 
+@keyframes plan-timeline-bar-sweep {
+  0% {
+    left: -35%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes plan-timeline-now-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    box-shadow: 0 0 0 0 rgb(245 166 35 / 0.35);
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 6px 1px rgb(245 166 35 / 0.45);
+  }
+}
+
 .plan-search-wrap {
   @apply relative w-full;
 
@@ -705,6 +728,10 @@
 
   &__now-marker {
     @apply absolute inset-y-1 w-0.5 -translate-x-1/2 bg-primary/80 pointer-events-none z-10;
+
+    &--live {
+      animation: plan-timeline-now-pulse 2.4s ease-in-out infinite;
+    }
   }
 
   &__bar {
@@ -715,6 +742,10 @@
     min-width: 0;
     @apply hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60;
 
+    &--live {
+      @apply border-base-content/10;
+    }
+
     &--compact {
       @apply justify-center px-0.5 z-[1];
 
@@ -724,12 +755,33 @@
     }
   }
 
+  &__bar-progress {
+    @apply absolute inset-y-0 left-0 rounded-l-[inherit] pointer-events-none;
+    z-index: 0;
+  }
+
+  &__bar-sweep {
+    @apply absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none;
+    z-index: 1;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 35%;
+      background: linear-gradient(90deg, transparent, currentColor, transparent);
+      opacity: 0.2;
+      animation: plan-timeline-bar-sweep 2.6s ease-in-out infinite;
+    }
+  }
+
   &__bar-icon {
-    @apply shrink-0 pointer-events-none;
+    @apply shrink-0 pointer-events-none relative z-[2];
   }
 
   &__bar-label {
-    @apply min-w-0 truncate leading-8;
+    @apply min-w-0 truncate leading-8 relative z-[2];
   }
 }
 
