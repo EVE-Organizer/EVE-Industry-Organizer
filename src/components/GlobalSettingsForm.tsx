@@ -17,17 +17,15 @@ import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 import {
   isPlayerStructure,
   isPresetPlayerStructure,
-  patchStructureType,
 } from '@/lib/structureSettings'
 import {
   isActiveRefinery,
   isPresetRefinery,
-  patchRefineryType,
   refineryHullTePercent,
   REACTION_FAMILY_LABELS,
 } from '@/lib/refinerySettings'
-import { StructureTypePicker } from '@/components/StructureTypePicker'
-import { RefineryTypePicker } from '@/components/RefineryTypePicker'
+import { ManufacturingLocationPicker } from '@/components/ManufacturingLocationPicker'
+import { RefineryLocationPicker } from '@/components/RefineryLocationPicker'
 import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
 import { BPO_LIFETIME_CATEGORY_LABELS, clampLifetimeRuns } from '@/lib/bpoLifetime'
 
@@ -327,11 +325,7 @@ export function ManufacturingSettingsSection({
         tooltip={GLOBAL_SETTING_TOOLTIPS.structureType}
         size={size}
       >
-        <StructureTypePicker
-          size={size}
-          value={settings.structureType}
-          onChange={(structureType) => onChange(patchStructureType(structureType))}
-        />
+        <ManufacturingLocationPicker settings={settings} onChange={onChange} size={size} />
       </SettingField>
 
       {isPlayerStructure(settings.structureType) ? (
@@ -404,6 +398,7 @@ export function ReactionFacilitySection({
   const gap = sectionGap(size)
   const facility = settings.reactionFacility
   const hullTe = refineryHullTePercent(facility.refineryType, facility.hullTeBonusPercent)
+  const reactionSystemLocked = settings.reactionLocationId != null
 
   function patchFamily(
     group: ReactionFamilyGroup,
@@ -424,7 +419,11 @@ export function ReactionFacilitySection({
     <div className={`flex flex-col ${gap}`}>
       <SettingField
         label="Reaction system"
-        tooltip={GLOBAL_SETTING_TOOLTIPS.reactionSystemId}
+        tooltip={
+          reactionSystemLocked
+            ? 'Set automatically from the selected refinery location.'
+            : GLOBAL_SETTING_TOOLTIPS.reactionSystemId
+        }
         size={size}
       >
         <ManufacturingSystemPicker
@@ -435,6 +434,8 @@ export function ReactionFacilitySection({
           systems={systems}
           regions={regions}
           costIndexKind="reaction"
+          size={size}
+          disabled={reactionSystemLocked}
         />
       </SettingField>
 
@@ -443,11 +444,7 @@ export function ReactionFacilitySection({
         tooltip={GLOBAL_SETTING_TOOLTIPS.refineryType}
         size={size}
       >
-        <RefineryTypePicker
-          size={size}
-          value={facility.refineryType}
-          onChange={(refineryType) => onChange(patchRefineryType(refineryType, facility))}
-        />
+        <RefineryLocationPicker settings={settings} onChange={onChange} size={size} />
       </SettingField>
 
       {isActiveRefinery(facility.refineryType) ? (

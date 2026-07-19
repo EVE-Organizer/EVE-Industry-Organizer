@@ -2,7 +2,7 @@ import type { HubId, MarketHistoryEntry, TimeRange } from '@/types'
 import { REGION_IDS } from '@/types'
 import { daysForRange, trimHistoryByDays, WIDER_TIME_RANGES } from '@/lib/profit'
 import { cacheKey, getCached, setCached, TTL } from '@/services/cache/cacheStore'
-import { batchProcess, dedupe, throttle } from '@/services/market/requestQueue'
+import { batchProcess, dedupe, noteEsiResponse, throttle } from '@/services/market/requestQueue'
 
 const ESI_BASE = 'https://esi.evetech.net/latest'
 const FUZZWORK_BASE = 'https://market.fuzzwork.co.uk/aggregates'
@@ -25,6 +25,7 @@ async function fetchEsiPrice(typeId: number, regionId: number): Promise<number> 
   await throttle()
   const url = `${ESI_BASE}/markets/${regionId}/orders/?type_id=${typeId}&order_type=sell`
   const res = await fetch(url)
+  noteEsiResponse(res)
   if (!res.ok) throw new Error(`ESI orders failed: ${res.status}`)
   const orders = (await res.json()) as { price: number }[]
   if (!orders.length) return 0
@@ -51,6 +52,7 @@ async function fetchEsiHistoryRaw(
   if (ifNoneMatch) headers['If-None-Match'] = ifNoneMatch
 
   const res = await fetch(url, { headers })
+  noteEsiResponse(res)
   if (res.status === 304) {
     return { history: [], etag: ifNoneMatch, notModified: true }
   }
@@ -215,6 +217,7 @@ export async function getCostIndices(forceRefresh = false): Promise<{
     try {
       await throttle()
       const res = await fetch(`${ESI_BASE}/industry/systems/`)
+      noteEsiResponse(res)
       if (!res.ok) throw new Error('cost index fetch failed')
       const systems = (await res.json()) as { solar_system_id: number; cost_indices: { activity: string; cost_index: number }[] }[]
       const manufacturing: Record<number, number> = {}
@@ -324,6 +327,7 @@ export async function getSystemKills(forceRefresh = false): Promise<{
     try {
       await throttle()
       const res = await fetch(`${ESI_BASE}/universe/system_kills/`)
+      noteEsiResponse(res)
       if (!res.ok) throw new Error(`system_kills failed: ${res.status}`)
       const rows = (await res.json()) as {
         system_id: number
@@ -365,6 +369,7 @@ export async function getRoute(
       await throttle()
       const url = `${ESI_BASE}/route/${originSystemId}/${destinationSystemId}/?flag=secure`
       const res = await fetch(url)
+      noteEsiResponse(res)
       if (res.status === 404) {
         const empty: number[] = []
         setCached(key, empty, 'esi', TTL.route.fresh, TTL.route.stale)
@@ -399,6 +404,7 @@ export async function getSystemInfo(
     try {
       await throttle()
       const res = await fetch(`${ESI_BASE}/universe/systems/${systemId}/`)
+      noteEsiResponse(res)
       if (!res.ok) throw new Error(`system info failed: ${res.status}`)
       const data = (await res.json()) as { name: string; security_status: number }
       const info = { systemId, name: data.name, security: data.security_status }

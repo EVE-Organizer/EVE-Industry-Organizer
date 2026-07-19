@@ -13,6 +13,7 @@ import {
 } from '@/lib/planTreeLines'
 import { buildBuyGroups, buildBuyTableRows, buyTableCollapseKeys, isBuyTableRowVisible, type PlanBuyTableRow } from '@/lib/planBuyGroups'
 import { packagedBuyNodesFromPlan } from '@/lib/planPackagedBuy'
+import { toBuyQuantity } from '@/lib/locationInventory'
 import { planBuildVsBuyFootnote } from '@/lib/planBuildVsBuy'
 import { SHARED_MATERIALS_ICON_TYPE_ID } from '@/lib/eveImages'
 import { PlanBlueprintItemName } from '@/components/plan/PlanBlueprintItemName'
@@ -22,7 +23,9 @@ import type { ManufactureDisplayRow } from '@/lib/planManufactureDisplay'
 import type { PlanNode, PlanRootEntry } from '@/types'
 
 const ROW_ICON_SIZE = PLAN_ROW_ICON_SIZE
-const UNIT_COL_CLASS = 'w-28 text-right'
+const UNIT_COL_CLASS = 'w-24 text-right'
+const HAVE_COL_CLASS = 'w-24 text-right'
+const TOBUY_COL_CLASS = 'w-24 text-right'
 const PRICE_COL_CLASS = 'w-32 text-right'
 const SOURCE_COL_CLASS = 'w-28 text-right'
 const DURATION_COL_CLASS = 'w-[6.5rem] text-right whitespace-nowrap'
@@ -170,6 +173,7 @@ interface PlanChainTableProps {
   onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
   warnings?: { productTypeId: number; message: string }[]
+  inventoryByTypeId?: Map<number, number> | null
 }
 
 function ChevronIcon({ open }: { open: boolean }) {
@@ -545,6 +549,35 @@ function BuildSection({
   )
 }
 
+function InventoryQtyCell({
+  need,
+  have,
+  showInventory,
+}: {
+  need: number
+  have: number
+  showInventory: boolean
+}) {
+  if (!showInventory) return <span className="text-sm opacity-40">—</span>
+  const toBuy = toBuyQuantity(need, have)
+  return (
+    <span className={`tabular-nums text-sm${toBuy > 0 ? ' text-warning' : ''}`}>
+      {formatGraphQuantity(toBuy)}
+    </span>
+  )
+}
+
+function HaveQtyCell({
+  have,
+  showInventory,
+}: {
+  have: number
+  showInventory: boolean
+}) {
+  if (!showInventory) return <span className="text-sm opacity-40">—</span>
+  return <span className="tabular-nums text-sm">{formatGraphQuantity(have)}</span>
+}
+
 function PriceCell({ node }: { node: PlanNode }) {
   if (node.unitPrice == null || node.unitPrice <= 0) {
     return <span className="text-sm opacity-40">—</span>
@@ -568,6 +601,8 @@ function BuyTableRow({
   onOpenGraph,
   blueprintTypeIdByProduct,
   nodesById,
+  inventoryByTypeId,
+  showInventory,
 }: {
   row: PlanBuyTableRow
   expanded: boolean
@@ -577,6 +612,8 @@ function BuyTableRow({
   onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
   nodesById: Map<number, PlanNode>
+  inventoryByTypeId?: Map<number, number> | null
+  showInventory: boolean
 }) {
   if (row.kind === 'group') {
     return (
@@ -619,6 +656,8 @@ function BuyTableRow({
         <td className={`${UNIT_COL_CLASS} tabular-nums text-sm align-top py-2`}>
           {formatGraphQuantity(row.totalQty)}
         </td>
+        <td className={`${HAVE_COL_CLASS} align-top py-2`} />
+        <td className={`${TOBUY_COL_CLASS} align-top py-2`} />
         <td className={`${PRICE_COL_CLASS} tabular-nums text-sm align-top py-2 pr-1`}>
           {row.totalCost > 0 ? formatIsk(row.totalCost) : <span className="opacity-40">—</span>}
         </td>
@@ -651,6 +690,19 @@ function BuyTableRow({
         <td className={`${UNIT_COL_CLASS} tabular-nums text-sm align-top py-2`}>
           {formatGraphQuantity(row.node.totalDemandQty)}
         </td>
+        <td className={`${HAVE_COL_CLASS} align-top py-2`}>
+          <HaveQtyCell
+            have={inventoryByTypeId?.get(row.node.productTypeId) ?? 0}
+            showInventory={showInventory}
+          />
+        </td>
+        <td className={`${TOBUY_COL_CLASS} align-top py-2`}>
+          <InventoryQtyCell
+            need={row.node.totalDemandQty}
+            have={inventoryByTypeId?.get(row.node.productTypeId) ?? 0}
+            showInventory={showInventory}
+          />
+        </td>
         <td className={`${PRICE_COL_CLASS} align-top py-2 pr-1`}>
           <PriceCell node={row.node} />
         </td>
@@ -660,6 +712,8 @@ function BuyTableRow({
       </tr>
     )
   }
+
+  const have = inventoryByTypeId?.get(row.node.productTypeId) ?? 0
 
   return (
     <tr className={planTableRowClass(false)}>
@@ -675,6 +729,16 @@ function BuyTableRow({
       </td>
       <td className={`${UNIT_COL_CLASS} tabular-nums text-sm align-top py-2`}>
         {formatGraphQuantity(row.node.totalDemandQty)}
+      </td>
+      <td className={`${HAVE_COL_CLASS} align-top py-2`}>
+        <HaveQtyCell have={have} showInventory={showInventory} />
+      </td>
+      <td className={`${TOBUY_COL_CLASS} align-top py-2`}>
+        <InventoryQtyCell
+          need={row.node.totalDemandQty}
+          have={have}
+          showInventory={showInventory}
+        />
       </td>
       <td className={`${PRICE_COL_CLASS} align-top py-2 pr-1`}>
         <PriceCell node={row.node} />
@@ -692,12 +756,16 @@ function BuySection({
   onToggleMode,
   onOpenGraph,
   blueprintTypeIdByProduct,
+  inventoryByTypeId,
+  showInventory,
 }: {
   allNodes: PlanNode[]
   buyNodes: PlanNode[]
   onToggleMode?: (productTypeId: number) => void
   onOpenGraph: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
+  inventoryByTypeId?: Map<number, number> | null
+  showInventory: boolean
 }) {
   const tableRows = useMemo(() => {
     const groups = buildBuyGroups(allNodes, buyNodes)
@@ -770,6 +838,16 @@ function BuySection({
                 <span className="cursor-help border-b border-dotted border-current/40">Need</span>
               </Tooltip>
             </th>
+            <th className={HAVE_COL_CLASS}>
+              <Tooltip text="Quantity in hangar at the selected production station for this character" placement="top">
+                <span className="cursor-help border-b border-dotted border-current/40">Have</span>
+              </Tooltip>
+            </th>
+            <th className={TOBUY_COL_CLASS}>
+              <Tooltip text="Need minus Have at the selected station" placement="top">
+                <span className="cursor-help border-b border-dotted border-current/40">To buy</span>
+              </Tooltip>
+            </th>
             <th className={`${PRICE_COL_CLASS} pr-1`}>
               <Tooltip text="Hub sell price per unit and line total (price × qty)" placement="top">
                 <span className="cursor-help border-b border-dotted border-current/40">Price</span>
@@ -789,6 +867,8 @@ function BuySection({
               onOpenGraph={onOpenGraph}
               blueprintTypeIdByProduct={blueprintTypeIdByProduct}
               nodesById={nodesById}
+              inventoryByTypeId={inventoryByTypeId}
+              showInventory={showInventory}
             />
           ))}
         </tbody>
@@ -798,6 +878,8 @@ function BuySection({
             <td className={`${UNIT_COL_CLASS} tabular-nums py-2`}>
               {formatGraphQuantity(totalUnits)}
             </td>
+            <td className={HAVE_COL_CLASS} />
+            <td className={TOBUY_COL_CLASS} />
             <td className={`${PRICE_COL_CLASS} tabular-nums py-2 pr-1`}>{formatIsk(buyTotal)}</td>
             <td className={SOURCE_COL_CLASS} />
           </tr>
@@ -817,6 +899,7 @@ export function PlanChainTable({
   onOpenMeTe,
   blueprintTypeIdByProduct,
   warnings = [],
+  inventoryByTypeId = null,
 }: PlanChainTableProps) {
   const buildNodes = useMemo(() => nodes.filter((n) => n.mode === 'build'), [nodes])
   const buyNodes = useMemo(() => nodes.filter((n) => n.mode === 'buy'), [nodes])
@@ -825,6 +908,7 @@ export function PlanChainTable({
     () => [...buyNodes, ...packagedBuyNodes],
     [buyNodes, packagedBuyNodes],
   )
+  const showInventory = inventoryByTypeId != null
 
   if (nodes.length === 0) {
     return <p className="text-sm opacity-60">Add roots to expand the chain.</p>
@@ -857,6 +941,8 @@ export function PlanChainTable({
           onToggleMode={onToggleMode}
           onOpenGraph={onOpenGraph}
           blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+          inventoryByTypeId={inventoryByTypeId}
+          showInventory={showInventory}
         />
       ) : null}
 

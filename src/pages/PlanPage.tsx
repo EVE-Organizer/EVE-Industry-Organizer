@@ -18,8 +18,10 @@ import { PlanProfitSummaryPanel } from '@/components/plan/PlanProfitSummaryPanel
 import { PlanRootSetupModal } from '@/components/plan/PlanRootSetupModal'
 import { PlanRootProfitModal } from '@/components/plan/PlanRootProfitModal'
 import { useAppStore } from '@/stores/appStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useSdeData } from '@/hooks/useSdeData'
 import { useManufacturingPlan } from '@/hooks/useManufacturingPlan'
+import { useLocationInventory } from '@/hooks/useCharacterIndustryData'
 import {
   buildTypeMap,
   getAllBlueprints,
@@ -299,6 +301,12 @@ export function PlanPage() {
   )
 
   const slots = manufacturingSlotsFromSkills(activeSettings.skills)
+
+  const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
+  const { data: locationInventory } = useLocationInventory(
+    activeCharacterId,
+    activeSettings.productionLocationId,
+  )
 
   const rootRunsTotal = useMemo(
     () => (activeTemplate ? activeTemplate.roots.reduce((sum, r) => sum + r.runs, 0) : 0),
@@ -971,6 +979,7 @@ export function PlanPage() {
                 onOpenMeTe={openMeTe}
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}
                 warnings={plan.warnings}
+                inventoryByTypeId={locationInventory ?? null}
               />
             ) : null}
 

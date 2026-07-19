@@ -357,6 +357,10 @@
     .label {
       @apply min-h-[1.25rem] py-0;
     }
+
+    &--wide {
+      @apply col-span-full mb-1;
+    }
   }
 
   &__hint {
@@ -697,6 +701,10 @@
 
   &__lane-empty {
     @apply absolute left-2 top-1/2 -translate-y-1/2 text-[11px] text-base-content/40;
+  }
+
+  &__now-marker {
+    @apply absolute inset-y-1 w-0.5 -translate-x-1/2 bg-primary/80 pointer-events-none z-10;
   }
 
   &__bar {

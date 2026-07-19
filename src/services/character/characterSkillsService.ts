@@ -1,7 +1,7 @@
 import type { SkillLevels } from '@/types'
 import { SKILL_FIELDS, normalizeImportedSkillLevels } from '@/lib/skillFields'
-import { ESI_BASE } from '@/services/auth/ssoMetadata'
-import { dedupe, throttle } from '@/services/market/requestQueue'
+import { esiAuthGet } from '@/services/character/esiAuthFetch'
+import type { EsiFetchOptions } from '@/services/character/esiAuthFetch'
 
 export interface EsiSkill {
   skill_id: number
@@ -19,18 +19,13 @@ export interface EsiSkillsResponse {
 export async function fetchCharacterSkills(
   characterId: number,
   accessToken: string,
+  options?: EsiFetchOptions,
 ): Promise<EsiSkillsResponse> {
-  return dedupe(`esi:skills:${characterId}`, async () => {
-    await throttle()
-    const res = await fetch(`${ESI_BASE}/characters/${characterId}/skills/`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-
-    if (res.status === 401) throw new Error('Session expired. Sign in again.')
-    if (!res.ok) throw new Error(`Failed to fetch skills (${res.status})`)
-
-    return (await res.json()) as EsiSkillsResponse
-  })
+  return esiAuthGet<EsiSkillsResponse>(
+    `/characters/${characterId}/skills/`,
+    accessToken,
+    { cacheKey: `esi:skills:${characterId}`, ...options },
+  )
 }
 
 /** Map ESI skill rows to the five app skill keys used in profit and buildability. */

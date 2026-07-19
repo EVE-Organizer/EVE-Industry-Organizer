@@ -1,12 +1,9 @@
 import type { GlobalSettings, RegionsData, SystemInfo } from '@/types'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
-import { StructureTypePicker } from '@/components/StructureTypePicker'
-import { RefineryTypePicker } from '@/components/RefineryTypePicker'
+import { ManufacturingLocationPicker } from '@/components/ManufacturingLocationPicker'
 import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
+import { RefineryLocationPicker } from '@/components/RefineryLocationPicker'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
-import { patchStructureType } from '@/lib/structureSettings'
-import { patchRefineryType } from '@/lib/refinerySettings'
-
 interface PlanFacilityControlsProps {
   settings: GlobalSettings
   onChange: (patch: Partial<GlobalSettings>) => void
@@ -21,6 +18,8 @@ export function PlanFacilityControls({
   regions,
 }: PlanFacilityControlsProps) {
   const facility = settings.reactionFacility
+  const buildSystemLocked = settings.productionLocationId != null
+  const reactionSystemLocked = settings.reactionLocationId != null
 
   return (
     <div className="plan-facility-controls">
@@ -31,15 +30,24 @@ export function PlanFacilityControls({
             tooltip={GLOBAL_SETTING_TOOLTIPS.structureType}
             size="sm"
           />
-          <StructureTypePicker
+          <ManufacturingLocationPicker
+            settings={settings}
+            onChange={onChange}
             size="sm"
-            value={settings.structureType}
-            onChange={(structureType) => onChange(patchStructureType(structureType))}
+            showInventoryHint
           />
         </div>
 
         <div className="plan-facility-controls__field">
-          <FormFieldLabel label="Build system" size="sm" />
+          <FormFieldLabel
+            label="Build system"
+            tooltip={
+              buildSystemLocked
+                ? 'Set automatically from the selected manufacturing location.'
+                : undefined
+            }
+            size="sm"
+          />
           <ManufacturingSystemPicker
             size="sm"
             value={settings.manufacturingSystemId}
@@ -47,6 +55,7 @@ export function PlanFacilityControls({
             systems={systems}
             regions={regions}
             costIndexKind="manufacturing"
+            disabled={buildSystemLocked}
           />
         </div>
 
@@ -56,17 +65,17 @@ export function PlanFacilityControls({
             tooltip={GLOBAL_SETTING_TOOLTIPS.refineryType}
             size="sm"
           />
-          <RefineryTypePicker
-            size="sm"
-            value={facility.refineryType}
-            onChange={(refineryType) => onChange(patchRefineryType(refineryType, facility))}
-          />
+          <RefineryLocationPicker settings={settings} onChange={onChange} size="sm" />
         </div>
 
         <div className="plan-facility-controls__field">
           <FormFieldLabel
             label="Reaction system"
-            tooltip={GLOBAL_SETTING_TOOLTIPS.reactionSystemId}
+            tooltip={
+              reactionSystemLocked
+                ? 'Set automatically from the selected refinery location.'
+                : GLOBAL_SETTING_TOOLTIPS.reactionSystemId
+            }
             size="sm"
           />
           <ManufacturingSystemPicker
@@ -80,6 +89,7 @@ export function PlanFacilityControls({
             systems={systems}
             regions={regions}
             costIndexKind="reaction"
+            disabled={reactionSystemLocked}
           />
         </div>
       </div>

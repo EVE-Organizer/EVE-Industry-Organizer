@@ -1,5 +1,6 @@
 import { CharacterAvatar } from '@/components/EveImage'
 import type { EveCharacterSession } from '@/services/auth/authStorage'
+import { useAuthScopes } from '@/hooks/useAuthScopes'
 import { useAuthStore } from '@/stores/authStore'
 
 export function EveNavAuth() {
@@ -14,6 +15,7 @@ export function EveNavAuth() {
   const syncSkills = useAuthStore((s) => s.syncSkills)
   const logoutCharacter = useAuthStore((s) => s.logoutCharacter)
   const logoutAll = useAuthStore((s) => s.logoutAll)
+  const { missing, hasAll } = useAuthScopes()
 
   if (!configured) return null
 
@@ -69,6 +71,13 @@ export function EveNavAuth() {
               {isBusy ? 'Syncing…' : 'Sync skills'}
             </button>
           </li>
+          {!hasAll ? (
+            <li>
+              <button type="button" disabled={isBusy} onClick={() => void login()}>
+                Re-authorize ({missing.length} scopes)
+              </button>
+            </li>
+          ) : null}
           <li>
             <button type="button" disabled={isBusy} onClick={() => logoutCharacter()}>
               Sign out {characters.length > 1 ? character.characterName : ''}

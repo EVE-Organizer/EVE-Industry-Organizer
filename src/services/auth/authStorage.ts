@@ -13,6 +13,7 @@ export interface EveCharacterSession {
   characterName: string
   lastSyncedAt?: string
   skills?: SkillLevels
+  scopes?: string[]
 }
 
 export interface StoredCharacter extends EveCharacterSession {
@@ -77,6 +78,7 @@ export function toPublicCharacter(char: StoredCharacter): EveCharacterSession {
     characterName: char.characterName,
     lastSyncedAt: char.lastSyncedAt,
     skills: char.skills,
+    scopes: char.scopes,
   }
 }
 

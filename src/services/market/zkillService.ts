@@ -1,5 +1,5 @@
 import { cacheKey, getCached, setCached, TTL } from '@/services/cache/cacheStore'
-import { batchProcess, dedupe, throttle } from '@/services/market/requestQueue'
+import { batchProcess, dedupe, noteEsiResponse, throttle } from '@/services/market/requestQueue'
 
 const ZKILL_BASE = 'https://zkillboard.com/api'
 const ESI_BASE = 'https://esi.evetech.net/latest'
@@ -46,6 +46,7 @@ async function fetchKillmailShipType(killmailId: number, hash: string): Promise<
       const res = await fetch(`${ESI_BASE}/killmails/${killmailId}/${hash}/`, {
         headers: { 'User-Agent': USER_AGENT },
       })
+      noteEsiResponse(res)
       if (!res.ok) throw new Error(`killmail failed: ${res.status}`)
       const data = (await res.json()) as EsiKillmail
       const shipTypeId = data.victim?.ship_type_id ?? null

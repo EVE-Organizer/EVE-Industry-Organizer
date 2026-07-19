@@ -110,4 +110,6 @@ export const TTL = {
   route: { fresh: 24 * 60 * 60 * 1000, stale: 7 * 24 * 60 * 60 * 1000 },
   zkillCamp: { fresh: 8 * 60 * 1000, stale: 30 * 60 * 1000 },
   failed: { fresh: 5 * 60 * 1000, stale: 5 * 60 * 1000 },
+  characterData: { fresh: 10 * 60 * 1000, stale: 24 * 60 * 60 * 1000 },
+  universeLocation: { fresh: 24 * 60 * 60 * 1000, stale: 7 * 24 * 60 * 60 * 1000 },
 } as const

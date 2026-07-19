@@ -12,6 +12,7 @@ interface ManufacturingSystemPickerProps {
   size?: 'md' | 'sm'
   /** Which system cost index to show in search results. */
   costIndexKind?: 'manufacturing' | 'reaction'
+  disabled?: boolean
 }
 
 function securityColor(security: number): string {
@@ -42,6 +43,7 @@ export function ManufacturingSystemPicker({
   className = '',
   size = 'md',
   costIndexKind = 'manufacturing',
+  disabled = false,
 }: ManufacturingSystemPickerProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -68,7 +70,7 @@ export function ManufacturingSystemPicker({
   }, [systems, regionNameById, query])
 
   useEffect(() => {
-    if (!open) return
+    if (!open || disabled) return
     function onMouseDown(e: MouseEvent) {
       if (!rootRef.current?.contains(e.target as Node)) {
         setOpen(false)
@@ -77,7 +79,13 @@ export function ManufacturingSystemPicker({
     }
     document.addEventListener('mousedown', onMouseDown)
     return () => document.removeEventListener('mousedown', onMouseDown)
-  }, [open])
+  }, [open, disabled])
+
+  useEffect(() => {
+    if (!disabled) return
+    setOpen(false)
+    setQuery('')
+  }, [disabled])
 
   function select(systemId: number) {
     onChange(systemId)
@@ -90,51 +98,63 @@ export function ManufacturingSystemPicker({
       ? 'input input-bordered input-sm !h-12 !min-h-12 py-1'
       : 'input input-bordered !h-14 !min-h-14 py-1.5'
 
+  const shellClassName = `${inputShellClass} flex items-center gap-2 w-full pr-8 ${
+    disabled
+      ? 'bg-base-300/30 text-base-content/70 cursor-not-allowed select-none'
+      : open
+        ? 'input-primary'
+        : ''
+  }`
+
   return (
     <div ref={rootRef} className={`relative w-full min-w-0 ${className}`}>
-      <div
-        className={`${inputShellClass} flex items-center gap-2 w-full pr-8 ${
-          open ? 'input-primary' : ''
-        }`}
-      >
-        <input
-          ref={inputRef}
-          type="text"
-          className="grow min-w-0 bg-transparent outline-none text-sm"
-          role="combobox"
-          aria-expanded={open}
-          aria-autocomplete="list"
-          placeholder="Search system or region…"
-          value={open ? query : selectedLabel}
-          onChange={(e) => {
-            setQuery(e.target.value)
-            if (!open) setOpen(true)
-          }}
-          onFocus={() => {
-            setOpen(true)
-            setQuery('')
-            requestAnimationFrame(() => inputRef.current?.focus())
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              setOpen(false)
+      {disabled ? (
+        <div className={shellClassName} aria-disabled="true">
+          <span className="grow min-w-0 truncate text-sm">{selectedLabel}</span>
+        </div>
+      ) : (
+        <div className={shellClassName}>
+          <input
+            ref={inputRef}
+            type="text"
+            className="grow min-w-0 bg-transparent outline-none text-sm"
+            role="combobox"
+            aria-expanded={open}
+            aria-autocomplete="list"
+            placeholder="Search system or region…"
+            value={open ? query : selectedLabel}
+            onChange={(e) => {
+              setQuery(e.target.value)
+              if (!open) setOpen(true)
+            }}
+            onFocus={() => {
+              setOpen(true)
               setQuery('')
-              inputRef.current?.blur()
-            }
-            if (e.key === 'Enter' && filtered.length > 0) {
-              select(filtered[0]!.systemId)
-            }
-          }}
-        />
-      </div>
+              requestAnimationFrame(() => inputRef.current?.focus())
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setOpen(false)
+                setQuery('')
+                inputRef.current?.blur()
+              }
+              if (e.key === 'Enter' && filtered.length > 0) {
+                select(filtered[0]!.systemId)
+              }
+            }}
+          />
+        </div>
+      )}
       <span
-        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs opacity-40"
+        className={`pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs ${
+          disabled ? 'opacity-25' : 'opacity-40'
+        }`}
         aria-hidden
       >
         ▾
       </span>
 
-      {open && (
+      {open && !disabled ? (
         <ul
           className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-eve-border bg-base-200 shadow-lg"
           role="listbox"
@@ -177,7 +197,7 @@ export function ManufacturingSystemPicker({
             })
           )}
         </ul>
-      )}
+      ) : null}
     </div>
   )
 }

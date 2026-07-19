@@ -55,6 +55,7 @@ function sessionFromTokens(tokens: EveAuthTokens): EveAuthSession {
   const character: EveCharacterSession = {
     characterId: claims.characterId,
     characterName: claims.characterName,
+    scopes: claims.scopes,
   }
   return { tokens, character }
 }
@@ -63,12 +64,14 @@ function storedFromSession(
   session: EveAuthSession,
   existing?: StoredCharacter,
 ): StoredCharacter {
+  const claims = parseAccessToken(session.tokens.accessToken)
   return {
     characterId: session.character.characterId,
     characterName: session.character.characterName,
     tokens: session.tokens,
     lastSyncedAt: existing?.lastSyncedAt,
     skills: existing?.skills,
+    scopes: claims.scopes,
   }
 }
 
@@ -183,6 +186,7 @@ function updateCharacterTokens(characterId: number, tokens: EveAuthTokens): Stor
     ...existing,
     characterName: claims.characterName,
     tokens,
+    scopes: claims.scopes,
   }
 
   const characters = [...accounts.characters]

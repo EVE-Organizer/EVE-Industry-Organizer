@@ -7,6 +7,7 @@ import { BlueprintsPage } from '@/pages/BlueprintsPage'
 import { ProductionGraphPage } from '@/pages/ProductionGraphPage'
 import { ItemDetailPage } from '@/pages/ItemDetailPage'
 import { PlanPage } from '@/pages/PlanPage'
+import { JobsPage } from '@/pages/JobsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { AuthCallbackPage } from '@/pages/AuthCallbackPage'
 import { useAuthStore } from '@/stores/authStore'
@@ -55,6 +56,7 @@ function AppRoutes() {
         <Route path="/blueprints/:typeId" element={<LegacyBlueprintRedirect />} />
         <Route path="/stations" element={<Navigate to="/" replace />} />
         <Route path="/plan" element={<PlanPage />} />
+        <Route path="/jobs" element={<JobsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/accounts" element={<Navigate to="/settings" replace />} />

@@ -156,6 +156,11 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
       legacyLifetimeRuns,
     ),
     skills: normalizeSkillLevels(parsedSkills),
+    productionCharacterId: rest.productionCharacterId ?? null,
+    productionLocationId: rest.productionLocationId ?? null,
+    productionLocationKind: rest.productionLocationKind ?? null,
+    reactionLocationId: rest.reactionLocationId ?? null,
+    reactionLocationKind: rest.reactionLocationKind ?? null,
   }
 }
 

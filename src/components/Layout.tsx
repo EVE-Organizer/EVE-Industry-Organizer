@@ -6,6 +6,7 @@ import { NavbarHubSelect } from '@/components/NavbarHubSelect'
 const links = [
   { to: '/', label: 'Blueprints' },
   { to: '/plan', label: 'Plan' },
+  { to: '/jobs', label: 'Jobs' },
   { to: '/settings', label: 'Settings' },
 ]
 

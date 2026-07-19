@@ -292,6 +292,14 @@ export interface GlobalSettings {
   includeBlueprintCost: boolean
   /** Assumed manufacturing and market skill levels used in profit and ranking calculations. */
   skills: SkillLevels
+  /** SSO character whose production station and inventory are used on Plan. */
+  productionCharacterId?: number | null
+  /** Selected station or structure ID for manufacturing and inventory. */
+  productionLocationId?: number | null
+  productionLocationKind?: ProductionLocationKind | null
+  /** Selected station or structure ID for reaction jobs. */
+  reactionLocationId?: number | null
+  reactionLocationKind?: ProductionLocationKind | null
 }
 
 /** Global settings plus per-job run count for manufacturing cost and profit math. */
@@ -423,6 +431,58 @@ export interface ScheduledPlanJob {
   endHour: number
   runs: number
   outputQty: number
+}
+
+export type IndustryActivityId = 1 | 3 | 4 | 5 | 7 | 8 | 11
+
+export type LiveIndustryJobStatus = 'active' | 'paused' | 'ready' | 'delivered' | 'cancelled' | 'reverted'
+
+/** In-game industry job from ESI (not a plan simulation). */
+export interface LiveIndustryJob {
+  jobId: number
+  characterId: number
+  installerId: number
+  /** ESI blueprint item instance ID (matches character blueprints item_id). */
+  blueprintId: number
+  activityId: IndustryActivityId
+  activityLabel: string
+  blueprintTypeId: number
+  productTypeId: number
+  productName: string
+  facilityId: number
+  locationId: number
+  runs: number
+  /** Licensed runs on the blueprint for this job (copy output runs, etc.). */
+  licensedRuns?: number
+  status: LiveIndustryJobStatus
+  startAt: string
+  endAt: string
+  durationSeconds: number
+  successfulRuns?: number
+}
+
+export interface AssetQuantity {
+  typeId: number
+  quantity: number
+}
+
+export type ProductionLocationKind = 'station' | 'structure'
+
+/** A station or player structure where a character can manufacture. */
+export interface ProductionLocation {
+  id: string
+  locationId: number
+  kind: ProductionLocationKind
+  name: string
+  solarSystemId: number
+  structureTypeId?: number
+  source:
+    | 'character_asset'
+    | 'corp_asset'
+    | 'corp_structure'
+    | 'industry_job'
+    | 'blueprint'
+    | 'station'
 }
 
 export interface UserData {
@@ -683,6 +743,11 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   inventionSkillLevel: 4,
   includeBlueprintCost: true,
   skills: { ...DEFAULT_SKILLS },
+  productionCharacterId: null,
+  productionLocationId: null,
+  productionLocationKind: null,
+  reactionLocationId: null,
+  reactionLocationKind: null,
 }
 
 /** T2 invented blueprint copy base efficiency without a decryptor. */
