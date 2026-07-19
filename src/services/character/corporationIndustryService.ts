@@ -36,7 +36,7 @@ export async function fetchCharacterCorporationId(characterId: number): Promise<
 export async function fetchCorporationStructures(
   corporationId: number,
   accessToken: string,
-  options?: EsiFetchOptions,
+  options?: EsiFetchOptions<EsiCorpStructure[]>,
 ): Promise<EsiCorpStructure[]> {
   return esiAuthGet<EsiCorpStructure[]>(
     `/corporations/${corporationId}/structures/`,
@@ -48,7 +48,7 @@ export async function fetchCorporationStructures(
 export async function fetchCorporationAssets(
   corporationId: number,
   accessToken: string,
-  options?: EsiFetchOptions,
+  options?: EsiFetchOptions<EsiAsset[]>,
 ): Promise<EsiAsset[]> {
   return esiAuthGetAllPages<EsiAsset>(
     `/corporations/${corporationId}/assets/`,

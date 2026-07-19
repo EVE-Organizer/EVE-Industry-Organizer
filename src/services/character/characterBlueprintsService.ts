@@ -34,7 +34,7 @@ export function mapEsiBlueprint(blueprint: EsiBlueprint): BlueprintItemState {
 export async function fetchCharacterBlueprints(
   characterId: number,
   accessToken: string,
-  options?: EsiFetchOptions,
+  options?: EsiFetchOptions<EsiBlueprint[]>,
 ): Promise<EsiBlueprint[]> {
   return esiAuthGetAllPages<EsiBlueprint>(
     `/characters/${characterId}/blueprints/`,

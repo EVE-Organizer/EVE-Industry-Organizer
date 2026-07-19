@@ -14,7 +14,7 @@ export interface EsiAsset {
 export async function fetchCharacterAssets(
   characterId: number,
   accessToken: string,
-  options?: EsiFetchOptions,
+  options?: EsiFetchOptions<EsiAsset[]>,
 ): Promise<EsiAsset[]> {
   return esiAuthGetAllPages<EsiAsset>(
     `/characters/${characterId}/assets/`,

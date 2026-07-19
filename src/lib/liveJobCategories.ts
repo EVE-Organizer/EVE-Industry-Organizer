@@ -19,7 +19,7 @@ export function isLiveResearchJob(job: LiveIndustryJob): boolean {
   return RESEARCH_IDS.has(job.activityId)
 }
 
-export function filterJobsByTab(jobs: LiveIndustryJob[], tab: LiveJobsTab): LiveIndustryJob[] {
+export function filterJobsByTab<T extends LiveIndustryJob>(jobs: T[], tab: LiveJobsTab): T[] {
   return jobs.filter(tab === 'manufacturing' ? isLiveManufacturingJob : isLiveResearchJob)
 }
 

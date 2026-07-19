@@ -83,7 +83,7 @@ export function mapEsiIndustryJob(
 export async function fetchCharacterIndustryJobs(
   characterId: number,
   accessToken: string,
-  options?: EsiFetchOptions,
+  options?: EsiFetchOptions<EsiIndustryJob[]>,
 ): Promise<EsiIndustryJob[]> {
   return esiAuthGet<EsiIndustryJob[]>(
     `/characters/${characterId}/industry/jobs/`,

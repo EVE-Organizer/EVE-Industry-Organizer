@@ -120,7 +120,7 @@ function pageMetaKey(cacheSegment: string): string {
   return cacheKey('esi-auth', cacheSegment, { meta: 'pages' })
 }
 
-function isPageCacheComplete(cacheSegment: string, pages: T[][]): boolean {
+function isPageCacheComplete<T>(cacheSegment: string, pages: T[][]): boolean {
   const meta = getCached<{ totalPages: number }>(pageMetaKey(cacheSegment))
   if (meta) return pages.length >= meta.data.totalPages
 

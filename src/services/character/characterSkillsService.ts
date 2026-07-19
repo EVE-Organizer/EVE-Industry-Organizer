@@ -19,7 +19,7 @@ export interface EsiSkillsResponse {
 export async function fetchCharacterSkills(
   characterId: number,
   accessToken: string,
-  options?: EsiFetchOptions,
+  options?: EsiFetchOptions<EsiSkillsResponse>,
 ): Promise<EsiSkillsResponse> {
   return esiAuthGet<EsiSkillsResponse>(
     `/characters/${characterId}/skills/`,
