@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T06:08:18.289Z",
+  "generatedAt": "2026-07-18T08:24:14.626Z",
   "types": [
     {
       "typeId": 18,
@@ -14433,7 +14433,7 @@
     },
     {
       "typeId": 3149,
-      "name": "Hardwiring - Zainou 'Sharpshooter' ZMX11",
+      "name": "Zainou 'Snapshot' XL Torpedoes XT-602",
       "group": "Cyber Missile",
       "category": "Implant",
       "volume": 1,
@@ -14443,7 +14443,7 @@
     },
     {
       "typeId": 3150,
-      "name": "Hardwiring - Zainou 'Sharpshooter' ZMX110",
+      "name": "Zainou 'Snapshot' XL Torpedoes XT-604",
       "group": "Cyber Missile",
       "category": "Implant",
       "volume": 1,
@@ -14453,7 +14453,7 @@
     },
     {
       "typeId": 3151,
-      "name": "Hardwiring - Zainou 'Sharpshooter' ZMX1100",
+      "name": "Zainou 'Snapshot' XL Torpedoes XT-606",
       "group": "Cyber Missile",
       "category": "Implant",
       "volume": 1,
@@ -83843,7 +83843,7 @@
     },
     {
       "typeId": 27204,
-      "name": "Hardwiring - Zainou 'Sharpshooter' ZMX100",
+      "name": "Zainou 'Snapshot' XL Torpedoes XT-603",
       "group": "Cyber Missile",
       "category": "Implant",
       "volume": 1,
@@ -83853,7 +83853,7 @@
     },
     {
       "typeId": 27205,
-      "name": "Hardwiring - Zainou 'Sharpshooter' ZMX1000",
+      "name": "Zainou 'Snapshot' XL Torpedoes XT-605",
       "group": "Cyber Missile",
       "category": "Implant",
       "volume": 1,
@@ -83863,7 +83863,7 @@
     },
     {
       "typeId": 27206,
-      "name": "Hardwiring - Zainou 'Sharpshooter' ZMX10",
+      "name": "Zainou 'Snapshot' XL Torpedoes XT-601",
       "group": "Cyber Missile",
       "category": "Implant",
       "volume": 1,
@@ -220383,7 +220383,7 @@
     },
     {
       "typeId": 63196,
-      "name": "Standup Flak Round Blueprint",
+      "name": "Standup Flak Round I Blueprint",
       "group": "Structure Area Denial Ammo Blueprint",
       "category": "Blueprint",
       "volume": 0.01,
@@ -271920,6 +271920,26 @@
       "iconUrl": "https://images.evetech.net/types/95727/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95727/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95727/bp?size=32"
+    },
+    {
+      "typeId": 95744,
+      "name": "Amarr Pilot",
+      "group": "Standard Expert Systems",
+      "category": "Expert Systems",
+      "volume": 1,
+      "iconUrl": "https://images.evetech.net/types/95744/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95744/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95744/bp?size=32"
+    },
+    {
+      "typeId": 95747,
+      "name": "Foundation Day Celebration Crate",
+      "group": "Special Edition Commodities",
+      "category": "Special Edition Assets",
+      "volume": 4,
+      "iconUrl": "https://images.evetech.net/types/95747/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95747/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95747/bp?size=32"
     }
   ]
 }
