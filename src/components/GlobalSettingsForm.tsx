@@ -246,7 +246,9 @@ export function CommonSettingsSection({ settings, onChange, size = 'md' }: Setti
             const hub = HUBS.find((h) => h.id === primaryHub)
             onChange({
               primaryHub,
-              ...(hub ? { manufacturingSystemId: hub.buildSystemId } : {}),
+              ...(hub && settings.productionLocationId == null
+                ? { manufacturingSystemId: hub.buildSystemId }
+                : {}),
             })
           }}
         >

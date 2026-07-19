@@ -148,6 +148,20 @@ export function ManufacturingLocationPicker({
     settings.productionLocationId,
   ])
 
+  // Keep build system aligned when a saved character location loads asynchronously.
+  useEffect(() => {
+    if (settings.productionLocationId == null || isLoading || !selectedLocation) return
+    const systemId = selectedLocation.solarSystemId
+    if (systemId <= 0 || settings.manufacturingSystemId === systemId) return
+    onChange({ manufacturingSystemId: systemId })
+  }, [
+    isLoading,
+    onChange,
+    selectedLocation,
+    settings.manufacturingSystemId,
+    settings.productionLocationId,
+  ])
+
   function selectPreset(type: StructureType) {
     onChange({
       productionLocationId: null,

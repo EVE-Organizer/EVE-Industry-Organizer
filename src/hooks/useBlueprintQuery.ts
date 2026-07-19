@@ -123,7 +123,7 @@ export function useBlueprintQuery(): {
         const s: Parameters<typeof updateSettings>[0] = {}
         if (patch.hub) {
           s.primaryHub = patch.hub
-          if (!('mfgSystem' in patch)) {
+          if (!('mfgSystem' in patch) && settingsRef.current.productionLocationId == null) {
             const hub = HUBS.find((h) => h.id === patch.hub)
             if (hub) s.manufacturingSystemId = hub.buildSystemId
           }

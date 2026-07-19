@@ -4,6 +4,7 @@ import { useAppStore } from '@/stores/appStore'
 
 export function NavbarHubSelect() {
   const hub = useAppStore((s) => s.userData.settings.primaryHub)
+  const productionLocationId = useAppStore((s) => s.userData.settings.productionLocationId)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -12,7 +13,9 @@ export function NavbarHubSelect() {
     const hubConfig = HUBS.find((h) => h.id === nextHub)
     updateSettings({
       primaryHub: nextHub,
-      ...(hubConfig ? { manufacturingSystemId: hubConfig.buildSystemId } : {}),
+      ...(hubConfig && productionLocationId == null
+        ? { manufacturingSystemId: hubConfig.buildSystemId }
+        : {}),
     })
 
     if (location.pathname === '/') {

@@ -622,8 +622,13 @@
   }
 
   &__input {
-    @apply select select-bordered select-xs h-6 min-h-6 min-w-[4.75rem] border-0 bg-transparent py-0 pl-0 pr-6 text-xs font-medium leading-none shadow-none;
+    @apply select select-bordered select-xs h-6 min-h-6 min-w-[4.75rem] border-0 bg-transparent py-0 pl-0 pr-6 text-xs font-medium leading-none text-base-content shadow-none;
     @apply focus:border-0 focus:outline-none;
+    color-scheme: dark;
+
+    option {
+      @apply bg-base-200 text-base-content;
+    }
   }
 }
 

@@ -140,6 +140,23 @@ export function RefineryLocationPicker({
     settings.reactionLocationId,
   ])
 
+  // Keep reaction system aligned when a saved character location loads asynchronously.
+  useEffect(() => {
+    if (settings.reactionLocationId == null || isLoading || !selectedLocation) return
+    const systemId = selectedLocation.solarSystemId
+    if (systemId <= 0 || facility.reactionSystemId === systemId) return
+    onChange({
+      reactionFacility: { ...settings.reactionFacility, reactionSystemId: systemId },
+    })
+  }, [
+    facility.reactionSystemId,
+    isLoading,
+    onChange,
+    selectedLocation,
+    settings.reactionFacility,
+    settings.reactionLocationId,
+  ])
+
   function selectPreset(type: RefineryType) {
     onChange({
       reactionLocationId: null,
