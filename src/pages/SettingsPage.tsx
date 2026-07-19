@@ -83,12 +83,18 @@ export function SettingsPage() {
   const authError = useAuthStore((s) => s.error)
   const login = useAuthStore((s) => s.login)
   const switchCharacter = useAuthStore((s) => s.switchCharacter)
+  const persistActiveSkillsFromSettings = useAuthStore((s) => s.persistActiveSkillsFromSettings)
   const syncSkills = useAuthStore((s) => s.syncSkills)
   const logoutCharacter = useAuthStore((s) => s.logoutCharacter)
   const logoutAll = useAuthStore((s) => s.logoutAll)
   const clearAuthError = useAuthStore((s) => s.clearError)
   const cacheStats = getCacheStats()
   const settings = userData.settings
+
+  function handleSettingsChange(patch: Partial<GlobalSettings>) {
+    updateSettings(patch)
+    if (patch.skills) persistActiveSkillsFromSettings()
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -186,13 +192,13 @@ export function SettingsPage() {
               title="Manufacturing"
               keys={MANUFACTURING_SKILL_KEYS}
               settings={settings}
-              onChange={updateSettings}
+              onChange={handleSettingsChange}
             />
             <SkillGroup
               title="Market"
               keys={MARKET_SKILL_KEYS}
               settings={settings}
-              onChange={updateSettings}
+              onChange={handleSettingsChange}
             />
           </div>
         </Panel>

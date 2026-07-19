@@ -59,6 +59,7 @@ interface AuthStore {
   login: () => Promise<void>
   completeCallback: (code: string, state: string) => Promise<void>
   switchCharacter: (characterId: number) => void
+  persistActiveSkillsFromSettings: () => void
   syncSkills: (characterId?: number) => Promise<void>
   logoutCharacter: (characterId?: number) => void
   logoutAll: () => void
@@ -139,6 +140,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   switchCharacter: (characterId) => {
+    const previousId = get().activeCharacterId
+    if (previousId != null && previousId !== characterId) {
+      const skills = useAppStore.getState().userData.settings.skills
+      touchCharacterSync(previousId, { skills: { ...skills } })
+    }
+
     if (!setActiveCharacter(characterId)) return
 
     const snapshot = readAuthSnapshot()
@@ -147,6 +154,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     activateCharacterSkills(snapshot.character, (id) => {
       void get().syncSkills(id).catch(() => {})
     })
+  },
+
+  persistActiveSkillsFromSettings: () => {
+    const characterId = get().activeCharacterId
+    if (characterId == null) return
+
+    const skills = useAppStore.getState().userData.settings.skills
+    touchCharacterSync(characterId, { skills: { ...skills } })
+    set({ ...readAuthSnapshot(), error: null })
   },
 
   syncSkills: async (characterId) => {

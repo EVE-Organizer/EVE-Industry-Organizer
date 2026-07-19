@@ -148,15 +148,10 @@ export function JobsPage() {
     [settings],
   )
 
-  const [viewCharacterId, setViewCharacterId] = useState<number | null>(activeCharacterId)
+  const viewCharacterId = activeCharacterId
   const [focusedSlotIndex, setFocusedSlotIndex] = useState<number | null>(null)
   const [graphProductTypeId, setGraphProductTypeId] = useState<number | null>(null)
   const timelineRef = useRef<HTMLElement>(null)
-  useEffect(() => {
-    if (viewCharacterId == null && activeCharacterId != null) {
-      setViewCharacterId(activeCharacterId)
-    }
-  }, [activeCharacterId, viewCharacterId])
 
   const { data: sdeData, isLoading: sdeLoading } = useSdeData()
   const typeNameMap = useMemo(() => {
@@ -200,8 +195,7 @@ export function JobsPage() {
     [rawJobs, typeNameMap, blueprintByBpo, blueprintByItemId],
   )
 
-  const viewCharacter = characters.find((c) => c.characterId === viewCharacterId) ?? null
-  const manufacturingSlots = manufacturingSlotsFromSkills(viewCharacter?.skills)
+  const manufacturingSlots = manufacturingSlotsFromSkills(settings.skills)
   const [activeTab, setActiveTab] = useState<LiveJobsTab>('manufacturing')
   const [nowMs, setNowMs] = useState(() => Date.now())
 
@@ -403,11 +397,7 @@ export function JobsPage() {
       <TabRail
         ariaLabel="Characters"
         selectedId={String(viewCharacterId ?? '')}
-        onSelect={(id) => {
-          const characterId = Number(id)
-          setViewCharacterId(characterId)
-          switchCharacter(characterId)
-        }}
+        onSelect={(id) => switchCharacter(Number(id))}
         items={characters.map((character) => ({
           id: String(character.characterId),
           label: character.characterName,
