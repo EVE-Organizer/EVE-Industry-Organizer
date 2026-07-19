@@ -33,6 +33,7 @@ import {
 import {
   buildLiveTimelineWindow,
   formatCountdown,
+  formatLiveScrubLabel,
   formatLiveTick,
   liveJobsToGanttLanes,
 } from '@/lib/liveTimelineAdapter'
@@ -291,6 +292,11 @@ export function JobsPage() {
     [timelineWindow],
   )
 
+  const formatScrub = useCallback(
+    (ratio: number) => formatLiveScrubLabel(ratio, timelineWindow, nowMs),
+    [timelineWindow, nowMs],
+  )
+
   const formatBarRange = useCallback((bar: GanttBar) => {
     const job = bar.meta?.job as LiveIndustryJob | undefined
     if (!job) return ''
@@ -489,6 +495,7 @@ export function JobsPage() {
               <SlotGanttChart
                 lanes={lanes}
                 formatTick={formatTick}
+                formatScrub={formatScrub}
                 formatBarRange={formatBarRange}
                 formatBarMeta={formatBarMeta}
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}

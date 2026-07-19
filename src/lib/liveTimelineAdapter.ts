@@ -101,6 +101,42 @@ export function formatLiveTick(ratio: number, window: LiveTimelineWindow): strin
   })
 }
 
+export function formatRelativeOffset(targetMs: number, nowMs: number): string {
+  const deltaMs = targetMs - nowMs
+  const absMs = Math.abs(deltaMs)
+  if (absMs < 60_000) {
+    if (deltaMs > 0) return 'less than 1m from now'
+    if (deltaMs < 0) return 'less than 1m ago'
+    return 'now'
+  }
+
+  const totalMinutes = Math.round(absMs / 60_000)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  let label: string
+  if (hours > 48) {
+    const days = Math.floor(hours / 24)
+    label = `${days}d ${hours % 24}h`
+  } else if (hours > 0) {
+    label = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+  } else {
+    label = `${minutes}m`
+  }
+
+  if (deltaMs > 0) return `${label} from now`
+  if (deltaMs < 0) return `${label} ago`
+  return 'now'
+}
+
+export function formatLiveScrubLabel(
+  ratio: number,
+  window: LiveTimelineWindow,
+  nowMs: number,
+): string {
+  const ms = window.startMs + ratio * window.spanMs
+  return `${formatLiveTick(ratio, window)} · ${formatRelativeOffset(ms, nowMs)}`
+}
+
 export interface LiveJobProgress {
   ratio: number
   remainingMs: number

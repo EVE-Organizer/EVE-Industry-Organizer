@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { buildLiveTimelineWindow, liveJobProgress, liveJobsToGanttLanes } from '@/lib/liveTimelineAdapter'
+import {
+  buildLiveTimelineWindow,
+  formatLiveScrubLabel,
+  formatRelativeOffset,
+  liveJobProgress,
+  liveJobsToGanttLanes,
+} from '@/lib/liveTimelineAdapter'
 import type { LiveIndustryJob } from '@/types'
 
 const baseJob: LiveIndustryJob = {
@@ -60,5 +66,14 @@ describe('liveTimelineAdapter', () => {
     const progress = liveJobProgress(baseJob, now)
     expect(progress.remainingMs).toBe(3_600_000)
     expect(progress.animating).toBe(true)
+  })
+
+  it('formats scrub labels with relative offsets', () => {
+    const now = Date.parse('2026-01-01T11:00:00Z')
+    const window = buildLiveTimelineWindow([baseJob], now)
+    const label = formatLiveScrubLabel(1, window, now)
+    expect(label).toContain('from now')
+    expect(formatRelativeOffset(now + 3_600_000, now)).toBe('1h from now')
+    expect(formatRelativeOffset(now - 3_600_000, now)).toBe('1h ago')
   })
 })

@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { Tooltip as UiTooltip } from '@/components/Tooltip'
 import { SlotGanttChart } from '@/components/gantt/SlotGanttChart'
 import { ManufacturingSlotsRow } from '@/components/plan/ManufacturingSlotRing'
-import { buildPlanGanttLanes, formatPlanGanttTick } from '@/lib/planGanttAdapter'
+import { buildPlanGanttLanes, formatPlanGanttTick, formatPlanScrubLabel } from '@/lib/planGanttAdapter'
 import { formatDecimal } from '@/lib/profit'
 import type { PlanNode, ScheduledPlanJob } from '@/types'
 
@@ -43,6 +43,11 @@ export function PlanTimelinePanel({
 
   const formatTick = useCallback(
     (ratio: number) => formatPlanGanttTick(ratio, windowHours),
+    [windowHours],
+  )
+
+  const formatScrub = useCallback(
+    (ratio: number) => formatPlanScrubLabel(ratio, windowHours),
     [windowHours],
   )
 
@@ -112,6 +117,7 @@ export function PlanTimelinePanel({
       <SlotGanttChart
         lanes={lanes}
         formatTick={formatTick}
+        formatScrub={formatScrub}
         formatBarRange={formatBarRange}
         formatBarMeta={formatBarMeta}
         blueprintTypeIdByProduct={blueprintTypeIdByProduct}

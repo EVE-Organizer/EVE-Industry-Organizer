@@ -662,7 +662,7 @@
   }
 
   &__gantt {
-    @apply flex flex-col gap-1 max-h-[22rem] overflow-x-hidden overflow-y-auto rounded-lg border border-eve-border/60 bg-base-300/20 p-3 pr-2 sm:p-4 sm:pr-3;
+    @apply relative flex flex-col gap-1 max-h-[22rem] overflow-x-hidden overflow-y-auto rounded-lg border border-eve-border/60 bg-base-300/20 p-3 pr-2 sm:p-4 sm:pr-3;
   }
 
   &__gantt-axis {
@@ -674,7 +674,7 @@
   }
 
   &__gantt-axis-track {
-    @apply relative h-5 border-b border-eve-border/50 min-w-0;
+    @apply relative h-5 border-b border-eve-border/50 min-w-0 cursor-crosshair;
   }
 
   &__gantt-tick {
@@ -713,7 +713,7 @@
     --timeline-bar-gap: 0.125rem;
     --timeline-row-h: calc(var(--timeline-bar-h) + var(--timeline-bar-gap));
     --lane-rows: 1;
-    @apply relative rounded-md bg-base-300/40 min-w-0 overflow-hidden;
+    @apply relative rounded-md bg-base-300/40 min-w-0 overflow-hidden cursor-crosshair;
     min-height: calc(0.75rem + var(--lane-rows) * var(--timeline-row-h));
     padding: 0.375rem 0;
   }
@@ -734,8 +734,17 @@
     }
   }
 
+  &__scrub-layer {
+    @apply absolute z-[5] pointer-events-none;
+  }
+
+  &__scrub-line {
+    @apply absolute inset-y-0 w-px -translate-x-1/2 bg-base-content/50 pointer-events-none;
+    box-shadow: 0 0 6px rgb(0 0 0 / 0.12);
+  }
+
   &__bar {
-    @apply absolute box-border flex items-center gap-1 overflow-hidden rounded-md border px-1 text-left text-[10px] font-medium text-base-content;
+    @apply absolute z-[2] box-border flex items-center gap-1 overflow-hidden rounded-md border px-1 text-left text-[10px] font-medium text-base-content cursor-pointer;
     top: calc(0.375rem + var(--bar-row, 0) * var(--timeline-row-h));
     height: var(--timeline-bar-h);
     max-width: 100%;

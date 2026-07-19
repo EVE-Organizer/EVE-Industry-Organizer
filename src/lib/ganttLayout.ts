@@ -5,6 +5,15 @@ import {
   timelineVisualRatio,
 } from '@/lib/planTimelineChartData'
 
+/** Inverse of `timelineTickPositionFromNormalized` / visual bar mapping (0–1 each). */
+export function timelineNormalizedRatioFromVisual(
+  visualRatio: number,
+  exponent = TIMELINE_VISUAL_EXPONENT,
+): number {
+  const clamped = Math.max(0, Math.min(visualRatio, 1))
+  return Math.pow(clamped, 1 / exponent)
+}
+
 export function buildTimelineTicks(span = 1, count = 5): number[] {
   if (count <= 1) return [0, span]
   const ticks: number[] = []

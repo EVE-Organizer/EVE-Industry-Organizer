@@ -1,10 +1,20 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react'
+import { createPortal } from 'react-dom'
 import { useAnchorTooltip } from '@/components/Tooltip'
 import { PlanProductIcon } from '@/components/plan/PlanProductIcon'
 import {
   barProgressFillRatio,
   buildTimelineTicks,
   layoutLaneBarsFromNormalized,
+  timelineNormalizedRatioFromVisual,
   timelineTickPositionFromNormalized,
 } from '@/lib/ganttLayout'
 import { liveJobProgress } from '@/lib/liveTimelineAdapter'
@@ -12,10 +22,27 @@ import type { LiveIndustryJob } from '@/types'
 import type { GanttBar, GanttBarLayout, GanttLane } from '@/components/gantt/ganttTypes'
 
 const BAR_ICON = 20
+const SCRUB_TOOLTIP_CLASS =
+  'pointer-events-none fixed z-[9999] max-w-xs rounded-md border border-eve-border bg-base-200 px-3 py-2 text-left text-xs leading-snug text-base-content shadow-lg tabular-nums'
+
+interface ScrubState {
+  ratio: number
+  visualRatio: number
+  clientX: number
+  clientY: number
+}
+
+interface ScrubBounds {
+  top: number
+  left: number
+  width: number
+  height: number
+}
 
 export interface SlotGanttChartProps {
   lanes: GanttLane[]
   formatTick: (ratio: number) => string
+  formatScrub: (ratio: number) => string
   formatBarRange?: (bar: GanttBar) => string
   formatBarMeta?: (bar: GanttBar) => string
   blueprintTypeIdByProduct?: Map<number, number>
@@ -143,9 +170,25 @@ function GanttBarButton({
   )
 }
 
+function ScrubTooltip({ clientX, clientY, text }: { clientX: number; clientY: number; text: string }) {
+  const style: CSSProperties = {
+    top: clientY + 14,
+    left: clientX,
+    transform: 'translate(-50%, 0)',
+  }
+
+  return createPortal(
+    <div role="tooltip" className={SCRUB_TOOLTIP_CLASS} style={style}>
+      {text}
+    </div>,
+    document.body,
+  )
+}
+
 export function SlotGanttChart({
   lanes,
   formatTick,
+  formatScrub,
   formatBarRange,
   formatBarMeta,
   blueprintTypeIdByProduct,
@@ -163,9 +206,14 @@ export function SlotGanttChart({
     [lanes],
   )
   const [internalFocusedLaneId, setInternalFocusedLaneId] = useState<string | null>(null)
+  const [scrub, setScrub] = useState<ScrubState | null>(null)
+  const [scrubBounds, setScrubBounds] = useState<ScrubBounds | null>(null)
   const isControlled = focusedLaneIdProp !== undefined
   const focusedLaneId = isControlled ? focusedLaneIdProp : internalFocusedLaneId
   const laneRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const ganttRef = useRef<HTMLDivElement>(null)
+  const axisTrackRef = useRef<HTMLDivElement>(null)
+  const laneTrackRefs = useRef<HTMLDivElement[]>([])
 
   const setFocusedLaneId = useCallback(
     (laneId: string | null) => {
@@ -180,10 +228,103 @@ export function SlotGanttChart({
     else laneRefs.current.delete(laneId)
   }, [])
 
+  const updateScrubBounds = useCallback(() => {
+    const gantt = ganttRef.current
+    const axis = axisTrackRef.current
+    const laneTracks = laneTrackRefs.current.filter(Boolean)
+    if (!gantt || !axis || laneTracks.length === 0) {
+      setScrubBounds(null)
+      return
+    }
+
+    const ganttRect = gantt.getBoundingClientRect()
+    const axisRect = axis.getBoundingClientRect()
+    const lastLaneRect = laneTracks[laneTracks.length - 1]!.getBoundingClientRect()
+
+    setScrubBounds({
+      top: axisRect.top - ganttRect.top,
+      left: axisRect.left - ganttRect.left,
+      width: axisRect.width,
+      height: lastLaneRect.bottom - axisRect.top,
+    })
+  }, [])
+
+  useLayoutEffect(() => {
+    updateScrubBounds()
+    const gantt = ganttRef.current
+    if (!gantt) return
+
+    const observer = new ResizeObserver(() => updateScrubBounds())
+    observer.observe(gantt)
+    for (const track of laneTrackRefs.current) {
+      if (track) observer.observe(track)
+    }
+    if (axisTrackRef.current) observer.observe(axisTrackRef.current)
+
+    return () => observer.disconnect()
+  }, [lanes, updateScrubBounds])
+
   useEffect(() => {
     if (!focusedLaneId) return
     laneRefs.current.get(focusedLaneId)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [focusedLaneId, lanes])
+
+  const updateScrubFromPointer = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!scrubBounds || scrubBounds.width <= 0 || !ganttRef.current) {
+        setScrub(null)
+        return
+      }
+
+      const ganttRect = ganttRef.current.getBoundingClientRect()
+      const x = clientX - ganttRect.left
+      const y = clientY - ganttRect.top
+      const inColumn =
+        x >= scrubBounds.left && x <= scrubBounds.left + scrubBounds.width
+      const inRows =
+        y >= scrubBounds.top && y <= scrubBounds.top + scrubBounds.height
+
+      if (!inColumn || !inRows) {
+        setScrub(null)
+        return
+      }
+
+      const stack = document.elementsFromPoint(clientX, clientY)
+      const overBar = stack.some((el) => el.closest('.plan-timeline__bar'))
+      const overLaneLabel = stack.some((el) => el.closest('.plan-timeline__lane-label'))
+      if (overBar || overLaneLabel) {
+        setScrub(null)
+        return
+      }
+
+      const visualRatio = (clientX - (ganttRect.left + scrubBounds.left)) / scrubBounds.width
+      const clampedVisual = Math.max(0, Math.min(visualRatio, 1))
+      setScrub({
+        ratio: timelineNormalizedRatioFromVisual(clampedVisual),
+        visualRatio: clampedVisual,
+        clientX,
+        clientY,
+      })
+    },
+    [scrubBounds],
+  )
+
+  useEffect(() => {
+    const gantt = ganttRef.current
+    if (!gantt) return
+
+    const onMove = (event: globalThis.MouseEvent) => {
+      updateScrubFromPointer(event.clientX, event.clientY)
+    }
+    const onLeave = () => setScrub(null)
+
+    gantt.addEventListener('mousemove', onMove)
+    gantt.addEventListener('mouseleave', onLeave)
+    return () => {
+      gantt.removeEventListener('mousemove', onMove)
+      gantt.removeEventListener('mouseleave', onLeave)
+    }
+  }, [updateScrubFromPointer, lanes])
 
   if (lanes.every((lane) => lane.bars.length === 0)) {
     return <p className="text-sm text-base-content/60">{emptyMessage}</p>
@@ -192,10 +333,13 @@ export function SlotGanttChart({
   return (
     <div className="plan-timeline__chart-block">
       <h3 className="plan-timeline__chart-title">{title}</h3>
-      <div className="plan-timeline__gantt">
-        <div className="plan-timeline__gantt-axis" aria-hidden>
+      <div ref={ganttRef} className="plan-timeline__gantt">
+        <div className="plan-timeline__gantt-axis">
           <div className="plan-timeline__gantt-axis-spacer" />
-          <div className="plan-timeline__gantt-track plan-timeline__gantt-axis-track">
+          <div
+            ref={axisTrackRef}
+            className="plan-timeline__gantt-track plan-timeline__gantt-axis-track"
+          >
             {ticks.map((ratio) => (
               <span
                 key={ratio}
@@ -229,6 +373,10 @@ export function SlotGanttChart({
                   ) : null}
                 </button>
                 <div
+                  ref={(node) => {
+                    if (node) laneTrackRefs.current[laneIndex] = node
+                    else laneTrackRefs.current.splice(laneIndex, 1)
+                  }}
                   className="plan-timeline__lane-track"
                   style={{ ['--lane-rows' as string]: rowCount }}
                 >
@@ -275,6 +423,28 @@ export function SlotGanttChart({
             )
           })}
         </div>
+
+        {scrubBounds && scrub ? (
+          <div
+            className="plan-timeline__scrub-layer"
+            style={{
+              top: scrubBounds.top,
+              left: scrubBounds.left,
+              width: scrubBounds.width,
+              height: scrubBounds.height,
+            }}
+          >
+            <span
+              className="plan-timeline__scrub-line"
+              style={{ left: `${scrub.visualRatio * 100}%` }}
+              aria-hidden
+            />
+          </div>
+        ) : null}
+
+        {scrub ? (
+          <ScrubTooltip clientX={scrub.clientX} clientY={scrub.clientY} text={formatScrub(scrub.ratio)} />
+        ) : null}
       </div>
     </div>
   )

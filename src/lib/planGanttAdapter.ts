@@ -2,6 +2,7 @@ import type { PlanNode, ScheduledPlanJob } from '@/types'
 import type { GanttBar, GanttLane } from '@/components/gantt/ganttTypes'
 import { ganttBarColor } from '@/lib/planTimelineChartData'
 import { formatHourTick } from '@/lib/planTimelineChartData'
+import { formatDecimal } from '@/lib/profit'
 
 export function buildPlanGanttLanes(
   jobs: ScheduledPlanJob[],
@@ -57,4 +58,10 @@ export function buildPlanGanttLanes(
 
 export function formatPlanGanttTick(ratio: number, windowHours: number): string {
   return formatHourTick(ratio * Math.max(windowHours, 1))
+}
+
+export function formatPlanScrubLabel(ratio: number, windowHours: number): string {
+  const span = Math.max(windowHours, 1)
+  const hours = ratio * span
+  return `${formatPlanGanttTick(ratio, windowHours)} · ${formatDecimal(hours, 1)}h from plan start`
 }
