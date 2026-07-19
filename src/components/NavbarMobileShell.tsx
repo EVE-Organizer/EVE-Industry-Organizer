@@ -35,8 +35,9 @@ export function NavbarMobileShell({ links }: { links: NavLinkItem[] }) {
   }, [menuOpen])
 
   useEffect(() => {
-    const header = shellRef.current?.closest('.app-navbar')
-    if (!(header instanceof HTMLElement)) return
+    const el = shellRef.current?.closest('.app-navbar')
+    if (!(el instanceof HTMLElement)) return
+    const header: HTMLElement = el
 
     function syncMenuTop() {
       header.style.setProperty('--mobile-menu-top', `${header.getBoundingClientRect().height}px`)
