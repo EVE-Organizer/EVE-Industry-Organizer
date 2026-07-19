@@ -48,6 +48,13 @@ export const SKILL_FIELDS: SkillFieldDef[] = [
     prerequisites: [{ key: 'massProduction', level: 5 }],
   },
   {
+    key: 'reactions',
+    skillId: 45746,
+    label: 'Reactions',
+    tooltip:
+      'Cuts reaction job time by 4% per level. Required by reaction formulas in supply chains and plans.',
+  },
+  {
     key: 'science',
     skillId: 3403,
     label: 'Science',

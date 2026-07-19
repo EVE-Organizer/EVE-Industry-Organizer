@@ -99,7 +99,7 @@ function packagedSelfBuyCost(
   settings: GlobalSettings,
   meTeOverride?: { me?: number; te?: number },
 ): number {
-  const { me } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
+  const { me } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride, blueprint)
   const structure = resolveStructureModifiers(settings)
   const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const selfQty = mats

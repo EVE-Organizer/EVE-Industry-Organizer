@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
 import { buildTypeMap, buildPriceMap, getBlueprintForProduct, getBlueprintForBpo, getAllBlueprints, getHubMarket } from '@/services/data/sdeLoader'
+import { isReactionRecipe } from '@/lib/recipes'
 import { getMarketHistory, getPrice } from '@/services/market/marketService'
 import { filterHistoryByRange, formatIsk, formatDecimal } from '@/lib/profit'
 import { tierLabel } from '@/lib/blueprintGroups'
@@ -41,6 +42,7 @@ export function ItemDetailPage() {
   }, [sde, numericId])
 
   const isBpoPage = blueprint?.blueprintTypeId === numericId
+  const isReactionFormula = blueprint != null && isReactionRecipe(blueprint) && isBpoPage
   const historyTypeId = isBpoPage && blueprint ? blueprint.productTypeId : numericId
   const manufacturedProduct = useMemo(() => {
     if (!sde || !blueprint) return undefined
@@ -117,9 +119,11 @@ export function ItemDetailPage() {
       <PageHeader
         title={typeInfo.name}
         subtitle={
-          isBpoPage
+          isReactionFormula
+            ? `${typeInfo.group} · Reaction formula`
+            : isBpoPage
             ? `${typeInfo.group} · ${tierLabel(blueprint!.tier)} blueprint`
-            : `${typeInfo.group} · ${typeInfo.category}${blueprint ? ` · ${tierLabel(blueprint.tier)} BPO` : ''}`
+            : `${typeInfo.group} · ${typeInfo.category}${blueprint ? ` · ${isReactionRecipe(blueprint) ? 'Reaction product' : `${tierLabel(blueprint.tier)} BPO`}` : ''}`
         }
         action={
           <LastUpdated
@@ -140,7 +144,7 @@ export function ItemDetailPage() {
         />
         <div className="flex flex-wrap gap-3">
           <StatCard
-            label={isBpoPage ? 'BPO hub sell order' : 'Sell price'}
+            label={isBpoPage ? (isReactionFormula ? 'Formula hub sell order' : 'BPO hub sell order') : 'Sell price'}
             value={
               loadingLive
                 ? '…'
@@ -178,10 +182,10 @@ export function ItemDetailPage() {
           ) : null}
           {blueprint && !isBpoPage ? (
             <StatCard
-              label="Blueprint"
+              label={isReactionRecipe(blueprint) ? 'Formula' : 'Blueprint'}
               value={
                 <Link className={textLinkClass('text-primary text-sm')} to={`/item/${blueprint.blueprintTypeId}`}>
-                  View BPO
+                  {isReactionRecipe(blueprint) ? 'View reaction formula' : 'View BPO'}
                 </Link>
               }
             />

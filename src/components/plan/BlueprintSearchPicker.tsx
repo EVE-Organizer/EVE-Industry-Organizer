@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { PlanProductIcon, PLAN_ROW_ICON_SIZE } from '@/components/plan/PlanProductIcon'
 import type { BlueprintInfo, TypeInfo } from '@/types'
+import { isReactionRecipe } from '@/lib/recipes'
 
 const MAX_RESULTS = 12
 
@@ -158,7 +159,12 @@ export function BlueprintSearchPicker({
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm truncate">{item.name}</span>
-                    <span className="block text-[10px] opacity-50 truncate">{item.group}</span>
+                    <span className="block text-[10px] opacity-50 truncate">
+                      {blueprintByProduct.get(item.productTypeId) &&
+                      isReactionRecipe(blueprintByProduct.get(item.productTypeId)!)
+                        ? 'Reaction'
+                        : item.group}
+                    </span>
                   </span>
                 </button>
               </li>

@@ -27,6 +27,7 @@ describe('skillFields', () => {
       advancedIndustry: 0,
       massProduction: 0,
       advancedMassProduction: 0,
+      reactions: 0,
       science: 0,
       accounting: 0,
       brokerRelations: 0,

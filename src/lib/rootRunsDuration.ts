@@ -1,12 +1,15 @@
 import type { BlueprintInfo, GlobalSettings, PlanNodeOverride, PlanRootEntry } from '@/types'
 import { DEFAULT_BATCH_SIZE } from '@/types'
 import {
+  applyReactionTime,
   applyTE,
   manufacturingTimePerRun,
+  reactionTimePerRun,
   resolveBlueprintMeTe,
   resolveStructureModifiers,
   runsForJobTime,
 } from '@/lib/cost'
+import { isReactionRecipe } from '@/lib/recipes'
 import { skillLevel } from '@/lib/skillFields'
 import { activeConcurrentCopies } from '@/lib/supplyChainSlots'
 
@@ -35,11 +38,22 @@ export function jobTimeSecondsForRuns(
   meTeOverride?: PlanNodeOverride,
 ): number {
   if (runs <= 0) return 0
-  const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
   const structure = resolveStructureModifiers(settings)
-  const { industry, advancedIndustry } = skillTimeLevels(settings)
   const lines = Math.max(1, concurrentCopies)
   const runsPerJob = Math.max(1, Math.ceil(runs / Math.min(lines, runs)))
+
+  if (isReactionRecipe(blueprint)) {
+    const reactions = skillLevel(settings.skills, 'reactions')
+    return applyReactionTime(
+      blueprint.manufacturingTime,
+      runsPerJob,
+      reactions,
+      structure.teBonusPercent,
+    )
+  }
+
+  const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride, blueprint)
+  const { industry, advancedIndustry } = skillTimeLevels(settings)
   return applyTE(
     blueprint.manufacturingTime,
     te,
@@ -57,12 +71,25 @@ export function runsFromDurationHours(
   parallelLines: number,
   meTeOverride?: PlanNodeOverride,
 ): number {
-  const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
   const structure = resolveStructureModifiers(settings)
-  const { industry, advancedIndustry } = skillTimeLevels(settings)
   const availableSec = Math.max(0, durationHours) * 3600
   const lines = Math.max(1, parallelLines)
   if (availableSec <= 0) return 1
+
+  if (isReactionRecipe(blueprint)) {
+    const reactions = skillLevel(settings.skills, 'reactions')
+    const perRun = reactionTimePerRun(
+      blueprint.manufacturingTime,
+      reactions,
+      structure.teBonusPercent,
+    )
+    if (perRun <= 0) return 1
+    const reactionRunsPerLine = Math.max(1, Math.floor(availableSec / perRun))
+    return Math.max(1, reactionRunsPerLine * lines)
+  }
+
+  const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride, blueprint)
+  const { industry, advancedIndustry } = skillTimeLevels(settings)
 
   const runsPerLine = runsForJobTime(
     availableSec,
@@ -100,8 +127,24 @@ export function durationHoursFromRuns(
   parallelLines: number,
   meTeOverride?: PlanNodeOverride,
 ): number {
-  const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride)
   const structure = resolveStructureModifiers(settings)
+  const effectiveLines = Math.max(1, parallelLines)
+  const runsPerJob = Math.max(1, Math.ceil(runs / Math.min(effectiveLines, runs)))
+
+  if (isReactionRecipe(blueprint)) {
+    const reactions = skillLevel(settings.skills, 'reactions')
+    const jobTime = applyReactionTime(
+      blueprint.manufacturingTime,
+      runsPerJob,
+      reactions,
+      structure.teBonusPercent,
+    )
+    if (jobTime <= 0 || runs <= 0) return 0
+    const waves = Math.ceil(runs / (runsPerJob * effectiveLines))
+    return (jobTime * waves) / 3600
+  }
+
+  const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride, blueprint)
   const { industry, advancedIndustry } = skillTimeLevels(settings)
   const perRun = manufacturingTimePerRun(
     blueprint.manufacturingTime,
@@ -112,8 +155,6 @@ export function durationHoursFromRuns(
   )
   if (perRun <= 0 || runs <= 0) return 0
 
-  const effectiveLines = Math.max(1, parallelLines)
-  const runsPerJob = Math.max(1, Math.ceil(runs / Math.min(effectiveLines, runs)))
   const jobTime = applyTE(
     blueprint.manufacturingTime,
     te,

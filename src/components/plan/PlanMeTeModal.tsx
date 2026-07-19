@@ -57,8 +57,8 @@ export function PlanMeTeModal({
   onChange,
   onClose,
 }: PlanMeTeModalProps) {
-  const resolved = resolveBlueprintMeTe(blueprint.tier, settings, nodeOverride)
-  const defaults = blueprintMeTe(blueprint.tier, settings)
+  const resolved = resolveBlueprintMeTe(blueprint.tier, settings, nodeOverride, blueprint)
+  const defaults = blueprintMeTe(blueprint.tier, settings, blueprint)
 
   const [draftMe, setDraftMe] = useState(resolved.me)
   const [draftTe, setDraftTe] = useState(resolved.te)
@@ -69,7 +69,9 @@ export function PlanMeTeModal({
   }, [resolved.locked, nodeOverride?.me, nodeOverride?.te])
 
   const lockedNote =
-    blueprint.tier === 't2'
+    blueprint.kind === 'reaction'
+      ? 'Reaction formulas cannot be researched. ME and TE stay at 0.'
+      : blueprint.tier === 't2'
       ? 'Invented T2 BPCs stay at ME 2 / TE 4.'
       : blueprint.tier === 'faction'
         ? 'Faction BPOs stay at ME 0 / TE 0.'

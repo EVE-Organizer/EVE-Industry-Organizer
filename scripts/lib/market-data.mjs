@@ -371,7 +371,11 @@ export async function buildMarketData(blueprints, regions, stations, options = {
 
     const defaultBuild = regions.regions.find((r) => r.regionId === regionId)
     const buildSystemId = defaultBuild?.buildSystemId ?? HUB_MARKET_SYSTEMS[hubId]
-    const costIndex = defaultBuild?.costIndex ?? costIndices.get(buildSystemId) ?? 0.01
+    const costIndex = defaultBuild?.costIndex ?? costIndices.manufacturing.get(buildSystemId) ?? 0.01
+    const reactionCostIndex =
+      defaultBuild?.reactionCostIndex ??
+      costIndices.reaction.get(buildSystemId) ??
+      costIndex
 
     const existingHub = market.hubs[hubId]
     const products = { ...(existingHub?.products ?? {}) }
@@ -398,6 +402,7 @@ export async function buildMarketData(blueprints, regions, stations, options = {
                 marketSystemId: HUB_MARKET_SYSTEMS[hubId],
                 buildSystemId,
                 costIndex,
+                reactionCostIndex,
                 prices: pricesToObject(prices),
                 buyPrices: pricesToObject(buyPrices),
                 products: { ...products },
@@ -419,6 +424,7 @@ export async function buildMarketData(blueprints, regions, stations, options = {
       marketSystemId: HUB_MARKET_SYSTEMS[hubId],
       buildSystemId,
       costIndex,
+      reactionCostIndex,
       prices: pricesToObject(prices),
       buyPrices: pricesToObject(buyPrices),
       products,

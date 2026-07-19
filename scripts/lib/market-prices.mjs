@@ -40,12 +40,15 @@ export async function fetchCostIndices() {
   const res = await fetch(`${ESI_BASE}/industry/systems/`)
   if (!res.ok) throw new Error(`ESI cost indices failed: ${res.status}`)
   const systems = await res.json()
-  const map = new Map()
+  const manufacturing = new Map()
+  const reaction = new Map()
   for (const sys of systems) {
     const mfg = sys.cost_indices.find((c) => c.activity === 'manufacturing')
-    if (mfg) map.set(sys.solar_system_id, mfg.cost_index)
+    const rxn = sys.cost_indices.find((c) => c.activity === 'reaction')
+    if (mfg) manufacturing.set(sys.solar_system_id, mfg.cost_index)
+    if (rxn) reaction.set(sys.solar_system_id, rxn.cost_index)
   }
-  return map
+  return { manufacturing, reaction }
 }
 
 export function collectBlueprintTypeIds(blueprints) {

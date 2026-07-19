@@ -39,7 +39,8 @@ import {
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
 import { buildWindowPriceMap } from '@/lib/ranking'
-import { revenueFromSale, applyTE, resolveStructureModifiers, blueprintMeTe, runsForJobTime, clampGraphRuns } from '@/lib/cost'
+import { revenueFromSale, applyTE, applyReactionTime, reactionTimePerRun, resolveStructureModifiers, blueprintMeTe, runsForJobTime, clampGraphRuns } from '@/lib/cost'
+import { isReactionRecipe } from '@/lib/recipes'
 import { buildSupplyChain, findBuildTargetDetails, type BuildTargetDetail } from '@/lib/supplyChain'
 import { tierLabel } from '@/lib/blueprintGroups'
 import { tradingFeeRates } from '@/lib/tradingFees'
@@ -250,7 +251,7 @@ const COLUMN_GAP = 64
 const ROW_GAP = 24
 const MAX_DEPTH_TIER = 4
 
-type NodeRole = 'root' | 'blueprint' | 'build' | 'buy'
+type NodeRole = 'root' | 'blueprint' | 'build' | 'react' | 'buy'
 
 interface NodeSize {
   width: number
@@ -417,6 +418,58 @@ interface OutputSummary {
   jobTimeSeconds: number
 }
 
+function graphJobTimeSeconds(
+  blueprint: BlueprintInfo,
+  settings: ManufacturingSettings | GlobalSettings,
+  runs: number,
+): number {
+  const structure = resolveStructureModifiers(settings)
+  if (isReactionRecipe(blueprint)) {
+    return applyReactionTime(
+      blueprint.manufacturingTime,
+      runs,
+      skillLevel(settings.skills, 'reactions'),
+      structure.teBonusPercent,
+    )
+  }
+  const { te } = blueprintMeTe(blueprint.tier, settings, blueprint)
+  return applyTE(
+    blueprint.manufacturingTime,
+    te,
+    runs,
+    skillLevel(settings.skills, 'industry'),
+    skillLevel(settings.skills, 'advancedIndustry'),
+    structure.teBonusPercent,
+  )
+}
+
+function graphRunsFromJobTime(
+  blueprint: BlueprintInfo,
+  settings: GlobalSettings,
+  jobTimeSeconds: number,
+): number {
+  const structure = resolveStructureModifiers(settings)
+  if (isReactionRecipe(blueprint)) {
+    const perRun = reactionTimePerRun(
+      blueprint.manufacturingTime,
+      skillLevel(settings.skills, 'reactions'),
+      structure.teBonusPercent,
+    )
+    if (perRun <= 0) return 1
+    return Math.max(1, Math.floor(jobTimeSeconds / perRun))
+  }
+  const { te } = blueprintMeTe(blueprint.tier, settings, blueprint)
+  return runsForJobTime(
+    jobTimeSeconds,
+    blueprint.manufacturingTime,
+    te,
+    skillLevel(settings.skills, 'industry'),
+    skillLevel(settings.skills, 'advancedIndustry'),
+    structure.teBonusPercent,
+    { step: 1, maxRuns: null },
+  )
+}
+
 function buildOutputSummary(
   root: SupplyChainNode,
   blueprint: BlueprintInfo,
@@ -424,7 +477,6 @@ function buildOutputSummary(
   buyPrices?: Map<number, number>,
 ): OutputSummary {
   const runs = settings.batchSize
-  const { te } = blueprintMeTe(blueprint.tier, settings)
   const productQuantity = blueprint.productQuantity
   const outputQty = root.quantity
   const sellPrice =
@@ -451,15 +503,7 @@ function buildOutputSummary(
   const netProfit = net - setupCost
   const marginPercent = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
   const buyFinishedCost = root.buyCost ?? 0
-  const structure = resolveStructureModifiers(settings)
-  const jobTimeSeconds = applyTE(
-    blueprint.manufacturingTime,
-    te,
-    runs,
-    skillLevel(settings.skills, 'industry'),
-    skillLevel(settings.skills, 'advancedIndustry'),
-    structure.teBonusPercent,
-  )
+  const jobTimeSeconds = graphJobTimeSeconds(blueprint, settings, runs)
 
   return {
     runs,
@@ -489,6 +533,7 @@ const edgeDefaults: Partial<Edge> = {
 function nodeRole(node: SupplyChainNode): NodeRole {
   if (node.depth === 0) return 'root'
   if (node.mode === 'blueprint') return 'blueprint'
+  if (node.mode === 'react') return 'react'
   if (node.mode === 'build') return 'build'
   return 'buy'
 }
@@ -687,6 +732,11 @@ const ROLE_STYLES: Record<NodeRole, { border: string; shell: string; accent: str
     shell: 'bg-base-200/95',
     accent: 'bg-success',
   },
+  react: {
+    border: 'border-accent/35',
+    shell: 'bg-base-200/95',
+    accent: 'bg-accent',
+  },
   blueprint: {
     border: 'border-info/35',
     shell: 'bg-base-200/95',
@@ -709,6 +759,11 @@ const ROLE_BADGE: Record<NodeRole, { label: string; title: string; className: st
     label: 'Build',
     title: 'Manufacture from sub-materials (cheaper than buying)',
     className: 'badge-success font-semibold',
+  },
+  react: {
+    label: 'React',
+    title: 'Run a reaction formula (cheaper than buying)',
+    className: 'badge-accent font-semibold',
   },
   blueprint: {
     label: 'BPO',
@@ -1514,16 +1569,7 @@ function GraphProductionControls({
   onRunsChange: (runs: number) => void
   onJobTimeChange: (jobTimeSeconds: number) => void
 }) {
-  const { te } = blueprintMeTe(blueprint.tier, settings)
-  const structure = resolveStructureModifiers(settings)
-  const perRunSeconds = applyTE(
-    blueprint.manufacturingTime,
-    te,
-    1,
-    skillLevel(settings.skills, 'industry'),
-    skillLevel(settings.skills, 'advancedIndustry'),
-    structure.teBonusPercent,
-  )
+  const perRunSeconds = graphJobTimeSeconds(blueprint, settings, 1)
   const jobHours = jobTimeSeconds / 3600
   const outputQty = blueprint.productQuantity * runs
 
@@ -1543,7 +1589,11 @@ function GraphProductionControls({
         />
         <GraphNumberField
           label="Job time (hr)"
-          tooltip="Total job duration. TE, structure rigs, and Advanced Industry set time per run."
+          tooltip={
+            isReactionRecipe(blueprint)
+              ? 'Total reaction duration. Reactions skill and structure TE set time per run.'
+              : 'Total job duration. TE, structure rigs, and Advanced Industry set time per run.'
+          }
           displayValue={formatDecimal(jobHours, 2)}
           min={0}
           step={0.01}
@@ -1631,17 +1681,7 @@ export function BlueprintGraphModal({
 
   const graphJobTiming = useMemo(() => {
     if (!activeBlueprint) return { jobTimeSeconds: 0 }
-    const { te } = blueprintMeTe(activeBlueprint.tier, settings)
-    const structure = resolveStructureModifiers(settings)
-    const jobTimeSeconds = applyTE(
-      activeBlueprint.manufacturingTime,
-      te,
-      graphRuns,
-      skillLevel(settings.skills, 'industry'),
-      skillLevel(settings.skills, 'advancedIndustry'),
-      structure.teBonusPercent,
-    )
-    return { jobTimeSeconds }
+    return { jobTimeSeconds: graphJobTimeSeconds(activeBlueprint, settings, graphRuns) }
   }, [activeBlueprint, settings, graphRuns])
 
   const handleRunsChange = useCallback((runs: number) => {
@@ -1651,19 +1691,7 @@ export function BlueprintGraphModal({
   const handleJobTimeChange = useCallback(
     (jobTimeSeconds: number) => {
       if (!activeBlueprint) return
-      const { te } = blueprintMeTe(activeBlueprint.tier, settings)
-      const structure = resolveStructureModifiers(settings)
-      setGraphRuns(
-        runsForJobTime(
-          jobTimeSeconds,
-          activeBlueprint.manufacturingTime,
-          te,
-          skillLevel(settings.skills, 'industry'),
-          skillLevel(settings.skills, 'advancedIndustry'),
-          structure.teBonusPercent,
-          { step: 1, maxRuns: null },
-        ),
-      )
+      setGraphRuns(clampGraphRuns(graphRunsFromJobTime(activeBlueprint, settings, jobTimeSeconds)))
     },
     [activeBlueprint, settings],
   )
@@ -1739,7 +1767,7 @@ export function BlueprintGraphModal({
     const hubMarket = getHubMarket(sde.market, hub)
     if (!hubMarket) return { nodes: [], edges: [] }
 
-    const { costIndex } = resolveBuildSystem(
+    const { costIndex, reactionCostIndex } = resolveBuildSystem(
       sde.systems,
       sde.regions,
       hubMarket,
@@ -1757,7 +1785,7 @@ export function BlueprintGraphModal({
       typeMap,
     )
     const sourceName = typeMap.get(activeBlueprint.productTypeId)?.name ?? 'this item'
-    const { me } = blueprintMeTe(activeBlueprint.tier, settings)
+    const { me } = blueprintMeTe(activeBlueprint.tier, settings, activeBlueprint)
     const chain = buildSupplyChain(
       activeBlueprint,
       allBlueprints,
@@ -1766,6 +1794,10 @@ export function BlueprintGraphModal({
       graphSettings,
       me,
       costIndex,
+      0,
+      10,
+      new Map(),
+      reactionCostIndex,
     )
     const flow = chainToFlow(chain)
     const withSummary = attachOutputSummary(

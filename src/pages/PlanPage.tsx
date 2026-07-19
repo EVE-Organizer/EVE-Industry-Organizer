@@ -205,6 +205,7 @@ export function PlanPage() {
 
   const hubMarket = data ? getHubMarket(data.market, userData.settings.primaryHub) : null
   const systemCostIndex = hubMarket?.costIndex ?? 0.01
+  const reactionCostIndex = hubMarket?.reactionCostIndex ?? systemCostIndex
   const hubName = HUBS.find((h) => h.id === userData.settings.primaryHub)?.name ?? 'Hub'
 
   const expandInput = useMemo(
@@ -217,9 +218,10 @@ export function PlanPage() {
             prices,
             settings: userData.settings,
             systemCostIndex,
+            reactionCostIndex,
           }
         : null,
-    [template, data, blueprints, typeMap, prices, userData.settings, systemCostIndex],
+    [template, data, blueprints, typeMap, prices, userData.settings, systemCostIndex, reactionCostIndex],
   )
 
   const manufacturingSettings = useMemo(
@@ -237,6 +239,7 @@ export function PlanPage() {
     prices,
     userData.settings,
     systemCostIndex,
+    reactionCostIndex,
   )
 
   const slots = manufacturingSlotsFromSkills(skills)

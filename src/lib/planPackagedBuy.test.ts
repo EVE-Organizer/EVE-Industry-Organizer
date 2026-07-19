@@ -32,6 +32,7 @@ describe('packagedBuyNodesFromPlan', () => {
       prices: new Map([[24574, 5_000_000]]),
       settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
     })
 
     const root = nodes.find((n) => n.productTypeId === 24574)

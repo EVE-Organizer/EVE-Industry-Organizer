@@ -5,12 +5,14 @@ import type {
   HubId,
   HubMarketData,
   MarketData,
+  RecipeKind,
   RegionInfo,
   RegionsData,
   SkillInfo,
   SystemInfo,
   TypeInfo,
 } from '@/types'
+import { isManufacturingRecipe, isReactionRecipe } from '@/lib/recipes'
 import { publicDataUrl } from '@/lib/paths'
 
 export interface SdeData {
@@ -48,6 +50,7 @@ export function isRankableBlueprint(
   blueprint: BlueprintInfo,
   typeMap: Map<number, TypeInfo>,
 ): boolean {
+  if (isReactionRecipe(blueprint)) return false
   if (!typeMap.has(blueprint.productTypeId)) return false
   if (blueprint.tier === 't1' && !typeMap.has(blueprint.blueprintTypeId)) return false
   return true
@@ -58,24 +61,43 @@ export function buildRegionMap(regions: RegionsData): Map<number, RegionInfo> {
 }
 
 /**
- * Resolve the build system ID and cost index for a given manufacturing system.
- * Falls back: system.costIndex -> region costIndex -> hubMarket costIndex.
+ * Resolve build system and manufacturing / reaction cost indices.
+ * Falls back: system -> region -> hub market; reaction falls back to manufacturing.
  */
 export function resolveBuildSystem(
   systems: SystemInfo[],
   regions: RegionsData,
   hubMarket: HubMarketData,
   manufacturingSystemId: number,
-): { buildSystemId: number; costIndex: number } {
+): { buildSystemId: number; costIndex: number; reactionCostIndex: number } {
   const system = systems.find((s) => s.systemId === manufacturingSystemId)
+  const region = system
+    ? regions.regions.find((r) => r.regionId === system.regionId)
+    : undefined
+
   if (system) {
-    const costIndex =
-      system.costIndex ??
-      regions.regions.find((r) => r.regionId === system.regionId)?.costIndex ??
-      hubMarket.costIndex
-    return { buildSystemId: manufacturingSystemId, costIndex }
+    const costIndex = system.costIndex ?? region?.costIndex ?? hubMarket.costIndex
+    const reactionCostIndex =
+      system.reactionCostIndex ??
+      region?.reactionCostIndex ??
+      hubMarket.reactionCostIndex ??
+      costIndex
+    return { buildSystemId: manufacturingSystemId, costIndex, reactionCostIndex }
   }
-  return { buildSystemId: manufacturingSystemId, costIndex: hubMarket.costIndex }
+
+  const costIndex = hubMarket.costIndex
+  return {
+    buildSystemId: manufacturingSystemId,
+    costIndex,
+    reactionCostIndex: hubMarket.reactionCostIndex ?? costIndex,
+  }
+}
+
+export function resolveCostIndexForKind(
+  resolved: { costIndex: number; reactionCostIndex: number },
+  kind: RecipeKind,
+): number {
+  return kind === 'reaction' ? resolved.reactionCostIndex : resolved.costIndex
 }
 
 export function getAllBlueprints(registry: BlueprintRegistry): BlueprintInfo[] {
@@ -123,8 +145,11 @@ export function filterBlueprints(
   blueprints: BlueprintInfo[],
   tiers: BlueprintTier[],
   productGroups?: string[],
+  options?: { includeReactions?: boolean },
 ): BlueprintInfo[] {
-  let result = blueprints
+  let result = options?.includeReactions
+    ? blueprints
+    : blueprints.filter((b) => isManufacturingRecipe(b))
   if (tiers.length > 0) {
     const allowed = new Set(tiers)
     result = result.filter((b) => allowed.has(b.tier))

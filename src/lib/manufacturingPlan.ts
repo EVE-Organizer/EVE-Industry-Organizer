@@ -26,6 +26,7 @@ import { activeConcurrentCopies, duplicateRootCount, totalRootRuns } from '@/lib
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { getBlueprintForBpo, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { isRawMaterial } from '@/lib/supplyChain'
+import { isReactionRecipe } from '@/lib/recipes'
 import type { TypeInfo } from '@/types'
 
 interface NodeAccum {
@@ -51,6 +52,7 @@ export interface ExpandPlanInput {
   prices: Map<number, number>
   settings: GlobalSettings
   systemCostIndex: number
+  reactionCostIndex: number
 }
 
 export interface ExpandPlanResult {
@@ -72,6 +74,7 @@ export function computePlanBuildCostForRuns(
   prices: Map<number, number>,
   settings: GlobalSettings,
   systemCostIndex: number,
+  reactionCostIndex: number,
   modeOverrides: Map<number, PlanBuildMode>,
   nodeOverrides: Record<number, PlanNodeOverride>,
   nodeMap: Map<number, NodeAccum>,
@@ -82,17 +85,20 @@ export function computePlanBuildCostForRuns(
     blueprint.tier,
     settings,
     nodeOverrides[blueprint.productTypeId],
+    blueprint,
   )
   const structure = resolveStructureModifiers(settings)
   const mfgSettings = { ...settings, batchSize: runs }
-  const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
+  const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
+  const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
   const buyTotal = materialCost(mats, prices)
   const { capital: buildTotal } = totalManufacturingCost(
     blueprint,
     prices,
     mfgSettings,
-    me,
+    effectiveMe,
     systemCostIndex,
+    reactionCostIndex,
   )
 
   let childBuild = 0
@@ -120,6 +126,7 @@ export function computePlanBuildCostForRuns(
       prices,
       settings,
       systemCostIndex,
+      reactionCostIndex,
       modeOverrides,
       nodeOverrides,
       nodeMap,
@@ -186,7 +193,7 @@ function expandInventionPrereqs(
   const inv = blueprint.invention
   if (!inv || blueprint.tier !== 't2') return
 
-  const { settings, blueprints, typeMap, prices, systemCostIndex } = input
+  const { settings, blueprints, typeMap, prices, systemCostIndex, reactionCostIndex } = input
   const invCost = inventionBlueprintCostPerRun({
     datacores: inv.datacores,
     prices,
@@ -220,6 +227,7 @@ function expandInventionPrereqs(
     prices,
     settings,
     systemCostIndex,
+    reactionCostIndex,
     modeOverrides,
     input.template.nodeOverrides,
     nodeMap,
@@ -253,14 +261,16 @@ function expandMaterials(
   modeOverrides: Map<number, PlanBuildMode>,
   maxDepth: number,
 ): void {
-  const { settings, blueprints, typeMap, prices, systemCostIndex, template } = input
+  const { settings, blueprints, typeMap, prices, systemCostIndex, reactionCostIndex, template } = input
   const { me } = resolveBlueprintMeTe(
     blueprint.tier,
     settings,
     template.nodeOverrides[blueprint.productTypeId],
+    blueprint,
   )
   const structure = resolveStructureModifiers(settings)
-  const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
+  const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
+  const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
   const parentNode = ensureNode(nodeMap, blueprint.productTypeId, typeMap, blueprint)
 
   if (blueprint.tier === 't2' && blueprint.invention) {
@@ -296,6 +306,7 @@ function expandMaterials(
       prices,
       settings,
       systemCostIndex,
+      reactionCostIndex,
       modeOverrides,
       template.nodeOverrides,
       nodeMap,
@@ -327,7 +338,7 @@ function finalizeNodes(
   input: ExpandPlanInput,
   modeOverrides: Map<number, PlanBuildMode>,
 ): PlanNode[] {
-  const { blueprints, typeMap, prices, systemCostIndex } = input
+  const { blueprints, typeMap, prices, systemCostIndex, reactionCostIndex } = input
   const nodes: PlanNode[] = []
   const rootRunsTotal = totalRootRuns(template.roots.map((r) => r.runs))
   const rootDuplicateCounts = new Map<number, number>()
@@ -371,7 +382,7 @@ function finalizeNodes(
         : 0)
 
     const meTe = blueprint
-      ? resolveBlueprintMeTe(blueprint.tier, settings, override)
+      ? resolveBlueprintMeTe(blueprint.tier, settings, override, blueprint)
       : { me: settings.meDefault, te: settings.teDefault, locked: false }
     const jobTimeSeconds =
       blueprint && accum.mode === 'build'
@@ -404,6 +415,7 @@ function finalizeNodes(
         prices,
         settings,
         systemCostIndex,
+        reactionCostIndex,
         modeOverrides,
         template.nodeOverrides,
         nodeMap,
@@ -420,6 +432,7 @@ function finalizeNodes(
       productTypeId: accum.productTypeId,
       name: accum.name,
       tier: accum.tier,
+      recipeKind: blueprint?.kind ?? (blueprint ? 'manufacturing' : undefined),
       mode: accum.mode,
       totalDemandQty: accum.isRoot ? outputQty : totalDemandQty,
       demandByParent: [...accum.demandByParent],
@@ -464,6 +477,7 @@ export function computePlanRootBuildCost(
     input.prices,
     input.settings,
     input.systemCostIndex,
+    input.reactionCostIndex,
     modeOverrides,
     input.template.nodeOverrides,
     new Map(),

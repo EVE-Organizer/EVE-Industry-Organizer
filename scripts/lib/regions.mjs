@@ -20,6 +20,9 @@ function securityClass(security) {
  * Tie-break: highest security (safer default).
  */
 export function buildRegionRecords(mapSolarSystems, mapRegions, costIndices) {
+  const mfgIndices = costIndices.manufacturing ?? costIndices
+  const rxnIndices = costIndices.reaction ?? new Map()
+
   const systemsByRegion = new Map()
   for (const row of mapSolarSystems) {
     const regionId = num(row.regionID)
@@ -46,10 +49,10 @@ export function buildRegionRecords(mapSolarSystems, mapRegions, costIndices) {
     if (!systems.length) continue
 
     let buildSystem = systems[0]
-    let bestIndex = costIndices.get(buildSystem.systemId) ?? 1
+    let bestIndex = mfgIndices.get(buildSystem.systemId) ?? 1
 
     for (const sys of systems) {
-      const idx = costIndices.get(sys.systemId) ?? 1
+      const idx = mfgIndices.get(sys.systemId) ?? 1
       if (
         idx < bestIndex ||
         (idx === bestIndex && sys.security > buildSystem.security)
@@ -60,6 +63,8 @@ export function buildRegionRecords(mapSolarSystems, mapRegions, costIndices) {
     }
 
     const marketSystemId = hubRegionToMarketSystem.get(regionId) ?? buildSystem.systemId
+    const reactionCostIndex =
+      rxnIndices.get(buildSystem.systemId) ?? mfgIndices.get(buildSystem.systemId) ?? bestIndex
 
     regions.push({
       regionId,
@@ -69,6 +74,7 @@ export function buildRegionRecords(mapSolarSystems, mapRegions, costIndices) {
       buildSystemName: buildSystem.name,
       buildSystemSecurity: buildSystem.security,
       costIndex: bestIndex,
+      reactionCostIndex,
       marketSystemId,
     })
   }

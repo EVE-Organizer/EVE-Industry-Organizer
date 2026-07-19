@@ -32,6 +32,7 @@ describe('self-referential structure blueprints', () => {
       prices: new Map([[12238, 1_000_000]]),
       settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
     })
 
     const root = nodes.find((n) => n.productTypeId === 12238)

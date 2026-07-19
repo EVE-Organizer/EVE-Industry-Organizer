@@ -73,6 +73,7 @@ describe('planProfit', () => {
       prices: sellPrices,
       settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
     }
 
     const row = computeRootProfitRow(
@@ -103,6 +104,7 @@ describe('planProfit', () => {
       prices: sellPrices,
       settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
     }
 
     const summary = computePlanProfitSummary(
@@ -131,6 +133,7 @@ describe('planProfit', () => {
       prices: sellPrices,
       settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
     }
 
     const breakdown = computeRootSetupBreakdown(

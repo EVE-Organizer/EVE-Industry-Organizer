@@ -11,6 +11,10 @@ export type BlueprintTier = 't1' | 't2' | 'faction'
 
 export const BLUEPRINT_TIERS: BlueprintTier[] = ['t1', 't2', 'faction']
 
+export type RecipeKind = 'manufacturing' | 'reaction'
+
+export type ReactionFamily = 'composite' | 'biochemical' | 'polymer' | 'molecular'
+
 export type TimeRange = '1d' | '1w' | '1m' | '1y' | 'all'
 
 export interface TypeInfo {
@@ -47,6 +51,10 @@ export interface BlueprintInfo {
   materials: BlueprintMaterial[]
   requiredSkills: Record<string, number>
   tier: BlueprintTier
+  /** SDE activity: manufacturing (1) or reaction (11). Omitted = manufacturing. */
+  kind?: RecipeKind
+  /** Reaction formula family from SDE group name. */
+  reactionFamily?: ReactionFamily
   productGroup: string
   bpIconUrl: string
   productIconUrl: string
@@ -74,6 +82,8 @@ export interface SystemInfo {
   security: number
   /** Manufacturing cost index from ESI. Present only on active-industry systems. */
   costIndex?: number
+  /** Reaction cost index from ESI. Present only on active-industry systems. */
+  reactionCostIndex?: number
   hubId?: HubId
 }
 
@@ -85,6 +95,8 @@ export interface RegionInfo {
   buildSystemName: string
   buildSystemSecurity: number
   costIndex: number
+  /** Reaction job cost index for the region build system. */
+  reactionCostIndex?: number
   marketSystemId: number
 }
 
@@ -105,6 +117,8 @@ export interface HubMarketData {
   marketSystemId: number
   buildSystemId: number
   costIndex: number
+  /** Reaction job cost index for the hub build system. */
+  reactionCostIndex?: number
   prices: Record<string, number>
   /** Hub buy order max prices (instant sell). Optional until market.json is rebuilt. */
   buyPrices?: Record<string, number>
@@ -193,6 +207,8 @@ export interface SkillLevels {
   brokerRelations: number
   massProduction: number
   advancedMassProduction: number
+  /** Reactions skill: −4% reaction time per level. */
+  reactions: number
   [key: string]: number
 }
 
@@ -249,6 +265,8 @@ export interface PlanNode {
   productTypeId: number
   name: string
   tier?: BlueprintTier
+  /** Recipe kind when this node has a blueprint (manufacturing vs reaction). */
+  recipeKind?: RecipeKind
   mode: PlanBuildMode
   totalDemandQty: number
   demandByParent: { parentProductTypeId: number; qty: number }[]
@@ -486,7 +504,7 @@ export interface SupplyChainNode {
   quantity: number
   unitPrice: number
   totalCost: number
-  mode: 'buy' | 'build' | 'blueprint'
+  mode: 'buy' | 'build' | 'react' | 'blueprint'
   buildCost?: number
   buyCost?: number
   savings?: number
@@ -532,6 +550,7 @@ export const DEFAULT_SKILLS: SkillLevels = {
   brokerRelations: 0,
   massProduction: DEFAULT_SKILL_LEVEL,
   advancedMassProduction: DEFAULT_SKILL_LEVEL,
+  reactions: DEFAULT_SKILL_LEVEL,
 }
 
 /** Untrained skill levels used when importing from ESI or before sync completes. */
@@ -543,6 +562,7 @@ export const ZERO_SKILLS: SkillLevels = {
   brokerRelations: 0,
   massProduction: 0,
   advancedMassProduction: 0,
+  reactions: 0,
 }
 
 export const DEFAULT_SETTINGS: GlobalSettings = {

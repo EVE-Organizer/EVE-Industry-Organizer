@@ -1,4 +1,5 @@
 import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings, ManufacturingSettings, StructureModifiers } from '@/types'
+import { isReactionRecipe, recipeKind } from '@/lib/recipes'
 import {
   BATCH_SIZE_STEP,
   DEFAULT_BATCH_SIZE,
@@ -18,6 +19,8 @@ const TE_BONUS = 0.01
 const INDUSTRY_BONUS = 0.04
 /** Advanced Industry: 3% manufacturing time reduction per level. */
 const ADVANCED_INDUSTRY_BONUS = 0.03
+/** Reactions skill: 4% reaction time reduction per level. */
+const REACTIONS_BONUS = 0.04
 
 /**
  * Rough EIV fraction for full ME10 + TE20 research, charged once per BPO.
@@ -49,6 +52,10 @@ export function industryTimeFactor(industry: number): number {
 
 export function advancedIndustryTimeFactor(advancedIndustry: number): number {
   return 1 - advancedIndustry * ADVANCED_INDUSTRY_BONUS
+}
+
+export function reactionsTimeFactor(reactions: number): number {
+  return 1 - reactions * REACTIONS_BONUS
 }
 
 /**
@@ -93,6 +100,25 @@ export function applyTE(
     structFactor *
     advancedIndustryTimeFactor(advancedIndustry)
   )
+}
+
+/** Reaction job time: no blueprint TE; Reactions skill and structure TE only. */
+export function applyReactionTime(
+  baseTimeSeconds: number,
+  runs: number,
+  reactions: number,
+  structureTeBonusPercent = 0,
+): number {
+  const structFactor = 1 - structureTeBonusPercent / 100
+  return baseTimeSeconds * runs * reactionsTimeFactor(reactions) * structFactor
+}
+
+export function reactionTimePerRun(
+  baseTimeSeconds: number,
+  reactions: number,
+  structureTeBonusPercent = 0,
+): number {
+  return applyReactionTime(baseTimeSeconds, 1, reactions, structureTeBonusPercent)
 }
 
 export function manufacturingTimePerRun(
@@ -220,13 +246,38 @@ export function totalManufacturingCost(
   settings: ManufacturingSettings,
   me: number,
   systemCostIndex: number,
+  reactionCostIndex = systemCostIndex,
 ): { materialCost: number; jobCost: number; capital: number; jobTime: number } {
   const runs = settings.batchSize
   const structure = resolveStructureModifiers(settings)
+  const kind = recipeKind(blueprint)
+  const costIndex =
+    kind === 'reaction' ? reactionCostIndex : systemCostIndex
+
+  if (isReactionRecipe(blueprint)) {
+    const mats = applyME(blueprint.materials, 0, runs, structure.meBonusPercent)
+    const matCost = materialCost(mats, prices)
+    const eiv = estimatedItemValue(blueprint.materials, runs, prices)
+    const jobCost = estimateJobCost(eiv, costIndex, structure)
+    const reactions = settings.skills.reactions ?? 0
+    const jobTime = applyReactionTime(
+      blueprint.manufacturingTime,
+      runs,
+      reactions,
+      structure.teBonusPercent,
+    )
+    return {
+      materialCost: matCost,
+      jobCost,
+      capital: matCost + jobCost,
+      jobTime,
+    }
+  }
+
   const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const matCost = materialCost(mats, prices)
   const eiv = estimatedItemValue(blueprint.materials, runs, prices)
-  const jobCost = estimateJobCost(eiv, systemCostIndex, structure)
+  const jobCost = estimateJobCost(eiv, costIndex, structure)
   const jobTime = applyTE(
     blueprint.manufacturingTime,
     settings.teDefault,
@@ -264,7 +315,11 @@ export function revenueFromSale(
 export function blueprintMeTe(
   tier: BlueprintTier,
   settings: GlobalSettings,
+  blueprint?: Pick<BlueprintInfo, 'kind'>,
 ): { me: number; te: number } {
+  if (blueprint && isReactionRecipe(blueprint as BlueprintInfo)) {
+    return { me: 0, te: 0 }
+  }
   if (tier === 't2') return { me: T2_INVENTED_ME, te: T2_INVENTED_TE }
   if (tier === 'faction') return { me: 0, te: 0 }
   return { me: settings.meDefault, te: settings.teDefault }
@@ -280,8 +335,12 @@ export function resolveBlueprintMeTe(
   tier: BlueprintTier,
   settings: GlobalSettings,
   override?: MeTeOverride,
+  blueprint?: Pick<BlueprintInfo, 'kind'>,
 ): { me: number; te: number; locked: boolean } {
-  const base = blueprintMeTe(tier, settings)
+  if (blueprint && isReactionRecipe(blueprint as BlueprintInfo)) {
+    return { me: 0, te: 0, locked: true }
+  }
+  const base = blueprintMeTe(tier, settings, blueprint)
   if (tier === 't2' || tier === 'faction') {
     return { me: base.me, te: base.te, locked: true }
   }

@@ -32,12 +32,13 @@ export function PlanBlueprintItemName({
   onOpenMeTe,
   showMeTeSettings,
 }: {
-  node: Pick<PlanNode, 'productTypeId' | 'name' | 'canToggle' | 'me' | 'te' | 'meTeLocked'>
+  node: Pick<PlanNode, 'productTypeId' | 'name' | 'canToggle' | 'isRoot' | 'me' | 'te' | 'meTeLocked'>
   onOpenGraph: (productTypeId: number) => void
   onOpenMeTe?: (productTypeId: number) => void
   showMeTeSettings?: boolean
 }) {
   const marketHref = appRoute(`item/${node.productTypeId}`)
+  const showGraph = node.canToggle || node.isRoot
 
   return (
     <div className="flex items-center gap-0.5 min-w-0">
@@ -51,7 +52,7 @@ export function PlanBlueprintItemName({
       >
         {node.name}
       </a>
-      {node.canToggle ? (
+      {showGraph ? (
         <Tooltip text="Open production graph" placement="top">
           <button
             type="button"

@@ -75,9 +75,11 @@ function PlanNodeBadges({ node }: { node: PlanNode }) {
     ? 'Build'
     : !node.canToggle
       ? 'Market'
-      : node.mode === 'build'
-        ? 'Build'
-        : 'Buy'
+      : node.recipeKind === 'reaction' && node.mode === 'build'
+        ? 'React'
+        : node.mode === 'build'
+          ? 'Build'
+          : 'Buy'
   const modeClass = node.isRoot || node.mode === 'build'
     ? 'badge-success'
     : !node.canToggle
@@ -90,6 +92,9 @@ function PlanNodeBadges({ node }: { node: PlanNode }) {
       {node.isRoot ? <PlanBadge label="Root" className="badge-primary" /> : null}
       {shared ? <PlanBadge label="Shared" className="badge-outline border-eve-border" /> : null}
       {node.tier === 't2' ? <PlanBadge label="T2" className="badge-warning" /> : null}
+      {node.recipeKind === 'reaction' && node.mode === 'build' ? (
+        <PlanBadge label="Reaction" className="badge-accent" />
+      ) : null}
       {node.canToggle && node.recommendedMode && node.mode !== node.recommendedMode ? (
         <PlanBadge
           label={node.recommendedMode === 'build' ? '→Build' : '→Buy'}

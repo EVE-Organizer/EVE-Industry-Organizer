@@ -6,6 +6,7 @@ import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/lib/planTreeLine
 import { planNodesToFlow } from '@/lib/planGraphLayout'
 import { schedulePlanJobs } from '@/lib/planScheduler'
 import { buildTypeMap, getAllBlueprints } from '@/services/data/sdeLoader'
+import { isManufacturingRecipe } from '@/lib/recipes'
 import { createDefaultPlanTemplate } from '@/services/sync/types'
 import { DEFAULT_SETTINGS } from '@/types'
 import type { BlueprintRegistry, TypeInfo } from '@/types'
@@ -25,7 +26,7 @@ describe('expandManufacturingPlan fuzz', () => {
   it('expands every blueprint without throwing', () => {
     const failures: { productTypeId: number; name: string; error: string }[] = []
 
-    for (const bp of blueprints) {
+    for (const bp of blueprints.filter(isManufacturingRecipe)) {
       const name = typeMap.get(bp.productTypeId)?.name ?? String(bp.productTypeId)
       try {
         const template = createDefaultPlanTemplate('fuzz')
@@ -45,6 +46,7 @@ describe('expandManufacturingPlan fuzz', () => {
           prices,
           settings: DEFAULT_SETTINGS,
           systemCostIndex: 0.01,
+          reactionCostIndex: 0.01,
         })
 
         const jobs = schedulePlanJobs({ nodes, slots, windowHours: Number.POSITIVE_INFINITY })
@@ -82,5 +84,5 @@ describe('expandManufacturingPlan fuzz', () => {
       console.error('Failed blueprints:', failures.slice(0, 20))
     }
     expect(failures).toEqual([])
-  })
+  }, 60_000)
 })

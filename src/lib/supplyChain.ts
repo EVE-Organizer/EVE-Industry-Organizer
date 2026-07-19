@@ -1,5 +1,12 @@
 import type { BlueprintInfo, ManufacturingSettings, SupplyChainNode, TypeInfo } from '@/types'
-import { applyME, materialCost, resolveStructureModifiers, totalManufacturingCost } from '@/lib/cost'
+import {
+  applyME,
+  materialCost,
+  resolveBlueprintMeTe,
+  resolveStructureModifiers,
+  totalManufacturingCost,
+} from '@/lib/cost'
+import { isReactionRecipe } from '@/lib/recipes'
 import { getBlueprintForProduct } from '@/services/data/sdeLoader'
 
 const MINERAL_IDS = new Set([34, 35, 36, 37, 38, 39, 40])
@@ -72,14 +79,23 @@ export function buildSupplyChain(
   depth = 0,
   maxDepth = 10,
   modeOverrides: Map<number, 'buy' | 'build'> = new Map(),
+  reactionCostIndex = systemCostIndex,
 ): SupplyChainNode {
   const runs = settings.batchSize
   const structure = resolveStructureModifiers(settings)
-  const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
+  const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
+  const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
   const product = typeMap.get(blueprint.productTypeId)
   const productPrice = prices.get(blueprint.productTypeId) ?? 0
   const buyTotal = materialCost(mats, prices)
-  const { capital: buildTotal } = totalManufacturingCost(blueprint, prices, settings, me, systemCostIndex)
+  const { capital: buildTotal } = totalManufacturingCost(
+    blueprint,
+    prices,
+    settings,
+    effectiveMe,
+    systemCostIndex,
+    reactionCostIndex,
+  )
 
   const children: SupplyChainNode[] = mats.map((mat) => {
     const type = typeMap.get(mat.typeId)
@@ -101,22 +117,25 @@ export function buildSupplyChain(
       }
     }
 
+    const subMe = resolveBlueprintMeTe(subBp.tier, settings, undefined, subBp).me
     const subChain = buildSupplyChain(
       subBp,
       blueprints,
       typeMap,
       prices,
       settings,
-      me,
+      subMe,
       systemCostIndex,
       depth + 1,
       maxDepth,
       modeOverrides,
+      reactionCostIndex,
     )
     const override = modeOverrides.get(mat.typeId)
     const smartMode: 'buy' | 'build' =
       override ?? (subChain.totalCost <= buyCost ? 'build' : 'buy')
     const totalCost = smartMode === 'build' ? subChain.totalCost : buyCost
+    const nodeMode = smartMode === 'build' && isReactionRecipe(subBp) ? 'react' : smartMode
 
     return {
       typeId: mat.typeId,
@@ -124,7 +143,7 @@ export function buildSupplyChain(
       quantity: mat.quantity,
       unitPrice,
       totalCost,
-      mode: smartMode,
+      mode: nodeMode,
       buildCost: subChain.totalCost,
       buyCost,
       savings: buyCost - subChain.totalCost,
@@ -156,13 +175,15 @@ export function buildSupplyChain(
   const allChildren =
     depth === 0 && blueprintChild ? [blueprintChild, ...children] : children
 
+  const rootMode = isReactionRecipe(blueprint) ? 'react' : 'build'
+
   return {
     typeId: blueprint.productTypeId,
     name: product?.name ?? 'Product',
     quantity: blueprint.productQuantity * runs,
     unitPrice: productPrice,
     totalCost: rolledUp + jobPart,
-    mode: 'build',
+    mode: rootMode,
     buildCost: buildTotal,
     buyCost: blueprint.productQuantity * runs * productPrice,
     children: allChildren,

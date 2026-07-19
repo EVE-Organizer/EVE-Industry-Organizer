@@ -15,12 +15,8 @@ import {
   typeRenderUrl,
 } from './lib/eve-image-urls.mjs'
 import { fetchCsv } from './lib/sde-csv.mjs'
-import {
-  classifyTier,
-  buildAttributesByType,
-  isPlaceholderManufacturingRecipe,
-} from './lib/blueprint-groups.mjs'
-import { buildInventionMap } from './lib/invention.mjs'
+import { buildAttributesByType } from './lib/blueprint-groups.mjs'
+import { buildBlueprintRecords } from './lib/blueprint-records.mjs'
 import { fetchCostIndices } from './lib/market-prices.mjs'
 import { buildRegionsFile } from './lib/regions.mjs'
 import { buildMarketData, loadExistingMarket, writeMarketJson } from './lib/market-data.mjs'
@@ -30,8 +26,6 @@ import { HUBS, resolveSellSystemId } from './lib/hubs.mjs'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outDir = join(__dirname, '../public/data')
 const SDE_BASE = 'https://www.fuzzwork.co.uk/dump/latest/csv'
-
-const MANUFACTURING_ACTIVITY = 1
 
 const REQUIRED_CSVS = [
   'industryActivity',
@@ -87,95 +81,6 @@ function buildSkillRecords(types, groups, typeAttributes) {
       }
     })
     .sort((a, b) => a.name.localeCompare(b.name))
-}
-
-function buildBlueprintRecords(tables) {
-  const {
-    activity,
-    products,
-    materials,
-    skills,
-    probabilities,
-    types,
-    groups,
-    categories,
-    metaTypes,
-    skillNames,
-  } = tables
-
-  const inventionByT2 = buildInventionMap({ products, materials, probabilities })
-
-  const typeById = new Map(types.map((type) => [type.typeID, type]))
-  const groupById = new Map(groups.map((group) => [group.groupID, group]))
-  const categoryById = new Map(categories.map((category) => [category.categoryID, category.categoryName]))
-  const metaByProduct = new Map(metaTypes.map((meta) => [meta.typeID, num(meta.metaGroupID)]))
-
-  const timeByBlueprint = new Map(
-    activity
-      .filter((row) => row.activityID === String(MANUFACTURING_ACTIVITY))
-      .map((row) => [row.typeID, num(row.time)]),
-  )
-
-  const materialsByBlueprint = new Map()
-  for (const row of materials) {
-    if (row.activityID !== String(MANUFACTURING_ACTIVITY)) continue
-    if (!materialsByBlueprint.has(row.typeID)) materialsByBlueprint.set(row.typeID, [])
-    materialsByBlueprint.get(row.typeID).push({
-      typeId: num(row.materialTypeID),
-      quantity: num(row.quantity),
-    })
-  }
-
-  const skillsByBlueprint = new Map()
-  for (const row of skills) {
-    if (row.activityID !== String(MANUFACTURING_ACTIVITY)) continue
-    const skillName = skillNames.get(num(row.skillID))
-    if (!skillName) continue
-    if (!skillsByBlueprint.has(row.typeID)) skillsByBlueprint.set(row.typeID, {})
-    skillsByBlueprint.get(row.typeID)[skillName] = num(row.level)
-  }
-
-  const blueprints = []
-  for (const row of products) {
-    if (row.activityID !== String(MANUFACTURING_ACTIVITY)) continue
-
-    const blueprintTypeId = num(row.typeID)
-    const productTypeId = num(row.productTypeID)
-    const product = typeById.get(String(productTypeId))
-    if (!product || product.published !== '1') continue
-
-    const productGroup = groupById.get(product.groupID)
-    if (!productGroup) continue
-
-    const metaGroupId = metaByProduct.get(String(productTypeId)) ?? 1
-    const recipeMaterials = materialsByBlueprint.get(row.typeID) ?? []
-    if (isPlaceholderManufacturingRecipe(recipeMaterials)) continue
-
-    const tier = classifyTier(metaGroupId)
-    const invention = tier === 't2' ? inventionByT2.get(blueprintTypeId) : undefined
-
-    blueprints.push({
-      blueprintTypeId,
-      productTypeId,
-      productQuantity: num(row.quantity),
-      manufacturingTime: timeByBlueprint.get(row.typeID) ?? 0,
-      materials: recipeMaterials,
-      requiredSkills: skillsByBlueprint.get(row.typeID) ?? {},
-      tier,
-      productGroup: productGroup.groupName,
-      bpIconUrl: blueprintIconUrl(blueprintTypeId),
-      productIconUrl: typeIconUrl(productTypeId),
-      productRenderUrl: typeRenderUrl(productTypeId),
-      ...(invention ? { invention } : {}),
-    })
-  }
-
-  return {
-    blueprints: blueprints.sort((a, b) => a.productTypeId - b.productTypeId),
-    typeById,
-    groupById,
-    categoryById,
-  }
 }
 
 function buildAllTypeRecords(types, groupById, categoryById, blueprintTypeIds = []) {
@@ -247,6 +152,9 @@ function buildHubSystems(hubs, stations, systems) {
  * sell/build systems. Hub systems without a cost index get costIndex = undefined.
  */
 function buildIndustrySystems(hubs, stations, mapSolarSystems, costIndices) {
+  const mfgIndices = costIndices.manufacturing ?? costIndices
+  const rxnIndices = costIndices.reaction ?? new Map()
+
   const stationById = new Map(stations.map((s) => [s.stationID, s]))
   const systemById = new Map(mapSolarSystems.map((s) => [num(s.solarSystemID), s]))
 
@@ -264,7 +172,7 @@ function buildIndustrySystems(hubs, stations, mapSolarSystems, costIndices) {
     if (sellSystemId) hubIdBySystemId.set(sellSystemId, hub.hubId)
   }
 
-  const systemIds = new Set([...costIndices.keys(), ...hubSystemIds])
+  const systemIds = new Set([...mfgIndices.keys(), ...rxnIndices.keys(), ...hubSystemIds])
   const results = []
 
   for (const systemId of systemIds) {
@@ -276,8 +184,10 @@ function buildIndustrySystems(hubs, stations, mapSolarSystems, costIndices) {
       regionId: num(raw.regionID),
       security: num(raw.security),
     }
-    const costIndex = costIndices.get(systemId)
+    const costIndex = mfgIndices.get(systemId)
     if (costIndex !== undefined) entry.costIndex = costIndex
+    const reactionCostIndex = rxnIndices.get(systemId)
+    if (reactionCostIndex !== undefined) entry.reactionCostIndex = reactionCostIndex
     const hubId = hubIdBySystemId.get(systemId)
     if (hubId) entry.hubId = hubId
     results.push(entry)

@@ -14,6 +14,7 @@ export function useManufacturingPlan(
   prices: Map<number, number>,
   settings: GlobalSettings,
   systemCostIndex: number,
+  reactionCostIndex: number,
 ) {
   return useMemo(() => {
     if (!template || template.roots.length === 0) {
@@ -34,6 +35,7 @@ export function useManufacturingPlan(
       prices,
       settings,
       systemCostIndex,
+      reactionCostIndex,
     })
     const jobs = schedulePlanJobs({
       nodes: expanded.nodes,
@@ -55,7 +57,7 @@ export function useManufacturingPlan(
       windowHours,
       warnings: detectOverUnder(expanded.nodes),
     }
-  }, [template, blueprints, typeMap, prices, settings, systemCostIndex])
+  }, [template, blueprints, typeMap, prices, settings, systemCostIndex, reactionCostIndex])
 }
 
 export function usePlanSkills() {

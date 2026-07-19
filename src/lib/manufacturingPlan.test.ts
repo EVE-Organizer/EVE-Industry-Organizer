@@ -53,6 +53,7 @@ describe('expandManufacturingPlan', () => {
       prices,
       settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
     })
 
     const cap = nodes.find((n) => n.productTypeId === 100)
@@ -90,6 +91,7 @@ describe('expandManufacturingPlan', () => {
       prices,
       settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
     })
 
     const hoursA = durationHoursFromRuns(shipA, DEFAULT_SETTINGS, 10, 1)
@@ -111,6 +113,7 @@ describe('expandManufacturingPlan', () => {
       prices,
       settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
     })
 
     const ship = nodes.find((n) => n.productTypeId === 200)
@@ -133,6 +136,7 @@ describe('expandManufacturingPlan', () => {
       prices,
       settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
     })
 
     const ship = nodes.find((n) => n.productTypeId === 200)

@@ -46,6 +46,7 @@ describe('supplyChainSlots', () => {
       prices,
       settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
     })
 
     const rootRuns = totalRootRuns(template.roots.map((r) => r.runs))
