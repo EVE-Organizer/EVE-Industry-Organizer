@@ -9,10 +9,7 @@ import { writeFileSync, mkdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import {
-  blueprintIconUrl,
   typeIconUrl,
-  typeImageUrls,
-  typeRenderUrl,
 } from './lib/eve-image-urls.mjs'
 import { fetchCsv } from './lib/sde-csv.mjs'
 import { buildAttributesByType } from './lib/blueprint-groups.mjs'
@@ -20,8 +17,9 @@ import { buildBlueprintRecords } from './lib/blueprint-records.mjs'
 import { fetchCostIndices } from './lib/market-prices.mjs'
 import { buildRegionsFile } from './lib/regions.mjs'
 import { buildMarketData, loadExistingMarket, writeMarketJson } from './lib/market-data.mjs'
-import { createMarketBuildTask, runListr } from './lib/run-progress.mjs'
+import { createMarketBuildTask, runListr, updateTaskProgress, startElapsedTicker, formatDuration } from './lib/run-progress.mjs'
 import { HUBS, resolveSellSystemId } from './lib/hubs.mjs'
+import { buildAllTypeRecords } from './lib/type-records.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outDir = join(__dirname, '../public/data')
@@ -81,34 +79,6 @@ function buildSkillRecords(types, groups, typeAttributes) {
       }
     })
     .sort((a, b) => a.name.localeCompare(b.name))
-}
-
-function buildAllTypeRecords(types, groupById, categoryById, blueprintTypeIds = []) {
-  const includeTypeIds = new Set(
-    types.filter((type) => type.published === '1').map((type) => type.typeID),
-  )
-  for (const typeId of blueprintTypeIds) {
-    includeTypeIds.add(String(typeId))
-  }
-
-  return types
-    .filter((type) => includeTypeIds.has(type.typeID))
-    .map((type) => {
-      const typeId = num(type.typeID)
-      const group = groupById.get(type.groupID)
-      const urls = typeImageUrls(typeId)
-      return {
-        typeId,
-        name: type.typeName,
-        group: group?.groupName ?? 'Unknown',
-        category: categoryById.get(group?.categoryID ?? '') ?? 'Unknown',
-        volume: num(type.volume),
-        iconUrl: urls.iconUrl,
-        renderUrl: urls.renderUrl,
-        bpIconUrl: urls.bpIconUrl,
-      }
-    })
-    .sort((a, b) => a.typeId - b.typeId)
 }
 
 function buildHubSystems(hubs, stations, systems) {
@@ -290,18 +260,23 @@ async function main() {
         title: 'Download SDE CSVs',
         task: async (_, task) => {
           const csvData = {}
-          for (let i = 0; i < REQUIRED_CSVS.length; i++) {
+          const total = REQUIRED_CSVS.length
+          const startedAt = Date.now()
+          for (let i = 0; i < total; i++) {
             const name = REQUIRED_CSVS[i]
-            task.title = `Download SDE CSVs (${i + 1}/${REQUIRED_CSVS.length}) · ${name}`
+            updateTaskProgress(task, `Download SDE CSVs · ${name}`, i, total, startedAt)
             csvData[name] = await fetchCsv(SDE_BASE, name, { silent: true })
+            updateTaskProgress(task, `Download SDE CSVs · ${name}`, i + 1, total, startedAt)
           }
           ctx.csvData = csvData
-          task.title = `Download SDE CSVs · ${REQUIRED_CSVS.length} files`
+          task.title = `Download SDE CSVs · ${total} files · ${formatDuration(Date.now() - startedAt)}`
         },
       },
       {
         title: 'Build blueprint registry',
         task: async (_, task) => {
+          const stopElapsed = startElapsedTicker(task, 'Build blueprint registry')
+          try {
           const types = ctx.csvData.invTypes
           const groups = ctx.csvData.invGroups
           const categories = ctx.csvData.invCategories
@@ -342,11 +317,16 @@ async function main() {
             ctx.csvData.mapRegions,
           )
           task.title = `Build blueprint registry · ${blueprints.length.toLocaleString()} blueprints`
+          } finally {
+            stopElapsed()
+          }
         },
       },
       {
         title: 'Cost indices and regions',
         task: async (_, task) => {
+          const stopElapsed = startElapsedTicker(task, 'Cost indices and regions')
+          try {
           const costIndices = await fetchCostIndices()
           ctx.regions = buildRegionsFile(
             ctx.csvData.mapSolarSystems,
@@ -360,6 +340,9 @@ async function main() {
             costIndices,
           )
           task.title = `Cost indices and regions · ${ctx.regions.regions.length} regions, ${ctx.systems.length} industry systems`
+          } finally {
+            stopElapsed()
+          }
         },
       },
       createMarketBuildTask(ctx, {
@@ -382,15 +365,28 @@ async function main() {
           const write = (name, data) =>
             writeFileSync(join(outDir, name), JSON.stringify(data, null, 2))
 
-          write('types.json', { generatedAt: new Date().toISOString(), types: ctx.typeRecords })
-          write('blueprints.json', registry)
-          write('regions.json', ctx.regions)
-          writeMarketJson(marketPath, ctx.market)
-          write('skills.json', ctx.skills)
-          write('systems.json', ctx.systems)
-          write('stations.json', ctx.stations)
+          const outputs = [
+            ['types.json', { generatedAt: new Date().toISOString(), types: ctx.typeRecords }],
+            ['blueprints.json', registry],
+            ['regions.json', ctx.regions],
+            ['market.json', ctx.market],
+            ['skills.json', ctx.skills],
+            ['systems.json', ctx.systems],
+            ['stations.json', ctx.stations],
+          ]
+          const startedAt = Date.now()
+          for (let i = 0; i < outputs.length; i++) {
+            const [name, data] = outputs[i]
+            updateTaskProgress(task, `Write JSON · ${name}`, i, outputs.length, startedAt)
+            if (name === 'market.json') {
+              writeMarketJson(marketPath, data)
+            } else {
+              write(name, data)
+            }
+            updateTaskProgress(task, `Write JSON · ${name}`, i + 1, outputs.length, startedAt)
+          }
 
-          task.title = `Write JSON files · ${ctx.blueprints.length.toLocaleString()} blueprints, ${ctx.typeRecords.length.toLocaleString()} types`
+          task.title = `Write JSON files · ${ctx.blueprints.length.toLocaleString()} blueprints, ${ctx.typeRecords.length.toLocaleString()} types · ${formatDuration(Date.now() - startedAt)}`
         },
       },
     ],

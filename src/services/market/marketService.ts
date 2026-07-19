@@ -7,6 +7,30 @@ import { batchProcess, dedupe, noteEsiResponse, throttle } from '@/services/mark
 const ESI_BASE = 'https://esi.evetech.net/latest'
 const FUZZWORK_BASE = 'https://market.fuzzwork.co.uk/aggregates'
 
+interface EsiHistoryRow {
+  date: string
+  average: number
+  highest: number
+  lowest: number
+  volume: number
+  order_count?: number
+}
+
+function normalizeHistoryEntry(row: EsiHistoryRow): MarketHistoryEntry {
+  return {
+    date: row.date,
+    average: row.average,
+    highest: row.highest,
+    lowest: row.lowest,
+    volume: row.volume,
+    orderCount: row.order_count ?? 0,
+  }
+}
+
+function normalizeHistoryRows(rows: EsiHistoryRow[]): MarketHistoryEntry[] {
+  return rows.map(normalizeHistoryEntry)
+}
+
 function trimHistoryForRange(history: MarketHistoryEntry[], range: TimeRange): MarketHistoryEntry[] {
   const days = daysForRange(range)
   if (days === null) return history
@@ -32,13 +56,44 @@ async function fetchEsiPrice(typeId: number, regionId: number): Promise<number> 
   return Math.min(...orders.map((o) => o.price))
 }
 
-async function fetchFuzzworkPrice(typeId: number, regionId: number): Promise<number> {
+async function fetchEsiBuyPrice(typeId: number, regionId: number): Promise<number> {
+  await throttle()
+  const url = `${ESI_BASE}/markets/${regionId}/orders/?type_id=${typeId}&order_type=buy`
+  const res = await fetch(url)
+  noteEsiResponse(res)
+  if (!res.ok) throw new Error(`ESI buy orders failed: ${res.status}`)
+  const orders = (await res.json()) as { price: number }[]
+  if (!orders.length) return 0
+  return Math.max(...orders.map((o) => o.price))
+}
+
+function normalizeMarketPrice(value: unknown): number {
+  const n = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(n) && n > 0 ? n : 0
+}
+
+async function fetchFuzzworkQuotes(
+  typeId: number,
+  regionId: number,
+): Promise<{ sell: number; buy: number }> {
   await throttle()
   const url = `${FUZZWORK_BASE}/?types=${typeId}&region=${regionId}`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Fuzzwork failed: ${res.status}`)
-  const data = (await res.json()) as Record<string, { sell?: { min?: number } }>
-  return data[String(typeId)]?.sell?.min ?? 0
+  const data = (await res.json()) as Record<
+    string,
+    { sell?: { min?: number | string }; buy?: { max?: number | string } }
+  >
+  const row = data[String(typeId)]
+  return {
+    sell: normalizeMarketPrice(row?.sell?.min),
+    buy: normalizeMarketPrice(row?.buy?.max),
+  }
+}
+
+async function fetchFuzzworkPrice(typeId: number, regionId: number): Promise<number> {
+  const quotes = await fetchFuzzworkQuotes(typeId, regionId)
+  return quotes.sell
 }
 
 async function fetchEsiHistoryRaw(
@@ -59,7 +114,7 @@ async function fetchEsiHistoryRaw(
   if (!res.ok) throw new Error(`ESI history failed: ${res.status}`)
 
   const etag = res.headers.get('etag') ?? undefined
-  const history = (await res.json()) as MarketHistoryEntry[]
+  const history = normalizeHistoryRows((await res.json()) as EsiHistoryRow[])
   return { history, etag, notModified: false }
 }
 
@@ -101,7 +156,7 @@ export async function getPrice(
   if (!forceRefresh) {
     const cached = getCached<number>(key)
     if (cached && !cached.stale) {
-      return { price: cached.data, source: 'cache', fetchedAt: cached.fetchedAt }
+      return { price: normalizeMarketPrice(cached.data), source: 'cache', fetchedAt: cached.fetchedAt }
     }
   }
 
@@ -118,13 +173,88 @@ export async function getPrice(
         price = await fetchFuzzworkPrice(typeId, regionId)
         source = 'fuzzwork'
       } catch {
-        if (cached) return { price: cached.data, source: 'cache-stale', fetchedAt: cached.fetchedAt }
+        if (cached) return { price: normalizeMarketPrice(cached.data), source: 'cache-stale', fetchedAt: cached.fetchedAt }
         return { price: 0, source: 'none', fetchedAt: Date.now() }
       }
     }
 
     setCached(key, price, source, TTL.price.fresh, TTL.price.stale)
     return { price, source, fetchedAt: Date.now() }
+  })
+}
+
+export async function getBuyPrice(
+  typeId: number,
+  hub: HubId = 'jita',
+  forceRefresh = false,
+): Promise<{ price: number; source: string; fetchedAt: number }> {
+  const { buy, source, fetchedAt } = await getHubQuotes(typeId, hub, forceRefresh)
+  return { price: buy, source, fetchedAt }
+}
+
+export interface HubQuotes {
+  sell: number
+  buy: number
+  source: string
+  fetchedAt: number
+}
+
+export async function getHubQuotes(
+  typeId: number,
+  hub: HubId = 'jita',
+  forceRefresh = false,
+): Promise<HubQuotes> {
+  const regionId = REGION_IDS[hub]
+  const sellKey = cacheKey('price', 'sell', { typeId, regionId })
+  const buyKey = cacheKey('price', 'buy', { typeId, regionId })
+
+  if (!forceRefresh) {
+    const sellCached = getCached<number>(sellKey)
+    const buyCached = getCached<number>(buyKey)
+    if (sellCached && buyCached && !sellCached.stale && !buyCached.stale) {
+      return {
+        sell: normalizeMarketPrice(sellCached.data),
+        buy: normalizeMarketPrice(buyCached.data),
+        source: 'cache',
+        fetchedAt: Math.max(sellCached.fetchedAt, buyCached.fetchedAt),
+      }
+    }
+  }
+
+  const dedupeKey = cacheKey('price', 'quotes', { typeId, regionId })
+  return dedupe(dedupeKey, async () => {
+    const sellCached = getCached<number>(sellKey)
+    const buyCached = getCached<number>(buyKey)
+
+    try {
+      const quotes = await fetchFuzzworkQuotes(typeId, regionId)
+      setCached(sellKey, quotes.sell, 'fuzzwork', TTL.price.fresh, TTL.price.stale)
+      setCached(buyKey, quotes.buy, 'fuzzwork', TTL.price.fresh, TTL.price.stale)
+      return { ...quotes, source: 'fuzzwork', fetchedAt: Date.now() }
+    } catch {
+      let sell = normalizeMarketPrice(sellCached?.data)
+      let buy = normalizeMarketPrice(buyCached?.data)
+      let source = 'cache-stale'
+      const fetchedAt = Math.max(sellCached?.fetchedAt ?? 0, buyCached?.fetchedAt ?? 0) || Date.now()
+
+      try {
+        if (!sellCached || sellCached.stale || forceRefresh) {
+          sell = await fetchEsiPrice(typeId, regionId)
+          setCached(sellKey, sell, 'esi', TTL.price.fresh, TTL.price.stale)
+        }
+        if (!buyCached || buyCached.stale || forceRefresh) {
+          buy = await fetchEsiBuyPrice(typeId, regionId)
+          setCached(buyKey, buy, 'esi', TTL.price.fresh, TTL.price.stale)
+        }
+        source = 'esi'
+        return { sell, buy, source, fetchedAt: Date.now() }
+      } catch {
+        if (sellCached || buyCached) {
+          return { sell, buy, source, fetchedAt }
+        }
+        return { sell: 0, buy: 0, source: 'none', fetchedAt: Date.now() }
+      }
+    }
   })
 }
 
@@ -250,9 +380,9 @@ async function fetchFuzzworkPrices(
     const url = `${FUZZWORK_BASE}/?types=${chunk.join(',')}&region=${regionId}`
     const res = await fetch(url)
     if (!res.ok) throw new Error(`Fuzzwork bulk failed: ${res.status}`)
-    const data = (await res.json()) as Record<string, { sell?: { min?: number } }>
+    const data = (await res.json()) as Record<string, { sell?: { min?: number | string } }>
     for (const typeId of chunk) {
-      map.set(typeId, data[String(typeId)]?.sell?.min ?? 0)
+      map.set(typeId, normalizeMarketPrice(data[String(typeId)]?.sell?.min))
     }
   }
   return map
@@ -272,7 +402,7 @@ export async function getPricesForTypes(
     if (!forceRefresh) {
       const cached = getCached<number>(key)
       if (cached && !cached.stale) {
-        map.set(typeId, cached.data)
+        map.set(typeId, normalizeMarketPrice(cached.data))
         continue
       }
     }

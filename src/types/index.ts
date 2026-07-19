@@ -23,6 +23,10 @@ export interface TypeInfo {
   group: string
   category: string
   volume: number
+  /** Item mass in kg from SDE. Omitted on older types.json builds. */
+  mass?: number
+  /** Flavor / usage text from SDE. Omitted on older types.json builds. */
+  description?: string
   iconUrl: string
   renderUrl: string
   bpIconUrl: string
@@ -148,6 +152,31 @@ export interface MarketHistoryEntry {
   highest: number
   lowest: number
   volume: number
+  /** ESI order_count; 0 when missing from cache or API. */
+  orderCount: number
+}
+
+export interface BpcContractListing {
+  contractId: number
+  price: number
+  buyout: number
+  me: number
+  te: number
+  runs: number
+  expires: string
+  stationId?: number
+}
+
+export interface BpcContractSummary {
+  count: number
+  minBuyout: number
+  listings: BpcContractListing[]
+}
+
+export interface ContractsData {
+  generatedAt: string
+  snapshotSource?: string
+  hubs: Partial<Record<HubId, { byBlueprintTypeId: Record<string, BpcContractSummary> }>>
 }
 
 export type StructureType = 'npc' | 'raitaru' | 'azbel' | 'sotiyo' | 'custom'

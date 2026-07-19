@@ -26,6 +26,10 @@ export function blueprintIconUrl(typeId: number, size = 32): string {
   return `https://images.evetech.net/types/${typeId}/bp?size=${normalizeImageSize(size)}`
 }
 
+export function blueprintCopyIconUrl(typeId: number, size = 32): string {
+  return `https://images.evetech.net/types/${typeId}/bpc?size=${normalizeImageSize(size)}`
+}
+
 /** NPC faction logos use the corporations category. */
 export function corporationLogoUrl(corporationId: number, size = 64): string {
   return `https://images.evetech.net/corporations/${corporationId}/logo?size=${normalizeImageSize(size)}`
@@ -35,7 +39,7 @@ export function characterPortraitUrl(characterId: number, size = 128): string {
   return `https://images.evetech.net/characters/${characterId}/portrait?size=${normalizeImageSize(size)}`
 }
 
-export type ImageVariant = 'icon' | 'render' | 'bp' | 'faction'
+export type ImageVariant = 'icon' | 'render' | 'bp' | 'bpc' | 'faction'
 
 /** Build a fallback chain from most to least preferred. */
 export function imageUrlChain(
@@ -59,6 +63,12 @@ export function imageUrlChain(
       }
       break
     case 'bp':
+      add(blueprintIconUrl(typeId, size))
+      if (productTypeId) add(typeIconUrl(productTypeId, size))
+      add(typeIconUrl(typeId, size))
+      break
+    case 'bpc':
+      add(blueprintCopyIconUrl(typeId, size))
       add(blueprintIconUrl(typeId, size))
       if (productTypeId) add(typeIconUrl(productTypeId, size))
       add(typeIconUrl(typeId, size))

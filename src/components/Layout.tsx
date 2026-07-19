@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { EveNavAuth } from '@/components/EveNavAuth'
 import { NavbarHubSelect } from '@/components/NavbarHubSelect'
+import { NavbarItemSearch } from '@/components/NavbarItemSearch'
+import { NavbarMobileShell } from '@/components/NavbarMobileShell'
 
 const links = [
   { to: '/', label: 'Blueprints' },
@@ -10,57 +12,65 @@ const links = [
   { to: '/settings', label: 'Settings' },
 ]
 
+function NavbarBrand() {
+  return (
+    <NavLink to="/" className="app-navbar__brand" title="EVE Industry Organizer">
+      <span className="app-navbar__brand-mark">EVE</span>
+      <span className="app-navbar__brand-rest hidden sm:inline"> Industry</span>
+      <span className="app-navbar__brand-rest hidden xl:inline"> Organizer</span>
+    </NavLink>
+  )
+}
+
+function NavbarTools() {
+  return (
+    <div className="app-navbar__tools">
+      <NavbarHubSelect />
+      <span className="app-navbar__tool-sep" aria-hidden />
+      <NavbarItemSearch />
+    </div>
+  )
+}
+
+function NavbarNav() {
+  return (
+    <nav className="app-navbar__nav" aria-label="Main">
+      {links.map((l) => (
+        <NavLink
+          key={l.to}
+          to={l.to}
+          end={l.to === '/'}
+          className={({ isActive }) =>
+            `app-navbar__nav-link ${isActive ? 'app-navbar__nav-link--active' : ''}`
+          }
+        >
+          {l.label}
+        </NavLink>
+      ))}
+    </nav>
+  )
+}
+
 export function Layout() {
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="sticky top-0 z-50">
-      <header className="navbar bg-base-200 border-b border-eve-border px-4 lg:px-8">
-        <div className="flex-1">
-          <NavLink to="/" className="text-xl font-bold text-primary">
-            EVE Industry Organizer
-          </NavLink>
+      <header className="app-navbar">
+        <div className="app-navbar__inner app-navbar__inner--desktop">
+          <NavbarBrand />
+          <NavbarTools />
+          <div className="app-navbar__end">
+            <NavbarNav />
+            <span className="app-navbar__divider" aria-hidden />
+            <div className="app-navbar__auth">
+              <EveNavAuth />
+            </div>
+          </div>
         </div>
-        <div className="flex-none hidden md:flex items-center gap-2">
-          <NavbarHubSelect />
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.to === '/'}
-              className={({ isActive }) =>
-                `btn btn-ghost btn-sm ${isActive ? 'text-primary' : ''}`
-              }
-            >
-              {l.label}
-            </NavLink>
-          ))}
-          <EveNavAuth />
-        </div>
+
+        <NavbarMobileShell links={links} />
       </header>
 
-      <div className="md:hidden bg-base-200 border-b border-eve-border">
-        <div className="flex items-center justify-between gap-2 p-2">
-          <NavbarHubSelect />
-          <div className="flex gap-1 overflow-x-auto min-w-0">
-            {links.map((l) => (
-              <NavLink
-                key={l.to}
-                to={l.to}
-                end={l.to === '/'}
-                className={({ isActive }) =>
-                  `btn btn-xs shrink-0 ${isActive ? 'btn-primary' : 'btn-ghost'}`
-                }
-              >
-                {l.label}
-              </NavLink>
-            ))}
-          </div>
-          <EveNavAuth />
-        </div>
-      </div>
-      </div>
-
-      <main className="flex-1 min-w-0 min-h-0 w-full max-w-7xl mx-auto p-4 lg:p-8 flex flex-col">
+      <main className="flex-1 min-w-0 min-h-0 w-full max-w-7xl mx-auto p-3 sm:p-4 lg:p-8 flex flex-col">
         <Outlet />
       </main>
     </div>
@@ -89,16 +99,21 @@ export function PageHeader({
   title,
   subtitle,
   action,
+  icon,
 }: {
   title: string
   subtitle?: string
   action?: React.ReactNode
+  icon?: React.ReactNode
 }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
-      <div className="min-w-0">
-        <h1 className="text-2xl font-bold">{title}</h1>
-        {subtitle && <p className="text-sm opacity-70 mt-1">{subtitle}</p>}
+      <div className="flex items-center gap-3 min-w-0">
+        {icon ? <div className="shrink-0">{icon}</div> : null}
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold truncate">{title}</h1>
+          {subtitle && <p className="text-sm opacity-70 mt-1">{subtitle}</p>}
+        </div>
       </div>
       {action}
     </div>

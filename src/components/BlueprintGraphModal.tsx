@@ -15,8 +15,6 @@ import { useNavigate } from 'react-router-dom'
 import {
   ReactFlow,
   Background,
-  Handle,
-  Position,
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
@@ -55,6 +53,8 @@ import { tierLabel } from '@/lib/blueprintGroups'
 import { tradingFeeRates } from '@/lib/tradingFees'
 import { skillLevel } from '@/lib/skillFields'
 import { appRoute, productionGraphRoute } from '@/lib/paths'
+import { withAlignedEdgeHandles } from '@/lib/graphHandles'
+import { FlowHandles } from '@/components/graph/FlowHandles'
 import { textLinkClass } from '@/lib/textLink'
 import { formatGraphQuantity, formatGraphUnitIsk, formatDuration, formatIsk, formatPercent, formatDecimal } from '@/lib/profit'
 import { CopyNameButton } from '@/components/CopyNameButton'
@@ -395,11 +395,15 @@ interface SupplyNodeData extends Record<string, unknown> {
   depth: number
   outputSummary?: OutputSummary
   canOpenGraph?: boolean
+  sourceHandles?: { id: string; top: string }[]
+  targetHandles?: { id: string; top: string }[]
 }
 
 interface BuildTargetNodeData extends Record<string, unknown> {
   target: BuildTargetDetail
   sourceName: string
+  sourceHandles?: { id: string; top: string }[]
+  targetHandles?: { id: string; top: string }[]
 }
 
 const BUILD_TARGET_CARD_WIDTH = 208
@@ -1047,7 +1051,7 @@ function BuildTargetNode({ data }: { data: BuildTargetNodeData }) {
         onMouseLeave={hideCard}
         onMouseDown={hideCard}
       >
-        <Handle type="source" position={Position.Right} className="opacity-0" />
+        <FlowHandles sourceHandles={data.sourceHandles} targetHandles={data.targetHandles} />
         <div className="flex gap-2 h-full min-h-0 overflow-hidden">
           <EveImage
             id={target.productTypeId}
@@ -1334,7 +1338,7 @@ function OutputNode({ data }: { data: SupplyNodeData }) {
         onMouseLeave={hideCard}
         onMouseDown={hideCard}
       >
-        <Handle type="target" position={Position.Left} className="opacity-0" />
+        <FlowHandles sourceHandles={data.sourceHandles} targetHandles={data.targetHandles} />
         <div className="flex gap-2.5 h-full min-h-0 overflow-hidden">
           <EveImage
             id={data.typeId}
@@ -1370,7 +1374,6 @@ function OutputNode({ data }: { data: SupplyNodeData }) {
             )}
           </div>
         </div>
-        <Handle type="source" position={Position.Right} className="opacity-0" />
       </GraphNodeShell>
       {cardStyle &&
         summary &&
@@ -1407,7 +1410,7 @@ function SupplyNode({ data }: { data: SupplyNodeData }) {
         onMouseLeave={hideCard}
         onMouseDown={hideCard}
       >
-        <Handle type="target" position={Position.Left} className="opacity-0" />
+        <FlowHandles sourceHandles={data.sourceHandles} targetHandles={data.targetHandles} />
         <div className="flex gap-1.5 h-full items-start py-px">
           <EveImage
             id={data.typeId}
@@ -1446,7 +1449,6 @@ function SupplyNode({ data }: { data: SupplyNodeData }) {
             />
           </div>
         </div>
-        <Handle type="source" position={Position.Right} className="opacity-0" />
       </GraphNodeShell>
       {cardStyle &&
         createPortal(
@@ -1846,9 +1848,10 @@ export function BlueprintGraphModal({
       buyPrices,
     )
     const withTargets = attachBuildTargetNodes(withSummary, flow.edges, buildTargets, sourceName)
+    const aligned = withAlignedEdgeHandles(withTargets.nodes, withTargets.edges)
     return {
-      nodes: markNavigableNodes(withTargets.nodes, blueprintByProduct),
-      edges: withTargets.edges,
+      nodes: markNavigableNodes(aligned.nodes, blueprintByProduct),
+      edges: aligned.edges,
     }
   }, [sde, activeBlueprint, hub, priceWindow, graphSettings, settings, blueprintByProduct])
 

@@ -3,7 +3,7 @@ import type { MarketHistoryEntry } from '@/types'
 import { filterHistoryByRange, formatDuration, formatDurationHms, formatGraphQuantity, formatGraphUnitIsk, formatIsk, formatIskInputUnit, parseDurationHms, parseIskInputUnit, trimHistoryByDays } from '@/lib/profit'
 
 function historyEntry(date: string, average = 100): MarketHistoryEntry {
-  return { date, average, highest: average, lowest: average, volume: 10 }
+  return { date, average, highest: average, lowest: average, volume: 10, orderCount: 3 }
 }
 
 describe('trimHistoryByDays', () => {

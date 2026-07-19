@@ -597,6 +597,200 @@
   }
 }
 
+.navbar-item-search {
+  @apply relative flex min-w-0 flex-1 items-center self-stretch;
+
+  .plan-search-wrap__input {
+    @apply input input-bordered input-xs h-6 min-h-6 w-full border-0 bg-transparent py-0 pl-7 pr-2 text-xs leading-none shadow-none;
+    @apply focus:border-0 focus:bg-transparent focus:outline-none;
+  }
+
+  .plan-search-wrap__icon {
+    @apply left-2.5 h-3.5 w-3.5;
+  }
+
+  &__menu {
+    @apply absolute left-0 right-0 top-full z-50 mt-1.5 max-h-64 overflow-y-auto rounded-xl border border-eve-border bg-base-200 p-1 shadow-xl;
+  }
+}
+
+.navbar-hub-select {
+  @apply flex h-full shrink-0 items-center gap-1.5 px-2.5;
+
+  &__label {
+    @apply text-[10px] font-semibold uppercase tracking-wide text-base-content/45;
+  }
+
+  &__input {
+    @apply select select-bordered select-xs h-6 min-h-6 min-w-[4.75rem] border-0 bg-transparent py-0 pl-0 pr-6 text-xs font-medium leading-none shadow-none;
+    @apply focus:border-0 focus:outline-none;
+  }
+}
+
+.app-navbar {
+  @apply sticky top-0 z-50 border-b border-eve-border bg-base-200/95 backdrop-blur-sm;
+
+  &--menu-open {
+    @apply z-[100];
+  }
+
+  &__inner {
+    @apply items-center gap-3 lg:gap-4;
+
+    &--desktop {
+      @apply hidden px-4 py-2 md:flex lg:px-8;
+    }
+
+    &--mobile {
+      @apply flex min-h-9 justify-between;
+    }
+  }
+
+  &__mobile-shell {
+    @apply flex flex-col gap-2.5 px-3 pb-2.5 pt-2 md:hidden;
+  }
+
+  &__mobile-actions {
+    @apply flex shrink-0 items-center gap-1.5;
+  }
+
+  &__menu-btn {
+    @apply inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-eve-border/60 bg-base-300/25 text-base-content/70 transition-colors;
+    @apply hover:border-eve-border hover:bg-base-300/40 hover:text-base-content;
+  }
+
+  &__menu-icon {
+    @apply relative flex h-3.5 w-4 flex-col justify-between;
+
+    span {
+      @apply block h-0.5 w-full rounded-full bg-current transition-transform duration-200;
+    }
+
+    &--open span:nth-child(1) {
+      @apply translate-y-[6px] rotate-45;
+    }
+
+    &--open span:nth-child(2) {
+      @apply scale-x-0 opacity-0;
+    }
+
+    &--open span:nth-child(3) {
+      @apply -translate-y-[6px] -rotate-45;
+    }
+  }
+
+  &__mobile-backdrop {
+    @apply fixed inset-0 z-[90] bg-black/45 md:hidden;
+  }
+
+  &__mobile-menu {
+    @apply fixed right-0 bottom-0 z-[95] flex w-64 max-w-[85vw] flex-col gap-1 overflow-y-auto border-l border-eve-border/80 bg-base-200 p-3 shadow-2xl md:hidden;
+    top: var(--mobile-menu-top, 6.5rem);
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  &__mobile-menu-link {
+    @apply rounded-lg px-3 py-3 text-sm font-medium text-base-content/70 transition-colors;
+    @apply hover:bg-base-300/50 hover:text-base-content;
+
+    &--active {
+      @apply border border-primary/30 bg-primary/10 text-primary;
+    }
+  }
+
+  &__brand {
+    @apply shrink-0 text-base font-bold leading-tight text-primary transition-opacity hover:opacity-90;
+
+    .app-navbar__inner--mobile & {
+      @apply text-lg;
+    }
+
+    .app-navbar__inner--desktop & {
+      @apply lg:text-lg;
+    }
+  }
+
+  &__brand-mark {
+    @apply text-primary;
+  }
+
+  &__brand-rest {
+    @apply text-base-content/90;
+  }
+
+  &__tools {
+    @apply flex min-h-8 min-w-0 flex-1 items-center overflow-hidden rounded-lg border border-eve-border/80 bg-base-300/20 shadow-sm;
+    @apply max-w-md lg:max-w-lg xl:max-w-xl;
+
+    &--mobile {
+      @apply min-h-10 w-full max-w-none flex-none;
+
+      .navbar-hub-select {
+        @apply w-[5.75rem] shrink-0 px-2;
+      }
+
+      .navbar-hub-select__label {
+        @apply hidden;
+      }
+
+      .navbar-hub-select__input {
+        @apply w-full min-w-0;
+      }
+
+      .navbar-item-search .plan-search-wrap__input {
+        @apply h-8 min-h-8 text-sm;
+      }
+
+      .plan-search-wrap__icon {
+        @apply h-4 w-4;
+      }
+    }
+  }
+
+  &__tool-sep {
+    @apply h-4 w-px shrink-0 self-center bg-eve-border/70;
+  }
+
+  &__end {
+    @apply ml-auto flex shrink-0 items-center gap-2;
+  }
+
+  &__divider {
+    @apply hidden h-6 w-px bg-eve-border/70 lg:block;
+  }
+
+  &__nav {
+    @apply inline-flex items-center gap-0.5 rounded-lg border border-eve-border/60 bg-base-300/25 p-0.5;
+  }
+
+  &__nav-link {
+    @apply inline-flex items-center rounded-md border border-transparent px-3 py-1.5 text-xs font-medium text-base-content/55 transition-colors;
+    @apply hover:bg-base-200/70 hover:text-base-content;
+
+    &--sm {
+      @apply px-2.5 py-1 text-[11px];
+    }
+
+    &--active {
+      @apply border-primary/30 bg-primary/10 text-primary shadow-sm;
+    }
+  }
+
+  &__auth {
+    .app-navbar__mobile-shell & .btn-ghost.btn-sm {
+      @apply h-9 min-h-9 px-1.5;
+    }
+
+    .btn-ghost.btn-sm {
+      @apply h-8 min-h-8 rounded-lg border border-eve-border/50 bg-base-300/20 px-2;
+    }
+
+    .btn-primary.btn-sm {
+      @apply h-8 min-h-8 rounded-lg px-3 text-xs;
+    }
+  }
+}
+
 .plan-view-tabs {
   @apply overflow-hidden rounded-xl border border-eve-border bg-base-200 shadow-sm;
 
@@ -612,6 +806,10 @@
     @apply inline-flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm font-medium text-base-content/60 transition-colors;
     @apply hover:bg-base-200/70 hover:text-base-content;
 
+    &--sm {
+      @apply px-2.5 py-1.5 text-xs;
+    }
+
     &--active {
       @apply border-primary/30 bg-primary/10 text-primary shadow-sm;
     }
@@ -619,6 +817,204 @@
 
   &__panel {
     @apply p-4 sm:p-5;
+  }
+}
+
+.item-section {
+  &__header {
+    @apply flex flex-col gap-2 border-b border-eve-border/80 bg-base-300/25 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4;
+  }
+
+  &__title {
+    @apply text-sm font-semibold leading-tight tracking-tight;
+  }
+
+  &__subtitle {
+    @apply mt-0.5 text-[11px] leading-snug text-base-content/45;
+  }
+
+  &__actions {
+    @apply flex flex-wrap items-center gap-1.5 shrink-0;
+  }
+
+  &__panel {
+    @apply p-3 sm:p-4;
+  }
+
+  &__metrics {
+    @apply flex flex-wrap items-baseline gap-x-3 gap-y-1 min-w-0;
+  }
+
+  &__block {
+    @apply mt-3 border-t border-eve-border/60 pt-3;
+  }
+}
+
+.item-blueprint-market {
+  &__tab-icon {
+    @apply shrink-0;
+  }
+}
+
+.item-market-history {
+  &__header {
+    @apply mb-2.5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  &__metrics {
+    @apply flex flex-wrap items-baseline gap-x-3 gap-y-1 min-w-0;
+  }
+
+  &__toolbar {
+    @apply flex flex-wrap items-center justify-end gap-1.5 shrink-0;
+  }
+
+  &__legend {
+    @apply mt-2 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] leading-snug text-base-content/55;
+  }
+
+  &__legend-item {
+    @apply flex min-w-0 items-center gap-1.5;
+  }
+
+  &__legend-swatch {
+    @apply shrink-0 rounded-sm;
+
+    &--high {
+      @apply h-0.5 w-3 bg-success/50;
+    }
+
+    &--low {
+      @apply h-0.5 w-3 bg-error/50;
+    }
+
+    &--average {
+      @apply h-0.5 w-3 bg-primary;
+    }
+
+    &--volume {
+      @apply h-2 w-1.5 bg-primary/25;
+    }
+  }
+
+  &__legend-label {
+    @apply font-medium text-base-content/70;
+  }
+
+  &__legend-hint {
+    @apply hidden text-base-content/45 sm:inline;
+  }
+}
+
+.item-market-history__toolbar-wrap {
+  @apply flex justify-end;
+}
+
+.item-chart-wrap {
+  @apply rounded-lg border border-eve-border/60 bg-base-300/20 p-1.5;
+
+  &--compact {
+    @apply h-44;
+  }
+
+  .recharts-cartesian-axis-tick-value {
+    @apply fill-base-content/60;
+  }
+}
+
+.item-data-table {
+  @apply max-h-60 overflow-auto rounded-lg border border-eve-border;
+
+  thead {
+    @apply sticky top-0 z-[1] bg-base-300/95 backdrop-blur-sm;
+  }
+
+  tbody tr:hover {
+    @apply bg-base-300/25;
+  }
+}
+
+.item-recipe-meta {
+  @apply flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-md border border-eve-border/60 bg-base-300/20 px-2.5 py-2 text-xs;
+}
+
+.item-recipe-row {
+  @apply rounded-md border border-eve-border/60 bg-base-300/20 px-2.5 py-1.5 transition-colors;
+
+  &:hover {
+    @apply bg-base-300/35 border-eve-border/80;
+  }
+}
+
+.item-recipe-graph {
+  @apply rounded-md border border-eve-border/60 bg-base-300/20 overflow-hidden;
+
+  &__shell {
+    @apply flex flex-col gap-1.5;
+  }
+
+  &__hint {
+    @apply px-2.5 pt-2 text-[10px] text-base-content/40;
+  }
+
+  &__canvas {
+    @apply w-full min-h-[15rem];
+
+    .react-flow__edges {
+      z-index: 0;
+    }
+
+    .react-flow__nodes {
+      z-index: 1;
+    }
+
+    .react-flow__pane {
+      cursor: grab;
+    }
+
+    .react-flow__pane:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__node {
+    @apply relative z-[2] box-border flex items-center gap-2 h-full w-full overflow-hidden rounded-md border border-eve-border/60 bg-base-200 px-2.5 py-2 shadow-sm;
+
+    &--input {
+      @apply cursor-pointer transition-colors;
+
+      &:hover {
+        @apply bg-base-300 border-eve-border/80;
+      }
+    }
+
+    &--blueprint {
+      @apply cursor-pointer border-info/35 bg-base-200 transition-colors;
+
+      &:hover {
+        @apply bg-info/10 border-info/50;
+      }
+    }
+
+    &--output {
+      @apply border-primary/30 bg-base-200;
+    }
+  }
+}
+
+.item-skill-badge {
+  @apply inline-flex max-w-full items-center gap-1 rounded-full border border-eve-border/70 bg-base-300/30 px-2 py-0.5 text-[11px] leading-none;
+
+  &__icon {
+    @apply size-4 shrink-0 rounded-sm bg-base-300/80;
+  }
+
+  &__name {
+    @apply min-w-0 truncate font-medium text-base-content/80;
+  }
+
+  &__level {
+    @apply shrink-0 font-semibold tabular-nums text-primary;
   }
 }
 
@@ -877,5 +1273,26 @@
 
   &__hint {
     @apply mt-1.5 text-[10px] leading-snug text-base-content/40;
+  }
+
+  &--inline {
+    @apply inline-flex flex-wrap items-baseline gap-x-1.5 gap-y-0 rounded-none border-0 bg-transparent px-0 py-0;
+
+    .plan-profit-metric__label {
+      @apply normal-case tracking-normal text-[11px] text-base-content/50;
+    }
+
+    .plan-profit-metric__value {
+      @apply mt-0 text-sm font-semibold;
+    }
+
+    .plan-profit-metric__hint {
+      @apply mt-0 text-[10px] text-base-content/40;
+    }
+
+    &:not(:last-child)::after {
+      content: '';
+      @apply ml-1.5 hidden h-3 w-px bg-eve-border/70 sm:inline-block;
+    }
   }
 }

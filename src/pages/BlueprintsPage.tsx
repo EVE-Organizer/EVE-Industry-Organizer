@@ -439,7 +439,7 @@ const BlueprintResults = memo(function BlueprintResults({
                 direction={rankingQuery.sortDir}
                 onSort={onSort}
               >
-                <InfoTooltip text="Average daily traded volume for liquidity (batch cap, IPH, filters). With a 1y price window, volume uses the 1m average. Shows — when only spot price is available (run fetch-data for full history)." />
+                <InfoTooltip text="Average daily traded volume for liquidity (batch cap, IPH, filters). With a 1y price window, volume uses the 1m average. Shows — when only spot price is available." />
               </SortableTh>
               <th>Haul risk</th>
               <th></th>

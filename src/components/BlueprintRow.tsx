@@ -4,11 +4,14 @@ import { CopyNameButton } from '@/components/CopyNameButton'
 import { EveImage } from '@/components/EveImage'
 import { BuildSkillGapFlag } from '@/components/BuildSkillGapFlag'
 import { HaulRiskTrigger } from '@/components/HaulRiskModal'
+import { PlanBlueprintItemName } from '@/components/plan/PlanBlueprintItemName'
 import { formatAvgVolume, formatDuration, formatIsk, formatPercent } from '@/lib/profit'
 import { tierLabel } from '@/lib/blueprintGroups'
 import { getMissingBuildSkills } from '@/lib/buildRequirements'
 import type { RouteDangerResult } from '@/lib/routeDanger'
 import { AddToPlanMenu } from '@/components/plan/AddToPlanMenu'
+import { stopRowToggle } from '@/components/plan/PlanTreeLines'
+import { appRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
 
 export interface BlueprintItemProps {
@@ -46,6 +49,26 @@ function BlueprintMetaLine({ row }: { row: RankedBlueprintRow }) {
   )
 }
 
+function BlueprintItemName({
+  row,
+  onOpenGraph,
+}: {
+  row: RankedBlueprintRow
+  onOpenGraph: () => void
+}) {
+  return (
+    <PlanBlueprintItemName
+      node={{
+        productTypeId: row.blueprint.productTypeId,
+        name: row.product.name,
+        canToggle: true,
+        isRoot: true,
+      }}
+      onOpenGraph={() => onOpenGraph()}
+    />
+  )
+}
+
 export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps) {
   const { row, rank, skills, watched, onWatch, onOpenGraph, onOpenSetup, onOpenIph, onOpenHaulRisk, haulIn, haulOut, haulError, dangerLoading } = props
   const missingSkills = getMissingBuildSkills(row.blueprint, skills)
@@ -64,13 +87,12 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
       </td>
       <td>
         <div className="flex items-center gap-1.5 min-w-0">
-          <CopyNameButton text={row.product.name} />
-          <span className={textLinkClass('truncate')}>{row.product.name}</span>
+          <BlueprintItemName row={row} onOpenGraph={onOpenGraph} />
           <BuildSkillGapFlag missing={missingSkills} />
         </div>
         <BlueprintMetaLine row={row} />
       </td>
-      <td className="whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+      <td className="whitespace-nowrap" onClick={stopRowToggle}>
         <button
           type="button"
           className={textLinkClass('tabular-nums')}
@@ -81,7 +103,7 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
         </button>
       </td>
       <td className={row.netProfit >= 0 ? 'text-success' : 'text-error'}>{formatIsk(row.netProfit)}</td>
-      <td className="whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+      <td className="whitespace-nowrap" onClick={stopRowToggle}>
         <button
           type="button"
           className={textLinkClass('tabular-nums')}
@@ -93,7 +115,7 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
       </td>
       <td>{formatPercent(row.margin)}</td>
       <td>{formatAvgVolume(row.avgVolume)}</td>
-      <td onClick={(e) => e.stopPropagation()}>
+      <td onClick={stopRowToggle}>
         <HaulRiskTrigger
           haulIn={haulIn}
           haulOut={haulOut}
@@ -102,7 +124,7 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
           onOpen={onOpenHaulRisk}
         />
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
+      <td onClick={stopRowToggle}>
         <div className="flex items-center gap-0.5">
           <AddToPlanMenu productTypeId={row.blueprint.productTypeId} />
           <button
@@ -157,8 +179,7 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
         <EveImage id={row.blueprint.productTypeId} size={32} framed alt={row.product.name} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 min-w-0">
-            <CopyNameButton text={row.product.name} />
-            <span className={textLinkClass('font-medium text-sm truncate')}>{row.product.name}</span>
+            <BlueprintItemName row={row} onOpenGraph={onOpenGraph} />
             <BuildSkillGapFlag missing={missingSkills} />
           </div>
           <p className="truncate mt-0.5">
@@ -169,21 +190,21 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
           type="button"
           className={`btn btn-ghost btn-xs shrink-0 -mt-1 ${watched ? 'text-primary' : ''}`}
           onClick={(e) => {
-            e.stopPropagation()
+            stopRowToggle(e)
             onWatch()
           }}
           aria-label={watched ? 'Remove from favorites' : 'Add to favorites'}
         >
           {watched ? '★' : '☆'}
         </button>
-        <div className="shrink-0 -mt-1" onClick={(e) => e.stopPropagation()}>
+        <div className="shrink-0 -mt-1" onClick={stopRowToggle}>
           <AddToPlanMenu productTypeId={row.blueprint.productTypeId} />
         </div>
       </div>
 
       <dl
         className="mt-2.5 pt-2.5 border-t border-eve-border/60 grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-2 min-w-0"
-        onClick={(e) => e.stopPropagation()}
+        onClick={stopRowToggle}
       >
         <MobileStat label="Setup">
           <button
@@ -226,6 +247,24 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
   )
 })
 
+function UnrankedItemName({ productTypeId, name }: { productTypeId: number; name: string }) {
+  const marketHref = appRoute(`item/${productTypeId}`)
+  return (
+    <div className="flex items-center gap-0.5 min-w-0">
+      <CopyNameButton text={name} />
+      <a
+        href={marketHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={textLinkClass('truncate')}
+        title={`${name} (market)`}
+      >
+        {name}
+      </a>
+    </div>
+  )
+}
+
 export function BlueprintUnrankedRow({
   productTypeId,
   name,
@@ -246,7 +285,7 @@ export function BlueprintUnrankedRow({
         </div>
       </td>
       <td>
-        <span className="truncate">{name}</span>
+        <UnrankedItemName productTypeId={productTypeId} name={name} />
         <span className="text-[10px] opacity-50 block">No price data for current hub and window</span>
       </td>
       <td>—</td>
@@ -255,7 +294,7 @@ export function BlueprintUnrankedRow({
       <td>—</td>
       <td>—</td>
       <td>—</td>
-      <td onClick={(e) => e.stopPropagation()}>
+      <td>
         <button
           type="button"
           className={`btn btn-ghost btn-xs ${watched ? 'text-primary' : ''}`}
@@ -284,7 +323,7 @@ export function BlueprintUnrankedMobileRow({
       <div className="flex items-center gap-2.5 min-w-0">
         <EveImage id={productTypeId} size={32} framed alt={name} />
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-sm truncate">{name}</h3>
+          <UnrankedItemName productTypeId={productTypeId} name={name} />
           <p className="text-[10px] opacity-50 mt-0.5">No price data for current hub and window</p>
         </div>
         <button

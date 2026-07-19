@@ -91,6 +91,36 @@ function createThrottledUpdater(minMs = 500, minPct = 0.01) {
   }
 }
 
+/**
+ * Update a Listr task title with count progress and ETA.
+ * @param {import('listr2').ListrTask} task
+ * @param {string} label
+ * @param {number} current
+ * @param {number} total
+ * @param {number} startedAt
+ */
+export function updateTaskProgress(task, label, current, total, startedAt) {
+  const eta = estimateEta(Date.now() - startedAt, current, total)
+  task.title = formatProgressTitle(label, current, total, { eta })
+}
+
+/**
+ * Show elapsed time on indeterminate tasks (no countable progress).
+ * @param {import('listr2').ListrTask} task
+ * @param {string} label
+ * @param {number} [intervalMs]
+ * @returns {() => void} stop
+ */
+export function startElapsedTicker(task, label, intervalMs = 1000) {
+  const startedAt = Date.now()
+  const tick = () => {
+    task.title = `${label} · ${formatDuration(Date.now() - startedAt)} elapsed`
+  }
+  tick()
+  const id = setInterval(tick, intervalMs)
+  return () => clearInterval(id)
+}
+
 /** @param {string | null | undefined} hubIds */
 function resolveHubList(hubIds) {
   return hubIds?.length ? hubIds : MARKET_HUB_IDS
@@ -105,9 +135,10 @@ function resolveHubList(hubIds) {
 export function createProgressHandler({ hubIds, skipHistory = false, onEvent }) {
   const throttled = createThrottledUpdater()
   const historyStartedAt = new Map()
+  const pricesStartedAt = new Map()
 
   return function handleProgress(event) {
-    if (event.phase !== 'history') {
+    if (event.phase !== 'history' && event.phase !== 'prices') {
       onEvent(event)
     }
 
@@ -142,6 +173,15 @@ export function createProgressHandler({ hubIds, skipHistory = false, onEvent }) 
 
     if (event.phase === 'history_start') {
       historyStartedAt.set(event.hubId, Date.now())
+    }
+
+    if (event.phase === 'prices') {
+      if (!pricesStartedAt.has(event.hubId)) {
+        pricesStartedAt.set(event.hubId, Date.now())
+      }
+      const started = pricesStartedAt.get(event.hubId) ?? Date.now()
+      event.eta = estimateEta(Date.now() - started, event.current, event.total)
+      throttled(event.current, event.total, () => onEvent(event))
     }
 
     if (event.phase === 'history') {
@@ -238,10 +278,12 @@ export function createMarketBuildTask(ctx, { runBuild, hubIds, skipHistory = fal
     const refs = event.hubId ? taskRefs.get(event.hubId) : null
 
     if (event.phase === 'prices' && refs?.prices) {
-      refs.prices.title = formatProgressTitle(`${event.hubId} · prices`, event.current, event.total)
+      refs.prices.title = formatProgressTitle(`${event.hubId} · prices`, event.current, event.total, {
+        eta: event.eta,
+      })
     }
     if (event.phase === 'prices_done' && refs?.prices) {
-      refs.prices.title = `${event.hubId} · prices · done`
+      refs.prices.title = formatProgressTitle(`${event.hubId} · prices`, event.total, event.total)
       completePhase(event.hubId, 'prices')
     }
     if (event.phase === 'history_start' && refs?.history) {

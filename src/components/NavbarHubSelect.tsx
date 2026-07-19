@@ -24,10 +24,10 @@ export function NavbarHubSelect() {
   }
 
   return (
-    <label className="flex items-center gap-1.5 shrink-0">
-      <span className="text-xs opacity-60 hidden lg:inline">Hub</span>
+    <label className="navbar-hub-select">
+      <span className="navbar-hub-select__label">Hub</span>
       <select
-        className="select select-bordered select-xs min-w-[5.5rem]"
+        className="navbar-hub-select__input select select-xs"
         value={hub}
         onChange={(e) => setHub(e.target.value as HubId)}
         aria-label="Trade hub"

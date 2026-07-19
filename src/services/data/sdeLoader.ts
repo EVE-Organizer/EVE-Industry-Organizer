@@ -2,6 +2,7 @@ import type {
   BlueprintTier,
   BlueprintInfo,
   BlueprintRegistry,
+  ContractsData,
   HubId,
   HubMarketData,
   MarketData,
@@ -19,6 +20,7 @@ export interface SdeData {
   types: TypeInfo[]
   registry: BlueprintRegistry
   market: MarketData
+  contracts: ContractsData
   regions: RegionsData
   skills: SkillInfo[]
   systems: SystemInfo[]
@@ -28,16 +30,27 @@ let cache: SdeData | null = null
 
 export async function loadSdeData(): Promise<SdeData> {
   if (cache) return cache
-  const [typesRaw, registry, market, regions, skills, systems] = await Promise.all([
+  const [typesRaw, registry, market, contracts, regions, skills, systems] = await Promise.all([
     fetch(publicDataUrl('types.json')).then((r) => r.json()),
     fetch(publicDataUrl('blueprints.json')).then((r) => r.json()),
     fetch(publicDataUrl('market.json')).then((r) => r.json()),
+    fetch(publicDataUrl('contracts.json'))
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null),
     fetch(publicDataUrl('regions.json')).then((r) => r.json()),
     fetch(publicDataUrl('skills.json')).then((r) => r.json()),
     fetch(publicDataUrl('systems.json')).then((r) => r.json()),
   ])
   const types: TypeInfo[] = Array.isArray(typesRaw) ? typesRaw : typesRaw.types
-  cache = { types, registry, market, regions, skills, systems }
+  cache = {
+    types,
+    registry,
+    market,
+    contracts: contracts ?? { generatedAt: '', hubs: {} },
+    regions,
+    skills,
+    systems,
+  }
   return cache
 }
 
@@ -230,4 +243,8 @@ export function buildProductGroupTree(
 
 export function buildSkillMap(skills: SkillInfo[]): Map<number, SkillInfo> {
   return new Map(skills.map((s) => [s.skillId, s]))
+}
+
+export function buildSkillNameMap(skills: SkillInfo[]): Map<string, SkillInfo> {
+  return new Map(skills.map((s) => [s.name, s]))
 }

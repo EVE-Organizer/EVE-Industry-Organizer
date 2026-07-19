@@ -2,38 +2,65 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
-import { buildTypeMap, buildPriceMap, getBlueprintForProduct, getBlueprintForBpo, getAllBlueprints, getHubMarket } from '@/services/data/sdeLoader'
+import {
+  buildTypeMap,
+  buildPriceMap,
+  buildBuyPriceMap,
+  buildSkillNameMap,
+  getBlueprintForProduct,
+  getBlueprintForBpo,
+  getAllBlueprints,
+  getHubMarket,
+} from '@/services/data/sdeLoader'
 import { isReactionRecipe } from '@/lib/recipes'
-import { getMarketHistory, getPrice } from '@/services/market/marketService'
-import { filterHistoryByRange, formatIsk, formatDecimal } from '@/lib/profit'
+import { getHubQuotes } from '@/services/market/marketService'
+import { getBpcContracts } from '@/lib/bpcContracts'
+import { formatDecimal, formatIsk } from '@/lib/profit'
 import { tierLabel } from '@/lib/blueprintGroups'
-import type { MarketHistoryEntry, TimeRange } from '@/types'
+import { HUBS } from '@/types'
 import { PageHeader, LoadingState, LastUpdated } from '@/components/Layout'
 import { textLinkClass } from '@/lib/textLink'
 import { EveImage } from '@/components/EveImage'
-import { Panel } from '@/components/Panel'
-import { StatCard } from '@/components/StatCard'
+import { ItemSection } from '@/components/item/ItemSection'
+import { ItemMetric } from '@/components/item/ItemMetric'
+import { ItemBlueprintMarket } from '@/components/item/ItemBlueprintMarket'
+import { ItemMarketHistory } from '@/components/item/ItemMarketHistory'
+import { ItemRecipePanel } from '@/components/item/ItemRecipePanel'
+
+function formatSnapshotAge(iso: string | undefined): string | undefined {
+  if (!iso) return undefined
+  const t = new Date(iso).getTime()
+  if (Number.isNaN(t) || t < 1_000_000_000_000) return undefined
+  const hours = Math.round((Date.now() - t) / (60 * 60 * 1000))
+  if (hours < 1) return 'under 1h ago'
+  if (hours < 48) return `${hours}h ago`
+  const days = Math.round(hours / 24)
+  return `${days}d ago`
+}
 
 export function ItemDetailPage() {
   const { typeId } = useParams()
   const settings = useAppStore((s) => s.userData.settings)
   const { data: sde, isLoading } = useSdeData()
-  const [price, setPrice] = useState<number>()
-  const [priceSource, setPriceSource] = useState<string>()
-  const [priceFetchedAt, setPriceFetchedAt] = useState<number>()
-  const [productPrice, setProductPrice] = useState<number>()
-  const [history, setHistory] = useState<MarketHistoryEntry[]>([])
-  const [historySource, setHistorySource] = useState<string>()
-  const [historyFetchedAt, setHistoryFetchedAt] = useState<number>()
-  const [chartRange, setChartRange] = useState<TimeRange>('1m')
+
+  const [heroSell, setHeroSell] = useState<number>()
+  const [heroBuy, setHeroBuy] = useState<number>()
+  const [productSell, setProductSell] = useState<number>()
+  const [productBuy, setProductBuy] = useState<number>()
+  const [quoteSource, setQuoteSource] = useState<string>()
+  const [quotesFetchedAt, setQuotesFetchedAt] = useState<number>()
   const [loadingLive, setLoadingLive] = useState(true)
 
   const numericId = Number(typeId ?? 0)
+  const hub = settings.primaryHub
+  const hubName = HUBS.find((h) => h.id === hub)?.name ?? hub
 
-  const typeInfo = useMemo(() => {
-    if (!sde) return undefined
-    return buildTypeMap(sde.types).get(numericId)
-  }, [sde, numericId])
+  const typeMap = useMemo(() => (sde ? buildTypeMap(sde.types) : new Map()), [sde])
+  const skillNameMap = useMemo(
+    () => (sde ? buildSkillNameMap(sde.skills) : new Map()),
+    [sde],
+  )
+  const typeInfo = typeMap.get(numericId)
 
   const blueprint = useMemo(() => {
     if (!sde) return undefined
@@ -43,135 +70,186 @@ export function ItemDetailPage() {
 
   const isBpoPage = blueprint?.blueprintTypeId === numericId
   const isReactionFormula = blueprint != null && isReactionRecipe(blueprint) && isBpoPage
-  const historyTypeId = isBpoPage && blueprint ? blueprint.productTypeId : numericId
-  const manufacturedProduct = useMemo(() => {
-    if (!sde || !blueprint) return undefined
-    return buildTypeMap(sde.types).get(blueprint.productTypeId)
-  }, [sde, blueprint])
+  const manufacturedProduct = blueprint ? typeMap.get(blueprint.productTypeId) : undefined
 
-  const staticHubPrice = useMemo(() => {
-    if (!sde) return undefined
-    const hubMarket = getHubMarket(sde.market, settings.primaryHub)
+  const hubMarket = useMemo(() => {
+    if (!sde) return null
+    return getHubMarket(sde.market, hub)
+  }, [sde, hub])
+
+  const staticSell = useMemo(() => {
     if (!hubMarket) return undefined
     return buildPriceMap(hubMarket).get(numericId)
-  }, [sde, settings.primaryHub, numericId])
+  }, [hubMarket, numericId])
+
+  const staticBuy = useMemo(() => {
+    if (!hubMarket) return undefined
+    return buildBuyPriceMap(hubMarket).get(numericId)
+  }, [hubMarket, numericId])
+
+  const bpcSummary = useMemo(() => {
+    if (!sde?.contracts || !blueprint) return null
+    return getBpcContracts(sde.contracts, blueprint.blueprintTypeId, hub)
+  }, [sde, blueprint, hub])
+
+  const snapshotAge = formatSnapshotAge(sde?.contracts?.generatedAt)
 
   useEffect(() => {
     if (!typeId || !typeInfo) return
     let cancelled = false
     setLoadingLive(true)
 
-    ;(async () => {
-      const pricePromise = getPrice(numericId, settings.primaryHub)
-      const historyPromise = getMarketHistory(historyTypeId, settings.primaryHub, 'all')
-      const productPricePromise =
-        isBpoPage && blueprint
-          ? getPrice(blueprint.productTypeId, settings.primaryHub)
-          : Promise.resolve(null)
+    const blueprintTypeId = blueprint?.blueprintTypeId
+    const heroTypeId = isBpoPage && blueprintTypeId ? blueprintTypeId : numericId
 
-      const [priceResult, historyResult, productPriceResult] = await Promise.all([
-        pricePromise,
-        historyPromise,
-        productPricePromise,
-      ])
-      if (cancelled) return
-      setPrice(priceResult.price)
-      setPriceSource(priceResult.source)
-      setPriceFetchedAt(priceResult.fetchedAt)
-      if (productPriceResult) {
-        setProductPrice(productPriceResult.price)
-      } else {
-        setProductPrice(undefined)
+    ;(async () => {
+      const fetches: Promise<{ sell: number; buy: number; source: string; fetchedAt: number }>[] = [
+        getHubQuotes(heroTypeId, hub),
+      ]
+
+      if (isBpoPage && blueprint) {
+        fetches.push(getHubQuotes(blueprint.productTypeId, hub))
+      } else if (blueprint && blueprintTypeId && blueprintTypeId !== numericId) {
+        fetches.push(getHubQuotes(blueprintTypeId, hub))
       }
-      setHistory(historyResult.history)
-      setHistorySource(historyResult.source)
-      setHistoryFetchedAt(historyResult.fetchedAt)
+
+      const results = await Promise.all(fetches)
+      if (cancelled) return
+
+      const heroQuotes = results[0]
+      setHeroSell(heroQuotes.sell)
+      setHeroBuy(heroQuotes.buy)
+      setQuoteSource(heroQuotes.source)
+      setQuotesFetchedAt(heroQuotes.fetchedAt)
+
+      if (isBpoPage && blueprint) {
+        const productQuotes = results[1]
+        setProductSell(productQuotes?.sell)
+        setProductBuy(productQuotes?.buy)
+      } else if (blueprint && results[1]) {
+        setProductSell(heroQuotes.sell)
+        setProductBuy(heroQuotes.buy)
+      } else {
+        setProductSell(heroQuotes.sell)
+        setProductBuy(heroQuotes.buy)
+      }
+
       setLoadingLive(false)
     })()
 
     return () => {
       cancelled = true
     }
-  }, [typeId, typeInfo, numericId, historyTypeId, settings.primaryHub, isBpoPage, blueprint])
+  }, [typeId, typeInfo, numericId, hub, isBpoPage, blueprint])
 
-  const chartHistory = useMemo(
-    () => filterHistoryByRange(history, chartRange),
-    [history, chartRange],
-  )
-
-  const avgPrice = useMemo(() => {
-    if (!chartHistory.length) return 0
-    return chartHistory.reduce((s, h) => s + h.average, 0) / chartHistory.length
-  }, [chartHistory])
-
-  const avgVolume = useMemo(() => {
-    if (!chartHistory.length) return 0
-    return chartHistory.reduce((s, h) => s + h.volume, 0) / chartHistory.length
-  }, [chartHistory])
-
-  const displayPrice = price && price > 0 ? price : (staticHubPrice ?? 0)
+  const displayHeroSell =
+    (heroSell && heroSell > 0 ? heroSell : staticSell) ?? 0
+  const displayHeroBuy =
+    (heroBuy && heroBuy > 0 ? heroBuy : staticBuy) ?? 0
 
   if (isLoading) return <LoadingState />
   if (!typeInfo) return <p className="text-sm opacity-60">Item not found.</p>
+
+  const productMarketTitle = isBpoPage && manufacturedProduct
+    ? `Product market · ${hubName} (${manufacturedProduct.name})`
+    : `Market history · ${hubName}`
 
   return (
     <div>
       <PageHeader
         title={typeInfo.name}
-        subtitle={
+        subtitle={`${
           isReactionFormula
             ? `${typeInfo.group} · Reaction formula`
             : isBpoPage
-            ? `${typeInfo.group} · ${tierLabel(blueprint!.tier)} blueprint`
-            : `${typeInfo.group} · ${typeInfo.category}${blueprint ? ` · ${isReactionRecipe(blueprint) ? 'Reaction product' : `${tierLabel(blueprint.tier)} BPO`}` : ''}`
+              ? `${typeInfo.group} · ${tierLabel(blueprint!.tier)} blueprint`
+              : `${typeInfo.group} · ${typeInfo.category}${blueprint ? ` · ${isReactionRecipe(blueprint) ? 'Reaction product' : `${tierLabel(blueprint.tier)} BPO`}` : ''}`
+        } · Hub: ${hubName}`}
+        icon={
+          <EveImage
+            id={typeInfo.typeId}
+            variant={isBpoPage ? 'bp' : 'icon'}
+            productTypeId={isBpoPage ? blueprint?.productTypeId : undefined}
+            size={56}
+            framed
+            alt={typeInfo.name}
+          />
         }
         action={
-          <LastUpdated
-            fetchedAt={priceFetchedAt ?? historyFetchedAt}
-            source={priceSource ?? historySource}
-          />
+          <LastUpdated fetchedAt={quotesFetchedAt} source={quoteSource} />
         }
       />
 
-      <div className="flex flex-wrap gap-4 mb-6 items-start">
-        <EveImage
-          id={typeInfo.typeId}
-          variant={isBpoPage ? 'bp' : 'icon'}
-          productTypeId={isBpoPage ? blueprint?.productTypeId : undefined}
-          size={64}
-          framed
-          alt={typeInfo.name}
-        />
-        <div className="flex flex-wrap gap-3">
-          <StatCard
-            label={isBpoPage ? (isReactionFormula ? 'Formula hub sell order' : 'BPO hub sell order') : 'Sell price'}
-            value={
-              loadingLive
-                ? '…'
-                : displayPrice > 0
-                  ? formatIsk(displayPrice)
-                  : isBpoPage
-                    ? 'No market orders'
-                    : formatIsk(0)
-            }
-            valueClassName={displayPrice > 0 ? 'text-primary' : undefined}
+      <ItemSection
+        title="Overview"
+        subtitle={`Live quotes and item stats · ${hubName}`}
+        className="mb-6"
+        actions={
+          <>
+            {blueprint ? (
+              <span className="badge badge-primary badge-sm badge-outline border-primary/30 font-normal">
+                {tierLabel(blueprint.tier)}
+              </span>
+            ) : null}
+            <span className="plan-stat-chip">
+              <span className="plan-stat-chip__label">Type ID</span>
+              <span className="plan-stat-chip__value">{typeInfo.typeId}</span>
+            </span>
+          </>
+        }
+      >
+        <dl className="item-section__metrics">
+          <ItemMetric
+            variant="inline"
+            label={isBpoPage ? (isReactionFormula ? 'Formula sell' : 'BPO sell') : 'Hub sell'}
+            hint={hubName}
+            tone={displayHeroSell > 0 ? 'primary' : 'neutral'}
+            value={loadingLive ? '…' : displayHeroSell > 0 ? formatIsk(displayHeroSell) : 'No orders'}
+          />
+          <ItemMetric
+            variant="inline"
+            label={isBpoPage ? (isReactionFormula ? 'Formula buy' : 'BPO buy') : 'Hub buy'}
+            hint={hubName}
+            tone={displayHeroBuy > 0 ? 'info' : 'neutral'}
+            value={loadingLive ? '…' : displayHeroBuy > 0 ? formatIsk(displayHeroBuy) : 'No orders'}
           />
           {isBpoPage && manufacturedProduct ? (
-            <StatCard
-              label="Product hub sell"
-              value={
-                loadingLive
-                  ? '…'
-                  : productPrice && productPrice > 0
-                    ? formatIsk(productPrice)
-                    : formatIsk(0)
-              }
-              valueClassName={productPrice && productPrice > 0 ? 'text-primary' : undefined}
-            />
+            <>
+              <ItemMetric
+                variant="inline"
+                label="Product sell"
+                hint={hubName}
+                tone={(productSell ?? 0) > 0 ? 'primary' : 'neutral'}
+                value={
+                  loadingLive
+                    ? '…'
+                    : (productSell ?? 0) > 0
+                      ? formatIsk(productSell!)
+                      : 'No orders'
+                }
+              />
+              <ItemMetric
+                variant="inline"
+                label="Product buy"
+                hint={hubName}
+                tone={(productBuy ?? 0) > 0 ? 'info' : 'neutral'}
+                value={
+                  loadingLive
+                    ? '…'
+                    : (productBuy ?? 0) > 0
+                      ? formatIsk(productBuy!)
+                      : 'No orders'
+                }
+              />
+            </>
           ) : null}
-          <StatCard label="Volume (m³)" value={formatDecimal(typeInfo.volume, 2)} />
+          <ItemMetric variant="inline" label="Volume" hint="m³" value={formatDecimal(typeInfo.volume, 2)} />
+          {typeInfo.mass != null && typeInfo.mass > 0 ? (
+            <ItemMetric variant="inline" label="Mass" hint="kg" value={formatDecimal(typeInfo.mass, 0)} />
+          ) : null}
           {isBpoPage && manufacturedProduct ? (
-            <StatCard
+            <ItemMetric
+              variant="inline"
               label="Manufactures"
               value={
                 <Link className={textLinkClass('text-primary text-sm')} to={`/item/${blueprint!.productTypeId}`}>
@@ -181,7 +259,8 @@ export function ItemDetailPage() {
             />
           ) : null}
           {blueprint && !isBpoPage ? (
-            <StatCard
+            <ItemMetric
+              variant="inline"
               label={isReactionRecipe(blueprint) ? 'Formula' : 'Blueprint'}
               value={
                 <Link className={textLinkClass('text-primary text-sm')} to={`/item/${blueprint.blueprintTypeId}`}>
@@ -190,85 +269,52 @@ export function ItemDetailPage() {
               }
             />
           ) : null}
-          {blueprint && !isBpoPage ? (
-            <StatCard
-              label="Rankings"
-              value={
-                <Link className={textLinkClass('text-primary text-sm')} to="/blueprints">
-                  View rankings
-                </Link>
-              }
-            />
-          ) : null}
-        </div>
-      </div>
+        </dl>
 
-      <Panel
-        title={isBpoPage ? 'Manufactured item market' : 'Market history'}
-        className="mb-6"
-        actions={
-          <div className="flex gap-1">
-            {(['1d', '1w', '1m', '1y', 'all'] as TimeRange[]).map((r) => (
-              <button
-                key={r}
-                type="button"
-                className={`btn btn-xs ${chartRange === r ? 'btn-secondary' : 'btn-ghost'}`}
-                onClick={() => setChartRange(r)}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
-        }
-      >
-        {isBpoPage && manufacturedProduct ? (
-          <p className="text-sm opacity-60 mb-4">
-            Many BPOs are not on the hub market API, so setup cost stays 0 ISK when there are no
-            sell orders. The chart below is for{' '}
-            <Link className={textLinkClass('text-primary')} to={`/item/${manufacturedProduct.typeId}`}>
-              {manufacturedProduct.name}
-            </Link>
-            , not this blueprint.
-          </p>
-        ) : null}
-        {loadingLive ? (
-          <LoadingState />
-        ) : chartHistory.length === 0 ? (
-          <p className="text-sm opacity-60">No history for this window.</p>
-        ) : (
-          <>
-            <div className="flex gap-4 text-sm mb-4">
-              <span>Avg price: {formatIsk(avgPrice)}</span>
-              <span>Avg volume: {formatDecimal(avgVolume, 1)}/day</span>
-              <span>{chartHistory.length} days</span>
-            </div>
-            <div className="overflow-x-auto max-h-80">
-              <table className="table table-compact w-full">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Avg</th>
-                    <th>High</th>
-                    <th>Low</th>
-                    <th>Volume</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...chartHistory].reverse().slice(0, 60).map((row) => (
-                    <tr key={row.date}>
-                      <td>{row.date}</td>
-                      <td>{formatIsk(row.average)}</td>
-                      <td>{formatIsk(row.highest)}</td>
-                      <td>{formatIsk(row.lowest)}</td>
-                      <td>{row.volume}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </Panel>
+        <div className="item-section__block">
+          {typeInfo.description ? (
+            <p className="text-sm leading-relaxed text-base-content/80 whitespace-pre-wrap">{typeInfo.description}</p>
+          ) : (
+            <p className="text-sm text-base-content/50">No description available.</p>
+          )}
+        </div>
+      </ItemSection>
+
+      {blueprint && manufacturedProduct ? (
+        <ItemRecipePanel
+          blueprint={blueprint}
+          typeMap={typeMap}
+          skillNameMap={skillNameMap}
+          productName={manufacturedProduct.name}
+          className="mb-6"
+        />
+      ) : (
+        <ItemSection title="Industry" className="mb-6">
+          <p className="text-sm text-base-content/50">No manufacturing recipe in this app.</p>
+        </ItemSection>
+      )}
+
+      {blueprint ? (
+        <ItemBlueprintMarket
+          blueprintTypeId={blueprint.blueprintTypeId}
+          productTypeId={blueprint.productTypeId}
+          hub={hub}
+          hubName={hubName}
+          bpcSummary={bpcSummary}
+          snapshotAge={snapshotAge}
+          className="mb-6"
+        />
+      ) : null}
+
+      {(isBpoPage && blueprint) || !isBpoPage ? (
+        <ItemMarketHistory
+          title={productMarketTitle}
+          typeId={isBpoPage && blueprint ? blueprint.productTypeId : numericId}
+          hub={hub}
+          className="mb-6"
+          emptyHint={`No hub market history in ${hubName}.`}
+        />
+      ) : null}
     </div>
   )
 }
