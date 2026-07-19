@@ -26,9 +26,19 @@ export function PlanTimelinePanel({
     [jobs, nodes, slots, windowHours],
   )
   const [focusedSlotIndex, setFocusedSlotIndex] = useState<number | null>(null)
+  const focusedLaneId = focusedSlotIndex != null ? `slot-${focusedSlotIndex}` : null
 
   const handleSelectSlot = useCallback((slotIndex: number) => {
     setFocusedSlotIndex((prev) => (prev === slotIndex ? null : slotIndex))
+  }, [])
+
+  const handleFocusedLaneChange = useCallback((laneId: string | null) => {
+    if (laneId == null) {
+      setFocusedSlotIndex(null)
+      return
+    }
+    const match = /^slot-(\d+)$/.exec(laneId)
+    if (match) setFocusedSlotIndex(Number(match[1]))
   }, [])
 
   const formatTick = useCallback(
@@ -105,6 +115,8 @@ export function PlanTimelinePanel({
         formatBarRange={formatBarRange}
         formatBarMeta={formatBarMeta}
         blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+        focusedLaneId={focusedLaneId}
+        onFocusedLaneChange={handleFocusedLaneChange}
         title="Job schedule"
       />
     </>
