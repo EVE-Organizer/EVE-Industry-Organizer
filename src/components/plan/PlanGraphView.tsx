@@ -178,14 +178,25 @@ function PlanFlowNode({ data }: { data: PlanFlowNodeData }) {
 
         <div className="text-[10px] tabular-nums leading-snug opacity-70 shrink-0">
           <p>
-            Need <span className="font-medium text-base-content">{formatGraphQuantity(node.totalDemandQty)}</span>
-            {node.mode === 'build' ? (
+            {node.isRoot ? (
+              node.mode === 'build' ? (
+                <>
+                  <span className="font-medium text-base-content">{formatGraphQuantity(node.outputQty)}</span>
+                  <span className="opacity-70"> out</span>
+                </>
+              ) : null
+            ) : (
               <>
-                {' · '}
-                <span className="font-medium text-base-content">{formatGraphQuantity(node.outputQty)}</span>
-                <span className="opacity-70"> out</span>
+                Need <span className="font-medium text-base-content">{formatGraphQuantity(node.totalDemandQty)}</span>
+                {node.mode === 'build' ? (
+                  <>
+                    {' · '}
+                    <span className="font-medium text-base-content">{formatGraphQuantity(node.outputQty)}</span>
+                    <span className="opacity-70"> out</span>
+                  </>
+                ) : null}
               </>
-            ) : null}
+            )}
           </p>
           {node.mode === 'build' && (
             <p>

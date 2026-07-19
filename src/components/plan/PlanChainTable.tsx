@@ -512,11 +512,11 @@ function BuildSection({
                   />
                 </td>
               <td className="text-right tabular-nums text-sm align-top py-2">
-                {formatGraphQuantity(node.totalDemandQty)}
+                <NeedQtyCell node={node} />
               </td>
               <td className="text-right tabular-nums text-sm align-top py-2">
                 {formatGraphQuantity(node.outputQty)}
-                {node.outputQty > node.totalDemandQty ? (
+                {!node.isRoot && node.outputQty > node.totalDemandQty ? (
                   <span className="block text-[10px] text-success opacity-80">
                     +{formatGraphQuantity(node.outputQty - node.totalDemandQty)} spare
                   </span>
@@ -547,6 +547,21 @@ function BuildSection({
       </table>
     </PlanChainSection>
   )
+}
+
+function NeedQtyCell({
+  node,
+  qty,
+  hidden,
+}: {
+  node?: PlanNode
+  qty?: number
+  hidden?: boolean
+}) {
+  if (hidden || node?.isRoot) {
+    return <span className="text-sm opacity-40">—</span>
+  }
+  return <>{formatGraphQuantity(qty ?? node?.totalDemandQty ?? 0)}</>
 }
 
 function InventoryQtyCell({
@@ -654,7 +669,13 @@ function BuyTableRow({
           </div>
         </td>
         <td className={`${UNIT_COL_CLASS} tabular-nums text-sm align-top py-2`}>
-          {formatGraphQuantity(row.totalQty)}
+          <NeedQtyCell
+            qty={row.totalQty}
+            hidden={
+              row.parentProductTypeId != null &&
+              nodesById.get(row.parentProductTypeId)?.isRoot === true
+            }
+          />
         </td>
         <td className={`${HAVE_COL_CLASS} align-top py-2`} />
         <td className={`${TOBUY_COL_CLASS} align-top py-2`} />
@@ -688,7 +709,7 @@ function BuyTableRow({
           </div>
         </td>
         <td className={`${UNIT_COL_CLASS} tabular-nums text-sm align-top py-2`}>
-          {formatGraphQuantity(row.node.totalDemandQty)}
+          <NeedQtyCell node={row.node} />
         </td>
         <td className={`${HAVE_COL_CLASS} align-top py-2`}>
           <HaveQtyCell
@@ -728,7 +749,7 @@ function BuyTableRow({
         />
       </td>
       <td className={`${UNIT_COL_CLASS} tabular-nums text-sm align-top py-2`}>
-        {formatGraphQuantity(row.node.totalDemandQty)}
+        <NeedQtyCell node={row.node} />
       </td>
       <td className={`${HAVE_COL_CLASS} align-top py-2`}>
         <HaveQtyCell have={have} showInventory={showInventory} />
