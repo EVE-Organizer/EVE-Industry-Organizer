@@ -118,6 +118,25 @@ export function formatGraphQuantity(value: number): string {
   return `x${formatNumber(value, 0)}`
 }
 
+/** Compact cargo volume (m³) with K/M/B suffixes. */
+export function formatVolumeM3(value: number): string {
+  if (!Number.isFinite(value) || value <= 0) return '—'
+  const abs = Math.abs(value)
+  if (abs >= 1_000_000_000) {
+    return `${formatDecimal(value / 1_000_000_000, 2)}B m³`
+  }
+  if (abs >= 1_000_000) {
+    return `${formatDecimal(value / 1_000_000, 2)}M m³`
+  }
+  if (abs >= 1_000) {
+    return `${formatNumber(value / 1_000, 1)}K m³`
+  }
+  if (abs >= 100) {
+    return `${formatDecimal(value, 1)} m³`
+  }
+  return `${formatDecimal(value, 2)} m³`
+}
+
 /** Production graph nodes: `4.7k ISK` (lowercase suffix, explicit ISK). */
 export function formatGraphUnitIsk(value: number): string {
   if (!Number.isFinite(value) || value <= 0) return '—'

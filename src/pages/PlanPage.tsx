@@ -237,6 +237,13 @@ export function PlanPage() {
 
   const blueprints = useMemo(() => (data ? getAllBlueprints(data.registry) : []), [data])
   const typeMap = useMemo(() => (data ? buildTypeMap(data.types) : new Map()), [data])
+  const typeVolumes = useMemo(() => {
+    const map = new Map<number, number>()
+    for (const [typeId, type] of typeMap) {
+      map.set(typeId, type.volume)
+    }
+    return map
+  }, [typeMap])
   const prices = useMemo(() => {
     if (!data) return new Map<number, number>()
     const hubMarket = getHubMarket(data.market, activeSettings.primaryHub)
@@ -980,6 +987,7 @@ export function PlanPage() {
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}
                 warnings={plan.warnings}
                 inventoryByTypeId={locationInventory ?? null}
+                typeVolumes={typeVolumes}
               />
             ) : null}
 

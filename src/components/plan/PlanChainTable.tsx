@@ -18,7 +18,8 @@ import { planBuildVsBuyFootnote } from '@/lib/planBuildVsBuy'
 import { SHARED_MATERIALS_ICON_TYPE_ID } from '@/lib/eveImages'
 import { PlanBlueprintItemName } from '@/components/plan/PlanBlueprintItemName'
 import { supplySlotsForComponent } from '@/lib/supplyChainSlots'
-import { formatDecimal, formatDurationHms, formatGraphQuantity, formatIsk } from '@/lib/profit'
+import { nodeHaulInVolumeM3, nodeHaulOutVolumeM3 } from '@/lib/planHaulVolume'
+import { formatDecimal, formatDurationHms, formatGraphQuantity, formatIsk, formatVolumeM3 } from '@/lib/profit'
 import type { ManufactureDisplayRow } from '@/lib/planManufactureDisplay'
 import type { PlanNode, PlanRootEntry } from '@/types'
 
@@ -30,6 +31,15 @@ const PRICE_COL_CLASS = 'w-32 text-right'
 const SOURCE_COL_CLASS = 'w-28 text-right'
 const DURATION_COL_CLASS = 'w-[6.5rem] text-right whitespace-nowrap'
 const SLOTS_COL_CLASS = 'w-[3.5rem] min-w-[3rem] text-right'
+const VOLUME_COL_CLASS = 'w-[4.5rem] text-right whitespace-nowrap'
+
+function VolumeCell({ m3 }: { m3: number }) {
+  if (m3 <= 0) {
+    return <span className="text-sm opacity-40">—</span>
+  }
+
+  return <span className="tabular-nums text-sm">{formatVolumeM3(m3)}</span>
+}
 
 function ConcurrentSlotsCell({
   isRoot,
@@ -174,6 +184,7 @@ interface PlanChainTableProps {
   blueprintTypeIdByProduct: Map<number, number>
   warnings?: { productTypeId: number; message: string }[]
   inventoryByTypeId?: Map<number, number> | null
+  typeVolumes: Map<number, number>
 }
 
 function ChevronIcon({ open }: { open: boolean }) {
@@ -394,6 +405,7 @@ function BuildSection({
   onOpenGraph,
   onOpenMeTe,
   blueprintTypeIdByProduct,
+  typeVolumes,
 }: {
   nodes: PlanNode[]
   manufactureRows?: ManufactureDisplayRow[]
@@ -403,6 +415,7 @@ function BuildSection({
   onOpenGraph: (productTypeId: number) => void
   onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
+  typeVolumes: Map<number, number>
 }) {
   const tableRows = useMemo(
     () => manufactureRows ?? flattenPlanNodesExpandable(nodes, 'manufacture'),
@@ -436,12 +449,20 @@ function BuildSection({
 
   const visibleRows = tableRows.filter((row) => isExpandableRowVisible(row, collapsed))
 
+  const totalHaulOutM3 = useMemo(
+    () =>
+      tableRows
+        .filter((row) => row.kind === 'leaf' && row.node.isRoot)
+        .reduce((sum, row) => sum + nodeHaulOutVolumeM3(row.node, typeVolumes), 0),
+    [tableRows, typeVolumes],
+  )
+
   return (
     <PlanChainSection
       tone="manufacture"
       title="Manufacture"
       count={rootCount}
-      summary={`${formatDecimal(totalRuns, 0)} total runs`}
+      summary={`${formatDecimal(totalRuns, 0)} total runs · ${formatVolumeM3(totalHaulOutM3)} haul out`}
       actions={
         <PlanSectionExpandActions onExpandAll={expandAll} onCollapseAll={collapseAll} />
       }
@@ -477,6 +498,11 @@ function BuildSection({
             <th className={DURATION_COL_CLASS}>
               <Tooltip text="Total job duration (hours:minutes:seconds)" placement="top">
                 <span className="cursor-help border-b border-dotted border-current/40">Duration</span>
+              </Tooltip>
+            </th>
+            <th className={VOLUME_COL_CLASS}>
+              <Tooltip text="Output cargo volume (output × item m³)" placement="top">
+                <span className="cursor-help border-b border-dotted border-current/40">Volume</span>
               </Tooltip>
             </th>
             <th className="w-[6.5rem] text-right">Source</th>
@@ -536,6 +562,9 @@ function BuildSection({
               </td>
               <td className={`${DURATION_COL_CLASS} tabular-nums text-sm text-info align-top py-2`}>
                 {node.jobTimeSeconds > 0 ? formatDurationHms(node.jobTimeSeconds) : '—'}
+              </td>
+              <td className={`${VOLUME_COL_CLASS} align-top py-2`}>
+                <VolumeCell m3={nodeHaulOutVolumeM3(node, typeVolumes)} />
               </td>
               <td className="text-right align-top py-2">
                 <ModeCell node={node} onToggleMode={onToggleMode} />
@@ -618,6 +647,8 @@ function BuyTableRow({
   nodesById,
   inventoryByTypeId,
   showInventory,
+  typeVolumes,
+  groupHaulVolumeM3,
 }: {
   row: PlanBuyTableRow
   expanded: boolean
@@ -629,6 +660,8 @@ function BuyTableRow({
   nodesById: Map<number, PlanNode>
   inventoryByTypeId?: Map<number, number> | null
   showInventory: boolean
+  typeVolumes: Map<number, number>
+  groupHaulVolumeM3: Map<string, number>
 }) {
   if (row.kind === 'group') {
     return (
@@ -682,6 +715,9 @@ function BuyTableRow({
         <td className={`${PRICE_COL_CLASS} tabular-nums text-sm align-top py-2 pr-1`}>
           {row.totalCost > 0 ? formatIsk(row.totalCost) : <span className="opacity-40">—</span>}
         </td>
+        <td className={`${VOLUME_COL_CLASS} align-top py-2`}>
+          <VolumeCell m3={groupHaulVolumeM3.get(row.key) ?? 0} />
+        </td>
         <td className={`${SOURCE_COL_CLASS} align-top py-2 pr-2`} />
       </tr>
     )
@@ -727,6 +763,7 @@ function BuyTableRow({
         <td className={`${PRICE_COL_CLASS} align-top py-2 pr-1`}>
           <PriceCell node={row.node} />
         </td>
+        <td className={`${VOLUME_COL_CLASS} align-top py-2`} />
         <td className={`${SOURCE_COL_CLASS} align-top py-2 pr-2`}>
           <ModeCell node={row.node} onToggleMode={onToggleMode} />
         </td>
@@ -735,6 +772,7 @@ function BuyTableRow({
   }
 
   const have = inventoryByTypeId?.get(row.node.productTypeId) ?? 0
+  const haulInM3 = nodeHaulInVolumeM3(row.node, have, showInventory, typeVolumes)
 
   return (
     <tr className={planTableRowClass(false)}>
@@ -764,6 +802,9 @@ function BuyTableRow({
       <td className={`${PRICE_COL_CLASS} align-top py-2 pr-1`}>
         <PriceCell node={row.node} />
       </td>
+      <td className={`${VOLUME_COL_CLASS} align-top py-2`}>
+        <VolumeCell m3={haulInM3} />
+      </td>
       <td className={`${SOURCE_COL_CLASS} align-top py-2 pr-2`}>
         <ModeCell node={row.node} onToggleMode={onToggleMode} />
       </td>
@@ -779,6 +820,7 @@ function BuySection({
   blueprintTypeIdByProduct,
   inventoryByTypeId,
   showInventory,
+  typeVolumes,
 }: {
   allNodes: PlanNode[]
   buyNodes: PlanNode[]
@@ -787,11 +829,26 @@ function BuySection({
   blueprintTypeIdByProduct: Map<number, number>
   inventoryByTypeId?: Map<number, number> | null
   showInventory: boolean
+  typeVolumes: Map<number, number>
 }) {
-  const tableRows = useMemo(() => {
-    const groups = buildBuyGroups(allNodes, buyNodes)
-    return buildBuyTableRows(groups, allNodes)
-  }, [allNodes, buyNodes])
+  const buyGroups = useMemo(() => buildBuyGroups(allNodes, buyNodes), [allNodes, buyNodes])
+
+  const tableRows = useMemo(
+    () => buildBuyTableRows(buyGroups, allNodes),
+    [buyGroups, allNodes],
+  )
+
+  const groupHaulVolumeM3 = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const group of buyGroups) {
+      const volume = group.nodes.reduce((sum, node) => {
+        const have = inventoryByTypeId?.get(node.productTypeId) ?? 0
+        return sum + nodeHaulInVolumeM3(node, have, showInventory, typeVolumes)
+      }, 0)
+      map.set(group.key, volume)
+    }
+    return map
+  }, [buyGroups, inventoryByTypeId, showInventory, typeVolumes])
 
   const nodesById = useMemo(() => new Map(allNodes.map((n) => [n.productTypeId, n])), [allNodes])
 
@@ -828,6 +885,15 @@ function BuySection({
     [buyNodes],
   )
 
+  const totalHaulInM3 = useMemo(
+    () =>
+      buyNodes.reduce((sum, node) => {
+        const have = inventoryByTypeId?.get(node.productTypeId) ?? 0
+        return sum + nodeHaulInVolumeM3(node, have, showInventory, typeVolumes)
+      }, 0),
+    [buyNodes, inventoryByTypeId, showInventory, typeVolumes],
+  )
+
   function rowExpanded(row: PlanBuyTableRow): boolean {
     if (row.kind === 'group') return !collapsed.has(row.key)
     if (row.kind === 'parent') return !collapsed.has(row.collapseKey)
@@ -845,7 +911,7 @@ function BuySection({
       tone="buy"
       title="Buy from market"
       count={buyNodes.length}
-      summary={`${formatGraphQuantity(totalUnits)} units · ${formatIsk(buyTotal)} total`}
+      summary={`${formatGraphQuantity(totalUnits)} units · ${formatVolumeM3(totalHaulInM3)} haul in · ${formatIsk(buyTotal)} total`}
       actions={
         <PlanSectionExpandActions onExpandAll={expandAll} onCollapseAll={collapseAll} />
       }
@@ -874,6 +940,11 @@ function BuySection({
                 <span className="cursor-help border-b border-dotted border-current/40">Price</span>
               </Tooltip>
             </th>
+            <th className={VOLUME_COL_CLASS}>
+              <Tooltip text="Cargo volume hauled from hub to build location (to buy × item m³)" placement="top">
+                <span className="cursor-help border-b border-dotted border-current/40">Volume</span>
+              </Tooltip>
+            </th>
             <th className={`${SOURCE_COL_CLASS} pr-2`}>Source</th>
           </tr>
         </thead>
@@ -890,6 +961,8 @@ function BuySection({
               nodesById={nodesById}
               inventoryByTypeId={inventoryByTypeId}
               showInventory={showInventory}
+              typeVolumes={typeVolumes}
+              groupHaulVolumeM3={groupHaulVolumeM3}
             />
           ))}
         </tbody>
@@ -902,6 +975,9 @@ function BuySection({
             <td className={HAVE_COL_CLASS} />
             <td className={TOBUY_COL_CLASS} />
             <td className={`${PRICE_COL_CLASS} tabular-nums py-2 pr-1`}>{formatIsk(buyTotal)}</td>
+            <td className={`${VOLUME_COL_CLASS} tabular-nums py-2`}>
+              {formatVolumeM3(totalHaulInM3)}
+            </td>
             <td className={SOURCE_COL_CLASS} />
           </tr>
         </tfoot>
@@ -921,6 +997,7 @@ export function PlanChainTable({
   blueprintTypeIdByProduct,
   warnings = [],
   inventoryByTypeId = null,
+  typeVolumes,
 }: PlanChainTableProps) {
   const buildNodes = useMemo(() => nodes.filter((n) => n.mode === 'build'), [nodes])
   const buyNodes = useMemo(() => nodes.filter((n) => n.mode === 'buy'), [nodes])
@@ -952,6 +1029,7 @@ export function PlanChainTable({
           onOpenGraph={onOpenGraph}
           onOpenMeTe={onOpenMeTe}
           blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+          typeVolumes={typeVolumes}
         />
       ) : null}
 
@@ -964,6 +1042,7 @@ export function PlanChainTable({
           blueprintTypeIdByProduct={blueprintTypeIdByProduct}
           inventoryByTypeId={inventoryByTypeId}
           showInventory={showInventory}
+          typeVolumes={typeVolumes}
         />
       ) : null}
 

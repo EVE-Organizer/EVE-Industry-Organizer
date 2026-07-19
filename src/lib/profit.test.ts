@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { MarketHistoryEntry } from '@/types'
-import { filterHistoryByRange, formatDuration, formatDurationHms, formatGraphQuantity, formatGraphUnitIsk, formatIsk, formatIskInputUnit, parseDurationHms, parseIskInputUnit, trimHistoryByDays } from '@/lib/profit'
+import { filterHistoryByRange, formatDuration, formatDurationHms, formatGraphQuantity, formatGraphUnitIsk, formatIsk, formatIskInputUnit, formatVolumeM3, parseDurationHms, parseIskInputUnit, trimHistoryByDays } from '@/lib/profit'
 
 function historyEntry(date: string, average = 100): MarketHistoryEntry {
   return { date, average, highest: average, lowest: average, volume: 10, orderCount: 3 }
@@ -49,6 +49,17 @@ describe('formatGraphQuantity', () => {
   it('prefixes quantity with x and comma-groups thousands', () => {
     expect(formatGraphQuantity(1552)).toBe('x1,552')
     expect(formatGraphQuantity(1)).toBe('x1')
+  })
+})
+
+describe('formatVolumeM3', () => {
+  it('uses compact K/M/B suffixes for large cargo volumes', () => {
+    expect(formatVolumeM3(12.34)).toBe('12.34 m³')
+    expect(formatVolumeM3(456.7)).toBe('456.7 m³')
+    expect(formatVolumeM3(12_345)).toBe('12.3K m³')
+    expect(formatVolumeM3(2_500_000)).toBe('2.50M m³')
+    expect(formatVolumeM3(3_400_000_000)).toBe('3.40B m³')
+    expect(formatVolumeM3(0)).toBe('—')
   })
 })
 
