@@ -818,17 +818,17 @@ export function PlanChainTable({
   blueprintTypeIdByProduct,
   warnings = [],
 }: PlanChainTableProps) {
-  if (nodes.length === 0) {
-    return <p className="text-sm opacity-60">Add roots to expand the chain.</p>
-  }
-
-  const buildNodes = nodes.filter((n) => n.mode === 'build')
-  const buyNodes = nodes.filter((n) => n.mode === 'buy')
+  const buildNodes = useMemo(() => nodes.filter((n) => n.mode === 'build'), [nodes])
+  const buyNodes = useMemo(() => nodes.filter((n) => n.mode === 'buy'), [nodes])
   const packagedBuyNodes = useMemo(() => packagedBuyNodesFromPlan(nodes), [nodes])
   const allBuyNodes = useMemo(
     () => [...buyNodes, ...packagedBuyNodes],
     [buyNodes, packagedBuyNodes],
   )
+
+  if (nodes.length === 0) {
+    return <p className="text-sm opacity-60">Add roots to expand the chain.</p>
+  }
 
   return (
     <div className="flex flex-col gap-4">

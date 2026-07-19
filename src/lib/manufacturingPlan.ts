@@ -65,6 +65,35 @@ function modeOverridesMap(template: ManufacturingPlanTemplate): Map<number, Plan
   return new Map(Object.entries(template.modeOverrides).map(([k, v]) => [Number(k), v]))
 }
 
+export type BuildCostCache = Map<string, number>
+
+export function createBuildCostCache(): BuildCostCache {
+  return new Map()
+}
+
+function buildCostCacheKey(productTypeId: number, runs: number, depth: number): string {
+  return `${productTypeId}\0${runs}\0${depth}`
+}
+
+function cachedBuildCost(
+  cache: BuildCostCache | undefined,
+  productTypeId: number,
+  runs: number,
+  depth: number,
+): number | undefined {
+  return cache?.get(buildCostCacheKey(productTypeId, runs, depth))
+}
+
+function storeBuildCost(
+  cache: BuildCostCache | undefined,
+  productTypeId: number,
+  runs: number,
+  depth: number,
+  cost: number,
+): void {
+  cache?.set(buildCostCacheKey(productTypeId, runs, depth), cost)
+}
+
 /** Datacores and T1 copies needed to invent T2 BPCs for `runs` manufacturing runs. */
 function computeInventionPrereqCost(
   blueprint: BlueprintInfo,
@@ -80,6 +109,7 @@ function computeInventionPrereqCost(
   nodeMap: Map<number, NodeAccum>,
   depth: number,
   maxDepth: number,
+  cache?: BuildCostCache,
 ): number {
   const inv = blueprint.invention
   if (!inv || blueprint.tier !== 't2') return 0
@@ -116,6 +146,7 @@ function computeInventionPrereqCost(
     nodeMap,
     depth + 1,
     maxDepth,
+    cache,
   )
   const buyCost = (prices.get(t1Bp.productTypeId) ?? 0) * t1Runs
   const override = modeOverrides.get(t1Bp.productTypeId)
@@ -140,7 +171,11 @@ export function computePlanBuildCostForRuns(
   nodeMap: Map<number, NodeAccum>,
   depth: number,
   maxDepth: number,
+  cache?: BuildCostCache,
 ): number {
+  const cached = cachedBuildCost(cache, blueprint.productTypeId, runs, depth)
+  if (cached !== undefined) return cached
+
   const { me } = resolveBlueprintMeTe(
     blueprint.tier,
     settings,
@@ -197,6 +232,7 @@ export function computePlanBuildCostForRuns(
       nodeMap,
       depth + 1,
       maxDepth,
+      cache,
     )
     const mode: PlanBuildMode = override ?? (subBuildCost <= buyCost ? 'build' : 'buy')
     childBuild += mode === 'build' ? subBuildCost : buyCost
@@ -216,9 +252,12 @@ export function computePlanBuildCostForRuns(
     nodeMap,
     depth,
     maxDepth,
+    cache,
   )
 
-  return childBuild + (buildTotal - buyTotal) + inventionCost
+  const total = childBuild + (buildTotal - buyTotal) + inventionCost
+  storeBuildCost(cache, blueprint.productTypeId, runs, depth, total)
+  return total
 }
 
 function ensureNode(
@@ -270,6 +309,7 @@ function expandInventionPrereqs(
   nodeMap: Map<number, NodeAccum>,
   modeOverrides: Map<number, PlanBuildMode>,
   maxDepth: number,
+  cache: BuildCostCache,
 ): void {
   const inv = blueprint.invention
   if (!inv || blueprint.tier !== 't2') return
@@ -314,6 +354,7 @@ function expandInventionPrereqs(
     nodeMap,
     parentNode.depth + 1,
     maxDepth,
+    cache,
   )
   const unitPrice = prices.get(t1Bp.productTypeId) ?? 0
   const buyCost = unitPrice * t1Runs
@@ -326,7 +367,7 @@ function expandInventionPrereqs(
   parentNode.childProductTypeIds.add(t1Bp.productTypeId)
 
   if (mode === 'build') {
-    expandMaterials(t1Bp, t1Runs, blueprint.productTypeId, parentNode.depth + 1, input, nodeMap, modeOverrides, maxDepth)
+    expandMaterials(t1Bp, t1Runs, blueprint.productTypeId, parentNode.depth + 1, input, nodeMap, modeOverrides, maxDepth, cache)
   } else {
     child.isLeaf = true
   }
@@ -341,6 +382,7 @@ function expandMaterials(
   nodeMap: Map<number, NodeAccum>,
   modeOverrides: Map<number, PlanBuildMode>,
   maxDepth: number,
+  cache: BuildCostCache,
 ): void {
   const { settings, blueprints, typeMap, prices, systemCostIndex, reactionCostIndex, template } = input
   const { me } = resolveBlueprintMeTe(
@@ -355,7 +397,7 @@ function expandMaterials(
   const parentNode = ensureNode(nodeMap, blueprint.productTypeId, typeMap, blueprint)
 
   if (blueprint.tier === 't2' && blueprint.invention) {
-    expandInventionPrereqs(blueprint, runs, input, nodeMap, modeOverrides, maxDepth)
+    expandInventionPrereqs(blueprint, runs, input, nodeMap, modeOverrides, maxDepth, cache)
   }
 
   for (const mat of mats) {
@@ -402,6 +444,7 @@ function expandMaterials(
       nodeMap,
       depth + 1,
       maxDepth,
+      cache,
     )
     const forceBuild = input.template.nodeOverrides[mat.typeId]?.forceInclude
     const mode: PlanBuildMode =
@@ -413,7 +456,7 @@ function expandMaterials(
     parentNode.childProductTypeIds.add(mat.typeId)
 
     if (mode === 'build') {
-      expandMaterials(subBp, subRuns, blueprint.productTypeId, depth + 1, input, nodeMap, modeOverrides, maxDepth)
+      expandMaterials(subBp, subRuns, blueprint.productTypeId, depth + 1, input, nodeMap, modeOverrides, maxDepth, cache)
     } else {
       child.isLeaf = true
     }
@@ -427,6 +470,7 @@ function finalizeNodes(
   slots: number,
   input: ExpandPlanInput,
   modeOverrides: Map<number, PlanBuildMode>,
+  cache: BuildCostCache,
 ): PlanNode[] {
   const { blueprints, typeMap, prices, systemCostIndex, reactionCostIndex } = input
   const nodes: PlanNode[] = []
@@ -511,6 +555,7 @@ function finalizeNodes(
         nodeMap,
         accum.depth,
         10,
+        cache,
       )
       savings = buyCost - buildCost
       recommendedMode = buildCost <= buyCost ? 'build' : 'buy'
@@ -557,8 +602,10 @@ export function computePlanRootBuildCost(
   blueprint: BlueprintInfo,
   runs: number,
   input: ExpandPlanInput,
+  cache?: BuildCostCache,
 ): number {
   const modeOverrides = modeOverridesMap(input.template)
+  const costCache = cache ?? createBuildCostCache()
   return computePlanBuildCostForRuns(
     blueprint,
     runs,
@@ -573,6 +620,7 @@ export function computePlanRootBuildCost(
     new Map(),
     0,
     10,
+    costCache,
   )
 }
 
@@ -581,6 +629,7 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
   const modeOverrides = modeOverridesMap(template)
   const nodeMap = new Map<number, NodeAccum>()
   const slots = manufacturingSlotsFromSkills(settings.skills)
+  const buildCostCache = createBuildCostCache()
 
   for (const root of template.roots) {
     const blueprint = getBlueprintForProduct(input.blueprints, root.productTypeId)
@@ -592,7 +641,7 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
     node.isLeaf = false
     node.depth = 0
 
-    expandMaterials(blueprint, root.runs, root.productTypeId, 0, input, nodeMap, modeOverrides, 10)
+    expandMaterials(blueprint, root.runs, root.productTypeId, 0, input, nodeMap, modeOverrides, 10, buildCostCache)
   }
 
   const windowFromRoots = template.roots.reduce((m, r) => {
@@ -610,7 +659,7 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
   const windowHours = Math.max(windowFromRoots, 1)
 
   return {
-    nodes: finalizeNodes(nodeMap, template, settings, slots, input, modeOverrides),
+    nodes: finalizeNodes(nodeMap, template, settings, slots, input, modeOverrides, buildCostCache),
     slots,
     windowHours,
   }

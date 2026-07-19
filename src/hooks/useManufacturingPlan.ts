@@ -7,6 +7,11 @@ import { simulatePlanFlow } from '@/lib/planSimulator'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import type { GlobalSettings, ManufacturingPlanTemplate } from '@/types'
 
+export interface UseManufacturingPlanOptions {
+  /** When false, skips flow simulation (graph tab only). */
+  includeSimulation?: boolean
+}
+
 export function useManufacturingPlan(
   template: ManufacturingPlanTemplate | null,
   blueprints: import('@/types').BlueprintInfo[],
@@ -15,7 +20,10 @@ export function useManufacturingPlan(
   settings: GlobalSettings,
   systemCostIndex: number,
   reactionCostIndex: number,
+  options: UseManufacturingPlanOptions = {},
 ) {
+  const includeSimulation = options.includeSimulation !== false
+
   return useMemo(() => {
     if (!template || template.roots.length === 0) {
       return {
@@ -43,11 +51,13 @@ export function useManufacturingPlan(
       windowHours: Number.POSITIVE_INFINITY,
     })
     const windowHours = windowHoursFromJobs(jobs)
-    const simulations = simulatePlanFlow({
-      nodes: expanded.nodes,
-      jobs,
-      windowHours,
-    })
+    const simulations = includeSimulation
+      ? simulatePlanFlow({
+          nodes: expanded.nodes,
+          jobs,
+          windowHours,
+        })
+      : new Map()
 
     return {
       nodes: expanded.nodes,
@@ -57,7 +67,7 @@ export function useManufacturingPlan(
       windowHours,
       warnings: detectOverUnder(expanded.nodes),
     }
-  }, [template, blueprints, typeMap, prices, settings, systemCostIndex, reactionCostIndex])
+  }, [template, blueprints, typeMap, prices, settings, systemCostIndex, reactionCostIndex, includeSimulation])
 }
 
 export function usePlanSkills() {

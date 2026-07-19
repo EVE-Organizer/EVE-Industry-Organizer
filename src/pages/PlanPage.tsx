@@ -197,8 +197,9 @@ export function PlanPage() {
   )
 
   const { data, isLoading } = useSdeData()
-  const userData = useAppStore((s) => s.userData)
-  const templates = userData.planTemplates ?? []
+  const templates = useAppStore((s) => s.userData.planTemplates ?? [])
+  const storeSettings = useAppStore((s) => s.userData.settings)
+  const watchlist = useAppStore((s) => s.userData.watchlist)
   const selectedId = useAppStore((s) => s.selectedPlanTemplateId)
   const setSelectedId = useAppStore((s) => s.setSelectedPlanTemplateId)
   const addPlanTemplate = useAppStore((s) => s.addPlanTemplate)
@@ -230,7 +231,7 @@ export function PlanPage() {
   const isSharedView = sharedView != null
   const blockStoreMutations = isSharedView || sharedHashLoading || shareLinkError
   const activeTemplate = sharedView?.template ?? storeTemplate
-  const activeSettings = sharedView?.settings ?? userData.settings
+  const activeSettings = sharedView?.settings ?? storeSettings
 
   const blueprints = useMemo(() => (data ? getAllBlueprints(data.registry) : []), [data])
   const typeMap = useMemo(() => (data ? buildTypeMap(data.types) : new Map()), [data])
@@ -294,6 +295,7 @@ export function PlanPage() {
     activeSettings,
     systemCostIndex,
     reactionCostIndex,
+    { includeSimulation: tab === 'graph' },
   )
 
   const slots = manufacturingSlotsFromSkills(activeSettings.skills)
@@ -339,7 +341,7 @@ export function PlanPage() {
       buyPrices,
       jobTimeHoursByRootId,
     )
-  }, [activeTemplate, expandInput, prices, buyPrices, blueprints, activeSettings, slots, rootRunsTotal])
+  }, [activeTemplate, expandInput, prices, buyPrices, blueprints, activeSettings])
 
   const profitByRootId = useMemo(
     () => new Map(profitSummary.rootRows.map((row) => [row.rootId, row])),
@@ -387,13 +389,16 @@ export function PlanPage() {
     prices,
     buyPrices,
     activeSettings,
-    slots,
-    rootRunsTotal,
   ])
 
   const favoriteProductIds = useMemo(
-    () => userData.watchlist.map((w) => w.productTypeId),
-    [userData.watchlist],
+    () => watchlist.map((w) => w.productTypeId),
+    [watchlist],
+  )
+
+  const planNodesByProductId = useMemo(
+    () => new Map(plan.nodes.map((n) => [n.productTypeId, n])),
+    [plan.nodes],
   )
 
   const blueprintTypeIdByProduct = useMemo(() => {
@@ -418,7 +423,7 @@ export function PlanPage() {
 
     const rootRows = activeTemplate.roots.flatMap((root) => {
       const bp = getBlueprintForProduct(blueprints, root.productTypeId)
-      const node = plan.nodes.find((n) => n.productTypeId === root.productTypeId)
+      const node = planNodesByProductId.get(root.productTypeId)
       if (!bp || !node) return []
 
       const instance = (rootSeen.get(root.productTypeId) ?? 0) + 1
@@ -464,7 +469,7 @@ export function PlanPage() {
     }))
 
     return withTreeLineMeta([...rootRows, ...subRows])
-  }, [activeTemplate, plan.nodes, plan.jobs, blueprints, typeMap, blueprintTypeIdByProduct, activeSettings, slots, rootRunsTotal])
+  }, [activeTemplate, planNodesByProductId, blueprints, typeMap, blueprintTypeIdByProduct, activeSettings])
 
   const manufactureRows = useMemo(() => {
     if (!activeTemplate) return []
@@ -546,7 +551,7 @@ export function PlanPage() {
   const copyShareLink = useCallback(async () => {
     if (!storeTemplate || isSharedView) return
     try {
-      const payload = buildPlanSharePayload(storeTemplate, userData.settings)
+      const payload = buildPlanSharePayload(storeTemplate, storeSettings)
       const url = await planShareUrl(payload, searchParams)
       await navigator.clipboard.writeText(url)
       setShareCopied(true)
@@ -554,7 +559,7 @@ export function PlanPage() {
     } catch {
       setShareCopied(false)
     }
-  }, [storeTemplate, isSharedView, userData.settings, searchParams])
+  }, [storeTemplate, isSharedView, storeSettings, searchParams])
 
   useEffect(() => {
     if (blockStoreMutations || !storeTemplate || !data) return
@@ -564,7 +569,7 @@ export function PlanPage() {
       const synced = syncRootEntry(
         root,
         bp,
-        userData.settings,
+        storeSettings,
         undefined,
         storeTemplate.nodeOverrides[root.productTypeId],
       )
@@ -574,7 +579,7 @@ export function PlanPage() {
     if (needsUpdate) {
       updatePlanTemplate(storeTemplate.id, { roots: nextRoots })
     }
-  }, [storeTemplate, data, blueprints, userData.settings, slots, rootRunsTotal, updatePlanTemplate, blockStoreMutations])
+  }, [storeTemplate, data, blueprints, storeSettings, slots, rootRunsTotal, updatePlanTemplate, blockStoreMutations])
 
   useEffect(() => {
     if (blockStoreMutations || !addProductId || !data || !storeTemplate) return
@@ -589,7 +594,7 @@ export function PlanPage() {
     handledAddRef.current = key
     addRootToPlanTemplate(storeTemplate.id, {
       id: createPlanRootId(),
-      ...createSyncedPlanRootEntry(id, bp, userData.settings),
+      ...createSyncedPlanRootEntry(id, bp, storeSettings),
     })
     setSearchParams(
       (prev) => {
@@ -605,7 +610,7 @@ export function PlanPage() {
     storeTemplate,
     blueprints,
     addRootToPlanTemplate,
-    userData.settings,
+    storeSettings,
     slots,
     rootRunsTotal,
     setSearchParams,
@@ -672,7 +677,7 @@ export function PlanPage() {
         return syncRootEntry(
           root,
           bp,
-          userData.settings,
+          storeSettings,
           undefined,
           nextOverrides[productTypeId],
         )
@@ -683,7 +688,7 @@ export function PlanPage() {
         roots: nextRoots,
       })
     },
-    [isSharedView, storeTemplate, blueprints, userData.settings, slots, rootRunsTotal, updatePlanTemplate],
+    [isSharedView, storeTemplate, blueprints, storeSettings, slots, rootRunsTotal, updatePlanTemplate],
   )
 
   const graphBlueprint = useMemo(() => {
@@ -727,7 +732,7 @@ export function PlanPage() {
     if (!bp) return
     addRootToPlanTemplate(storeTemplate.id, {
       id: createPlanRootId(),
-      ...createSyncedPlanRootEntry(productTypeId, bp, userData.settings),
+      ...createSyncedPlanRootEntry(productTypeId, bp, storeSettings),
     })
   }
 
@@ -898,7 +903,7 @@ export function PlanPage() {
                                 r,
                                 patch,
                                 bp,
-                                userData.settings,
+                                storeSettings,
                                 undefined,
                                 storeTemplate.nodeOverrides[r.productTypeId],
                               )
@@ -914,7 +919,7 @@ export function PlanPage() {
                           node.runs,
                           patch,
                           bp,
-                          userData.settings,
+                          storeSettings,
                           node.concurrentCopies,
                         )
 

@@ -40,18 +40,14 @@ export function sortPlanNodesDepthFirst(nodes: PlanNode[]): PlanTreeRow<PlanNode
 }
 
 export function computeTreeLineMeta(rows: { depth: number }[]): TreeLineMeta[] {
-  return rows.map((row, index) => {
-    const depth = row.depth
-    const continues: boolean[] = []
+  const result: TreeLineMeta[] = []
+  const parentHasMoreSiblings: boolean[] = []
 
-    for (let level = 0; level < depth - 1; level++) {
-      let cont = false
-      for (let j = index + 1; j < rows.length; j++) {
-        if (rows[j].depth <= level) break
-        cont = true
-        break
-      }
-      continues.push(cont)
+  for (let index = 0; index < rows.length; index++) {
+    const depth = rows[index].depth
+
+    while (parentHasMoreSiblings.length > depth) {
+      parentHasMoreSiblings.pop()
     }
 
     let isLast = true
@@ -63,8 +59,18 @@ export function computeTreeLineMeta(rows: { depth: number }[]): TreeLineMeta[] {
       }
     }
 
-    return { isLast, continues }
-  })
+    const continues = parentHasMoreSiblings.slice(0, Math.max(0, depth - 1))
+    result.push({ isLast, continues })
+
+    if (depth > 0) {
+      while (parentHasMoreSiblings.length < depth) {
+        parentHasMoreSiblings.push(false)
+      }
+      parentHasMoreSiblings[depth - 1] = !isLast
+    }
+  }
+
+  return result
 }
 
 export function withTreeLineMeta<T extends { depth: number }>(

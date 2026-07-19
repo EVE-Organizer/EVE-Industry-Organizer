@@ -8,7 +8,9 @@ import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
 import {
   computePlanRootBuildCost,
+  createBuildCostCache,
   expandManufacturingPlan,
+  type BuildCostCache,
   type ExpandPlanInput,
 } from '@/lib/manufacturingPlan'
 import { skillLevel } from '@/lib/skillFields'
@@ -118,11 +120,12 @@ export function computeRootProfitRow(
   sellPrices: Map<number, number>,
   buyPrices: Map<number, number>,
   jobTimeHours: number,
+  buildCostCache?: BuildCostCache,
 ): RootProfitRow {
   const { settings, template } = expandInput
   const meTeOverride = template.nodeOverrides[root.productTypeId]
 
-  const chainCost = computePlanRootBuildCost(blueprint, root.runs, expandInput)
+  const chainCost = computePlanRootBuildCost(blueprint, root.runs, expandInput, buildCostCache)
   const setupCost =
     chainCost + packagedSelfBuyCost(blueprint, root.runs, sellPrices, settings, meTeOverride)
 
@@ -286,6 +289,7 @@ export function computePlanProfitSummary(
   jobTimeHoursByRootId: Map<string, number>,
 ): PlanProfitSummary {
   const rootRows: RootProfitRow[] = []
+  const buildCostCache = createBuildCostCache()
 
   for (const root of template.roots) {
     const blueprint = getBlueprintForProduct(expandInput.blueprints, root.productTypeId)
@@ -298,6 +302,7 @@ export function computePlanProfitSummary(
         sellPrices,
         buyPrices,
         jobTimeHoursByRootId.get(root.id) ?? root.productionDurationHours,
+        buildCostCache,
       ),
     )
   }
