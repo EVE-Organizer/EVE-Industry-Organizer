@@ -10,6 +10,7 @@ import {
   normalizeGlobalSettings,
   saveUserDataToLocal,
 } from '@/services/sync/types'
+import { mergeSharedSettingsForImport, sharedTemplateToSavedTemplate } from '@/lib/planShare'
 import { clearPriceCache as clearPriceCacheStorage } from '@/services/cache/cacheStore'
 
 interface AppStore {
@@ -27,6 +28,10 @@ interface AppStore {
   updatePlanTemplate: (id: string, patch: Partial<ManufacturingPlanTemplate>) => void
   deletePlanTemplate: (id: string) => void
   duplicatePlanTemplate: (id: string) => ManufacturingPlanTemplate | null
+  importSharedPlan: (
+    template: ManufacturingPlanTemplate,
+    settings: GlobalSettings,
+  ) => ManufacturingPlanTemplate
   addRootToPlanTemplate: (templateId: string, root: PlanRootEntry) => void
   removeRootFromPlanTemplate: (templateId: string, rootId: string) => void
 }
@@ -160,6 +165,17 @@ export const useAppStore = create<AppStore>((set, get) => ({
     get().setUserData(userData)
     persistSelectedPlanTemplateId(get, set, copy.id)
     return copy
+  },
+
+  importSharedPlan: (template, settings) => {
+    const saved = sharedTemplateToSavedTemplate(template)
+    const userData = touchTemplates(get().userData, (templates) => [...templates, saved])
+    get().setUserData({
+      ...userData,
+      settings: mergeSharedSettingsForImport(userData.settings, settings),
+    })
+    persistSelectedPlanTemplateId(get, set, saved.id)
+    return saved
   },
 
   addRootToPlanTemplate: (templateId, root) => {

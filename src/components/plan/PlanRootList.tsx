@@ -35,12 +35,13 @@ interface PlanRootListProps {
   onOpenProfit?: (rootId: string) => void
   onOpenGraph: (productTypeId: number) => void
   onOpenMeTe?: (productTypeId: number) => void
-  onChange: (
+  readOnly?: boolean
+  onChange?: (
     rootId: string | undefined,
     productTypeId: number,
     patch: { runs?: number; productionDurationHours?: number },
   ) => void
-  onRemove: (rootId: string) => void
+  onRemove?: (rootId: string) => void
 }
 
 function ChevronIcon({ open }: { open: boolean }) {
@@ -229,6 +230,7 @@ export function PlanRootList({
   onOpenProfit,
   onOpenGraph,
   onOpenMeTe,
+  readOnly = false,
   onChange,
   onRemove,
 }: PlanRootListProps) {
@@ -333,22 +335,32 @@ export function PlanRootList({
                     />
                   </td>
                   <td onClick={stopRowToggle}>
-                    <RunsInput
-                      key={`${rowKey}-runs`}
-                      runs={row.runs}
-                      onCommit={(nextRuns) =>
-                        onChange(row.rootId, row.productTypeId, { runs: nextRuns })
-                      }
-                    />
+                    {readOnly || !onChange ? (
+                      <span className="tabular-nums text-sm">{formatDecimal(row.runs, 0)}</span>
+                    ) : (
+                      <RunsInput
+                        key={`${rowKey}-runs`}
+                        runs={row.runs}
+                        onCommit={(nextRuns) =>
+                          onChange(row.rootId, row.productTypeId, { runs: nextRuns })
+                        }
+                      />
+                    )}
                   </td>
                   <td className="plan-jobs-table__duration-col" onClick={stopRowToggle}>
-                    <DurationInput
-                      key={rowKey}
-                      hours={row.jobTimeHours}
-                      onCommit={(productionDurationHours) =>
-                        onChange(row.rootId, row.productTypeId, { productionDurationHours })
-                      }
-                    />
+                    {readOnly || !onChange ? (
+                      <span className="tabular-nums text-sm whitespace-nowrap">
+                        {formatDurationHms(row.jobTimeHours * 3600)}
+                      </span>
+                    ) : (
+                      <DurationInput
+                        key={rowKey}
+                        hours={row.jobTimeHours}
+                        onCommit={(productionDurationHours) =>
+                          onChange(row.rootId, row.productTypeId, { productionDurationHours })
+                        }
+                      />
+                    )}
                   </td>
                   <td className="plan-jobs-table__money-col tabular-nums text-sm opacity-80">
                     {formatGraphQuantity(row.outputQty)}
@@ -406,7 +418,7 @@ export function PlanRootList({
                     )}
                   </td>
                   <td onClick={stopRowToggle}>
-                    {row.isRoot && row.rootId ? (
+                    {row.isRoot && row.rootId && onRemove && !readOnly ? (
                       <Tooltip text="Remove root" placement="left">
                         <button
                           type="button"

@@ -165,7 +165,7 @@ interface PlanChainTableProps {
   manufactureRows?: ManufactureDisplayRow[]
   planRoots?: PlanRootEntry[]
   skillSlots: number
-  onToggleMode: (productTypeId: number) => void
+  onToggleMode?: (productTypeId: number) => void
   onOpenGraph: (productTypeId: number) => void
   onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
@@ -293,7 +293,7 @@ function ModeCell({
   onToggleMode,
 }: {
   node: PlanNode
-  onToggleMode: (productTypeId: number) => void
+  onToggleMode?: (productTypeId: number) => void
 }) {
   if (!node.canToggle) {
     if (node.mode === 'build') {
@@ -306,6 +306,14 @@ function ModeCell({
           <PlanModeLockedMarket lockIcon={<LockIcon />} />
         </span>
       </Tooltip>
+    )
+  }
+
+  if (!onToggleMode) {
+    return (
+      <div className="inline-flex justify-end w-[6rem]">
+        <span className="text-xs font-semibold uppercase opacity-70">{node.mode}</span>
+      </div>
     )
   }
 
@@ -387,7 +395,7 @@ function BuildSection({
   manufactureRows?: ManufactureDisplayRow[]
   planRoots?: PlanRootEntry[]
   skillSlots: number
-  onToggleMode: (productTypeId: number) => void
+  onToggleMode?: (productTypeId: number) => void
   onOpenGraph: (productTypeId: number) => void
   onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
@@ -564,7 +572,7 @@ function BuyTableRow({
   row: PlanBuyTableRow
   expanded: boolean
   onToggleCollapse: (key: string) => void
-  onToggleMode: (productTypeId: number) => void
+  onToggleMode?: (productTypeId: number) => void
   onOpenGraph: (productTypeId: number) => void
   onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
@@ -687,7 +695,7 @@ function BuySection({
 }: {
   allNodes: PlanNode[]
   buyNodes: PlanNode[]
-  onToggleMode: (productTypeId: number) => void
+  onToggleMode?: (productTypeId: number) => void
   onOpenGraph: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
 }) {

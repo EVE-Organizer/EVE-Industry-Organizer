@@ -93,4 +93,37 @@ describe('useAppStore plan templates', () => {
     expect(state.userData.planTemplates[0].roots).toEqual([])
     expect(state.userData.planTemplates[0].modeOverrides).toEqual({})
   })
+
+  it('imports a shared plan and selects it', () => {
+    const currentSettings = {
+      ...createDefaultUserData().settings,
+      skills: { ...createDefaultUserData().settings.skills, industry: 5 },
+    }
+    useAppStore.setState({
+      userData: { ...createDefaultUserData(), settings: currentSettings },
+      hydrated: true,
+      selectedPlanTemplateId: null,
+    })
+
+    const sharedTemplate = {
+      ...createDefaultPlanTemplate('Friend plan'),
+      id: 'shared-view',
+      roots: [{ id: 'root-shared', productTypeId: 587, runs: 50, productionDurationHours: 12 }],
+      modeOverrides: { 587: 'build' as const },
+    }
+    const sharedSettings = {
+      ...createDefaultUserData().settings,
+      primaryHub: 'amarr' as const,
+      skills: { ...createDefaultUserData().settings.skills, industry: 1 },
+    }
+
+    const saved = useAppStore.getState().importSharedPlan(sharedTemplate, sharedSettings)
+    const state = useAppStore.getState()
+
+    expect(saved.id).not.toBe('shared-view')
+    expect(state.userData.planTemplates).toHaveLength(1)
+    expect(state.selectedPlanTemplateId).toBe(saved.id)
+    expect(state.userData.settings.primaryHub).toBe('amarr')
+    expect(state.userData.settings.skills.industry).toBe(5)
+  })
 })

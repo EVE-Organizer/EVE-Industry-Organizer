@@ -19,7 +19,7 @@ import { PlanRootSetupModal } from '@/components/plan/PlanRootSetupModal'
 import { PlanRootProfitModal } from '@/components/plan/PlanRootProfitModal'
 import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
-import { useManufacturingPlan, usePlanSkills } from '@/hooks/useManufacturingPlan'
+import { useManufacturingPlan } from '@/hooks/useManufacturingPlan'
 import {
   buildTypeMap,
   getAllBlueprints,
@@ -44,9 +44,16 @@ import { createPlanRootId } from '@/services/sync/types'
 import { computePlanProfitSummary, computeRootProfitBreakdown, computeRootSetupBreakdown } from '@/lib/planProfit'
 import { HUBS } from '@/types'
 import { productionGraphRoute } from '@/lib/paths'
+import {
+  buildPlanSharePayload,
+  normalizeSharedSettings,
+  parsePlanShareHash,
+  planShareUrl,
+  sharedPayloadToTemplate,
+} from '@/lib/planShare'
 import { formatDecimal } from '@/lib/profit'
 import { DEFAULT_BATCH_SIZE } from '@/types'
-import type { ManufacturingSettings, PlanBuildMode, PlanNodeOverride } from '@/types'
+import type { GlobalSettings, ManufacturingSettings, PlanBuildMode, PlanNodeOverride } from '@/types'
 
 function parsePlanViewTab(raw: string | null): PlanViewTab {
   return raw === 'graph' ? 'graph' : 'supply'
@@ -56,11 +63,13 @@ function IconBtn({
   label,
   onClick,
   danger,
+  disabled,
   children,
 }: {
   label: string
   onClick: () => void
   danger?: boolean
+  disabled?: boolean
   children: ReactNode
 }) {
   return (
@@ -70,6 +79,7 @@ function IconBtn({
         className={`btn btn-ghost btn-sm btn-square ${danger ? 'text-error' : ''}`}
         aria-label={label}
         onClick={onClick}
+        disabled={disabled}
       >
         {children}
       </button>
@@ -90,6 +100,25 @@ function CopyIcon() {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
       <path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" />
       <path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" />
+    </svg>
+  )
+}
+
+function ShareLinkIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M6.25 5.75h5.5a1.25 1.25 0 0 1 1.25 1.25v5.5a1.25 1.25 0 0 1-1.25 1.25h-5.5A1.25 1.25 0 0 1 5 12.5v-5.5a1.25 1.25 0 0 1 1.25-1.25Z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M3.75 10.25V4.75A1.25 1.25 0 0 1 5 3.5h5.5"
+      />
     </svg>
   )
 }
@@ -176,6 +205,7 @@ export function PlanPage() {
   const updatePlanTemplate = useAppStore((s) => s.updatePlanTemplate)
   const deletePlanTemplate = useAppStore((s) => s.deletePlanTemplate)
   const duplicatePlanTemplate = useAppStore((s) => s.duplicatePlanTemplate)
+  const importSharedPlan = useAppStore((s) => s.importSharedPlan)
   const addRootToPlanTemplate = useAppStore((s) => s.addRootToPlanTemplate)
   const removeRootFromPlanTemplate = useAppStore((s) => s.removeRootFromPlanTemplate)
   const updateSettings = useAppStore((s) => s.updateSettings)
@@ -185,31 +215,42 @@ export function PlanPage() {
   const [setupDetailRootId, setSetupDetailRootId] = useState<string | null>(null)
   const [profitDetailRootId, setProfitDetailRootId] = useState<string | null>(null)
   const [chainFullscreen, setChainFullscreen] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
+  const [sharedView, setSharedView] = useState<{
+    template: import('@/types').ManufacturingPlanTemplate
+    settings: GlobalSettings
+  } | null>(null)
+  const [sharedHashLoading, setSharedHashLoading] = useState(() =>
+    window.location.hash.includes('plan='),
+  )
+  const [shareLinkError, setShareLinkError] = useState(false)
   const handledAddRef = useRef<string | null>(null)
-  const { skills } = usePlanSkills()
 
-  const template = templates.find((t) => t.id === selectedId) ?? null
+  const storeTemplate = templates.find((t) => t.id === selectedId) ?? null
+  const isSharedView = sharedView != null
+  const blockStoreMutations = isSharedView || sharedHashLoading || shareLinkError
+  const activeTemplate = sharedView?.template ?? storeTemplate
+  const activeSettings = sharedView?.settings ?? userData.settings
 
   const blueprints = useMemo(() => (data ? getAllBlueprints(data.registry) : []), [data])
   const typeMap = useMemo(() => (data ? buildTypeMap(data.types) : new Map()), [data])
   const prices = useMemo(() => {
     if (!data) return new Map<number, number>()
-    const hubMarket = getHubMarket(data.market, userData.settings.primaryHub)
+    const hubMarket = getHubMarket(data.market, activeSettings.primaryHub)
     if (!hubMarket) return new Map<number, number>()
     return buildWindowPriceMap(hubMarket, '1w', buildPriceMap(hubMarket))
-  }, [data, userData.settings.primaryHub])
+  }, [data, activeSettings.primaryHub])
 
   const buyPrices = useMemo(() => {
     if (!data) return new Map<number, number>()
-    const hubMarket = getHubMarket(data.market, userData.settings.primaryHub)
+    const hubMarket = getHubMarket(data.market, activeSettings.primaryHub)
     if (!hubMarket) return new Map<number, number>()
     return buildBuyPriceMap(hubMarket)
-  }, [data, userData.settings.primaryHub])
+  }, [data, activeSettings.primaryHub])
 
-  const hubMarket = data ? getHubMarket(data.market, userData.settings.primaryHub) : null
-  const mfgSystemId = userData.settings.manufacturingSystemId
-  const reactionSystemId =
-    userData.settings.reactionFacility?.reactionSystemId ?? mfgSystemId
+  const hubMarket = data ? getHubMarket(data.market, activeSettings.primaryHub) : null
+  const mfgSystemId = activeSettings.manufacturingSystemId
+  const reactionSystemId = activeSettings.reactionFacility?.reactionSystemId ?? mfgSystemId
   const systemCostIndex = useMemo(() => {
     if (!data || !hubMarket) return 0.01
     return resolveBuildSystem(data.systems, data.regions, hubMarket, mfgSystemId).costIndex
@@ -219,51 +260,51 @@ export function PlanPage() {
     return resolveBuildSystem(data.systems, data.regions, hubMarket, reactionSystemId)
       .reactionCostIndex
   }, [data, hubMarket, reactionSystemId, systemCostIndex])
-  const hubName = HUBS.find((h) => h.id === userData.settings.primaryHub)?.name ?? 'Hub'
+  const hubName = HUBS.find((h) => h.id === activeSettings.primaryHub)?.name ?? 'Hub'
 
   const expandInput = useMemo(
     () =>
-      template && data
+      activeTemplate && data
         ? {
-            template,
+            template: activeTemplate,
             blueprints,
             typeMap,
             prices,
-            settings: userData.settings,
+            settings: activeSettings,
             systemCostIndex,
             reactionCostIndex,
           }
         : null,
-    [template, data, blueprints, typeMap, prices, userData.settings, systemCostIndex, reactionCostIndex],
+    [activeTemplate, data, blueprints, typeMap, prices, activeSettings, systemCostIndex, reactionCostIndex],
   )
 
   const manufacturingSettings = useMemo(
     (): ManufacturingSettings => ({
-      ...userData.settings,
+      ...activeSettings,
       batchSize: DEFAULT_BATCH_SIZE,
     }),
-    [userData.settings],
+    [activeSettings],
   )
 
   const plan = useManufacturingPlan(
-    template,
+    activeTemplate,
     blueprints,
     typeMap,
     prices,
-    userData.settings,
+    activeSettings,
     systemCostIndex,
     reactionCostIndex,
   )
 
-  const slots = manufacturingSlotsFromSkills(skills)
+  const slots = manufacturingSlotsFromSkills(activeSettings.skills)
 
   const rootRunsTotal = useMemo(
-    () => (template ? template.roots.reduce((sum, r) => sum + r.runs, 0) : 0),
-    [template],
+    () => (activeTemplate ? activeTemplate.roots.reduce((sum, r) => sum + r.runs, 0) : 0),
+    [activeTemplate],
   )
 
   const profitSummary = useMemo(() => {
-    if (!template || !expandInput) {
+    if (!activeTemplate || !expandInput) {
       return {
         setupCost: 0,
         netRevenue: 0,
@@ -277,14 +318,14 @@ export function PlanPage() {
     }
 
     const jobTimeHoursByRootId = new Map(
-      template.roots.map((root) => {
+      activeTemplate.roots.map((root) => {
         const bp = getBlueprintForProduct(blueprints, root.productTypeId)
         const hours = bp
           ? rootJobTimeHours(
               root,
               bp,
-              userData.settings,
-              template.nodeOverrides[root.productTypeId],
+              activeSettings,
+              activeTemplate.nodeOverrides[root.productTypeId],
             )
           : root.productionDurationHours
         return [root.id, hours] as const
@@ -292,13 +333,13 @@ export function PlanPage() {
     )
 
     return computePlanProfitSummary(
-      template,
+      activeTemplate,
       expandInput,
       prices,
       buyPrices,
       jobTimeHoursByRootId,
     )
-  }, [template, expandInput, prices, buyPrices, blueprints, userData.settings, slots, rootRunsTotal])
+  }, [activeTemplate, expandInput, prices, buyPrices, blueprints, activeSettings, slots, rootRunsTotal])
 
   const profitByRootId = useMemo(
     () => new Map(profitSummary.rootRows.map((row) => [row.rootId, row])),
@@ -306,18 +347,18 @@ export function PlanPage() {
   )
 
   const setupDetailBreakdown = useMemo(() => {
-    if (!setupDetailRootId || !template || !expandInput) return null
-    const root = template.roots.find((r) => r.id === setupDetailRootId)
+    if (!setupDetailRootId || !activeTemplate || !expandInput) return null
+    const root = activeTemplate.roots.find((r) => r.id === setupDetailRootId)
     if (!root) return null
     const blueprint = getBlueprintForProduct(blueprints, root.productTypeId)
     if (!blueprint) return null
     const productName = typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`
     return computeRootSetupBreakdown(root, blueprint, expandInput, productName)
-  }, [setupDetailRootId, template, expandInput, blueprints, typeMap])
+  }, [setupDetailRootId, activeTemplate, expandInput, blueprints, typeMap])
 
   const profitDetailBreakdown = useMemo(() => {
-    if (!profitDetailRootId || !template || !expandInput) return null
-    const root = template.roots.find((r) => r.id === profitDetailRootId)
+    if (!profitDetailRootId || !activeTemplate || !expandInput) return null
+    const root = activeTemplate.roots.find((r) => r.id === profitDetailRootId)
     if (!root) return null
     const blueprint = getBlueprintForProduct(blueprints, root.productTypeId)
     if (!blueprint) return null
@@ -325,8 +366,8 @@ export function PlanPage() {
     const jobHours = rootJobTimeHours(
       root,
       blueprint,
-      userData.settings,
-      template.nodeOverrides[root.productTypeId],
+      activeSettings,
+      activeTemplate.nodeOverrides[root.productTypeId],
     )
     return computeRootProfitBreakdown(
       root,
@@ -339,13 +380,13 @@ export function PlanPage() {
     )
   }, [
     profitDetailRootId,
-    template,
+    activeTemplate,
     expandInput,
     blueprints,
     typeMap,
     prices,
     buyPrices,
-    userData.settings,
+    activeSettings,
     slots,
     rootRunsTotal,
   ])
@@ -364,18 +405,18 @@ export function PlanPage() {
   }, [blueprints])
 
   const buildRows = useMemo(() => {
-    if (!template) return []
+    if (!activeTemplate) return []
 
     const nonRootBuild = plan.nodes.filter((n) => n.mode === 'build' && !n.isRoot)
     const subExpandable = flattenPlanNodesExpandable(nonRootBuild, 'build-blueprints')
 
     const rootCounts = new Map<number, number>()
-    for (const root of template.roots) {
+    for (const root of activeTemplate.roots) {
       rootCounts.set(root.productTypeId, (rootCounts.get(root.productTypeId) ?? 0) + 1)
     }
     const rootSeen = new Map<number, number>()
 
-    const rootRows = template.roots.flatMap((root) => {
+    const rootRows = activeTemplate.roots.flatMap((root) => {
       const bp = getBlueprintForProduct(blueprints, root.productTypeId)
       const node = plan.nodes.find((n) => n.productTypeId === root.productTypeId)
       if (!bp || !node) return []
@@ -400,8 +441,8 @@ export function PlanPage() {
           ? rootJobTimeHours(
               root,
               bp,
-              userData.settings,
-              template.nodeOverrides[root.productTypeId],
+              activeSettings,
+              activeTemplate.nodeOverrides[root.productTypeId],
             )
           : root.productionDurationHours,
         outputQty: root.runs * bp.productQuantity,
@@ -423,51 +464,121 @@ export function PlanPage() {
     }))
 
     return withTreeLineMeta([...rootRows, ...subRows])
-  }, [template, plan.nodes, plan.jobs, blueprints, typeMap, blueprintTypeIdByProduct, userData.settings, slots, rootRunsTotal])
+  }, [activeTemplate, plan.nodes, plan.jobs, blueprints, typeMap, blueprintTypeIdByProduct, activeSettings, slots, rootRunsTotal])
 
   const manufactureRows = useMemo(() => {
-    if (!template) return []
+    if (!activeTemplate) return []
     return buildManufactureDisplayRows(
       plan.nodes,
-      template.roots,
+      activeTemplate.roots,
       (id) => getBlueprintForProduct(blueprints, id),
-      userData.settings,
+      activeSettings,
       slots,
-      template.defaultRunsPerBpc,
-      template.nodeOverrides,
+      activeTemplate.defaultRunsPerBpc,
+      activeTemplate.nodeOverrides,
     )
-  }, [template, plan.nodes, blueprints, userData.settings, slots])
+  }, [activeTemplate, plan.nodes, blueprints, activeSettings, slots])
 
   useEffect(() => {
+    if (isSharedView) return
     if (templates.length === 0) return
     if (!selectedId || !templates.some((t) => t.id === selectedId)) {
       setSelectedId(templates[0].id)
     }
-  }, [templates, selectedId, setSelectedId])
+  }, [templates, selectedId, setSelectedId, isSharedView])
 
   useEffect(() => {
-    if (!template || !data) return
+    let cancelled = false
+
+    async function loadSharedHash() {
+      const hash = window.location.hash
+      if (!hash.includes('plan=')) {
+        setSharedView(null)
+        setShareLinkError(false)
+        setSharedHashLoading(false)
+        return
+      }
+
+      setSharedHashLoading(true)
+      const payload = await parsePlanShareHash(hash)
+      if (cancelled) return
+
+      if (payload) {
+        setSharedView({
+          template: sharedPayloadToTemplate(payload),
+          settings: normalizeSharedSettings(payload.settings),
+        })
+        setShareLinkError(false)
+      } else {
+        setSharedView(null)
+        setShareLinkError(true)
+      }
+      setSharedHashLoading(false)
+    }
+
+    void loadSharedHash()
+    window.addEventListener('hashchange', loadSharedHash)
+    return () => {
+      cancelled = true
+      window.removeEventListener('hashchange', loadSharedHash)
+    }
+  }, [])
+
+  const exitSharedView = useCallback(() => {
+    const params = new URLSearchParams(window.location.search)
+    params.delete('add')
+    const search = params.toString()
+    window.history.replaceState(
+      null,
+      '',
+      window.location.pathname + (search ? `?${search}` : ''),
+    )
+    setSharedView(null)
+    setShareLinkError(false)
+  }, [])
+
+  const saveSharedToMyPlans = useCallback(() => {
+    if (!sharedView) return
+    importSharedPlan(sharedView.template, sharedView.settings)
+    exitSharedView()
+  }, [sharedView, importSharedPlan, exitSharedView])
+
+  const copyShareLink = useCallback(async () => {
+    if (!storeTemplate || isSharedView) return
+    try {
+      const payload = buildPlanSharePayload(storeTemplate, userData.settings)
+      const url = await planShareUrl(payload, searchParams)
+      await navigator.clipboard.writeText(url)
+      setShareCopied(true)
+      window.setTimeout(() => setShareCopied(false), 2000)
+    } catch {
+      setShareCopied(false)
+    }
+  }, [storeTemplate, isSharedView, userData.settings, searchParams])
+
+  useEffect(() => {
+    if (blockStoreMutations || !storeTemplate || !data) return
     let needsUpdate = false
-    const nextRoots = template.roots.map((root) => {
+    const nextRoots = storeTemplate.roots.map((root) => {
       const bp = getBlueprintForProduct(blueprints, root.productTypeId)
       const synced = syncRootEntry(
         root,
         bp,
         userData.settings,
         undefined,
-        template.nodeOverrides[root.productTypeId],
+        storeTemplate.nodeOverrides[root.productTypeId],
       )
       if (synced !== root) needsUpdate = true
       return synced
     })
     if (needsUpdate) {
-      updatePlanTemplate(template.id, { roots: nextRoots })
+      updatePlanTemplate(storeTemplate.id, { roots: nextRoots })
     }
-  }, [template, data, blueprints, userData.settings, slots, rootRunsTotal, updatePlanTemplate])
+  }, [storeTemplate, data, blueprints, userData.settings, slots, rootRunsTotal, updatePlanTemplate, blockStoreMutations])
 
   useEffect(() => {
-    if (!addProductId || !data || !template) return
-    const key = `${template.id}:${addProductId}`
+    if (blockStoreMutations || !addProductId || !data || !storeTemplate) return
+    const key = `${storeTemplate.id}:${addProductId}`
     if (handledAddRef.current === key) return
 
     const id = Number(addProductId)
@@ -476,7 +587,7 @@ export function PlanPage() {
     if (!bp) return
 
     handledAddRef.current = key
-    addRootToPlanTemplate(template.id, {
+    addRootToPlanTemplate(storeTemplate.id, {
       id: createPlanRootId(),
       ...createSyncedPlanRootEntry(id, bp, userData.settings),
     })
@@ -491,13 +602,14 @@ export function PlanPage() {
   }, [
     addProductId,
     data,
-    template,
+    storeTemplate,
     blueprints,
     addRootToPlanTemplate,
     userData.settings,
     slots,
     rootRunsTotal,
     setSearchParams,
+    blockStoreMutations,
   ])
 
   useEffect(() => {
@@ -515,15 +627,15 @@ export function PlanPage() {
 
   const toggleMode = useCallback(
     (productTypeId: number) => {
-      if (!template) return
+      if (isSharedView || !storeTemplate) return
       const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
       if (!node?.canToggle) return
       const next: PlanBuildMode = node.mode === 'build' ? 'buy' : 'build'
-      updatePlanTemplate(template.id, {
-        modeOverrides: { ...template.modeOverrides, [productTypeId]: next },
+      updatePlanTemplate(storeTemplate.id, {
+        modeOverrides: { ...storeTemplate.modeOverrides, [productTypeId]: next },
       })
     },
-    [template, plan.nodes, updatePlanTemplate],
+    [isSharedView, storeTemplate, plan.nodes, updatePlanTemplate],
   )
 
   const openGraph = useCallback((productTypeId: number) => {
@@ -536,9 +648,9 @@ export function PlanPage() {
 
   const saveMeTe = useCallback(
     (productTypeId: number, patch: { me?: number; te?: number } | null) => {
-      if (!template) return
+      if (isSharedView || !storeTemplate) return
 
-      const current = template.nodeOverrides[productTypeId] ?? {}
+      const current = storeTemplate.nodeOverrides[productTypeId] ?? {}
       let nextEntry: PlanNodeOverride
       if (patch == null) {
         const { me: _me, te: _te, ...rest } = current
@@ -547,14 +659,14 @@ export function PlanPage() {
         nextEntry = { ...current, ...patch }
       }
 
-      const nextOverrides = { ...template.nodeOverrides }
+      const nextOverrides = { ...storeTemplate.nodeOverrides }
       if (Object.keys(nextEntry).length === 0) {
         delete nextOverrides[productTypeId]
       } else {
         nextOverrides[productTypeId] = nextEntry
       }
 
-      const nextRoots = template.roots.map((root) => {
+      const nextRoots = storeTemplate.roots.map((root) => {
         if (root.productTypeId !== productTypeId) return root
         const bp = getBlueprintForProduct(blueprints, root.productTypeId)
         return syncRootEntry(
@@ -566,12 +678,12 @@ export function PlanPage() {
         )
       })
 
-      updatePlanTemplate(template.id, {
+      updatePlanTemplate(storeTemplate.id, {
         nodeOverrides: nextOverrides,
         roots: nextRoots,
       })
     },
-    [template, blueprints, userData.settings, slots, rootRunsTotal, updatePlanTemplate],
+    [isSharedView, storeTemplate, blueprints, userData.settings, slots, rootRunsTotal, updatePlanTemplate],
   )
 
   const graphBlueprint = useMemo(() => {
@@ -610,36 +722,62 @@ export function PlanPage() {
   )
 
   const addRoot = (productTypeId: number) => {
-    if (!template) return
+    if (isSharedView || !storeTemplate) return
     const bp = getBlueprintForProduct(blueprints, productTypeId)
     if (!bp) return
-    addRootToPlanTemplate(template.id, {
+    addRootToPlanTemplate(storeTemplate.id, {
       id: createPlanRootId(),
       ...createSyncedPlanRootEntry(productTypeId, bp, userData.settings),
     })
   }
 
-  if (isLoading || !data) return <LoadingState />
+  if (isLoading || !data || sharedHashLoading) return <LoadingState />
 
   return (
     <div className="flex flex-col gap-5 flex-1 min-h-0">
       <PageHeader
         title="Manufacturing plan"
-        subtitle="Templates, build vs buy chain, and when the plan finishes"
+        subtitle={
+          isSharedView
+            ? 'Viewing a shared plan. Save it to your plans to customize.'
+            : 'Templates, build vs buy chain, and when the plan finishes'
+        }
         action={
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => addPlanTemplate()}>
-            New plan
-          </button>
+          isSharedView ? (
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="btn btn-primary btn-sm" onClick={saveSharedToMyPlans}>
+                Save to my plans
+              </button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={exitSharedView}>
+                Exit shared view
+              </button>
+            </div>
+          ) : (
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => addPlanTemplate()}>
+              New plan
+            </button>
+          )
         }
       />
 
-      <PlanTemplateBar
-        templates={templates}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-      />
+      {!isSharedView ? (
+        <PlanTemplateBar
+          templates={templates}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+        />
+      ) : null}
 
-      {!template ? (
+      {shareLinkError ? (
+        <Panel title="Could not open shared plan">
+          <p className="text-sm opacity-70">
+            The link may be incomplete or corrupted. Ask the sender to copy it again.
+          </p>
+          <button type="button" className="btn btn-primary btn-sm mt-4" onClick={exitSharedView}>
+            Back to my plans
+          </button>
+        </Panel>
+      ) : !activeTemplate ? (
         <Panel title="Get started">
           <p className="text-sm opacity-70">
             Create a plan and add root blueprints by name, then tune runs and job time.
@@ -650,32 +788,57 @@ export function PlanPage() {
         </Panel>
       ) : (
         <div className="flex flex-col gap-5">
+          {isSharedView ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="badge badge-outline border-eve-border">Shared view</span>
+              <span className="text-sm opacity-70">
+                Read-only until you save it. Hub and facility settings import with the plan; your skills stay as-is.
+              </span>
+            </div>
+          ) : null}
+
           <PlanDetailHeader
-            name={template.name}
+            name={activeTemplate.name}
             stats={[
-              { label: 'Roots', value: String(template.roots.length) },
+              { label: 'Roots', value: String(activeTemplate.roots.length) },
               { label: 'Nodes', value: String(plan.nodes.length) },
               { label: 'Slots', value: String(slots) },
               { label: 'Timeline', value: `${formatDecimal(plan.windowHours, 1)}h` },
             ]}
             actions={
-              <>
-                <IconBtn
-                  label="Rename"
-                  onClick={() => {
-                    const n = prompt('Plan name', template.name)
-                    if (n?.trim()) updatePlanTemplate(template.id, { name: n.trim() })
-                  }}
-                >
-                  <PencilIcon />
-                </IconBtn>
-                <IconBtn label="Duplicate" onClick={() => duplicatePlanTemplate(template.id)}>
-                  <CopyIcon />
-                </IconBtn>
-                <IconBtn label="Delete" danger onClick={() => deletePlanTemplate(template.id)}>
-                  <TrashIcon />
-                </IconBtn>
-              </>
+              isSharedView ? null : (
+                <>
+                  <IconBtn
+                    label={shareCopied ? 'Copied' : 'Copy share link'}
+                    onClick={() => void copyShareLink()}
+                  >
+                    <ShareLinkIcon />
+                  </IconBtn>
+                  <IconBtn
+                    label="Rename"
+                    onClick={() => {
+                      if (!storeTemplate) return
+                      const n = prompt('Plan name', storeTemplate.name)
+                      if (n?.trim()) updatePlanTemplate(storeTemplate.id, { name: n.trim() })
+                    }}
+                  >
+                    <PencilIcon />
+                  </IconBtn>
+                  <IconBtn
+                    label="Duplicate"
+                    onClick={() => storeTemplate && duplicatePlanTemplate(storeTemplate.id)}
+                  >
+                    <CopyIcon />
+                  </IconBtn>
+                  <IconBtn
+                    label="Delete"
+                    danger
+                    onClick={() => storeTemplate && deletePlanTemplate(storeTemplate.id)}
+                  >
+                    <TrashIcon />
+                  </IconBtn>
+                </>
+              )
             }
           />
 
@@ -685,79 +848,92 @@ export function PlanPage() {
             <div className="plan-build-card__header">
               <h2 className="plan-build-card__title">Build blueprints</h2>
               <span className="plan-build-card__badge">
-                {template.roots.length} root{template.roots.length === 1 ? '' : 's'}
+                {activeTemplate.roots.length} root{activeTemplate.roots.length === 1 ? '' : 's'}
               </span>
             </div>
             <div className="plan-build-card__body">
               {data ? (
-                <PlanFacilityControls
-                  settings={userData.settings}
-                  onChange={updateSettings}
-                  systems={data.systems}
-                  regions={data.regions}
-                />
+                <div className={isSharedView ? 'pointer-events-none opacity-80' : undefined}>
+                  <PlanFacilityControls
+                    settings={activeSettings}
+                    onChange={isSharedView ? () => {} : updateSettings}
+                    systems={data.systems}
+                    regions={data.regions}
+                  />
+                </div>
               ) : null}
-              <div className="plan-build-card__search">
-                <BlueprintSearchPicker
-                  blueprints={blueprints}
-                  typeMap={typeMap}
-                  favoriteIds={favoriteProductIds}
-                  onSelect={addRoot}
-                />
-                <p className="plan-build-card__hint">
-                  Search by product name, or add from Blueprints ranking (+ Plan).
-                </p>
-              </div>
+              {!isSharedView ? (
+                <div className="plan-build-card__search">
+                  <BlueprintSearchPicker
+                    blueprints={blueprints}
+                    typeMap={typeMap}
+                    favoriteIds={favoriteProductIds}
+                    onSelect={addRoot}
+                  />
+                  <p className="plan-build-card__hint">
+                    Search by product name, or add from Blueprints ranking (+ Plan).
+                  </p>
+                </div>
+              ) : null}
               <PlanRootList
                 rows={buildRows}
                 profitByRootId={profitByRootId}
+                readOnly={isSharedView}
                 onOpenSetup={setSetupDetailRootId}
                 onOpenProfit={setProfitDetailRootId}
                 onOpenGraph={openGraph}
-                onOpenMeTe={openMeTe}
-                onChange={(rootId, productTypeId, patch) => {
-                  if (!template) return
+                onOpenMeTe={isSharedView ? undefined : openMeTe}
+                onChange={
+                  isSharedView
+                    ? undefined
+                    : (rootId, productTypeId, patch) => {
+                        if (!storeTemplate) return
 
-                  if (rootId) {
-                    updatePlanTemplate(template.id, {
-                      roots: template.roots.map((r) => {
-                        if (r.id !== rootId) return r
-                        const bp = getBlueprintForProduct(blueprints, r.productTypeId)
-                        return applyRootEntryPatch(
-                          r,
+                        if (rootId) {
+                          updatePlanTemplate(storeTemplate.id, {
+                            roots: storeTemplate.roots.map((r) => {
+                              if (r.id !== rootId) return r
+                              const bp = getBlueprintForProduct(blueprints, r.productTypeId)
+                              return applyRootEntryPatch(
+                                r,
+                                patch,
+                                bp,
+                                userData.settings,
+                                undefined,
+                                storeTemplate.nodeOverrides[r.productTypeId],
+                              )
+                            }),
+                          })
+                          return
+                        }
+
+                        const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
+                        if (!node) return
+                        const bp = getBlueprintForProduct(blueprints, productTypeId)
+                        const runs = resolveRunsFromPatch(
+                          node.runs,
                           patch,
                           bp,
                           userData.settings,
-                          undefined,
-                          template.nodeOverrides[r.productTypeId],
+                          node.concurrentCopies,
                         )
-                      }),
-                    })
-                    return
-                  }
 
-                  const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
-                  if (!node) return
-                  const bp = getBlueprintForProduct(blueprints, productTypeId)
-                  const runs = resolveRunsFromPatch(
-                    node.runs,
-                    patch,
-                    bp,
-                    userData.settings,
-                    node.concurrentCopies,
-                  )
-
-                  updatePlanTemplate(template.id, {
-                    nodeOverrides: {
-                      ...template.nodeOverrides,
-                      [productTypeId]: {
-                        ...template.nodeOverrides[productTypeId],
-                        runs,
-                      },
-                    },
-                  })
-                }}
-                onRemove={(rootId) => removeRootFromPlanTemplate(template.id, rootId)}
+                        updatePlanTemplate(storeTemplate.id, {
+                          nodeOverrides: {
+                            ...storeTemplate.nodeOverrides,
+                            [productTypeId]: {
+                              ...storeTemplate.nodeOverrides[productTypeId],
+                              runs,
+                            },
+                          },
+                        })
+                      }
+                }
+                onRemove={
+                  isSharedView
+                    ? undefined
+                    : (rootId) => storeTemplate && removeRootFromPlanTemplate(storeTemplate.id, rootId)
+                }
               />
             </div>
           </section>
@@ -783,9 +959,9 @@ export function PlanPage() {
               <PlanChainTable
                 nodes={plan.nodes}
                 manufactureRows={manufactureRows}
-                planRoots={template.roots}
+                planRoots={activeTemplate.roots}
                 skillSlots={slots}
-                onToggleMode={toggleMode}
+                onToggleMode={isSharedView ? undefined : toggleMode}
                 onOpenGraph={openGraph}
                 onOpenMeTe={openMeTe}
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}
@@ -796,7 +972,7 @@ export function PlanPage() {
             {tab === 'graph' ? (
               <PlanGraphView
                 nodes={plan.nodes}
-                onToggleMode={toggleMode}
+                onToggleMode={isSharedView ? undefined : toggleMode}
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}
                 simulations={plan.simulations}
                 windowHours={plan.windowHours}
@@ -816,7 +992,7 @@ export function PlanPage() {
                 <PlanGraphView
                   layout="expanded"
                   nodes={plan.nodes}
-                  onToggleMode={toggleMode}
+                  onToggleMode={isSharedView ? undefined : toggleMode}
                   blueprintTypeIdByProduct={blueprintTypeIdByProduct}
                   simulations={plan.simulations}
                   windowHours={plan.windowHours}
@@ -838,7 +1014,7 @@ export function PlanPage() {
         <BlueprintGraphModal
           variant="modal"
           blueprint={graphBlueprint}
-          hub={userData.settings.primaryHub}
+          hub={activeSettings.primaryHub}
           settings={manufacturingSettings}
           getPlanRuns={getPlanRuns}
           onClose={() => setGraphProductTypeId(null)}
@@ -846,12 +1022,12 @@ export function PlanPage() {
         />
       ) : null}
 
-      {meTeBlueprint && meTeProductTypeId != null && template ? (
+      {meTeBlueprint && meTeProductTypeId != null && activeTemplate && !isSharedView ? (
         <PlanMeTeModal
           blueprint={meTeBlueprint}
           name={meTeNodeName}
-          settings={userData.settings}
-          nodeOverride={template.nodeOverrides[meTeProductTypeId]}
+          settings={activeSettings}
+          nodeOverride={activeTemplate.nodeOverrides[meTeProductTypeId]}
           onChange={(patch) => saveMeTe(meTeProductTypeId, patch)}
           onClose={() => setMeTeProductTypeId(null)}
         />

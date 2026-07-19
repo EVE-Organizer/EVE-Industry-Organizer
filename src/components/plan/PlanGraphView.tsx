@@ -30,7 +30,7 @@ import { formatDecimal, formatDuration, formatGraphQuantity } from '@/lib/profit
 import type { PlanNode, PlanNodeSimulation } from '@/types'
 
 const PlanGraphActionsContext = createContext<{
-  onToggleMode: (productTypeId: number) => void
+  onToggleMode?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
   simulations: Map<number, PlanNodeSimulation>
   windowHours: number
@@ -129,7 +129,7 @@ function PlanFlowNode({ data }: { data: PlanFlowNodeData }) {
   const iconSize = node.isRoot ? 36 : node.depth <= 1 ? 28 : 24
   const blueprintTypeId = actions?.blueprintTypeIdByProduct.get(node.productTypeId)
   const padding = node.isRoot ? 'px-3 py-2.5' : 'px-2 py-1.5'
-  const canToggle = node.canToggle
+  const canToggle = node.canToggle && !!actions?.onToggleMode
   const costSummary = planBuildVsBuySummary(node)
   const savingsFootnote = planBuildVsBuyFootnote(node)
 
@@ -138,13 +138,13 @@ function PlanFlowNode({ data }: { data: PlanFlowNodeData }) {
       role={canToggle ? 'button' : undefined}
       tabIndex={canToggle ? 0 : undefined}
       className={`group relative h-full w-full overflow-hidden rounded-xl border shadow-sm ${canToggle ? 'cursor-pointer hover:shadow-lg hover:border-primary/50' : 'cursor-default'} ${style.border} ${style.shell} ${padding}`}
-      onClick={canToggle ? () => actions?.onToggleMode(node.productTypeId) : undefined}
+      onClick={canToggle ? () => actions?.onToggleMode?.(node.productTypeId) : undefined}
       onKeyDown={
         canToggle
           ? (e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
-                actions?.onToggleMode(node.productTypeId)
+                actions?.onToggleMode?.(node.productTypeId)
               }
             }
           : undefined
@@ -252,7 +252,7 @@ function PlanGraphCanvas({
   layoutKey,
 }: {
   nodes: PlanNode[]
-  onToggleMode: (productTypeId: number) => void
+  onToggleMode?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
   simulations: Map<number, PlanNodeSimulation>
   windowHours: number
@@ -330,7 +330,7 @@ export function PlanGraphView({
   layout = 'embedded',
 }: {
   nodes: PlanNode[]
-  onToggleMode: (productTypeId: number) => void
+  onToggleMode?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
   simulations: Map<number, PlanNodeSimulation>
   windowHours: number
