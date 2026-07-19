@@ -39,7 +39,16 @@ import {
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
 import { buildWindowPriceMap } from '@/lib/ranking'
-import { revenueFromSale, applyTE, applyReactionTime, reactionTimePerRun, resolveStructureModifiers, blueprintMeTe, runsForJobTime, clampGraphRuns } from '@/lib/cost'
+import {
+  revenueFromSale,
+  applyTE,
+  applyReactionTime,
+  reactionTimePerRun,
+  blueprintMeTe,
+  runsForJobTime,
+  clampGraphRuns,
+} from '@/lib/cost'
+import { resolveReactionModifiers, resolveManufacturingModifiers } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
 import { buildSupplyChain, findBuildTargetDetails, type BuildTargetDetail } from '@/lib/supplyChain'
 import { tierLabel } from '@/lib/blueprintGroups'
@@ -48,6 +57,7 @@ import { skillLevel } from '@/lib/skillFields'
 import { appRoute, productionGraphRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
 import { formatGraphQuantity, formatGraphUnitIsk, formatDuration, formatIsk, formatPercent, formatDecimal } from '@/lib/profit'
+import { CopyNameButton } from '@/components/CopyNameButton'
 import { EveImage } from '@/components/EveImage'
 import { InfoTooltip } from '@/components/InfoTooltip'
 
@@ -136,6 +146,7 @@ function GraphHeaderTitle({
 
   return (
     <div className="min-w-0 flex-1 flex items-center gap-1">
+      <CopyNameButton text={displayName} />
       {variant === 'modal' && onOpenPage ? (
         <button
           type="button"
@@ -418,18 +429,28 @@ interface OutputSummary {
   jobTimeSeconds: number
 }
 
+function graphStructureTe(
+  blueprint: BlueprintInfo,
+  settings: ManufacturingSettings | GlobalSettings,
+): number {
+  const structure = isReactionRecipe(blueprint)
+    ? resolveReactionModifiers(settings, blueprint)
+    : resolveManufacturingModifiers(settings)
+  return structure.teBonusPercent
+}
+
 function graphJobTimeSeconds(
   blueprint: BlueprintInfo,
   settings: ManufacturingSettings | GlobalSettings,
   runs: number,
 ): number {
-  const structure = resolveStructureModifiers(settings)
+  const structureTe = graphStructureTe(blueprint, settings)
   if (isReactionRecipe(blueprint)) {
     return applyReactionTime(
       blueprint.manufacturingTime,
       runs,
       skillLevel(settings.skills, 'reactions'),
-      structure.teBonusPercent,
+      structureTe,
     )
   }
   const { te } = blueprintMeTe(blueprint.tier, settings, blueprint)
@@ -439,7 +460,7 @@ function graphJobTimeSeconds(
     runs,
     skillLevel(settings.skills, 'industry'),
     skillLevel(settings.skills, 'advancedIndustry'),
-    structure.teBonusPercent,
+    structureTe,
   )
 }
 
@@ -448,12 +469,12 @@ function graphRunsFromJobTime(
   settings: GlobalSettings,
   jobTimeSeconds: number,
 ): number {
-  const structure = resolveStructureModifiers(settings)
+  const structureTe = graphStructureTe(blueprint, settings)
   if (isReactionRecipe(blueprint)) {
     const perRun = reactionTimePerRun(
       blueprint.manufacturingTime,
       skillLevel(settings.skills, 'reactions'),
-      structure.teBonusPercent,
+      structureTe,
     )
     if (perRun <= 0) return 1
     return Math.max(1, Math.floor(jobTimeSeconds / perRun))
@@ -465,7 +486,7 @@ function graphRunsFromJobTime(
     te,
     skillLevel(settings.skills, 'industry'),
     skillLevel(settings.skills, 'advancedIndustry'),
-    structure.teBonusPercent,
+    structureTe,
     { step: 1, maxRuns: null },
   )
 }
@@ -1037,11 +1058,18 @@ function BuildTargetNode({ data }: { data: BuildTargetNodeData }) {
             className="shrink-0"
           />
           <div className="min-w-0 flex-1 flex flex-col gap-1 overflow-hidden">
-            <div className="min-w-0 shrink-0">
-              <p className="text-[11px] font-semibold leading-tight line-clamp-2" title={target.productName}>
-                {target.productName}
-              </p>
-              <span className="badge badge-secondary badge-xs mt-0.5">{tierLabel(target.blueprint.tier)}</span>
+            <div className="min-w-0 shrink-0 flex items-start gap-0.5">
+              <CopyNameButton
+                text={target.productName}
+                className="h-5 w-5"
+                iconClassName="size-2.5"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-semibold leading-tight line-clamp-2" title={target.productName}>
+                  {target.productName}
+                </p>
+                <span className="badge badge-secondary badge-xs mt-0.5">{tierLabel(target.blueprint.tier)}</span>
+              </div>
             </div>
             <div className="text-[10px] tabular-nums leading-snug opacity-70 min-h-0">
               <p>
@@ -1391,7 +1419,14 @@ function SupplyNode({ data }: { data: SupplyNodeData }) {
             className="shrink-0"
           />
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1 min-w-0">
+            <div className="flex items-center gap-0.5 min-w-0">
+              {data.canOpenGraph ? (
+                <CopyNameButton
+                  text={data.label}
+                  className="h-5 w-5"
+                  iconClassName="size-2.5"
+                />
+              ) : null}
               <p
                 className={`${visual.nameClass} leading-tight min-w-0 flex-1 truncate`}
                 title={data.label}
@@ -1628,7 +1663,7 @@ function GraphProductionControls({
 
 export function BlueprintGraphModal({
   blueprint,
-  rankedRow,
+  rankedRow: _rankedRow,
   hub,
   priceWindow = '1w',
   settings,
@@ -1649,20 +1684,15 @@ export function BlueprintGraphModal({
     }
   }, [blueprint?.productTypeId, blueprint])
 
-  const activeRankedRow = useMemo(() => {
-    if (!rankedRow || !activeBlueprint || !blueprint) return null
-    return activeBlueprint.productTypeId === entryProductTypeIdRef.current ? rankedRow : null
-  }, [activeBlueprint, blueprint, rankedRow])
-
   const resolveGraphRuns = useCallback(
     (productTypeId: number | undefined): number => {
       if (productTypeId != null) {
         const planRuns = getPlanRuns?.(productTypeId)
         if (planRuns != null && planRuns > 0) return planRuns
       }
-      return activeRankedRow?.iphBreakdown.runs ?? settings.batchSize
+      return settings.batchSize
     },
-    [getPlanRuns, activeRankedRow, settings.batchSize],
+    [getPlanRuns, settings.batchSize],
   )
 
   const [graphRuns, setGraphRuns] = useState(() => resolveGraphRuns(blueprint?.productTypeId))
@@ -1767,11 +1797,19 @@ export function BlueprintGraphModal({
     const hubMarket = getHubMarket(sde.market, hub)
     if (!hubMarket) return { nodes: [], edges: [] }
 
-    const { costIndex, reactionCostIndex } = resolveBuildSystem(
+    const reactionSystemId =
+      settings.reactionFacility?.reactionSystemId ?? settings.manufacturingSystemId
+    const { costIndex } = resolveBuildSystem(
       sde.systems,
       sde.regions,
       hubMarket,
       settings.manufacturingSystemId,
+    )
+    const { reactionCostIndex: reactionIndexForSystem } = resolveBuildSystem(
+      sde.systems,
+      sde.regions,
+      hubMarket,
+      reactionSystemId,
     )
 
     const typeMap = buildTypeMap(sde.types)
@@ -1797,7 +1835,7 @@ export function BlueprintGraphModal({
       0,
       10,
       new Map(),
-      reactionCostIndex,
+      reactionIndexForSystem,
     )
     const flow = chainToFlow(chain)
     const withSummary = attachOutputSummary(

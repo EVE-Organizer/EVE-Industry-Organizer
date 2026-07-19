@@ -1,3 +1,4 @@
+import { CopyNameButton } from '@/components/CopyNameButton'
 import { Tooltip } from '@/components/Tooltip'
 import { stopRowToggle } from '@/components/plan/PlanTreeLines'
 import { appRoute } from '@/lib/paths'
@@ -42,6 +43,7 @@ export function PlanBlueprintItemName({
 
   return (
     <div className="flex items-center gap-0.5 min-w-0">
+      <CopyNameButton text={node.name} onClick={stopRowToggle} />
       <a
         href={marketHref}
         target="_blank"

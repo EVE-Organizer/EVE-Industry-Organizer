@@ -1,10 +1,12 @@
 import type { GlobalSettings } from '@/types'
 import { useAppStore } from '@/stores/appStore'
 import { getCacheStats } from '@/services/cache/cacheStore'
+import { useSdeData } from '@/hooks/useSdeData'
 import {
   BpoCostSettingsSection,
   CommonSettingsSection,
   ManufacturingSettingsSection,
+  ReactionFacilitySection,
 } from '@/components/GlobalSettingsForm'
 import { SkillLevelSlider } from '@/components/SkillLevelSlider'
 import { SKILL_FIELDS, enforceSkillPrerequisites, maxTrainableSkillLevel, skillLevel, skillPrerequisiteLabel, type SkillFieldDef } from '@/lib/skillFields'
@@ -18,6 +20,7 @@ const MANUFACTURING_SKILL_KEYS: SkillFieldDef['key'][] = [
   'advancedIndustry',
   'massProduction',
   'advancedMassProduction',
+  'reactions',
   'science',
 ]
 const MARKET_SKILL_KEYS: SkillFieldDef['key'][] = ['accounting', 'brokerRelations']
@@ -70,6 +73,7 @@ export function SettingsPage() {
   const updateSettings = useAppStore((s) => s.updateSettings)
   const resetAll = useAppStore((s) => s.resetAll)
   const clearPriceCache = useAppStore((s) => s.clearPriceCache)
+  const { data: sde } = useSdeData()
   const configured = useAuthStore((s) => s.configured)
   const characters = useAuthStore((s) => s.characters)
   const character = useAuthStore((s) => s.character)
@@ -108,14 +112,32 @@ export function SettingsPage() {
 
         <Panel title="Manufacturing">
           <p className="text-xs opacity-70 mb-3">
-            Where you run jobs. NPC stations use the system cost index only. Player structures add
-            role bonuses and owner tax.
+            Engineering complex for manufacturing jobs. Hull role bonuses come from the structure
+            type; enter fitted M-Set rig values separately.
           </p>
           <ManufacturingSettingsSection
             size="sm"
             settings={settings}
             onChange={updateSettings}
           />
+        </Panel>
+
+        <Panel title="Reaction facility">
+          <p className="text-xs opacity-70 mb-3">
+            Refinery for reaction formulas in plans and supply chains. Uses a separate build system
+            and reaction cost index from manufacturing.
+          </p>
+          {sde ? (
+            <ReactionFacilitySection
+              size="sm"
+              settings={settings}
+              onChange={updateSettings}
+              systems={sde.systems}
+              regions={sde.regions}
+            />
+          ) : (
+            <p className="text-sm opacity-60">Loading systems…</p>
+          )}
         </Panel>
       </div>
 

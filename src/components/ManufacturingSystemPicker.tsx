@@ -9,6 +9,9 @@ interface ManufacturingSystemPickerProps {
   systems: SystemInfo[]
   regions: RegionsData
   className?: string
+  size?: 'md' | 'sm'
+  /** Which system cost index to show in search results. */
+  costIndexKind?: 'manufacturing' | 'reaction'
 }
 
 function securityColor(security: number): string {
@@ -21,9 +24,14 @@ function formatSecurity(security: number): string {
   return security.toFixed(1)
 }
 
-function formatCostIndex(costIndex: number | undefined): string {
-  if (costIndex === undefined) return ''
-  return `${(costIndex * 100).toFixed(2)}%`
+function formatCostIndex(
+  system: SystemInfo,
+  kind: 'manufacturing' | 'reaction',
+): string {
+  const index =
+    kind === 'reaction' ? system.reactionCostIndex ?? system.costIndex : system.costIndex
+  if (index === undefined) return ''
+  return `${(index * 100).toFixed(2)}%`
 }
 
 export function ManufacturingSystemPicker({
@@ -32,6 +40,8 @@ export function ManufacturingSystemPicker({
   systems,
   regions,
   className = '',
+  size = 'md',
+  costIndexKind = 'manufacturing',
 }: ManufacturingSystemPickerProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -75,10 +85,15 @@ export function ManufacturingSystemPicker({
     setQuery('')
   }
 
+  const inputShellClass =
+    size === 'sm'
+      ? 'input input-bordered input-sm !h-12 !min-h-12 py-1'
+      : 'input input-bordered !h-14 !min-h-14 py-1.5'
+
   return (
-    <div ref={rootRef} className={`relative min-w-[min(100%,14rem)] max-w-xs ${className}`}>
+    <div ref={rootRef} className={`relative w-full min-w-0 ${className}`}>
       <div
-        className={`input input-bordered input-sm flex items-center gap-2 w-full pr-8 ${
+        className={`${inputShellClass} flex items-center gap-2 w-full pr-8 ${
           open ? 'input-primary' : ''
         }`}
       >
@@ -146,9 +161,9 @@ export function ManufacturingSystemPicker({
                   >
                     <span className="font-medium truncate">{sys.name}</span>
                     <span className="ml-auto flex items-center gap-2 shrink-0 text-xs opacity-60">
-                      {sys.costIndex !== undefined && (
-                        <span className="tabular-nums">{formatCostIndex(sys.costIndex)}</span>
-                      )}
+                      {formatCostIndex(sys, costIndexKind) ? (
+                        <span className="tabular-nums">{formatCostIndex(sys, costIndexKind)}</span>
+                      ) : null}
                       <span className={`tabular-nums ${securityColor(sys.security)}`}>
                         {formatSecurity(sys.security)}
                       </span>

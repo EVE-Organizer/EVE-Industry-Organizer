@@ -16,6 +16,7 @@ import type {
   TimeRange,
   TypeInfo,
 } from '@/types'
+import { MAX_BATCH_SIZE, MIN_BATCH_SIZE } from '@/types'
 import {
   advancedIndustryTimeFactor,
   amortizedBpoCost,
@@ -32,6 +33,7 @@ import {
   revenueFromSale,
   teTimeFactor,
 } from '@/lib/cost'
+import { manufacturingFacilityDetail } from '@/lib/facilityModifiers'
 import {
   lifetimeCategoryKeyFromProductCategory,
   resolveBlueprintLifetimeRuns,
@@ -68,18 +70,20 @@ export function isPlaceholderManufacturingBlueprint(blueprint: BlueprintInfo): b
   return mats.length === 1 && mats[0]?.typeId === 34 && mats[0]?.quantity === 1
 }
 
-/** Runs capped so output units fit within MAX_DAYS_TO_CLEAR at avg daily volume. */
-function runsForMarketVolume(
+/** Runs for setup cost and profit from the batch-size filter (clamped to allowed range). */
+export function resolveRankingRuns(
   batchSize: number,
   productQuantity: number,
   avgVolume: number,
 ): number | null {
-  if (avgVolume <= 0) return batchSize
+  if (!Number.isFinite(batchSize)) return null
+  const runs = Math.min(MAX_BATCH_SIZE, Math.max(MIN_BATCH_SIZE, Math.round(batchSize)))
+  if (avgVolume <= 0) return runs
 
-  const maxRuns = Math.floor((avgVolume * MAX_DAYS_TO_CLEAR) / productQuantity)
-  if (maxRuns < 1) return null
+  const maxMarketRuns = Math.floor((avgVolume * MAX_DAYS_TO_CLEAR) / productQuantity)
+  if (maxMarketRuns < 1) return null
 
-  return Math.min(batchSize, maxRuns)
+  return runs
 }
 
 export interface RankingFilters {
@@ -397,11 +401,12 @@ function computeRow(
   }
 
   const avgVolume = windowSummary.avgVolume
-  const runs = runsForMarketVolume(settings.batchSize, blueprint.productQuantity, avgVolume)
+  const runs = resolveRankingRuns(settings.batchSize, blueprint.productQuantity, avgVolume)
   if (runs === null) return null
 
   const { me, te } = blueprintMeTe(blueprint.tier, settings)
   const structure = resolveStructureModifiers(settings)
+  const facilityBonus = manufacturingFacilityDetail(settings)
   const industry = skillLevel(settings.skills, 'industry')
   const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
   const matCost = materialCost(mats, windowPrices)
@@ -464,6 +469,7 @@ function computeRow(
     structureTeBonusPercent: structure.teBonusPercent,
     structureJobCostBonusPercent: structure.jobCostBonusPercent,
     structureTaxPercent: structure.taxPercent,
+    facilityBonus,
     jobCost,
     bpoTypeId: blueprint.blueprintTypeId,
     bpoUnitPrice,
@@ -550,6 +556,7 @@ function computeRow(
     structureTeBonusPercent: structure.teBonusPercent,
     structureJobCostBonusPercent: structure.jobCostBonusPercent,
     structureTaxPercent: structure.taxPercent,
+    facilityBonus,
     jobCost,
     bpoTypeId: blueprint.blueprintTypeId,
     bpoUnitPrice,

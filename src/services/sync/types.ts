@@ -1,7 +1,13 @@
-import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry } from '@/types'
-import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS } from '@/types'
+import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry, StructureType } from '@/types'
+import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS, STRUCTURE_HULL_PRESETS } from '@/types'
 import { SKILL_FIELDS, enforceSkillPrerequisites } from '@/lib/skillFields'
 import { normalizeBpoLifetimeRunsByCategory } from '@/lib/bpoLifetime'
+import {
+  migrateManufacturingRigs,
+  normalizeReactionFacility,
+  rigPercentFromCombined,
+} from '@/lib/facilityModifiers'
+import { isPresetPlayerStructure } from '@/lib/structureSettings'
 
 type LegacySettings = Partial<Omit<GlobalSettings, 'skills'>> & {
   skills?: Partial<SkillLevels>
@@ -64,14 +70,87 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     batchSize: _batchSize,
     blueprintLifetimeRuns: legacyLifetimeRuns,
     skills: parsedSkills,
+    manufacturingRigs: parsedRigs,
+    reactionFacility: parsedReactionFacility,
     ...rest
   } = parsed
+
+  const structureType = (rest.structureType ?? DEFAULT_SETTINGS.structureType) as StructureType
+  const migratedRigs = migrateManufacturingRigs(
+    structureType,
+    rest.structureMeBonusPercent ?? 0,
+    rest.structureTeBonusPercent ?? 0,
+    rest.structureJobCostBonusPercent ?? 0,
+    parsedRigs,
+  )
+
+  let structureMeBonusPercent = migratedRigs.hullMe
+  let structureTeBonusPercent = migratedRigs.hullTe
+  let structureJobCostBonusPercent = migratedRigs.hullJobCost
+  let manufacturingRigs = migratedRigs.rigs
+
+  if (isPresetPlayerStructure(structureType)) {
+    const hullPreset = STRUCTURE_HULL_PRESETS[structureType as keyof typeof STRUCTURE_HULL_PRESETS]
+    structureMeBonusPercent = hullPreset.hullMeBonusPercent
+    structureTeBonusPercent = hullPreset.hullTeBonusPercent
+    structureJobCostBonusPercent = hullPreset.hullJobCostBonusPercent
+
+    const legacyMe = rest.structureMeBonusPercent ?? 0
+    const legacyTe = rest.structureTeBonusPercent ?? 0
+    const legacyJobCost = rest.structureJobCostBonusPercent ?? 0
+    manufacturingRigs = { ...migratedRigs.rigs }
+    const rigMe = rigPercentFromCombined(hullPreset.hullMeBonusPercent, legacyMe)
+    const rigTe = rigPercentFromCombined(hullPreset.hullTeBonusPercent, legacyTe)
+    const rigJobCost = rigPercentFromCombined(
+      hullPreset.hullJobCostBonusPercent,
+      legacyJobCost,
+    )
+    if (rigMe > manufacturingRigs.rigMeBonusPercent) {
+      manufacturingRigs.rigMeBonusPercent = rigMe
+    }
+    if (rigTe > manufacturingRigs.rigTeBonusPercent) {
+      manufacturingRigs.rigTeBonusPercent = rigTe
+    }
+    if (rigJobCost > manufacturingRigs.rigJobCostBonusPercent) {
+      manufacturingRigs.rigJobCostBonusPercent = rigJobCost
+    }
+  }
+
+  const reactionFacility = normalizeReactionFacility(parsedReactionFacility, manufacturingSystemId)
+
+  const hadPlayerStructure =
+    structureType !== 'npc' &&
+    (rest.structureMeBonusPercent ?? 0) +
+      (rest.structureTeBonusPercent ?? 0) +
+      (rest.structureTaxPercent ?? 0) >
+      0
+
+  if (hadPlayerStructure && reactionFacility.refineryType === 'none' && !parsedReactionFacility) {
+    reactionFacility.refineryType = 'custom'
+    reactionFacility.hullTeBonusPercent = rest.structureTeBonusPercent ?? 0
+    const tax = rest.structureTaxPercent ?? 0
+    if (tax > 0) {
+      for (const group of ['composite', 'biochemical', 'hybrid'] as const) {
+        reactionFacility.familyModifiers[group] = {
+          ...reactionFacility.familyModifiers[group],
+          taxPercent: tax,
+        }
+      }
+    }
+  }
+
   return {
     ...DEFAULT_SETTINGS,
     ...rest,
     primaryHub,
     sellHubId,
     manufacturingSystemId,
+    structureType,
+    structureMeBonusPercent,
+    structureTeBonusPercent,
+    structureJobCostBonusPercent,
+    manufacturingRigs,
+    reactionFacility,
     blueprintLifetimeRunsByCategory: normalizeBpoLifetimeRunsByCategory(
       rest.blueprintLifetimeRunsByCategory,
       legacyLifetimeRuns,

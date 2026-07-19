@@ -2,9 +2,10 @@ import type { BlueprintInfo, GlobalSettings, ManufacturingPlanTemplate, PlanRoot
 import {
   applyME,
   resolveBlueprintMeTe,
-  resolveStructureModifiers,
   revenueFromSale,
 } from '@/lib/cost'
+import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
+import { isReactionRecipe } from '@/lib/recipes'
 import {
   computePlanRootBuildCost,
   expandManufacturingPlan,
@@ -100,8 +101,9 @@ function packagedSelfBuyCost(
   meTeOverride?: { me?: number; te?: number },
 ): number {
   const { me } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride, blueprint)
-  const structure = resolveStructureModifiers(settings)
-  const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
+  const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
+  const structure = resolveRecipeModifiers(settings, blueprint)
+  const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
   const selfQty = mats
     .filter((m) => m.typeId === blueprint.productTypeId)
     .reduce((sum, m) => sum + m.quantity, 0)

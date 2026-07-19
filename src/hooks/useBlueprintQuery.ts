@@ -13,9 +13,9 @@ const SLIDER_DEBOUNCE_MS = 400
 /**
  * Syncs all Top Blueprints filter state to the URL via useSearchParams.
  *
- * Budget and batch sliders are held in local state for immediate visual feedback
- * and debounced before writing to the URL so dragging does not flood the router.
- * All other filter writes hit the URL immediately with replace:true so the
+ * Budget, batch size, and min volume are held in local state for immediate visual
+ * feedback and debounced before writing to the URL so dragging does not flood the
+ * router. All other filter writes hit the URL immediately with replace:true so the
  * back button is not flooded.
  *
  * Hub and Mfg system are also mirrored to Zustand settings so they persist
@@ -41,12 +41,14 @@ export function useBlueprintQuery(): {
   const [localMinSlider, setLocalMinSlider] = useState(urlQuery.budgetMinSlider)
   const [localMaxSlider, setLocalMaxSlider] = useState(urlQuery.budgetMaxSlider)
   const [localBatchSize, setLocalBatchSize] = useState(urlQuery.batchSize)
+  const [localMinVolume, setLocalMinVolume] = useState(urlQuery.minVolume)
 
-  // Refs always hold the latest slider values so the debounce callback can read them.
+  // Refs always hold the latest deferred values so the debounce callback can read them.
   // Updated via useEffect (not during render) to satisfy the react-hooks/refs lint rule.
   const minSliderRef = useRef(localMinSlider)
   const maxSliderRef = useRef(localMaxSlider)
   const batchSizeRef = useRef(localBatchSize)
+  const minVolumeRef = useRef(localMinVolume)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const settingsRef = useRef(settings)
   const urlQueryRef = useRef(urlQuery)
@@ -54,6 +56,7 @@ export function useBlueprintQuery(): {
   useEffect(() => { minSliderRef.current = localMinSlider }, [localMinSlider])
   useEffect(() => { maxSliderRef.current = localMaxSlider }, [localMaxSlider])
   useEffect(() => { batchSizeRef.current = localBatchSize }, [localBatchSize])
+  useEffect(() => { minVolumeRef.current = localMinVolume }, [localMinVolume])
   useEffect(() => { settingsRef.current = settings }, [settings])
   useEffect(() => { urlQueryRef.current = urlQuery }, [urlQuery])
 
@@ -65,8 +68,9 @@ export function useBlueprintQuery(): {
       setLocalMinSlider(urlQuery.budgetMinSlider)
       setLocalMaxSlider(urlQuery.budgetMaxSlider)
       setLocalBatchSize(urlQuery.batchSize)
+      setLocalMinVolume(urlQuery.minVolume)
     }
-  }, [searchParams, urlQuery.budgetMinSlider, urlQuery.budgetMaxSlider, urlQuery.batchSize])
+  }, [searchParams, urlQuery.budgetMinSlider, urlQuery.budgetMaxSlider, urlQuery.batchSize, urlQuery.minVolume])
 
   // Expose live slider positions on top of the URL-derived query.
   const query = useMemo<BlueprintQuery>(
@@ -75,11 +79,12 @@ export function useBlueprintQuery(): {
       budgetMinSlider: localMinSlider,
       budgetMaxSlider: localMaxSlider,
       batchSize: localBatchSize,
+      minVolume: localMinVolume,
     }),
-    [urlQuery, localMinSlider, localMaxSlider, localBatchSize],
+    [urlQuery, localMinSlider, localMaxSlider, localBatchSize, localMinVolume],
   )
 
-  const commitSlidersToUrl = useCallback(
+  const commitDeferredToUrl = useCallback(
     (effectivePatch: Partial<BlueprintQuery>) => {
       const merged: BlueprintQuery = {
         ...urlQueryRef.current,
@@ -87,24 +92,31 @@ export function useBlueprintQuery(): {
         budgetMinSlider: minSliderRef.current,
         budgetMaxSlider: maxSliderRef.current,
         batchSize: batchSizeRef.current,
+        minVolume: minVolumeRef.current,
       }
       setSearchParams(queryToSearchParams(merged, settingsRef.current), { replace: true })
     },
     [setSearchParams],
   )
 
+  const DEFERRED_QUERY_KEYS = [
+    'budgetMinSlider',
+    'budgetMaxSlider',
+    'batchSize',
+    'minVolume',
+  ] as const satisfies readonly (keyof BlueprintQuery)[]
+
   const setQuery = useCallback(
     (patch: Partial<BlueprintQuery>) => {
-      const hasSlider =
-        'budgetMinSlider' in patch || 'budgetMaxSlider' in patch || 'batchSize' in patch
+      const hasDeferred = DEFERRED_QUERY_KEYS.some((key) => key in patch)
       const hasOther = Object.keys(patch).some(
-        (k) => k !== 'budgetMinSlider' && k !== 'budgetMaxSlider' && k !== 'batchSize',
+        (k) => !DEFERRED_QUERY_KEYS.includes(k as (typeof DEFERRED_QUERY_KEYS)[number]),
       )
 
-      // Move slider thumbs immediately.
       if ('budgetMinSlider' in patch) setLocalMinSlider(patch.budgetMinSlider!)
       if ('budgetMaxSlider' in patch) setLocalMaxSlider(patch.budgetMaxSlider!)
       if ('batchSize' in patch) setLocalBatchSize(patch.batchSize!)
+      if ('minVolume' in patch) setLocalMinVolume(patch.minVolume!)
 
       // Persist hub/mfg system to settings so they become the next defaults.
       if ('hub' in patch || 'mfgSystem' in patch) {
@@ -130,19 +142,20 @@ export function useBlueprintQuery(): {
           budgetMinSlider: minSliderRef.current,
           budgetMaxSlider: maxSliderRef.current,
           batchSize: batchSizeRef.current,
+          minVolume: minVolumeRef.current,
           ...effectivePatch,
         }
         setSearchParams(queryToSearchParams(merged, settingsRef.current), { replace: true })
       }
 
-      if (hasSlider) {
+      if (hasDeferred) {
         if (debounceRef.current) clearTimeout(debounceRef.current)
         debounceRef.current = setTimeout(() => {
-          commitSlidersToUrl(effectivePatch)
+          commitDeferredToUrl(effectivePatch)
         }, SLIDER_DEBOUNCE_MS)
       }
     },
-    [setSearchParams, updateSettings, commitSlidersToUrl],
+    [setSearchParams, updateSettings, commitDeferredToUrl],
   )
 
   return { query, setQuery }

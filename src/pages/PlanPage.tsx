@@ -10,6 +10,7 @@ import { BlueprintSearchPicker } from '@/components/plan/BlueprintSearchPicker'
 import { PlanChainTable } from '@/components/plan/PlanChainTable'
 import { PlanMeTeModal } from '@/components/plan/PlanMeTeModal'
 import { PlanRootList } from '@/components/plan/PlanRootList'
+import { PlanFacilityControls } from '@/components/plan/PlanFacilityControls'
 import { PlanViewTabs, type PlanViewTab } from '@/components/plan/PlanViewTabs'
 import { PlanTemplateBar } from '@/components/plan/PlanTemplateBar'
 import { PlanDetailHeader } from '@/components/plan/PlanDetailHeader'
@@ -26,6 +27,7 @@ import {
   getHubMarket,
   buildPriceMap,
   buildBuyPriceMap,
+  resolveBuildSystem,
 } from '@/services/data/sdeLoader'
 import { buildWindowPriceMap } from '@/lib/ranking'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
@@ -176,6 +178,7 @@ export function PlanPage() {
   const duplicatePlanTemplate = useAppStore((s) => s.duplicatePlanTemplate)
   const addRootToPlanTemplate = useAppStore((s) => s.addRootToPlanTemplate)
   const removeRootFromPlanTemplate = useAppStore((s) => s.removeRootFromPlanTemplate)
+  const updateSettings = useAppStore((s) => s.updateSettings)
 
   const [graphProductTypeId, setGraphProductTypeId] = useState<number | null>(null)
   const [meTeProductTypeId, setMeTeProductTypeId] = useState<number | null>(null)
@@ -204,8 +207,18 @@ export function PlanPage() {
   }, [data, userData.settings.primaryHub])
 
   const hubMarket = data ? getHubMarket(data.market, userData.settings.primaryHub) : null
-  const systemCostIndex = hubMarket?.costIndex ?? 0.01
-  const reactionCostIndex = hubMarket?.reactionCostIndex ?? systemCostIndex
+  const mfgSystemId = userData.settings.manufacturingSystemId
+  const reactionSystemId =
+    userData.settings.reactionFacility?.reactionSystemId ?? mfgSystemId
+  const systemCostIndex = useMemo(() => {
+    if (!data || !hubMarket) return 0.01
+    return resolveBuildSystem(data.systems, data.regions, hubMarket, mfgSystemId).costIndex
+  }, [data, hubMarket, mfgSystemId])
+  const reactionCostIndex = useMemo(() => {
+    if (!data || !hubMarket) return systemCostIndex
+    return resolveBuildSystem(data.systems, data.regions, hubMarket, reactionSystemId)
+      .reactionCostIndex
+  }, [data, hubMarket, reactionSystemId, systemCostIndex])
   const hubName = HUBS.find((h) => h.id === userData.settings.primaryHub)?.name ?? 'Hub'
 
   const expandInput = useMemo(
@@ -676,6 +689,14 @@ export function PlanPage() {
               </span>
             </div>
             <div className="plan-build-card__body">
+              {data ? (
+                <PlanFacilityControls
+                  settings={userData.settings}
+                  onChange={updateSettings}
+                  systems={data.systems}
+                  regions={data.regions}
+                />
+              ) : null}
               <div className="plan-build-card__search">
                 <BlueprintSearchPicker
                   blueprints={blueprints}

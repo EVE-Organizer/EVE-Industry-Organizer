@@ -1,5 +1,6 @@
 import type { SetupCostBreakdown } from '@/types'
 import { formatDecimal, formatIsk } from '@/lib/profit'
+import { formatFacilityBonusLine } from '@/lib/facilityModifiers'
 import { baseJobCostFromIndex, isPlayerStructure, jobCostSectionTitle } from '@/lib/structureSettings'
 
 type JobCostFields = Pick<
@@ -10,6 +11,7 @@ type JobCostFields = Pick<
   | 'structureJobCostBonusPercent'
   | 'structureTaxPercent'
   | 'jobCost'
+  | 'facilityBonus'
 >
 
 export function JobCostFormula({ breakdown }: { breakdown: JobCostFields }) {
@@ -26,7 +28,11 @@ export function JobCostFormula({ breakdown }: { breakdown: JobCostFields }) {
         <>
           {breakdown.structureJobCostBonusPercent > 0 ? (
             <p>
-              × (1 − {formatDecimal(breakdown.structureJobCostBonusPercent, 2)}% structure role bonus)
+              × (1 −{' '}
+              {breakdown.facilityBonus
+                ? `${formatFacilityBonusLine(breakdown.facilityBonus, 'jobCost')} job cost bonus`
+                : `${formatDecimal(breakdown.structureJobCostBonusPercent, 2)}% structure role bonus`}
+              )
             </p>
           ) : null}
           {breakdown.structureTaxPercent > 0 ? (

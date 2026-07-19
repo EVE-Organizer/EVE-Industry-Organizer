@@ -12,9 +12,9 @@ import {
   inventionBlueprintCostPerRun,
   materialCost,
   resolveBlueprintMeTe,
-  resolveStructureModifiers,
   totalManufacturingCost,
 } from '@/lib/cost'
+import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
 import {
   bpcCountForRuns,
   defaultRunsPerBpc,
@@ -26,7 +26,7 @@ import { activeConcurrentCopies, duplicateRootCount, totalRootRuns } from '@/lib
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { getBlueprintForBpo, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { isRawMaterial } from '@/lib/supplyChain'
-import { isReactionRecipe } from '@/lib/recipes'
+import { canRunReactionJobs, isReactionRecipe } from '@/lib/recipes'
 import type { TypeInfo } from '@/types'
 
 interface NodeAccum {
@@ -65,6 +65,66 @@ function modeOverridesMap(template: ManufacturingPlanTemplate): Map<number, Plan
   return new Map(Object.entries(template.modeOverrides).map(([k, v]) => [Number(k), v]))
 }
 
+/** Datacores and T1 copies needed to invent T2 BPCs for `runs` manufacturing runs. */
+function computeInventionPrereqCost(
+  blueprint: BlueprintInfo,
+  runs: number,
+  blueprints: BlueprintInfo[],
+  typeMap: Map<number, TypeInfo>,
+  prices: Map<number, number>,
+  settings: GlobalSettings,
+  systemCostIndex: number,
+  reactionCostIndex: number,
+  modeOverrides: Map<number, PlanBuildMode>,
+  nodeOverrides: Record<number, PlanNodeOverride>,
+  nodeMap: Map<number, NodeAccum>,
+  depth: number,
+  maxDepth: number,
+): number {
+  const inv = blueprint.invention
+  if (!inv || blueprint.tier !== 't2') return 0
+
+  const invCost = inventionBlueprintCostPerRun({
+    datacores: inv.datacores,
+    prices,
+    baseChance: inv.baseChance,
+    runsPerBPC: inv.runsPerBPC,
+    skillLevel: settings.inventionSkillLevel,
+  })
+  const attempts = Math.max(
+    1,
+    Math.ceil(runs / Math.max(1, invCost.expectedRunsPerAttempt)),
+  )
+
+  let cost = invCost.attemptCost * attempts
+
+  const t1Bp = getBlueprintForBpo(blueprints, inv.t1BlueprintTypeId)
+  if (!t1Bp || depth >= maxDepth) return cost
+
+  const t1Runs = attempts
+  const buildCost = computePlanBuildCostForRuns(
+    t1Bp,
+    t1Runs,
+    blueprints,
+    typeMap,
+    prices,
+    settings,
+    systemCostIndex,
+    reactionCostIndex,
+    modeOverrides,
+    nodeOverrides,
+    nodeMap,
+    depth + 1,
+    maxDepth,
+  )
+  const buyCost = (prices.get(t1Bp.productTypeId) ?? 0) * t1Runs
+  const override = modeOverrides.get(t1Bp.productTypeId)
+  const mode: PlanBuildMode = override ?? (buildCost <= buyCost ? 'build' : 'buy')
+  cost += mode === 'build' ? buildCost : buyCost
+
+  return cost
+}
+
 /** Rolled-up build cost for a blueprint's runs using the plan's build/buy overrides. */
 export function computePlanBuildCostForRuns(
   blueprint: BlueprintInfo,
@@ -87,7 +147,7 @@ export function computePlanBuildCostForRuns(
     nodeOverrides[blueprint.productTypeId],
     blueprint,
   )
-  const structure = resolveStructureModifiers(settings)
+  const structure = resolveRecipeModifiers(settings, blueprint)
   const mfgSettings = { ...settings, batchSize: runs }
   const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
   const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
@@ -106,13 +166,18 @@ export function computePlanBuildCostForRuns(
     const unitPrice = prices.get(mat.typeId) ?? 0
     const buyCost = unitPrice * mat.quantity
     if (mat.typeId === blueprint.productTypeId) {
-      childBuild += buyCost
+      // Packaged self-input is charged separately in planProfit.packagedSelfBuyCost.
       continue
     }
     const subBp = getBlueprintForProduct(blueprints, mat.typeId)
     const override = modeOverrides.get(mat.typeId)
 
     if (!subBp || isRawMaterial(mat.typeId) || depth >= maxDepth) {
+      childBuild += buyCost
+      continue
+    }
+
+    if (isReactionRecipe(subBp) && !canRunReactionJobs(settings)) {
       childBuild += buyCost
       continue
     }
@@ -137,7 +202,23 @@ export function computePlanBuildCostForRuns(
     childBuild += mode === 'build' ? subBuildCost : buyCost
   }
 
-  return childBuild + (buildTotal - buyTotal)
+  const inventionCost = computeInventionPrereqCost(
+    blueprint,
+    runs,
+    blueprints,
+    typeMap,
+    prices,
+    settings,
+    systemCostIndex,
+    reactionCostIndex,
+    modeOverrides,
+    nodeOverrides,
+    nodeMap,
+    depth,
+    maxDepth,
+  )
+
+  return childBuild + (buildTotal - buyTotal) + inventionCost
 }
 
 function ensureNode(
@@ -268,7 +349,7 @@ function expandMaterials(
     template.nodeOverrides[blueprint.productTypeId],
     blueprint,
   )
-  const structure = resolveStructureModifiers(settings)
+  const structure = resolveRecipeModifiers(settings, blueprint)
   const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
   const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
   const parentNode = ensureNode(nodeMap, blueprint.productTypeId, typeMap, blueprint)
@@ -289,6 +370,15 @@ function expandMaterials(
     const override = modeOverrides.get(mat.typeId)
 
     if (!subBp || isRawMaterial(mat.typeId) || depth >= maxDepth) {
+      const leaf = ensureNode(nodeMap, mat.typeId, typeMap)
+      if (!leaf.isRoot) leaf.mode = 'buy'
+      leaf.isLeaf = true
+      addDemand(leaf, blueprint.productTypeId, mat.quantity, depth + 1)
+      parentNode.childProductTypeIds.add(mat.typeId)
+      continue
+    }
+
+    if (isReactionRecipe(subBp) && !canRunReactionJobs(settings)) {
       const leaf = ensureNode(nodeMap, mat.typeId, typeMap)
       if (!leaf.isRoot) leaf.mode = 'buy'
       leaf.isLeaf = true

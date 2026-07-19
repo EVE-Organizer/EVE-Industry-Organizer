@@ -4,6 +4,7 @@ import {
   applyTE,
   estimatedItemValue,
   estimateJobCost,
+  inventionBlueprintCostPerRun,
   teTimeFactor,
 } from '@/lib/cost'
 
@@ -64,5 +65,36 @@ describe('estimatedItemValue / estimateJobCost', () => {
     expect(jobFromEiv).toBe(100)
     expect(jobFromMeCost).toBe(90)
     expect(jobFromEiv).toBeGreaterThan(jobFromMeCost)
+  })
+})
+
+describe('inventionBlueprintCostPerRun', () => {
+  it('applies +1% per invention skill level multiplicatively', () => {
+    const prices = new Map([
+      [11467, 100_000],
+      [11455, 100_000],
+    ])
+    const base = inventionBlueprintCostPerRun({
+      datacores: [
+        { typeId: 11467, quantity: 1 },
+        { typeId: 11455, quantity: 1 },
+      ],
+      prices,
+      baseChance: 0.3,
+      runsPerBPC: 10,
+      skillLevel: 0,
+    })
+    const skilled = inventionBlueprintCostPerRun({
+      datacores: [
+        { typeId: 11467, quantity: 1 },
+        { typeId: 11455, quantity: 1 },
+      ],
+      prices,
+      baseChance: 0.3,
+      runsPerBPC: 10,
+      skillLevel: 4,
+    })
+    expect(skilled.chance).toBeCloseTo(0.3 * 1.04 ** 3, 5)
+    expect(skilled.costPerRun).toBeLessThan(base.costPerRun)
   })
 })

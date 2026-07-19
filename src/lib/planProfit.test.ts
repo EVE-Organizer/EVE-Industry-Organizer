@@ -151,4 +151,78 @@ describe('planProfit', () => {
       + breakdown.packagedBuyCost
     expect(parts).toBeCloseTo(breakdown.totalSetupCost, 5)
   })
+
+  it('does not double-count packaged self-input in setup cost', () => {
+    const selfRef = mockBlueprint(200, [
+      { typeId: 200, quantity: 1 },
+      { typeId: 34, quantity: 5 },
+    ])
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [
+      { id: 'root-1', productTypeId: 200, runs: 100, productionDurationHours: 10 },
+    ]
+    const expandInput: ExpandPlanInput = {
+      template,
+      blueprints: [selfRef],
+      typeMap: new Map([
+        [
+          34,
+          {
+            typeId: 34,
+            name: 'Tritanium',
+            group: '',
+            category: '',
+            volume: 0,
+            iconUrl: '',
+            renderUrl: '',
+            bpIconUrl: '',
+          },
+        ],
+        [
+          200,
+          {
+            typeId: 200,
+            name: 'Kit',
+            group: '',
+            category: '',
+            volume: 0,
+            iconUrl: '',
+            renderUrl: '',
+            bpIconUrl: '',
+          },
+        ],
+      ]),
+      prices: new Map([
+        [34, 5],
+        [200, 1_000_000],
+      ]),
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+
+    const row = computeRootProfitRow(
+      template.roots[0],
+      selfRef,
+      expandInput,
+      expandInput.prices,
+      new Map([[200, 900_000]]),
+      10,
+    )
+    const breakdown = computeRootSetupBreakdown(
+      template.roots[0],
+      selfRef,
+      expandInput,
+      'Kit',
+    )
+
+    expect(breakdown.packagedBuyCost).toBeGreaterThan(0)
+    expect(row.setupCost).toBeCloseTo(
+      breakdown.totalSetupCost,
+      5,
+    )
+    const withoutPackaged =
+      breakdown.totalSetupCost - breakdown.packagedBuyCost
+    expect(withoutPackaged).toBeLessThan(row.setupCost)
+  })
 })

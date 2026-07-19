@@ -44,7 +44,13 @@ describe('supplyChainSlots', () => {
       blueprints,
       typeMap: new Map(),
       prices,
-      settings: DEFAULT_SETTINGS,
+      settings: {
+        ...DEFAULT_SETTINGS,
+        reactionFacility: {
+          ...DEFAULT_SETTINGS.reactionFacility,
+          refineryType: 'tatara',
+        },
+      },
       systemCostIndex: 0.01,
       reactionCostIndex: 0.01,
     })

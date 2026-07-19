@@ -1,9 +1,10 @@
 import { memo, type ReactNode } from 'react'
 import type { RankedBlueprintRow, SkillLevels } from '@/types'
+import { CopyNameButton } from '@/components/CopyNameButton'
 import { EveImage } from '@/components/EveImage'
 import { BuildSkillGapFlag } from '@/components/BuildSkillGapFlag'
 import { HaulRiskTrigger } from '@/components/HaulRiskModal'
-import { formatAvgVolume, formatIsk, formatPercent } from '@/lib/profit'
+import { formatAvgVolume, formatDuration, formatIsk, formatPercent } from '@/lib/profit'
 import { tierLabel } from '@/lib/blueprintGroups'
 import { getMissingBuildSkills } from '@/lib/buildRequirements'
 import type { RouteDangerResult } from '@/lib/routeDanger'
@@ -26,6 +27,25 @@ export interface BlueprintItemProps {
   dangerLoading: boolean
 }
 
+function BlueprintMetaLine({ row }: { row: RankedBlueprintRow }) {
+  return (
+    <span className="text-[10px] flex items-center gap-1 flex-wrap">
+      <span className="opacity-50 flex items-center gap-1">
+        <span className="badge badge-xs badge-ghost shrink-0">{tierLabel(row.blueprint.tier)}</span>
+        {row.product.group}
+      </span>
+      {row.jobTimeSeconds > 0 ? (
+        <span
+          className="shrink-0 tabular-nums text-info/70"
+          title="Total job duration for your batch size"
+        >
+          {formatDuration(row.jobTimeSeconds)}
+        </span>
+      ) : null}
+    </span>
+  )
+}
+
 export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps) {
   const { row, rank, skills, watched, onWatch, onOpenGraph, onOpenSetup, onOpenIph, onOpenHaulRisk, haulIn, haulOut, haulError, dangerLoading } = props
   const missingSkills = getMissingBuildSkills(row.blueprint, skills)
@@ -44,13 +64,11 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
       </td>
       <td>
         <div className="flex items-center gap-1.5 min-w-0">
+          <CopyNameButton text={row.product.name} />
           <span className={textLinkClass('truncate')}>{row.product.name}</span>
           <BuildSkillGapFlag missing={missingSkills} />
         </div>
-        <span className="text-[10px] opacity-50 flex items-center gap-1">
-          <span className="badge badge-xs badge-ghost">{tierLabel(row.blueprint.tier)}</span>
-          {row.product.group}
-        </span>
+        <BlueprintMetaLine row={row} />
       </td>
       <td className="whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
         <button
@@ -139,12 +157,12 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
         <EveImage id={row.blueprint.productTypeId} size={32} framed alt={row.product.name} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 min-w-0">
+            <CopyNameButton text={row.product.name} />
             <span className={textLinkClass('font-medium text-sm truncate')}>{row.product.name}</span>
             <BuildSkillGapFlag missing={missingSkills} />
           </div>
-          <p className="text-[10px] opacity-50 flex items-center gap-1 truncate mt-0.5">
-            <span className="badge badge-xs badge-ghost shrink-0">{tierLabel(row.blueprint.tier)}</span>
-            {row.product.group}
+          <p className="truncate mt-0.5">
+            <BlueprintMetaLine row={row} />
           </p>
         </div>
         <button

@@ -1,6 +1,5 @@
 import type { BlueprintTier, GlobalSettings, HubId, TimeRange } from '@/types'
 import {
-  BATCH_SIZE_STEP,
   BLUEPRINT_TIERS,
   DEFAULT_BATCH_SIZE,
   HUBS,
@@ -201,15 +200,17 @@ function tiersEqual(a: BlueprintTier[], b: BlueprintTier[]): boolean {
   return sorted(a) === sorted(b)
 }
 
-function clampMinVolume(value: number): number {
+/** Slider cap for min vol/day; typed values may exceed this. */
+export const MAX_MIN_VOLUME_SLIDER = 5000
+
+export function clampMinVolume(value: number): number {
   if (!Number.isFinite(value) || value <= 0) return 0
   return value
 }
 
-function clampBatchSize(value: number): number {
+export function clampBatchSize(value: number): number {
   if (!Number.isFinite(value)) return DEFAULT_BATCH_SIZE
-  const stepped = Math.round(value / BATCH_SIZE_STEP) * BATCH_SIZE_STEP
-  return Math.min(MAX_BATCH_SIZE, Math.max(MIN_BATCH_SIZE, stepped))
+  return Math.min(MAX_BATCH_SIZE, Math.max(MIN_BATCH_SIZE, Math.round(value)))
 }
 
 function clampSlider(value: number): number {

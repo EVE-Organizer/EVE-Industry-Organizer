@@ -57,10 +57,11 @@ describe('manufacturing run/time helpers', () => {
     ).toBe(targetRuns)
   })
 
-  it('clampManufacturingRuns enforces step 10 and max 500', () => {
+  it('clampManufacturingRuns enforces step 10 and max batch cap', () => {
     expect(clampManufacturingRuns(47)).toBe(50)
-    expect(clampManufacturingRuns(505)).toBe(500)
+    expect(clampManufacturingRuns(10_050)).toBe(10_000)
     expect(clampManufacturingRuns(7)).toBe(10)
+    expect(clampManufacturingRuns(1)).toBe(1)
   })
 
   it('clampGraphRuns allows runs above blueprint list cap', () => {

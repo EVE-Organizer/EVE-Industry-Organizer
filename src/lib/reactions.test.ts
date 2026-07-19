@@ -73,6 +73,41 @@ describe('reaction formulas', () => {
     expect(highIndex.jobCost).toBeGreaterThan(lowIndex.jobCost)
   })
 
+  it('defaults reaction intermediates to buy when refinery is inactive', () => {
+    const plate = getBlueprintForProduct(blueprints, 11544)
+    expect(plate).toBeDefined()
+
+    const prices = new Map<number, number>()
+    for (const t of types) prices.set(t.typeId, 100)
+
+    const { nodes } = expandManufacturingPlan({
+      template: {
+        id: 't',
+        name: 'test',
+        roots: [{ id: 'r1', productTypeId: 11544, runs: 100, productionDurationHours: 1 }],
+        defaultRunsPerBpc: 100,
+        modeOverrides: {},
+        nodeOverrides: {},
+      },
+      blueprints,
+      typeMap,
+      prices,
+      settings: {
+        ...DEFAULT_SETTINGS,
+        reactionFacility: {
+          ...DEFAULT_SETTINGS.reactionFacility,
+          refineryType: 'none',
+        },
+      },
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.02,
+    })
+
+    const tcNode = nodes.find((n) => n.productTypeId === 16671)
+    expect(tcNode).toBeDefined()
+    expect(tcNode!.mode).toBe('buy')
+  })
+
   it('expands Titanium Diborite plan through Titanium Carbide reactions', () => {
     const plate = getBlueprintForProduct(blueprints, 11544)
     expect(plate).toBeDefined()
@@ -92,7 +127,13 @@ describe('reaction formulas', () => {
       blueprints,
       typeMap,
       prices,
-      settings: DEFAULT_SETTINGS,
+      settings: {
+        ...DEFAULT_SETTINGS,
+        reactionFacility: {
+          ...DEFAULT_SETTINGS.reactionFacility,
+          refineryType: 'tatara',
+        },
+      },
       systemCostIndex: 0.01,
       reactionCostIndex: 0.02,
     })
@@ -115,7 +156,14 @@ describe('reaction formulas', () => {
       blueprints,
       typeMap,
       prices,
-      { ...DEFAULT_SETTINGS, batchSize: 1 },
+      {
+        ...DEFAULT_SETTINGS,
+        batchSize: 1,
+        reactionFacility: {
+          ...DEFAULT_SETTINGS.reactionFacility,
+          refineryType: 'tatara',
+        },
+      },
       0,
       0.01,
       0,

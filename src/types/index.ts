@@ -2,8 +2,8 @@ export type HubId = 'jita' | 'amarr' | 'dodixie' | 'rens' | 'hek' | 'ympwl'
 
 export const MAX_ME = 10
 export const MAX_TE = 20
-export const MIN_BATCH_SIZE = 10
-export const MAX_BATCH_SIZE = 500
+export const MIN_BATCH_SIZE = 1
+export const MAX_BATCH_SIZE = 10_000
 export const BATCH_SIZE_STEP = 10
 export const DEFAULT_BATCH_SIZE = 100
 
@@ -152,7 +152,17 @@ export interface MarketHistoryEntry {
 
 export type StructureType = 'npc' | 'raitaru' | 'azbel' | 'sotiyo' | 'custom'
 
-/** Upwell engineering complex role bonuses (percent reduction). Tax is set per structure. */
+/** Upwell engineering complex hull role bonuses (percent reduction). Rigs are separate. */
+export const STRUCTURE_HULL_PRESETS: Record<
+  Exclude<StructureType, 'npc' | 'custom'>,
+  { hullMeBonusPercent: number; hullTeBonusPercent: number; hullJobCostBonusPercent: number }
+> = {
+  raitaru: { hullMeBonusPercent: 1, hullTeBonusPercent: 15, hullJobCostBonusPercent: 3 },
+  azbel: { hullMeBonusPercent: 2, hullTeBonusPercent: 20, hullJobCostBonusPercent: 4 },
+  sotiyo: { hullMeBonusPercent: 3, hullTeBonusPercent: 25, hullJobCostBonusPercent: 5 },
+}
+
+/** @deprecated Use STRUCTURE_HULL_PRESETS. Kept for migration reads. */
 export const STRUCTURE_PRESETS: Record<
   Exclude<StructureType, 'npc' | 'custom'>,
   { structureMeBonusPercent: number; structureTeBonusPercent: number; structureJobCostBonusPercent: number }
@@ -160,6 +170,90 @@ export const STRUCTURE_PRESETS: Record<
   raitaru: { structureMeBonusPercent: 1, structureTeBonusPercent: 15, structureJobCostBonusPercent: 3 },
   azbel: { structureMeBonusPercent: 2, structureTeBonusPercent: 20, structureJobCostBonusPercent: 4 },
   sotiyo: { structureMeBonusPercent: 3, structureTeBonusPercent: 25, structureJobCostBonusPercent: 5 },
+}
+
+export interface ManufacturingRigModifiers {
+  rigMeBonusPercent: number
+  rigTeBonusPercent: number
+  rigJobCostBonusPercent: number
+}
+
+export const DEFAULT_MANUFACTURING_RIGS: ManufacturingRigModifiers = {
+  rigMeBonusPercent: 0,
+  rigTeBonusPercent: 0,
+  rigJobCostBonusPercent: 0,
+}
+
+export type RefineryType = 'none' | 'athanor' | 'tatara' | 'custom'
+
+export type ReactionFamilyGroup = 'composite' | 'biochemical' | 'hybrid'
+
+export interface ReactionFamilyModifiers {
+  rigMeBonusPercent: number
+  rigTeBonusPercent: number
+  taxPercent: number
+}
+
+export const REACTION_FAMILY_GROUPS: ReactionFamilyGroup[] = [
+  'composite',
+  'biochemical',
+  'hybrid',
+]
+
+export const DEFAULT_REACTION_FAMILY_MODIFIERS: ReactionFamilyModifiers = {
+  rigMeBonusPercent: 0,
+  rigTeBonusPercent: 0,
+  taxPercent: 0,
+}
+
+export function defaultReactionFamilyModifiers(): Record<
+  ReactionFamilyGroup,
+  ReactionFamilyModifiers
+> {
+  return {
+    composite: { ...DEFAULT_REACTION_FAMILY_MODIFIERS },
+    biochemical: { ...DEFAULT_REACTION_FAMILY_MODIFIERS },
+    hybrid: { ...DEFAULT_REACTION_FAMILY_MODIFIERS },
+  }
+}
+
+export interface ReactionFacilitySettings {
+  reactionSystemId: number
+  refineryType: RefineryType
+  /** Hull TE role bonus for custom refinery; presets use REFINERY_HULL_PRESETS. */
+  hullTeBonusPercent: number
+  familyModifiers: Record<ReactionFamilyGroup, ReactionFamilyModifiers>
+}
+
+export const REFINERY_HULL_PRESETS: Record<
+  Exclude<RefineryType, 'none' | 'custom'>,
+  { hullTeBonusPercent: number }
+> = {
+  athanor: { hullTeBonusPercent: 0 },
+  tatara: { hullTeBonusPercent: 25 },
+}
+
+export function defaultReactionFacility(manufacturingSystemId: number): ReactionFacilitySettings {
+  return {
+    reactionSystemId: manufacturingSystemId,
+    refineryType: 'none',
+    hullTeBonusPercent: 0,
+    familyModifiers: defaultReactionFamilyModifiers(),
+  }
+}
+
+/** Resolved facility bonuses for cost math and breakdown display. */
+export interface FacilityBonusDetail {
+  hullMeBonusPercent: number
+  hullTeBonusPercent: number
+  hullJobCostBonusPercent: number
+  rigMeBonusPercent: number
+  rigTeBonusPercent: number
+  rigJobCostBonusPercent: number
+  effectiveMeBonusPercent: number
+  effectiveTeBonusPercent: number
+  effectiveJobCostBonusPercent: number
+  taxPercent: number
 }
 
 export interface StructureModifiers {
@@ -177,14 +271,18 @@ export interface GlobalSettings {
   meDefault: number
   teDefault: number
   structureType: StructureType
-  /** Extra material reduction from structure role bonus (player structures only). */
+  /** Custom hull ME bonus (player structures only; presets use STRUCTURE_HULL_PRESETS). */
   structureMeBonusPercent: number
-  /** Extra job time reduction from structure role bonus (player structures only). */
+  /** Custom hull TE bonus (player structures only). */
   structureTeBonusPercent: number
-  /** Job installation cost reduction from structure role bonus (player structures only). */
+  /** Custom hull job cost bonus (player structures only). */
   structureJobCostBonusPercent: number
+  /** M-Set rig bonuses fitted on the manufacturing structure. */
+  manufacturingRigs: ManufacturingRigModifiers
   /** Manufacturing tax charged by the structure owner (player structures only). */
   structureTaxPercent: number
+  /** Refinery and per-type reaction rig/tax settings. */
+  reactionFacility: ReactionFacilitySettings
   priceMethod: 'sell_orders' | 'buy_orders'
   /** Per product-category assumed BPO lifetime runs for T1 amortization. */
   blueprintLifetimeRunsByCategory: BpoLifetimeRunsByCategory
@@ -377,6 +475,7 @@ export interface SetupCostBreakdown {
   structureTeBonusPercent: number
   structureJobCostBonusPercent: number
   structureTaxPercent: number
+  facilityBonus?: FacilityBonusDetail
   jobCost: number
   bpoTypeId: number
   bpoUnitPrice: number
@@ -449,6 +548,7 @@ export interface IphBreakdown {
   structureTeBonusPercent: number
   structureJobCostBonusPercent: number
   structureTaxPercent: number
+  facilityBonus?: FacilityBonusDetail
   jobCost: number
   bpoTypeId: number
   bpoUnitPrice: number
@@ -575,7 +675,9 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   structureMeBonusPercent: 0,
   structureTeBonusPercent: 0,
   structureJobCostBonusPercent: 0,
+  manufacturingRigs: { ...DEFAULT_MANUFACTURING_RIGS },
   structureTaxPercent: 0,
+  reactionFacility: defaultReactionFacility(30000144),
   priceMethod: 'sell_orders',
   blueprintLifetimeRunsByCategory: { ...DEFAULT_BPO_LIFETIME_RUNS_BY_CATEGORY },
   inventionSkillLevel: 4,

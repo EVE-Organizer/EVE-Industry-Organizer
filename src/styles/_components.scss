@@ -150,6 +150,63 @@
   }
 }
 
+.compact-slider {
+  @apply min-w-0;
+
+  &__header {
+    @apply flex items-center justify-between gap-2 mb-1.5 min-w-0;
+  }
+
+  &__title {
+    @apply inline-flex items-center gap-1 text-xs text-base-content/80 shrink-0;
+  }
+
+  &__summary {
+    @apply text-xs font-medium text-primary tabular-nums truncate;
+  }
+
+  &__controls {
+    @apply grid items-center gap-x-2 min-w-0;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  &__track-col {
+    @apply flex flex-col gap-0.5 min-w-0;
+  }
+
+  &--panel {
+    @apply flex flex-col gap-2.5 rounded-lg border border-eve-border bg-gradient-to-br from-base-200/50 to-base-300/15 px-3 py-2.5 h-full;
+
+    .compact-slider__header {
+      @apply mb-0 pb-2 border-b border-eve-border/60;
+    }
+
+    .compact-slider__title {
+      @apply text-sm font-medium text-base-content/90;
+    }
+
+    .compact-slider__summary {
+      @apply text-sm;
+    }
+
+    .compact-slider__input-row {
+      @apply flex items-center;
+    }
+
+    .compact-slider__track-col {
+      @apply gap-1 mt-auto;
+    }
+
+    .setup-budget__field {
+      min-width: 4.5rem;
+    }
+
+    .setup-budget__field-input {
+      @apply w-14 text-sm;
+    }
+  }
+}
+
 .setup-budget {
   @apply rounded-lg border border-eve-border bg-base-200/40 px-3 py-2.5 min-w-0;
 
@@ -284,6 +341,26 @@
 
   &__hint {
     @apply mt-2 text-[11px] leading-relaxed text-base-content/40;
+  }
+}
+
+.plan-facility-controls {
+  @apply mb-4 rounded-lg border border-eve-border/80 bg-base-300/15 px-3 py-3 sm:px-4;
+
+  &__grid {
+    @apply grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  &__field {
+    @apply flex min-w-0 flex-col gap-1;
+
+    .label {
+      @apply min-h-[1.25rem] py-0;
+    }
+  }
+
+  &__hint {
+    @apply mt-3 border-t border-eve-border/60 pt-3 text-[11px] leading-relaxed text-base-content/40;
   }
 }
 

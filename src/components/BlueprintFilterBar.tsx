@@ -1,17 +1,16 @@
 import type { ReactNode } from 'react'
 import type { BlueprintTier, TimeRange } from '@/types'
 import {
-  BATCH_SIZE_STEP,
   BLUEPRINT_TIERS,
   MAX_BATCH_SIZE,
   MIN_BATCH_SIZE,
 } from '@/types'
 import type { SdeData, ProductGroupCategoryNode } from '@/services/data/sdeLoader'
-import { defaultQuery, type BlueprintQuery } from '@/lib/blueprintQuery'
+import { clampBatchSize, clampMinVolume, defaultQuery, MAX_MIN_VOLUME_SLIDER, type BlueprintQuery } from '@/lib/blueprintQuery'
 import { useAppStore } from '@/stores/appStore'
 import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
 import { ProductGroupPicker } from '@/components/ProductGroupPicker'
-import { RangeSlider } from '@/components/RangeSlider'
+import { CompactSliderField } from '@/components/CompactSliderField'
 import { SetupBudgetRange } from '@/components/SetupBudgetRange'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
@@ -19,7 +18,7 @@ import { EveImage } from '@/components/EveImage'
 import { Panel } from '@/components/Panel'
 import { TIER_FILTER_LABELS, TIER_IMAGE_VARIANTS, TIER_TYPE_IDS } from '@/lib/eveImages'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
-import { useEffect, useState } from 'react'
+import { formatAvgVolume, formatInputDecimal, formatNumber } from '@/lib/profit'
 
 const TIME_WINDOWS: TimeRange[] = ['1d', '1w', '1m', '1y', 'all']
 
@@ -108,20 +107,6 @@ export function BlueprintFilterBar({
   resultPending = false,
 }: BlueprintFilterBarProps) {
   const settings = useAppStore((s) => s.userData.settings)
-  const [minVolumeDraft, setMinVolumeDraft] = useState(
-    query.minVolume > 0 ? String(query.minVolume) : '',
-  )
-
-  useEffect(() => {
-    setMinVolumeDraft(query.minVolume > 0 ? String(query.minVolume) : '')
-  }, [query.minVolume])
-
-  function commitMinVolume() {
-    const parsed = parseFloat(minVolumeDraft)
-    const next = Number.isFinite(parsed) && parsed > 0 ? parsed : 0
-    if (next !== query.minVolume) onChange({ minVolume: next })
-    setMinVolumeDraft(next > 0 ? String(next) : '')
-  }
 
   function handleReset() {
     onChange(defaultQuery(settings))
@@ -312,54 +297,51 @@ export function BlueprintFilterBar({
             />
           </LimitsTile>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <LimitsTile>
-              <FormFieldLabel
-                label="Batch size (runs)"
-                tooltip="Number of manufacturing runs per job. Profit, setup cost, and ISK/hr use this value, capped by hub volume when listed."
-                valueLabel={query.batchSize}
-                size="sm"
-              />
-              <div className="flex flex-col justify-end min-h-[2.75rem]">
-                <RangeSlider
-                  min={MIN_BATCH_SIZE}
-                  max={MAX_BATCH_SIZE}
-                  step={BATCH_SIZE_STEP}
-                  value={query.batchSize}
-                  onChange={(batchSize) => onChange({ batchSize })}
-                  label="Batch size"
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-base-content/50 tabular-nums px-0.5 mt-1">
-                  <span>{MIN_BATCH_SIZE}</span>
-                  <span>{MAX_BATCH_SIZE}</span>
-                </div>
-              </div>
-            </LimitsTile>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0 items-stretch">
+            <CompactSliderField
+              variant="panel"
+              label="Batch size"
+              tooltip="Number of manufacturing runs per job. Setup cost and profit scale with this value. ISK/hr also caps sell rate to hub volume."
+              value={query.batchSize}
+              onChange={(batchSize) => onChange({ batchSize })}
+              min={MIN_BATCH_SIZE}
+              max={MAX_BATCH_SIZE}
+              step={1}
+              unit="runs"
+              formatSummary={(v) => `${formatNumber(v, 0)} runs`}
+              formatDisplay={(v) => formatInputDecimal(v, 0)}
+              parseInput={(raw) => {
+                const parsed = parseFloat(raw.trim())
+                return Number.isFinite(parsed) ? parsed : null
+              }}
+              clampValue={clampBatchSize}
+              formatAxis={(v) => formatNumber(v, 0)}
+              ariaLabel="Batch size (runs)"
+            />
 
-            <LimitsTile>
-              <FormFieldLabel
-                label="Min vol/day"
-                tooltip="Hide blueprints whose average daily traded volume is below this threshold. Uses the same Vol/day column as the table (1m volume when the price window is 1y)."
-                size="sm"
-              />
-              <div className="flex items-end min-h-[2.75rem]">
-                <input
-                  type="number"
-                  min={0}
-                  step={0.1}
-                  className="input input-bordered input-sm w-full tabular-nums h-8"
-                  placeholder="Any"
-                  value={minVolumeDraft}
-                  aria-label="Minimum average daily volume"
-                  onChange={(e) => setMinVolumeDraft(e.target.value)}
-                  onBlur={commitMinVolume}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') e.currentTarget.blur()
-                  }}
-                />
-              </div>
-            </LimitsTile>
+            <CompactSliderField
+              variant="panel"
+              label="Min vol/day"
+              tooltip="Hide blueprints whose average daily traded volume is below this threshold. Uses the same Vol/day column as the table (1m volume when the price window is 1y)."
+              value={query.minVolume}
+              onChange={(minVolume) => onChange({ minVolume })}
+              min={0}
+              max={MAX_MIN_VOLUME_SLIDER}
+              step={0.1}
+              unit="/d"
+              formatSummary={(v) => (v > 0 ? `${formatAvgVolume(v)}/d` : 'Any')}
+              formatDisplay={(v) => (v > 0 ? formatInputDecimal(v, 1) : '')}
+              parseInput={(raw) => {
+                const trimmed = raw.trim()
+                if (!trimmed) return 0
+                const parsed = parseFloat(trimmed)
+                return Number.isFinite(parsed) ? parsed : null
+              }}
+              clampValue={clampMinVolume}
+              formatAxis={(v) => (v === 0 ? 'Any' : formatAvgVolume(v))}
+              inputPlaceholder="Any"
+              ariaLabel="Minimum average daily volume"
+            />
           </div>
         </FilterSection>
       </div>

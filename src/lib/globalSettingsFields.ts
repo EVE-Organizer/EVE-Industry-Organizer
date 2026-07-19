@@ -14,13 +14,37 @@ export const GLOBAL_SETTING_TOOLTIPS = {
   inventionSkillLevel:
     'Assumed level (0-5) for your invention encryption and datacore skills. Higher levels raise the T2 success chance, which lowers the invention cost charged per run.',
   structureType:
-    'Where you run manufacturing jobs. NPC stations use only the system cost index. Player structures add role bonuses for materials, job time, and installation cost, plus an owner tax.',
+    'Where you run manufacturing jobs. NPC stations use only the system cost index. Engineering complexes add hull role bonuses; fitted M-Set rigs are entered separately below.',
+  structureHullMeBonusPercent:
+    'Hull role bonus for material reduction (Raitaru 1%, Azbel 2%, Sotiyo 3%). Presets are fixed; custom structures can override.',
+  structureHullTeBonusPercent:
+    'Hull role bonus for job time (Raitaru 15%, Azbel 20%, Sotiyo 25%). Stacks multiplicatively with rig TE.',
+  structureHullJobCostBonusPercent:
+    'Hull role bonus on installation fees (Raitaru 3%, Azbel 4%, Sotiyo 5%).',
   structureMeBonusPercent:
-    'Extra material reduction from the structure role bonus, on top of BPO ME. Raitaru is 1%, Azbel 2%, Sotiyo 3%. Match the in-game Manufacturing tooltip.',
+    'Custom hull material reduction when using Custom structure type.',
   structureTeBonusPercent:
-    'Extra job time reduction from the structure role bonus, on top of BPO TE. Raitaru is 15%, Azbel 20%, Sotiyo 25%.',
+    'Custom hull job time reduction when using Custom structure type.',
   structureJobCostBonusPercent:
-    'Reduction on the industry installation fee from the structure role bonus. Raitaru is 3%, Azbel 4%, Sotiyo 5%.',
+    'Custom hull installation fee reduction when using Custom structure type.',
+  manufacturingRigMeBonusPercent:
+    'M-Set rig material bonus fitted on your engineering complex. Stacks multiplicatively with hull ME.',
+  manufacturingRigTeBonusPercent:
+    'M-Set rig time bonus on your engineering complex. Stacks multiplicatively with hull TE.',
+  manufacturingRigJobCostBonusPercent:
+    'Rig bonus on installation fees, if any.',
   structureTaxPercent:
-    'Manufacturing tax set by the structure owner, shown in the in-game job cost modifiers. Default NPC stations have no owner tax.',
+    'Manufacturing tax set by the structure owner. Default NPC stations have no owner tax.',
+  reactionSystemId:
+    'Solar system where reaction jobs run. Drives the reaction cost index (separate from manufacturing).',
+  refineryType:
+    'Refinery hull for reaction jobs. Tatara gives −25% reaction time; Athanor has no hull time bonus. Rigs are entered per reaction type below.',
+  refineryHullTeBonusPercent:
+    'Custom refinery hull time bonus when using Custom refinery.',
+  reactionRigMeBonusPercent:
+    'L-Set reaction rig material bonus for this reaction type (from in-game Reaction tooltip).',
+  reactionRigTeBonusPercent:
+    'L-Set reaction rig time bonus for this reaction type.',
+  reactionTaxPercent:
+    'Owner tax for this reaction type shown in the in-game Reaction tooltip.',
 } as const

@@ -1,6 +1,11 @@
 import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings, ManufacturingSettings, StructureModifiers } from '@/types'
 import { isReactionRecipe, recipeKind } from '@/lib/recipes'
 import {
+  resolveManufacturingModifiers,
+  resolveReactionModifiers,
+  resolveRecipeModifiers,
+} from '@/lib/facilityModifiers'
+import {
   BATCH_SIZE_STEP,
   DEFAULT_BATCH_SIZE,
   MAX_BATCH_SIZE,
@@ -29,16 +34,18 @@ const REACTIONS_BONUS = 0.04
  */
 const RESEARCH_FEE_FACTOR = 1
 
+/** Multiplicative bonus as a factor in [0, 1] (40% bonus → 0.6). */
+function bonusFactor(percent: number): number {
+  return Math.max(0, 1 - percent / 100)
+}
+
+/** Owner tax as a multiplier (10% tax → 1.1). */
+function taxFactor(percent: number): number {
+  return Math.max(0, 1 + percent / 100)
+}
+
 export function resolveStructureModifiers(settings: GlobalSettings): StructureModifiers {
-  if (settings.structureType === 'npc') {
-    return { meBonusPercent: 0, teBonusPercent: 0, jobCostBonusPercent: 0, taxPercent: 0 }
-  }
-  return {
-    meBonusPercent: settings.structureMeBonusPercent,
-    teBonusPercent: settings.structureTeBonusPercent,
-    jobCostBonusPercent: settings.structureJobCostBonusPercent,
-    taxPercent: settings.structureTaxPercent,
-  }
+  return resolveManufacturingModifiers(settings)
 }
 
 /** TE time multiplier for display and breakdowns (TE 20 → 0.80). */
@@ -71,8 +78,8 @@ export function applyME(
   if (runs <= 0) {
     return materials.map((m) => ({ typeId: m.typeId, quantity: 0 }))
   }
-  const meFactor = 1 - me * ME_BONUS
-  const structFactor = 1 - structureMeBonusPercent / 100
+  const meFactor = Math.max(0, 1 - me * ME_BONUS)
+  const structFactor = bonusFactor(structureMeBonusPercent)
   return materials.map((m) => {
     const raw = m.quantity * runs * meFactor * structFactor
     const rounded = Math.round(raw * 100) / 100
@@ -91,7 +98,7 @@ export function applyTE(
   advancedIndustry: number,
   structureTeBonusPercent = 0,
 ): number {
-  const structFactor = 1 - structureTeBonusPercent / 100
+  const structFactor = bonusFactor(structureTeBonusPercent)
   return (
     baseTimeSeconds *
     runs *
@@ -109,7 +116,7 @@ export function applyReactionTime(
   reactions: number,
   structureTeBonusPercent = 0,
 ): number {
-  const structFactor = 1 - structureTeBonusPercent / 100
+  const structFactor = bonusFactor(structureTeBonusPercent)
   return baseTimeSeconds * runs * reactionsTimeFactor(reactions) * structFactor
 }
 
@@ -235,8 +242,8 @@ export function estimateJobCost(
   return (
     eiv *
     systemCostIndex *
-    (1 - modifiers.jobCostBonusPercent / 100) *
-    (1 + modifiers.taxPercent / 100)
+    bonusFactor(modifiers.jobCostBonusPercent) *
+    taxFactor(modifiers.taxPercent)
   )
 }
 
@@ -249,10 +256,10 @@ export function totalManufacturingCost(
   reactionCostIndex = systemCostIndex,
 ): { materialCost: number; jobCost: number; capital: number; jobTime: number } {
   const runs = settings.batchSize
-  const structure = resolveStructureModifiers(settings)
   const kind = recipeKind(blueprint)
   const costIndex =
     kind === 'reaction' ? reactionCostIndex : systemCostIndex
+  const structure = resolveRecipeModifiers(settings, blueprint)
 
   if (isReactionRecipe(blueprint)) {
     const mats = applyME(blueprint.materials, 0, runs, structure.meBonusPercent)
@@ -278,9 +285,10 @@ export function totalManufacturingCost(
   const matCost = materialCost(mats, prices)
   const eiv = estimatedItemValue(blueprint.materials, runs, prices)
   const jobCost = estimateJobCost(eiv, costIndex, structure)
+  const { te } = blueprintMeTe(blueprint.tier, settings, blueprint)
   const jobTime = applyTE(
     blueprint.manufacturingTime,
-    settings.teDefault,
+    te,
     runs,
     settings.skills.industry ?? 0,
     settings.skills.advancedIndustry ?? 0,
@@ -393,8 +401,9 @@ export function inventionBlueprintCostPerRun({
 }): InventionCostResult {
   const datacoreCost = materialCost(datacores, prices)
   const attemptCost = datacoreCost + copyFeePerAttempt
-  // Encryption skill divided by 40, the two datacore skills by 30 each.
-  const chance = Math.min(1, baseChance * (1 + skillLevel / 40 + (2 * skillLevel) / 30))
+  // Encryption and both datacore skills add +1% per level (multiplicative).
+  const skillFactor = 1 + skillLevel * 0.01
+  const chance = Math.min(1, baseChance * skillFactor * skillFactor * skillFactor)
   const expectedRunsPerAttempt = chance * runsPerBPC
   const costPerRun = expectedRunsPerAttempt > 0 ? attemptCost / expectedRunsPerAttempt : Infinity
   return { datacoreCost, attemptCost, chance, expectedRunsPerAttempt, costPerRun }

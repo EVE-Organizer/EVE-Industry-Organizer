@@ -23,19 +23,19 @@ interface BlueprintQueryFiltersProps {
   onRankingQueryChange: (query: BlueprintQuery) => void
 }
 
-function sliderSnapshot(query: BlueprintQuery): string {
+function deferredRankingSnapshot(query: BlueprintQuery): string {
   return JSON.stringify({
     budgetMinSlider: query.budgetMinSlider,
     budgetMaxSlider: query.budgetMaxSlider,
     batchSize: query.batchSize,
+    minVolume: query.minVolume,
   })
 }
 
-function nonSliderQuery(query: BlueprintQuery): Omit<
-  BlueprintQuery,
-  'budgetMinSlider' | 'budgetMaxSlider' | 'batchSize'
-> {
-  const { budgetMinSlider, budgetMaxSlider, batchSize, ...rest } = query
+function immediateRankingQuery(
+  query: BlueprintQuery,
+): Omit<BlueprintQuery, 'budgetMinSlider' | 'budgetMaxSlider' | 'batchSize' | 'minVolume'> {
+  const { budgetMinSlider, budgetMaxSlider, batchSize, minVolume, ...rest } = query
   return rest
 }
 
@@ -50,11 +50,14 @@ export const BlueprintQueryFilters = forwardRef<
 
   useImperativeHandle(ref, () => ({ setQuery }), [setQuery])
 
-  const debouncedSliders = useDebouncedValue(sliderSnapshot(query), SLIDER_DEBOUNCE_MS)
-  const isRankingPending = sliderSnapshot(query) !== debouncedSliders
+  const debouncedRankingFields = useDebouncedValue(
+    deferredRankingSnapshot(query),
+    SLIDER_DEBOUNCE_MS,
+  )
+  const isRankingPending = deferredRankingSnapshot(query) !== debouncedRankingFields
 
-  const stableNonSlider = useMemo(
-    () => nonSliderQuery(query),
+  const stableImmediateQuery = useMemo(
+    () => immediateRankingQuery(query),
     [
       query.hub,
       query.mfgSystem,
@@ -64,19 +67,18 @@ export const BlueprintQueryFilters = forwardRef<
       query.priceMethod,
       query.buildableOnly,
       query.includeHaul,
-      query.minVolume,
       query.sortBy,
       query.sortDir,
     ],
   )
 
   useEffect(() => {
-    const sliders = JSON.parse(debouncedSliders) as Pick<
+    const deferred = JSON.parse(debouncedRankingFields) as Pick<
       BlueprintQuery,
-      'budgetMinSlider' | 'budgetMaxSlider' | 'batchSize'
+      'budgetMinSlider' | 'budgetMaxSlider' | 'batchSize' | 'minVolume'
     >
-    onRankingQueryChange({ ...stableNonSlider, ...sliders })
-  }, [debouncedSliders, stableNonSlider, onRankingQueryChange])
+    onRankingQueryChange({ ...stableImmediateQuery, ...deferred })
+  }, [debouncedRankingFields, stableImmediateQuery, onRankingQueryChange])
 
   return (
     <BlueprintFilterBar

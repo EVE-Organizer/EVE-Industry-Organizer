@@ -1,5 +1,5 @@
 import type { GlobalSettings, StructureType } from '@/types'
-import { STRUCTURE_PRESETS } from '@/types'
+import { STRUCTURE_HULL_PRESETS } from '@/types'
 
 /** EVE type icons for manufacturing location options. */
 export const STRUCTURE_TYPE_IDS: Record<StructureType, number> = {
@@ -12,7 +12,7 @@ export const STRUCTURE_TYPE_IDS: Record<StructureType, number> = {
 
 export const STRUCTURE_TYPES: StructureType[] = ['npc', 'raitaru', 'azbel', 'sotiyo', 'custom']
 
-/** Apply preset bonuses when the user picks a structure type. */
+/** Apply preset hull bonuses when the user picks a structure type. Rigs are unchanged. */
 export function patchStructureType(structureType: StructureType): Partial<GlobalSettings> {
   if (structureType === 'npc') {
     return {
@@ -26,7 +26,13 @@ export function patchStructureType(structureType: StructureType): Partial<Global
   if (structureType === 'custom') {
     return { structureType }
   }
-  return { structureType, ...STRUCTURE_PRESETS[structureType] }
+  const hull = STRUCTURE_HULL_PRESETS[structureType]
+  return {
+    structureType,
+    structureMeBonusPercent: hull.hullMeBonusPercent,
+    structureTeBonusPercent: hull.hullTeBonusPercent,
+    structureJobCostBonusPercent: hull.hullJobCostBonusPercent,
+  }
 }
 
 export function structureTypeLabel(type: StructureType): string {

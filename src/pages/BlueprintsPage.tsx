@@ -423,7 +423,7 @@ const BlueprintResults = memo(function BlueprintResults({
                 direction={rankingQuery.sortDir}
                 onSort={onSort}
               >
-                <InfoTooltip text={`Profit and ISK/hr use min(production/day, market volume/day) × profit per unit, scaled down when your production share exceeds daily market volume (competition penalty). Batch runs are capped at ${MAX_DAYS_TO_CLEAR} days of average hub volume.`} />
+                <InfoTooltip text={`Setup cost and profit use your batch size. ISK/hr uses min(production/day, market volume/day) × profit per unit, scaled down when your production share exceeds daily hub volume (competition penalty).`} />
               </SortableTh>
               <SortableTh
                 label="Margin"

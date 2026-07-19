@@ -2,6 +2,7 @@ import type { BlueprintCostBreakdown, RankedBlueprintRow, SetupCostBreakdown, Ty
 import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
 import { JobCostFormula, jobCostStepTitle } from '@/components/JobCostFormula'
+import { formatFacilityBonusLine } from '@/lib/facilityModifiers'
 import { isPlayerStructure } from '@/lib/structureSettings'
 import { BPO_LIFETIME_CATEGORY_LABELS } from '@/lib/bpoLifetime'
 
@@ -41,11 +42,11 @@ function RunsExplanation({ breakdown }: { breakdown: SetupCostBreakdown }) {
         <strong>{formatAvgVolume(avgVolume)}</strong> units/day
       </li>
       <li>
-        Max runs for market: floor({formatAvgVolume(avgVolume)} × {volumeCapDays} ÷{' '}
-        {productQuantity}) = <strong>{maxRuns}</strong>
+        Runs for setup & profit: <strong>{runs}</strong> (your batch setting)
       </li>
       <li>
-        Runs used: min({batchSizeSetting}, {maxRuns}) = <strong>{runs}</strong>
+        Market fits ~<strong>{maxRuns}</strong> runs in {volumeCapDays} days at hub volume (ISK/hr
+        uses this cap)
       </li>
       <li>
         Output qty: {runs} × {productQuantity} = <strong>{formatQuantity(outputQty)}</strong>{' '}
@@ -213,14 +214,18 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
             <h4 className="font-semibold text-sm mb-2">
               3. Materials (ME {b.me}
               {isPlayerStructure(b.structureType) && b.structureMeBonusPercent > 0
-                ? ` + ${formatDecimal(b.structureMeBonusPercent, 1)}% structure`
+                ? b.facilityBonus
+                  ? ` + ${formatFacilityBonusLine(b.facilityBonus, 'me')} structure`
+                  : ` + ${formatDecimal(b.structureMeBonusPercent, 1)}% structure`
                 : ''}
               )
             </h4>
             <p className="text-xs opacity-60 mb-2">
               Per line: ceil(base qty × runs × (1 − ME × 1%)
               {isPlayerStructure(b.structureType) && b.structureMeBonusPercent > 0
-                ? ` × (1 − structure ${formatDecimal(b.structureMeBonusPercent, 1)}%)`
+                ? b.facilityBonus
+                  ? ` × (1 − ${formatFacilityBonusLine(b.facilityBonus, 'me')} structure bonus)`
+                  : ` × (1 − structure ${formatDecimal(b.structureMeBonusPercent, 1)}%)`
                 : ''}
               ) × hub window price
             </p>

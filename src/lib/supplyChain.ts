@@ -3,10 +3,11 @@ import {
   applyME,
   materialCost,
   resolveBlueprintMeTe,
-  resolveStructureModifiers,
   totalManufacturingCost,
 } from '@/lib/cost'
-import { isReactionRecipe } from '@/lib/recipes'
+import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
+import { canRunReactionJobs, isReactionRecipe } from '@/lib/recipes'
+import { runsForDemand } from '@/lib/rootRunsDuration'
 import { getBlueprintForProduct } from '@/services/data/sdeLoader'
 
 const MINERAL_IDS = new Set([34, 35, 36, 37, 38, 39, 40])
@@ -68,6 +69,27 @@ export function findBuildTargetDetails(
   return results.sort((a, b) => a.productName.localeCompare(b.productName))
 }
 
+function buyLeaf(
+  mat: { typeId: number; quantity: number },
+  typeMap: Map<number, TypeInfo>,
+  prices: Map<number, number>,
+  depth: number,
+): SupplyChainNode {
+  const unitPrice = prices.get(mat.typeId) ?? 0
+  const buyCost = unitPrice * mat.quantity
+  return {
+    typeId: mat.typeId,
+    name: typeMap.get(mat.typeId)?.name ?? `Type ${mat.typeId}`,
+    quantity: mat.quantity,
+    unitPrice,
+    totalCost: buyCost,
+    mode: 'buy',
+    buyCost,
+    isLeaf: true,
+    depth: depth + 1,
+  }
+}
+
 export function buildSupplyChain(
   blueprint: BlueprintInfo,
   blueprints: BlueprintInfo[],
@@ -82,7 +104,7 @@ export function buildSupplyChain(
   reactionCostIndex = systemCostIndex,
 ): SupplyChainNode {
   const runs = settings.batchSize
-  const structure = resolveStructureModifiers(settings)
+  const structure = resolveRecipeModifiers(settings, blueprint)
   const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
   const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
   const product = typeMap.get(blueprint.productTypeId)
@@ -98,32 +120,31 @@ export function buildSupplyChain(
   )
 
   const children: SupplyChainNode[] = mats.map((mat) => {
+    if (mat.typeId === blueprint.productTypeId) {
+      return buyLeaf(mat, typeMap, prices, depth)
+    }
+
     const type = typeMap.get(mat.typeId)
     const unitPrice = prices.get(mat.typeId) ?? 0
     const buyCost = unitPrice * mat.quantity
     const subBp = getBlueprintForProduct(blueprints, mat.typeId)
 
     if (!subBp || isRawMaterial(mat.typeId) || depth >= maxDepth) {
-      return {
-        typeId: mat.typeId,
-        name: type?.name ?? `Type ${mat.typeId}`,
-        quantity: mat.quantity,
-        unitPrice,
-        totalCost: buyCost,
-        mode: 'buy' as const,
-        buyCost,
-        isLeaf: true,
-        depth: depth + 1,
-      }
+      return buyLeaf(mat, typeMap, prices, depth)
     }
 
+    if (isReactionRecipe(subBp) && !canRunReactionJobs(settings)) {
+      return buyLeaf(mat, typeMap, prices, depth)
+    }
+
+    const subRuns = runsForDemand(subBp.productQuantity, mat.quantity)
     const subMe = resolveBlueprintMeTe(subBp.tier, settings, undefined, subBp).me
     const subChain = buildSupplyChain(
       subBp,
       blueprints,
       typeMap,
       prices,
-      settings,
+      { ...settings, batchSize: subRuns },
       subMe,
       systemCostIndex,
       depth + 1,

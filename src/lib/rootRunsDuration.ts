@@ -6,9 +6,9 @@ import {
   manufacturingTimePerRun,
   reactionTimePerRun,
   resolveBlueprintMeTe,
-  resolveStructureModifiers,
   runsForJobTime,
 } from '@/lib/cost'
+import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
 import { skillLevel } from '@/lib/skillFields'
 import { activeConcurrentCopies } from '@/lib/supplyChainSlots'
@@ -21,6 +21,14 @@ function skillTimeLevels(settings: GlobalSettings): { industry: number; advanced
     industry: skillLevel(settings.skills, 'industry'),
     advancedIndustry: skillLevel(settings.skills, 'advancedIndustry'),
   }
+}
+
+function structureTeForBlueprint(
+  blueprint: BlueprintInfo,
+  settings: GlobalSettings,
+): number {
+  const structure = resolveRecipeModifiers(settings, blueprint)
+  return structure.teBonusPercent
 }
 
 /** Manufacturing runs needed to satisfy material demand (matches in-game run count). */
@@ -38,7 +46,7 @@ export function jobTimeSecondsForRuns(
   meTeOverride?: PlanNodeOverride,
 ): number {
   if (runs <= 0) return 0
-  const structure = resolveStructureModifiers(settings)
+  const structureTe = structureTeForBlueprint(blueprint, settings)
   const lines = Math.max(1, concurrentCopies)
   const runsPerJob = Math.max(1, Math.ceil(runs / Math.min(lines, runs)))
 
@@ -48,7 +56,7 @@ export function jobTimeSecondsForRuns(
       blueprint.manufacturingTime,
       runsPerJob,
       reactions,
-      structure.teBonusPercent,
+      structureTe,
     )
   }
 
@@ -60,7 +68,7 @@ export function jobTimeSecondsForRuns(
     runsPerJob,
     industry,
     advancedIndustry,
-    structure.teBonusPercent,
+    structureTe,
   )
 }
 
@@ -71,7 +79,7 @@ export function runsFromDurationHours(
   parallelLines: number,
   meTeOverride?: PlanNodeOverride,
 ): number {
-  const structure = resolveStructureModifiers(settings)
+  const structureTe = structureTeForBlueprint(blueprint, settings)
   const availableSec = Math.max(0, durationHours) * 3600
   const lines = Math.max(1, parallelLines)
   if (availableSec <= 0) return 1
@@ -81,7 +89,7 @@ export function runsFromDurationHours(
     const perRun = reactionTimePerRun(
       blueprint.manufacturingTime,
       reactions,
-      structure.teBonusPercent,
+      structureTe,
     )
     if (perRun <= 0) return 1
     const reactionRunsPerLine = Math.max(1, Math.floor(availableSec / perRun))
@@ -97,7 +105,7 @@ export function runsFromDurationHours(
     te,
     industry,
     advancedIndustry,
-    structure.teBonusPercent,
+    structureTe,
     { step: 1, maxRuns: null },
   )
   return Math.max(1, runsPerLine * lines)
@@ -127,7 +135,7 @@ export function durationHoursFromRuns(
   parallelLines: number,
   meTeOverride?: PlanNodeOverride,
 ): number {
-  const structure = resolveStructureModifiers(settings)
+  const structureTe = structureTeForBlueprint(blueprint, settings)
   const effectiveLines = Math.max(1, parallelLines)
   const runsPerJob = Math.max(1, Math.ceil(runs / Math.min(effectiveLines, runs)))
 
@@ -137,7 +145,7 @@ export function durationHoursFromRuns(
       blueprint.manufacturingTime,
       runsPerJob,
       reactions,
-      structure.teBonusPercent,
+      structureTe,
     )
     if (jobTime <= 0 || runs <= 0) return 0
     const waves = Math.ceil(runs / (runsPerJob * effectiveLines))
@@ -151,7 +159,7 @@ export function durationHoursFromRuns(
     te,
     industry,
     advancedIndustry,
-    structure.teBonusPercent,
+    structureTe,
   )
   if (perRun <= 0 || runs <= 0) return 0
 
@@ -161,7 +169,7 @@ export function durationHoursFromRuns(
     runsPerJob,
     industry,
     advancedIndustry,
-    structure.teBonusPercent,
+    structureTe,
   )
   const waves = Math.ceil(runs / (runsPerJob * effectiveLines))
   return (jobTime * waves) / 3600

@@ -3,6 +3,7 @@ import type { RankedBlueprintRow, SetupCostBreakdown, TypeInfo } from '@/types'
 import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
 import { JobCostFormula, jobCostStepTitle } from '@/components/JobCostFormula'
+import { formatFacilityBonusLine } from '@/lib/facilityModifiers'
 import { isPlayerStructure } from '@/lib/structureSettings'
 import { BPO_LIFETIME_CATEGORY_LABELS } from '@/lib/bpoLifetime'
 
@@ -115,12 +116,12 @@ function BatchSteps({ breakdown }: { breakdown: SetupCostBreakdown }) {
       <CalcStep label="Hub average volume">
         {formatAvgVolume(avgVolume)} units/day (capped at {volumeCapDays} days of volume)
       </CalcStep>
-      <CalcStep label="Max runs the market can absorb">
-        floor({formatAvgVolume(avgVolume)} × {volumeCapDays} ÷ {productQuantity}) ={' '}
-        <strong>{maxRuns} runs</strong>
+      <CalcStep label="Runs for setup and profit">
+        <strong>{runs} runs</strong> (your batch setting)
       </CalcStep>
-      <CalcStep label="Runs used for this row">
-        min({batchSizeSetting}, {maxRuns}) = <strong>{runs} runs</strong>
+      <CalcStep label="Market volume cap (ISK/hr only)">
+        floor({formatAvgVolume(avgVolume)} × {volumeCapDays} ÷ {productQuantity}) ={' '}
+        <strong>{maxRuns} runs</strong> max sellable in {volumeCapDays} days
       </CalcStep>
       <CalcStep label="Output quantity">
         {runs} runs × {productQuantity} units/run ={' '}
@@ -203,13 +204,21 @@ export function IphBreakdownModal({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
                   <SkillTile
                     label="Struct. ME"
-                    value={`${formatDecimal(iph.structureMeBonusPercent, 1)}%`}
-                    detail="Extra material reduction"
+                    value={
+                      iph.facilityBonus
+                        ? formatFacilityBonusLine(iph.facilityBonus, 'me')
+                        : `${formatDecimal(iph.structureMeBonusPercent, 1)}%`
+                    }
+                    detail="Hull + rig material reduction"
                   />
                   <SkillTile
                     label="Struct. TE"
-                    value={`${formatDecimal(iph.structureTeBonusPercent, 1)}%`}
-                    detail="Extra job time reduction"
+                    value={
+                      iph.facilityBonus
+                        ? formatFacilityBonusLine(iph.facilityBonus, 'te')
+                        : `${formatDecimal(iph.structureTeBonusPercent, 1)}%`
+                    }
+                    detail="Hull + rig time reduction"
                   />
                   <SkillTile
                     label="Owner tax"
@@ -372,7 +381,9 @@ export function IphBreakdownModal({
               title="Material cost"
               note={
                 isPlayerStructure(iph.structureType) && iph.structureMeBonusPercent > 0
-                  ? `ME ${iph.me} + ${formatDecimal(iph.structureMeBonusPercent, 1)}% structure: ceil(base qty × runs × (1 − ME × 1%) × (1 − structure bonus)) × hub price`
+                  ? iph.facilityBonus
+                    ? `ME ${iph.me} + ${formatFacilityBonusLine(iph.facilityBonus, 'me')} structure`
+                    : `ME ${iph.me} + ${formatDecimal(iph.structureMeBonusPercent, 1)}% structure: ceil(base qty × runs × (1 − ME × 1%) × (1 − structure bonus)) × hub price`
                   : `ME ${iph.me}: ceil(base qty × runs × (1 − ME × 1%)) × hub price`
               }
               result={formatIsk(iph.materialCost)}

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { GlobalSettings } from '@/types'
+import type { GlobalSettings, ReactionFamilyGroup, RegionsData, SystemInfo } from '@/types'
 import {
   HUBS,
   MAX_ME,
@@ -7,13 +7,28 @@ import {
   BPO_LIFETIME_CATEGORY_KEYS,
   MIN_BLUEPRINT_LIFETIME_RUNS,
   MAX_BLUEPRINT_LIFETIME_RUNS,
+  REACTION_FAMILY_GROUPS,
+  STRUCTURE_HULL_PRESETS,
 } from '@/types'
 import { formatQuantity } from '@/lib/profit'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
-import { isPlayerStructure, isPresetPlayerStructure, patchStructureType } from '@/lib/structureSettings'
+import {
+  isPlayerStructure,
+  isPresetPlayerStructure,
+  patchStructureType,
+} from '@/lib/structureSettings'
+import {
+  isActiveRefinery,
+  isPresetRefinery,
+  patchRefineryType,
+  refineryHullTePercent,
+  REACTION_FAMILY_LABELS,
+} from '@/lib/refinerySettings'
 import { StructureTypePicker } from '@/components/StructureTypePicker'
+import { RefineryTypePicker } from '@/components/RefineryTypePicker'
+import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
 import { BPO_LIFETIME_CATEGORY_LABELS, clampLifetimeRuns } from '@/lib/bpoLifetime'
 
 export interface SettingsSectionProps {
@@ -94,16 +109,80 @@ function StructurePresetBonuses({
   settings: GlobalSettings
   size: 'md' | 'sm'
 }) {
+  const hull =
+    settings.structureType === 'raitaru' ||
+    settings.structureType === 'azbel' ||
+    settings.structureType === 'sotiyo'
+      ? STRUCTURE_HULL_PRESETS[settings.structureType]
+      : null
+  if (!hull) return null
+
   return (
     <div className="rounded-lg border border-eve-border bg-base-300/20 px-3 py-3">
       <div className="flex items-center gap-1.5 text-xs font-medium opacity-70 mb-2">
-        <span>Structure role bonuses</span>
-        <InfoTooltip text="Fixed for this hull type. Pick Custom structure to enter your own values." />
+        <span>Hull role bonuses</span>
+        <InfoTooltip text="Fixed for this hull type. Fitted rig bonuses are entered below." />
       </div>
       <div className={`grid grid-cols-3 ${size === 'sm' ? 'gap-2' : 'gap-3'}`}>
-        <StructureBonusTile label="ME" value={settings.structureMeBonusPercent} />
-        <StructureBonusTile label="TE" value={settings.structureTeBonusPercent} />
-        <StructureBonusTile label="Job cost" value={settings.structureJobCostBonusPercent} />
+        <StructureBonusTile label="Hull ME" value={hull.hullMeBonusPercent} />
+        <StructureBonusTile label="Hull TE" value={hull.hullTeBonusPercent} />
+        <StructureBonusTile label="Hull job cost" value={hull.hullJobCostBonusPercent} />
+      </div>
+    </div>
+  )
+}
+
+function ManufacturingRigFields({
+  settings,
+  onChange,
+  size = 'md',
+}: SettingsSectionProps) {
+  const gap = sectionGap(size)
+  const rigs = settings.manufacturingRigs
+
+  return (
+    <div className="rounded-lg border border-eve-border bg-base-300/20 px-3 py-3">
+      <div className="flex items-center gap-1.5 text-xs font-medium opacity-70 mb-2">
+        <span>Structure rigs</span>
+        <InfoTooltip text="M-Set rig bonuses from your in-game Manufacturing tooltip. Hull and rig stack multiplicatively." />
+      </div>
+      <div className={`grid grid-cols-3 ${gap}`}>
+        <NumberField
+          label="Rig ME %"
+          tooltip={GLOBAL_SETTING_TOOLTIPS.manufacturingRigMeBonusPercent}
+          size={size}
+          value={rigs.rigMeBonusPercent}
+          min={0}
+          max={10}
+          step={0.1}
+          onChange={(rigMeBonusPercent) =>
+            onChange({ manufacturingRigs: { ...rigs, rigMeBonusPercent } })
+          }
+        />
+        <NumberField
+          label="Rig TE %"
+          tooltip={GLOBAL_SETTING_TOOLTIPS.manufacturingRigTeBonusPercent}
+          size={size}
+          value={rigs.rigTeBonusPercent}
+          min={0}
+          max={50}
+          step={0.1}
+          onChange={(rigTeBonusPercent) =>
+            onChange({ manufacturingRigs: { ...rigs, rigTeBonusPercent } })
+          }
+        />
+        <NumberField
+          label="Rig job cost %"
+          tooltip={GLOBAL_SETTING_TOOLTIPS.manufacturingRigJobCostBonusPercent}
+          size={size}
+          value={rigs.rigJobCostBonusPercent}
+          min={0}
+          max={10}
+          step={0.1}
+          onChange={(rigJobCostBonusPercent) =>
+            onChange({ manufacturingRigs: { ...rigs, rigJobCostBonusPercent } })
+          }
+        />
       </div>
     </div>
   )
@@ -256,66 +335,218 @@ export function ManufacturingSettingsSection({
       </SettingField>
 
       {isPlayerStructure(settings.structureType) ? (
-        isPresetPlayerStructure(settings.structureType) ? (
-          <>
+        <>
+          {isPresetPlayerStructure(settings.structureType) ? (
             <StructurePresetBonuses settings={settings} size={size} />
+          ) : (
+            <div className={`grid grid-cols-2 ${gap}`}>
+              <NumberField
+                label="Hull ME bonus %"
+                tooltip={GLOBAL_SETTING_TOOLTIPS.structureMeBonusPercent}
+                size={size}
+                value={settings.structureMeBonusPercent}
+                min={0}
+                max={10}
+                step={0.1}
+                onChange={(structureMeBonusPercent) => onChange({ structureMeBonusPercent })}
+              />
+              <NumberField
+                label="Hull TE bonus %"
+                tooltip={GLOBAL_SETTING_TOOLTIPS.structureTeBonusPercent}
+                size={size}
+                value={settings.structureTeBonusPercent}
+                min={0}
+                max={50}
+                step={0.1}
+                onChange={(structureTeBonusPercent) => onChange({ structureTeBonusPercent })}
+              />
+              <NumberField
+                label="Hull job cost bonus %"
+                tooltip={GLOBAL_SETTING_TOOLTIPS.structureJobCostBonusPercent}
+                size={size}
+                value={settings.structureJobCostBonusPercent}
+                min={0}
+                max={10}
+                step={0.1}
+                onChange={(structureJobCostBonusPercent) =>
+                  onChange({ structureJobCostBonusPercent })
+                }
+              />
+            </div>
+          )}
+          <ManufacturingRigFields settings={settings} onChange={onChange} size={size} />
+          <NumberField
+            label="Owner tax %"
+            tooltip={GLOBAL_SETTING_TOOLTIPS.structureTaxPercent}
+            size={size}
+            value={settings.structureTaxPercent}
+            min={0}
+            max={50}
+            step={0.1}
+            onChange={(structureTaxPercent) => onChange({ structureTaxPercent })}
+          />
+        </>
+      ) : null}
+    </div>
+  )
+}
+
+export function ReactionFacilitySection({
+  settings,
+  onChange,
+  systems,
+  regions,
+  size = 'md',
+}: SettingsSectionProps & {
+  systems: SystemInfo[]
+  regions: RegionsData
+}) {
+  const gap = sectionGap(size)
+  const facility = settings.reactionFacility
+  const hullTe = refineryHullTePercent(facility.refineryType, facility.hullTeBonusPercent)
+
+  function patchFamily(
+    group: ReactionFamilyGroup,
+    patch: Partial<(typeof facility.familyModifiers)[ReactionFamilyGroup]>,
+  ) {
+    onChange({
+      reactionFacility: {
+        ...facility,
+        familyModifiers: {
+          ...facility.familyModifiers,
+          [group]: { ...facility.familyModifiers[group], ...patch },
+        },
+      },
+    })
+  }
+
+  return (
+    <div className={`flex flex-col ${gap}`}>
+      <SettingField
+        label="Reaction system"
+        tooltip={GLOBAL_SETTING_TOOLTIPS.reactionSystemId}
+        size={size}
+      >
+        <ManufacturingSystemPicker
+          value={facility.reactionSystemId}
+          onChange={(reactionSystemId) =>
+            onChange({ reactionFacility: { ...facility, reactionSystemId } })
+          }
+          systems={systems}
+          regions={regions}
+          costIndexKind="reaction"
+        />
+      </SettingField>
+
+      <SettingField
+        label="Refinery"
+        tooltip={GLOBAL_SETTING_TOOLTIPS.refineryType}
+        size={size}
+      >
+        <RefineryTypePicker
+          size={size}
+          value={facility.refineryType}
+          onChange={(refineryType) => onChange(patchRefineryType(refineryType, facility))}
+        />
+      </SettingField>
+
+      {isActiveRefinery(facility.refineryType) ? (
+        <>
+          {isPresetRefinery(facility.refineryType) ? (
+            <div className="rounded-lg border border-eve-border bg-base-300/20 px-3 py-3">
+              <div className="flex items-center gap-1.5 text-xs font-medium opacity-70 mb-2">
+                <span>Hull role bonus</span>
+              </div>
+              <StructureBonusTile label="Hull TE" value={hullTe} />
+            </div>
+          ) : (
             <NumberField
-              label="Owner tax %"
-              tooltip={GLOBAL_SETTING_TOOLTIPS.structureTaxPercent}
+              label="Hull TE bonus %"
+              tooltip={GLOBAL_SETTING_TOOLTIPS.refineryHullTeBonusPercent}
               size={size}
-              value={settings.structureTaxPercent}
+              value={facility.hullTeBonusPercent}
               min={0}
               max={50}
               step={0.1}
-              onChange={(structureTaxPercent) => onChange({ structureTaxPercent })}
-            />
-          </>
-        ) : (
-          <div className={`grid grid-cols-2 ${gap}`}>
-            <NumberField
-              label="Structure ME bonus %"
-              tooltip={GLOBAL_SETTING_TOOLTIPS.structureMeBonusPercent}
-              size={size}
-              value={settings.structureMeBonusPercent}
-              min={0}
-              max={10}
-              step={0.1}
-              onChange={(structureMeBonusPercent) => onChange({ structureMeBonusPercent })}
-            />
-            <NumberField
-              label="Structure TE bonus %"
-              tooltip={GLOBAL_SETTING_TOOLTIPS.structureTeBonusPercent}
-              size={size}
-              value={settings.structureTeBonusPercent}
-              min={0}
-              max={50}
-              step={0.1}
-              onChange={(structureTeBonusPercent) => onChange({ structureTeBonusPercent })}
-            />
-            <NumberField
-              label="Job cost bonus %"
-              tooltip={GLOBAL_SETTING_TOOLTIPS.structureJobCostBonusPercent}
-              size={size}
-              value={settings.structureJobCostBonusPercent}
-              min={0}
-              max={10}
-              step={0.1}
-              onChange={(structureJobCostBonusPercent) =>
-                onChange({ structureJobCostBonusPercent })
+              onChange={(hullTeBonusPercent) =>
+                onChange({ reactionFacility: { ...facility, hullTeBonusPercent } })
               }
             />
-            <NumberField
-              label="Owner tax %"
-              tooltip={GLOBAL_SETTING_TOOLTIPS.structureTaxPercent}
-              size={size}
-              value={settings.structureTaxPercent}
-              min={0}
-              max={50}
-              step={0.1}
-              onChange={(structureTaxPercent) => onChange({ structureTaxPercent })}
-            />
+          )}
+
+          <div className="rounded-lg border border-eve-border bg-base-300/20 px-3 py-3 overflow-x-auto">
+            <div className="flex items-center gap-1.5 text-xs font-medium opacity-70 mb-2">
+              <span>Structure rigs and tax by type</span>
+              <InfoTooltip text="Match the in-game Reaction tooltip: Composite, Biochemical, and Hybrid rows." />
+            </div>
+            <table className="table table-sm w-full min-w-[20rem]">
+              <thead>
+                <tr className="text-xs opacity-60">
+                  <th>Type</th>
+                  <th>Rig ME %</th>
+                  <th>Rig TE %</th>
+                  <th>Tax %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {REACTION_FAMILY_GROUPS.map((group) => {
+                  const row = facility.familyModifiers[group]
+                  const inputClass =
+                    size === 'sm' ? 'input input-bordered input-xs w-full' : 'input input-bordered input-sm w-full'
+                  return (
+                    <tr key={group}>
+                      <td className="text-sm font-medium whitespace-nowrap">
+                        {REACTION_FAMILY_LABELS[group]}
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          min={0}
+                          max={10}
+                          step={0.1}
+                          className={inputClass}
+                          value={row.rigMeBonusPercent}
+                          onChange={(e) =>
+                            patchFamily(group, { rigMeBonusPercent: +e.target.value || 0 })
+                          }
+                          aria-label={`${REACTION_FAMILY_LABELS[group]} rig ME`}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          min={0}
+                          max={50}
+                          step={0.1}
+                          className={inputClass}
+                          value={row.rigTeBonusPercent}
+                          onChange={(e) =>
+                            patchFamily(group, { rigTeBonusPercent: +e.target.value || 0 })
+                          }
+                          aria-label={`${REACTION_FAMILY_LABELS[group]} rig TE`}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          min={0}
+                          max={50}
+                          step={0.1}
+                          className={inputClass}
+                          value={row.taxPercent}
+                          onChange={(e) =>
+                            patchFamily(group, { taxPercent: +e.target.value || 0 })
+                          }
+                          aria-label={`${REACTION_FAMILY_LABELS[group]} tax`}
+                        />
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
-        )
+        </>
       ) : null}
     </div>
   )
