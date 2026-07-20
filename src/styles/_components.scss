@@ -340,6 +340,11 @@
 
     &:has(.plan-search-wrap--open) {
       @apply z-50;
+
+      /* Jobs table sits below in DOM and steals clicks once the plan grows. */
+      ~ * {
+        pointer-events: none;
+      }
     }
   }
 

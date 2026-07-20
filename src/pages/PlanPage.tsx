@@ -55,10 +55,16 @@ import {
 } from '@/lib/planShare'
 import { formatDecimal } from '@/lib/profit'
 import { DEFAULT_BATCH_SIZE } from '@/types'
-import type { GlobalSettings, ManufacturingSettings, PlanBuildMode, PlanNodeOverride } from '@/types'
+import type { GlobalSettings, ManufacturingPlanTemplate, ManufacturingSettings, PlanBuildMode, PlanNodeOverride } from '@/types'
 
 function parsePlanViewTab(raw: string | null): PlanViewTab {
   return raw === 'graph' ? 'graph' : 'supply'
+}
+
+function selectedPlanTemplateFromStore(): ManufacturingPlanTemplate | null {
+  const { selectedPlanTemplateId, userData } = useAppStore.getState()
+  if (!selectedPlanTemplateId) return null
+  return userData.planTemplates?.find((t) => t.id === selectedPlanTemplateId) ?? null
 }
 
 function IconBtn({
@@ -599,16 +605,7 @@ export function PlanPage() {
     if (needsUpdate) {
       updatePlanTemplate(template.id, { roots: nextRoots })
     }
-  }, [
-    selectedId,
-    data,
-    blueprints,
-    storeSettings,
-    slots,
-    rootRunsTotal,
-    updatePlanTemplate,
-    blockStoreMutations,
-  ])
+  }, [selectedId, data, blueprints, storeSettings, updatePlanTemplate, blockStoreMutations])
 
   useEffect(() => {
     if (blockStoreMutations || !addProductId || !data || !storeTemplate) return
@@ -682,9 +679,11 @@ export function PlanPage() {
 
   const saveMeTe = useCallback(
     (productTypeId: number, patch: { me?: number; te?: number } | null) => {
-      if (isSharedView || !storeTemplate) return
+      if (isSharedView) return
+      const template = selectedPlanTemplateFromStore()
+      if (!template) return
 
-      const current = storeTemplate.nodeOverrides[productTypeId] ?? {}
+      const current = template.nodeOverrides[productTypeId] ?? {}
       let nextEntry: PlanNodeOverride
       if (patch == null) {
         const { me: _me, te: _te, ...rest } = current
@@ -693,14 +692,14 @@ export function PlanPage() {
         nextEntry = { ...current, ...patch }
       }
 
-      const nextOverrides = { ...storeTemplate.nodeOverrides }
+      const nextOverrides = { ...template.nodeOverrides }
       if (Object.keys(nextEntry).length === 0) {
         delete nextOverrides[productTypeId]
       } else {
         nextOverrides[productTypeId] = nextEntry
       }
 
-      const nextRoots = storeTemplate.roots.map((root) => {
+      const nextRoots = template.roots.map((root) => {
         if (root.productTypeId !== productTypeId) return root
         const bp = getBlueprintForProduct(blueprints, root.productTypeId)
         return syncRootEntry(
@@ -712,12 +711,12 @@ export function PlanPage() {
         )
       })
 
-      updatePlanTemplate(storeTemplate.id, {
+      updatePlanTemplate(template.id, {
         nodeOverrides: nextOverrides,
         roots: nextRoots,
       })
     },
-    [isSharedView, storeTemplate, blueprints, storeSettings, slots, rootRunsTotal, updatePlanTemplate],
+    [isSharedView, blueprints, storeSettings, updatePlanTemplate],
   )
 
   const graphBlueprint = useMemo(() => {
@@ -923,11 +922,12 @@ export function PlanPage() {
                   isSharedView
                     ? undefined
                     : (rootId, productTypeId, patch) => {
-                        if (!storeTemplate) return
+                        const template = selectedPlanTemplateFromStore()
+                        if (!template) return
 
                         if (rootId) {
-                          updatePlanTemplate(storeTemplate.id, {
-                            roots: storeTemplate.roots.map((r) => {
+                          updatePlanTemplate(template.id, {
+                            roots: template.roots.map((r) => {
                               if (r.id !== rootId) return r
                               const bp = getBlueprintForProduct(blueprints, r.productTypeId)
                               return applyRootEntryPatch(
@@ -936,7 +936,7 @@ export function PlanPage() {
                                 bp,
                                 storeSettings,
                                 undefined,
-                                storeTemplate.nodeOverrides[r.productTypeId],
+                                template.nodeOverrides[r.productTypeId],
                               )
                             }),
                           })
@@ -954,11 +954,11 @@ export function PlanPage() {
                           node.concurrentCopies,
                         )
 
-                        updatePlanTemplate(storeTemplate.id, {
+                        updatePlanTemplate(template.id, {
                           nodeOverrides: {
-                            ...storeTemplate.nodeOverrides,
+                            ...template.nodeOverrides,
                             [productTypeId]: {
-                              ...storeTemplate.nodeOverrides[productTypeId],
+                              ...template.nodeOverrides[productTypeId],
                               runs,
                             },
                           },
