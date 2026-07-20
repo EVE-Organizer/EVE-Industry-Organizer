@@ -1,4 +1,23 @@
-import type { IndustryActivityId, LiveIndustryJob } from '@/types'
+import type { IndustryActivityId, LiveIndustryJob, LiveIndustryJobStatus } from '@/types'
+
+/** ESI can still report `active` until the next fetch after `end_date`. */
+export function effectiveLiveJobStatus(
+  job: Pick<LiveIndustryJob, 'status' | 'endAt'>,
+  nowMs = Date.now(),
+): LiveIndustryJobStatus {
+  if (job.status === 'active' && nowMs >= Date.parse(job.endAt)) {
+    return 'ready'
+  }
+  return job.status
+}
+
+export function isTrackedLiveJob(
+  job: Pick<LiveIndustryJob, 'status' | 'endAt'>,
+  nowMs = Date.now(),
+): boolean {
+  const status = effectiveLiveJobStatus(job, nowMs)
+  return status === 'active' || status === 'ready' || status === 'paused'
+}
 
 export type LiveJobsTab = 'manufacturing' | 'research'
 
