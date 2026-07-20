@@ -577,24 +577,38 @@ export function PlanPage() {
   }, [storeTemplate, isSharedView, storeSettings, searchParams])
 
   useEffect(() => {
-    if (blockStoreMutations || !storeTemplate || !data) return
+    if (blockStoreMutations || !data || !selectedId) return
+    const template = useAppStore
+      .getState()
+      .userData.planTemplates?.find((t) => t.id === selectedId)
+    if (!template) return
+
     let needsUpdate = false
-    const nextRoots = storeTemplate.roots.map((root) => {
+    const nextRoots = template.roots.map((root) => {
       const bp = getBlueprintForProduct(blueprints, root.productTypeId)
       const synced = syncRootEntry(
         root,
         bp,
         storeSettings,
         undefined,
-        storeTemplate.nodeOverrides[root.productTypeId],
+        template.nodeOverrides[root.productTypeId],
       )
       if (synced !== root) needsUpdate = true
       return synced
     })
     if (needsUpdate) {
-      updatePlanTemplate(storeTemplate.id, { roots: nextRoots })
+      updatePlanTemplate(template.id, { roots: nextRoots })
     }
-  }, [storeTemplate, data, blueprints, storeSettings, slots, rootRunsTotal, updatePlanTemplate, blockStoreMutations])
+  }, [
+    selectedId,
+    data,
+    blueprints,
+    storeSettings,
+    slots,
+    rootRunsTotal,
+    updatePlanTemplate,
+    blockStoreMutations,
+  ])
 
   useEffect(() => {
     if (blockStoreMutations || !addProductId || !data || !storeTemplate) return
@@ -742,10 +756,12 @@ export function PlanPage() {
   )
 
   const addRoot = (productTypeId: number) => {
-    if (isSharedView || !storeTemplate) return
+    if (isSharedView) return
+    const templateId = useAppStore.getState().selectedPlanTemplateId
+    if (!templateId) return
     const bp = getBlueprintForProduct(blueprints, productTypeId)
     if (!bp) return
-    addRootToPlanTemplate(storeTemplate.id, {
+    addRootToPlanTemplate(templateId, {
       id: createPlanRootId(),
       ...createSyncedPlanRootEntry(productTypeId, bp, storeSettings),
     })

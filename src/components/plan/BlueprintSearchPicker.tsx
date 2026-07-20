@@ -107,7 +107,10 @@ export function BlueprintSearchPicker({
   }
 
   return (
-    <div ref={rootRef} className={`plan-search-wrap ${className}`}>
+    <div
+      ref={rootRef}
+      className={`plan-search-wrap${open ? ' plan-search-wrap--open' : ''} ${className}`}
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
@@ -136,7 +139,7 @@ export function BlueprintSearchPicker({
         onFocus={() => setOpen(true)}
       />
       {(showFavorites || showSearch) && (
-        <ul className="absolute z-20 mt-1.5 w-full max-h-64 overflow-y-auto rounded-xl border border-eve-border bg-base-200 p-1 shadow-xl">
+        <ul className="plan-search-wrap__menu absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto rounded-xl border border-eve-border bg-base-200 p-1 shadow-xl">
           {showFavorites ? (
             <li className="px-2.5 py-1.5 text-[10px] uppercase tracking-wide opacity-40">Favorites</li>
           ) : null}
@@ -148,6 +151,7 @@ export function BlueprintSearchPicker({
                 <button
                   type="button"
                   className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg hover:bg-base-300/80 text-left transition-colors"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => select(item.productTypeId)}
                 >
                   <PlanProductIcon

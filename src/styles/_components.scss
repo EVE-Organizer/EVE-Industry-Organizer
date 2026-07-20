@@ -317,7 +317,7 @@
 }
 
 .plan-build-card {
-  @apply overflow-hidden rounded-xl border border-eve-border bg-base-200 shadow-sm;
+  @apply overflow-visible rounded-xl border border-eve-border bg-base-200 shadow-sm;
 
   &__header {
     @apply flex flex-wrap items-center gap-2 border-b border-eve-border/80 bg-gradient-to-r from-primary/5 via-base-300/20 to-transparent px-4 py-3.5 sm:px-5;
@@ -336,7 +336,11 @@
   }
 
   &__search {
-    @apply pb-4;
+    @apply relative z-0 pb-4;
+
+    &:has(.plan-search-wrap--open) {
+      @apply z-50;
+    }
   }
 
   &__hint {
@@ -641,6 +645,10 @@
 
 .plan-search-wrap {
   @apply relative w-full;
+
+  &--open {
+    @apply z-50;
+  }
 
   &__icon {
     @apply pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40;
