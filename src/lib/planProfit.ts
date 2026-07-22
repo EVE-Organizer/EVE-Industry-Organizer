@@ -215,7 +215,7 @@ export function computeRootSetupBreakdown(
           qty: outputQty,
           unitPrice,
           cost,
-          priceSource: unitPrice > 0 ? 'window_avg' : 'missing',
+          priceSource: unitPrice > 0 ? ('window_avg' as const) : ('missing' as const),
         },
       ],
       buildChainCost: 0,
@@ -243,7 +243,8 @@ export function computeRootSetupBreakdown(
       qty: node.totalDemandQty,
       unitPrice: node.unitPrice ?? 0,
       cost: node.buyCost ?? 0,
-      priceSource: (node.unitPrice ?? 0) > 0 ? 'window_avg' : 'missing',
+      priceSource:
+        (node.unitPrice ?? 0) > 0 ? ('window_avg' as const) : ('missing' as const),
     }))
     .sort((a, b) => b.cost - a.cost)
 
