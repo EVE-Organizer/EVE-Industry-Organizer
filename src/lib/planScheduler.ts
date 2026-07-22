@@ -1,15 +1,29 @@
-import type { PlanNode, ScheduledPlanJob } from '@/types'
+import type { PlanJobActivity, PlanJobPool, PlanNode, ScheduledPlanJob } from '@/types'
+import type { PlanPipeline, PlanPipelineStage } from '@/lib/planPipeline'
+import { isReactionRecipe } from '@/lib/recipes'
+import { getBlueprintForProduct } from '@/services/data/sdeLoader'
+import type { BlueprintInfo } from '@/types'
 
 export interface SchedulePlanInput {
   nodes: PlanNode[]
   slots: number
+  /** Concurrent science slots for copy / invention. */
+  scienceSlots?: number
   windowHours: number
+  /** Optional pre-built pipeline; when present, science stages are scheduled too. */
+  pipeline?: PlanPipeline
+  blueprints?: BlueprintInfo[]
 }
 
 interface ScheduleEvent {
   productTypeId: number
   hour: number
   qty: number
+}
+
+interface StageReadyEvent {
+  stageId: string
+  hour: number
 }
 
 function childDemandForJob(child: PlanNode, parent: PlanNode, parentRunsThisJob: number): number {
@@ -79,8 +93,12 @@ function earliestStartWithDependencies(
   nodesById: Map<number, PlanNode>,
   supplies: ScheduleEvent[],
   demands: ScheduleEvent[],
+  scienceReadyByProduct: Map<number, number>,
 ): number {
   let start = slotMinStart
+
+  const scienceReady = scienceReadyByProduct.get(node.productTypeId)
+  if (scienceReady != null) start = Math.max(start, scienceReady)
 
   for (const childId of node.childProductTypeIds) {
     const child = nodesById.get(childId)
@@ -98,21 +116,76 @@ function earliestStartWithDependencies(
   return start
 }
 
-/** Greedy slot packing with build dependencies: parents wait for child supply. */
+function scheduleScienceStages(
+  stages: PlanPipelineStage[],
+  scienceSlots: number,
+): { jobs: ScheduledPlanJob[]; readyByProduct: Map<number, number>; stageEnd: Map<string, number> } {
+  const scienceStages = stages.filter((s) => s.pool === 'science')
+  const slotFreeAt = Array.from({ length: Math.max(1, scienceSlots) }, () => 0)
+  const jobs: ScheduledPlanJob[] = []
+  const stageEnd = new Map<string, number>()
+  const readyByProduct = new Map<number, number>()
+
+  // Topological-ish: process in array order (copy before invent for same product).
+  for (const stage of scienceStages) {
+    let depEnd = 0
+    for (const dep of stage.dependsOn) {
+      depEnd = Math.max(depEnd, stageEnd.get(dep) ?? 0)
+    }
+    const slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
+    const startHour = Math.max(slotFreeAt[slot] ?? 0, depEnd)
+    const endHour = startHour + stage.durationHours
+    jobs.push({
+      productTypeId: stage.productTypeId,
+      name: stage.name,
+      slot,
+      startHour,
+      endHour,
+      runs: stage.runs,
+      outputQty: stage.runs,
+      activity: stage.activity,
+      pool: 'science',
+    })
+    slotFreeAt[slot] = endHour
+    stageEnd.set(stage.id, endHour)
+    const prev = readyByProduct.get(stage.productTypeId) ?? 0
+    readyByProduct.set(stage.productTypeId, Math.max(prev, endHour))
+  }
+
+  return { jobs, readyByProduct, stageEnd }
+}
+
+function activityForNode(node: PlanNode, blueprints?: BlueprintInfo[]): PlanJobActivity {
+  if (node.recipeKind === 'reaction') return 'reaction'
+  if (blueprints) {
+    const bp = getBlueprintForProduct(blueprints, node.productTypeId)
+    if (bp && isReactionRecipe(bp)) return 'reaction'
+  }
+  return 'manufacture'
+}
+
+/** Greedy slot packing with build dependencies: parents wait for child supply + science. */
 export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
-  const { nodes, slots, windowHours } = input
+  const { nodes, slots, windowHours, pipeline, blueprints } = input
+  const scienceSlots = input.scienceSlots ?? 1
+
+  const scienceResult = pipeline
+    ? scheduleScienceStages(pipeline.stages, scienceSlots)
+    : { jobs: [] as ScheduledPlanJob[], readyByProduct: new Map<number, number>(), stageEnd: new Map() }
+
   const buildNodes = nodes.filter((n) => n.mode === 'build' && n.runs > 0)
   const byDepth = [...buildNodes].sort((a, b) => b.depth - a.depth)
   const nodesById = new Map(nodes.map((node) => [node.productTypeId, node]))
 
   const slotFreeAt = Array.from({ length: Math.max(1, slots) }, () => 0)
-  const jobs: ScheduledPlanJob[] = []
+  const jobs: ScheduledPlanJob[] = [...scienceResult.jobs]
   const supplies: ScheduleEvent[] = []
   const demands: ScheduleEvent[] = []
 
   for (const node of byDepth) {
     let remainingRuns = node.runs
     const runsPerJob = Math.max(1, Math.ceil(node.runs / Math.max(1, node.concurrentCopies)))
+    const activity = activityForNode(node, blueprints)
 
     while (remainingRuns > 0) {
       const slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
@@ -125,6 +198,7 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
         nodesById,
         supplies,
         demands,
+        scienceResult.readyByProduct,
       )
       const jobDurationHours =
         runsPerJob > 0 ? (node.jobTimeSeconds * runsThisJob) / runsPerJob / 3600 : 0
@@ -139,6 +213,8 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
         endHour,
         runs: runsThisJob,
         outputQty,
+        activity,
+        pool: 'manufacturing' as PlanJobPool,
       })
 
       supplies.push({ productTypeId: node.productTypeId, hour: endHour, qty: outputQty })

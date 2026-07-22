@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { PlanProductIcon, PLAN_ROW_ICON_SIZE } from '@/components/plan/PlanProductIcon'
-import type { BlueprintInfo, TypeInfo } from '@/types'
+import type { BlueprintInfo, BlueprintTier, SkillLevels, TypeInfo } from '@/types'
 import { isReactionRecipe } from '@/lib/recipes'
+import { meetsBuildRequirements } from '@/lib/buildRequirements'
 
 const MAX_RESULTS = 12
 
@@ -19,6 +20,17 @@ interface BlueprintSearchPickerProps {
   onSelect: (productTypeId: number) => void
   className?: string
   placeholder?: string
+  /** Focus the input when mounted (Plan page primary action). */
+  autoFocus?: boolean
+  /** Larger, higher-contrast field for the Plan compose area. */
+  prominent?: boolean
+  /** When set, only these tiers appear in search results. */
+  tierFilter?: BlueprintTier[]
+  /** When set (non-empty), only these product groups appear. */
+  groupFilter?: string[]
+  /** When true, hide blueprints the current skills cannot build. */
+  buildableOnly?: boolean
+  skills?: SkillLevels
 }
 
 function buildPickerItem(
@@ -35,6 +47,21 @@ function buildPickerItem(
   }
 }
 
+function passesFilters(
+  bp: BlueprintInfo,
+  tierFilter: BlueprintTier[] | undefined,
+  groupFilter: string[] | undefined,
+  buildableOnly: boolean | undefined,
+  skills: SkillLevels | undefined,
+): boolean {
+  if (tierFilter && tierFilter.length > 0 && !tierFilter.includes(bp.tier)) return false
+  if (groupFilter && groupFilter.length > 0 && !groupFilter.includes(bp.productGroup)) {
+    return false
+  }
+  if (buildableOnly && skills && !meetsBuildRequirements(bp, skills)) return false
+  return true
+}
+
 export function BlueprintSearchPicker({
   blueprints,
   typeMap,
@@ -42,16 +69,37 @@ export function BlueprintSearchPicker({
   onSelect,
   className = '',
   placeholder = 'Search blueprint by name…',
+  autoFocus = false,
+  prominent = false,
+  tierFilter,
+  groupFilter,
+  buildableOnly,
+  skills,
 }: BlueprintSearchPickerProps) {
   const rootRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
 
+  useEffect(() => {
+    if (!autoFocus) return
+    const id = window.setTimeout(() => inputRef.current?.focus(), 0)
+    return () => window.clearTimeout(id)
+  }, [autoFocus])
+
+  const eligibleBlueprints = useMemo(
+    () =>
+      blueprints.filter((bp) =>
+        passesFilters(bp, tierFilter, groupFilter, buildableOnly, skills),
+      ),
+    [blueprints, tierFilter, groupFilter, buildableOnly, skills],
+  )
+
   const blueprintByProduct = useMemo(() => {
     const map = new Map<number, BlueprintInfo>()
-    for (const bp of blueprints) map.set(bp.productTypeId, bp)
+    for (const bp of eligibleBlueprints) map.set(bp.productTypeId, bp)
     return map
-  }, [blueprints])
+  }, [eligibleBlueprints])
 
   const favorites = useMemo(() => {
     const items: PickerItem[] = []
@@ -69,7 +117,7 @@ export function BlueprintSearchPicker({
     const q = query.trim().toLowerCase()
     if (q.length < 2) return []
     const results: PickerItem[] = []
-    for (const bp of blueprints) {
+    for (const bp of eligibleBlueprints) {
       const name = typeMap.get(bp.productTypeId)?.name ?? ''
       if (!name.toLowerCase().includes(q)) continue
       results.push({
@@ -82,7 +130,7 @@ export function BlueprintSearchPicker({
     }
     results.sort((a, b) => a.name.localeCompare(b.name))
     return results
-  }, [blueprints, typeMap, query])
+  }, [eligibleBlueprints, typeMap, query])
 
   const showFavorites = open && query.trim().length < 2 && favorites.length > 0
   const showSearch = open && query.trim().length >= 2
@@ -109,7 +157,7 @@ export function BlueprintSearchPicker({
   return (
     <div
       ref={rootRef}
-      className={`plan-search-wrap${open ? ' plan-search-wrap--open' : ''} ${className}`}
+      className={`plan-search-wrap${prominent ? ' plan-search-wrap--prominent' : ''}${open ? ' plan-search-wrap--open' : ''} ${className}`}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -125,6 +173,7 @@ export function BlueprintSearchPicker({
         />
       </svg>
       <input
+        ref={inputRef}
         type="search"
         className={`plan-search-wrap__input ${open ? 'input-primary' : ''}`}
         role="combobox"
@@ -132,6 +181,7 @@ export function BlueprintSearchPicker({
         aria-autocomplete="list"
         placeholder={placeholder}
         value={query}
+        autoFocus={autoFocus}
         onChange={(e) => {
           setQuery(e.target.value)
           setOpen(true)

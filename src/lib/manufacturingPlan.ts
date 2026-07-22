@@ -23,7 +23,7 @@ import {
   runsForDemand,
 } from '@/lib/rootRunsDuration'
 import { activeConcurrentCopies, duplicateRootCount, totalRootRuns } from '@/lib/supplyChainSlots'
-import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
+import { manufacturingSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { getBlueprintForBpo, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { isRawMaterial } from '@/lib/supplyChain'
 import { canRunReactionJobs, isReactionRecipe } from '@/lib/recipes'
@@ -43,6 +43,7 @@ interface NodeAccum {
   depth: number
   /** Packaged self-input bought from market (POS / structure kits). */
   selfBuyQty: number
+  missingPrice?: boolean
 }
 
 export interface ExpandPlanInput {
@@ -58,11 +59,54 @@ export interface ExpandPlanInput {
 export interface ExpandPlanResult {
   nodes: PlanNode[]
   slots: number
+  scienceSlots: number
   windowHours: number
+  missingPriceTypeIds: number[]
+  warnings: { productTypeId: number; message: string }[]
 }
 
 function modeOverridesMap(template: ManufacturingPlanTemplate): Map<number, PlanBuildMode> {
   return new Map(Object.entries(template.modeOverrides).map(([k, v]) => [Number(k), v]))
+}
+
+/** Whether a material can be built in-plan (has recipe and facility allows it). */
+function canBuildMaterial(
+  subBp: BlueprintInfo | undefined,
+  typeId: number,
+  settings: GlobalSettings,
+  depth: number,
+  maxDepth: number,
+): boolean {
+  if (!subBp || isRawMaterial(typeId) || depth >= maxDepth) return false
+  if (isReactionRecipe(subBp) && !canRunReactionJobs(settings)) return false
+  return true
+}
+
+/**
+ * Resolve buy vs build. Missing buy price forces build when possible.
+ * Returns missingPrice=true when neither buy nor build can price the item.
+ */
+function resolveBuildBuyMode(args: {
+  override: PlanBuildMode | undefined
+  forceBuild: boolean | undefined
+  unitPrice: number
+  buyCost: number
+  buildCost: number
+  canBuild: boolean
+}): { mode: PlanBuildMode; missingPrice: boolean } {
+  const { override, forceBuild, unitPrice, buyCost, buildCost, canBuild } = args
+  if (override === 'buy') {
+    return { mode: 'buy', missingPrice: unitPrice <= 0 }
+  }
+  if (override === 'build') {
+    return { mode: 'build', missingPrice: false }
+  }
+  if (unitPrice <= 0) {
+    if (canBuild) return { mode: 'build', missingPrice: false }
+    return { mode: 'buy', missingPrice: true }
+  }
+  if (forceBuild) return { mode: 'build', missingPrice: false }
+  return { mode: buildCost <= buyCost ? 'build' : 'buy', missingPrice: false }
 }
 
 export type BuildCostCache = Map<string, number>
@@ -332,6 +376,8 @@ function expandInventionPrereqs(
     const leaf = ensureNode(nodeMap, dc.typeId, typeMap)
     leaf.mode = 'buy'
     leaf.isLeaf = true
+    const unitPrice = prices.get(dc.typeId) ?? 0
+    if (unitPrice <= 0) leaf.missingPrice = true
     addDemand(leaf, blueprint.productTypeId, dc.quantity * attempts, parentNode.depth + 1)
     parentNode.childProductTypeIds.add(dc.typeId)
   }
@@ -359,10 +405,18 @@ function expandInventionPrereqs(
   const unitPrice = prices.get(t1Bp.productTypeId) ?? 0
   const buyCost = unitPrice * t1Runs
   const override = modeOverrides.get(t1Bp.productTypeId)
-  const mode: PlanBuildMode = override ?? (buildCost <= buyCost ? 'build' : 'buy')
+  const { mode, missingPrice } = resolveBuildBuyMode({
+    override,
+    forceBuild: undefined,
+    unitPrice,
+    buyCost,
+    buildCost,
+    canBuild: canBuildMaterial(t1Bp, t1Bp.productTypeId, settings, parentNode.depth + 1, maxDepth),
+  })
 
   const child = ensureNode(nodeMap, t1Bp.productTypeId, typeMap, t1Bp)
   child.mode = mode
+  if (missingPrice) child.missingPrice = true
   addDemand(child, blueprint.productTypeId, t1Runs, parentNode.depth + 1)
   parentNode.childProductTypeIds.add(t1Bp.productTypeId)
 
@@ -410,28 +464,21 @@ function expandMaterials(
     const unitPrice = prices.get(mat.typeId) ?? 0
     const buyCost = unitPrice * mat.quantity
     const override = modeOverrides.get(mat.typeId)
+    const canBuild = canBuildMaterial(subBp, mat.typeId, settings, depth, maxDepth)
 
-    if (!subBp || isRawMaterial(mat.typeId) || depth >= maxDepth) {
-      const leaf = ensureNode(nodeMap, mat.typeId, typeMap)
+    if (!canBuild) {
+      const leaf = ensureNode(nodeMap, mat.typeId, typeMap, subBp)
       if (!leaf.isRoot) leaf.mode = 'buy'
       leaf.isLeaf = true
+      if (unitPrice <= 0) leaf.missingPrice = true
       addDemand(leaf, blueprint.productTypeId, mat.quantity, depth + 1)
       parentNode.childProductTypeIds.add(mat.typeId)
       continue
     }
 
-    if (isReactionRecipe(subBp) && !canRunReactionJobs(settings)) {
-      const leaf = ensureNode(nodeMap, mat.typeId, typeMap)
-      if (!leaf.isRoot) leaf.mode = 'buy'
-      leaf.isLeaf = true
-      addDemand(leaf, blueprint.productTypeId, mat.quantity, depth + 1)
-      parentNode.childProductTypeIds.add(mat.typeId)
-      continue
-    }
-
-    const subRuns = runsForDemand(subBp.productQuantity, mat.quantity)
+    const subRuns = runsForDemand(subBp!.productQuantity, mat.quantity)
     const subBuildCost = computePlanBuildCostForRuns(
-      subBp,
+      subBp!,
       subRuns,
       blueprints,
       typeMap,
@@ -447,16 +494,23 @@ function expandMaterials(
       cache,
     )
     const forceBuild = input.template.nodeOverrides[mat.typeId]?.forceInclude
-    const mode: PlanBuildMode =
-      override ?? (forceBuild ? 'build' : subBuildCost <= buyCost ? 'build' : 'buy')
+    const { mode, missingPrice } = resolveBuildBuyMode({
+      override,
+      forceBuild,
+      unitPrice,
+      buyCost,
+      buildCost: subBuildCost,
+      canBuild: true,
+    })
 
     const child = ensureNode(nodeMap, mat.typeId, typeMap, subBp)
     child.mode = mode
+    if (missingPrice) child.missingPrice = true
     addDemand(child, blueprint.productTypeId, mat.quantity, depth + 1)
     parentNode.childProductTypeIds.add(mat.typeId)
 
     if (mode === 'build') {
-      expandMaterials(subBp, subRuns, blueprint.productTypeId, depth + 1, input, nodeMap, modeOverrides, maxDepth, cache)
+      expandMaterials(subBp!, subRuns, blueprint.productTypeId, depth + 1, input, nodeMap, modeOverrides, maxDepth, cache)
     } else {
       child.isLeaf = true
     }
@@ -530,7 +584,8 @@ function finalizeNodes(
         : 0
 
     const outputQty = blueprint ? runs * blueprint.productQuantity : totalDemandQty
-    const canToggle = !!(blueprint && !isRawMaterial(accum.productTypeId) && !accum.isRoot)
+    // Roots are always built; buy vs build is only for supply-chain intermediates.
+    const canToggle = !!(blueprint && !accum.isRoot && !isRawMaterial(accum.productTypeId))
 
     const unitPrice = prices.get(accum.productTypeId) ?? 0
 
@@ -540,7 +595,8 @@ function finalizeNodes(
     let recommendedMode: PlanBuildMode | undefined
 
     if (canToggle && blueprint && runs > 0) {
-      buyCost = unitPrice * totalDemandQty
+      const demandQty = accum.isRoot ? outputQty : totalDemandQty
+      buyCost = unitPrice * demandQty
       buildCost = computePlanBuildCostForRuns(
         blueprint,
         runs,
@@ -558,7 +614,8 @@ function finalizeNodes(
         cache,
       )
       savings = buyCost - buildCost
-      recommendedMode = buildCost <= buyCost ? 'build' : 'buy'
+      recommendedMode =
+        unitPrice <= 0 ? 'build' : buildCost <= buyCost ? 'build' : 'buy'
     } else if (accum.mode === 'buy' && unitPrice > 0) {
       buyCost = unitPrice * totalDemandQty
     }
@@ -573,13 +630,13 @@ function finalizeNodes(
       demandByParent: [...accum.demandByParent],
       parentProductTypeIds: [...accum.parentProductTypeIds],
       childProductTypeIds: [...accum.childProductTypeIds],
-      runs,
-      bpcCount,
-      concurrentCopies: concurrent,
-      jobTimeSeconds,
-      outputQty,
+      runs: accum.mode === 'buy' && accum.isRoot ? 0 : runs,
+      bpcCount: accum.mode === 'buy' ? 0 : bpcCount,
+      concurrentCopies: accum.mode === 'buy' ? 0 : concurrent,
+      jobTimeSeconds: accum.mode === 'buy' ? 0 : jobTimeSeconds,
+      outputQty: accum.isRoot && accum.mode === 'buy' ? outputQty : outputQty,
       isRoot: accum.isRoot,
-      isLeaf: accum.isLeaf,
+      isLeaf: accum.isLeaf || accum.mode === 'buy',
       depth: accum.depth,
       canToggle,
       unitPrice: unitPrice > 0 ? unitPrice : undefined,
@@ -629,6 +686,7 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
   const modeOverrides = modeOverridesMap(template)
   const nodeMap = new Map<number, NodeAccum>()
   const slots = manufacturingSlotsFromSkills(settings.skills)
+  const scienceSlots = researchSlotsFromSkills(settings.skills)
   const buildCostCache = createBuildCostCache()
 
   for (const root of template.roots) {
@@ -637,10 +695,9 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
 
     const node = ensureNode(nodeMap, root.productTypeId, input.typeMap, blueprint)
     node.isRoot = true
+    node.depth = 0
     node.mode = 'build'
     node.isLeaf = false
-    node.depth = 0
-
     expandMaterials(blueprint, root.runs, root.productTypeId, 0, input, nodeMap, modeOverrides, 10, buildCostCache)
   }
 
@@ -658,9 +715,24 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
   }, 0)
   const windowHours = Math.max(windowFromRoots, 1)
 
+  const nodes = finalizeNodes(nodeMap, template, settings, slots, input, modeOverrides, buildCostCache)
+  const missingPriceTypeIds: number[] = []
+  const warnings: { productTypeId: number; message: string }[] = []
+  for (const accum of nodeMap.values()) {
+    if (!accum.missingPrice) continue
+    missingPriceTypeIds.push(accum.productTypeId)
+    warnings.push({
+      productTypeId: accum.productTypeId,
+      message: `${accum.name}: no hub sell price (cannot buy; ${accum.blueprint ? 'forced build or blocked' : 'must buy'})`,
+    })
+  }
+
   return {
-    nodes: finalizeNodes(nodeMap, template, settings, slots, input, modeOverrides, buildCostCache),
+    nodes,
     slots,
+    scienceSlots,
     windowHours,
+    missingPriceTypeIds,
+    warnings,
   }
 }

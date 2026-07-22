@@ -44,7 +44,6 @@ import {
 } from '@/lib/rootRunsDuration'
 import { createPlanRootId } from '@/services/sync/types'
 import { computePlanProfitSummary, computeRootProfitBreakdown, computeRootSetupBreakdown } from '@/lib/planProfit'
-import { HUBS } from '@/types'
 import { productionGraphRoute } from '@/lib/paths'
 import {
   buildPlanSharePayload,
@@ -54,11 +53,22 @@ import {
   sharedPayloadToTemplate,
 } from '@/lib/planShare'
 import { formatDecimal } from '@/lib/profit'
-import { DEFAULT_BATCH_SIZE } from '@/types'
-import type { GlobalSettings, ManufacturingPlanTemplate, ManufacturingSettings, PlanBuildMode, PlanNodeOverride } from '@/types'
+import { DEFAULT_BATCH_SIZE, HUBS } from '@/types'
+import type {
+  GlobalSettings,
+  ManufacturingPlanTemplate,
+  ManufacturingSettings,
+  PlanBuildMode,
+  PlanNodeOverride,
+  TimeRange,
+} from '@/types'
+import { PlanPipelineChecklist } from '@/components/plan/PlanPipelineChecklist'
+import { InfoTooltip } from '@/components/InfoTooltip'
+import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 
 function parsePlanViewTab(raw: string | null): PlanViewTab {
-  return raw === 'graph' ? 'graph' : 'supply'
+  if (raw === 'graph' || raw === 'pipeline') return raw
+  return 'supply'
 }
 
 function selectedPlanTemplateFromStore(): ManufacturingPlanTemplate | null {
@@ -254,8 +264,9 @@ export function PlanPage() {
     if (!data) return new Map<number, number>()
     const hubMarket = getHubMarket(data.market, activeSettings.primaryHub)
     if (!hubMarket) return new Map<number, number>()
-    return buildWindowPriceMap(hubMarket, '1w', buildPriceMap(hubMarket))
-  }, [data, activeSettings.primaryHub])
+    const window = activeSettings.priceWindow ?? '1w'
+    return buildWindowPriceMap(hubMarket, window, buildPriceMap(hubMarket))
+  }, [data, activeSettings.primaryHub, activeSettings.priceWindow])
 
   const buyPrices = useMemo(() => {
     if (!data) return new Map<number, number>()
@@ -361,8 +372,12 @@ export function PlanPage() {
       prices,
       buyPrices,
       jobTimeHoursByRootId,
+      {
+        hasReliablePrices: plan.hasReliablePrices,
+        scheduledWindowHours: plan.windowHours,
+      },
     )
-  }, [activeTemplate, expandInput, prices, buyPrices, blueprints, activeSettings])
+  }, [activeTemplate, expandInput, prices, buyPrices, blueprints, activeSettings, plan.hasReliablePrices, plan.windowHours])
 
   const profitByRootId = useMemo(
     () => new Map(profitSummary.rootRows.map((row) => [row.rootId, row])),
@@ -660,7 +675,7 @@ export function PlanPage() {
     (productTypeId: number) => {
       if (isSharedView || !storeTemplate) return
       const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
-      if (!node?.canToggle) return
+      if (!node?.canToggle || node.isRoot) return
       const next: PlanBuildMode = node.mode === 'build' ? 'buy' : 'build'
       updatePlanTemplate(storeTemplate.id, {
         modeOverrides: { ...storeTemplate.modeOverrides, [productTypeId]: next },
@@ -890,6 +905,7 @@ export function PlanPage() {
               {data ? (
                 <div className={isSharedView ? 'pointer-events-none opacity-80' : undefined}>
                   <PlanFacilityControls
+                    className="mb-4"
                     settings={activeSettings}
                     onChange={isSharedView ? () => {} : updateSettings}
                     systems={data.systems}
@@ -898,15 +914,62 @@ export function PlanPage() {
                 </div>
               ) : null}
               {!isSharedView ? (
-                <div className="plan-build-card__search">
-                  <BlueprintSearchPicker
-                    blueprints={blueprints}
-                    typeMap={typeMap}
-                    favoriteIds={favoriteProductIds}
-                    onSelect={addRoot}
-                  />
+                <div className="plan-build-card__compose">
+                  <div className="plan-build-card__search">
+                    <p className="plan-build-card__search-label">Add a blueprint</p>
+                    <BlueprintSearchPicker
+                      blueprints={blueprints}
+                      typeMap={typeMap}
+                      favoriteIds={favoriteProductIds}
+                      onSelect={addRoot}
+                      autoFocus
+                      prominent
+                      placeholder="Type a product name to add…"
+                    />
+                  </div>
+                  <div className="plan-price-bar">
+                    <div className="plan-price-bar__group">
+                      <span className="plan-price-bar__label">
+                        Price window
+                        <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.priceWindow} />
+                      </span>
+                      <div
+                        role="group"
+                        aria-label="Price window"
+                        className="plan-price-bar__windows"
+                      >
+                        {(['1d', '1w', '1m', '1y', 'all'] as TimeRange[]).map((window) => {
+                          const active = (activeSettings.priceWindow ?? '1w') === window
+                          return (
+                            <button
+                              key={window}
+                              type="button"
+                              aria-pressed={active}
+                              className={`plan-price-bar__chip${active ? ' plan-price-bar__chip--active' : ''}`}
+                              onClick={() => updateSettings({ priceWindow: window })}
+                            >
+                              {window}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    <label className="plan-price-bar__haul">
+                      <input
+                        type="checkbox"
+                        className="toggle toggle-sm toggle-primary"
+                        checked={activeSettings.includeHaulCost ?? true}
+                        onChange={(e) => updateSettings({ includeHaulCost: e.target.checked })}
+                      />
+                      <span className="plan-price-bar__haul-text">
+                        Include hauling
+                        <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.includeHaulCost} />
+                      </span>
+                    </label>
+                  </div>
                   <p className="plan-build-card__hint">
-                    Search by product name, or add from Blueprints ranking (+ Plan).
+                    Search by product name, or add from Blueprints ranking (+ Plan). Window and haul
+                    sync to Settings.
                   </p>
                 </div>
               ) : null}
@@ -979,8 +1042,20 @@ export function PlanPage() {
             nodes={plan.nodes}
             jobs={plan.jobs}
             slots={slots}
+            scienceSlots={plan.scienceSlots}
             blueprintTypeIdByProduct={blueprintTypeIdByProduct}
           />
+
+          {plan.warnings.length > 0 ? (
+            <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
+              <p className="font-medium mb-1">Plan warnings</p>
+              <ul className="list-disc list-inside opacity-80 space-y-0.5">
+                {plan.warnings.map((w) => (
+                  <li key={`${w.productTypeId}-${w.message}`}>{w.message}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <PlanViewTabs
             active={tab}
@@ -1004,6 +1079,14 @@ export function PlanPage() {
                 warnings={plan.warnings}
                 inventoryByTypeId={locationInventory ?? null}
                 typeVolumes={typeVolumes}
+              />
+            ) : null}
+
+            {tab === 'pipeline' ? (
+              <PlanPipelineChecklist
+                pipeline={plan.pipeline}
+                typeMap={typeMap}
+                onOpenMeTe={isSharedView ? undefined : openMeTe}
               />
             ) : null}
 

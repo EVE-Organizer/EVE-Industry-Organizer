@@ -185,7 +185,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         return
       }
 
-      const esi = await fetchCharacterSkills(targetId, accessToken)
+      const esi = await fetchCharacterSkills(targetId, accessToken, { forceRefresh: true })
       const skills = mapEsiSkillsToSkillLevels(esi.skills)
       const syncedAt = new Date().toISOString()
       touchCharacterSync(targetId, { lastSyncedAt: syncedAt, skills })

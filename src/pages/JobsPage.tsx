@@ -20,8 +20,6 @@ import {
   filterJobsByTab,
   LIVE_JOBS_TAB_ICON_TYPE_ID,
   researchSlotsEstimate,
-  effectiveLiveJobStatus,
-  isTrackedLiveJob,
   type LiveJobsTab,
 } from '@/lib/liveJobCategories'
 import {
@@ -178,42 +176,28 @@ export function JobsPage() {
 
   const activeJobCountByCharacter = useMemo(() => {
     const map = new Map<number, number>()
-    const now = Date.now()
-    const activeCount = (jobs: Pick<LiveIndustryJob, 'status' | 'endAt'>[]) =>
-      jobs.filter((j) => isTrackedLiveJob(j, now)).length
+    const activeCount = (jobs: { status: string }[]) =>
+      jobs.filter((j) => j.status === 'active' || j.status === 'ready' || j.status === 'paused').length
 
     for (const character of characters) {
       if (character.characterId === viewCharacterId) {
         map.set(character.characterId, activeCount(rawJobs))
       } else {
         const cached = getCachedCharacterIndustryJobs(character.characterId)
-        map.set(
-          character.characterId,
-          cached
-            ? activeCount(
-                cached.map((job) => ({
-                  status: job.status as LiveIndustryJob['status'],
-                  endAt: job.end_date,
-                })),
-              )
-            : 0,
-        )
+        map.set(character.characterId, cached ? activeCount(cached) : 0)
       }
     }
     return map
   }, [characters, viewCharacterId, rawJobs])
 
+  const jobs = useMemo(
+    () => enrichLiveJobs(rawJobs, typeNameMap, blueprintByBpo, blueprintByItemId),
+    [rawJobs, typeNameMap, blueprintByBpo, blueprintByItemId],
+  )
+
   const manufacturingSlots = manufacturingSlotsFromSkills(settings.skills)
   const [activeTab, setActiveTab] = useState<LiveJobsTab>('manufacturing')
   const [nowMs, setNowMs] = useState(() => Date.now())
-
-  const jobs = useMemo(() => {
-    const enriched = enrichLiveJobs(rawJobs, typeNameMap, blueprintByBpo, blueprintByItemId)
-    return enriched.map((job) => ({
-      ...job,
-      status: effectiveLiveJobStatus(job, nowMs),
-    }))
-  }, [rawJobs, typeNameMap, blueprintByBpo, blueprintByItemId, nowMs])
 
   const tabJobs = useMemo(() => filterJobsByTab(jobs, activeTab), [jobs, activeTab])
   const timelineJobs = useMemo(() => timelineJobsFromDisplay(tabJobs), [tabJobs])
@@ -223,24 +207,9 @@ export function JobsPage() {
     return () => globalThis.clearInterval(timer)
   }, [])
 
-  /** Background tabs are frozen/throttled; catch up clock and ESI when the user returns. */
-  useEffect(() => {
-    const syncAfterWake = () => {
-      if (document.visibilityState !== 'visible') return
-      setNowMs(Date.now())
-      void refetch()
-    }
-    document.addEventListener('visibilitychange', syncAfterWake)
-    window.addEventListener('focus', syncAfterWake)
-    return () => {
-      document.removeEventListener('visibilitychange', syncAfterWake)
-      window.removeEventListener('focus', syncAfterWake)
-    }
-  }, [refetch])
-
   const activeTabJobs = useMemo(
-    () => tabJobs.filter((j) => isTrackedLiveJob(j, nowMs)),
-    [tabJobs, nowMs],
+    () => tabJobs.filter((j) => j.status === 'active' || j.status === 'ready' || j.status === 'paused'),
+    [tabJobs],
   )
 
   const slots =
@@ -250,8 +219,8 @@ export function JobsPage() {
 
   const timelineWindow = useMemo(() => buildLiveTimelineWindow(timelineJobs, nowMs), [timelineJobs, nowMs])
   const lanes = useMemo(
-    () => liveJobsToGanttLanes(timelineJobs, slots, timelineWindow, nowMs),
-    [timelineJobs, slots, timelineWindow, nowMs],
+    () => liveJobsToGanttLanes(timelineJobs, slots, timelineWindow),
+    [timelineJobs, slots, timelineWindow],
   )
   const nowRatio = (nowMs - timelineWindow.startMs) / timelineWindow.spanMs
 
@@ -363,43 +332,20 @@ export function JobsPage() {
   )
 
   const manufacturingActiveCount = useMemo(
-    () => filterJobsByTab(jobs, 'manufacturing').filter((j) => isTrackedLiveJob(j, nowMs)).length,
-    [jobs, nowMs],
+    () =>
+      filterJobsByTab(jobs, 'manufacturing').filter(
+        (j) => j.status === 'active' || j.status === 'ready' || j.status === 'paused',
+      ).length,
+    [jobs],
   )
 
   const researchActiveCount = useMemo(
-    () => filterJobsByTab(jobs, 'research').filter((j) => isTrackedLiveJob(j, nowMs)).length,
-    [jobs, nowMs],
+    () =>
+      filterJobsByTab(jobs, 'research').filter(
+        (j) => j.status === 'active' || j.status === 'ready' || j.status === 'paused',
+      ).length,
+    [jobs],
   )
-
-  useEffect(() => {
-    const pending = rawJobs.some(
-      (j) => j.status === 'active' || j.status === 'paused' || j.status === 'ready',
-    )
-    if (!pending) return
-
-    const poll = globalThis.setInterval(() => {
-      void refetch()
-    }, 60_000)
-    return () => globalThis.clearInterval(poll)
-  }, [rawJobs, refetch])
-
-  useEffect(() => {
-    const now = Date.now()
-    const nextEndMs = rawJobs
-      .filter((j) => j.status === 'active' || j.status === 'paused')
-      .map((j) => Date.parse(j.endAt))
-      .filter((endMs) => endMs > now)
-      .sort((a, b) => a - b)[0]
-
-    if (nextEndMs == null) return
-
-    const delay = Math.max(0, nextEndMs - now + 1_500)
-    const timer = globalThis.setTimeout(() => {
-      void refetch()
-    }, delay)
-    return () => globalThis.clearTimeout(timer)
-  }, [rawJobs, refetch])
 
   if (!configured) {
     return (

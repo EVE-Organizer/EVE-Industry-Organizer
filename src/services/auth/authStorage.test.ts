@@ -53,13 +53,13 @@ describe('authStorage multi-character', () => {
           characterId: 1,
           characterName: 'Alpha',
           tokens: { accessToken: 'a', refreshToken: 'ra', expiresAt: 0 },
-          skillsSnapshotVersion: 2,
+          skillsSnapshotVersion: 3,
         },
         {
           characterId: 2,
           characterName: 'Bravo',
           tokens: { accessToken: 'b', refreshToken: 'rb', expiresAt: 0 },
-          skillsSnapshotVersion: 2,
+          skillsSnapshotVersion: 3,
         },
       ],
     })

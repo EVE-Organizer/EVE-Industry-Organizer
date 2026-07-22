@@ -7,6 +7,10 @@ export const GLOBAL_SETTING_TOOLTIPS = {
     'Assumed Time Efficiency (0-20) for job time estimates when a blueprint’s TE is unknown. Each TE point cuts job time by 1% (TE 20 = −20%). Each BPO has its own TE in-game. This global value is a starting default only.',
   priceMethod:
     'How manufactured output is priced at the hub. Sell orders use window average or current sell listings (includes broker fee). Buy orders use the best buy order for an instant sale (no broker fee, lower price). Material costs always use sell-side prices.',
+  priceWindow:
+    'Market history window used for material costs and (when selling via sell orders) product revenue. Spot sell prices fill gaps when history is missing.',
+  includeHaulCost:
+    'Haul in (materials to build system) is added to setup cost; haul out (products to hub) is subtracted from profit. Turn off if you build and sell locally or haul on your own.',
   includeBlueprintCost:
     'Include the blueprint cost in profit and budget. T1 spreads the BPO purchase plus research over a category-specific lifetime; T2 charges the full invention cost (datacores divided by success chance) every batch. Charges (ammo, scripts) are excluded. Turn off to compare operating profit only.',
   blueprintLifetimeRunsByCategory:

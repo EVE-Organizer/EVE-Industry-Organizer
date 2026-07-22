@@ -75,4 +75,12 @@ describe('normalizeGlobalSettings', () => {
     expect(settings.manufacturingRegionId).toBeUndefined()
     expect(settings.manufacturingSystemId).toBe(DEFAULT_SETTINGS.manufacturingSystemId)
   })
+
+  it('defaults priceWindow and includeHaulCost when missing from older saves', () => {
+    const settings = normalizeGlobalSettings({
+      primaryHub: 'jita',
+    })
+    expect(settings.priceWindow).toBe('1w')
+    expect(settings.includeHaulCost).toBe(true)
+  })
 })

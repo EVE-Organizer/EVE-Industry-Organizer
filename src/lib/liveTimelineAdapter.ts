@@ -1,6 +1,5 @@
 import type { LiveIndustryJob } from '@/types'
 import type { GanttBar, GanttLane } from '@/components/gantt/ganttTypes'
-import { isTrackedLiveJob } from '@/lib/liveJobCategories'
 import { ganttBarColor } from '@/lib/planTimelineChartData'
 
 export interface LiveTimelineWindow {
@@ -10,7 +9,7 @@ export interface LiveTimelineWindow {
 }
 
 export function buildLiveTimelineWindow(jobs: LiveIndustryJob[], nowMs = Date.now()): LiveTimelineWindow {
-  const activeJobs = jobs.filter((j) => isTrackedLiveJob(j, nowMs))
+  const activeJobs = jobs.filter((j) => j.status === 'active' || j.status === 'ready' || j.status === 'paused')
   if (activeJobs.length === 0) {
     const endMs = nowMs + 24 * 60 * 60 * 1000
     return { startMs: nowMs, endMs, spanMs: endMs - nowMs }
@@ -31,10 +30,9 @@ export function liveJobsToGanttLanes(
   jobs: LiveIndustryJob[],
   slotCount: number,
   window: LiveTimelineWindow,
-  nowMs = Date.now(),
 ): GanttLane[] {
   const activeJobs = [...jobs]
-    .filter((j) => isTrackedLiveJob(j, nowMs))
+    .filter((j) => j.status === 'active' || j.status === 'ready' || j.status === 'paused')
     .sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt))
 
   const slots = Math.max(1, slotCount)

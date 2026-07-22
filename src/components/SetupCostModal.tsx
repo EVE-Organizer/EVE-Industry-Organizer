@@ -1,5 +1,6 @@
+import { PriceSourceBadge } from '@/components/PriceSourceBadge'
 import type { BlueprintCostBreakdown, RankedBlueprintRow, SetupCostBreakdown, TypeInfo } from '@/types'
-import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
+import { formatAvgVolume, formatDecimal, formatIsk, formatPercent, formatQuantity } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
 import { JobCostFormula, jobCostStepTitle } from '@/components/JobCostFormula'
 import { formatFacilityBonusLine } from '@/lib/facilityModifiers'
@@ -243,7 +244,10 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
                 <tbody>
                   {b.materials.map((line) => (
                     <tr key={line.typeId} className="text-sm">
-                      <td className="max-w-[12rem] truncate">{typeName(typeMap, line.typeId)}</td>
+                      <td className="max-w-[12rem] truncate">
+                        {typeName(typeMap, line.typeId)}
+                        {line.priceSource ? <PriceSourceBadge source={line.priceSource} /> : null}
+                      </td>
                       <td className="text-right tabular-nums">{formatQuantity(line.baseQtyPerRun)}</td>
                       <td className="text-right tabular-nums">{formatQuantity(line.quantity)}</td>
                       <td className="text-right tabular-nums whitespace-nowrap">

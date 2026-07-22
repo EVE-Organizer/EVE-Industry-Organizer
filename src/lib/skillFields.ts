@@ -48,6 +48,22 @@ export const SKILL_FIELDS: SkillFieldDef[] = [
     prerequisites: [{ key: 'massProduction', level: 5 }],
   },
   {
+    key: 'laboratoryOperation',
+    skillId: 3406,
+    label: 'Laboratory Operation',
+    tooltip:
+      'Adds one concurrent science job (copy, invention, research) per level on top of one base slot. Used for research pipeline timelines.',
+    prerequisites: [{ key: 'science', level: 3 }],
+  },
+  {
+    key: 'advancedLaboratoryOperation',
+    skillId: 24624,
+    label: 'Advanced Laboratory Operation',
+    tooltip:
+      'Adds one more concurrent science job per level on top of Laboratory Operation. Max 11 science slots at V/V.',
+    prerequisites: [{ key: 'laboratoryOperation', level: 5 }],
+  },
+  {
     key: 'reactions',
     skillId: 45746,
     label: 'Reactions',
@@ -59,7 +75,7 @@ export const SKILL_FIELDS: SkillFieldDef[] = [
     skillId: 3403,
     label: 'Science',
     tooltip:
-      'Required by a small set of blueprints (e.g. some tech items). Used for the buildable filter and skill gap flags, same as Industry.',
+      'Required by a small set of blueprints (e.g. some tech items). Prerequisite for Laboratory Operation. Used for the buildable filter and skill gap flags.',
   },
   {
     key: 'accounting',
@@ -112,7 +128,9 @@ export function prerequisitesMet(
 ): boolean {
   const field = SKILL_FIELDS.find((f) => f.key === key)
   if (!field?.prerequisites?.length) return true
-  return field.prerequisites.every((req) => skillLevel(skills, req.key) >= req.level)
+  return field.prerequisites.every(
+    (req) => skillLevel(skills, req.key) >= req.level && prerequisitesMet(skills, req.key),
+  )
 }
 
 /** Highest level the slider allows (0 when prerequisites are not met). */

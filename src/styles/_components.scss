@@ -335,11 +335,11 @@
     @apply flex flex-col gap-0 p-4 sm:p-5;
   }
 
-  &__search {
-    @apply relative z-0 pb-4;
+  &__compose {
+    @apply flex flex-col gap-3 pb-4;
 
     &:has(.plan-search-wrap--open) {
-      @apply z-50;
+      @apply relative z-50;
 
       /* Jobs table sits below in DOM and steals clicks once the plan grows. */
       ~ * {
@@ -348,13 +348,53 @@
     }
   }
 
+  &__search {
+    @apply relative z-0 flex flex-col gap-2;
+  }
+
+  &__search-label {
+    @apply text-sm font-semibold tracking-tight text-base-content;
+  }
+
   &__hint {
-    @apply mt-2 text-[11px] leading-relaxed text-base-content/40;
+    @apply text-[11px] leading-relaxed text-base-content/40;
+  }
+}
+
+.plan-price-bar {
+  @apply flex flex-col gap-3 rounded-lg bg-base-300/20 px-3 py-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-5 sm:gap-y-2;
+
+  &__group {
+    @apply flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2.5;
+  }
+
+  &__label {
+    @apply inline-flex shrink-0 items-center gap-1 text-[11px] font-medium uppercase tracking-[0.08em] text-base-content/45;
+  }
+
+  &__windows {
+    @apply inline-flex items-center gap-0.5 rounded-md border border-eve-border/70 bg-base-200/80 p-0.5;
+  }
+
+  &__chip {
+    @apply min-w-[2.25rem] rounded px-2 py-1 text-xs font-medium tabular-nums text-base-content/55 transition-colors hover:bg-base-300/60 hover:text-base-content;
+
+    &--active {
+      @apply bg-primary/15 text-primary shadow-sm;
+    }
+  }
+
+  &__haul {
+    @apply inline-flex cursor-pointer items-center gap-2.5 self-start sm:self-auto;
+  }
+
+  &__haul-text {
+    @apply inline-flex items-center gap-1.5 text-sm text-base-content/75;
   }
 }
 
 .plan-facility-controls {
-  @apply mb-4 rounded-lg border border-eve-border/80 bg-base-300/15 px-3 py-3 sm:px-4;
+  @apply mb-0 rounded-lg border border-eve-border/80 bg-base-300/15 px-3 py-3 sm:px-4;
 
   &__grid {
     @apply grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2 xl:grid-cols-4;
@@ -374,6 +414,79 @@
 
   &__hint {
     @apply mt-3 border-t border-eve-border/60 pt-3 text-[11px] leading-relaxed text-base-content/40;
+  }
+}
+
+.blueprint-filters {
+  @apply mb-4 w-full min-w-0 shrink-0 overflow-hidden rounded-xl border border-eve-border bg-base-200 shadow-sm;
+
+  &__header {
+    @apply flex flex-wrap items-start justify-between gap-3 border-b border-eve-border/80 bg-gradient-to-r from-primary/5 via-base-300/20 to-transparent px-4 py-3.5 sm:px-5;
+  }
+
+  &__title {
+    @apply text-base font-semibold tracking-tight;
+  }
+
+  &__subtitle {
+    @apply mt-0.5 text-xs text-base-content/45;
+  }
+
+  &__body {
+    @apply flex flex-col gap-4 p-4 sm:p-5;
+  }
+
+  &__market {
+    @apply flex flex-col gap-2.5 rounded-lg border border-eve-border/80 bg-base-300/15 px-3 py-3 sm:px-4;
+  }
+
+  &__market-head {
+    @apply flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5;
+  }
+
+  &__grid {
+    @apply grid grid-cols-1 gap-4 min-w-0 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-start;
+  }
+
+  &__card {
+    @apply border-eve-border/80 bg-base-300/10 shadow-none;
+  }
+}
+
+.economics-filter-bar {
+  @apply flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-x-4 sm:gap-y-2;
+
+  &__method,
+  &__window {
+    @apply flex min-w-0 flex-col gap-1;
+  }
+
+  &__method {
+    @apply sm:flex-1 sm:max-w-xs;
+  }
+
+  &__label {
+    @apply inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.08em] text-base-content/45;
+  }
+
+  &__chips {
+    @apply inline-flex items-center gap-0.5 rounded-md border border-eve-border/70 bg-base-200/80 p-0.5;
+  }
+
+  &__chip {
+    @apply min-w-[2.25rem] rounded px-2 py-1.5 text-xs font-medium tabular-nums text-base-content/55 transition-colors hover:bg-base-300/60 hover:text-base-content;
+
+    &--active {
+      @apply bg-primary/15 text-primary shadow-sm;
+    }
+  }
+
+  &__haul {
+    @apply inline-flex cursor-pointer items-center gap-2.5 self-start pb-1 sm:ml-auto sm:self-end;
+  }
+
+  &__haul-text {
+    @apply inline-flex items-center gap-1.5 text-sm text-base-content/75;
   }
 }
 
@@ -662,6 +775,19 @@
   &__input {
     @apply input input-bordered w-full bg-base-300/40 pl-9 text-sm;
     @apply focus:border-primary/50 focus:bg-base-300/60;
+  }
+
+  &--prominent {
+    .plan-search-wrap__icon {
+      @apply left-4 h-5 w-5 text-primary/70;
+    }
+
+    .plan-search-wrap__input {
+      @apply h-12 rounded-xl border-primary/35 bg-base-100 pl-12 text-base shadow-[0_0_0_1px_rgb(245_166_35_/_0.12),0_8px_24px_-12px_rgb(0_0_0_/_0.45)];
+      @apply placeholder:text-base-content/40;
+      @apply focus:border-primary focus:bg-base-100 focus:outline-none;
+      @apply focus:shadow-[0_0_0_3px_rgb(245_166_35_/_0.22),0_10px_28px_-10px_rgb(0_0_0_/_0.5)];
+    }
   }
 }
 
@@ -1348,6 +1474,27 @@
 }
 
 .plan-timeline {
+  &__header {
+    @apply justify-between gap-3;
+  }
+
+  &__tabs {
+    @apply inline-flex items-center gap-0.5 rounded-lg border border-eve-border/70 bg-base-300/35 p-0.5;
+  }
+
+  &__tab {
+    @apply inline-flex items-center gap-1.5 rounded-md border border-transparent px-2.5 py-1.5 text-xs font-medium text-base-content/55 transition-colors;
+    @apply hover:bg-base-200/70 hover:text-base-content;
+
+    &--active {
+      @apply border-primary/25 bg-base-200 text-primary shadow-sm;
+    }
+  }
+
+  &__tab-count {
+    @apply badge badge-ghost badge-xs tabular-nums font-normal opacity-70;
+  }
+
   &__body {
     @apply flex flex-col gap-4;
   }
@@ -1357,7 +1504,7 @@
   }
 
   &__hero-top {
-    @apply flex flex-wrap items-baseline gap-x-4 gap-y-1;
+    @apply flex flex-wrap items-center justify-between gap-x-4 gap-y-2;
   }
 
   &__slots-panel {

@@ -1,5 +1,4 @@
 import type {
-  BlueprintCostBreakdown,
   BlueprintTier,
   BlueprintInfo,
   BlueprintRegistry,
@@ -11,7 +10,6 @@ import type {
   IphBreakdown,
   RankedBlueprintRow,
   RegionsData,
-  SetupCostBreakdown,
   SystemInfo,
   TimeRange,
   TypeInfo,
@@ -19,25 +17,14 @@ import type {
 import { MAX_BATCH_SIZE, MIN_BATCH_SIZE } from '@/types'
 import {
   advancedIndustryTimeFactor,
-  amortizedBpoCost,
-  applyME,
   applyTE,
   blueprintMeTe,
-  estimatedItemValue,
-  estimateJobCost,
-  estimateResearchFee,
   industryTimeFactor,
-  inventionBlueprintCostPerRun,
-  materialCost,
   resolveStructureModifiers,
   revenueFromSale,
   teTimeFactor,
 } from '@/lib/cost'
-import { manufacturingFacilityDetail } from '@/lib/facilityModifiers'
-import {
-  lifetimeCategoryKeyFromProductCategory,
-  resolveBlueprintLifetimeRuns,
-} from '@/lib/bpoLifetime'
+import { computeFlatSetup, type PriceContext } from '@/lib/blueprintEconomics'
 import { meetsBuildRequirements } from '@/lib/buildRequirements'
 import { skillLevel } from '@/lib/skillFields'
 import { tradingFeeRates } from '@/lib/tradingFees'
@@ -182,13 +169,6 @@ export function buildWindowPriceMap(
   return map
 }
 
-function computeMaterialVolume(
-  mats: { typeId: number; quantity: number }[],
-  typeVolumes: Map<number, number>,
-): number {
-  return mats.reduce((sum, m) => sum + m.quantity * (typeVolumes.get(m.typeId) ?? 0), 0)
-}
-
 type WindowMetric = 'price' | 'volume'
 
 function pickHistoryWindow(
@@ -247,28 +227,6 @@ function resolveWindowSummary(
   return { avgPrice: spot, avgVolume: 0, high: spot, low: spot }
 }
 
-/** Hub sell order for a BPO, then window average from BPO market history when spot is missing. */
-function resolveBpoUnitPrice(
-  blueprintTypeId: number,
-  hubMarket: HubMarketData,
-  spotPrices: Map<number, number>,
-  window: TimeRange,
-): number {
-  const spot = spotPrices.get(blueprintTypeId) ?? 0
-  if (spot > 0) return spot
-
-  const bpoHistory = hubMarket.products[String(blueprintTypeId)]
-  if (!bpoHistory) return 0
-
-  const fromWindow = pickHistoryWindow(bpoHistory, window, 'price')
-  if (fromWindow?.avgPrice && fromWindow.avgPrice > 0) return fromWindow.avgPrice
-
-  const fromAll = pickHistoryWindow(bpoHistory, 'all', 'price')
-  if (fromAll?.avgPrice && fromAll.avgPrice > 0) return fromAll.avgPrice
-
-  return 0
-}
-
 /**
  * Charges (ammo, scripts, etc.) are produced in huge quantities from a single
  * cheap, effectively reusable BPO, so amortizing its purchase price per batch
@@ -276,97 +234,6 @@ function resolveBpoUnitPrice(
  */
 export function isChargeProduct(category: string | undefined): boolean {
   return category === 'Charge'
-}
-
-/** Charged (into profit) and upfront (real cash) blueprint cost for one batch, tier-aware. */
-function computeBlueprintCost(
-  blueprint: BlueprintInfo,
-  settings: ManufacturingSettings,
-  hubMarket: HubMarketData,
-  spotPrices: Map<number, number>,
-  windowPrices: Map<number, number>,
-  regionCostIndex: number,
-  runs: number,
-  window: TimeRange,
-  productCategory: string | undefined,
-  isCharge: boolean,
-): { charged: number; upfront: number; bpoUnitPrice: number; breakdown: BlueprintCostBreakdown } {
-  const include = settings.includeBlueprintCost && !isCharge
-
-  if (blueprint.tier === 't2' && blueprint.invention) {
-    const inv = blueprint.invention
-    const r = inventionBlueprintCostPerRun({
-      datacores: inv.datacores,
-      prices: windowPrices,
-      baseChance: inv.baseChance,
-      runsPerBPC: inv.runsPerBPC,
-      skillLevel: settings.inventionSkillLevel,
-    })
-    const charged = include && Number.isFinite(r.costPerRun) ? r.costPerRun * runs : 0
-    return {
-      charged,
-      upfront: charged,
-      bpoUnitPrice: 0,
-      breakdown: {
-        mode: 'invention',
-        charged,
-        upfront: charged,
-        chargeExcluded: isCharge,
-        datacoreCost: r.datacoreCost,
-        inventionChance: r.chance,
-        runsPerBPC: inv.runsPerBPC,
-        expectedRunsPerAttempt: r.expectedRunsPerAttempt,
-        costPerRun: r.costPerRun,
-      },
-    }
-  }
-
-  if (blueprint.tier === 'faction') {
-    // Faction blueprints are BPCs bought from NPC LP stores or contracts, not BPOs.
-    // There is no BPO to buy and amortize, and a BPC cannot be researched. We have
-    // no LP/ISK price source for the copy, so no acquisition cost is charged.
-    return {
-      charged: 0,
-      upfront: 0,
-      bpoUnitPrice: 0,
-      breakdown: {
-        mode: 'faction_bpc',
-        charged: 0,
-        upfront: 0,
-        chargeExcluded: isCharge,
-      },
-    }
-  }
-
-  const bpoUnitPrice = resolveBpoUnitPrice(blueprint.blueprintTypeId, hubMarket, spotPrices, window)
-  const bpoPriceMissing = include && bpoUnitPrice <= 0
-  const baseRunMaterialValue = materialCost(blueprint.materials, windowPrices)
-  const researchFee = estimateResearchFee(baseRunMaterialValue, regionCostIndex)
-  const lifetimeCategory = lifetimeCategoryKeyFromProductCategory(productCategory)
-  const lifetimeRuns = resolveBlueprintLifetimeRuns(
-    productCategory,
-    settings.blueprintLifetimeRunsByCategory,
-  )
-  const charged = include && !bpoPriceMissing
-    ? amortizedBpoCost(bpoUnitPrice, researchFee, lifetimeRuns, runs)
-    : 0
-  const upfront = include && !bpoPriceMissing ? bpoUnitPrice : 0
-  return {
-    charged,
-    upfront,
-    bpoUnitPrice,
-    breakdown: {
-      mode: 'bpo',
-      charged,
-      upfront,
-      chargeExcluded: isCharge,
-      bpoPriceMissing: bpoPriceMissing || undefined,
-      bpoUnitPrice,
-      researchFee,
-      lifetimeRuns,
-      lifetimeCategory,
-    },
-  }
 }
 
 function computeRow(
@@ -378,6 +245,7 @@ function computeRow(
   buyPrices: Map<number, number>,
   settings: ManufacturingSettings,
   regionCostIndex: number,
+  reactionCostIndex: number,
   haulInIskPerM3: number,
   haulOutIskPerM3: number,
   includeHaulCost: boolean,
@@ -406,82 +274,57 @@ function computeRow(
 
   const { me, te } = blueprintMeTe(blueprint.tier, settings)
   const structure = resolveStructureModifiers(settings)
-  const facilityBonus = manufacturingFacilityDetail(settings)
   const industry = skillLevel(settings.skills, 'industry')
-  const mats = applyME(blueprint.materials, me, runs, structure.meBonusPercent)
-  const matCost = materialCost(mats, windowPrices)
-  const eiv = estimatedItemValue(blueprint.materials, runs, windowPrices)
-  const jobCost = estimateJobCost(eiv, regionCostIndex, structure)
-  const outputQty = blueprint.productQuantity * runs
-  const materialVolume = computeMaterialVolume(mats, typeVolumes)
-  const productVolume = (typeVolumes.get(blueprint.productTypeId) ?? product.volume) * outputQty
-  const haulExcluded = !includeHaulCost
-  const haulIn = haulExcluded ? 0 : materialVolume * haulInIskPerM3
-  const haulOut = haulExcluded ? 0 : productVolume * haulOutIskPerM3
-  const operatingCost = matCost + jobCost + haulIn
-  const blueprintCostResult = computeBlueprintCost(
-    blueprint,
-    settings,
-    hubMarket,
-    spotPrices,
-    windowPrices,
-    regionCostIndex,
-    runs,
-    window,
-    product.category,
-    isChargeProduct(product.category),
-  )
-  // T1 BPO with no hub price means we cannot price the blueprint, so drop the row.
-  if (blueprintCostResult.breakdown.bpoPriceMissing) return null
-  const blueprintCost = blueprintCostResult.breakdown
-  const bpoUnitPrice = blueprintCostResult.bpoUnitPrice
-  const bpoCost = blueprintCostResult.charged
-  const setupCost = operatingCost + blueprintCostResult.charged
-  const upfrontCapital = operatingCost + blueprintCostResult.upfront
 
-  const baseQtyByType = new Map(blueprint.materials.map((m) => [m.typeId, m.quantity]))
-  const setupBreakdown: SetupCostBreakdown = {
-    batchSizeSetting: settings.batchSize,
-    productQuantity: blueprint.productQuantity,
+  const priceCtx: PriceContext = {
+    hubId: settings.primaryHub,
+    window,
+    spotSell: spotPrices,
+    buyOrders: buyPrices,
+    windowSell: windowPrices,
+    priceMethod: settings.priceMethod,
+  }
+
+  const flat = computeFlatSetup({
+    blueprint,
+    product,
+    settings,
+    runs,
+    prices: windowPrices,
+    systemCostIndex: regionCostIndex,
+    reactionCostIndex,
+    hubMarket,
+    priceCtx,
+    haulInIskPerM3,
+    haulOutIskPerM3,
+    includeHaulCost,
+    typeVolumes,
     avgVolume,
     volumeCapDays: MAX_DAYS_TO_CLEAR,
-    runs,
-    outputQty,
-    me,
-    materials: mats.map((m) => {
-      const unitPrice = windowPrices.get(m.typeId) ?? 0
-      const unitVolumeM3 = typeVolumes.get(m.typeId) ?? 0
-      return {
-        typeId: m.typeId,
-        baseQtyPerRun: baseQtyByType.get(m.typeId) ?? m.quantity,
-        quantity: m.quantity,
-        unitPrice,
-        lineTotal: unitPrice * m.quantity,
-        unitVolumeM3,
-        lineVolumeM3: unitVolumeM3 * m.quantity,
-      }
-    }),
+  })
+
+  if (flat.setup.blueprintCost.bpoPriceMissing) return null
+
+  const setupBreakdown = flat.setup
+  const {
     materialCost: matCost,
     estimatedItemValue: eiv,
-    systemCostIndex: regionCostIndex,
-    structureType: settings.structureType,
-    structureMeBonusPercent: structure.meBonusPercent,
-    structureTeBonusPercent: structure.teBonusPercent,
-    structureJobCostBonusPercent: structure.jobCostBonusPercent,
-    structureTaxPercent: structure.taxPercent,
-    facilityBonus,
+    systemCostIndex: jobCostIndex,
     jobCost,
-    bpoTypeId: blueprint.blueprintTypeId,
+    facilityBonus,
     bpoUnitPrice,
     bpoCost,
     blueprintCost,
     upfrontCapital,
     materialVolumeM3: materialVolume,
-    haulInIskPerM3,
     haulIn,
-    haulExcluded: haulExcluded || undefined,
+    haulExcluded,
     setupCost,
-  }
+    outputQty,
+  } = setupBreakdown
+  const haulOut = flat.haulOut
+  const productVolume = flat.productVolumeM3
+
   const sellPricePerUnit =
     settings.priceMethod === 'buy_orders'
       ? (buyPrices.get(blueprint.productTypeId) ?? 0)
@@ -550,7 +393,7 @@ function computeRow(
     netRevenue,
     materialCost: matCost,
     estimatedItemValue: eiv,
-    systemCostIndex: regionCostIndex,
+    systemCostIndex: jobCostIndex,
     structureType: settings.structureType,
     structureMeBonusPercent: structure.meBonusPercent,
     structureTeBonusPercent: structure.teBonusPercent,
@@ -640,18 +483,16 @@ export function rankBlueprintsFromMarket(
   const hubMarket = getHubMarket(market, hub)
   if (!hubMarket) return []
 
-  const { buildSystemId, costIndex: resolvedCostIndex } = resolveBuildSystem(
-    systems,
-    regions,
-    hubMarket,
-    settings.manufacturingSystemId,
-  )
+  const { buildSystemId, costIndex: resolvedCostIndex, reactionCostIndex: resolvedReactionIndex } =
+    resolveBuildSystem(systems, regions, hubMarket, settings.manufacturingSystemId)
+  const reactionCostIndex =
+    typeof resolvedReactionIndex === 'number' ? resolvedReactionIndex : resolvedCostIndex
 
   const spotPrices = buildPriceMap(hubMarket)
   const buyPrices = buildBuyPriceMap(hubMarket)
   const windowPrices = buildWindowPriceMap(hubMarket, window, spotPrices)
   const marketSystemId = hubMarket.marketSystemId
-  const includeHaulCost = filters.includeHaulCost ?? true
+  const includeHaulCost = filters.includeHaulCost ?? settings.includeHaulCost ?? true
   const haulInRate = resolveHaulRate(market.haulRates, marketSystemId, buildSystemId)
   const haulOutRate = resolveHaulRate(market.haulRates, buildSystemId, marketSystemId)
   const haulFallback = medianValidIskPerM3(market.haulRates)
@@ -703,6 +544,7 @@ export function rankBlueprintsFromMarket(
       buyPrices,
       settings,
       resolvedCostIndex,
+      reactionCostIndex,
       haulInIskPerM3,
       haulOutIskPerM3,
       includeHaulCost,

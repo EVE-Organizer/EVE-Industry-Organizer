@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import { buildPlanPipeline } from '@/lib/planPipeline'
 import { schedulePlanJobs, detectOverUnder, scheduledDurationHours, windowHoursFromJobs } from '@/lib/planScheduler'
 import { simulatePlanFlow } from '@/lib/planSimulator'
-import type { PlanNode } from '@/types'
+import { DEFAULT_SETTINGS } from '@/types'
+import type { BlueprintInfo, PlanNode } from '@/types'
 
 function mockNode(partial: Partial<PlanNode> & Pick<PlanNode, 'productTypeId' | 'name'>): PlanNode {
   return {
@@ -18,6 +20,7 @@ function mockNode(partial: Partial<PlanNode> & Pick<PlanNode, 'productTypeId' | 
     isRoot: false,
     isLeaf: false,
     depth: 1,
+    canToggle: false,
     ...partial,
   }
 }
@@ -168,6 +171,78 @@ describe('schedulePlanJobs', () => {
       expect(job.endHour - job.startHour).toBeCloseTo(1, 5)
     }
     expect(jobs[0].runs + jobs[1].runs).toBe(20)
+  })
+
+  it('schedules science pool jobs before manufacture when pipeline includes invention', () => {
+    const productTypeId = 500
+    const blueprints: BlueprintInfo[] = [
+      {
+        blueprintTypeId: 15000,
+        productTypeId,
+        productQuantity: 1,
+        manufacturingTime: 3600,
+        materials: [],
+        requiredSkills: {},
+        tier: 't2',
+        productGroup: 'Module',
+        bpIconUrl: '',
+        productIconUrl: '',
+        productRenderUrl: '',
+        invention: {
+          t1BlueprintTypeId: 14000,
+          datacores: [{ typeId: 11467, quantity: 1 }],
+          runsPerBPC: 10,
+          baseChance: 0.34,
+          copyTime: 3600,
+          inventionTime: 1800,
+        },
+      },
+    ]
+    const nodes = [
+      mockNode({
+        productTypeId,
+        name: 'T2 Module',
+        isRoot: true,
+        depth: 0,
+        runs: 10,
+        jobTimeSeconds: 3600,
+        outputQty: 10,
+        unitPrice: 1_000_000,
+      }),
+    ]
+    const pipeline = buildPlanPipeline({
+      nodes,
+      blueprints,
+      settings: DEFAULT_SETTINGS,
+      scienceSlots: 2,
+      manufacturingSlots: 3,
+    })
+
+    const jobs = schedulePlanJobs({
+      nodes,
+      slots: 3,
+      scienceSlots: 2,
+      windowHours: 500,
+      pipeline,
+      blueprints,
+    })
+
+    const scienceJobs = jobs.filter((j) => j.pool === 'science')
+    const mfgJobs = jobs.filter((j) => j.pool === 'manufacturing')
+    expect(scienceJobs.length).toBeGreaterThan(0)
+    expect(mfgJobs.length).toBeGreaterThan(0)
+    for (const job of scienceJobs) {
+      expect(job.pool).toBe('science')
+    }
+    for (const job of mfgJobs) {
+      expect(job.pool).toBe('manufacturing')
+    }
+
+    const inventJob = scienceJobs.find((j) => j.activity === 'invention')
+    const mfgJob = mfgJobs.find((j) => j.productTypeId === productTypeId)
+    expect(inventJob).toBeDefined()
+    expect(mfgJob).toBeDefined()
+    expect(mfgJob!.startHour).toBeGreaterThanOrEqual(inventJob!.endHour - 1e-6)
   })
 })
 

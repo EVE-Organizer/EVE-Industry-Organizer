@@ -1,6 +1,7 @@
 import type { PlanProfitBreakdown } from '@/lib/planProfit'
 import { formatDecimal, formatGraphQuantity, formatIsk, formatPercent, formatQuantity } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
+import { PriceSourceBadge } from '@/components/PriceSourceBadge'
 
 interface PlanRootProfitModalProps {
   breakdown: PlanProfitBreakdown | null
@@ -36,10 +37,21 @@ export function PlanRootProfitModal({ breakdown, onClose }: PlanRootProfitModalP
           <p className={`text-2xl font-bold tabular-nums mt-0.5 ${profitTone}`}>
             {formatIsk(breakdown.netProfit)}
           </p>
-          <p className="text-xs opacity-60 mt-1">
-            {formatPercent(breakdown.margin)} margin · {formatIsk(breakdown.iph)}/hr over{' '}
-            {formatDecimal(breakdown.jobTimeHours, 1)} h scheduled
-          </p>
+            <p className="text-xs opacity-60 mt-1">
+              {formatPercent(breakdown.margin)} margin · {formatIsk(breakdown.iph)}/hr over{' '}
+              {formatDecimal(breakdown.jobTimeHours, 1)} h scheduled
+              {usesBuyOrders ? (
+                <>
+                  {' '}
+                  <PriceSourceBadge source="buy_max" />
+                </>
+              ) : (
+                <>
+                  {' '}
+                  <PriceSourceBadge source="window_avg" />
+                </>
+              )}
+            </p>
         </div>
 
         <div className="px-5 py-4 max-h-[min(70dvh,32rem)] overflow-y-auto space-y-5">

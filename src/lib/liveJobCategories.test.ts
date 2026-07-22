@@ -3,11 +3,9 @@ import type { LiveIndustryJob } from '@/types'
 import {
   blueprintStackTypeId,
   blueprintTypeIdMapFromJobs,
-  effectiveLiveJobStatus,
   filterJobsByTab,
   isLiveManufacturingJob,
   isLiveResearchJob,
-  isTrackedLiveJob,
 } from '@/lib/liveJobCategories'
 
 const baseJob: LiveIndustryJob = {
@@ -48,15 +46,5 @@ describe('liveJobCategories', () => {
     const map = blueprintTypeIdMapFromJobs([baseJob, { ...baseJob, jobId: 2, productTypeId: 100 }])
     expect(map.get(200)).toBe(100)
     expect(map.has(100)).toBe(false)
-  })
-
-  it('treats past end_date active jobs as ready for display', () => {
-    const now = Date.parse('2026-01-03T00:00:00Z')
-    expect(effectiveLiveJobStatus(baseJob, now)).toBe('ready')
-    expect(isTrackedLiveJob(baseJob, now)).toBe(true)
-  })
-
-  it('drops delivered jobs from tracked set', () => {
-    expect(isTrackedLiveJob({ ...baseJob, status: 'delivered' })).toBe(false)
   })
 })

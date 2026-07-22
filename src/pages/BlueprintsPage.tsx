@@ -100,8 +100,9 @@ export function BlueprintsPage() {
       ...settings,
       batchSize: rankingQuery.batchSize,
       priceMethod: rankingQuery.priceMethod,
+      manufacturingSystemId: rankingQuery.mfgSystem,
     }),
-    [settings, rankingQuery.batchSize, rankingQuery.priceMethod],
+    [settings, rankingQuery.batchSize, rankingQuery.priceMethod, rankingQuery.mfgSystem],
   )
 
   const [haulRiskOpen, setHaulRiskOpen] = useState(false)

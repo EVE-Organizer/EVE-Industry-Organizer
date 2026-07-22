@@ -151,6 +151,9 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     structureJobCostBonusPercent,
     manufacturingRigs,
     reactionFacility,
+    priceMethod: rest.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
+    priceWindow: rest.priceWindow ?? DEFAULT_SETTINGS.priceWindow,
+    includeHaulCost: rest.includeHaulCost ?? DEFAULT_SETTINGS.includeHaulCost,
     blueprintLifetimeRunsByCategory: normalizeBpoLifetimeRunsByCategory(
       rest.blueprintLifetimeRunsByCategory,
       legacyLifetimeRuns,

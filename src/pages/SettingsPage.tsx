@@ -20,8 +20,10 @@ const MANUFACTURING_SKILL_KEYS: SkillFieldDef['key'][] = [
   'advancedIndustry',
   'massProduction',
   'advancedMassProduction',
-  'reactions',
   'science',
+  'laboratoryOperation',
+  'advancedLaboratoryOperation',
+  'reactions',
 ]
 const MARKET_SKILL_KEYS: SkillFieldDef['key'][] = ['accounting', 'brokerRelations']
 

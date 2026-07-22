@@ -22,8 +22,8 @@ export interface StoredCharacter extends EveCharacterSession {
   skillsSnapshotVersion?: number
 }
 
-/** Untrained skills are stored as 0 (not default 3). */
-export const CHARACTER_SKILLS_SNAPSHOT_VERSION = 2
+/** Untrained skills are stored as 0 (not default 3). Bump when tracked skill keys change. */
+export const CHARACTER_SKILLS_SNAPSHOT_VERSION = 3
 
 export interface AuthAccountState {
   version: 1

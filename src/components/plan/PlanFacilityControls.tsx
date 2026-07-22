@@ -4,11 +4,14 @@ import { ManufacturingLocationPicker } from '@/components/ManufacturingLocationP
 import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
 import { RefineryLocationPicker } from '@/components/RefineryLocationPicker'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
+
 interface PlanFacilityControlsProps {
   settings: GlobalSettings
   onChange: (patch: Partial<GlobalSettings>) => void
   systems: SystemInfo[]
   regions: RegionsData
+  hint?: string
+  className?: string
 }
 
 export function PlanFacilityControls({
@@ -16,13 +19,15 @@ export function PlanFacilityControls({
   onChange,
   systems,
   regions,
+  hint = "Rig bonuses and owner tax are in Settings. Changes here apply to this plan's cost estimates.",
+  className = '',
 }: PlanFacilityControlsProps) {
   const facility = settings.reactionFacility
   const buildSystemLocked = settings.productionLocationId != null
   const reactionSystemLocked = settings.reactionLocationId != null
 
   return (
-    <div className="plan-facility-controls">
+    <div className={`plan-facility-controls ${className}`.trim()}>
       <div className="plan-facility-controls__grid">
         <div className="plan-facility-controls__field">
           <FormFieldLabel
@@ -94,10 +99,7 @@ export function PlanFacilityControls({
         </div>
       </div>
 
-      <p className="plan-facility-controls__hint">
-        Rig bonuses and owner tax are in Settings. Changes here apply to this plan&apos;s cost
-        estimates.
-      </p>
+      {hint ? <p className="plan-facility-controls__hint">{hint}</p> : null}
     </div>
   )
 }

@@ -23,6 +23,7 @@ export interface PlanBuyCostLine {
   qty: number
   unitPrice: number
   cost: number
+  priceSource?: 'spot' | 'window_avg' | 'buy_max' | 'missing'
 }
 
 export interface PlanSetupBreakdown {
@@ -121,22 +122,32 @@ export function computeRootProfitRow(
   buyPrices: Map<number, number>,
   jobTimeHours: number,
   buildCostCache?: BuildCostCache,
+  options?: { hasReliablePrices?: boolean },
 ): RootProfitRow {
   const { settings, template } = expandInput
   const meTeOverride = template.nodeOverrides[root.productTypeId]
-
-  const chainCost = computePlanRootBuildCost(blueprint, root.runs, expandInput, buildCostCache)
-  const setupCost =
-    chainCost + packagedSelfBuyCost(blueprint, root.runs, sellPrices, settings, meTeOverride)
-
+  const rootMode = template.modeOverrides[root.productTypeId] ?? 'build'
   const outputQty = root.runs * blueprint.productQuantity
+
+  let setupCost: number
+  if (rootMode === 'buy') {
+    setupCost = (sellPrices.get(blueprint.productTypeId) ?? 0) * outputQty
+  } else {
+    const chainCost = computePlanRootBuildCost(blueprint, root.runs, expandInput, buildCostCache)
+    setupCost =
+      chainCost + packagedSelfBuyCost(blueprint, root.runs, sellPrices, settings, meTeOverride)
+  }
+
   const sellPricePerUnit = sellPriceForProduct(
     blueprint.productTypeId,
     sellPrices,
     buyPrices,
     settings,
   )
-  const hasPrices = sellPricePerUnit > 0 && setupCost > 0
+  const hasPrices =
+    (options?.hasReliablePrices ?? true) &&
+    sellPricePerUnit > 0 &&
+    (rootMode === 'buy' ? setupCost > 0 : setupCost > 0)
 
   const feeRates = tradingFeeRates(
     skillLevel(settings.skills, 'accounting'),
@@ -148,7 +159,7 @@ export function computeRootProfitRow(
   })
   const netProfit = netRevenue - setupCost
   const margin = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
-  const iph = jobTimeHours > 0 ? netProfit / jobTimeHours : 0
+  const iph = jobTimeHours > 0 && hasPrices ? netProfit / jobTimeHours : 0
 
   return {
     rootId: root.id,
@@ -157,8 +168,8 @@ export function computeRootProfitRow(
     outputQty,
     setupCost,
     netRevenue,
-    netProfit,
-    margin,
+    netProfit: hasPrices ? netProfit : 0,
+    margin: hasPrices ? margin : 0,
     iph,
     sellPricePerUnit,
     hasPrices,
@@ -183,6 +194,34 @@ export function computeRootSetupBreakdown(
 ): PlanSetupBreakdown {
   const { settings, template } = expandInput
   const meTeOverride = template.nodeOverrides[root.productTypeId]
+  const rootMode = template.modeOverrides[root.productTypeId] ?? 'build'
+  const outputQty = root.runs * blueprint.productQuantity
+
+  if (rootMode === 'buy') {
+    const unitPrice = expandInput.prices.get(blueprint.productTypeId) ?? 0
+    const cost = unitPrice * outputQty
+    return {
+      rootId: root.id,
+      productTypeId: root.productTypeId,
+      productName,
+      runs: root.runs,
+      outputQty,
+      totalSetupCost: cost,
+      packagedBuyCost: 0,
+      buyLines: [
+        {
+          productTypeId: blueprint.productTypeId,
+          name: productName,
+          qty: outputQty,
+          unitPrice,
+          cost,
+          priceSource: unitPrice > 0 ? 'window_avg' : 'missing',
+        },
+      ],
+      buildChainCost: 0,
+    }
+  }
+
   const isolated = isolatedExpandInput(expandInput, root)
   const { nodes } = expandManufacturingPlan(isolated)
 
@@ -204,6 +243,7 @@ export function computeRootSetupBreakdown(
       qty: node.totalDemandQty,
       unitPrice: node.unitPrice ?? 0,
       cost: node.buyCost ?? 0,
+      priceSource: (node.unitPrice ?? 0) > 0 ? 'window_avg' : 'missing',
     }))
     .sort((a, b) => b.cost - a.cost)
 
@@ -215,7 +255,7 @@ export function computeRootSetupBreakdown(
     productTypeId: root.productTypeId,
     productName,
     runs: root.runs,
-    outputQty: root.runs * blueprint.productQuantity,
+    outputQty,
     totalSetupCost,
     packagedBuyCost,
     buyLines,
@@ -287,6 +327,7 @@ export function computePlanProfitSummary(
   sellPrices: Map<number, number>,
   buyPrices: Map<number, number>,
   jobTimeHoursByRootId: Map<string, number>,
+  options?: { hasReliablePrices?: boolean; scheduledWindowHours?: number },
 ): PlanProfitSummary {
   const rootRows: RootProfitRow[] = []
   const buildCostCache = createBuildCostCache()
@@ -303,26 +344,30 @@ export function computePlanProfitSummary(
         buyPrices,
         jobTimeHoursByRootId.get(root.id) ?? root.productionDurationHours,
         buildCostCache,
+        options,
       ),
     )
   }
 
   const setupCost = rootRows.reduce((sum, row) => sum + row.setupCost, 0)
   const netRevenue = rootRows.reduce((sum, row) => sum + row.netRevenue, 0)
-  const netProfit = netRevenue - setupCost
+  const netProfit = rootRows.every((r) => r.hasPrices)
+    ? netRevenue - setupCost
+    : rootRows.reduce((sum, row) => sum + row.netProfit, 0)
   const margin = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
-  const jobHours = rootRows.reduce(
-    (sum, row) => sum + (jobTimeHoursByRootId.get(row.rootId) ?? 0),
-    0,
-  )
-  const iph = jobHours > 0 ? netProfit / jobHours : 0
-  const hasPrices = rootRows.some((row) => row.hasPrices)
+  const jobHours =
+    options?.scheduledWindowHours != null && options.scheduledWindowHours > 0
+      ? options.scheduledWindowHours
+      : rootRows.reduce((sum, row) => sum + (jobTimeHoursByRootId.get(row.rootId) ?? 0), 0)
+  const hasPrices =
+    (options?.hasReliablePrices ?? true) && rootRows.some((row) => row.hasPrices)
+  const iph = jobHours > 0 && hasPrices ? netProfit / jobHours : 0
 
   return {
     setupCost,
     netRevenue,
-    netProfit,
-    margin,
+    netProfit: hasPrices ? netProfit : 0,
+    margin: hasPrices ? margin : 0,
     iph,
     jobHours,
     rootRows,

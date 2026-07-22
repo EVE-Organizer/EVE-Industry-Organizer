@@ -45,6 +45,10 @@ export interface InventionInfo {
   runsPerBPC: number
   /** Base success chance before skills (0-1). */
   baseChance: number
+  /** Copy job time (seconds) on the T1 BPO (SDE activity 5). */
+  copyTime?: number
+  /** Invention job time (seconds) on the T1 BPC (SDE activity 8). */
+  inventionTime?: number
 }
 
 export interface BlueprintInfo {
@@ -52,6 +56,10 @@ export interface BlueprintInfo {
   productTypeId: number
   productQuantity: number
   manufacturingTime: number
+  /** Copy job time (seconds) for this blueprint type (SDE activity 5). */
+  copyTime?: number
+  /** Invention job time (seconds) when this BPO is the invention input (SDE activity 8). */
+  inventionTime?: number
   materials: BlueprintMaterial[]
   requiredSkills: Record<string, number>
   tier: BlueprintTier
@@ -313,6 +321,10 @@ export interface GlobalSettings {
   /** Refinery and per-type reaction rig/tax settings. */
   reactionFacility: ReactionFacilitySettings
   priceMethod: 'sell_orders' | 'buy_orders'
+  /** Hub price / history window for material and product pricing (Plan + Blueprints default). */
+  priceWindow: TimeRange
+  /** Include haul in/out in setup and profit (Plan + Blueprints default). */
+  includeHaulCost: boolean
   /** Per product-category assumed BPO lifetime runs for T1 amortization. */
   blueprintLifetimeRunsByCategory: BpoLifetimeRunsByCategory
   /** Assumed level (0-5) for invention encryption + datacore skills, used to estimate T2 success chance. */
@@ -344,6 +356,10 @@ export interface SkillLevels {
   advancedMassProduction: number
   /** Reactions skill: −4% reaction time per level. */
   reactions: number
+  /** Laboratory Operation: +1 concurrent science job per level. */
+  laboratoryOperation: number
+  /** Advanced Laboratory Operation: +1 more concurrent science job per level. */
+  advancedLaboratoryOperation: number
   [key: string]: number
 }
 
@@ -460,7 +476,14 @@ export interface ScheduledPlanJob {
   endHour: number
   runs: number
   outputQty: number
+  /** Industry activity for this bar (copy / invent / manufacture / reaction). */
+  activity?: PlanJobActivity
+  /** Which concurrent-job pool this job occupies. */
+  pool?: PlanJobPool
 }
+
+export type PlanJobActivity = 'copy' | 'invention' | 'manufacture' | 'reaction'
+export type PlanJobPool = 'science' | 'manufacturing'
 
 export type IndustryActivityId = 1 | 3 | 4 | 5 | 7 | 8 | 11
 
@@ -544,6 +567,8 @@ export interface SetupMaterialLine {
   lineTotal: number
   unitVolumeM3: number
   lineVolumeM3: number
+  /** Spot vs window average vs missing (for modal badges). */
+  priceSource?: 'spot' | 'window_avg' | 'buy_max' | 'missing'
 }
 
 export interface SetupCostBreakdown {
@@ -740,6 +765,8 @@ export const DEFAULT_SKILLS: SkillLevels = {
   massProduction: DEFAULT_SKILL_LEVEL,
   advancedMassProduction: DEFAULT_SKILL_LEVEL,
   reactions: DEFAULT_SKILL_LEVEL,
+  laboratoryOperation: DEFAULT_SKILL_LEVEL,
+  advancedLaboratoryOperation: DEFAULT_SKILL_LEVEL,
 }
 
 /** Untrained skill levels used when importing from ESI or before sync completes. */
@@ -752,6 +779,8 @@ export const ZERO_SKILLS: SkillLevels = {
   massProduction: 0,
   advancedMassProduction: 0,
   reactions: 0,
+  laboratoryOperation: 0,
+  advancedLaboratoryOperation: 0,
 }
 
 export const DEFAULT_SETTINGS: GlobalSettings = {
@@ -768,6 +797,8 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   structureTaxPercent: 0,
   reactionFacility: defaultReactionFacility(30000144),
   priceMethod: 'sell_orders',
+  priceWindow: '1w',
+  includeHaulCost: true,
   blueprintLifetimeRunsByCategory: { ...DEFAULT_BPO_LIFETIME_RUNS_BY_CATEGORY },
   inventionSkillLevel: 4,
   includeBlueprintCost: true,

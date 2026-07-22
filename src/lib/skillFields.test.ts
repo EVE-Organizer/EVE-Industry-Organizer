@@ -6,7 +6,7 @@ import {
   prerequisitesMet,
   skillLevel,
 } from '@/lib/skillFields'
-import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
+import { manufacturingSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
 
 describe('skillFields', () => {
   it('skillLevel returns 0 for missing keys', () => {
@@ -27,6 +27,8 @@ describe('skillFields', () => {
       advancedIndustry: 0,
       massProduction: 0,
       advancedMassProduction: 0,
+      laboratoryOperation: 0,
+      advancedLaboratoryOperation: 0,
       reactions: 0,
       science: 0,
       accounting: 0,
@@ -43,6 +45,9 @@ describe('skillFields', () => {
         advancedIndustry: 5,
         massProduction: 4,
         advancedMassProduction: 5,
+        laboratoryOperation: 0,
+        advancedLaboratoryOperation: 0,
+        reactions: 0,
         science: 0,
         accounting: 0,
         brokerRelations: 0,
@@ -65,5 +70,25 @@ describe('skillFields', () => {
         advancedMassProduction: 5,
       }),
     ).toBe(11)
+  })
+
+  it('locks advanced laboratory until laboratory operation V and science III', () => {
+    expect(
+      prerequisitesMet({ science: 3, laboratoryOperation: 4 }, 'advancedLaboratoryOperation'),
+    ).toBe(false)
+    expect(
+      researchSlotsFromSkills({
+        science: 3,
+        laboratoryOperation: 5,
+        advancedLaboratoryOperation: 5,
+      }),
+    ).toBe(11)
+    expect(
+      researchSlotsFromSkills({
+        science: 2,
+        laboratoryOperation: 5,
+        advancedLaboratoryOperation: 5,
+      }),
+    ).toBe(1)
   })
 })

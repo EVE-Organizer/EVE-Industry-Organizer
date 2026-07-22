@@ -8,6 +8,13 @@ export function manufacturingSlotsFromSkills(skills: Partial<SkillLevels> | unde
   return 1 + mass + advanced
 }
 
+/** EVE: 1 base + Laboratory Operation + Advanced Laboratory Operation (max 11 at V/V). */
+export function researchSlotsFromSkills(skills: Partial<SkillLevels> | undefined): number {
+  const lab = effectiveSkillLevel(skills, 'laboratoryOperation')
+  const advanced = effectiveSkillLevel(skills, 'advancedLaboratoryOperation')
+  return 1 + lab + advanced
+}
+
 /** @deprecated Slots always come from character/settings skills. */
 export function resolveTemplateSlots(
   _template: Pick<ManufacturingPlanTemplate, 'slotSource' | 'manufacturingSlots'>,

@@ -1,6 +1,7 @@
 import type { PlanSetupBreakdown } from '@/lib/planProfit'
 import { formatGraphQuantity, formatIsk, formatQuantity } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
+import { PriceSourceBadge } from '@/components/PriceSourceBadge'
 
 interface PlanRootSetupModalProps {
   breakdown: PlanSetupBreakdown | null
@@ -11,6 +12,7 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
   if (!breakdown) return null
 
   const buyTotal = breakdown.buyLines.reduce((sum, line) => sum + line.cost, 0)
+  const isBuyRoot = breakdown.buildChainCost <= 0 && breakdown.buyLines.length === 1
 
   return (
     <dialog className="modal modal-open">
@@ -36,7 +38,9 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
               <strong>{formatGraphQuantity(breakdown.outputQty)}</strong> units output
             </p>
             <p className="text-xs opacity-60 mt-1">
-              Setup includes your build/buy choices for this root&apos;s supply chain.
+              {isBuyRoot
+                ? 'Root is set to buy finished product from the hub (no copy, invention, or manufacture).'
+                : "Setup includes your build/buy choices for this root's supply chain (same sell-side material prices as Blueprints)."}
             </p>
           </section>
 
@@ -56,7 +60,15 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
                   <tbody>
                     {breakdown.buyLines.map((line) => (
                       <tr key={line.productTypeId} className="text-sm">
-                        <td className="max-w-[14rem] truncate">{line.name}</td>
+                        <td className="max-w-[14rem] truncate">
+                          {line.name}
+                          <PriceSourceBadge
+                            source={
+                              line.priceSource ??
+                              (line.unitPrice > 0 ? 'window_avg' : 'missing')
+                            }
+                          />
+                        </td>
                         <td className="text-right tabular-nums whitespace-nowrap">
                           {formatGraphQuantity(line.qty)}
                         </td>
@@ -80,17 +92,20 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
             </section>
           ) : null}
 
-          <section>
-            <h4 className="font-semibold text-sm mb-2">
-              {breakdown.buyLines.length > 0 ? '3' : '2'}. Build chain
-            </h4>
-            <p className="text-xs opacity-60 mb-2">
-              Materials and job fees for components you build in-plan (rolled up from sub-blueprints).
-            </p>
-            <div className="font-mono text-sm">
-              Build chain: <strong>{formatIsk(breakdown.buildChainCost)}</strong>
-            </div>
-          </section>
+          {!isBuyRoot ? (
+            <section>
+              <h4 className="font-semibold text-sm mb-2">
+                {breakdown.buyLines.length > 0 ? '3' : '2'}. Build chain
+              </h4>
+              <p className="text-xs opacity-60 mb-2">
+                Materials and job fees for components you build in-plan (rolled up from sub-blueprints).
+                Flat single-recipe setup matches the Blueprints ranking modal when the chain is minerals only.
+              </p>
+              <div className="font-mono text-sm">
+                Build chain: <strong>{formatIsk(breakdown.buildChainCost)}</strong>
+              </div>
+            </section>
+          ) : null}
 
           {breakdown.packagedBuyCost > 0 ? (
             <section>
@@ -107,6 +122,11 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
               <span className="text-lg font-bold tabular-nums">{formatIsk(breakdown.totalSetupCost)}</span>
             </div>
           </section>
+        </div>
+
+        <div className="px-5 py-3 border-t border-eve-border bg-base-200/40 text-[11px] opacity-60">
+          Material prices use the selected time window average when history exists; otherwise spot sell
+          orders. Product revenue follows price method (same rules as Blueprints).
         </div>
       </div>
       <form method="dialog" className="modal-backdrop" onSubmit={onClose}>

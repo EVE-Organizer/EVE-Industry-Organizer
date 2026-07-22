@@ -67,7 +67,7 @@ describe('expandManufacturingPlan', () => {
     const ship = nodes.find((n) => n.productTypeId === 200)
     expect(ship?.isRoot).toBe(true)
     expect(ship?.canToggle).toBe(false)
-    expect(ship?.buyCost).toBeUndefined()
+    expect(ship?.mode).toBe('build')
 
     const tri = nodes.find((n) => n.productTypeId === 34)
     expect(tri?.canToggle).toBe(false)
@@ -146,6 +146,31 @@ describe('expandManufacturingPlan', () => {
     const rootJobs = jobs.filter((j) => j.productTypeId === 200)
     expect(rootJobs.length).toBeGreaterThanOrEqual(2)
     expect(new Set(rootJobs.map((j) => j.slot)).size).toBeGreaterThanOrEqual(2)
+  })
+
+  it('builds buildable intermediates when hub sell price is zero', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [
+      { id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 24 },
+    ]
+    const pricesNoIntermediate = new Map([
+      [34, 5],
+      [200, 50_000],
+    ])
+
+    const { nodes } = expandManufacturingPlan({
+      template,
+      blueprints,
+      typeMap,
+      prices: pricesNoIntermediate,
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    })
+
+    const cap = nodes.find((n) => n.productTypeId === 100)
+    expect(cap?.mode).toBe('build')
+    expect(cap?.buyCost).toBe(0)
   })
 })
 

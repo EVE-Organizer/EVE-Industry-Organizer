@@ -2,9 +2,10 @@ import { useMemo } from 'react'
 import { useAppStore } from '@/stores/appStore'
 import { useAuthStore } from '@/stores/authStore'
 import { expandManufacturingPlan } from '@/lib/manufacturingPlan'
+import { buildPlanPipeline } from '@/lib/planPipeline'
 import { schedulePlanJobs, detectOverUnder, windowHoursFromJobs } from '@/lib/planScheduler'
 import { simulatePlanFlow } from '@/lib/planSimulator'
-import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
+import { manufacturingSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
 import type { GlobalSettings, ManufacturingPlanTemplate } from '@/types'
 
 export interface UseManufacturingPlanOptions {
@@ -25,14 +26,21 @@ export function useManufacturingPlan(
   const includeSimulation = options.includeSimulation !== false
 
   return useMemo(() => {
+    const mfgSlots = manufacturingSlotsFromSkills(settings.skills)
+    const scienceSlots = researchSlotsFromSkills(settings.skills)
+
     if (!template || template.roots.length === 0) {
       return {
         nodes: [],
         jobs: [],
+        pipeline: null,
         simulations: new Map(),
-        slots: manufacturingSlotsFromSkills(settings.skills),
+        slots: mfgSlots,
+        scienceSlots,
         windowHours: 1,
         warnings: [] as { productTypeId: number; message: string }[],
+        missingPriceTypeIds: [] as number[],
+        hasReliablePrices: true,
       }
     }
 
@@ -45,10 +53,20 @@ export function useManufacturingPlan(
       systemCostIndex,
       reactionCostIndex,
     })
+    const pipeline = buildPlanPipeline({
+      nodes: expanded.nodes,
+      blueprints,
+      settings,
+      scienceSlots: expanded.scienceSlots,
+      manufacturingSlots: expanded.slots,
+    })
     const jobs = schedulePlanJobs({
       nodes: expanded.nodes,
       slots: expanded.slots,
+      scienceSlots: expanded.scienceSlots,
       windowHours: Number.POSITIVE_INFINITY,
+      pipeline,
+      blueprints,
     })
     const windowHours = windowHoursFromJobs(jobs)
     const simulations = includeSimulation
@@ -62,10 +80,14 @@ export function useManufacturingPlan(
     return {
       nodes: expanded.nodes,
       jobs,
+      pipeline,
       simulations,
       slots: expanded.slots,
+      scienceSlots: expanded.scienceSlots,
       windowHours,
-      warnings: detectOverUnder(expanded.nodes),
+      warnings: [...expanded.warnings, ...detectOverUnder(expanded.nodes)],
+      missingPriceTypeIds: expanded.missingPriceTypeIds,
+      hasReliablePrices: expanded.missingPriceTypeIds.length === 0,
     }
   }, [template, blueprints, typeMap, prices, settings, systemCostIndex, reactionCostIndex, includeSimulation])
 }

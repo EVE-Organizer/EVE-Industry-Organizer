@@ -1,26 +1,24 @@
 import type { ReactNode } from 'react'
-import type { BlueprintTier, TimeRange } from '@/types'
-import {
-  BLUEPRINT_TIERS,
-  MAX_BATCH_SIZE,
-  MIN_BATCH_SIZE,
-} from '@/types'
+import { MAX_BATCH_SIZE, MIN_BATCH_SIZE } from '@/types'
 import type { SdeData, ProductGroupCategoryNode } from '@/services/data/sdeLoader'
-import { clampBatchSize, clampMinVolume, defaultQuery, MAX_MIN_VOLUME_SLIDER, type BlueprintQuery } from '@/lib/blueprintQuery'
+import {
+  clampBatchSize,
+  clampMinVolume,
+  defaultQuery,
+  MAX_MIN_VOLUME_SLIDER,
+  type BlueprintQuery,
+} from '@/lib/blueprintQuery'
 import { useAppStore } from '@/stores/appStore'
-import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
-import { ProductGroupPicker } from '@/components/ProductGroupPicker'
 import { CompactSliderField } from '@/components/CompactSliderField'
 import { SetupBudgetRange } from '@/components/SetupBudgetRange'
-import { FormFieldLabel } from '@/components/FormFieldLabel'
-import { InfoTooltip } from '@/components/InfoTooltip'
-import { EveImage } from '@/components/EveImage'
-import { Panel } from '@/components/Panel'
-import { TIER_FILTER_LABELS, TIER_IMAGE_VARIANTS, TIER_TYPE_IDS } from '@/lib/eveImages'
-import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
+import { PlanFacilityControls } from '@/components/plan/PlanFacilityControls'
+import {
+  EconomicsFilterSection,
+  FilterSection,
+} from '@/components/EconomicsFilterSection'
+import { BlueprintPickerFilterSection } from '@/components/BlueprintPickerFilterSection'
 import { formatAvgVolume, formatInputDecimal, formatNumber } from '@/lib/profit'
-
-const TIME_WINDOWS: TimeRange[] = ['1d', '1w', '1m', '1y', 'all']
+import type { GlobalSettings } from '@/types'
 
 interface BlueprintFilterBarProps {
   query: BlueprintQuery
@@ -29,30 +27,6 @@ interface BlueprintFilterBarProps {
   productGroupTree: ProductGroupCategoryNode[]
   resultCount: number
   resultPending?: boolean
-}
-
-function FilterSection({
-  title,
-  hint,
-  children,
-  className = '',
-}: {
-  title: string
-  hint: string
-  children: ReactNode
-  className?: string
-}) {
-  return (
-    <section
-      className={`rounded-lg border border-eve-border bg-base-300/15 p-4 flex flex-col gap-3 min-w-0 ${className}`}
-    >
-      <header className="min-w-0">
-        <h3 className="text-sm font-semibold leading-tight">{title}</h3>
-        <p className="text-xs opacity-50 mt-0.5">{hint}</p>
-      </header>
-      {children}
-    </section>
-  )
 }
 
 function LimitsTile({
@@ -64,37 +38,10 @@ function LimitsTile({
 }) {
   return (
     <div
-      className={`rounded-md border border-eve-border bg-base-300/10 p-3 flex flex-col gap-2 min-w-0 ${className}`}
+      className={`rounded-md border border-eve-border/70 bg-base-300/10 p-3 flex flex-col gap-2 min-w-0 ${className}`}
     >
       {children}
     </div>
-  )
-}
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-  className = '',
-  tall = false,
-}: {
-  active: boolean
-  onClick: () => void
-  children: ReactNode
-  className?: string
-  tall?: boolean
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      className={`category-chip ${active ? 'btn-primary' : 'btn-ghost border border-eve-border'} ${
-        tall ? 'flex-col gap-1.5 min-h-[4.5rem] py-2' : ''
-      } ${className}`}
-      onClick={onClick}
-    >
-      {children}
-    </button>
   )
 }
 
@@ -107,244 +54,170 @@ export function BlueprintFilterBar({
   resultPending = false,
 }: BlueprintFilterBarProps) {
   const settings = useAppStore((s) => s.userData.settings)
+  const updateSettings = useAppStore((s) => s.updateSettings)
 
   function handleReset() {
     onChange(defaultQuery(settings))
   }
 
-  function toggleTier(tier: BlueprintTier) {
-    const active = query.tiers.includes(tier)
-    const tiers = active
-      ? query.tiers.filter((t) => t !== tier)
-      : [...query.tiers, tier]
-    onChange({ tiers, groups: [] })
+  function onEconomicsChange(patch: {
+    priceMethod?: BlueprintQuery['priceMethod']
+    priceWindow?: BlueprintQuery['window']
+    includeHaulCost?: boolean
+  }) {
+    const queryPatch: Partial<BlueprintQuery> = {}
+    const settingsPatch: Partial<GlobalSettings> = {}
+    if (patch.priceMethod != null) {
+      queryPatch.priceMethod = patch.priceMethod
+      settingsPatch.priceMethod = patch.priceMethod
+    }
+    if (patch.priceWindow != null) {
+      queryPatch.window = patch.priceWindow
+      settingsPatch.priceWindow = patch.priceWindow
+    }
+    if (patch.includeHaulCost != null) {
+      queryPatch.includeHaul = patch.includeHaulCost
+      settingsPatch.includeHaulCost = patch.includeHaulCost
+    }
+    if (Object.keys(queryPatch).length) onChange(queryPatch)
+    if (Object.keys(settingsPatch).length) updateSettings(settingsPatch)
+  }
+
+  function onFacilityChange(patch: Partial<GlobalSettings>) {
+    updateSettings(patch)
+    if (patch.manufacturingSystemId != null) {
+      onChange({ mfgSystem: patch.manufacturingSystemId })
+    }
   }
 
   return (
-    <Panel
-      title="Filters"
-      titleClassName="text-sm"
-      compact
-      className="w-full min-w-0 mb-4 shrink-0"
-      bodyClassName="gap-4"
-      actions={
+    <section className="blueprint-filters">
+      <header className="blueprint-filters__header">
+        <div className="min-w-0">
+          <h2 className="blueprint-filters__title">Filters</h2>
+          <p className="blueprint-filters__subtitle">
+            Station, market window, and what to rank
+          </p>
+        </div>
         <div className="flex items-center gap-2 shrink-0">
           <button type="button" className="btn btn-ghost btn-xs" onClick={handleReset}>
             Reset
           </button>
-          <span className="badge badge-ghost badge-sm tabular-nums">
+          <span className="badge badge-primary badge-sm badge-outline border-primary/30 tabular-nums font-normal">
             {resultPending ? 'Updating…' : `${resultCount} shown`}
           </span>
         </div>
-      }
-    >
-      <div className="flex flex-col gap-4 min-w-0">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0 items-stretch">
-          <FilterSection
-            title="Where & prices"
-            hint="Hub is in the navbar. Build system, market data, and availability below."
-          >
-            {sde ? (
-              <label className="form-control w-full min-w-0">
-                <FormFieldLabel label="Mfg system" size="sm" />
-                <ManufacturingSystemPicker
-                  value={query.mfgSystem}
-                  onChange={(systemId) => onChange({ mfgSystem: systemId })}
-                  systems={sde.systems}
-                  regions={sde.regions}
-                  className="w-full max-w-none"
-                />
-              </label>
-            ) : null}
+      </header>
 
-            <label className="form-control w-full min-w-0">
-              <FormFieldLabel
-                label="Price method"
-                tooltip={GLOBAL_SETTING_TOOLTIPS.priceMethod}
-                size="sm"
-              />
-              <select
-                className="select select-bordered select-sm w-full"
-                value={query.priceMethod}
-                onChange={(e) =>
-                  onChange({
-                    priceMethod: e.target.value as typeof query.priceMethod,
-                  })
+      <div className="blueprint-filters__body">
+        {sde ? (
+          <PlanFacilityControls
+            settings={{
+              ...settings,
+              manufacturingSystemId: query.mfgSystem,
+            }}
+            onChange={onFacilityChange}
+            systems={sde.systems}
+            regions={sde.regions}
+            hint="Rig bonuses and owner tax are in Settings. Station and system changes apply to ranking cost estimates."
+          />
+        ) : null}
+
+        <div className="blueprint-filters__market">
+          <div className="blueprint-filters__market-head">
+            <h3 className="text-sm font-semibold leading-tight">Market pricing</h3>
+            <p className="text-xs opacity-50">Hub is in the navbar</p>
+          </div>
+          <EconomicsFilterSection
+            layout="bar"
+            values={{
+              priceMethod: query.priceMethod,
+              priceWindow: query.window,
+              includeHaulCost: query.includeHaul,
+            }}
+            onChange={onEconomicsChange}
+          />
+        </div>
+
+        <div className="blueprint-filters__grid">
+          <BlueprintPickerFilterSection
+            values={{
+              tiers: query.tiers,
+              groups: query.groups,
+              buildableOnly: query.buildableOnly,
+            }}
+            onChange={(patch) => onChange(patch)}
+            productGroupTree={productGroupTree}
+            title="Catalog"
+            hint="Tier, product group, and buildable-only."
+            className="blueprint-filters__card"
+          />
+
+          <FilterSection
+            title="Ranking limits"
+            hint="Budget, batch size, and volume cutoffs"
+            className="blueprint-filters__card"
+          >
+            <LimitsTile>
+              <SetupBudgetRange
+                minSlider={query.budgetMinSlider}
+                maxSlider={query.budgetMaxSlider}
+                onChange={(minSlider, maxSlider) =>
+                  onChange({ budgetMinSlider: minSlider, budgetMaxSlider: maxSlider })
                 }
-              >
-                <option value="sell_orders">Sell orders (list and average)</option>
-                <option value="buy_orders">Buy orders (instant sell)</option>
-              </select>
-            </label>
-
-            <div className="form-control w-full min-w-0">
-              <FormFieldLabel label="Price window" size="sm" />
-              <div
-                role="group"
-                aria-label="Price window"
-                className="grid grid-cols-5 gap-1.5 w-full min-w-0"
-              >
-                {TIME_WINDOWS.map((r) => (
-                  <FilterChip
-                    key={r}
-                    active={query.window === r}
-                    onClick={() => onChange({ window: r })}
-                    className="min-w-0 px-0"
-                  >
-                    {r}
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-
-            <div className="form-control w-full min-w-0">
-              <FormFieldLabel label="Availability" size="sm" />
-              <div className="rounded-md border border-eve-border bg-base-300/10 px-3 py-2.5 flex flex-col gap-2">
-                <label className="label cursor-pointer gap-2 justify-start py-0 min-h-0">
-                  <input
-                    type="checkbox"
-                    className="checkbox checkbox-sm"
-                    checked={query.buildableOnly}
-                    onChange={(e) => onChange({ buildableOnly: e.target.checked })}
-                  />
-                  <span className="label-text text-sm inline-flex items-center gap-1.5">
-                    Only buildable
-                    <InfoTooltip text="Checks Industry and other skills you entered during setup or in Settings." />
-                  </span>
-                </label>
-
-                <label className="label cursor-pointer gap-2 justify-start py-0 min-h-0">
-                  <input
-                    type="checkbox"
-                    className="checkbox checkbox-sm"
-                    checked={query.includeHaul}
-                    onChange={(e) => onChange({ includeHaul: e.target.checked })}
-                  />
-                  <span className="label-text text-sm inline-flex items-center gap-1.5">
-                    Include hauling
-                    <InfoTooltip text="Haul in (materials to build system) is added to setup cost; haul out (products to hub) is subtracted from profit. Turn off if you build and sell locally or haul on your own." />
-                  </span>
-                </label>
-              </div>
-            </div>
-          </FilterSection>
-
-          <FilterSection
-            title="What to build"
-            hint="Blueprint tier and product group"
-            className="h-full"
-          >
-            <div className="shrink-0">
-              <FormFieldLabel label="Tier" size="sm" />
-              <div
-                role="group"
-                aria-label="Blueprint tier"
-                className="grid grid-cols-3 gap-2 w-full min-w-0 mt-1"
-              >
-                {BLUEPRINT_TIERS.map((t) => (
-                  <FilterChip
-                    key={t}
-                    active={query.tiers.includes(t)}
-                    onClick={() => toggleTier(t)}
-                    tall
-                    className="min-w-0 justify-center"
-                  >
-                    <span className="rounded-md bg-base-100/90 p-1 shadow-sm">
-                      <EveImage
-                        id={TIER_TYPE_IDS[t]}
-                        variant={TIER_IMAGE_VARIANTS[t]}
-                        size={40}
-                        framed
-                        alt=""
-                        lazy={false}
-                      />
-                    </span>
-                    <span className="text-xs font-medium">{TIER_FILTER_LABELS[t]}</span>
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2 min-w-0">
-              <FormFieldLabel
-                label="Product group"
-                tooltip="Check groups to limit rankings. Leave none selected for all groups. Rankings reset when you change tiers."
-                size="sm"
+                className="w-full !border-0 !bg-transparent !p-0"
               />
-              <ProductGroupPicker
+            </LimitsTile>
+
+            <div className="grid grid-cols-1 gap-3 min-w-0 items-stretch">
+              <CompactSliderField
                 variant="panel"
-                value={query.groups}
-                onChange={(groups) => onChange({ groups })}
-                tree={productGroupTree}
-                className="w-full"
+                label="Batch size"
+                tooltip="Number of manufacturing runs per job. Setup cost and profit scale with this value. ISK/hr also caps sell rate to hub volume."
+                value={query.batchSize}
+                onChange={(batchSize) => onChange({ batchSize })}
+                min={MIN_BATCH_SIZE}
+                max={MAX_BATCH_SIZE}
+                step={1}
+                unit="runs"
+                formatSummary={(v) => `${formatNumber(v, 0)} runs`}
+                formatDisplay={(v) => formatInputDecimal(v, 0)}
+                parseInput={(raw) => {
+                  const parsed = parseFloat(raw.trim())
+                  return Number.isFinite(parsed) ? parsed : null
+                }}
+                clampValue={clampBatchSize}
+                formatAxis={(v) => formatNumber(v, 0)}
+                ariaLabel="Batch size (runs)"
+              />
+
+              <CompactSliderField
+                variant="panel"
+                label="Min vol/day"
+                tooltip="Hide blueprints whose average daily traded volume is below this threshold. Uses the same Vol/day column as the table (1m volume when the price window is 1y)."
+                value={query.minVolume}
+                onChange={(minVolume) => onChange({ minVolume })}
+                min={0}
+                max={MAX_MIN_VOLUME_SLIDER}
+                step={0.1}
+                unit="/d"
+                formatSummary={(v) => (v > 0 ? `${formatAvgVolume(v)}/d` : 'Any')}
+                formatDisplay={(v) => (v > 0 ? formatInputDecimal(v, 1) : '')}
+                parseInput={(raw) => {
+                  const trimmed = raw.trim()
+                  if (!trimmed) return 0
+                  const parsed = parseFloat(trimmed)
+                  return Number.isFinite(parsed) ? parsed : null
+                }}
+                clampValue={clampMinVolume}
+                formatAxis={(v) => (v === 0 ? 'Any' : formatAvgVolume(v))}
+                inputPlaceholder="Any"
+                ariaLabel="Minimum average daily volume"
               />
             </div>
           </FilterSection>
         </div>
-
-        <FilterSection
-          title="Your limits"
-          hint="Budget, batch size, and volume"
-        >
-          <LimitsTile>
-            <SetupBudgetRange
-              minSlider={query.budgetMinSlider}
-              maxSlider={query.budgetMaxSlider}
-              onChange={(minSlider, maxSlider) =>
-                onChange({ budgetMinSlider: minSlider, budgetMaxSlider: maxSlider })
-              }
-              className="w-full !border-0 !bg-transparent !p-0"
-            />
-          </LimitsTile>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0 items-stretch">
-            <CompactSliderField
-              variant="panel"
-              label="Batch size"
-              tooltip="Number of manufacturing runs per job. Setup cost and profit scale with this value. ISK/hr also caps sell rate to hub volume."
-              value={query.batchSize}
-              onChange={(batchSize) => onChange({ batchSize })}
-              min={MIN_BATCH_SIZE}
-              max={MAX_BATCH_SIZE}
-              step={1}
-              unit="runs"
-              formatSummary={(v) => `${formatNumber(v, 0)} runs`}
-              formatDisplay={(v) => formatInputDecimal(v, 0)}
-              parseInput={(raw) => {
-                const parsed = parseFloat(raw.trim())
-                return Number.isFinite(parsed) ? parsed : null
-              }}
-              clampValue={clampBatchSize}
-              formatAxis={(v) => formatNumber(v, 0)}
-              ariaLabel="Batch size (runs)"
-            />
-
-            <CompactSliderField
-              variant="panel"
-              label="Min vol/day"
-              tooltip="Hide blueprints whose average daily traded volume is below this threshold. Uses the same Vol/day column as the table (1m volume when the price window is 1y)."
-              value={query.minVolume}
-              onChange={(minVolume) => onChange({ minVolume })}
-              min={0}
-              max={MAX_MIN_VOLUME_SLIDER}
-              step={0.1}
-              unit="/d"
-              formatSummary={(v) => (v > 0 ? `${formatAvgVolume(v)}/d` : 'Any')}
-              formatDisplay={(v) => (v > 0 ? formatInputDecimal(v, 1) : '')}
-              parseInput={(raw) => {
-                const trimmed = raw.trim()
-                if (!trimmed) return 0
-                const parsed = parseFloat(trimmed)
-                return Number.isFinite(parsed) ? parsed : null
-              }}
-              clampValue={clampMinVolume}
-              formatAxis={(v) => (v === 0 ? 'Any' : formatAvgVolume(v))}
-              inputPlaceholder="Any"
-              ariaLabel="Minimum average daily volume"
-            />
-          </div>
-        </FilterSection>
       </div>
-    </Panel>
+    </section>
   )
 }

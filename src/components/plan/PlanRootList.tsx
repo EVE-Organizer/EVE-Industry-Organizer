@@ -177,7 +177,7 @@ function ProductCell({
           alt={row.name}
         />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1 min-w-0 flex-wrap">
+          <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
             <PlanBlueprintItemName
               node={row.node}
               onOpenGraph={onOpenGraph}
@@ -185,7 +185,10 @@ function ProductCell({
               showMeTeSettings
             />
             {row.isRoot ? (
-              <span className="badge badge-primary badge-xs shrink-0">Root</span>
+              <span className="badge badge-primary badge-sm shrink-0">Root</span>
+            ) : null}
+            {row.isRoot && row.node.tier === 't2' ? (
+              <span className="badge badge-warning badge-sm shrink-0">T2</span>
             ) : null}
           </div>
           <p className="text-[11px] opacity-50 tabular-nums mt-0.5 leading-snug">
@@ -206,7 +209,7 @@ function ProductCell({
         alt={row.name}
       />
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1 flex-wrap min-w-0">
+        <div className="flex items-center gap-1.5 flex-wrap min-w-0">
           <PlanBlueprintItemName
             node={row.node}
             onOpenGraph={onOpenGraph}
@@ -216,7 +219,10 @@ function ProductCell({
           {row.rootInstance != null && row.rootInstanceTotal != null && row.rootInstanceTotal > 1 ? (
             <span className="badge badge-ghost badge-xs shrink-0 tabular-nums">#{row.rootInstance}</span>
           ) : null}
-          {row.isRoot ? <span className="badge badge-primary badge-xs shrink-0">Root</span> : null}
+          {row.isRoot ? <span className="badge badge-primary badge-sm shrink-0">Root</span> : null}
+          {row.isRoot && row.node.tier === 't2' ? (
+            <span className="badge badge-warning badge-sm shrink-0">T2</span>
+          ) : null}
         </div>
       </div>
     </div>
@@ -379,8 +385,12 @@ export function PlanRootList({
                       <span className="tabular-nums text-sm whitespace-nowrap">
                         {formatIsk(profit.setupCost)}
                       </span>
-                    ) : (
+                    ) : row.isRoot ? (
                       <span className="opacity-40">—</span>
+                    ) : (
+                      <Tooltip text="Setup and profit are rolled up on the root row only" placement="top">
+                        <span className="opacity-30 cursor-help">—</span>
+                      </Tooltip>
                     )}
                   </td>
                   <td className="plan-jobs-table__money-col" onClick={stopRowToggle}>
@@ -404,8 +414,12 @@ export function PlanRootList({
                       >
                         {formatIsk(profit.netProfit)}
                       </span>
-                    ) : (
+                    ) : row.isRoot ? (
                       <span className="opacity-40">—</span>
+                    ) : (
+                      <Tooltip text="Setup and profit are rolled up on the root row only" placement="top">
+                        <span className="opacity-30 cursor-help">—</span>
+                      </Tooltip>
                     )}
                   </td>
                   <td className="plan-jobs-table__money-col plan-jobs-table__money-col--narrow tabular-nums text-sm whitespace-nowrap">
@@ -413,8 +427,10 @@ export function PlanRootList({
                       <span className={profit.netProfit >= 0 ? 'text-success' : 'text-error'}>
                         {formatPercent(profit.margin)}
                       </span>
-                    ) : (
+                    ) : row.isRoot ? (
                       <span className="opacity-40">—</span>
+                    ) : (
+                      <span className="opacity-30">—</span>
                     )}
                   </td>
                   <td onClick={stopRowToggle}>

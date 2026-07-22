@@ -9,6 +9,8 @@ import { classifyTier, isPlaceholderManufacturingRecipe } from './blueprint-grou
 import { buildInventionMap } from './invention.mjs'
 
 export const MANUFACTURING_ACTIVITY = 1
+export const COPYING_ACTIVITY = 5
+export const INVENTION_ACTIVITY = 8
 export const REACTION_ACTIVITY = 11
 
 function num(value) {
@@ -76,6 +78,22 @@ function buildRecipesForActivity(tables, activityId, kind) {
     activityId,
   )
 
+  // Copy (5) and invention (8) times are keyed by blueprint type ID.
+  const copyTimes =
+    kind === 'manufacturing'
+      ? indexActivityRows(
+          { activity: tables.activity, materials: [], skills: [], skillNames },
+          COPYING_ACTIVITY,
+        ).timeByBlueprint
+      : new Map()
+  const inventionTimes =
+    kind === 'manufacturing'
+      ? indexActivityRows(
+          { activity: tables.activity, materials: [], skills: [], skillNames },
+          INVENTION_ACTIVITY,
+        ).timeByBlueprint
+      : new Map()
+
   const recipes = []
   for (const row of products) {
     if (row.activityID !== String(activityId)) continue
@@ -98,7 +116,19 @@ function buildRecipesForActivity(tables, activityId, kind) {
 
     const metaGroupId = metaByProduct.get(String(productTypeId)) ?? 1
     const tier = kind === 'reaction' ? 't1' : classifyTier(metaGroupId)
-    const invention = tier === 't2' ? inventionByT2.get(blueprintTypeId) : undefined
+    const inventionBase = tier === 't2' ? inventionByT2.get(blueprintTypeId) : undefined
+    const t1BpId = inventionBase?.t1BlueprintTypeId
+    const invention = inventionBase
+      ? {
+          ...inventionBase,
+          // Copy + invent run on the T1 BPO/BPC, not the T2 product BPO.
+          copyTime: t1BpId != null ? (copyTimes.get(String(t1BpId)) ?? 0) : 0,
+          inventionTime: t1BpId != null ? (inventionTimes.get(String(t1BpId)) ?? 0) : 0,
+        }
+      : undefined
+
+    const copyTime = copyTimes.get(row.typeID)
+    const inventionTime = inventionTimes.get(row.typeID)
 
     recipes.push({
       blueprintTypeId,
@@ -113,6 +143,8 @@ function buildRecipesForActivity(tables, activityId, kind) {
       bpIconUrl: blueprintIconUrl(blueprintTypeId),
       productIconUrl: typeIconUrl(productTypeId),
       productRenderUrl: typeRenderUrl(productTypeId),
+      ...(copyTime != null && copyTime > 0 ? { copyTime } : {}),
+      ...(inventionTime != null && inventionTime > 0 ? { inventionTime } : {}),
       ...(kind === 'reaction'
         ? { reactionFamily: reactionFamilyFromGroup(formulaGroupName) }
         : {}),

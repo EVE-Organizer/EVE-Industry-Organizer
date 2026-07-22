@@ -28,17 +28,17 @@ export async function fetchCharacterSkills(
   )
 }
 
-/** Map ESI skill rows to the five app skill keys used in profit and buildability. */
+/** Map ESI skill rows to app skill keys used in profit, slots, and buildability. */
 export function mapEsiSkillsToSkillLevels(esiSkills: EsiSkill[] | undefined): SkillLevels {
   const byId = new Map((esiSkills ?? []).map((s) => [s.skill_id, s.trained_skill_level]))
-  const result = normalizeImportedSkillLevels({})
+  const partial: Partial<SkillLevels> = {}
 
   for (const field of SKILL_FIELDS) {
     const level = byId.get(field.skillId)
     if (typeof level === 'number') {
-      result[field.key] = Math.min(5, Math.max(0, level))
+      partial[field.key] = Math.min(5, Math.max(0, level))
     }
   }
 
-  return result
+  return normalizeImportedSkillLevels(partial)
 }
