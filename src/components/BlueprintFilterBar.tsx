@@ -126,7 +126,7 @@ export function BlueprintFilterBar({
         <div className="blueprint-filters__market">
           <div className="blueprint-filters__market-head">
             <h3 className="text-sm font-semibold leading-tight">Market pricing</h3>
-            <p className="text-xs opacity-50">Hub is in the navbar</p>
+            <p className="text-xs opacity-50 hidden sm:block">Hub is in the navbar</p>
           </div>
           <EconomicsFilterSection
             layout="bar"
@@ -158,62 +158,64 @@ export function BlueprintFilterBar({
             hint="Budget, batch size, and volume cutoffs"
             className="blueprint-filters__card"
           >
-            <LimitsTile>
-              <SetupBudgetRange
-                minSlider={query.budgetMinSlider}
-                maxSlider={query.budgetMaxSlider}
-                onChange={(minSlider, maxSlider) =>
-                  onChange({ budgetMinSlider: minSlider, budgetMaxSlider: maxSlider })
-                }
-                className="w-full !border-0 !bg-transparent !p-0"
-              />
-            </LimitsTile>
+            <div className="blueprint-filters__limits-body">
+              <LimitsTile>
+                <SetupBudgetRange
+                  minSlider={query.budgetMinSlider}
+                  maxSlider={query.budgetMaxSlider}
+                  onChange={(minSlider, maxSlider) =>
+                    onChange({ budgetMinSlider: minSlider, budgetMaxSlider: maxSlider })
+                  }
+                  className="w-full !border-0 !bg-transparent !p-0"
+                />
+              </LimitsTile>
 
-            <div className="grid grid-cols-1 gap-3 min-w-0 items-stretch">
-              <CompactSliderField
-                variant="panel"
-                label="Batch size"
-                tooltip="Number of manufacturing runs per job. Setup cost and profit scale with this value. ISK/hr also caps sell rate to hub volume."
-                value={query.batchSize}
-                onChange={(batchSize) => onChange({ batchSize })}
-                min={MIN_BATCH_SIZE}
-                max={MAX_BATCH_SIZE}
-                step={1}
-                unit="runs"
-                formatSummary={(v) => `${formatNumber(v, 0)} runs`}
-                formatDisplay={(v) => formatInputDecimal(v, 0)}
-                parseInput={(raw) => {
-                  const parsed = parseFloat(raw.trim())
-                  return Number.isFinite(parsed) ? parsed : null
-                }}
-                clampValue={clampBatchSize}
-                formatAxis={(v) => formatNumber(v, 0)}
-                ariaLabel="Batch size (runs)"
-              />
+              <div className="grid grid-cols-1 gap-3 min-w-0 items-stretch">
+                <CompactSliderField
+                  variant="panel"
+                  label="Batch size"
+                  tooltip="Number of manufacturing runs per job. Setup cost and profit scale with this value. ISK/hr also caps sell rate to hub volume."
+                  value={query.batchSize}
+                  onChange={(batchSize) => onChange({ batchSize })}
+                  min={MIN_BATCH_SIZE}
+                  max={MAX_BATCH_SIZE}
+                  step={1}
+                  unit="runs"
+                  formatSummary={(v) => `${formatNumber(v, 0)} runs`}
+                  formatDisplay={(v) => formatInputDecimal(v, 0)}
+                  parseInput={(raw) => {
+                    const parsed = parseFloat(raw.trim())
+                    return Number.isFinite(parsed) ? parsed : null
+                  }}
+                  clampValue={clampBatchSize}
+                  formatAxis={(v) => formatNumber(v, 0)}
+                  ariaLabel="Batch size (runs)"
+                />
 
-              <CompactSliderField
-                variant="panel"
-                label="Min vol/day"
-                tooltip="Hide blueprints whose average daily traded volume is below this threshold. Uses the same Vol/day column as the table (1m volume when the price window is 1y)."
-                value={query.minVolume}
-                onChange={(minVolume) => onChange({ minVolume })}
-                min={0}
-                max={MAX_MIN_VOLUME_SLIDER}
-                step={0.1}
-                unit="/d"
-                formatSummary={(v) => (v > 0 ? `${formatAvgVolume(v)}/d` : 'Any')}
-                formatDisplay={(v) => (v > 0 ? formatInputDecimal(v, 1) : '')}
-                parseInput={(raw) => {
-                  const trimmed = raw.trim()
-                  if (!trimmed) return 0
-                  const parsed = parseFloat(trimmed)
-                  return Number.isFinite(parsed) ? parsed : null
-                }}
-                clampValue={clampMinVolume}
-                formatAxis={(v) => (v === 0 ? 'Any' : formatAvgVolume(v))}
-                inputPlaceholder="Any"
-                ariaLabel="Minimum average daily volume"
-              />
+                <CompactSliderField
+                  variant="panel"
+                  label="Min vol/day"
+                  tooltip="Hide blueprints whose average daily traded volume is below this threshold. Uses the same Vol/day column as the table (1m volume when the price window is 1y)."
+                  value={query.minVolume}
+                  onChange={(minVolume) => onChange({ minVolume })}
+                  min={0}
+                  max={MAX_MIN_VOLUME_SLIDER}
+                  step={0.1}
+                  unit="/d"
+                  formatSummary={(v) => (v > 0 ? `${formatAvgVolume(v)}/d` : 'Any')}
+                  formatDisplay={(v) => (v > 0 ? formatInputDecimal(v, 1) : '')}
+                  parseInput={(raw) => {
+                    const trimmed = raw.trim()
+                    if (!trimmed) return 0
+                    const parsed = parseFloat(trimmed)
+                    return Number.isFinite(parsed) ? parsed : null
+                  }}
+                  clampValue={clampMinVolume}
+                  formatAxis={(v) => (v === 0 ? 'Any' : formatAvgVolume(v))}
+                  inputPlaceholder="Any"
+                  ariaLabel="Minimum average daily volume"
+                />
+              </div>
             </div>
           </FilterSection>
         </div>
