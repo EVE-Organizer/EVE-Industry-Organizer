@@ -2,7 +2,7 @@ import { readFileSync } from 'fs'
 import { describe, expect, it } from 'vitest'
 import { applyME, estimateJobCost, estimatedItemValue, materialCost } from '@/lib/cost'
 import { WIDER_TIME_RANGES } from '@/lib/profit'
-import { marketAwareIph, rankBlueprintsFromMarket, volumeWindowForPrice } from '@/lib/ranking'
+import { marketAwareIph, rankBlueprintsFromMarket } from '@/lib/ranking'
 import { buildPriceMap, buildTypeMap, getHubMarket } from '@/services/data/sdeLoader'
 import { DEFAULT_SETTINGS, DEFAULT_BATCH_SIZE, type ManufacturingSettings } from '@/types'
 import type { BlueprintRegistry, MarketData, RegionsData, TimeRange, TypeInfo } from '@/types'
@@ -142,22 +142,10 @@ describe('window-based material costs', () => {
     expect(ranked1w.length).toBeGreaterThan(0)
     expect(ranked1y.length).toBeGreaterThan(0)
 
-    const ammo1mRow = rankBlueprintsFromMarket(
-      registry,
-      market,
-      regions,
-      typeMap,
-      'jita',
-      '1m',
-      settings,
-      filters,
-    ).find((r) => r.blueprint.productTypeId === 178)
     const ammo1y = ranked1y.find((r) => r.blueprint.productTypeId === 178)
-    expect(ammo1mRow).toBeDefined()
     expect(ammo1y).toBeDefined()
-    expect(volumeWindowForPrice('1y')).toBe('1m')
-    expect(ammo1y!.avgVolume).toBe(ammo1mRow!.avgVolume)
-    expect(ammo1y!.avgVolume).toBe(ammoHistory['1m']!.avgVolume)
+    expect(ammo1y!.avgVolume).toBe(ammoHistory['1y']!.avgVolume)
+    expect(ammo1y!.avgVolume).not.toBe(ammoHistory['1m']!.avgVolume)
   })
 })
 

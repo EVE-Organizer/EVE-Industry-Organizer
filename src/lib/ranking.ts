@@ -42,15 +42,6 @@ export const TOP_N = 50
 /** Rankings assume production up to this many days of average hub volume. */
 export const MAX_DAYS_TO_CLEAR = 7
 
-/** Long price windows use a shorter volume window for liquidity (batch cap, IPH, filters). */
-const VOLUME_WINDOW_FOR_PRICE: Partial<Record<TimeRange, TimeRange>> = {
-  '1y': '1m',
-}
-
-export function volumeWindowForPrice(window: TimeRange): TimeRange {
-  return VOLUME_WINDOW_FOR_PRICE[window] ?? window
-}
-
 /** CCP placeholder recipes (e.g. Praxis, Gnosis): 1 Tritanium, not player manufacturing. */
 export function isPlaceholderManufacturingBlueprint(blueprint: BlueprintInfo): boolean {
   const mats = blueprint.materials
@@ -83,7 +74,7 @@ export interface RankingFilters {
   productGroups?: string[]
   /** Rank only these product type IDs (ignores tier/group filters). */
   productTypeIds?: number[]
-  /** Minimum avg daily hub volume (0 = no filter). Uses volumeWindowForPrice(window). */
+  /** Minimum avg daily hub volume (0 = no filter). Uses the same window as price. */
   minVolume?: number
   sortBy?: BlueprintSortKey
   sortDirection?: SortDirection
@@ -169,17 +160,13 @@ export function buildWindowPriceMap(
   return map
 }
 
-type WindowMetric = 'price' | 'volume'
-
 function pickHistoryWindow(
   productHistory: Partial<Record<TimeRange, ProductWindowSummary>>,
   window: TimeRange,
-  metric: WindowMetric = 'price',
 ): ProductWindowSummary | null {
   const tryWindow = (w: TimeRange) => {
     const summary = productHistory[w]
     if (!summary) return null
-    if (metric === 'volume') return summary.avgVolume > 0 ? summary : null
     return summary.avgPrice > 0 ? summary : null
   }
 
@@ -202,19 +189,14 @@ function resolveWindowSummary(
 ): ProductWindowSummary | null {
   const productHistory = hubMarket.products[String(productTypeId)]
   if (productHistory) {
-    const priceWindow = pickHistoryWindow(productHistory, window, 'price')
-    if (!priceWindow) return null
+    const windowSummary = pickHistoryWindow(productHistory, window)
+    if (!windowSummary) return null
 
-    const volumeWindow = pickHistoryWindow(
-      productHistory,
-      volumeWindowForPrice(window),
-      'volume',
-    )
     return {
-      avgPrice: priceWindow.avgPrice,
-      avgVolume: volumeWindow?.avgVolume ?? 0,
-      high: priceWindow.high,
-      low: priceWindow.low,
+      avgPrice: windowSummary.avgPrice,
+      avgVolume: windowSummary.avgVolume ?? 0,
+      high: windowSummary.high,
+      low: windowSummary.low,
     }
   }
 

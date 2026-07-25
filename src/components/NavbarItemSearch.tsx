@@ -84,7 +84,10 @@ export function NavbarItemSearch({ className = '' }: { className?: string }) {
   }
 
   return (
-    <div ref={rootRef} className={`navbar-item-search plan-search-wrap ${className}`}>
+    <div
+      ref={rootRef}
+      className={`navbar-item-search plan-search-wrap${open ? ' plan-search-wrap--open' : ''} ${className}`}
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
@@ -128,6 +131,7 @@ export function NavbarItemSearch({ className = '' }: { className?: string }) {
                 <button
                   type="button"
                   className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg hover:bg-base-300/80 text-left transition-colors"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => select(item.typeId)}
                 >
                   <EveImage id={item.typeId} size={ICON_SIZE} framed alt={item.name} lazy={false} />

@@ -1186,6 +1186,10 @@
     @apply flex min-h-8 min-w-0 flex-1 items-center overflow-hidden rounded-lg border border-eve-border/80 bg-base-300/20 shadow-sm;
     @apply max-w-md lg:max-w-lg xl:max-w-xl;
 
+    &:has(.plan-search-wrap--open) {
+      @apply relative z-[60] overflow-visible;
+    }
+
     &--mobile {
       @apply min-h-10 w-full max-w-none flex-none;
 

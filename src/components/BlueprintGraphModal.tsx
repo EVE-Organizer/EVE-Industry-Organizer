@@ -26,7 +26,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import type { BlueprintInfo, GlobalSettings, ManufacturingSettings, RankedBlueprintRow, SupplyChainNode, TimeRange } from '@/types'
-import { HUBS } from '@/types'
+import { DEFAULT_SETTINGS, HUBS } from '@/types'
 import { useSdeData } from '@/hooks/useSdeData'
 import {
   buildPriceMap,
@@ -1667,7 +1667,7 @@ export function BlueprintGraphModal({
   blueprint,
   rankedRow: _rankedRow,
   hub,
-  priceWindow = '1w',
+  priceWindow = DEFAULT_SETTINGS.priceWindow,
   settings,
   onClose,
   onProductChange,

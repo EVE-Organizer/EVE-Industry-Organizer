@@ -53,7 +53,7 @@ import {
   sharedPayloadToTemplate,
 } from '@/lib/planShare'
 import { formatDecimal } from '@/lib/profit'
-import { DEFAULT_BATCH_SIZE, HUBS } from '@/types'
+import { DEFAULT_BATCH_SIZE, DEFAULT_SETTINGS, HUBS } from '@/types'
 import type {
   GlobalSettings,
   ManufacturingPlanTemplate,
@@ -264,7 +264,7 @@ export function PlanPage() {
     if (!data) return new Map<number, number>()
     const hubMarket = getHubMarket(data.market, activeSettings.primaryHub)
     if (!hubMarket) return new Map<number, number>()
-    const window = activeSettings.priceWindow ?? '1w'
+    const window = activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow
     return buildWindowPriceMap(hubMarket, window, buildPriceMap(hubMarket))
   }, [data, activeSettings.primaryHub, activeSettings.priceWindow])
 
@@ -939,7 +939,7 @@ export function PlanPage() {
                         className="plan-price-bar__windows"
                       >
                         {(['1d', '1w', '1m', '1y', 'all'] as TimeRange[]).map((window) => {
-                          const active = (activeSettings.priceWindow ?? '1w') === window
+                          const active = (activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow) === window
                           return (
                             <button
                               key={window}

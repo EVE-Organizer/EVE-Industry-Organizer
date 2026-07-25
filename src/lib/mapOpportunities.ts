@@ -1,5 +1,5 @@
 import type { HubId, ManufacturingSettings, RankedBlueprintRow } from '@/types'
-import { HUBS } from '@/types'
+import { DEFAULT_SETTINGS, HUBS } from '@/types'
 import type {
   MapGraph,
   MapOpportunityRow,
@@ -205,7 +205,7 @@ export function buildMapOpportunities(input: MapOpportunityInput): MapOpportunit
     sde.regions,
     new Map(sde.types.map((t) => [t.typeId, t])),
     primaryHub,
-    '1w',
+    settings.priceWindow ?? DEFAULT_SETTINGS.priceWindow,
     settings,
     {
       tiers: ['t1', 't2'],

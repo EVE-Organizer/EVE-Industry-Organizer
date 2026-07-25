@@ -797,7 +797,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   structureTaxPercent: 0,
   reactionFacility: defaultReactionFacility(30000144),
   priceMethod: 'sell_orders',
-  priceWindow: '1w',
+  priceWindow: '1m',
   includeHaulCost: true,
   blueprintLifetimeRunsByCategory: { ...DEFAULT_BPO_LIFETIME_RUNS_BY_CATEGORY },
   inventionSkillLevel: 4,

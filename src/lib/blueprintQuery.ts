@@ -2,6 +2,7 @@ import type { BlueprintTier, GlobalSettings, HubId, TimeRange } from '@/types'
 import {
   BLUEPRINT_TIERS,
   DEFAULT_BATCH_SIZE,
+  DEFAULT_SETTINGS,
   HUBS,
   MAX_BATCH_SIZE,
   MIN_BATCH_SIZE,
@@ -26,7 +27,7 @@ export interface BlueprintQuery {
   budgetMaxSlider: number
   buildableOnly: boolean
   includeHaul: boolean
-  /** Minimum average daily hub volume (0 = no filter). Volume window may differ from price window. */
+  /** Minimum average daily hub volume (0 = no filter). Uses the selected price window. */
   minVolume: number
   /** Manufacturing runs per job for profit and cost calculations on this page. */
   batchSize: number
@@ -47,7 +48,7 @@ export function defaultQuery(settings: GlobalSettings): BlueprintQuery {
     mfgSystem: settings.manufacturingSystemId,
     tiers: ['t1'],
     groups: [],
-    window: settings.priceWindow ?? '1w',
+    window: settings.priceWindow ?? DEFAULT_SETTINGS.priceWindow,
     priceMethod: settings.priceMethod,
     budgetMinSlider: setupBudgetToSlider(defaultMinSetupCost()),
     budgetMaxSlider: setupBudgetToSlider(defaultMaxSetupCost()),

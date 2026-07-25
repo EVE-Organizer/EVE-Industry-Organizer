@@ -80,7 +80,7 @@ describe('normalizeGlobalSettings', () => {
     const settings = normalizeGlobalSettings({
       primaryHub: 'jita',
     })
-    expect(settings.priceWindow).toBe('1w')
+    expect(settings.priceWindow).toBe(DEFAULT_SETTINGS.priceWindow)
     expect(settings.includeHaulCost).toBe(true)
   })
 })
