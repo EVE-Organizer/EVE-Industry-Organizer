@@ -55,6 +55,9 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
         with:
@@ -96,8 +99,27 @@ jobs:
           git add public/data/
           if git diff --staged --quiet; then
             echo "No data changes to commit"
-          else
-            script="${{ github.event_name == 'schedule' && 'fetch-data' || inputs.script }}"
-            git commit -m "chore: update data ($script)"
-            git push
+            exit 0
           fi
+
+          script="${{ github.event_name == 'schedule' && 'fetch-data' || inputs.script }}"
+          git commit -m "chore: update data ($script)"
+
+          max_attempts=5
+          for attempt in $(seq 1 "$max_attempts"); do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              echo "Rebase conflict with latest main; aborting data push"
+              git rebase --abort
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              echo "Pushed data update on attempt $attempt"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt/$max_attempts), retrying..."
+            sleep 5
+          done
+
+          echo "Failed to push data update after $max_attempts attempts"
+          exit 1
