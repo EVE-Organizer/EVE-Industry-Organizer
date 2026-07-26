@@ -1,4 +1,4 @@
-import type { BlueprintInfo, GlobalSettings, ManufacturingPlanTemplate, PlanRootEntry } from '@/types'
+import type { BlueprintInfo, GlobalSettings, ManufacturingPlanTemplate, PlanRootEntry, TypeInfo } from '@/types'
 import {
   applyME,
   resolveBlueprintMeTe,
@@ -16,6 +16,16 @@ import {
 import { skillLevel } from '@/lib/skillFields'
 import { tradingFeeRates } from '@/lib/tradingFees'
 import { getBlueprintForProduct } from '@/services/data/sdeLoader'
+import { rootHaulVolumesFromNodes } from '@/lib/planHaulVolume'
+
+export interface PlanProfitOptions {
+  hasReliablePrices?: boolean
+  scheduledWindowHours?: number
+  haulInIskPerM3?: number
+  haulOutIskPerM3?: number
+  includeHaulCost?: boolean
+  priceMethod?: GlobalSettings['priceMethod']
+}
 
 export interface PlanBuyCostLine {
   productTypeId: number
@@ -37,6 +47,8 @@ export interface PlanSetupBreakdown {
   buyLines: PlanBuyCostLine[]
   /** Rolled-up build cost after market buys and packaged inputs. */
   buildChainCost: number
+  haulIn: number
+  haulExcluded?: boolean
 }
 
 export interface PlanProfitBreakdown {
@@ -53,6 +65,9 @@ export interface PlanProfitBreakdown {
   salesTax: number
   netRevenue: number
   setupCost: number
+  haulIn: number
+  haulOut: number
+  haulExcluded?: boolean
   netProfit: number
   margin: number
   iph: number
@@ -114,6 +129,56 @@ function packagedSelfBuyCost(
   return (prices.get(blueprint.productTypeId) ?? 0) * selfQty
 }
 
+function typeVolumesFromMap(typeMap: Map<number, TypeInfo>): Map<number, number> {
+  const map = new Map<number, number>()
+  for (const [id, type] of typeMap) {
+    map.set(id, type.volume)
+  }
+  return map
+}
+
+function rootHaulIsk(
+  root: PlanRootEntry,
+  blueprint: BlueprintInfo,
+  expandInput: ExpandPlanInput,
+  outputQty: number,
+  options?: PlanProfitOptions,
+): { haulIn: number; haulOut: number; haulExcluded: boolean } {
+  const { settings, template } = expandInput
+  const includeHaulCost =
+    options?.includeHaulCost ?? settings.includeHaulCost ?? true
+  const haulExcluded = !includeHaulCost
+  if (
+    haulExcluded ||
+    options?.haulInIskPerM3 == null ||
+    options?.haulOutIskPerM3 == null
+  ) {
+    return { haulIn: 0, haulOut: 0, haulExcluded }
+  }
+
+  const rootMode = template.modeOverrides[root.productTypeId] ?? 'build'
+  if (rootMode === 'buy') {
+    return { haulIn: 0, haulOut: 0, haulExcluded: false }
+  }
+
+  const isolated = isolatedExpandInput(expandInput, root)
+  const { nodes } = expandManufacturingPlan(isolated)
+  const typeVolumes = typeVolumesFromMap(expandInput.typeMap)
+  const { haulInM3, haulOutM3 } = rootHaulVolumesFromNodes(
+    nodes,
+    rootMode,
+    blueprint.productTypeId,
+    outputQty,
+    typeVolumes,
+  )
+
+  return {
+    haulIn: haulInM3 * options.haulInIskPerM3,
+    haulOut: haulOutM3 * options.haulOutIskPerM3,
+    haulExcluded: false,
+  }
+}
+
 export function computeRootProfitRow(
   root: PlanRootEntry,
   blueprint: BlueprintInfo,
@@ -122,7 +187,7 @@ export function computeRootProfitRow(
   buyPrices: Map<number, number>,
   jobTimeHours: number,
   buildCostCache?: BuildCostCache,
-  options?: { hasReliablePrices?: boolean },
+  options?: PlanProfitOptions,
 ): RootProfitRow {
   const { settings, template } = expandInput
   const meTeOverride = template.nodeOverrides[root.productTypeId]
@@ -137,6 +202,9 @@ export function computeRootProfitRow(
     setupCost =
       chainCost + packagedSelfBuyCost(blueprint, root.runs, sellPrices, settings, meTeOverride)
   }
+
+  const { haulIn, haulOut } = rootHaulIsk(root, blueprint, expandInput, outputQty, options)
+  setupCost += haulIn
 
   const sellPricePerUnit = sellPriceForProduct(
     blueprint.productTypeId,
@@ -157,7 +225,7 @@ export function computeRootProfitRow(
   const { net: netRevenue } = revenueFromSale(sellPricePerUnit, outputQty, feeRates, {
     includeBrokerFee: !usesBuyOrders,
   })
-  const netProfit = netRevenue - setupCost
+  const netProfit = netRevenue - setupCost - haulOut
   const margin = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
   const iph = jobTimeHours > 0 && hasPrices ? netProfit / jobTimeHours : 0
 
@@ -191,6 +259,7 @@ export function computeRootSetupBreakdown(
   blueprint: BlueprintInfo,
   expandInput: ExpandPlanInput,
   productName: string,
+  options?: PlanProfitOptions,
 ): PlanSetupBreakdown {
   const { settings, template } = expandInput
   const meTeOverride = template.nodeOverrides[root.productTypeId]
@@ -219,6 +288,7 @@ export function computeRootSetupBreakdown(
         },
       ],
       buildChainCost: 0,
+      haulIn: 0,
     }
   }
 
@@ -232,8 +302,10 @@ export function computeRootSetupBreakdown(
     settings,
     meTeOverride,
   )
-  const totalSetupCost =
+  const chainSetupCost =
     computePlanRootBuildCost(blueprint, root.runs, expandInput) + packagedBuyCost
+  const { haulIn, haulExcluded } = rootHaulIsk(root, blueprint, expandInput, outputQty, options)
+  const totalSetupCost = chainSetupCost + haulIn
 
   const buyLines: PlanBuyCostLine[] = nodes
     .filter((node) => node.mode === 'buy' && (node.buyCost ?? 0) > 0)
@@ -249,7 +321,7 @@ export function computeRootSetupBreakdown(
     .sort((a, b) => b.cost - a.cost)
 
   const buyTotal = buyLines.reduce((sum, line) => sum + line.cost, 0)
-  const buildChainCost = Math.max(0, totalSetupCost - buyTotal - packagedBuyCost)
+  const buildChainCost = Math.max(0, chainSetupCost - buyTotal - packagedBuyCost)
 
   return {
     rootId: root.id,
@@ -261,6 +333,8 @@ export function computeRootSetupBreakdown(
     packagedBuyCost,
     buyLines,
     buildChainCost,
+    haulIn,
+    haulExcluded: haulExcluded || undefined,
   }
 }
 
@@ -272,8 +346,17 @@ export function computeRootProfitBreakdown(
   buyPrices: Map<number, number>,
   jobTimeHours: number,
   productName: string,
+  options?: PlanProfitOptions,
 ): PlanProfitBreakdown {
   const { settings } = expandInput
+  const outputQty = root.runs * blueprint.productQuantity
+  const { haulIn, haulOut, haulExcluded } = rootHaulIsk(
+    root,
+    blueprint,
+    expandInput,
+    outputQty,
+    options,
+  )
   const base = computeRootProfitRow(
     root,
     blueprint,
@@ -281,6 +364,8 @@ export function computeRootProfitBreakdown(
     sellPrices,
     buyPrices,
     jobTimeHours,
+    undefined,
+    options,
   )
 
   const sellPricePerUnit = sellPriceForProduct(
@@ -315,6 +400,9 @@ export function computeRootProfitBreakdown(
     salesTax,
     netRevenue: net,
     setupCost: base.setupCost,
+    haulIn,
+    haulOut,
+    haulExcluded: haulExcluded || undefined,
     netProfit: base.netProfit,
     margin: base.margin,
     iph: base.iph,
@@ -328,7 +416,7 @@ export function computePlanProfitSummary(
   sellPrices: Map<number, number>,
   buyPrices: Map<number, number>,
   jobTimeHoursByRootId: Map<string, number>,
-  options?: { hasReliablePrices?: boolean; scheduledWindowHours?: number },
+  options?: PlanProfitOptions,
 ): PlanProfitSummary {
   const rootRows: RootProfitRow[] = []
   const buildCostCache = createBuildCostCache()
@@ -352,9 +440,7 @@ export function computePlanProfitSummary(
 
   const setupCost = rootRows.reduce((sum, row) => sum + row.setupCost, 0)
   const netRevenue = rootRows.reduce((sum, row) => sum + row.netRevenue, 0)
-  const netProfit = rootRows.every((r) => r.hasPrices)
-    ? netRevenue - setupCost
-    : rootRows.reduce((sum, row) => sum + row.netProfit, 0)
+  const netProfit = rootRows.reduce((sum, row) => sum + row.netProfit, 0)
   const margin = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
   const jobHours =
     options?.scheduledWindowHours != null && options.scheduledWindowHours > 0

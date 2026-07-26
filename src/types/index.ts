@@ -341,6 +341,12 @@ export interface GlobalSettings {
   /** Selected station or structure ID for reaction jobs. */
   reactionLocationId?: number | null
   reactionLocationKind?: ProductionLocationKind | null
+  /** Mining ISK/hr page: reference hull for m³/hr scale. */
+  miningShipId?: MiningShipId
+  /** Mining ISK/hr page: yield buff toggles (stack multiplicatively). */
+  miningBuffIds?: MiningBuffId[]
+  /** Where you mine with fleet boosts (Orca in HS, Rorqual in LS/NS/WH). */
+  miningBoostSpace?: MiningBoostSpace
 }
 
 /** Global settings plus per-job run count for manufacturing cost and profit math. */
@@ -808,6 +814,9 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   productionLocationKind: null,
   reactionLocationId: null,
   reactionLocationKind: null,
+  miningShipId: 'retriever',
+  miningBuffIds: [],
+  miningBoostSpace: 'highsec',
 }
 
 /** T2 invented blueprint copy base efficiency without a decryptor. */
@@ -905,6 +914,30 @@ export const MINERAL_TYPE_IDS: Record<keyof MineralStock, number> = {
 export type MiningSubtype = 'ore' | 'moon' | 'ice' | 'gas'
 export type MiningSpaceClass = 'highsec' | 'lowsec' | 'nullsec' | 'wormhole'
 
+export type MiningShipId =
+  | 'retriever'
+  | 'covetor'
+  | 'procurer'
+  | 'hulk'
+  | 'mackinaw'
+  | 'skiff'
+  | 'venture'
+  | 'prospect'
+  | 'endurance'
+
+export type MiningBuffId =
+  | 'mlu3'
+  | 'highwall'
+  | 'yeti'
+  | 'gasHarvesting'
+  | 'porpoiseBoost'
+  | 'orcaBoost'
+  | 'rorqualBoost'
+  | 'mindlink'
+
+/** Fleet boost context: solo = no foreman ship. */
+export type MiningBoostSpace = 'solo' | MiningSpaceClass
+
 export interface MiningReprocessMat {
   typeId: number
   quantityPerBatch: number
@@ -960,6 +993,8 @@ export interface MiningRankedRow {
   compressedIph: number | null
   mineralsIph: number
   focusIph: number | null
+  /** Focused reprocess output units per hour (null when no material focus). */
+  focusQtyPerHr: number | null
   focusTypeId: number | null
   /** Hub liquidity volume (max of raw vs compressed when applicable). */
   volDay: number

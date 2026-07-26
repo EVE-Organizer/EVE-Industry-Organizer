@@ -225,4 +225,75 @@ describe('planProfit', () => {
       breakdown.totalSetupCost - breakdown.packagedBuyCost
     expect(withoutPackaged).toBeLessThan(row.setupCost)
   })
+
+  it('includes haul in setup and haul out in profit when enabled', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [
+      { id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 },
+    ]
+    const expandInput: ExpandPlanInput = {
+      template,
+      blueprints,
+      typeMap: new Map([
+        [
+          34,
+          {
+            typeId: 34,
+            name: 'Tritanium',
+            group: '',
+            category: '',
+            volume: 0.01,
+            iconUrl: '',
+            renderUrl: '',
+            bpIconUrl: '',
+          },
+        ],
+        [
+          100,
+          {
+            typeId: 100,
+            name: 'Widget',
+            group: '',
+            category: '',
+            volume: 1,
+            iconUrl: '',
+            renderUrl: '',
+            bpIconUrl: '',
+          },
+        ],
+      ]),
+      prices: sellPrices,
+      settings: { ...DEFAULT_SETTINGS, includeHaulCost: true },
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+    const haulOptions = { haulInIskPerM3: 100, haulOutIskPerM3: 200 }
+
+    const withHaul = computeRootProfitRow(
+      template.roots[0],
+      widget,
+      expandInput,
+      sellPrices,
+      buyPrices,
+      10,
+      undefined,
+      haulOptions,
+    )
+    const withoutHaul = computeRootProfitRow(
+      template.roots[0],
+      widget,
+      { ...expandInput, settings: { ...expandInput.settings, includeHaulCost: false } },
+      sellPrices,
+      buyPrices,
+      10,
+      undefined,
+      haulOptions,
+    )
+
+    expect(withHaul.setupCost).toBeGreaterThan(withoutHaul.setupCost)
+    expect(withHaul.netProfit).toBeLessThan(withoutHaul.netProfit)
+    expect(withHaul.netProfit).toBe(
+      withHaul.netRevenue - withHaul.setupCost - (100 * 1 * 200),
+    )
+  })
 })

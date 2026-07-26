@@ -19,7 +19,7 @@ export function FilterSection({
 }) {
   return (
     <section
-      className={`rounded-lg border border-eve-border bg-base-300/15 p-4 flex flex-col gap-3 min-w-0 ${className}`}
+      className={`filter-section rounded-lg border border-eve-border p-4 flex flex-col gap-3 min-w-0 ${className}`}
     >
       <header className="min-w-0">
         <h3 className="text-sm font-semibold leading-tight">{title}</h3>
@@ -90,18 +90,28 @@ export function EconomicsFilterSection({
             Price method
             <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.priceMethod} />
           </span>
-          <select
-            className="select select-bordered select-sm w-full min-w-0 sm:min-w-[12rem]"
-            value={values.priceMethod}
-            onChange={(e) =>
-              onChange({
-                priceMethod: e.target.value as GlobalSettings['priceMethod'],
-              })
-            }
-          >
-            <option value="sell_orders">Sell orders</option>
-            <option value="buy_orders">Buy orders</option>
-          </select>
+          <div role="group" aria-label="Price method" className="economics-filter-bar__chips">
+            <button
+              type="button"
+              aria-pressed={values.priceMethod === 'sell_orders'}
+              className={`economics-filter-bar__chip${
+                values.priceMethod === 'sell_orders' ? ' economics-filter-bar__chip--active' : ''
+              }`}
+              onClick={() => onChange({ priceMethod: 'sell_orders' })}
+            >
+              Sell
+            </button>
+            <button
+              type="button"
+              aria-pressed={values.priceMethod === 'buy_orders'}
+              className={`economics-filter-bar__chip${
+                values.priceMethod === 'buy_orders' ? ' economics-filter-bar__chip--active' : ''
+              }`}
+              onClick={() => onChange({ priceMethod: 'buy_orders' })}
+            >
+              Buy
+            </button>
+          </div>
         </label>
 
         <div className="economics-filter-bar__window">

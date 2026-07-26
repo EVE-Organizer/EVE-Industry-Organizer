@@ -31,6 +31,29 @@
 
 .category-chip {
   @apply btn btn-sm gap-2 normal-case font-medium;
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+
+  &.btn-ghost {
+    @apply border-eve-border/80 bg-gradient-to-b from-base-300/45 to-base-300/10;
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+
+    &:hover {
+      @apply border-eve-border bg-gradient-to-b from-base-300/60 to-base-300/20;
+      box-shadow:
+        inset 0 1px 0 0 rgb(255 255 255 / 0.06),
+        0 4px 12px -6px rgb(0 0 0 / 0.55);
+    }
+  }
+
+  &.btn-primary {
+    box-shadow:
+      0 0 0 1px rgb(245 166 35 / 0.3),
+      0 4px 14px -4px rgb(245 166 35 / 0.55),
+      0 2px 6px rgb(0 0 0 / 0.35);
+  }
 }
 
 // Dense list checkboxes: smaller than DaisyUI defaults, eve border + primary fill.
@@ -317,10 +340,27 @@
 }
 
 .plan-build-card {
-  @apply overflow-visible rounded-xl border border-eve-border bg-base-200 shadow-sm;
+  @apply overflow-visible rounded-xl border border-eve-border/90;
+  background-image: linear-gradient(
+    165deg,
+    rgb(22 27 34) 0%,
+    rgb(22 27 34 / 0.96) 48%,
+    rgb(13 17 23 / 0.94) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
+    0 0 0 1px rgb(0 0 0 / 0.28),
+    0 12px 32px -12px rgb(0 0 0 / 0.7),
+    0 4px 12px -4px rgb(0 0 0 / 0.45);
 
   &__header {
-    @apply flex flex-wrap items-center gap-2 border-b border-eve-border/80 bg-gradient-to-r from-primary/5 via-base-300/20 to-transparent px-4 py-3.5 sm:px-5;
+    @apply flex flex-wrap items-center gap-2 border-b border-eve-border/80 px-4 py-3.5 sm:px-5;
+    background-image: linear-gradient(
+      90deg,
+      rgb(245 166 35 / 0.1) 0%,
+      rgb(48 54 61 / 0.35) 42%,
+      transparent 100%
+    );
   }
 
   &__title {
@@ -394,7 +434,15 @@
 }
 
 .plan-facility-controls {
-  @apply mb-0 rounded-lg border border-eve-border/80 bg-base-300/15 px-3 py-3 sm:px-4;
+  @apply mb-0 rounded-lg border border-eve-border/80 px-3 py-3 sm:px-4;
+  background-image: linear-gradient(
+    145deg,
+    rgb(48 54 61 / 0.35) 0%,
+    rgb(48 54 61 / 0.12) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.04),
+    0 2px 8px -4px rgb(0 0 0 / 0.45);
 
   &__grid {
     @apply grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2 xl:grid-cols-4;
@@ -417,11 +465,39 @@
   }
 }
 
+.filter-section {
+  background-image: linear-gradient(
+    160deg,
+    rgb(48 54 61 / 0.28) 0%,
+    rgb(48 54 61 / 0.08) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.04),
+    0 4px 14px -8px rgb(0 0 0 / 0.5);
+}
+
 .blueprint-filters {
-  @apply mb-4 w-full min-w-0 shrink-0 overflow-hidden rounded-xl border border-eve-border bg-base-200 shadow-sm;
+  @apply mb-4 w-full min-w-0 shrink-0 overflow-hidden rounded-xl border border-eve-border/90;
+  background-image: linear-gradient(
+    165deg,
+    rgb(22 27 34) 0%,
+    rgb(22 27 34 / 0.96) 48%,
+    rgb(13 17 23 / 0.94) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
+    0 0 0 1px rgb(0 0 0 / 0.28),
+    0 12px 32px -12px rgb(0 0 0 / 0.7),
+    0 4px 12px -4px rgb(0 0 0 / 0.45);
 
   &__header {
-    @apply flex flex-wrap items-start justify-between gap-3 border-b border-eve-border/80 bg-gradient-to-r from-primary/5 via-base-300/20 to-transparent px-4 py-3.5 sm:px-5;
+    @apply flex flex-wrap items-start justify-between gap-3 border-b border-eve-border/80 px-4 py-3.5 sm:px-5;
+    background-image: linear-gradient(
+      90deg,
+      rgb(245 166 35 / 0.1) 0%,
+      rgb(48 54 61 / 0.35) 42%,
+      transparent 100%
+    );
   }
 
   &__title {
@@ -438,7 +514,15 @@
 
   // Compact market strip: never stretch beside Catalog (that was the empty gap).
   &__market {
-    @apply flex flex-col gap-3 rounded-lg border border-eve-border/80 bg-base-300/15 px-3 py-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 sm:px-4;
+    @apply flex flex-col gap-3 rounded-lg border border-eve-border/80 px-3 py-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 sm:px-4;
+    background-image: linear-gradient(
+      145deg,
+      rgb(48 54 61 / 0.35) 0%,
+      rgb(48 54 61 / 0.12) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.04),
+      0 2px 8px -4px rgb(0 0 0 / 0.45);
   }
 
   &__market-head {
@@ -450,7 +534,15 @@
   }
 
   &__card {
-    @apply h-full border-eve-border/80 bg-base-300/10 shadow-none;
+    @apply h-full border-eve-border/80 shadow-sm;
+    background-image: linear-gradient(
+      160deg,
+      rgb(48 54 61 / 0.28) 0%,
+      rgb(48 54 61 / 0.08) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.04),
+      0 4px 14px -8px rgb(0 0 0 / 0.5);
   }
 
   &__limits-body {
@@ -462,7 +554,15 @@
   // Mining filter chrome inside `.blueprint-filters` (matches Blueprints / Plan).
 
   &__header-icon {
-    @apply flex size-9 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary;
+    @apply flex size-9 items-center justify-center rounded-lg border border-primary/35 text-primary;
+    background-image: linear-gradient(
+      145deg,
+      rgb(245 166 35 / 0.22) 0%,
+      rgb(245 166 35 / 0.06) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.08),
+      0 0 14px -2px rgb(245 166 35 / 0.4);
   }
 
   &__section {
@@ -486,19 +586,204 @@
   }
 
   &__seg-group {
-    @apply inline-flex items-center gap-0.5 rounded-md border border-eve-border/70 bg-base-200/80 p-0.5;
+    @apply inline-flex flex-wrap items-center gap-0.5 rounded-md border border-eve-border/70 p-0.5;
+    background-image: linear-gradient(
+      180deg,
+      rgb(22 27 34 / 0.95) 0%,
+      rgb(13 17 23 / 0.8) 100%
+    );
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35);
   }
 
   &__seg {
-    @apply min-w-[2.25rem] rounded px-2.5 py-1 text-xs font-medium tabular-nums text-base-content/55 transition-colors hover:bg-base-300/60 hover:text-base-content;
+    @apply min-w-[2.25rem] rounded px-2.5 py-1 text-xs font-medium tabular-nums text-base-content/55 transition-[color,background-color,box-shadow] duration-150 hover:bg-base-300/60 hover:text-base-content;
 
     &--active {
-      @apply bg-primary/15 text-primary shadow-sm hover:bg-primary/20 hover:text-primary;
+      @apply bg-primary text-primary-content hover:bg-primary hover:text-primary-content;
+      box-shadow:
+        0 1px 3px rgb(0 0 0 / 0.4),
+        0 0 10px -2px rgb(245 166 35 / 0.45);
+    }
+
+    &--disabled {
+      @apply cursor-not-allowed opacity-35 hover:bg-transparent hover:text-base-content/55;
     }
   }
 
   &__material-row {
     @apply flex flex-wrap gap-2;
+  }
+
+  &__setup {
+    @apply rounded-lg border border-eve-border/80 bg-base-300/20 p-3 min-w-0;
+  }
+
+  &__setup-summary {
+    @apply flex min-w-0 cursor-pointer list-none items-center gap-2 sm:gap-3;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::after {
+      @apply ml-auto shrink-0 text-base-content/40 transition-transform duration-150 text-xs;
+      content: '▾';
+    }
+  }
+
+  &__setup[open] &__setup-summary::after {
+    transform: rotate(180deg);
+  }
+
+  &__setup-title {
+    @apply text-xs font-semibold uppercase tracking-[0.08em] text-base-content/55 shrink-0;
+  }
+
+  &__setup-preview {
+    @apply min-w-0 flex-1 truncate text-xs text-base-content/70 tabular-nums;
+  }
+
+  &__setup-body {
+    @apply mt-3 flex flex-col gap-2.5 border-t border-eve-border/50 pt-3;
+  }
+
+  &__setup-row {
+    @apply flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-2;
+
+    &--stack {
+      @apply sm:flex-col sm:items-stretch;
+    }
+  }
+
+  &__setup-rate-card {
+    @apply flex flex-col gap-0.5 rounded-lg border border-primary/25 px-3 py-2.5;
+    background-image: linear-gradient(
+      135deg,
+      rgb(245 166 35 / 0.12) 0%,
+      rgb(245 166 35 / 0.03) 55%,
+      transparent 100%
+    );
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  }
+
+  &__setup-rate-main {
+    @apply flex items-baseline gap-1.5;
+  }
+
+  &__setup-rate-value {
+    @apply text-xl font-semibold leading-none text-primary;
+  }
+
+  &__setup-rate-unit {
+    @apply text-xs font-medium uppercase tracking-[0.06em] text-base-content/45;
+  }
+
+  &__setup-rate-meta {
+    @apply flex flex-wrap items-center gap-x-1.5 gap-y-0 text-xs;
+  }
+
+  &__ship-grid {
+    @apply grid min-w-0 flex-1 grid-cols-3 gap-1.5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9;
+  }
+
+  &__ship-chip {
+    @apply flex min-w-0 flex-col items-center gap-1 rounded-lg border border-eve-border/70 px-1.5 py-2 text-center transition-[border-color,background-color,box-shadow] duration-150;
+    background-image: linear-gradient(
+      180deg,
+      rgb(22 27 34 / 0.9) 0%,
+      rgb(13 17 23 / 0.75) 100%
+    );
+
+    &:hover:not(:disabled):not(&--active) {
+      @apply border-eve-border bg-base-300/50;
+    }
+
+    &--active {
+      @apply border-primary/70 bg-primary/15;
+      box-shadow:
+        0 0 14px -4px rgb(245 166 35 / 0.45),
+        inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+    }
+
+    &--disabled {
+      @apply cursor-not-allowed opacity-30 hover:border-eve-border/70 hover:bg-transparent;
+    }
+  }
+
+  &__ship-chip-name {
+    @apply w-full truncate text-[10px] font-medium leading-tight text-base-content/75;
+  }
+
+  &__buff-grid {
+    @apply flex min-w-0 flex-wrap gap-1.5;
+  }
+
+  &__buff-chip {
+    @apply inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-lg border border-eve-border/70 px-2.5 py-1.5 text-xs font-medium transition-[border-color,background-color,box-shadow] duration-150;
+    background-image: linear-gradient(
+      180deg,
+      rgb(22 27 34 / 0.95) 0%,
+      rgb(13 17 23 / 0.8) 100%
+    );
+
+    &:hover:not(&--active) {
+      @apply border-eve-border bg-base-300/45;
+    }
+
+    &--active {
+      @apply border-primary/65 text-base-content;
+      background-image: linear-gradient(
+        135deg,
+        rgb(245 166 35 / 0.18) 0%,
+        rgb(245 166 35 / 0.06) 100%
+      );
+      box-shadow: 0 0 12px -3px rgb(245 166 35 / 0.4);
+    }
+
+    &--fleet {
+      @apply pr-2;
+    }
+  }
+
+  &__buff-chip-name {
+    @apply min-w-0 truncate;
+  }
+
+  &__buff-chip-spaces {
+    @apply inline-flex shrink-0 items-center gap-1;
+  }
+
+  &__buff-chip-space {
+    @apply inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[9px] font-medium uppercase tracking-wide text-base-content/45;
+    background: rgb(255 255 255 / 0.06);
+  }
+
+  &__buff-chip-pct {
+    @apply ml-auto shrink-0 font-semibold text-primary;
+  }
+
+  &__buff-list {
+    @apply flex min-w-0 flex-col gap-1 list-none m-0 p-0 sm:pl-0;
+  }
+
+  &__buff-row {
+    @apply flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 rounded-md border border-transparent px-2 py-1.5 text-xs cursor-pointer hover:bg-base-300/40;
+
+    &--active {
+      @apply border-eve-border/60 bg-base-300/30;
+    }
+  }
+
+  &__buff-name {
+    @apply font-medium min-w-0;
+  }
+
+  &__buff-pct {
+    @apply text-primary font-semibold shrink-0;
+  }
+
+  &__buff-effect {
+    @apply text-base-content/45 min-w-0 flex-1;
   }
 }
 
@@ -511,7 +796,7 @@
   }
 
   &__method {
-    @apply sm:w-[13.5rem] sm:flex-none;
+    @apply sm:flex-none;
   }
 
   &__window {
@@ -523,19 +808,34 @@
   }
 
   &__chips {
-    @apply inline-flex items-center gap-0.5 rounded-md border border-eve-border/70 bg-base-200/80 p-0.5;
+    @apply inline-flex items-center gap-0.5 rounded-md border border-eve-border/70 p-0.5;
+    background-image: linear-gradient(
+      180deg,
+      rgb(22 27 34 / 0.95) 0%,
+      rgb(13 17 23 / 0.8) 100%
+    );
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35);
   }
 
   &__chip {
-    @apply min-w-[2.1rem] rounded px-2 py-1 text-xs font-medium tabular-nums text-base-content/55 transition-colors hover:bg-base-300/60 hover:text-base-content;
+    @apply min-w-[2.1rem] rounded px-2 py-1 text-xs font-medium tabular-nums text-base-content/55 transition-[color,background-color,box-shadow] duration-150 hover:bg-base-300/60 hover:text-base-content;
 
     &--active {
-      @apply bg-primary text-primary-content shadow-sm;
+      @apply bg-primary text-primary-content;
+      box-shadow:
+        0 1px 3px rgb(0 0 0 / 0.4),
+        0 0 10px -2px rgb(245 166 35 / 0.45);
     }
   }
 
   &__haul {
-    @apply inline-flex cursor-pointer items-center gap-2 self-start rounded-md border border-eve-border/60 bg-base-200/50 px-2.5 py-1.5 sm:ml-auto sm:self-end;
+    @apply inline-flex cursor-pointer items-center gap-2 self-start rounded-md border border-eve-border/60 px-2.5 py-1.5 sm:ml-auto sm:self-end;
+    background-image: linear-gradient(
+      160deg,
+      rgb(48 54 61 / 0.35) 0%,
+      rgb(48 54 61 / 0.12) 100%
+    );
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
   }
 
   &__haul-text {

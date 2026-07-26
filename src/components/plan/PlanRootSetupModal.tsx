@@ -107,6 +107,15 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
             </section>
           ) : null}
 
+          {breakdown.haulIn > 0 ? (
+            <section>
+              <h4 className="font-semibold text-sm mb-2">Haul in</h4>
+              <p className="text-sm font-mono">
+                Materials to build system: <strong>{formatIsk(breakdown.haulIn)}</strong>
+              </p>
+            </section>
+          ) : null}
+
           {breakdown.packagedBuyCost > 0 ? (
             <section>
               <h4 className="font-semibold text-sm mb-2">Packaged self-input</h4>

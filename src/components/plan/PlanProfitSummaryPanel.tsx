@@ -1,10 +1,14 @@
 import type { PlanProfitSummary } from '@/lib/planProfit'
+import type { GlobalSettings } from '@/types'
 import { formatDecimal, formatIsk, formatPercent } from '@/lib/profit'
 import { ScoreBar } from '@/components/ScoreBar'
 
 interface PlanProfitSummaryProps {
   summary: PlanProfitSummary
   hubName: string
+  priceMethod: GlobalSettings['priceMethod']
+  includeHaulCost: boolean
+  haulApplicable: boolean
 }
 
 function ProfitMetric({
@@ -30,12 +34,24 @@ function ProfitMetric({
   )
 }
 
-export function PlanProfitSummaryPanel({ summary, hubName }: PlanProfitSummaryProps) {
+export function PlanProfitSummaryPanel({
+  summary,
+  hubName,
+  priceMethod,
+  includeHaulCost,
+  haulApplicable,
+}: PlanProfitSummaryProps) {
   if (summary.rootRows.length === 0) return null
 
   const profitTone = summary.netProfit >= 0 ? 'success' : 'error'
   const marginCap = 100
   const marginDisplay = Math.min(marginCap, Math.max(-marginCap, summary.margin))
+  const priceLabel = priceMethod === 'buy_orders' ? 'buy orders' : 'sell orders'
+  const haulLabel = !haulApplicable
+    ? 'haul n/a (build in market system)'
+    : includeHaulCost
+      ? 'haul included'
+      : 'haul excluded'
 
   return (
     <section className="plan-profit-panel" aria-label="Plan profit summary">
@@ -43,7 +59,7 @@ export function PlanProfitSummaryPanel({ summary, hubName }: PlanProfitSummaryPr
         <div>
           <h2 className="plan-profit-panel__title">Plan economics</h2>
           <p className="plan-profit-panel__subtitle">
-            {hubName} hub · build/buy chain cost vs sell revenue after fees
+            {hubName} hub · {priceLabel} · {haulLabel}
           </p>
         </div>
         {!summary.hasPrices ? (

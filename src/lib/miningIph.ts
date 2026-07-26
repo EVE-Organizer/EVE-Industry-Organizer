@@ -12,14 +12,25 @@ import type {
 } from '@/types'
 import { buildWindowPriceMap, pickHistoryWindow } from '@/lib/ranking'
 
-/** Mid-tier barge reference rate for comparable ranks. */
-export const DEFAULT_MINING_M3_PER_HR = 40_000
+/**
+ * Retriever + 2× Strip Miner I, average Mining/Astrogeology (~840 m³/min).
+ * @see https://wiki.eveuniversity.org/Mining_yield
+ */
+export const RETRIEVER_ORE_M3_PER_HR = 50_400
+
+/** Retriever + 2× Ice Harvester I, Ice Harvesting IV (SDE cycle times, no boosts). */
+export const RETRIEVER_ICE_M3_PER_HR = 37_500
+
+/** Venture + Gas Cloud Scoop II, reference gas skills (Retriever cannot harvest gas). */
+export const VENTURE_GAS_M3_PER_HR = 2_400
+
+export const DEFAULT_MINING_M3_PER_HR = RETRIEVER_ORE_M3_PER_HR
 
 export const DEFAULT_MINING_M3_PER_HR_BY_SUBTYPE: Record<MiningSubtype, number> = {
-  ore: 40_000,
-  moon: 40_000,
-  ice: 40_000,
-  gas: 3_000,
+  ore: RETRIEVER_ORE_M3_PER_HR,
+  moon: RETRIEVER_ORE_M3_PER_HR,
+  ice: RETRIEVER_ICE_M3_PER_HR,
+  gas: VENTURE_GAS_M3_PER_HR,
 }
 
 /** Labeled default reprocess yield (NPC-ish / unskilled structure). */
@@ -32,15 +43,21 @@ export const MINING_SUBTYPES: { id: MiningSubtype; label: string }[] = [
   { id: 'gas', label: 'Gas' },
 ]
 
-export const MINING_SPACES: { id: MiningSpaceClass; label: string }[] = [
-  { id: 'highsec', label: 'HS' },
-  { id: 'lowsec', label: 'LS' },
-  { id: 'nullsec', label: 'NS' },
-  { id: 'wormhole', label: 'WH' },
+export const MINING_SPACES: { id: MiningSpaceClass; label: string; color: string }[] = [
+  // CCP in-game security status colors (https://developers.eveonline.com/docs/guides/system-security/).
+  { id: 'highsec', label: 'HS', color: '#71E754' }, // 0.6
+  { id: 'lowsec', label: 'LS', color: '#DC6C06' }, // 0.4
+  { id: 'nullsec', label: 'NS', color: '#8D3163' }, // ≤ 0.0
+  // WH systems display as −1.0 (same band as null); slightly brighter so chips stay distinct.
+  { id: 'wormhole', label: 'WH', color: '#B44AC0' },
 ]
 
 export function spaceLabel(space: MiningSpaceClass): string {
   return MINING_SPACES.find((s) => s.id === space)?.label ?? space
+}
+
+export function spaceColor(space: MiningSpaceClass): string {
+  return MINING_SPACES.find((s) => s.id === space)?.color ?? '#8D3163'
 }
 
 export function resolveMiningM3PerHr(mining: MiningData, subtype: MiningSubtype): number {
@@ -55,6 +72,31 @@ export function resolveMiningM3PerHr(mining: MiningData, subtype: MiningSubtype)
 export function miningVolumeLabel(window: TimeRange): string {
   return `Vol (${window})`
 }
+
+/** Table/modal labels and tooltips for the three ISK/hr valuation paths. */
+/** Which valuation path is shown in the breakdown modal. */
+export type MiningIphFocusPath = 'raw' | 'compressed' | 'minerals'
+
+export const MINING_IPH_PATHS = {
+  raw: {
+    label: 'Raw ISK/hr',
+    shortLabel: 'Raw',
+    tooltip:
+      'Sell uncompressed ore, ice, or gas at the hub. Uses your price window and sell/buy setting.',
+  },
+  compressed: {
+    label: 'Compressed ISK/hr',
+    shortLabel: 'Compressed',
+    tooltip:
+      'Same m³/hr, valued as the compressed form when this item has a compressed type on the market.',
+  },
+  minerals: {
+    label: 'Reprocess ISK/hr',
+    shortLabel: 'Reprocess',
+    tooltip:
+      'Reprocess at your yield setting and sell every output mineral at hub prices.',
+  },
+} as const
 
 /** Prefer compressed hub volume when the raw market is thin. */
 export function miningLiquidityVolume(row: MiningRankedRow): number {
@@ -233,9 +275,11 @@ export function rankMiningItem(
   const mineralsValuePerM3 = opts.m3PerHr > 0 ? mineralsIph / opts.m3PerHr : 0
 
   let focusIph: number | null = null
+  let focusQtyPerHr: number | null = null
   if (opts.focusTypeId != null) {
     const line = reprocessLines.find((l) => l.typeId === opts.focusTypeId)
     focusIph = line?.iskPerHr ?? 0
+    focusQtyPerHr = line != null ? line.qtyPerM3 * opts.m3PerHr : 0
   }
 
   const topMineralId = topMineralTypeId(reprocessLines)
@@ -265,6 +309,7 @@ export function rankMiningItem(
     compressedIph,
     mineralsIph,
     focusIph,
+    focusQtyPerHr,
     focusTypeId: opts.focusTypeId,
     volDayRaw: volRaw,
     volDayCompressed: volCompressed,
@@ -293,7 +338,7 @@ export function sortMiningRows(
       case 'minerals':
         return row.mineralsIph
       case 'focus':
-        return row.focusIph ?? -1
+        return row.focusQtyPerHr ?? -1
       case 'vol':
         return miningDisplayVolume(row, sortKey)
       default:
@@ -345,7 +390,7 @@ export function rankMiningIph(
   for (const item of mining.items) {
     if (isCompressedMiningName(item.name)) continue
     if (item.subtype !== options.subtype) continue
-    if (foundFilter.length > 0 && !item.foundIn.some((s) => foundFilter.includes(s))) continue
+    if (foundFilter.length > 0 && !foundFilter.every((s) => item.foundIn.includes(s))) continue
 
     const row = rankMiningItem(
       item,
@@ -362,7 +407,7 @@ export function rankMiningIph(
       },
     )
     if (!row) continue
-    if (options.focusTypeId != null && (row.focusIph == null || row.focusIph <= 0)) continue
+    if (options.focusTypeId != null && (row.focusQtyPerHr == null || row.focusQtyPerHr <= 0)) continue
     if (!shouldIncludeMiningRow(row, options.subtype)) continue
     rows.push(row)
   }

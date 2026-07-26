@@ -397,7 +397,7 @@ const BlueprintResults = memo(function BlueprintResults({
 }) {
   return (
     <>
-      <div className="hidden lg:block overflow-x-auto border border-eve-border rounded-lg shrink-0 mb-4">
+      <div className="hidden lg:block overflow-x-auto border border-eve-border/90 rounded-xl shrink-0 mb-4 bg-base-200/70 shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04),0_8px_24px_-12px_rgb(0_0_0_/_0.55)]">
         <table className="table table-compact w-full">
           <thead className="bg-base-200 sticky top-0">
             <tr>

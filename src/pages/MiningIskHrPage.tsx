@@ -14,24 +14,35 @@ import {
   MINING_SPACES,
   MINING_SUBTYPES,
   collectMiningPriceTypeIds,
+  MINING_IPH_PATHS,
   miningDisplayVolume,
   miningVolumeLabel,
   rankMiningIph,
-  resolveMiningM3PerHr,
   sortMiningRows,
-  spaceLabel,
+  type MiningIphFocusPath,
 } from '@/lib/miningIph'
+import {
+  normalizeMiningShipId,
+  normalizeMiningBoostSpace,
+  inferMiningBoostSpace,
+  toggleMiningBuffId,
+  resolveUserMiningM3PerHr,
+} from '@/lib/miningShipPresets'
 import { formatIsk, formatQuantity } from '@/lib/profit'
 import { appRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
-import { HUBS, type MiningIphSortKey, type MiningRankedRow, type MiningSpaceClass, type MiningSubtype, type TimeRange } from '@/types'
+import { HUBS, type MiningBuffId, type MiningIphSortKey, type MiningRankedRow, type MiningShipId, type MiningSpaceClass, type MiningSubtype, type TimeRange } from '@/types'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { EveImage } from '@/components/EveImage'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { MiningIphBreakdownModal } from '@/components/MiningIphBreakdownModal'
+import { MiningSpaceBadges, MiningSpaceDot } from '@/components/MiningSpaceBadges'
 import { CopyNameButton } from '@/components/CopyNameButton'
 import { Tooltip } from '@/components/Tooltip'
+import { MiningSetupFilterSection } from '@/components/MiningSetupFilterSection'
+import { FilterSection } from '@/components/EconomicsFilterSection'
+import { FormFieldLabel } from '@/components/FormFieldLabel'
 
 const TIME_WINDOWS: TimeRange[] = ['1d', '1w', '1m', '1y', 'all']
 
@@ -49,9 +60,10 @@ const SUBTYPE_ICON_IDS: Record<MiningSubtype, number> = {
 }
 
 const SUBTYPE_HINT = 'Moon goo, belt ore, ice, or harvestable gas.'
-const FOUND_IN_HINT = 'Where the item can spawn. None selected = all spaces.'
+const FOUND_IN_HINT =
+  'Item must spawn in every selected space (AND). None selected = all spaces.'
 const MATERIAL_HINT =
-  'Rank by one reprocess output (e.g. Mexallon). All = total reprocess ISK/hr.'
+  'Rank ores by how much of one reprocess output you get per hour (e.g. Mexallon/hr). All = total reprocess ISK/hr.'
 const PRICE_METHOD_HINT =
   'Sell = window average at the hub. Buy = instant sell to buy orders.'
 
@@ -91,8 +103,8 @@ function CategoryChip({
     <button
       type="button"
       aria-pressed={active}
-      className={`category-chip ${active ? 'btn-primary' : 'btn-ghost border border-eve-border'} ${
-        tall ? 'flex-col gap-1.5 min-h-[4.5rem] py-2' : ''
+      className={`category-chip ${active ? 'btn-primary' : 'btn-ghost'} ${
+        tall ? 'flex-col gap-1.5 min-h-[4.5rem] py-2.5' : ''
       } ${className}`}
       onClick={onClick}
     >
@@ -140,25 +152,30 @@ function FilterLabel({
 
 function SortHeader({
   label,
+  tooltip,
   active,
   onClick,
   align = 'right',
 }: {
   label: string
+  tooltip?: string
   active: boolean
   onClick: () => void
   align?: 'left' | 'right'
 }) {
   return (
     <th className={align === 'right' ? 'text-right' : undefined}>
-      <button
-        type="button"
-        className={`font-semibold ${active ? 'text-primary' : 'opacity-70 hover:opacity-100'}`}
-        onClick={onClick}
-      >
-        {label}
-        {active ? ' ▾' : ''}
-      </button>
+      <div className={`flex items-center gap-0.5 ${align === 'right' ? 'justify-end' : ''}`}>
+        <button
+          type="button"
+          className={`font-semibold ${active ? 'text-primary' : 'opacity-70 hover:opacity-100'}`}
+          onClick={onClick}
+        >
+          {label}
+          {active ? ' ▾' : ''}
+        </button>
+        {tooltip ? <InfoTooltip text={tooltip} placement="top" /> : null}
+      </div>
     </th>
   )
 }
@@ -174,11 +191,45 @@ function BreakdownIcon({ className }: { className?: string }) {
   )
 }
 
-function IphCell({ value }: { value: number | null | undefined }) {
+function IphCell({
+  value,
+  onClick,
+  ariaLabel,
+}: {
+  value: number | null | undefined
+  onClick?: () => void
+  ariaLabel?: string
+}) {
+  const empty = value == null || value <= 0
+  const className = `text-right tabular-nums ${empty ? 'opacity-40' : ''}`
+
+  if (empty || !onClick) {
+    return (
+      <td className={className}>
+        {empty ? '—' : formatIsk(value)}
+      </td>
+    )
+  }
+
+  return (
+    <td className={className}>
+      <button
+        type="button"
+        className={textLinkClass('tabular-nums')}
+        onClick={onClick}
+        aria-label={ariaLabel}
+      >
+        {formatIsk(value)}
+      </button>
+    </td>
+  )
+}
+
+function QtyPerHrCell({ value }: { value: number | null | undefined }) {
   const empty = value == null || value <= 0
   return (
     <td className={`text-right tabular-nums ${empty ? 'opacity-40' : ''}`}>
-      {empty ? '—' : formatIsk(value)}
+      {empty ? '—' : formatQuantity(value)}
     </td>
   )
 }
@@ -229,7 +280,10 @@ export function MiningIskHrPage() {
   const [focusTypeId, setFocusTypeId] = useState<number | null>(null)
   const [priceWindow, setPriceWindow] = useState<TimeRange>(settings.priceWindow)
   const [sortKey, setSortKey] = useState<MiningIphSortKey>('raw')
-  const [breakdown, setBreakdown] = useState<MiningRankedRow | null>(null)
+  const [breakdown, setBreakdown] = useState<{
+    row: MiningRankedRow
+    focusPath: MiningIphFocusPath
+  } | null>(null)
 
   const hub = settings.primaryHub
   const hubName = HUBS.find((h) => h.id === hub)?.name ?? hub
@@ -356,6 +410,22 @@ export function MiningIskHrPage() {
     return changed ? { ...hubMarket, products } : hubMarket
   }, [hubMarket, liveVolumes, priceWindow])
 
+  useEffect(() => {
+    const current = settings.miningShipId ?? 'retriever'
+    const normalized = normalizeMiningShipId(current, subtype)
+    if (normalized !== current) {
+      updateSettings({ miningShipId: normalized })
+    }
+  }, [subtype, settings.miningShipId, updateSettings])
+
+  const miningShipId = normalizeMiningShipId(settings.miningShipId, subtype)
+  const miningBuffIds = settings.miningBuffIds ?? []
+  const miningBoostSpace = inferMiningBoostSpace(
+    miningBuffIds,
+    normalizeMiningBoostSpace(settings.miningBoostSpace),
+  )
+  const m3PerHr = resolveUserMiningM3PerHr(subtype, miningShipId, miningBuffIds, miningBoostSpace)
+
   const rankedRows = useMemo(() => {
     if (!mining || !hubMarketWithVolumes || !spotPrices) return []
     return rankMiningIph(mining, hubMarketWithVolumes, spotPrices, buyPrices, typeMap, {
@@ -365,6 +435,7 @@ export function MiningIskHrPage() {
       window: priceWindow,
       priceMethod: settings.priceMethod,
       reprocessYield: mining.defaults.reprocessYield,
+      m3PerHr,
     })
   }, [
     mining,
@@ -377,6 +448,7 @@ export function MiningIskHrPage() {
     focusTypeId,
     priceWindow,
     settings.priceMethod,
+    m3PerHr,
   ])
 
   const rows = useMemo(
@@ -387,7 +459,6 @@ export function MiningIskHrPage() {
   const focusName =
     focusTypeId != null ? focusOptions.find((o) => o.typeId === focusTypeId)?.name ?? null : null
 
-  const m3PerHr = mining ? resolveMiningM3PerHr(mining, subtype) : 40_000
   const reprocessYield = mining?.defaults.reprocessYield ?? 0.5
   const volLabel = miningVolumeLabel(priceWindow)
 
@@ -433,6 +504,28 @@ export function MiningIskHrPage() {
     })
   }
 
+  function openBreakdown(row: MiningRankedRow, focusPath: MiningIphFocusPath = 'raw') {
+    setBreakdown({ row, focusPath })
+  }
+
+  function onMiningShipChange(next: MiningShipId) {
+    startTransition(() => updateSettings({ miningShipId: next }))
+  }
+
+  function onMiningBuffToggle(id: MiningBuffId) {
+    startTransition(() => {
+      const prev = settings.miningBuffIds ?? []
+      const next = toggleMiningBuffId(prev, id)
+      updateSettings({
+        miningBuffIds: next,
+        miningBoostSpace: inferMiningBoostSpace(
+          next,
+          normalizeMiningBoostSpace(settings.miningBoostSpace),
+        ),
+      })
+    })
+  }
+
   if (sdeLoading || miningLoading) return <LoadingState />
 
   if (miningError || !mining) {
@@ -449,14 +542,16 @@ export function MiningIskHrPage() {
 
   const sortLabel =
     sortKey === 'focus' && focusName
-      ? `${focusName} ISK/hr`
+      ? `${focusName}/hr`
       : sortKey === 'raw'
-        ? 'Raw ISK/hr'
+        ? MINING_IPH_PATHS.raw.label
         : sortKey === 'compressed'
-          ? 'Compressed ISK/hr'
+          ? MINING_IPH_PATHS.compressed.label
           : sortKey === 'vol'
             ? volLabel
-            : 'Minerals ISK/hr'
+            : sortKey === 'minerals'
+              ? MINING_IPH_PATHS.minerals.label
+              : MINING_IPH_PATHS.raw.label
 
   return (
     <div>
@@ -481,37 +576,48 @@ export function MiningIskHrPage() {
         </header>
 
         <div className="blueprint-filters__body">
-          <div className="mining-filters__section">
-            <FilterLabel label="Type" hint={SUBTYPE_HINT} />
-            <div
-              role="group"
-              aria-label="Mining subtype"
-              className="mining-filters__type-grid"
-            >
-              {MINING_SUBTYPES.map((s) => (
-                <CategoryChip
-                  key={s.id}
-                  tall
-                  active={subtype === s.id}
-                  onClick={() => onSubtypeChange(s.id)}
-                  className="min-w-0 justify-center"
-                >
-                  <span className="rounded-md bg-base-100/90 p-1 shadow-sm">
-                    <EveImage
-                      id={SUBTYPE_ICON_IDS[s.id]}
-                      size={40}
-                      framed
-                      alt=""
-                      lazy={false}
-                    />
-                  </span>
-                  <span className="text-xs font-medium">{s.label}</span>
-                </CategoryChip>
-              ))}
+          <FilterSection
+            title="What to mine"
+            hint="Ore, moon goo, ice, or gas"
+            className="blueprint-filters__card"
+          >
+            <div className="mining-filters__section">
+              <FormFieldLabel label="Type" tooltip={SUBTYPE_HINT} size="sm" />
+              <div
+                role="group"
+                aria-label="Mining subtype"
+                className="mining-filters__type-grid"
+              >
+                {MINING_SUBTYPES.map((s) => (
+                  <CategoryChip
+                    key={s.id}
+                    tall
+                    active={subtype === s.id}
+                    onClick={() => onSubtypeChange(s.id)}
+                    className="min-w-0 justify-center"
+                  >
+                    <span className="rounded-md bg-base-100/90 p-1 shadow-sm">
+                      <EveImage
+                        id={SUBTYPE_ICON_IDS[s.id]}
+                        size={40}
+                        framed
+                        alt=""
+                        lazy={false}
+                      />
+                    </span>
+                    <span className="text-xs font-medium">{s.label}</span>
+                  </CategoryChip>
+                ))}
+              </div>
             </div>
-          </div>
+          </FilterSection>
 
           <div className="blueprint-filters__market">
+            <div className="blueprint-filters__market-head">
+              <h3 className="text-sm font-semibold leading-tight">Market pricing</h3>
+              <p className="text-xs opacity-50 hidden sm:block">Hub is in the navbar</p>
+            </div>
+
             <div className="mining-filters__market-group">
               <FilterLabel label="Window" hint={GLOBAL_SETTING_TOOLTIPS.priceWindow} />
               <div role="group" aria-label="Price window" className="mining-filters__seg-group">
@@ -551,7 +657,10 @@ export function MiningIskHrPage() {
                     active={foundIn.includes(s.id)}
                     onClick={() => toggleFound(s.id)}
                   >
-                    {s.label}
+                    <span className="inline-flex items-center gap-1.5">
+                      <MiningSpaceDot space={s.id} />
+                      {s.label}
+                    </span>
                   </SegmentChip>
                 ))}
               </div>
@@ -559,57 +668,79 @@ export function MiningIskHrPage() {
           </div>
 
           {subtype !== 'gas' ? (
-            <div className="mining-filters__section">
-              <FilterLabel label="Material" hint={MATERIAL_HINT} />
-              <div
-                role="group"
-                aria-label="Reprocess material focus"
-                className="mining-filters__material-row"
-              >
-                <CategoryChip
-                  active={focusTypeId == null}
-                  onClick={() => onFocusChange(null)}
+            <FilterSection
+              title="Reprocess focus"
+              hint="Rank by one output mineral, or All for total ISK/hr"
+              className="blueprint-filters__card"
+            >
+              <div className="mining-filters__section">
+                <FormFieldLabel label="Material" tooltip={MATERIAL_HINT} size="sm" />
+                <div
+                  role="group"
+                  aria-label="Reprocess material focus"
+                  className="mining-filters__material-row"
                 >
-                  All
-                </CategoryChip>
-                {focusOptions.map((o) => (
                   <CategoryChip
-                    key={o.typeId}
-                    active={focusTypeId === o.typeId}
-                    onClick={() => onFocusChange(o.typeId)}
+                    active={focusTypeId == null}
+                    onClick={() => onFocusChange(null)}
                   >
-                    <EveImage id={o.typeId} size={20} framed alt="" lazy={false} />
-                    {o.name}
+                    All
                   </CategoryChip>
-                ))}
+                  {focusOptions.map((o) => (
+                    <CategoryChip
+                      key={o.typeId}
+                      active={focusTypeId === o.typeId}
+                      onClick={() => onFocusChange(o.typeId)}
+                    >
+                      <EveImage id={o.typeId} size={20} framed alt="" lazy={false} />
+                      {o.name}
+                    </CategoryChip>
+                  ))}
+                </div>
               </div>
-            </div>
+            </FilterSection>
           ) : null}
+
+          <MiningSetupFilterSection
+            subtype={subtype}
+            shipId={miningShipId}
+            buffIds={miningBuffIds}
+            boostSpace={miningBoostSpace}
+            onShipChange={onMiningShipChange}
+            onBuffToggle={onMiningBuffToggle}
+          />
         </div>
       </section>
 
       {/* Desktop table */}
-      <div className="hidden lg:block overflow-x-auto rounded-lg border border-eve-border">
+      <div className="hidden lg:block overflow-x-auto rounded-xl border border-eve-border/90 bg-base-200/70 shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04),0_8px_24px_-12px_rgb(0_0_0_/_0.55)]">
         <table className="table table-compact w-full">
           <thead>
             <tr>
               <th className="w-10">#</th>
               <th>Name</th>
               <th>Found</th>
-              <SortHeader label="Raw ISK/hr" active={sortKey === 'raw'} onClick={() => onSort('raw')} />
               <SortHeader
-                label="Comp ISK/hr"
+                label={MINING_IPH_PATHS.raw.label}
+                tooltip={MINING_IPH_PATHS.raw.tooltip}
+                active={sortKey === 'raw'}
+                onClick={() => onSort('raw')}
+              />
+              <SortHeader
+                label={MINING_IPH_PATHS.compressed.label}
+                tooltip={MINING_IPH_PATHS.compressed.tooltip}
                 active={sortKey === 'compressed'}
                 onClick={() => onSort('compressed')}
               />
               <SortHeader
-                label="Mins ISK/hr"
+                label={MINING_IPH_PATHS.minerals.label}
+                tooltip={MINING_IPH_PATHS.minerals.tooltip}
                 active={sortKey === 'minerals'}
                 onClick={() => onSort('minerals')}
               />
               {focusTypeId != null && focusName ? (
                 <SortHeader
-                  label={`${focusName} ISK/hr`}
+                  label={`${focusName}/hr`}
                   active={sortKey === 'focus'}
                   onClick={() => onSort('focus')}
                 />
@@ -622,17 +753,27 @@ export function MiningIskHrPage() {
               <tr key={row.item.typeId} className="hover:bg-base-200/80">
                 <td className="tabular-nums opacity-60">{index + 1}</td>
                 <td>
-                  <MiningItemName row={row} onOpenBreakdown={() => setBreakdown(row)} />
+                  <MiningItemName row={row} onOpenBreakdown={() => openBreakdown(row)} />
                 </td>
                 <td>
-                  <span className="text-xs opacity-70 whitespace-nowrap">
-                    {row.item.foundIn.map(spaceLabel).join(' ')}
-                  </span>
+                  <MiningSpaceBadges spaces={row.item.foundIn} />
                 </td>
-                <IphCell value={row.rawIph} />
-                <IphCell value={row.compressedIph} />
-                <IphCell value={row.mineralsIph} />
-                {focusTypeId != null ? <IphCell value={row.focusIph} /> : null}
+                <IphCell
+                  value={row.rawIph}
+                  onClick={() => openBreakdown(row, 'raw')}
+                  ariaLabel={`Raw ISK per hour breakdown for ${row.item.name}`}
+                />
+                <IphCell
+                  value={row.compressedIph}
+                  onClick={() => openBreakdown(row, 'compressed')}
+                  ariaLabel={`Compressed ISK per hour breakdown for ${row.item.name}`}
+                />
+                <IphCell
+                  value={row.mineralsIph}
+                  onClick={() => openBreakdown(row, 'minerals')}
+                  ariaLabel={`Reprocess ISK per hour breakdown for ${row.item.name}`}
+                />
+                {focusTypeId != null ? <QtyPerHrCell value={row.focusQtyPerHr} /> : null}
                 <td className="text-right tabular-nums text-xs opacity-70">
                   {formatQuantity(miningDisplayVolume(row, sortKey))}
                 </td>
@@ -654,22 +795,38 @@ export function MiningIskHrPage() {
         {rows.map((row, index) => (
           <article
             key={row.item.typeId}
-            className="rounded-lg border border-eve-border bg-base-200/40 p-3"
+            className="rounded-xl border border-eve-border/90 bg-gradient-to-br from-base-200/90 to-base-300/20 p-3 shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04),0_4px_14px_-8px_rgb(0_0_0_/_0.5)]"
           >
             <div className="flex items-center gap-2 min-w-0 mb-2">
               <span className="text-xs opacity-50 tabular-nums">#{index + 1}</span>
-              <MiningItemName row={row} onOpenBreakdown={() => setBreakdown(row)} />
+              <MiningItemName row={row} onOpenBreakdown={() => openBreakdown(row)} />
             </div>
-            <p className="text-[11px] opacity-60 mb-2">
-              Found {row.item.foundIn.map(spaceLabel).join(' ')} · {volLabel}{' '}
-              {formatQuantity(miningDisplayVolume(row, sortKey))}
+            <p className="text-[11px] opacity-60 mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span className="inline-flex items-center gap-1">
+                Found <MiningSpaceBadges spaces={row.item.foundIn} />
+              </span>
+              <span>
+                · {volLabel} {formatQuantity(miningDisplayVolume(row, sortKey))}
+              </span>
             </p>
             <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
-              <MobileIph label="Raw" value={row.rawIph} />
-              <MobileIph label="Comp" value={row.compressedIph} />
-              <MobileIph label="Mins" value={row.mineralsIph} />
+              <MobileIph
+                label={MINING_IPH_PATHS.raw.label}
+                value={row.rawIph}
+                onClick={() => openBreakdown(row, 'raw')}
+              />
+              <MobileIph
+                label={MINING_IPH_PATHS.compressed.label}
+                value={row.compressedIph}
+                onClick={() => openBreakdown(row, 'compressed')}
+              />
+              <MobileIph
+                label={MINING_IPH_PATHS.minerals.label}
+                value={row.mineralsIph}
+                onClick={() => openBreakdown(row, 'minerals')}
+              />
               {focusTypeId != null && focusName ? (
-                <MobileIph label={focusName} value={row.focusIph} />
+                <MobileQty label={focusName} value={row.focusQtyPerHr} />
               ) : null}
             </div>
           </article>
@@ -680,11 +837,14 @@ export function MiningIskHrPage() {
       </div>
 
       <MiningIphBreakdownModal
-        row={breakdown}
+        row={breakdown?.row ?? null}
+        initialFocusPath={breakdown?.focusPath ?? 'raw'}
         m3PerHr={m3PerHr}
         reprocessYield={reprocessYield}
         focusTypeId={focusTypeId}
         window={priceWindow}
+        priceMethod={settings.priceMethod}
+        typeMap={typeMap}
         onClose={() => setBreakdown(null)}
       />
     </div>
@@ -694,6 +854,37 @@ export function MiningIskHrPage() {
 function MobileIph({
   label,
   value,
+  onClick,
+}: {
+  label: string
+  value: number | null | undefined
+  onClick?: () => void
+}) {
+  const empty = value == null || value <= 0
+  const formatted = empty ? '—' : formatIsk(value)
+
+  return (
+    <div className={`flex justify-between gap-2 ${empty ? 'opacity-40' : ''}`}>
+      <span className="opacity-60 text-xs">{label}</span>
+      {empty || !onClick ? (
+        <span className="tabular-nums font-medium">{formatted}</span>
+      ) : (
+        <button
+          type="button"
+          className={textLinkClass('tabular-nums font-medium')}
+          onClick={onClick}
+          aria-label={`${label} breakdown`}
+        >
+          {formatted}
+        </button>
+      )}
+    </div>
+  )
+}
+
+function MobileQty({
+  label,
+  value,
 }: {
   label: string
   value: number | null | undefined
@@ -701,8 +892,8 @@ function MobileIph({
   const empty = value == null || value <= 0
   return (
     <div className={`flex justify-between gap-2 ${empty ? 'opacity-40' : ''}`}>
-      <span className="opacity-60 text-xs">{label}</span>
-      <span className="tabular-nums font-medium">{empty ? '—' : formatIsk(value)}</span>
+      <span className="opacity-60 text-xs">{label}/hr</span>
+      <span className="tabular-nums font-medium">{empty ? '—' : formatQuantity(value)}</span>
     </div>
   )
 }

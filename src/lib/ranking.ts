@@ -120,6 +120,21 @@ function resolveHaulRate(
   return { iskPerM3: medianValidIskPerM3(haulRates), valid: true }
 }
 
+/** Hub ↔ build-system haul rates (materials in, products out). */
+export function resolveHubHaulRates(
+  haulRates: MarketData['haulRates'],
+  marketSystemId: number,
+  buildSystemId: number,
+): { haulInIskPerM3: number; haulOutIskPerM3: number } {
+  const haulInRate = resolveHaulRate(haulRates, marketSystemId, buildSystemId)
+  const haulOutRate = resolveHaulRate(haulRates, buildSystemId, marketSystemId)
+  const haulFallback = medianValidIskPerM3(haulRates)
+  return {
+    haulInIskPerM3: haulInRate?.iskPerM3 ?? haulFallback,
+    haulOutIskPerM3: haulOutRate?.iskPerM3 ?? haulFallback,
+  }
+}
+
 function hasValidPrices(
   blueprint: BlueprintInfo,
   spotPrices: Map<number, number>,
@@ -477,11 +492,11 @@ export function rankBlueprintsFromMarket(
   const windowPrices = buildWindowPriceMap(hubMarket, window, spotPrices)
   const marketSystemId = hubMarket.marketSystemId
   const includeHaulCost = filters.includeHaulCost ?? settings.includeHaulCost ?? true
-  const haulInRate = resolveHaulRate(market.haulRates, marketSystemId, buildSystemId)
-  const haulOutRate = resolveHaulRate(market.haulRates, buildSystemId, marketSystemId)
-  const haulFallback = medianValidIskPerM3(market.haulRates)
-  const haulInIskPerM3 = haulInRate?.iskPerM3 ?? haulFallback
-  const haulOutIskPerM3 = haulOutRate?.iskPerM3 ?? haulFallback
+  const { haulInIskPerM3, haulOutIskPerM3 } = resolveHubHaulRates(
+    market.haulRates,
+    marketSystemId,
+    buildSystemId,
+  )
 
   const typeVolumes = new Map<number, number>()
   for (const [id, type] of typeMap) {

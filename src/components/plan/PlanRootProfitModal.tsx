@@ -91,13 +91,23 @@ export function PlanRootProfitModal({ breakdown, onClose }: PlanRootProfitModalP
           <section>
             <h4 className="font-semibold text-sm mb-2">3. Setup cost</h4>
             <p className="text-sm font-mono">
-              Rolled-up build/buy chain: <strong>{formatIsk(breakdown.setupCost)}</strong>
+              Rolled-up build/buy chain
+              {breakdown.haulIn > 0 ? ' + haul in' : ''}:{' '}
+              <strong>{formatIsk(breakdown.setupCost)}</strong>
             </p>
+            {breakdown.haulOut > 0 ? (
+              <p className="text-sm font-mono mt-1 opacity-80">
+                Haul out (products to hub): <strong>{formatIsk(breakdown.haulOut)}</strong>
+              </p>
+            ) : null}
           </section>
 
           <section className="rounded-lg border border-eve-border bg-base-300/30 px-4 py-3 space-y-2">
             <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm font-mono">
-              <span>{formatIsk(breakdown.netRevenue)} − {formatIsk(breakdown.setupCost)}</span>
+              <span>
+                {formatIsk(breakdown.netRevenue)} − {formatIsk(breakdown.setupCost)}
+                {breakdown.haulOut > 0 ? ` − ${formatIsk(breakdown.haulOut)}` : ''}
+              </span>
               <span className={`font-bold tabular-nums ${profitTone}`}>
                 = {formatIsk(breakdown.netProfit)}
               </span>

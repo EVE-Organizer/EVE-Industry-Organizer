@@ -210,12 +210,13 @@ async function main() {
   const payload = {
     generatedAt: new Date().toISOString(),
     defaults: {
-      m3PerHr: 40000,
+      // Keep in sync with src/lib/miningIph.ts (Retriever / Venture reference fits).
+      m3PerHr: 50400,
       m3PerHrBySubtype: {
-        ore: 40000,
-        moon: 40000,
-        ice: 40000,
-        gas: 3000,
+        ore: 50400, // Retriever, 2× Strip Miner I (~840 m³/min, EVE Uni)
+        moon: 50400,
+        ice: 37500, // Retriever, 2× Ice Harvester I, Ice Harvesting IV
+        gas: 2400, // Venture + Gas Cloud Scoop II
       },
       reprocessYield: 0.5,
     },

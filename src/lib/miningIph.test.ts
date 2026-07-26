@@ -99,7 +99,71 @@ describe('rankMiningIph', () => {
       sortKey: 'focus',
     })
     expect(rows.every((r) => r.item.name === 'Plagioclase')).toBe(true)
-    expect(rows[0].focusIph).toBeGreaterThan(0)
+    expect(rows[0].focusQtyPerHr).toBeGreaterThan(0)
+  })
+
+  it('requires every selected Found in space (AND)', () => {
+    const spot = new Map(Object.entries(hubMarket.prices).map(([k, v]) => [Number(k), v]))
+    const rows = rankMiningIph(mining, hubMarket, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: ['highsec', 'lowsec'],
+      focusTypeId: null,
+      window: 'all',
+      priceMethod: 'sell_orders',
+    })
+    // Plagioclase is HS+LS; Veldspar is HS only.
+    expect(rows.every((r) => r.item.name === 'Plagioclase')).toBe(true)
+    expect(rows).toHaveLength(1)
+  })
+
+  it('ranks focused material by units/hr not ISK/hr', () => {
+    // Cheap high-yield Trit vs expensive low-yield Trit: qty sort picks Veldspar.
+    const focusMining: MiningData = {
+      ...mining,
+      items: [
+        {
+          typeId: 18,
+          name: 'Plagioclase',
+          group: 'Plagioclase',
+          volume: 0.35,
+          portionSize: 100,
+          subtype: 'ore',
+          foundIn: ['highsec'],
+          compressedTypeId: 62528,
+          reprocess: [{ typeId: 34, quantityPerBatch: 50 }],
+          iconUrl: '',
+        },
+        {
+          typeId: 1230,
+          name: 'Veldspar',
+          group: 'Veldspar',
+          volume: 0.1,
+          portionSize: 100,
+          subtype: 'ore',
+          foundIn: ['highsec'],
+          compressedTypeId: 62516,
+          reprocess: [{ typeId: 34, quantityPerBatch: 400 }],
+          iconUrl: '',
+        },
+      ],
+    }
+    const spot = new Map([
+      [18, 10],
+      [1230, 5],
+      [34, 4],
+      [62528, 12],
+      [62516, 6],
+    ])
+    const rows = rankMiningIph(focusMining, hubMarket, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: 34,
+      window: 'all',
+      priceMethod: 'sell_orders',
+      sortKey: 'focus',
+    })
+    expect(rows[0].item.name).toBe('Veldspar')
+    expect(rows[0].focusQtyPerHr!).toBeGreaterThan(rows[1].focusQtyPerHr!)
   })
 
   it('never lists compressed names as rows', () => {

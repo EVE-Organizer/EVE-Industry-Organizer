@@ -31,7 +31,7 @@ import {
   buildBuyPriceMap,
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
-import { buildWindowPriceMap } from '@/lib/ranking'
+import { buildWindowPriceMap, resolveHubHaulRates } from '@/lib/ranking'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/lib/planTreeLines'
 import { buildManufactureDisplayRows } from '@/lib/planManufactureDisplay'
@@ -60,11 +60,9 @@ import type {
   ManufacturingSettings,
   PlanBuildMode,
   PlanNodeOverride,
-  TimeRange,
 } from '@/types'
 import { PlanPipelineChecklist } from '@/components/plan/PlanPipelineChecklist'
-import { InfoTooltip } from '@/components/InfoTooltip'
-import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
+import { EconomicsFilterSection, type EconomicsFilterValues } from '@/components/EconomicsFilterSection'
 
 function parsePlanViewTab(raw: string | null): PlanViewTab {
   if (raw === 'graph' || raw === 'pipeline') return raw
@@ -278,6 +276,18 @@ export function PlanPage() {
   const hubMarket = data ? getHubMarket(data.market, activeSettings.primaryHub) : null
   const mfgSystemId = activeSettings.manufacturingSystemId
   const reactionSystemId = activeSettings.reactionFacility?.reactionSystemId ?? mfgSystemId
+  const buildSystemId = useMemo(() => {
+    if (!data || !hubMarket) return mfgSystemId
+    return resolveBuildSystem(data.systems, data.regions, hubMarket, mfgSystemId).buildSystemId
+  }, [data, hubMarket, mfgSystemId])
+  const planHaulRates = useMemo(() => {
+    if (!data || !hubMarket) return undefined
+    return resolveHubHaulRates(data.market.haulRates, hubMarket.marketSystemId, buildSystemId)
+  }, [data, hubMarket, buildSystemId])
+  const haulApplicable = useMemo(() => {
+    if (!hubMarket) return false
+    return hubMarket.marketSystemId !== buildSystemId
+  }, [hubMarket, buildSystemId])
   const systemCostIndex = useMemo(() => {
     if (!data || !hubMarket) return 0.01
     return resolveBuildSystem(data.systems, data.regions, hubMarket, mfgSystemId).costIndex
@@ -322,6 +332,31 @@ export function PlanPage() {
     systemCostIndex,
     reactionCostIndex,
     { includeSimulation: tab === 'graph' },
+  )
+
+  const planProfitOptions = useMemo(
+    () => ({
+      hasReliablePrices: plan.hasReliablePrices,
+      scheduledWindowHours: plan.windowHours,
+      haulInIskPerM3: planHaulRates?.haulInIskPerM3,
+      haulOutIskPerM3: planHaulRates?.haulOutIskPerM3,
+      includeHaulCost: activeSettings.includeHaulCost ?? true,
+      priceMethod: activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
+    }),
+    [
+      plan.hasReliablePrices,
+      plan.windowHours,
+      planHaulRates,
+      activeSettings.includeHaulCost,
+      activeSettings.priceMethod,
+    ],
+  )
+
+  const onPlanEconomicsChange = useCallback(
+    (patch: Partial<EconomicsFilterValues>) => {
+      updateSettings(patch)
+    },
+    [updateSettings],
   )
 
   const slots = manufacturingSlotsFromSkills(activeSettings.skills)
@@ -372,12 +407,9 @@ export function PlanPage() {
       prices,
       buyPrices,
       jobTimeHoursByRootId,
-      {
-        hasReliablePrices: plan.hasReliablePrices,
-        scheduledWindowHours: plan.windowHours,
-      },
+      planProfitOptions,
     )
-  }, [activeTemplate, expandInput, prices, buyPrices, blueprints, activeSettings, plan.hasReliablePrices, plan.windowHours])
+  }, [activeTemplate, expandInput, prices, buyPrices, blueprints, activeSettings, planProfitOptions])
 
   const profitByRootId = useMemo(
     () => new Map(profitSummary.rootRows.map((row) => [row.rootId, row])),
@@ -391,8 +423,8 @@ export function PlanPage() {
     const blueprint = getBlueprintForProduct(blueprints, root.productTypeId)
     if (!blueprint) return null
     const productName = typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`
-    return computeRootSetupBreakdown(root, blueprint, expandInput, productName)
-  }, [setupDetailRootId, activeTemplate, expandInput, blueprints, typeMap])
+    return computeRootSetupBreakdown(root, blueprint, expandInput, productName, planProfitOptions)
+  }, [setupDetailRootId, activeTemplate, expandInput, blueprints, typeMap, planProfitOptions])
 
   const profitDetailBreakdown = useMemo(() => {
     if (!profitDetailRootId || !activeTemplate || !expandInput) return null
@@ -415,6 +447,7 @@ export function PlanPage() {
       buyPrices,
       jobHours,
       productName,
+      planProfitOptions,
     )
   }, [
     profitDetailRootId,
@@ -425,6 +458,7 @@ export function PlanPage() {
     prices,
     buyPrices,
     activeSettings,
+    planProfitOptions,
   ])
 
   const favoriteProductIds = useMemo(
@@ -673,15 +707,19 @@ export function PlanPage() {
 
   const toggleMode = useCallback(
     (productTypeId: number) => {
-      if (isSharedView || !storeTemplate) return
+      if (isSharedView) return
+      const { userData, selectedPlanTemplateId } = useAppStore.getState()
+      const template = userData.planTemplates?.find((t) => t.id === selectedPlanTemplateId)
+      if (!template) return
       const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
       if (!node?.canToggle || node.isRoot) return
-      const next: PlanBuildMode = node.mode === 'build' ? 'buy' : 'build'
-      updatePlanTemplate(storeTemplate.id, {
-        modeOverrides: { ...storeTemplate.modeOverrides, [productTypeId]: next },
+      const currentMode = template.modeOverrides[productTypeId] ?? node.mode
+      const next: PlanBuildMode = currentMode === 'build' ? 'buy' : 'build'
+      updatePlanTemplate(template.id, {
+        modeOverrides: { ...template.modeOverrides, [productTypeId]: next },
       })
     },
-    [isSharedView, storeTemplate, plan.nodes, updatePlanTemplate],
+    [isSharedView, plan.nodes, updatePlanTemplate],
   )
 
   const openGraph = useCallback((productTypeId: number) => {
@@ -892,7 +930,13 @@ export function PlanPage() {
             }
           />
 
-          <PlanProfitSummaryPanel summary={profitSummary} hubName={hubName} />
+          <PlanProfitSummaryPanel
+            summary={profitSummary}
+            hubName={hubName}
+            priceMethod={activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod}
+            includeHaulCost={activeSettings.includeHaulCost ?? true}
+            haulApplicable={haulApplicable}
+          />
 
           <section className="plan-build-card">
             <div className="plan-build-card__header">
@@ -928,48 +972,19 @@ export function PlanPage() {
                     />
                   </div>
                   <div className="plan-price-bar">
-                    <div className="plan-price-bar__group">
-                      <span className="plan-price-bar__label">
-                        Price window
-                        <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.priceWindow} />
-                      </span>
-                      <div
-                        role="group"
-                        aria-label="Price window"
-                        className="plan-price-bar__windows"
-                      >
-                        {(['1d', '1w', '1m', '1y', 'all'] as TimeRange[]).map((window) => {
-                          const active = (activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow) === window
-                          return (
-                            <button
-                              key={window}
-                              type="button"
-                              aria-pressed={active}
-                              className={`plan-price-bar__chip${active ? ' plan-price-bar__chip--active' : ''}`}
-                              onClick={() => updateSettings({ priceWindow: window })}
-                            >
-                              {window}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                    <label className="plan-price-bar__haul">
-                      <input
-                        type="checkbox"
-                        className="toggle toggle-sm toggle-primary"
-                        checked={activeSettings.includeHaulCost ?? true}
-                        onChange={(e) => updateSettings({ includeHaulCost: e.target.checked })}
-                      />
-                      <span className="plan-price-bar__haul-text">
-                        Include hauling
-                        <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.includeHaulCost} />
-                      </span>
-                    </label>
+                    <EconomicsFilterSection
+                      layout="bar"
+                      values={{
+                        priceMethod: activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
+                        priceWindow: activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow,
+                        includeHaulCost: activeSettings.includeHaulCost ?? true,
+                      }}
+                      onChange={onPlanEconomicsChange}
+                    />
                   </div>
                   <p className="plan-build-card__hint">
-                    Search by product name, or add from Blueprints ranking (+ Plan). Window and haul
-                    sync to Settings.
+                    Search by product name, or add from Blueprints ranking (+ Plan). Pricing syncs to
+                    Settings.
                   </p>
                 </div>
               ) : null}
