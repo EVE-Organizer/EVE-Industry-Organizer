@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-26T05:20:09.615Z",
+  "generatedAt": "2026-07-26T05:29:54.878Z",
   "defaults": {
     "m3PerHr": 40000,
     "reprocessYield": 0.5
@@ -170,7 +170,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62396,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/25268/icon?size=32"
     },
@@ -186,7 +186,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62377,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/28694/icon?size=32"
     },
@@ -308,7 +308,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62386,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/25279/icon?size=32"
     },
@@ -324,7 +324,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62379,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/28695/icon?size=32"
     },
@@ -822,7 +822,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62387,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/25275/icon?size=32"
     },
@@ -838,7 +838,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62380,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/28696/icon?size=32"
     },
@@ -854,7 +854,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62388,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/28630/icon?size=32"
     },
@@ -1407,7 +1407,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62402,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/30375/icon?size=32"
     },
@@ -1423,7 +1423,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62404,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/30376/icon?size=32"
     },
@@ -1439,7 +1439,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62406,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/30377/icon?size=32"
     },
@@ -1455,7 +1455,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62399,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/30370/icon?size=32"
     },
@@ -1471,7 +1471,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62405,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/30378/icon?size=32"
     },
@@ -1487,7 +1487,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62397,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/30371/icon?size=32"
     },
@@ -1503,7 +1503,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62398,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/30372/icon?size=32"
     },
@@ -1519,7 +1519,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62403,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/30373/icon?size=32"
     },
@@ -1535,7 +1535,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62400,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/30374/icon?size=32"
     },
@@ -1551,7 +1551,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62389,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/28629/icon?size=32"
     },
@@ -1952,7 +1952,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62390,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/25273/icon?size=32"
     },
@@ -1968,7 +1968,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62381,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/28697/icon?size=32"
     },
@@ -2676,7 +2676,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62391,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/25277/icon?size=32"
     },
@@ -2692,7 +2692,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62382,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/28698/icon?size=32"
     },
@@ -2739,7 +2739,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62392,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/25276/icon?size=32"
     },
@@ -2755,7 +2755,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62383,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/28699/icon?size=32"
     },
@@ -4451,7 +4451,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62393,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/25278/icon?size=32"
     },
@@ -4467,7 +4467,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62384,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/28700/icon?size=32"
     },
@@ -4483,7 +4483,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62394,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/25274/icon?size=32"
     },
@@ -4499,7 +4499,7 @@
         "nullsec",
         "lowsec"
       ],
-      "compressedTypeId": null,
+      "compressedTypeId": 62385,
       "reprocess": [],
       "iconUrl": "https://images.evetech.net/types/28701/icon?size=32"
     },

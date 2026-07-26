@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, startTransition, type ReactNode, type MouseEvent } from 'react'
+import { useEffect, useMemo, useState, startTransition, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
@@ -28,6 +28,7 @@ import { EveImage } from '@/components/EveImage'
 import { FilterSection } from '@/components/EconomicsFilterSection'
 import { MiningIphBreakdownModal } from '@/components/MiningIphBreakdownModal'
 import { CopyNameButton } from '@/components/CopyNameButton'
+import { Tooltip } from '@/components/Tooltip'
 
 const TIME_WINDOWS: TimeRange[] = ['1d', '1w', '1m', '1y', 'all']
 
@@ -82,30 +83,59 @@ function SortHeader({
   )
 }
 
-function IphCell({
-  value,
-  onClick,
-}: {
-  value: number | null | undefined
-  onClick: () => void
-}) {
+function BreakdownIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden>
+      <circle cx="3.5" cy="4" r="1.75" strokeWidth="1.5" />
+      <circle cx="12.5" cy="4" r="1.75" strokeWidth="1.5" />
+      <circle cx="8" cy="12" r="1.75" strokeWidth="1.5" />
+      <path strokeLinecap="round" strokeWidth="1.5" d="M5 5.2 6.8 10.5M11 5.2 9.2 10.5" />
+    </svg>
+  )
+}
+
+function IphCell({ value }: { value: number | null | undefined }) {
   const empty = value == null || value <= 0
   return (
-    <td className="text-right">
-      <button
-        type="button"
-        className={`tabular-nums ${empty ? 'opacity-40 cursor-default' : 'hover:text-primary cursor-pointer'}`}
-        onClick={empty ? undefined : onClick}
-        disabled={empty}
-      >
-        {empty ? '—' : formatIsk(value)}
-      </button>
+    <td className={`text-right tabular-nums ${empty ? 'opacity-40' : ''}`}>
+      {empty ? '—' : formatIsk(value)}
     </td>
   )
 }
 
-function stopLinkClick(e: MouseEvent) {
-  e.stopPropagation()
+function MiningItemName({
+  row,
+  onOpenBreakdown,
+}: {
+  row: MiningRankedRow
+  onOpenBreakdown: () => void
+}) {
+  const itemHref = appRoute(`item/${row.item.typeId}`)
+  return (
+    <div className="flex items-center gap-1.5 min-w-0">
+      <EveImage id={row.item.typeId} size={28} framed alt="" className="shrink-0" />
+      <CopyNameButton text={row.item.name} />
+      <a
+        href={itemHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={textLinkClass('text-sm truncate leading-snug min-w-0')}
+        title={`${row.item.name} (market)`}
+      >
+        {row.item.name}
+      </a>
+      <Tooltip text="Open ISK/hr breakdown" placement="top">
+        <button
+          type="button"
+          className="btn btn-ghost btn-xs btn-square shrink-0 min-h-0 h-6 w-6 opacity-70 hover:opacity-100"
+          aria-label={`Open ISK/hr breakdown for ${row.item.name}`}
+          onClick={onOpenBreakdown}
+        >
+          <BreakdownIcon className="size-3.5" />
+        </button>
+      </Tooltip>
+    </div>
+  )
 }
 
 export function MiningIskHrPage() {
@@ -471,32 +501,17 @@ export function MiningIskHrPage() {
               <tr key={row.item.typeId} className="hover:bg-base-200/80">
                 <td className="tabular-nums opacity-60">{index + 1}</td>
                 <td>
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <EveImage id={row.item.typeId} size={28} alt="" className="rounded shrink-0" />
-                    <CopyNameButton text={row.item.name} />
-                    <a
-                      href={appRoute(`item/${row.item.typeId}`)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={textLinkClass('text-sm truncate')}
-                      title={`${row.item.name} (market)`}
-                      onClick={stopLinkClick}
-                    >
-                      {row.item.name}
-                    </a>
-                  </div>
+                  <MiningItemName row={row} onOpenBreakdown={() => setBreakdown(row)} />
                 </td>
                 <td>
                   <span className="text-xs opacity-70 whitespace-nowrap">
                     {row.item.foundIn.map(spaceLabel).join(' ')}
                   </span>
                 </td>
-                <IphCell value={row.rawIph} onClick={() => setBreakdown(row)} />
-                <IphCell value={row.compressedIph} onClick={() => setBreakdown(row)} />
-                <IphCell value={row.mineralsIph} onClick={() => setBreakdown(row)} />
-                {focusTypeId != null ? (
-                  <IphCell value={row.focusIph} onClick={() => setBreakdown(row)} />
-                ) : null}
+                <IphCell value={row.rawIph} />
+                <IphCell value={row.compressedIph} />
+                <IphCell value={row.mineralsIph} />
+                {focusTypeId != null ? <IphCell value={row.focusIph} /> : null}
                 <td className="text-right tabular-nums text-xs opacity-70">
                   {formatQuantity(row.volDay)}
                 </td>
@@ -522,30 +537,18 @@ export function MiningIskHrPage() {
           >
             <div className="flex items-center gap-2 min-w-0 mb-2">
               <span className="text-xs opacity-50 tabular-nums">#{index + 1}</span>
-              <EveImage id={row.item.typeId} size={32} alt="" className="rounded shrink-0" />
-              <a
-                href={appRoute(`item/${row.item.typeId}`)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={textLinkClass('text-sm font-medium truncate min-w-0')}
-              >
-                {row.item.name}
-              </a>
+              <MiningItemName row={row} onOpenBreakdown={() => setBreakdown(row)} />
             </div>
             <p className="text-[11px] opacity-60 mb-2">
               Found {row.item.foundIn.map(spaceLabel).join(' ')} · {volLabel}{' '}
               {formatQuantity(row.volDay)}
             </p>
             <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
-              <MobileIph label="Raw" value={row.rawIph} onClick={() => setBreakdown(row)} />
-              <MobileIph label="Comp" value={row.compressedIph} onClick={() => setBreakdown(row)} />
-              <MobileIph label="Mins" value={row.mineralsIph} onClick={() => setBreakdown(row)} />
+              <MobileIph label="Raw" value={row.rawIph} />
+              <MobileIph label="Comp" value={row.compressedIph} />
+              <MobileIph label="Mins" value={row.mineralsIph} />
               {focusTypeId != null && focusName ? (
-                <MobileIph
-                  label={focusName}
-                  value={row.focusIph}
-                  onClick={() => setBreakdown(row)}
-                />
+                <MobileIph label={focusName} value={row.focusIph} />
               ) : null}
             </div>
           </article>
@@ -570,22 +573,15 @@ export function MiningIskHrPage() {
 function MobileIph({
   label,
   value,
-  onClick,
 }: {
   label: string
   value: number | null | undefined
-  onClick: () => void
 }) {
   const empty = value == null || value <= 0
   return (
-    <button
-      type="button"
-      className={`flex justify-between gap-2 text-left ${empty ? 'opacity-40' : ''}`}
-      onClick={empty ? undefined : onClick}
-      disabled={empty}
-    >
+    <div className={`flex justify-between gap-2 ${empty ? 'opacity-40' : ''}`}>
       <span className="opacity-60 text-xs">{label}</span>
       <span className="tabular-nums font-medium">{empty ? '—' : formatIsk(value)}</span>
-    </button>
+    </div>
   )
 }

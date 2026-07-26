@@ -106,6 +106,20 @@ function isCompressedName(name) {
   return /compress/i.test(name)
 }
 
+/**
+ * Map raw mineable → compressed type.
+ * Ore/ice/moon keep the same group; gas compresses into group "Compressed Gas".
+ */
+function resolveCompressedTypeId(type, byName) {
+  const compressed = byName.get(`Compressed ${type.name}`)
+  if (!compressed) return null
+  if (compressed.group === type.group) return compressed.typeId
+  if (type.group === 'Harvestable Cloud' && compressed.group === 'Compressed Gas') {
+    return compressed.typeId
+  }
+  return null
+}
+
 /** IV-Grade variants and similar types rarely trade as raw ore/ice at hubs. */
 function isLowTradeVariant(type, subtype) {
   if (subtype !== 'ore' && subtype !== 'ice') return false
@@ -160,9 +174,7 @@ async function main() {
   for (const { type, subtype } of candidates) {
     const portionSize = portionByType.get(type.typeId) ?? 100
     const reprocess = materialsByType.get(type.typeId) ?? []
-    const compressed = byName.get(`Compressed ${type.name}`)
-    const compressedTypeId =
-      compressed && compressed.group === type.group ? compressed.typeId : null
+    const compressedTypeId = resolveCompressedTypeId(type, byName)
 
     // Gas: sell as harvested; skip if no marketable volume
     if (subtype === 'gas' && !(type.volume > 0)) continue
