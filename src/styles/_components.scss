@@ -438,7 +438,7 @@
 
   // Compact market strip: never stretch beside Catalog (that was the empty gap).
   &__market {
-    @apply flex flex-col gap-2 rounded-lg border border-eve-border/80 bg-base-300/15 px-3 py-2.5 sm:flex-row sm:items-center sm:gap-4 sm:px-4;
+    @apply flex flex-col gap-3 rounded-lg border border-eve-border/80 bg-base-300/15 px-3 py-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 sm:px-4;
   }
 
   &__market-head {
@@ -455,6 +455,50 @@
 
   &__limits-body {
     @apply flex min-h-0 flex-1 flex-col justify-between gap-3;
+  }
+}
+
+.mining-filters {
+  // Mining filter chrome inside `.blueprint-filters` (matches Blueprints / Plan).
+
+  &__header-icon {
+    @apply flex size-9 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary;
+  }
+
+  &__section {
+    @apply flex min-w-0 flex-col gap-2;
+  }
+
+  &__label {
+    @apply inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-base-content/45;
+  }
+
+  &__type-grid {
+    @apply grid grid-cols-2 gap-2 sm:grid-cols-4;
+  }
+
+  &__market-group {
+    @apply flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2.5;
+
+    &--end {
+      @apply sm:ml-auto;
+    }
+  }
+
+  &__seg-group {
+    @apply inline-flex items-center gap-0.5 rounded-md border border-eve-border/70 bg-base-200/80 p-0.5;
+  }
+
+  &__seg {
+    @apply min-w-[2.25rem] rounded px-2.5 py-1 text-xs font-medium tabular-nums text-base-content/55 transition-colors hover:bg-base-300/60 hover:text-base-content;
+
+    &--active {
+      @apply bg-primary/15 text-primary shadow-sm hover:bg-primary/20 hover:text-primary;
+    }
+  }
+
+  &__material-row {
+    @apply flex flex-wrap gap-2;
   }
 }
 

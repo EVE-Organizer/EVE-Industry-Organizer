@@ -24,10 +24,11 @@ import {
 import { formatIsk, formatQuantity } from '@/lib/profit'
 import { appRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
+import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 import { HUBS, type MiningIphSortKey, type MiningRankedRow, type MiningSpaceClass, type MiningSubtype, type TimeRange } from '@/types'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { EveImage } from '@/components/EveImage'
-import { FilterSection } from '@/components/EconomicsFilterSection'
+import { InfoTooltip } from '@/components/InfoTooltip'
 import { MiningIphBreakdownModal } from '@/components/MiningIphBreakdownModal'
 import { CopyNameButton } from '@/components/CopyNameButton'
 import { Tooltip } from '@/components/Tooltip'
@@ -39,7 +40,69 @@ const PRICE_METHODS = [
   { id: 'buy_orders' as const, label: 'Buy' },
 ]
 
-function FilterChip({
+/** Representative type icons for subtype tiles (Veldspar, Bitumens, Clear Icicle, Amber Cytoserocin). */
+const SUBTYPE_ICON_IDS: Record<MiningSubtype, number> = {
+  ore: 1230,
+  moon: 45490,
+  ice: 16262,
+  gas: 25275,
+}
+
+const SUBTYPE_HINT = 'Moon goo, belt ore, ice, or harvestable gas.'
+const FOUND_IN_HINT = 'Where the item can spawn. None selected = all spaces.'
+const MATERIAL_HINT =
+  'Rank by one reprocess output (e.g. Mexallon). All = total reprocess ISK/hr.'
+const PRICE_METHOD_HINT =
+  'Sell = window average at the hub. Buy = instant sell to buy orders.'
+
+function FiltersIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className={className}
+      aria-hidden
+    >
+      <path
+        fillRule="evenodd"
+        d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+        clipRule="evenodd"
+      />
+    </svg>
+  )
+}
+
+/** Primary pickers: same category-chip language as Blueprints tier tiles. */
+function CategoryChip({
+  active,
+  onClick,
+  children,
+  tall = false,
+  className = '',
+}: {
+  active: boolean
+  onClick: () => void
+  children: ReactNode
+  tall?: boolean
+  className?: string
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      className={`category-chip ${active ? 'btn-primary' : 'btn-ghost border border-eve-border'} ${
+        tall ? 'flex-col gap-1.5 min-h-[4.5rem] py-2' : ''
+      } ${className}`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  )
+}
+
+/** Compact segmented control like Plan price window / economics bar. */
+function SegmentChip({
   active,
   onClick,
   children,
@@ -52,11 +115,26 @@ function FilterChip({
     <button
       type="button"
       aria-pressed={active}
-      className={`category-chip ${active ? 'btn-primary' : 'btn-ghost border border-eve-border'}`}
+      className={`mining-filters__seg${active ? ' mining-filters__seg--active' : ''}`}
       onClick={onClick}
     >
       {children}
     </button>
+  )
+}
+
+function FilterLabel({
+  label,
+  hint,
+}: {
+  label: string
+  hint?: string
+}) {
+  return (
+    <span className="mining-filters__label">
+      {label}
+      {hint ? <InfoTooltip text={hint} /> : null}
+    </span>
   )
 }
 
@@ -369,103 +447,146 @@ export function MiningIskHrPage() {
     )
   }
 
+  const sortLabel =
+    sortKey === 'focus' && focusName
+      ? `${focusName} ISK/hr`
+      : sortKey === 'raw'
+        ? 'Raw ISK/hr'
+        : sortKey === 'compressed'
+          ? 'Compressed ISK/hr'
+          : sortKey === 'vol'
+            ? volLabel
+            : 'Minerals ISK/hr'
+
   return (
     <div>
       <PageHeader title="Mining" subtitle={subtitleParts.join(' · ')} />
 
-      <div className="flex flex-col gap-4 mb-4">
-        <FilterSection title="Subtype" hint="Moon goo, belt ore, ice, or harvestable gas.">
-          <div className="flex flex-wrap gap-2">
-            {MINING_SUBTYPES.map((s) => (
-              <FilterChip
-                key={s.id}
-                active={subtype === s.id}
-                onClick={() => onSubtypeChange(s.id)}
-              >
-                {s.label}
-              </FilterChip>
-            ))}
+      <section className="blueprint-filters" aria-label="Mining filters">
+        <header className="blueprint-filters__header">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="mining-filters__header-icon shrink-0" aria-hidden>
+              <FiltersIcon className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <h2 className="blueprint-filters__title">Filters</h2>
+              <p className="blueprint-filters__subtitle">
+                What to mine, market window, and reprocess focus
+              </p>
+            </div>
           </div>
-        </FilterSection>
+          <span className="badge badge-primary badge-sm badge-outline border-primary/30 tabular-nums font-normal shrink-0">
+            {rows.length} shown · {sortLabel}
+          </span>
+        </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <FilterSection title="Window" hint="Price history window (same as Blueprints).">
-            <div className="flex flex-wrap gap-2">
-              {TIME_WINDOWS.map((w) => (
-                <FilterChip key={w} active={priceWindow === w} onClick={() => onPriceWindowChange(w)}>
-                  {w}
-                </FilterChip>
-              ))}
-            </div>
-          </FilterSection>
-
-          <FilterSection
-            title="Price"
-            hint="Sell = window average. Buy = instant sell to buy orders."
-          >
-            <div className="flex flex-wrap gap-2">
-              {PRICE_METHODS.map((m) => (
-                <FilterChip
-                  key={m.id}
-                  active={settings.priceMethod === m.id}
-                  onClick={() => onPriceMethodChange(m.id)}
-                >
-                  {m.label}
-                </FilterChip>
-              ))}
-            </div>
-          </FilterSection>
-
-          <FilterSection title="Found in" hint="Filter by where the item can spawn. None selected = all.">
-            <div className="flex flex-wrap gap-2">
-              {MINING_SPACES.map((s) => (
-                <FilterChip
+        <div className="blueprint-filters__body">
+          <div className="mining-filters__section">
+            <FilterLabel label="Type" hint={SUBTYPE_HINT} />
+            <div
+              role="group"
+              aria-label="Mining subtype"
+              className="mining-filters__type-grid"
+            >
+              {MINING_SUBTYPES.map((s) => (
+                <CategoryChip
                   key={s.id}
-                  active={foundIn.includes(s.id)}
-                  onClick={() => toggleFound(s.id)}
+                  tall
+                  active={subtype === s.id}
+                  onClick={() => onSubtypeChange(s.id)}
+                  className="min-w-0 justify-center"
                 >
-                  {s.label}
-                </FilterChip>
+                  <span className="rounded-md bg-base-100/90 p-1 shadow-sm">
+                    <EveImage
+                      id={SUBTYPE_ICON_IDS[s.id]}
+                      size={40}
+                      framed
+                      alt=""
+                      lazy={false}
+                    />
+                  </span>
+                  <span className="text-xs font-medium">{s.label}</span>
+                </CategoryChip>
               ))}
             </div>
-          </FilterSection>
+          </div>
+
+          <div className="blueprint-filters__market">
+            <div className="mining-filters__market-group">
+              <FilterLabel label="Window" hint={GLOBAL_SETTING_TOOLTIPS.priceWindow} />
+              <div role="group" aria-label="Price window" className="mining-filters__seg-group">
+                {TIME_WINDOWS.map((w) => (
+                  <SegmentChip
+                    key={w}
+                    active={priceWindow === w}
+                    onClick={() => onPriceWindowChange(w)}
+                  >
+                    {w}
+                  </SegmentChip>
+                ))}
+              </div>
+            </div>
+
+            <div className="mining-filters__market-group">
+              <FilterLabel label="Price" hint={PRICE_METHOD_HINT} />
+              <div role="group" aria-label="Price method" className="mining-filters__seg-group">
+                {PRICE_METHODS.map((m) => (
+                  <SegmentChip
+                    key={m.id}
+                    active={settings.priceMethod === m.id}
+                    onClick={() => onPriceMethodChange(m.id)}
+                  >
+                    {m.label}
+                  </SegmentChip>
+                ))}
+              </div>
+            </div>
+
+            <div className="mining-filters__market-group mining-filters__market-group--end">
+              <FilterLabel label="Found in" hint={FOUND_IN_HINT} />
+              <div role="group" aria-label="Found in" className="mining-filters__seg-group">
+                {MINING_SPACES.map((s) => (
+                  <SegmentChip
+                    key={s.id}
+                    active={foundIn.includes(s.id)}
+                    onClick={() => toggleFound(s.id)}
+                  >
+                    {s.label}
+                  </SegmentChip>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {subtype !== 'gas' ? (
+            <div className="mining-filters__section">
+              <FilterLabel label="Material" hint={MATERIAL_HINT} />
+              <div
+                role="group"
+                aria-label="Reprocess material focus"
+                className="mining-filters__material-row"
+              >
+                <CategoryChip
+                  active={focusTypeId == null}
+                  onClick={() => onFocusChange(null)}
+                >
+                  All
+                </CategoryChip>
+                {focusOptions.map((o) => (
+                  <CategoryChip
+                    key={o.typeId}
+                    active={focusTypeId === o.typeId}
+                    onClick={() => onFocusChange(o.typeId)}
+                  >
+                    <EveImage id={o.typeId} size={20} framed alt="" lazy={false} />
+                    {o.name}
+                  </CategoryChip>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
-
-        {subtype !== 'gas' ? (
-          <FilterSection
-            title="Material"
-            hint="Rank by one reprocess output (e.g. Mexallon). All = total reprocess ISK/hr."
-          >
-            <div className="flex flex-wrap gap-2">
-              <FilterChip active={focusTypeId == null} onClick={() => onFocusChange(null)}>
-                All
-              </FilterChip>
-              {focusOptions.map((o) => (
-                <FilterChip
-                  key={o.typeId}
-                  active={focusTypeId === o.typeId}
-                  onClick={() => onFocusChange(o.typeId)}
-                >
-                  {o.name}
-                </FilterChip>
-              ))}
-            </div>
-          </FilterSection>
-        ) : null}
-      </div>
-
-      <p className="text-xs opacity-60 mb-2">
-        {rows.length} shown · sorted by{' '}
-        {sortKey === 'focus' && focusName
-          ? `${focusName} ISK/hr`
-          : sortKey === 'raw'
-            ? 'Raw ISK/hr'
-            : sortKey === 'compressed'
-              ? 'Compressed ISK/hr'
-              : sortKey === 'vol'
-                ? volLabel
-                : 'Minerals ISK/hr'}
-      </p>
+      </section>
 
       {/* Desktop table */}
       <div className="hidden lg:block overflow-x-auto rounded-lg border border-eve-border">
