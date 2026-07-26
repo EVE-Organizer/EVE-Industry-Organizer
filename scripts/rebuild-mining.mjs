@@ -211,6 +211,12 @@ async function main() {
     generatedAt: new Date().toISOString(),
     defaults: {
       m3PerHr: 40000,
+      m3PerHrBySubtype: {
+        ore: 40000,
+        moon: 40000,
+        ice: 40000,
+        gas: 3000,
+      },
       reprocessYield: 0.5,
     },
     focusOutputs,

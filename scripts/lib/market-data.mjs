@@ -91,11 +91,35 @@ function sliceHistoryForWindow(history, days) {
   if (days === null) return sorted
 
   const cutoff = Date.now() - days * 86400000
-  const filtered = sorted.filter((row) => new Date(row.date).getTime() >= cutoff)
-  if (filtered.length) return filtered
+  return sorted.filter((row) => new Date(row.date).getTime() >= cutoff)
+}
 
-  // ESI history lags; use the most recent N trading days available.
-  return sorted.slice(-Math.min(days, sorted.length))
+/** @param {number[]} values */
+function median(values) {
+  if (!values.length) return 0
+  const sorted = [...values].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
+}
+
+const OUTLIER_PRICE_RATIO = 4
+
+/**
+ * Drop thin-market spike days, then volume-weight the survivors.
+ * @param {{ average: number, volume: number }[]} rows
+ */
+export function robustVolumeWeightedAvgPrice(rows) {
+  if (!rows.length) return 0
+  const med = median(rows.map((h) => h.average))
+  const lo = med / OUTLIER_PRICE_RATIO
+  const hi = med * OUTLIER_PRICE_RATIO
+  const kept = rows.filter((h) => h.average >= lo && h.average <= hi)
+  const use = kept.length ? kept : rows
+  const totalVol = use.reduce((s, h) => s + h.volume, 0)
+  if (totalVol > 0) {
+    return use.reduce((s, h) => s + h.average * h.volume, 0) / totalVol
+  }
+  return use.reduce((s, h) => s + h.average, 0) / use.length
 }
 
 export function aggregateHistoryWindows(history) {
@@ -105,7 +129,7 @@ export function aggregateHistoryWindows(history) {
   for (const [key, days] of Object.entries(HISTORY_WINDOWS)) {
     const filtered = sliceHistoryForWindow(history, days)
     if (!filtered.length) continue
-    const avgPrice = filtered.reduce((s, h) => s + h.average, 0) / filtered.length
+    const avgPrice = robustVolumeWeightedAvgPrice(filtered)
     const avgVolume = filtered.reduce((s, h) => s + h.volume, 0) / filtered.length
     const high = Math.max(...filtered.map((h) => h.highest))
     const low = Math.min(...filtered.map((h) => h.lowest))

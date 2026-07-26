@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { rankMiningIph } from '@/lib/miningIph'
+import {
+  miningDisplayVolume,
+  rankMiningIph,
+  sortMiningRows,
+} from '@/lib/miningIph'
 import type { HubMarketData, MiningData, TypeInfo } from '@/types'
 
 const mining: MiningData = {
@@ -243,8 +247,69 @@ describe('rankMiningIph', () => {
     expect(rows).toHaveLength(1)
     expect(rows[0].volDayRaw).toBe(279)
     expect(rows[0].volDayCompressed).toBe(3057)
-    // Sorted by raw → Vol column uses compressed liquidity, not tiny raw trades.
     expect(rows[0].volDay).toBe(3057)
+    expect(miningDisplayVolume(rows[0], 'raw')).toBe(3057)
+  })
+
+  it('sortMiningRows does not rewrite volDay', () => {
+    const mercoxitMining: MiningData = {
+      generatedAt: '',
+      defaults: { m3PerHr: 40_000, reprocessYield: 0.5 },
+      focusOutputs: { ore: [], moon: [], ice: [], gas: [] },
+      items: [
+        {
+          typeId: 11396,
+          name: 'Mercoxit',
+          group: 'Mercoxit',
+          volume: 40,
+          portionSize: 100,
+          subtype: 'ore',
+          foundIn: ['nullsec'],
+          compressedTypeId: 62586,
+          reprocess: [{ typeId: 11399, quantityPerBatch: 140 }],
+          iconUrl: '',
+        },
+      ],
+    }
+    const hub: HubMarketData = {
+      regionId: 10000043,
+      marketSystemId: 30002187,
+      buildSystemId: 30002187,
+      costIndex: 0.01,
+      prices: { '11396': 24480, '62586': 20000, '11399': 20000 },
+      products: {
+        '11396': { '1y': { avgPrice: 16500, avgVolume: 279, high: 125000, low: 42 } },
+        '62586': { '1y': { avgPrice: 20000, avgVolume: 3057, high: 25000, low: 10000 } },
+      },
+    }
+    const spot = new Map([
+      [11396, 24480],
+      [62586, 20000],
+      [11399, 20000],
+    ])
+    const rows = rankMiningIph(mercoxitMining, hub, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1y',
+      priceMethod: 'sell_orders',
+    })
+    const sorted = sortMiningRows(rows, 'minerals')
+    expect(sorted[0].volDay).toBe(3057)
+    expect(miningDisplayVolume(sorted[0], 'minerals')).toBe(0)
+  })
+
+  it('buy mode drops rows without buy quotes', () => {
+    const spot = new Map(Object.entries(hubMarket.prices).map(([k, v]) => [Number(k), v]))
+    const buyPrices = new Map<number, number>([[18, 8]])
+    const rows = rankMiningIph(mining, hubMarket, spot, buyPrices, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: 'all',
+      priceMethod: 'buy_orders',
+    })
+    expect(rows.every((r) => r.item.typeId === 18)).toBe(true)
   })
 
   it('hides gas with spot price but no volume history (non-Jita hubs)', () => {

@@ -1,10 +1,9 @@
 import type { MiningRankedRow, TimeRange } from '@/types'
-import { miningVolumeLabel } from '@/lib/miningIph'
+import { miningVolumeLabel, spaceLabel } from '@/lib/miningIph'
 import { EveImage } from '@/components/EveImage'
 import { formatDecimal, formatIsk, formatQuantity } from '@/lib/profit'
 import { appRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
-import { spaceLabel } from '@/lib/miningIph'
 
 interface MiningIphBreakdownModalProps {
   row: MiningRankedRow | null
@@ -113,8 +112,7 @@ export function MiningIphBreakdownModal({
           )}
 
           <p className="text-xs opacity-50">
-            Hub {miningVolumeLabel(window)} (sort column): {formatQuantity(row.volDay)} · Raw unit
-            price{' '}
+            Hub {miningVolumeLabel(window)} liquidity: {formatQuantity(row.volDay)} · Raw unit price{' '}
             {formatIsk(row.rawPrice)}
           </p>
         </div>

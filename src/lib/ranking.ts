@@ -160,14 +160,16 @@ export function buildWindowPriceMap(
   return map
 }
 
-function pickHistoryWindow(
+export function pickHistoryWindow(
   productHistory: Partial<Record<TimeRange, ProductWindowSummary>>,
   window: TimeRange,
+  field: 'avgPrice' | 'avgVolume' = 'avgPrice',
 ): ProductWindowSummary | null {
   const tryWindow = (w: TimeRange) => {
     const summary = productHistory[w]
     if (!summary) return null
-    return summary.avgPrice > 0 ? summary : null
+    const value = field === 'avgVolume' ? summary.avgVolume : summary.avgPrice
+    return value != null && value > 0 ? summary : null
   }
 
   const exact = tryWindow(window)

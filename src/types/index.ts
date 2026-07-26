@@ -932,6 +932,7 @@ export interface MiningData {
   generatedAt: string
   defaults: {
     m3PerHr: number
+    m3PerHrBySubtype?: Partial<Record<MiningSubtype, number>>
     reprocessYield: number
   }
   focusOutputs: Record<MiningSubtype, MiningFocusOutput[]>
@@ -960,7 +961,7 @@ export interface MiningRankedRow {
   mineralsIph: number
   focusIph: number | null
   focusTypeId: number | null
-  /** Volume shown in the table (matches active sort column). */
+  /** Hub liquidity volume (max of raw vs compressed when applicable). */
   volDay: number
   volDayRaw?: number
   volDayCompressed?: number

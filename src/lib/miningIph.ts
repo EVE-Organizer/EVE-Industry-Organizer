@@ -10,10 +10,17 @@ import type {
   TimeRange,
   TypeInfo,
 } from '@/types'
-import { buildWindowPriceMap } from '@/lib/ranking'
+import { buildWindowPriceMap, pickHistoryWindow } from '@/lib/ranking'
 
 /** Mid-tier barge reference rate for comparable ranks. */
 export const DEFAULT_MINING_M3_PER_HR = 40_000
+
+export const DEFAULT_MINING_M3_PER_HR_BY_SUBTYPE: Record<MiningSubtype, number> = {
+  ore: 40_000,
+  moon: 40_000,
+  ice: 40_000,
+  gas: 3_000,
+}
 
 /** Labeled default reprocess yield (NPC-ish / unskilled structure). */
 export const DEFAULT_REPROCESS_YIELD = 0.5
@@ -36,15 +43,20 @@ export function spaceLabel(space: MiningSpaceClass): string {
   return MINING_SPACES.find((s) => s.id === space)?.label ?? space
 }
 
-/** Hub avg traded volume for the active price window (same source as Blueprints). */
+export function resolveMiningM3PerHr(mining: MiningData, subtype: MiningSubtype): number {
+  return (
+    mining.defaults.m3PerHrBySubtype?.[subtype] ??
+    mining.defaults.m3PerHr ??
+    DEFAULT_MINING_M3_PER_HR_BY_SUBTYPE[subtype] ??
+    DEFAULT_MINING_M3_PER_HR
+  )
+}
+
 export function miningVolumeLabel(window: TimeRange): string {
   return `Vol (${window})`
 }
 
-/**
- * Hub liquidity for Vol column. Ores/ice mostly trade compressed at hubs —
- * raw Mercoxit volume is tiny while Compressed Mercoxit is the real market.
- */
+/** Prefer compressed hub volume when the raw market is thin. */
 export function miningLiquidityVolume(row: MiningRankedRow): number {
   const raw = row.volDayRaw ?? 0
   const compressed = row.volDayCompressed ?? 0
@@ -52,7 +64,25 @@ export function miningLiquidityVolume(row: MiningRankedRow): number {
   return raw
 }
 
-/** Drop rows that are not meaningfully traded at the hub for their subtype. */
+/** Volume column for the active sort key (does not mutate row.volDay). */
+export function miningDisplayVolume(
+  row: MiningRankedRow,
+  sortKey: MiningIphSortKey,
+): number {
+  switch (sortKey) {
+    case 'raw':
+    case 'vol':
+      return miningLiquidityVolume(row)
+    case 'compressed':
+      return row.volDayCompressed ?? row.volDay
+    case 'focus':
+      return row.volDayFocus ?? row.volDay
+    case 'minerals':
+    default:
+      return row.volDayMinerals ?? row.volDay
+  }
+}
+
 export function shouldIncludeMiningRow(
   row: MiningRankedRow,
   subtype: MiningSubtype,
@@ -63,7 +93,6 @@ export function shouldIncludeMiningRow(
       const hasRaw = (row.volDayRaw ?? 0) > 0 && row.rawIph > 0
       const hasComp =
         (row.volDayCompressed ?? 0) > 0 && (row.compressedIph ?? 0) > 0
-      // Require ore/ice itself to trade (raw or compressed), not mineral-only ghosts.
       return hasRaw || hasComp
     }
     case 'gas':
@@ -76,12 +105,10 @@ export function shouldIncludeMiningRow(
   }
 }
 
-/** Compressed / batch-compressed types belong in the Comp column, never as rows. */
 export function isCompressedMiningName(name: string): boolean {
   return /compress/i.test(name)
 }
 
-/** All type IDs needed for mining ISK/hr (raw, compressed, reprocess outputs). */
 export function collectMiningPriceTypeIds(
   mining: MiningData,
   subtype?: MiningSubtype,
@@ -106,9 +133,8 @@ function priceOf(
   buyPrices: Map<number, number> | null,
   priceMethod: 'sell_orders' | 'buy_orders',
 ): number {
-  if (priceMethod === 'buy_orders' && buyPrices) {
-    const buy = buyPrices.get(typeId) ?? 0
-    if (buy > 0) return buy
+  if (priceMethod === 'buy_orders') {
+    return buyPrices?.get(typeId) ?? 0
   }
   return windowPrices.get(typeId) ?? 0
 }
@@ -116,8 +142,20 @@ function priceOf(
 function avgVolumeOf(hubMarket: HubMarketData, typeId: number, window: TimeRange): number {
   const byWindow = hubMarket.products[String(typeId)]
   if (!byWindow) return 0
-  const summary = byWindow[window] ?? byWindow['1m'] ?? byWindow['1d'] ?? byWindow.all
+  const summary = pickHistoryWindow(byWindow, window, 'avgVolume')
   return summary?.avgVolume ?? 0
+}
+
+function topMineralTypeId(lines: MiningReprocessLine[]): number | null {
+  let bestId: number | null = null
+  let bestIph = 0
+  for (const line of lines) {
+    if (bestId == null || line.iskPerHr > bestIph) {
+      bestId = line.typeId
+      bestIph = line.iskPerHr
+    }
+  }
+  return bestId
 }
 
 function buildReprocessLines(
@@ -147,7 +185,6 @@ function buildReprocessLines(
     })
   }
 
-  // No sort here — ranking only needs totals; modal can sort if needed.
   return lines
 }
 
@@ -201,12 +238,7 @@ export function rankMiningItem(
     focusIph = line?.iskPerHr ?? 0
   }
 
-  // Precompute volumes for every sort key so sort never re-ranks economics.
-  const topMineralId = reprocessLines.reduce<number | null>((best, line) => {
-    if (best == null) return line.typeId
-    const bestLine = reprocessLines.find((l) => l.typeId === best)
-    return (line.iskPerHr > (bestLine?.iskPerHr ?? 0) ? line.typeId : best)
-  }, null)
+  const topMineralId = topMineralTypeId(reprocessLines)
 
   const volRaw = avgVolumeOf(hubMarket, item.typeId, window)
   const volCompressed =
@@ -222,7 +254,7 @@ export function rankMiningItem(
     return null
   }
 
-  return {
+  const rowBase = {
     item,
     rawPrice,
     compressedPrice,
@@ -234,12 +266,16 @@ export function rankMiningItem(
     mineralsIph,
     focusIph,
     focusTypeId: opts.focusTypeId,
-    volDay: volRaw,
     volDayRaw: volRaw,
     volDayCompressed: volCompressed,
     volDayMinerals: volMinerals,
     volDayFocus: volFocus,
     reprocessLines,
+  }
+
+  return {
+    ...rowBase,
+    volDay: miningLiquidityVolume({ ...rowBase, volDay: volRaw }),
   }
 }
 
@@ -248,7 +284,6 @@ export function sortMiningRows(
   sortKey: MiningIphSortKey,
   sortDesc = true,
 ): MiningRankedRow[] {
-  // When sorting by vol, use the volume that matches how the user last ranked economics.
   const value = (row: MiningRankedRow): number => {
     switch (sortKey) {
       case 'raw':
@@ -260,41 +295,21 @@ export function sortMiningRows(
       case 'focus':
         return row.focusIph ?? -1
       case 'vol':
-        return row.volDay
+        return miningDisplayVolume(row, sortKey)
       default:
         return row.mineralsIph
     }
   }
 
-  const volForDisplay = (row: MiningRankedRow): number => {
-    switch (sortKey) {
-      case 'raw':
-      case 'vol':
-        // Prefer compressed hub volume when present (ores trade compressed).
-        return miningLiquidityVolume(row)
-      case 'compressed':
-        return row.volDayCompressed ?? row.volDay
-      case 'focus':
-        return row.volDayFocus ?? row.volDay
-      case 'minerals':
-      default:
-        return row.volDayMinerals ?? row.volDay
-    }
-  }
-
-  const decorated = rows.map((row) => ({
-    ...row,
-    volDay: volForDisplay(row),
-  }))
-
-  decorated.sort((a, b) => {
-    const av = sortKey === 'vol' ? volForDisplay(a) : value(a)
-    const bv = sortKey === 'vol' ? volForDisplay(b) : value(b)
+  const sorted = [...rows]
+  sorted.sort((a, b) => {
+    const av = value(a)
+    const bv = value(b)
     if (av === bv) return a.item.name.localeCompare(b.item.name)
     return sortDesc ? bv - av : av - bv
   })
 
-  return decorated
+  return sorted
 }
 
 export interface RankMiningOptions {
@@ -309,7 +324,6 @@ export interface RankMiningOptions {
   sortDesc?: boolean
 }
 
-/** Build ranked rows once (prices computed a single time). Pass sortKey to also sort. */
 export function rankMiningIph(
   mining: MiningData,
   hubMarket: HubMarketData,
@@ -318,13 +332,13 @@ export function rankMiningIph(
   typeMap: Map<number, TypeInfo>,
   options: RankMiningOptions,
 ): MiningRankedRow[] {
-  const m3PerHr = options.m3PerHr ?? mining.defaults.m3PerHr ?? DEFAULT_MINING_M3_PER_HR
+  const m3PerHr =
+    options.m3PerHr ?? resolveMiningM3PerHr(mining, options.subtype)
   const reprocessYield =
     options.reprocessYield ?? mining.defaults.reprocessYield ?? DEFAULT_REPROCESS_YIELD
   const typeName = (typeId: number) => typeMap.get(typeId)?.name ?? `Type ${typeId}`
   const foundFilter = options.foundIn
 
-  // One window price map for the whole hub — not once per item.
   const windowPrices = buildWindowPriceMap(hubMarket, options.window, spotPrices)
 
   const rows: MiningRankedRow[] = []
