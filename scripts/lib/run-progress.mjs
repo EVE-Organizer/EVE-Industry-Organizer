@@ -12,18 +12,20 @@ function isCiLog() {
   return process.env.GITHUB_ACTIONS === 'true' || (process.env.CI === 'true' && !process.stdout.isTTY)
 }
 
-/** Use Listr task tree instead of plain log lines. */
+/** Animated Listr tree in a local TTY; plain log lines in CI and when MARKET_PROGRESS_PLAIN=1. */
 export function isInteractive() {
-  if (process.env.MARKET_PROGRESS_PLAIN === '1') return false
-  if (isProgressForced() || isCiLog()) return true
+  if (process.env.MARKET_PROGRESS_PLAIN === '1' || process.env.MARKET_PROGRESS_PLAIN === 'true') {
+    return false
+  }
+  if (isCiLog() && !isProgressForced()) return false
+  if (isProgressForced()) return true
   return Boolean(process.stdout.isTTY)
 }
 
-/** Listr renderer: animated tree locally, line-by-line task updates in CI logs. */
+/** Listr renderer: animated tree locally, SimpleRenderer for CI/plain logs. */
 export function getListrRenderer() {
   if (!isInteractive()) return SimpleRenderer
-  if (process.stdout.isTTY && !isCiLog()) return 'default'
-  return 'verbose'
+  return 'default'
 }
 
 /** @param {number} ms */
@@ -101,7 +103,11 @@ function createThrottledUpdater(minMs = 500, minPct = 0.01) {
  */
 export function updateTaskProgress(task, label, current, total, startedAt) {
   const eta = estimateEta(Date.now() - startedAt, current, total)
-  task.title = formatProgressTitle(label, current, total, { eta })
+  const title = formatProgressTitle(label, current, total, { eta })
+  task.title = title
+  if (!isInteractive()) {
+    console.log(`  ${title}`)
+  }
 }
 
 /**
@@ -118,7 +124,17 @@ export function startElapsedTicker(task, label, intervalMs = 1000) {
   }
   tick()
   const id = setInterval(tick, intervalMs)
-  return () => clearInterval(id)
+  let plainLogId = null
+  if (!isInteractive()) {
+    console.log(`  ${label}…`)
+    plainLogId = setInterval(() => {
+      console.log(`  ${label} · ${formatDuration(Date.now() - startedAt)} elapsed`)
+    }, 30_000)
+  }
+  return () => {
+    clearInterval(id)
+    if (plainLogId) clearInterval(plainLogId)
+  }
 }
 
 /** @param {string | null | undefined} hubIds */

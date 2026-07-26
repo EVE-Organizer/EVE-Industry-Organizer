@@ -17,7 +17,14 @@ import { buildBlueprintRecords } from './lib/blueprint-records.mjs'
 import { fetchCostIndices } from './lib/market-prices.mjs'
 import { buildRegionsFile } from './lib/regions.mjs'
 import { buildMarketData, loadExistingMarket, writeMarketJson } from './lib/market-data.mjs'
-import { createMarketBuildTask, runListr, updateTaskProgress, startElapsedTicker, formatDuration } from './lib/run-progress.mjs'
+import {
+  createMarketBuildTask,
+  runListr,
+  updateTaskProgress,
+  startElapsedTicker,
+  formatDuration,
+  isInteractive,
+} from './lib/run-progress.mjs'
 import { HUBS, resolveSellSystemId } from './lib/hubs.mjs'
 import { buildAllTypeRecords } from './lib/type-records.mjs'
 import { buildMapData, systemsFromSdeJsonl } from './lib/map-data.mjs'
@@ -269,7 +276,7 @@ async function main() {
           for (let i = 0; i < total; i++) {
             const name = REQUIRED_CSVS[i]
             updateTaskProgress(task, `Download SDE CSVs · ${name}`, i, total, startedAt)
-            csvData[name] = await fetchCsv(SDE_BASE, name, { silent: true })
+            csvData[name] = await fetchCsv(SDE_BASE, name, { silent: isInteractive() })
             updateTaskProgress(task, `Download SDE CSVs · ${name}`, i + 1, total, startedAt)
           }
           ctx.csvData = csvData

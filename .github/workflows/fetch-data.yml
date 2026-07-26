@@ -53,6 +53,8 @@ jobs:
   update-data:
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    env:
+      NODE_OPTIONS: '--unbuffered'
     steps:
       - uses: actions/checkout@v4
         with:

@@ -17,7 +17,7 @@
  *   MARKET_HISTORY_CONCURRENCY=10 parallel ESI history requests (default 10)
  *   MARKET_HISTORY_TTL_HOURS=24  skip refetch if cached within this window
  *   MARKET_PROGRESS_VERBOSE=1    log per-product history skip warnings
- *   MARKET_PROGRESS_PLAIN=1      force plain log output (no listr tree)
+ *   MARKET_PROGRESS_PLAIN=1      force plain log output (CI uses this automatically)
  *   MARKET_PROGRESS_FORCE=1      force listr task tree (e.g. local non-TTY)
  */
 import { readFileSync } from 'fs'
