@@ -132,7 +132,7 @@
     "name": "0-R5TS",
     "regionId": 10000003,
     "security": -0.218627,
-    "costIndex": 0.0322,
+    "costIndex": 0.0336,
     "reactionCostIndex": 0.0072
   },
   {
@@ -173,7 +173,7 @@
     "regionId": 10000005,
     "security": -0.217466,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.0602
+    "reactionCostIndex": 0.0601
   },
   {
     "systemId": 30003947,
@@ -220,7 +220,7 @@
     "name": "00GD-D",
     "regionId": 10000058,
     "security": -0.204488,
-    "costIndex": 0.0331,
+    "costIndex": 0.033,
     "reactionCostIndex": 0.0376
   },
   {
@@ -292,7 +292,7 @@
     "name": "05R-7A",
     "regionId": 10000003,
     "security": -0.401776,
-    "costIndex": 0.0402,
+    "costIndex": 0.0401,
     "reactionCostIndex": 0.0128
   },
   {
@@ -444,7 +444,7 @@
     "name": "0J3L-V",
     "regionId": 10000003,
     "security": -0.790707,
-    "costIndex": 0.0417,
+    "costIndex": 0.0416,
     "reactionCostIndex": 0.0014
   },
   {
@@ -572,7 +572,7 @@
     "name": "0R-F2F",
     "regionId": 10000003,
     "security": -0.312841,
-    "costIndex": 0.0277,
+    "costIndex": 0.0276,
     "reactionCostIndex": 0.073
   },
   {
@@ -589,7 +589,7 @@
     "regionId": 10000006,
     "security": -0.294006,
     "costIndex": 0.0213,
-    "reactionCostIndex": 0.0293
+    "reactionCostIndex": 0.0292
   },
   {
     "systemId": 30001458,
@@ -660,7 +660,7 @@
     "name": "0UBC-R",
     "regionId": 10000009,
     "security": -0.214357,
-    "costIndex": 0.0405,
+    "costIndex": 0.0404,
     "reactionCostIndex": 0.0397
   },
   {
@@ -916,8 +916,8 @@
     "name": "15U-JY",
     "regionId": 10000058,
     "security": -0.153461,
-    "costIndex": 0.0416,
-    "reactionCostIndex": 0.0538
+    "costIndex": 0.0417,
+    "reactionCostIndex": 0.0537
   },
   {
     "systemId": 30000861,
@@ -925,7 +925,7 @@
     "regionId": 10000010,
     "security": -0.322977,
     "costIndex": 0.0527,
-    "reactionCostIndex": 0.0587
+    "reactionCostIndex": 0.0586
   },
   {
     "systemId": 30000425,
@@ -989,7 +989,7 @@
     "regionId": 10000066,
     "security": -0.270929,
     "costIndex": 0.0365,
-    "reactionCostIndex": 0.034
+    "reactionCostIndex": 0.0339
   },
   {
     "systemId": 30002317,
@@ -1044,7 +1044,7 @@
     "name": "1DH-SX",
     "regionId": 10000060,
     "security": -0.015274,
-    "costIndex": 0.0541,
+    "costIndex": 0.054,
     "reactionCostIndex": 0.0533
   },
   {
@@ -1133,7 +1133,7 @@
     "regionId": 10000018,
     "security": -0.533442,
     "costIndex": 0.0711,
-    "reactionCostIndex": 0.089
+    "reactionCostIndex": 0.0889
   },
   {
     "systemId": 30004920,
@@ -1188,7 +1188,7 @@
     "name": "1M4-FK",
     "regionId": 10000050,
     "security": -0.032136,
-    "costIndex": 0.0146,
+    "costIndex": 0.0145,
     "reactionCostIndex": 0.0192
   },
   {
@@ -1204,7 +1204,7 @@
     "name": "1N-FJ8",
     "regionId": 10000003,
     "security": -0.223295,
-    "costIndex": 0.0484,
+    "costIndex": 0.0483,
     "reactionCostIndex": 0.0452
   },
   {
@@ -1309,7 +1309,7 @@
     "regionId": 10000008,
     "security": -0.428577,
     "costIndex": 0.0319,
-    "reactionCostIndex": 0.0443
+    "reactionCostIndex": 0.0442
   },
   {
     "systemId": 30000286,
@@ -1396,8 +1396,8 @@
     "name": "2-KF56",
     "regionId": 10000035,
     "security": -0.828059,
-    "costIndex": 0.0804,
-    "reactionCostIndex": 0.1151
+    "costIndex": 0.0834,
+    "reactionCostIndex": 0.115
   },
   {
     "systemId": 30000684,
@@ -1428,7 +1428,7 @@
     "name": "2-RSC7",
     "regionId": 10000056,
     "security": -0.842269,
-    "costIndex": 0.0079,
+    "costIndex": 0.0078,
     "reactionCostIndex": 0.0014
   },
   {
@@ -1516,7 +1516,7 @@
     "name": "27-HP0",
     "regionId": 10000009,
     "security": -0.64074,
-    "costIndex": 0.0484,
+    "costIndex": 0.0483,
     "reactionCostIndex": 0.0599
   },
   {
@@ -1668,7 +1668,7 @@
     "name": "2I-520",
     "regionId": 10000059,
     "security": -0.153685,
-    "costIndex": 0.0201,
+    "costIndex": 0.0203,
     "reactionCostIndex": 0.0014
   },
   {
@@ -1788,8 +1788,8 @@
     "name": "2R-CRW",
     "regionId": 10000035,
     "security": -0.877548,
-    "costIndex": 0.0817,
-    "reactionCostIndex": 0.1152
+    "costIndex": 0.0816,
+    "reactionCostIndex": 0.1151
   },
   {
     "systemId": 30003182,
@@ -1860,7 +1860,7 @@
     "name": "2X-PQG",
     "regionId": 10000041,
     "security": -0.062467,
-    "costIndex": 0.0014,
+    "costIndex": 0.0017,
     "reactionCostIndex": 0.0014
   },
   {
@@ -1932,8 +1932,8 @@
     "name": "3-FKCZ",
     "regionId": 10000050,
     "security": -0.283531,
-    "costIndex": 0.0628,
-    "reactionCostIndex": 0.0547
+    "costIndex": 0.0627,
+    "reactionCostIndex": 0.0546
   },
   {
     "systemId": 30000341,
@@ -2085,7 +2085,7 @@
     "regionId": 10000055,
     "security": -0.448538,
     "costIndex": 0.0073,
-    "reactionCostIndex": 0.0091
+    "reactionCostIndex": 0.009
   },
   {
     "systemId": 30004722,
@@ -2228,7 +2228,7 @@
     "name": "3A1P-N",
     "regionId": 10000015,
     "security": -0.878544,
-    "costIndex": 0.0226,
+    "costIndex": 0.0225,
     "reactionCostIndex": 0.0374
   },
   {
@@ -2236,7 +2236,7 @@
     "name": "3AE-CP",
     "regionId": 10000009,
     "security": -0.674231,
-    "costIndex": 0.0248,
+    "costIndex": 0.0251,
     "reactionCostIndex": 0.0443
   },
   {
@@ -2324,8 +2324,8 @@
     "name": "3G-LHB",
     "regionId": 10000010,
     "security": -0.208766,
-    "costIndex": 0.0665,
-    "reactionCostIndex": 0.0909
+    "costIndex": 0.0664,
+    "reactionCostIndex": 0.0908
   },
   {
     "systemId": 30001200,
@@ -2468,7 +2468,7 @@
     "name": "3Q-VZA",
     "regionId": 10000006,
     "security": -0.249902,
-    "costIndex": 0.0278,
+    "costIndex": 0.0277,
     "reactionCostIndex": 0.0014
   },
   {
@@ -2549,7 +2549,7 @@
     "regionId": 10000058,
     "security": -0.107298,
     "costIndex": 0.0288,
-    "reactionCostIndex": 0.046
+    "reactionCostIndex": 0.0459
   },
   {
     "systemId": 30004628,
@@ -2676,8 +2676,8 @@
     "name": "4-HWWF",
     "regionId": 10000003,
     "security": -0.473026,
-    "costIndex": 0.0792,
-    "reactionCostIndex": 0.1089
+    "costIndex": 0.0794,
+    "reactionCostIndex": 0.1097
   },
   {
     "systemId": 30000431,
@@ -2853,7 +2853,7 @@
     "regionId": 10000003,
     "security": -0.261392,
     "costIndex": 0.0316,
-    "reactionCostIndex": 0.0264
+    "reactionCostIndex": 0.0263
   },
   {
     "systemId": 30004949,
@@ -2956,8 +2956,8 @@
     "name": "4CJ-AC",
     "regionId": 10000009,
     "security": -0.204916,
-    "costIndex": 0.0394,
-    "reactionCostIndex": 0.0397
+    "costIndex": 0.0393,
+    "reactionCostIndex": 0.0396
   },
   {
     "systemId": 30002469,
@@ -2988,8 +2988,8 @@
     "name": "4DTQ-K",
     "regionId": 10000055,
     "security": -0.434485,
-    "costIndex": 0.0254,
-    "reactionCostIndex": 0.0424
+    "costIndex": 0.0253,
+    "reactionCostIndex": 0.0423
   },
   {
     "systemId": 30002154,
@@ -2997,7 +2997,7 @@
     "regionId": 10000025,
     "security": -0.586491,
     "costIndex": 0.031,
-    "reactionCostIndex": 0.0361
+    "reactionCostIndex": 0.036
   },
   {
     "systemId": 30000701,
@@ -3044,7 +3044,7 @@
     "name": "4GQ-XQ",
     "regionId": 10000022,
     "security": -0.029418,
-    "costIndex": 0.0155,
+    "costIndex": 0.0156,
     "reactionCostIndex": 0.0014
   },
   {
@@ -3060,7 +3060,7 @@
     "name": "4GYV-Q",
     "regionId": 10000003,
     "security": -0.536556,
-    "costIndex": 0.0281,
+    "costIndex": 0.028,
     "reactionCostIndex": 0.0266
   },
   {
@@ -3172,7 +3172,7 @@
     "name": "4M-QXK",
     "regionId": 10000009,
     "security": -0.148759,
-    "costIndex": 0.0234,
+    "costIndex": 0.0236,
     "reactionCostIndex": 0.0394
   },
   {
@@ -3181,7 +3181,7 @@
     "regionId": 10000035,
     "security": -0.51747,
     "costIndex": 0.0173,
-    "reactionCostIndex": 0.0138
+    "reactionCostIndex": 0.0137
   },
   {
     "systemId": 30001251,
@@ -3197,7 +3197,7 @@
     "regionId": 10000005,
     "security": -0.333607,
     "costIndex": 0.0087,
-    "reactionCostIndex": 0.0746
+    "reactionCostIndex": 0.0745
   },
   {
     "systemId": 30002456,
@@ -3220,15 +3220,15 @@
     "name": "4O-ZRI",
     "regionId": 10000021,
     "security": -0.753538,
-    "costIndex": 0.0254,
-    "reactionCostIndex": 0.0261
+    "costIndex": 0.026,
+    "reactionCostIndex": 0.026
   },
   {
     "systemId": 30002585,
     "name": "4OIV-X",
     "regionId": 10000031,
     "security": -0.258484,
-    "costIndex": 0.0354,
+    "costIndex": 0.0353,
     "reactionCostIndex": 0.0401
   },
   {
@@ -3420,15 +3420,15 @@
     "name": "5-CQDA",
     "regionId": 10000060,
     "security": -0.491403,
-    "costIndex": 0.0216,
-    "reactionCostIndex": 0.0132
+    "costIndex": 0.0215,
+    "reactionCostIndex": 0.0131
   },
   {
     "systemId": 30004670,
     "name": "5-CSE3",
     "regionId": 10000059,
     "security": -0.200503,
-    "costIndex": 0.0422,
+    "costIndex": 0.0424,
     "reactionCostIndex": 0.0629
   },
   {
@@ -3492,7 +3492,7 @@
     "name": "5-MQQ7",
     "regionId": 10000008,
     "security": -0.374878,
-    "costIndex": 0.0407,
+    "costIndex": 0.0406,
     "reactionCostIndex": 0.0669
   },
   {
@@ -3677,7 +3677,7 @@
     "regionId": 10000059,
     "security": -0.19434,
     "costIndex": 0.0204,
-    "reactionCostIndex": 0.0405
+    "reactionCostIndex": 0.0404
   },
   {
     "systemId": 30001104,
@@ -3709,7 +3709,7 @@
     "regionId": 10000006,
     "security": -0.373028,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.109
+    "reactionCostIndex": 0.1089
   },
   {
     "systemId": 30000554,
@@ -4108,7 +4108,7 @@
     "name": "6-GRN7",
     "regionId": 10000021,
     "security": -0.010926,
-    "costIndex": 0.0024,
+    "costIndex": 0.0023,
     "reactionCostIndex": 0.0014
   },
   {
@@ -4204,7 +4204,7 @@
     "name": "6-TYRX",
     "regionId": 10000039,
     "security": -0.01296,
-    "costIndex": 0.0113,
+    "costIndex": 0.0112,
     "reactionCostIndex": 0.0099
   },
   {
@@ -4229,7 +4229,7 @@
     "regionId": 10000050,
     "security": -0.349892,
     "costIndex": 0.0266,
-    "reactionCostIndex": 0.0614
+    "reactionCostIndex": 0.0613
   },
   {
     "systemId": 30003315,
@@ -4301,7 +4301,7 @@
     "regionId": 10000009,
     "security": -0.256202,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.034
+    "reactionCostIndex": 0.0339
   },
   {
     "systemId": 30002593,
@@ -4309,7 +4309,7 @@
     "regionId": 10000031,
     "security": -0.213378,
     "costIndex": 0.0175,
-    "reactionCostIndex": 0.0132
+    "reactionCostIndex": 0.0131
   },
   {
     "systemId": 30001624,
@@ -4397,7 +4397,7 @@
     "regionId": 10000058,
     "security": -0.236335,
     "costIndex": 0.0205,
-    "reactionCostIndex": 0.0327
+    "reactionCostIndex": 0.0326
   },
   {
     "systemId": 30000402,
@@ -4532,7 +4532,7 @@
     "name": "6SB-BN",
     "regionId": 10000039,
     "security": -0.48933,
-    "costIndex": 0.0302,
+    "costIndex": 0.0301,
     "reactionCostIndex": 0.0438
   },
   {
@@ -4588,7 +4588,7 @@
     "name": "6VDT-H",
     "regionId": 10000058,
     "security": -0.219455,
-    "costIndex": 0.0415,
+    "costIndex": 0.0418,
     "reactionCostIndex": 0.0174
   },
   {
@@ -4620,7 +4620,7 @@
     "name": "6WW-28",
     "regionId": 10000003,
     "security": -0.226656,
-    "costIndex": 0.012,
+    "costIndex": 0.0119,
     "reactionCostIndex": 0.0376
   },
   {
@@ -4660,8 +4660,8 @@
     "name": "6Z-CKS",
     "regionId": 10000060,
     "security": -0.568951,
-    "costIndex": 0.0324,
-    "reactionCostIndex": 0.0313
+    "costIndex": 0.0326,
+    "reactionCostIndex": 0.0314
   },
   {
     "systemId": 30004057,
@@ -4748,7 +4748,7 @@
     "name": "7-K5EL",
     "regionId": 10000003,
     "security": -0.150502,
-    "costIndex": 0.0518,
+    "costIndex": 0.0517,
     "reactionCostIndex": 0.0522
   },
   {
@@ -4908,7 +4908,7 @@
     "name": "78-0R6",
     "regionId": 10000009,
     "security": -0.256904,
-    "costIndex": 0.0509,
+    "costIndex": 0.0508,
     "reactionCostIndex": 0.061
   },
   {
@@ -4996,7 +4996,7 @@
     "name": "7F-2FB",
     "regionId": 10000021,
     "security": -0.916113,
-    "costIndex": 0.0119,
+    "costIndex": 0.0118,
     "reactionCostIndex": 0.0014
   },
   {
@@ -5004,7 +5004,7 @@
     "name": "7G-H7D",
     "regionId": 10000003,
     "security": -0.357808,
-    "costIndex": 0.0185,
+    "costIndex": 0.0184,
     "reactionCostIndex": 0.0362
   },
   {
@@ -5084,7 +5084,7 @@
     "name": "7LHB-Z",
     "regionId": 10000014,
     "security": -0.607211,
-    "costIndex": 0.0278,
+    "costIndex": 0.0279,
     "reactionCostIndex": 0.0432
   },
   {
@@ -5348,7 +5348,7 @@
     "name": "8-TFDX",
     "regionId": 10000003,
     "security": -0.190766,
-    "costIndex": 0.0144,
+    "costIndex": 0.0143,
     "reactionCostIndex": 0.0284
   },
   {
@@ -5452,7 +5452,7 @@
     "name": "88A-RA",
     "regionId": 10000009,
     "security": -0.28641,
-    "costIndex": 0.0484,
+    "costIndex": 0.0483,
     "reactionCostIndex": 0.0434
   },
   {
@@ -5549,7 +5549,7 @@
     "regionId": 10000009,
     "security": -0.279753,
     "costIndex": 0.0308,
-    "reactionCostIndex": 0.0396
+    "reactionCostIndex": 0.0395
   },
   {
     "systemId": 30004574,
@@ -5988,7 +5988,7 @@
     "name": "9-VO0Q",
     "regionId": 10000058,
     "security": -0.121028,
-    "costIndex": 0.0132,
+    "costIndex": 0.0131,
     "reactionCostIndex": 0.0128
   },
   {
@@ -6180,7 +6180,7 @@
     "name": "9D6O-M",
     "regionId": 10000058,
     "security": -0.24312,
-    "costIndex": 0.0137,
+    "costIndex": 0.0136,
     "reactionCostIndex": 0.0318
   },
   {
@@ -6188,15 +6188,15 @@
     "name": "9DQW-W",
     "regionId": 10000058,
     "security": -0.795331,
-    "costIndex": 0.0319,
-    "reactionCostIndex": 0.0514
+    "costIndex": 0.0318,
+    "reactionCostIndex": 0.0513
   },
   {
     "systemId": 30003954,
     "name": "9ES-SI",
     "regionId": 10000050,
     "security": -0.124598,
-    "costIndex": 0.0157,
+    "costIndex": 0.0156,
     "reactionCostIndex": 0.0014
   },
   {
@@ -6236,7 +6236,7 @@
     "name": "9GI-FB",
     "regionId": 10000010,
     "security": -0.264238,
-    "costIndex": 0.0434,
+    "costIndex": 0.0433,
     "reactionCostIndex": 0.0325
   },
   {
@@ -6357,7 +6357,7 @@
     "regionId": 10000058,
     "security": -0.121253,
     "costIndex": 0.0247,
-    "reactionCostIndex": 0.0325
+    "reactionCostIndex": 0.0324
   },
   {
     "systemId": 30001886,
@@ -6372,8 +6372,8 @@
     "name": "9OLQ-6",
     "regionId": 10000009,
     "security": -0.785978,
-    "costIndex": 0.0489,
-    "reactionCostIndex": 0.0368
+    "costIndex": 0.0488,
+    "reactionCostIndex": 0.0367
   },
   {
     "systemId": 30000247,
@@ -6453,7 +6453,7 @@
     "regionId": 10000010,
     "security": -0.096309,
     "costIndex": 0.0311,
-    "reactionCostIndex": 0.0265
+    "reactionCostIndex": 0.0264
   },
   {
     "systemId": 30000969,
@@ -6588,7 +6588,7 @@
     "name": "A-7XFN",
     "regionId": 10000005,
     "security": -0.232001,
-    "costIndex": 0.0079,
+    "costIndex": 0.0086,
     "reactionCostIndex": 0.0372
   },
   {
@@ -6636,7 +6636,7 @@
     "name": "A-CJGE",
     "regionId": 10000039,
     "security": -0.183121,
-    "costIndex": 0.0203,
+    "costIndex": 0.0202,
     "reactionCostIndex": 0.0463
   },
   {
@@ -6644,7 +6644,7 @@
     "name": "A-DDGY",
     "regionId": 10000010,
     "security": -0.206354,
-    "costIndex": 0.0201,
+    "costIndex": 0.0205,
     "reactionCostIndex": 0.0258
   },
   {
@@ -6684,7 +6684,7 @@
     "name": "A-HZYL",
     "regionId": 10000058,
     "security": -0.124333,
-    "costIndex": 0.0478,
+    "costIndex": 0.0477,
     "reactionCostIndex": 0.0548
   },
   {
@@ -6725,7 +6725,7 @@
     "regionId": 10000009,
     "security": -0.085189,
     "costIndex": 0.0241,
-    "reactionCostIndex": 0.046
+    "reactionCostIndex": 0.0459
   },
   {
     "systemId": 30001210,
@@ -6964,7 +6964,7 @@
     "name": "AAM-1A",
     "regionId": 10000012,
     "security": -0.019144,
-    "costIndex": 0.0247,
+    "costIndex": 0.0246,
     "reactionCostIndex": 0.0131
   },
   {
@@ -7028,7 +7028,7 @@
     "name": "ABE-M2",
     "regionId": 10000061,
     "security": -0.356306,
-    "costIndex": 0.0625,
+    "costIndex": 0.0624,
     "reactionCostIndex": 0.0469
   },
   {
@@ -7076,7 +7076,7 @@
     "name": "Abudban",
     "regionId": 10000030,
     "security": 0.732448,
-    "costIndex": 0.0481,
+    "costIndex": 0.0483,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7100,7 +7100,7 @@
     "name": "AC2E-3",
     "regionId": 10000058,
     "security": -0.307185,
-    "costIndex": 0.0525,
+    "costIndex": 0.0524,
     "reactionCostIndex": 0.0631
   },
   {
@@ -7116,7 +7116,7 @@
     "name": "Aclan",
     "regionId": 10000037,
     "security": 0.506709,
-    "costIndex": 0.0194,
+    "costIndex": 0.0193,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7148,7 +7148,7 @@
     "name": "Adacyne",
     "regionId": 10000048,
     "security": 0.548774,
-    "costIndex": 0.016,
+    "costIndex": 0.0159,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7180,7 +7180,7 @@
     "name": "Adaz",
     "regionId": 10001004,
     "security": 1,
-    "costIndex": 0.0087,
+    "costIndex": 0.0086,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7204,7 +7204,7 @@
     "name": "Adia",
     "regionId": 10000043,
     "security": 0.666568,
-    "costIndex": 0.0219,
+    "costIndex": 0.0218,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7220,15 +7220,15 @@
     "name": "Adirain",
     "regionId": 10000064,
     "security": 0.423686,
-    "costIndex": 0.0096,
-    "reactionCostIndex": 0.0374
+    "costIndex": 0.0095,
+    "reactionCostIndex": 0.0373
   },
   {
     "systemId": 30002704,
     "name": "Adrallezoen",
     "regionId": 10000032,
     "security": 0.478932,
-    "costIndex": 0.0177,
+    "costIndex": 0.0176,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7268,7 +7268,7 @@
     "name": "Aeddin",
     "regionId": 10000028,
     "security": 0.569668,
-    "costIndex": 0.0117,
+    "costIndex": 0.0116,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7276,7 +7276,7 @@
     "name": "Aeditide",
     "regionId": 10000028,
     "security": 0.214491,
-    "costIndex": 0.0067,
+    "costIndex": 0.0066,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7349,7 +7349,7 @@
     "regionId": 10000054,
     "security": 0.316207,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.0378
+    "reactionCostIndex": 0.0377
   },
   {
     "systemId": 30001539,
@@ -7364,7 +7364,7 @@
     "name": "Agal",
     "regionId": 10000067,
     "security": 0.53587,
-    "costIndex": 0.0135,
+    "costIndex": 0.0134,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7381,7 +7381,7 @@
     "regionId": 10000009,
     "security": -0.14032,
     "costIndex": 0.0249,
-    "reactionCostIndex": 0.0559
+    "reactionCostIndex": 0.0558
   },
   {
     "systemId": 30002933,
@@ -7436,7 +7436,7 @@
     "name": "Agtver",
     "regionId": 10000042,
     "security": 0.881108,
-    "costIndex": 0.0096,
+    "costIndex": 0.0095,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7444,7 +7444,7 @@
     "name": "AH-B84",
     "regionId": 10000055,
     "security": -0.527871,
-    "costIndex": 0.0504,
+    "costIndex": 0.0503,
     "reactionCostIndex": 0.0429
   },
   {
@@ -7460,7 +7460,7 @@
     "name": "Ahala",
     "regionId": 10000043,
     "security": 0.544906,
-    "costIndex": 0.0068,
+    "costIndex": 0.0069,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7468,7 +7468,7 @@
     "name": "Aharalel",
     "regionId": 10000052,
     "security": 0.567123,
-    "costIndex": 0.0251,
+    "costIndex": 0.025,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7476,7 +7476,7 @@
     "name": "Ahbazon",
     "regionId": 10000067,
     "security": 0.42052,
-    "costIndex": 0.0804,
+    "costIndex": 0.0803,
     "reactionCostIndex": 0.069
   },
   {
@@ -7532,7 +7532,7 @@
     "name": "Ahtulaima",
     "regionId": 10000002,
     "security": 0.612689,
-    "costIndex": 0.0218,
+    "costIndex": 0.022,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7540,7 +7540,7 @@
     "name": "Ahynada",
     "regionId": 10000033,
     "security": 0.803548,
-    "costIndex": 0.0247,
+    "costIndex": 0.0246,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7572,7 +7572,7 @@
     "name": "Aidart",
     "regionId": 10000068,
     "security": 0.612358,
-    "costIndex": 0.026,
+    "costIndex": 0.0261,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7580,7 +7580,7 @@
     "name": "Aikantoh",
     "regionId": 10000016,
     "security": 0.645797,
-    "costIndex": 0.0177,
+    "costIndex": 0.0176,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7620,7 +7620,7 @@
     "name": "Airaken",
     "regionId": 10000002,
     "security": 0.503992,
-    "costIndex": 0.0179,
+    "costIndex": 0.0182,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7628,7 +7628,7 @@
     "name": "Airkio",
     "regionId": 10000016,
     "security": 0.851633,
-    "costIndex": 0.045,
+    "costIndex": 0.0454,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7652,7 +7652,7 @@
     "name": "Aivoli",
     "regionId": 10000016,
     "security": 0.577975,
-    "costIndex": 0.0086,
+    "costIndex": 0.0085,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7708,7 +7708,7 @@
     "name": "AK-QBU",
     "regionId": 10000041,
     "security": -0.307686,
-    "costIndex": 0.0112,
+    "costIndex": 0.0111,
     "reactionCostIndex": 0.0055
   },
   {
@@ -7732,7 +7732,7 @@
     "name": "Akhmoh",
     "regionId": 10000052,
     "security": 0.815058,
-    "costIndex": 0.0423,
+    "costIndex": 0.0422,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7741,7 +7741,7 @@
     "regionId": 10000001,
     "security": 0.358477,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.022
+    "reactionCostIndex": 0.0222
   },
   {
     "systemId": 30002197,
@@ -7788,7 +7788,7 @@
     "name": "Akkilen",
     "regionId": 10000002,
     "security": 0.689046,
-    "costIndex": 0.0333,
+    "costIndex": 0.0334,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7804,7 +7804,7 @@
     "name": "Akonoinen",
     "regionId": 10000016,
     "security": 0.49451,
-    "costIndex": 0.0429,
+    "costIndex": 0.0431,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7869,7 +7869,7 @@
     "regionId": 10000067,
     "security": 0.443534,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.0727
+    "reactionCostIndex": 0.0726
   },
   {
     "systemId": 30003854,
@@ -7948,7 +7948,7 @@
     "name": "Alenia",
     "regionId": 10000068,
     "security": 0.923913,
-    "costIndex": 0.0337,
+    "costIndex": 0.0336,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7956,7 +7956,7 @@
     "name": "Alentene",
     "regionId": 10000068,
     "security": 0.866783,
-    "costIndex": 0.0328,
+    "costIndex": 0.0329,
     "reactionCostIndex": 0.0014
   },
   {
@@ -7996,7 +7996,7 @@
     "name": "Alikara",
     "regionId": 10000033,
     "security": 0.711293,
-    "costIndex": 0.0369,
+    "costIndex": 0.037,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8036,7 +8036,7 @@
     "name": "Allebin",
     "regionId": 10000064,
     "security": 0.460556,
-    "costIndex": 0.0083,
+    "costIndex": 0.0084,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8124,8 +8124,8 @@
     "name": "Amamake",
     "regionId": 10000030,
     "security": 0.438761,
-    "costIndex": 0.1286,
-    "reactionCostIndex": 0.1267
+    "costIndex": 0.1285,
+    "reactionCostIndex": 0.1266
   },
   {
     "systemId": 30004983,
@@ -8173,7 +8173,7 @@
     "name": "Amdonen",
     "regionId": 10000065,
     "security": 0.640655,
-    "costIndex": 0.0809,
+    "costIndex": 0.0808,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8181,7 +8181,7 @@
     "name": "Ameinaka",
     "regionId": 10000030,
     "security": 0.949,
-    "costIndex": 0.0102,
+    "costIndex": 0.0101,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8197,7 +8197,7 @@
     "name": "Ammold",
     "regionId": 10000030,
     "security": 0.949,
-    "costIndex": 0.0162,
+    "costIndex": 0.0161,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8253,7 +8253,7 @@
     "name": "Amygnon",
     "regionId": 10000068,
     "security": 0.637569,
-    "costIndex": 0.0277,
+    "costIndex": 0.0279,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8405,8 +8405,8 @@
     "name": "Anka",
     "regionId": 10000038,
     "security": 0.4146,
-    "costIndex": 0.0455,
-    "reactionCostIndex": 0.0856
+    "costIndex": 0.0454,
+    "reactionCostIndex": 0.0855
   },
   {
     "systemId": 30025042,
@@ -8493,7 +8493,7 @@
     "name": "Ansila",
     "regionId": 10000002,
     "security": 0.912017,
-    "costIndex": 0.0335,
+    "costIndex": 0.0334,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8581,7 +8581,7 @@
     "name": "Aokannitoh",
     "regionId": 10000002,
     "security": 0.949,
-    "costIndex": 0.0249,
+    "costIndex": 0.0248,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8613,7 +8613,7 @@
     "name": "Aphend",
     "regionId": 10000052,
     "security": 0.629298,
-    "costIndex": 0.018,
+    "costIndex": 0.0183,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8629,7 +8629,7 @@
     "name": "APM-6K",
     "regionId": 10000058,
     "security": -0.058686,
-    "costIndex": 0.0135,
+    "costIndex": 0.0134,
     "reactionCostIndex": 0.0174
   },
   {
@@ -8637,7 +8637,7 @@
     "name": "Aporulie",
     "regionId": 10000064,
     "security": 0.78874,
-    "costIndex": 0.0214,
+    "costIndex": 0.0213,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8677,7 +8677,7 @@
     "name": "Aramachi",
     "regionId": 10000033,
     "security": 0.489789,
-    "costIndex": 0.0215,
+    "costIndex": 0.0214,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8693,7 +8693,7 @@
     "name": "Arant",
     "regionId": 10000064,
     "security": 0.604753,
-    "costIndex": 0.0277,
+    "costIndex": 0.0276,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8725,7 +8725,7 @@
     "name": "ARBX-9",
     "regionId": 10000059,
     "security": -0.18409,
-    "costIndex": 0.0143,
+    "costIndex": 0.0142,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8805,7 +8805,7 @@
     "name": "Arera",
     "regionId": 10000043,
     "security": 0.646061,
-    "costIndex": 0.013,
+    "costIndex": 0.0133,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8853,7 +8853,7 @@
     "name": "Arlek",
     "regionId": 10000042,
     "security": 0.949,
-    "costIndex": 0.0159,
+    "costIndex": 0.0158,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8893,7 +8893,7 @@
     "name": "Arnola",
     "regionId": 10000001,
     "security": 0.462835,
-    "costIndex": 0.0231,
+    "costIndex": 0.0232,
     "reactionCostIndex": 0.0014
   },
   {
@@ -8925,7 +8925,7 @@
     "name": "Arraron",
     "regionId": 10000068,
     "security": 0.471987,
-    "costIndex": 0.011,
+    "costIndex": 0.0109,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9037,7 +9037,7 @@
     "name": "Asakai",
     "regionId": 10000069,
     "security": 0.256374,
-    "costIndex": 0.0123,
+    "costIndex": 0.0124,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9077,7 +9077,7 @@
     "name": "Asgeir",
     "regionId": 10000042,
     "security": 0.735822,
-    "costIndex": 0.0101,
+    "costIndex": 0.01,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9101,7 +9101,7 @@
     "name": "Ashab",
     "regionId": 10000043,
     "security": 0.90946,
-    "costIndex": 0.044,
+    "costIndex": 0.0439,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9173,7 +9173,7 @@
     "name": "Asrios",
     "regionId": 10000052,
     "security": 0.83976,
-    "costIndex": 0.0228,
+    "costIndex": 0.0227,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9318,7 +9318,7 @@
     "regionId": 10000064,
     "security": 0.404096,
     "costIndex": 0.0246,
-    "reactionCostIndex": 0.0114
+    "reactionCostIndex": 0.0113
   },
   {
     "systemId": 30003455,
@@ -9349,7 +9349,7 @@
     "name": "Atreen",
     "regionId": 10000067,
     "security": 0.458912,
-    "costIndex": 0.0143,
+    "costIndex": 0.0144,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9357,7 +9357,7 @@
     "name": "Attyn",
     "regionId": 10000064,
     "security": 0.669496,
-    "costIndex": 0.0103,
+    "costIndex": 0.0102,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9461,7 +9461,7 @@
     "name": "Auner",
     "regionId": 10000042,
     "security": 0.407542,
-    "costIndex": 0.1031,
+    "costIndex": 0.103,
     "reactionCostIndex": 0.1573
   },
   {
@@ -9517,7 +9517,7 @@
     "name": "Ausmaert",
     "regionId": 10000048,
     "security": 0.074843,
-    "costIndex": 0.0061,
+    "costIndex": 0.006,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9549,7 +9549,7 @@
     "name": "Auvergne",
     "regionId": 10000032,
     "security": 0.892461,
-    "costIndex": 0.0187,
+    "costIndex": 0.0186,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9693,7 +9693,7 @@
     "name": "Aydoteaux",
     "regionId": 10000037,
     "security": 0.680553,
-    "costIndex": 0.0343,
+    "costIndex": 0.0342,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9757,7 +9757,7 @@
     "name": "Azer",
     "regionId": 10000037,
     "security": 0.65707,
-    "costIndex": 0.0396,
+    "costIndex": 0.0397,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9845,7 +9845,7 @@
     "name": "B-5UFY",
     "regionId": 10000005,
     "security": -0.401422,
-    "costIndex": 0.0194,
+    "costIndex": 0.0193,
     "reactionCostIndex": 0.0014
   },
   {
@@ -9925,7 +9925,7 @@
     "name": "B-E3KQ",
     "regionId": 10000003,
     "security": -0.25547,
-    "costIndex": 0.013,
+    "costIndex": 0.0129,
     "reactionCostIndex": 0.0257
   },
   {
@@ -10046,7 +10046,7 @@
     "regionId": 10000047,
     "security": -0.200593,
     "costIndex": 0.0352,
-    "reactionCostIndex": 0.0528
+    "reactionCostIndex": 0.0527
   },
   {
     "systemId": 30000610,
@@ -10085,7 +10085,7 @@
     "name": "B17O-R",
     "regionId": 10000058,
     "security": -0.120439,
-    "costIndex": 0.0428,
+    "costIndex": 0.043,
     "reactionCostIndex": 0.0652
   },
   {
@@ -10093,8 +10093,8 @@
     "name": "B1D-KU",
     "regionId": 10000039,
     "security": -0.385899,
-    "costIndex": 0.0207,
-    "reactionCostIndex": 0.0339
+    "costIndex": 0.0209,
+    "reactionCostIndex": 0.034
   },
   {
     "systemId": 30002850,
@@ -10157,8 +10157,8 @@
     "name": "B6-XE8",
     "regionId": 10000018,
     "security": -0.724929,
-    "costIndex": 0.0726,
-    "reactionCostIndex": 0.0732
+    "costIndex": 0.0725,
+    "reactionCostIndex": 0.0734
   },
   {
     "systemId": 30002012,
@@ -10189,7 +10189,7 @@
     "name": "B9E-H6",
     "regionId": 10000025,
     "security": -0.365429,
-    "costIndex": 0.036,
+    "costIndex": 0.0359,
     "reactionCostIndex": 0.0417
   },
   {
@@ -10214,7 +10214,7 @@
     "regionId": 10000044,
     "security": 0.178823,
     "costIndex": 0.0175,
-    "reactionCostIndex": 0.0225
+    "reactionCostIndex": 0.0224
   },
   {
     "systemId": 30003888,
@@ -10237,7 +10237,7 @@
     "name": "Bahromab",
     "regionId": 10000043,
     "security": 0.569426,
-    "costIndex": 0.0461,
+    "costIndex": 0.0462,
     "reactionCostIndex": 0.0014
   },
   {
@@ -10285,7 +10285,7 @@
     "name": "Bamiette",
     "regionId": 10000032,
     "security": 0.498773,
-    "costIndex": 0.027,
+    "costIndex": 0.0269,
     "reactionCostIndex": 0.0014
   },
   {
@@ -10341,7 +10341,7 @@
     "name": "Barkrik",
     "regionId": 10000042,
     "security": 0.56238,
-    "costIndex": 0.0192,
+    "costIndex": 0.0191,
     "reactionCostIndex": 0.0014
   },
   {
@@ -10373,7 +10373,7 @@
     "name": "Basgerin",
     "regionId": 10000032,
     "security": 0.378678,
-    "costIndex": 0.0527,
+    "costIndex": 0.0526,
     "reactionCostIndex": 0.0765
   },
   {
@@ -10653,7 +10653,7 @@
     "name": "BKG-Q2",
     "regionId": 10000055,
     "security": -0.673283,
-    "costIndex": 0.0598,
+    "costIndex": 0.0597,
     "reactionCostIndex": 0.0612
   },
   {
@@ -10685,7 +10685,7 @@
     "name": "BLMX-B",
     "regionId": 10000007,
     "security": -0.032301,
-    "costIndex": 0.0418,
+    "costIndex": 0.0417,
     "reactionCostIndex": 0.0014
   },
   {
@@ -10765,7 +10765,7 @@
     "name": "Bongveber",
     "regionId": 10000042,
     "security": 0.911898,
-    "costIndex": 0.015,
+    "costIndex": 0.0149,
     "reactionCostIndex": 0.0014
   },
   {
@@ -10781,7 +10781,7 @@
     "name": "Bordan",
     "regionId": 10000052,
     "security": 0.411153,
-    "costIndex": 0.002,
+    "costIndex": 0.0019,
     "reactionCostIndex": 0.0014
   },
   {
@@ -10805,7 +10805,7 @@
     "name": "Botane",
     "regionId": 10000032,
     "security": 0.87544,
-    "costIndex": 0.0702,
+    "costIndex": 0.0701,
     "reactionCostIndex": 0.0014
   },
   {
@@ -10829,7 +10829,7 @@
     "name": "Boystin",
     "regionId": 10000044,
     "security": 0.523019,
-    "costIndex": 0.0439,
+    "costIndex": 0.044,
     "reactionCostIndex": 0.0014
   },
   {
@@ -10893,7 +10893,7 @@
     "name": "Brellystier",
     "regionId": 10000048,
     "security": 0.503716,
-    "costIndex": 0.0091,
+    "costIndex": 0.009,
     "reactionCostIndex": 0.0014
   },
   {
@@ -10957,7 +10957,7 @@
     "name": "Buftiar",
     "regionId": 10000001,
     "security": 0.708741,
-    "costIndex": 0.01,
+    "costIndex": 0.0099,
     "reactionCostIndex": 0.0014
   },
   {
@@ -11093,7 +11093,7 @@
     "name": "BYXF-Q",
     "regionId": 10000058,
     "security": -0.241359,
-    "costIndex": 0.0408,
+    "costIndex": 0.0407,
     "reactionCostIndex": 0.066
   },
   {
@@ -11198,7 +11198,7 @@
     "regionId": 10000061,
     "security": -0.315514,
     "costIndex": 0.0499,
-    "reactionCostIndex": 0.0531
+    "reactionCostIndex": 0.053
   },
   {
     "systemId": 30004651,
@@ -11206,7 +11206,7 @@
     "regionId": 10000058,
     "security": -0.564523,
     "costIndex": 0.025,
-    "reactionCostIndex": 0.0355
+    "reactionCostIndex": 0.0354
   },
   {
     "systemId": 30000302,
@@ -11214,7 +11214,7 @@
     "regionId": 10000003,
     "security": -0.758771,
     "costIndex": 0.0154,
-    "reactionCostIndex": 0.0387
+    "reactionCostIndex": 0.0386
   },
   {
     "systemId": 30001992,
@@ -11237,8 +11237,8 @@
     "name": "C-J6MT",
     "regionId": 10000009,
     "security": -0.288745,
-    "costIndex": 0.0978,
-    "reactionCostIndex": 0.0737
+    "costIndex": 0.0977,
+    "reactionCostIndex": 0.0736
   },
   {
     "systemId": 30000273,
@@ -11285,7 +11285,7 @@
     "name": "C-N4OD",
     "regionId": 10000058,
     "security": -0.606511,
-    "costIndex": 0.0695,
+    "costIndex": 0.0694,
     "reactionCostIndex": 0.0761
   },
   {
@@ -11389,7 +11389,7 @@
     "name": "C1XD-X",
     "regionId": 10000058,
     "security": -0.452908,
-    "costIndex": 0.0262,
+    "costIndex": 0.0261,
     "reactionCostIndex": 0.0014
   },
   {
@@ -11517,7 +11517,7 @@
     "name": "C8H5-X",
     "regionId": 10000009,
     "security": -0.149284,
-    "costIndex": 0.0072,
+    "costIndex": 0.0073,
     "reactionCostIndex": 0.0053
   },
   {
@@ -11525,7 +11525,7 @@
     "name": "C8VC-S",
     "regionId": 10000010,
     "security": -0.272806,
-    "costIndex": 0.0399,
+    "costIndex": 0.0398,
     "reactionCostIndex": 0.031
   },
   {
@@ -11597,7 +11597,7 @@
     "name": "Carirgnottin",
     "regionId": 10000037,
     "security": 0.624878,
-    "costIndex": 0.0173,
+    "costIndex": 0.0174,
     "reactionCostIndex": 0.0014
   },
   {
@@ -11718,7 +11718,7 @@
     "regionId": 10000058,
     "security": -0.850626,
     "costIndex": 0.0373,
-    "reactionCostIndex": 0.0401
+    "reactionCostIndex": 0.0403
   },
   {
     "systemId": 30002688,
@@ -11758,7 +11758,7 @@
     "regionId": 10000020,
     "security": 0.291687,
     "costIndex": 0.0124,
-    "reactionCostIndex": 0.0273
+    "reactionCostIndex": 0.0272
   },
   {
     "systemId": 30004108,
@@ -11957,7 +11957,7 @@
     "name": "Cistuvaert",
     "regionId": 10000068,
     "security": 0.949,
-    "costIndex": 0.0155,
+    "costIndex": 0.0154,
     "reactionCostIndex": 0.0014
   },
   {
@@ -11981,7 +11981,7 @@
     "name": "CKX-RW",
     "regionId": 10000025,
     "security": -0.627516,
-    "costIndex": 0.0184,
+    "costIndex": 0.0183,
     "reactionCostIndex": 0.0232
   },
   {
@@ -12005,7 +12005,7 @@
     "name": "CL-BWB",
     "regionId": 10000058,
     "security": -0.285093,
-    "costIndex": 0.0166,
+    "costIndex": 0.0165,
     "reactionCostIndex": 0.0095
   },
   {
@@ -12093,7 +12093,7 @@
     "name": "Cleyd",
     "regionId": 10000067,
     "security": 0.481204,
-    "costIndex": 0.0507,
+    "costIndex": 0.0506,
     "reactionCostIndex": 0.0014
   },
   {
@@ -12149,7 +12149,7 @@
     "name": "Colcer",
     "regionId": 10000037,
     "security": 0.851225,
-    "costIndex": 0.0077,
+    "costIndex": 0.0076,
     "reactionCostIndex": 0.0014
   },
   {
@@ -12189,7 +12189,7 @@
     "name": "Couster",
     "regionId": 10000064,
     "security": 0.902461,
-    "costIndex": 0.0239,
+    "costIndex": 0.024,
     "reactionCostIndex": 0.0014
   },
   {
@@ -12253,7 +12253,7 @@
     "name": "Croleur",
     "regionId": 10000032,
     "security": 0.573767,
-    "costIndex": 0.0175,
+    "costIndex": 0.0174,
     "reactionCostIndex": 0.0014
   },
   {
@@ -12485,7 +12485,7 @@
     "name": "D-9UEV",
     "regionId": 10000061,
     "security": -0.321372,
-    "costIndex": 0.0067,
+    "costIndex": 0.0066,
     "reactionCostIndex": 0.0158
   },
   {
@@ -12501,7 +12501,7 @@
     "name": "D-BAMJ",
     "regionId": 10000025,
     "security": -0.133085,
-    "costIndex": 0.0314,
+    "costIndex": 0.0313,
     "reactionCostIndex": 0.0473
   },
   {
@@ -12573,8 +12573,8 @@
     "name": "D-P1EH",
     "regionId": 10000009,
     "security": -0.537587,
-    "costIndex": 0.0196,
-    "reactionCostIndex": 0.0248
+    "costIndex": 0.0195,
+    "reactionCostIndex": 0.0247
   },
   {
     "systemId": 30000340,
@@ -12773,7 +12773,7 @@
     "name": "Dabrid",
     "regionId": 10000020,
     "security": 0.64884,
-    "costIndex": 0.0116,
+    "costIndex": 0.0115,
     "reactionCostIndex": 0.0014
   },
   {
@@ -12821,7 +12821,7 @@
     "name": "Danera",
     "regionId": 10000049,
     "security": 0.56257,
-    "costIndex": 0.006,
+    "costIndex": 0.0059,
     "reactionCostIndex": 0.0014
   },
   {
@@ -12837,7 +12837,7 @@
     "name": "Dantbeinn",
     "regionId": 10000042,
     "security": 0.726191,
-    "costIndex": 0.0151,
+    "costIndex": 0.015,
     "reactionCostIndex": 0.0014
   },
   {
@@ -12925,7 +12925,7 @@
     "name": "DBT-GB",
     "regionId": 10000010,
     "security": -0.245724,
-    "costIndex": 0.0627,
+    "costIndex": 0.0626,
     "reactionCostIndex": 0.0905
   },
   {
@@ -13037,7 +13037,7 @@
     "name": "Deltole",
     "regionId": 10000032,
     "security": 0.540473,
-    "costIndex": 0.0372,
+    "costIndex": 0.0371,
     "reactionCostIndex": 0.0014
   },
   {
@@ -13237,7 +13237,7 @@
     "name": "DL1C-E",
     "regionId": 10000010,
     "security": -0.129866,
-    "costIndex": 0.0108,
+    "costIndex": 0.0107,
     "reactionCostIndex": 0.0014
   },
   {
@@ -13334,7 +13334,7 @@
     "name": "Dour",
     "regionId": 10000048,
     "security": 0.384864,
-    "costIndex": 0.0352,
+    "costIndex": 0.0351,
     "reactionCostIndex": 0.0656
   },
   {
@@ -13342,7 +13342,7 @@
     "name": "Doussivitte",
     "regionId": 10000032,
     "security": 0.76192,
-    "costIndex": 0.0173,
+    "costIndex": 0.0174,
     "reactionCostIndex": 0.0014
   },
   {
@@ -13398,7 +13398,7 @@
     "name": "Dranga",
     "regionId": 10001004,
     "security": 1,
-    "costIndex": 0.0112,
+    "costIndex": 0.0113,
     "reactionCostIndex": 0.0014
   },
   {
@@ -13454,8 +13454,8 @@
     "name": "DT-PXH",
     "regionId": 10000061,
     "security": -0.113461,
-    "costIndex": 0.0353,
-    "reactionCostIndex": 0.0443
+    "costIndex": 0.0352,
+    "reactionCostIndex": 0.0442
   },
   {
     "systemId": 30002041,
@@ -13486,7 +13486,7 @@
     "name": "Dudreda",
     "regionId": 10000042,
     "security": 0.292149,
-    "costIndex": 0.0309,
+    "costIndex": 0.0308,
     "reactionCostIndex": 0.025
   },
   {
@@ -13502,7 +13502,7 @@
     "name": "Dumkirinur",
     "regionId": 10000030,
     "security": 0.706616,
-    "costIndex": 0.0123,
+    "costIndex": 0.0122,
     "reactionCostIndex": 0.0014
   },
   {
@@ -13574,7 +13574,7 @@
     "name": "DW-N2S",
     "regionId": 10000025,
     "security": -0.213712,
-    "costIndex": 0.0321,
+    "costIndex": 0.032,
     "reactionCostIndex": 0.0418
   },
   {
@@ -13654,7 +13654,7 @@
     "name": "Dysa",
     "regionId": 10000001,
     "security": 0.236195,
-    "costIndex": 0.014,
+    "costIndex": 0.0141,
     "reactionCostIndex": 0.0014
   },
   {
@@ -14118,7 +14118,7 @@
     "name": "Ebo",
     "regionId": 10000043,
     "security": 0.523045,
-    "costIndex": 0.022,
+    "costIndex": 0.0219,
     "reactionCostIndex": 0.0014
   },
   {
@@ -14183,7 +14183,7 @@
     "regionId": 10000054,
     "security": 0.072,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.0055
+    "reactionCostIndex": 0.0054
   },
   {
     "systemId": 30002518,
@@ -14230,8 +14230,8 @@
     "name": "EFM-C4",
     "regionId": 10000009,
     "security": -0.481914,
-    "costIndex": 0.0332,
-    "reactionCostIndex": 0.0409
+    "costIndex": 0.0331,
+    "reactionCostIndex": 0.0408
   },
   {
     "systemId": 30004297,
@@ -14374,7 +14374,7 @@
     "name": "EIMJ-M",
     "regionId": 10000063,
     "security": -0.919092,
-    "costIndex": 0.0184,
+    "costIndex": 0.0183,
     "reactionCostIndex": 0.0168
   },
   {
@@ -14446,8 +14446,8 @@
     "name": "EKPB-3",
     "regionId": 10000009,
     "security": -0.355332,
-    "costIndex": 0.0271,
-    "reactionCostIndex": 0.0273
+    "costIndex": 0.0276,
+    "reactionCostIndex": 0.0286
   },
   {
     "systemId": 30005317,
@@ -14518,7 +14518,7 @@
     "name": "Elgoi",
     "regionId": 10000042,
     "security": 0.8885,
-    "costIndex": 0.0241,
+    "costIndex": 0.024,
     "reactionCostIndex": 0.0014
   },
   {
@@ -14526,7 +14526,7 @@
     "name": "Ellmay",
     "regionId": 10000068,
     "security": 0.861044,
-    "costIndex": 0.0302,
+    "costIndex": 0.0301,
     "reactionCostIndex": 0.0014
   },
   {
@@ -14542,7 +14542,7 @@
     "name": "Elonaya",
     "regionId": 10000016,
     "security": 0.665783,
-    "costIndex": 0.0769,
+    "costIndex": 0.0768,
     "reactionCostIndex": 0.0014
   },
   {
@@ -14670,7 +14670,7 @@
     "name": "Enedore",
     "regionId": 10000037,
     "security": 0.646758,
-    "costIndex": 0.0253,
+    "costIndex": 0.0252,
     "reactionCostIndex": 0.0014
   },
   {
@@ -14806,7 +14806,7 @@
     "name": "Erenta",
     "regionId": 10000016,
     "security": 0.634758,
-    "costIndex": 0.0455,
+    "costIndex": 0.0454,
     "reactionCostIndex": 0.0014
   },
   {
@@ -15062,7 +15062,7 @@
     "name": "Ethernity",
     "regionId": 10000037,
     "security": 0.935634,
-    "costIndex": 0.0353,
+    "costIndex": 0.0355,
     "reactionCostIndex": 0.0014
   },
   {
@@ -15238,7 +15238,7 @@
     "name": "Eystur",
     "regionId": 10000030,
     "security": 0.949232,
-    "costIndex": 0.0526,
+    "costIndex": 0.0525,
     "reactionCostIndex": 0.0014
   },
   {
@@ -15254,7 +15254,7 @@
     "name": "EZA-FM",
     "regionId": 10000041,
     "security": -0.160266,
-    "costIndex": 0.0085,
+    "costIndex": 0.0084,
     "reactionCostIndex": 0.0014
   },
   {
@@ -15326,7 +15326,7 @@
     "name": "F-88PJ",
     "regionId": 10000058,
     "security": -0.900264,
-    "costIndex": 0.0221,
+    "costIndex": 0.022,
     "reactionCostIndex": 0.0014
   },
   {
@@ -15342,7 +15342,7 @@
     "name": "F-9F6Q",
     "regionId": 10000055,
     "security": -0.673547,
-    "costIndex": 0.0101,
+    "costIndex": 0.01,
     "reactionCostIndex": 0.0014
   },
   {
@@ -15391,7 +15391,7 @@
     "regionId": 10000010,
     "security": -0.593187,
     "costIndex": 0.0198,
-    "reactionCostIndex": 0.0281
+    "reactionCostIndex": 0.028
   },
   {
     "systemId": 30005183,
@@ -15574,7 +15574,7 @@
     "name": "F2OY-X",
     "regionId": 10000050,
     "security": -0.032618,
-    "costIndex": 0.0439,
+    "costIndex": 0.0438,
     "reactionCostIndex": 0.0094
   },
   {
@@ -15590,7 +15590,7 @@
     "name": "F3-8X2",
     "regionId": 10000009,
     "security": -0.54212,
-    "costIndex": 0.0416,
+    "costIndex": 0.0415,
     "reactionCostIndex": 0.0408
   },
   {
@@ -15598,8 +15598,8 @@
     "name": "F39H-1",
     "regionId": 10000009,
     "security": -0.169613,
-    "costIndex": 0.0195,
-    "reactionCostIndex": 0.0262
+    "costIndex": 0.0196,
+    "reactionCostIndex": 0.0272
   },
   {
     "systemId": 30000332,
@@ -15679,7 +15679,7 @@
     "regionId": 10000025,
     "security": -0.060216,
     "costIndex": 0.0426,
-    "reactionCostIndex": 0.0412
+    "reactionCostIndex": 0.0411
   },
   {
     "systemId": 30000981,
@@ -15742,7 +15742,7 @@
     "name": "FA-DMO",
     "regionId": 10000003,
     "security": -0.385583,
-    "costIndex": 0.0962,
+    "costIndex": 0.0961,
     "reactionCostIndex": 0.0014
   },
   {
@@ -15782,7 +15782,7 @@
     "name": "Faktun",
     "regionId": 10000036,
     "security": 0.626366,
-    "costIndex": 0.0213,
+    "costIndex": 0.0212,
     "reactionCostIndex": 0.0014
   },
   {
@@ -15950,7 +15950,7 @@
     "name": "Feshur",
     "regionId": 10000054,
     "security": 0.035519,
-    "costIndex": 0.0078,
+    "costIndex": 0.0077,
     "reactionCostIndex": 0.0014
   },
   {
@@ -15975,7 +15975,7 @@
     "regionId": 10000003,
     "security": -0.137553,
     "costIndex": 0.0452,
-    "reactionCostIndex": 0.0596
+    "reactionCostIndex": 0.0601
   },
   {
     "systemId": 30001344,
@@ -16151,7 +16151,7 @@
     "regionId": 10000025,
     "security": -0.397824,
     "costIndex": 0.0327,
-    "reactionCostIndex": 0.0163
+    "reactionCostIndex": 0.0164
   },
   {
     "systemId": 30003118,
@@ -16254,7 +16254,7 @@
     "name": "Fovihi",
     "regionId": 10000001,
     "security": 0.869394,
-    "costIndex": 0.023,
+    "costIndex": 0.0229,
     "reactionCostIndex": 0.0014
   },
   {
@@ -16318,7 +16318,7 @@
     "name": "Freatlidur",
     "regionId": 10000042,
     "security": 0.826576,
-    "costIndex": 0.0267,
+    "costIndex": 0.0266,
     "reactionCostIndex": 0.0014
   },
   {
@@ -16350,7 +16350,7 @@
     "name": "Friggi",
     "regionId": 10000002,
     "security": 0.509153,
-    "costIndex": 0.0274,
+    "costIndex": 0.0273,
     "reactionCostIndex": 0.0014
   },
   {
@@ -16366,7 +16366,7 @@
     "name": "Frulegur",
     "regionId": 10000042,
     "security": 0.434329,
-    "costIndex": 0.0071,
+    "costIndex": 0.0076,
     "reactionCostIndex": 0.0094
   },
   {
@@ -16503,7 +16503,7 @@
     "regionId": 10000009,
     "security": -0.755701,
     "costIndex": 0.0415,
-    "reactionCostIndex": 0.0588
+    "reactionCostIndex": 0.0587
   },
   {
     "systemId": 30000850,
@@ -16719,7 +16719,7 @@
     "regionId": 10000003,
     "security": -0.157009,
     "costIndex": 0.0343,
-    "reactionCostIndex": 0.0603
+    "reactionCostIndex": 0.0602
   },
   {
     "systemId": 30004696,
@@ -16727,7 +16727,7 @@
     "regionId": 10000059,
     "security": -1,
     "costIndex": 0.042,
-    "reactionCostIndex": 0.0393
+    "reactionCostIndex": 0.0392
   },
   {
     "systemId": 30001987,
@@ -16799,7 +16799,7 @@
     "regionId": 10000058,
     "security": -0.121486,
     "costIndex": 0.0284,
-    "reactionCostIndex": 0.0319
+    "reactionCostIndex": 0.0318
   },
   {
     "systemId": 30001569,
@@ -16838,7 +16838,7 @@
     "name": "G06-8Y",
     "regionId": 10000045,
     "security": -0.305331,
-    "costIndex": 0.0459,
+    "costIndex": 0.0458,
     "reactionCostIndex": 0.0744
   },
   {
@@ -16974,7 +16974,7 @@
     "name": "G96R-F",
     "regionId": 10000003,
     "security": -0.87333,
-    "costIndex": 0.0106,
+    "costIndex": 0.0105,
     "reactionCostIndex": 0.012
   },
   {
@@ -17214,7 +17214,7 @@
     "name": "GE-8JV",
     "regionId": 10000014,
     "security": -0.209423,
-    "costIndex": 0.0429,
+    "costIndex": 0.0431,
     "reactionCostIndex": 0.039
   },
   {
@@ -17270,7 +17270,7 @@
     "name": "Gekutami",
     "regionId": 10000002,
     "security": 0.699187,
-    "costIndex": 0.0175,
+    "costIndex": 0.0174,
     "reactionCostIndex": 0.0014
   },
   {
@@ -17342,7 +17342,7 @@
     "name": "Gererique",
     "regionId": 10000044,
     "security": 0.664606,
-    "costIndex": 0.004,
+    "costIndex": 0.0055,
     "reactionCostIndex": 0.0014
   },
   {
@@ -17510,8 +17510,8 @@
     "name": "GJ0-OJ",
     "regionId": 10000014,
     "security": -0.049051,
-    "costIndex": 0.0479,
-    "reactionCostIndex": 0.0417
+    "costIndex": 0.0478,
+    "reactionCostIndex": 0.0416
   },
   {
     "systemId": 30003232,
@@ -17606,7 +17606,7 @@
     "name": "Goinard",
     "regionId": 10000032,
     "security": 0.342349,
-    "costIndex": 0.0126,
+    "costIndex": 0.0125,
     "reactionCostIndex": 0.006
   },
   {
@@ -17670,7 +17670,7 @@
     "name": "Gosalav",
     "regionId": 10000043,
     "security": 0.739668,
-    "costIndex": 0.0272,
+    "costIndex": 0.0271,
     "reactionCostIndex": 0.0014
   },
   {
@@ -17702,8 +17702,8 @@
     "name": "GPLB-C",
     "regionId": 10000006,
     "security": -0.254697,
-    "costIndex": 0.0522,
-    "reactionCostIndex": 0.0715
+    "costIndex": 0.0524,
+    "reactionCostIndex": 0.0714
   },
   {
     "systemId": 30004465,
@@ -17726,7 +17726,7 @@
     "name": "GQ2S-8",
     "regionId": 10000059,
     "security": -0.258275,
-    "costIndex": 0.0093,
+    "costIndex": 0.0094,
     "reactionCostIndex": 0.0174
   },
   {
@@ -17830,7 +17830,7 @@
     "name": "GTY-FW",
     "regionId": 10000027,
     "security": -0.139883,
-    "costIndex": 0.0129,
+    "costIndex": 0.0128,
     "reactionCostIndex": 0.0014
   },
   {
@@ -17878,7 +17878,7 @@
     "name": "Gultratren",
     "regionId": 10000030,
     "security": 0.309276,
-    "costIndex": 0.0197,
+    "costIndex": 0.0196,
     "reactionCostIndex": 0.0014
   },
   {
@@ -17975,7 +17975,7 @@
     "regionId": 10000003,
     "security": -0.171275,
     "costIndex": 0.0342,
-    "reactionCostIndex": 0.031
+    "reactionCostIndex": 0.0309
   },
   {
     "systemId": 30005123,
@@ -17998,8 +17998,8 @@
     "name": "H-5GUI",
     "regionId": 10000003,
     "security": -0.140515,
-    "costIndex": 0.0344,
-    "reactionCostIndex": 0.0358
+    "costIndex": 0.0346,
+    "reactionCostIndex": 0.0357
   },
   {
     "systemId": 30002588,
@@ -18135,7 +18135,7 @@
     "regionId": 10000003,
     "security": -0.140606,
     "costIndex": 0.0243,
-    "reactionCostIndex": 0.048
+    "reactionCostIndex": 0.0479
   },
   {
     "systemId": 30004592,
@@ -18206,7 +18206,7 @@
     "name": "H-W9TY",
     "regionId": 10000010,
     "security": -0.460155,
-    "costIndex": 0.0239,
+    "costIndex": 0.0238,
     "reactionCostIndex": 0.0351
   },
   {
@@ -18374,7 +18374,7 @@
     "name": "Haatomo",
     "regionId": 10000033,
     "security": 0.609266,
-    "costIndex": 0.036,
+    "costIndex": 0.0359,
     "reactionCostIndex": 0.0014
   },
   {
@@ -18398,7 +18398,7 @@
     "name": "Hadji",
     "regionId": 10000067,
     "security": 0.492759,
-    "costIndex": 0.0175,
+    "costIndex": 0.0174,
     "reactionCostIndex": 0.0014
   },
   {
@@ -18422,7 +18422,7 @@
     "name": "Hageken",
     "regionId": 10000016,
     "security": 0.604188,
-    "costIndex": 0.0257,
+    "costIndex": 0.0264,
     "reactionCostIndex": 0.0014
   },
   {
@@ -18430,7 +18430,7 @@
     "name": "Hagilur",
     "regionId": 10000042,
     "security": 0.362024,
-    "costIndex": 0.0137,
+    "costIndex": 0.0136,
     "reactionCostIndex": 0.0014
   },
   {
@@ -18462,7 +18462,7 @@
     "name": "Haimeh",
     "regionId": 10000054,
     "security": 0.498555,
-    "costIndex": 0.0082,
+    "costIndex": 0.0091,
     "reactionCostIndex": 0.0014
   },
   {
@@ -18470,8 +18470,8 @@
     "name": "Haine",
     "regionId": 10000064,
     "security": 0.436471,
-    "costIndex": 0.0294,
-    "reactionCostIndex": 0.0253
+    "costIndex": 0.0293,
+    "reactionCostIndex": 0.0279
   },
   {
     "systemId": 30003106,
@@ -18511,7 +18511,7 @@
     "regionId": 10000042,
     "security": 0.211785,
     "costIndex": 0.0057,
-    "reactionCostIndex": 0.0357
+    "reactionCostIndex": 0.0356
   },
   {
     "systemId": 30003085,
@@ -18558,7 +18558,7 @@
     "name": "Half",
     "regionId": 10000028,
     "security": 0.241078,
-    "costIndex": 0.0312,
+    "costIndex": 0.0311,
     "reactionCostIndex": 0.0121
   },
   {
@@ -18574,7 +18574,7 @@
     "name": "Hallanen",
     "regionId": 10000069,
     "security": 0.364361,
-    "costIndex": 0.0287,
+    "costIndex": 0.0286,
     "reactionCostIndex": 0.035
   },
   {
@@ -18582,7 +18582,7 @@
     "name": "Halle",
     "regionId": 10000037,
     "security": 0.728363,
-    "costIndex": 0.0439,
+    "costIndex": 0.044,
     "reactionCostIndex": 0.0014
   },
   {
@@ -18654,7 +18654,7 @@
     "name": "Haras",
     "regionId": 10000038,
     "security": 0.279962,
-    "costIndex": 0.0346,
+    "costIndex": 0.0353,
     "reactionCostIndex": 0.0391
   },
   {
@@ -18678,7 +18678,7 @@
     "name": "Harerget",
     "regionId": 10000037,
     "security": 0.833758,
-    "costIndex": 0.0233,
+    "costIndex": 0.0232,
     "reactionCostIndex": 0.0014
   },
   {
@@ -18742,7 +18742,7 @@
     "name": "Hatakani",
     "regionId": 10000033,
     "security": 0.941061,
-    "costIndex": 0.0349,
+    "costIndex": 0.0348,
     "reactionCostIndex": 0.0014
   },
   {
@@ -18950,7 +18950,7 @@
     "name": "Hek",
     "regionId": 10000042,
     "security": 0.8,
-    "costIndex": 0.0654,
+    "costIndex": 0.0653,
     "reactionCostIndex": 0.0014,
     "hubId": "hek"
   },
@@ -18991,7 +18991,7 @@
     "name": "Henebene",
     "regionId": 10000064,
     "security": 0.837329,
-    "costIndex": 0.0247,
+    "costIndex": 0.0246,
     "reactionCostIndex": 0.0014
   },
   {
@@ -19064,7 +19064,7 @@
     "regionId": 10000009,
     "security": -0.929293,
     "costIndex": 0.0195,
-    "reactionCostIndex": 0.0902
+    "reactionCostIndex": 0.0901
   },
   {
     "systemId": 30001135,
@@ -19120,7 +19120,7 @@
     "regionId": 10000039,
     "security": -0.109915,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.0233
+    "reactionCostIndex": 0.0232
   },
   {
     "systemId": 30001662,
@@ -19167,7 +19167,7 @@
     "name": "Hilaban",
     "regionId": 10000020,
     "security": 0.891444,
-    "costIndex": 0.0314,
+    "costIndex": 0.0313,
     "reactionCostIndex": 0.0014
   },
   {
@@ -19271,7 +19271,7 @@
     "name": "Hizhara",
     "regionId": 10000043,
     "security": 0.581256,
-    "costIndex": 0.006,
+    "costIndex": 0.0059,
     "reactionCostIndex": 0.0014
   },
   {
@@ -19343,7 +19343,7 @@
     "name": "HM-UVD",
     "regionId": 10000022,
     "security": -0.248875,
-    "costIndex": 0.0117,
+    "costIndex": 0.0116,
     "reactionCostIndex": 0.0014
   },
   {
@@ -19447,7 +19447,7 @@
     "name": "Horkkisen",
     "regionId": 10000033,
     "security": 0.438425,
-    "costIndex": 0.0049,
+    "costIndex": 0.0048,
     "reactionCostIndex": 0.0014
   },
   {
@@ -19519,7 +19519,7 @@
     "name": "HP-6Z6",
     "regionId": 10000047,
     "security": -0.06304,
-    "costIndex": 0.0362,
+    "costIndex": 0.0363,
     "reactionCostIndex": 0.0568
   },
   {
@@ -19615,7 +19615,7 @@
     "name": "Hrondedir",
     "regionId": 10000030,
     "security": 0.317424,
-    "costIndex": 0.0044,
+    "costIndex": 0.0045,
     "reactionCostIndex": 0.0014
   },
   {
@@ -19671,8 +19671,8 @@
     "name": "Huola",
     "regionId": 10000038,
     "security": 0.370249,
-    "costIndex": 0.0941,
-    "reactionCostIndex": 0.1237
+    "costIndex": 0.094,
+    "reactionCostIndex": 0.1236
   },
   {
     "systemId": 30002572,
@@ -19703,7 +19703,7 @@
     "name": "Huttaken",
     "regionId": 10000033,
     "security": 0.572713,
-    "costIndex": 0.0278,
+    "costIndex": 0.028,
     "reactionCostIndex": 0.0014
   },
   {
@@ -19999,8 +19999,8 @@
     "name": "I30-3A",
     "regionId": 10000035,
     "security": -0.84595,
-    "costIndex": 0.0832,
-    "reactionCostIndex": 0.1151
+    "costIndex": 0.0831,
+    "reactionCostIndex": 0.115
   },
   {
     "systemId": 30000758,
@@ -20263,8 +20263,8 @@
     "name": "IFJ-EL",
     "regionId": 10000003,
     "security": -0.291599,
-    "costIndex": 0.0388,
-    "reactionCostIndex": 0.0548
+    "costIndex": 0.0387,
+    "reactionCostIndex": 0.0549
   },
   {
     "systemId": 30003203,
@@ -20320,7 +20320,7 @@
     "regionId": 10000032,
     "security": 0.438755,
     "costIndex": 0.1252,
-    "reactionCostIndex": 0.1125
+    "reactionCostIndex": 0.1126
   },
   {
     "systemId": 30000169,
@@ -20328,7 +20328,7 @@
     "regionId": 10000002,
     "security": 0.380809,
     "costIndex": 0.0329,
-    "reactionCostIndex": 0.0346
+    "reactionCostIndex": 0.0345
   },
   {
     "systemId": 30000048,
@@ -20351,7 +20351,7 @@
     "name": "II-5O9",
     "regionId": 10000035,
     "security": -0.693124,
-    "costIndex": 0.0831,
+    "costIndex": 0.083,
     "reactionCostIndex": 0.0729
   },
   {
@@ -20359,7 +20359,7 @@
     "name": "Iidoken",
     "regionId": 10000016,
     "security": 0.843816,
-    "costIndex": 0.058,
+    "costIndex": 0.0579,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20391,7 +20391,7 @@
     "name": "Ikami",
     "regionId": 10000002,
     "security": 0.532008,
-    "costIndex": 0.026,
+    "costIndex": 0.0259,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20399,7 +20399,7 @@
     "name": "Ikao",
     "regionId": 10000033,
     "security": 0.602213,
-    "costIndex": 0.0451,
+    "costIndex": 0.045,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20408,7 +20408,7 @@
     "regionId": 10000069,
     "security": 0.283312,
     "costIndex": 0.0398,
-    "reactionCostIndex": 0.073
+    "reactionCostIndex": 0.0729
   },
   {
     "systemId": 30003641,
@@ -20423,7 +20423,7 @@
     "name": "Ikuchi",
     "regionId": 10000002,
     "security": 0.949,
-    "costIndex": 0.0889,
+    "costIndex": 0.0888,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20448,7 +20448,7 @@
     "regionId": 10000061,
     "security": -0.589537,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.0196
+    "reactionCostIndex": 0.0195
   },
   {
     "systemId": 30000090,
@@ -20575,7 +20575,7 @@
     "name": "Inaro",
     "regionId": 10000033,
     "security": 0.836978,
-    "costIndex": 0.0442,
+    "costIndex": 0.0441,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20719,7 +20719,7 @@
     "name": "Ipref",
     "regionId": 10000049,
     "security": 0.899686,
-    "costIndex": 0.0093,
+    "costIndex": 0.0094,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20735,7 +20735,7 @@
     "name": "IR-DYY",
     "regionId": 10000003,
     "security": -0.159339,
-    "costIndex": 0.0074,
+    "costIndex": 0.0073,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20791,7 +20791,7 @@
     "name": "Irjunen",
     "regionId": 10000033,
     "security": 0.520267,
-    "costIndex": 0.0286,
+    "costIndex": 0.0285,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20807,7 +20807,7 @@
     "name": "Irnal",
     "regionId": 10000043,
     "security": 0.949,
-    "costIndex": 0.0219,
+    "costIndex": 0.0218,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20863,7 +20863,7 @@
     "name": "Isanamo",
     "regionId": 10000016,
     "security": 0.635016,
-    "costIndex": 0.0329,
+    "costIndex": 0.033,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20871,7 +20871,7 @@
     "name": "Isaziwa",
     "regionId": 10000033,
     "security": 0.720814,
-    "costIndex": 0.0478,
+    "costIndex": 0.0479,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20880,7 +20880,7 @@
     "regionId": 10000042,
     "security": 0.355195,
     "costIndex": 0.0112,
-    "reactionCostIndex": 0.039
+    "reactionCostIndex": 0.0389
   },
   {
     "systemId": 30002815,
@@ -20911,7 +20911,7 @@
     "name": "Ishisomo",
     "regionId": 10000002,
     "security": 0.650832,
-    "costIndex": 0.0615,
+    "costIndex": 0.0616,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20919,7 +20919,7 @@
     "name": "Ishkad",
     "regionId": 10000001,
     "security": 0.366036,
-    "costIndex": 0.0108,
+    "costIndex": 0.0107,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20927,8 +20927,8 @@
     "name": "Ishomilken",
     "regionId": 10000033,
     "security": 0.374638,
-    "costIndex": 0.0966,
-    "reactionCostIndex": 0.0944
+    "costIndex": 0.0965,
+    "reactionCostIndex": 0.0943
   },
   {
     "systemId": 30004243,
@@ -20983,7 +20983,7 @@
     "name": "Isseras",
     "regionId": 10000016,
     "security": 0.560588,
-    "costIndex": 0.0366,
+    "costIndex": 0.0369,
     "reactionCostIndex": 0.0014
   },
   {
@@ -20991,7 +20991,7 @@
     "name": "Istodard",
     "regionId": 10000028,
     "security": 0.29488,
-    "costIndex": 0.0293,
+    "costIndex": 0.0295,
     "reactionCostIndex": 0.0096
   },
   {
@@ -21103,7 +21103,7 @@
     "name": "IVP-KA",
     "regionId": 10000007,
     "security": -0.063088,
-    "costIndex": 0.0176,
+    "costIndex": 0.0175,
     "reactionCostIndex": 0.0014
   },
   {
@@ -21112,7 +21112,7 @@
     "regionId": 10000069,
     "security": 0.23836,
     "costIndex": 0.033,
-    "reactionCostIndex": 0.04
+    "reactionCostIndex": 0.0399
   },
   {
     "systemId": 30003765,
@@ -21135,7 +21135,7 @@
     "name": "Iyen-Oursta",
     "regionId": 10000032,
     "security": 0.779575,
-    "costIndex": 0.0444,
+    "costIndex": 0.0443,
     "reactionCostIndex": 0.0014
   },
   {
@@ -21255,7 +21255,7 @@
     "name": "J-QA7I",
     "regionId": 10000025,
     "security": -0.480517,
-    "costIndex": 0.025,
+    "costIndex": 0.0249,
     "reactionCostIndex": 0.0014
   },
   {
@@ -21280,7 +21280,7 @@
     "regionId": 10000039,
     "security": -0.042487,
     "costIndex": 0.0147,
-    "reactionCostIndex": 0.025
+    "reactionCostIndex": 0.0249
   },
   {
     "systemId": 30000594,
@@ -21471,7 +21471,7 @@
     "name": "J9-5MQ",
     "regionId": 10000055,
     "security": -0.513395,
-    "costIndex": 0.0381,
+    "costIndex": 0.038,
     "reactionCostIndex": 0.0272
   },
   {
@@ -21527,7 +21527,7 @@
     "name": "Jakanerva",
     "regionId": 10000002,
     "security": 0.743252,
-    "costIndex": 0.0297,
+    "costIndex": 0.0296,
     "reactionCostIndex": 0.0014
   },
   {
@@ -21535,7 +21535,7 @@
     "name": "Jakri",
     "regionId": 10000052,
     "security": 0.530917,
-    "costIndex": 0.0177,
+    "costIndex": 0.0176,
     "reactionCostIndex": 0.0014
   },
   {
@@ -21559,7 +21559,7 @@
     "name": "Jan",
     "regionId": 10000016,
     "security": 0.416954,
-    "costIndex": 0.079,
+    "costIndex": 0.0789,
     "reactionCostIndex": 0.0768
   },
   {
@@ -21663,7 +21663,7 @@
     "name": "Javrendei",
     "regionId": 10000030,
     "security": 0.878652,
-    "costIndex": 0.0145,
+    "costIndex": 0.0144,
     "reactionCostIndex": 0.0014
   },
   {
@@ -21847,7 +21847,7 @@
     "name": "Jesoyeh",
     "regionId": 10000043,
     "security": 0.690712,
-    "costIndex": 0.0492,
+    "costIndex": 0.0491,
     "reactionCostIndex": 0.0014
   },
   {
@@ -22152,7 +22152,7 @@
     "name": "Jovainnon",
     "regionId": 10000068,
     "security": 0.298141,
-    "costIndex": 0.0291,
+    "costIndex": 0.029,
     "reactionCostIndex": 0.0411
   },
   {
@@ -22192,7 +22192,7 @@
     "name": "JQU-KY",
     "regionId": 10000006,
     "security": -0.267341,
-    "costIndex": 0.0461,
+    "costIndex": 0.046,
     "reactionCostIndex": 0.0661
   },
   {
@@ -22296,7 +22296,7 @@
     "name": "Jufvitte",
     "regionId": 10000068,
     "security": 0.520488,
-    "costIndex": 0.0271,
+    "costIndex": 0.027,
     "reactionCostIndex": 0.0014
   },
   {
@@ -22344,7 +22344,7 @@
     "name": "Juunigaishi",
     "regionId": 10000033,
     "security": 0.621322,
-    "costIndex": 0.0312,
+    "costIndex": 0.0311,
     "reactionCostIndex": 0.0014
   },
   {
@@ -22472,7 +22472,7 @@
     "name": "K-6SNI",
     "regionId": 10000010,
     "security": -0.272433,
-    "costIndex": 0.0891,
+    "costIndex": 0.089,
     "reactionCostIndex": 0.0749
   },
   {
@@ -22488,7 +22488,7 @@
     "name": "K-9UG4",
     "regionId": 10000056,
     "security": -0.973473,
-    "costIndex": 0.0241,
+    "costIndex": 0.0242,
     "reactionCostIndex": 0.0347
   },
   {
@@ -22736,7 +22736,7 @@
     "name": "K7D-II",
     "regionId": 10000050,
     "security": -0.06692,
-    "costIndex": 0.013,
+    "costIndex": 0.0131,
     "reactionCostIndex": 0.0014
   },
   {
@@ -22816,7 +22816,7 @@
     "name": "Kador Prime",
     "regionId": 10000052,
     "security": 0.618488,
-    "costIndex": 0.0246,
+    "costIndex": 0.0245,
     "reactionCostIndex": 0.0014
   },
   {
@@ -22856,7 +22856,7 @@
     "name": "Kakki",
     "regionId": 10000033,
     "security": 0.8397,
-    "costIndex": 0.0331,
+    "costIndex": 0.033,
     "reactionCostIndex": 0.0014
   },
   {
@@ -22896,7 +22896,7 @@
     "name": "Kamokor",
     "regionId": 10000016,
     "security": 0.687696,
-    "costIndex": 0.0573,
+    "costIndex": 0.0572,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23008,7 +23008,7 @@
     "name": "KB-U56",
     "regionId": 10000014,
     "security": -0.266734,
-    "costIndex": 0.0195,
+    "costIndex": 0.0194,
     "reactionCostIndex": 0.0179
   },
   {
@@ -23065,7 +23065,7 @@
     "regionId": 10000009,
     "security": -0.179147,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.131
+    "reactionCostIndex": 0.1309
   },
   {
     "systemId": 30002027,
@@ -23096,7 +23096,7 @@
     "name": "Keberz",
     "regionId": 10000049,
     "security": 0.53013,
-    "costIndex": 0.0118,
+    "costIndex": 0.0117,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23152,7 +23152,7 @@
     "name": "Keikaken",
     "regionId": 10000002,
     "security": 0.721319,
-    "costIndex": 0.0205,
+    "costIndex": 0.0204,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23176,7 +23176,7 @@
     "name": "Kenahehab",
     "regionId": 10000054,
     "security": 0.229465,
-    "costIndex": 0.0066,
+    "costIndex": 0.0095,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23328,7 +23328,7 @@
     "name": "Khafis",
     "regionId": 10000052,
     "security": 0.599686,
-    "costIndex": 0.0052,
+    "costIndex": 0.0051,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23336,7 +23336,7 @@
     "name": "Khanid Prime",
     "regionId": 10000049,
     "security": 0.897374,
-    "costIndex": 0.018,
+    "costIndex": 0.0179,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23368,7 +23368,7 @@
     "name": "Khopa",
     "regionId": 10000043,
     "security": 0.810458,
-    "costIndex": 0.0126,
+    "costIndex": 0.0128,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23424,7 +23424,7 @@
     "name": "Kihtaled",
     "regionId": 10000049,
     "security": 0.913252,
-    "costIndex": 0.0203,
+    "costIndex": 0.0202,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23448,7 +23448,7 @@
     "name": "Kirras",
     "regionId": 10000016,
     "security": 0.821743,
-    "costIndex": 0.0323,
+    "costIndex": 0.0322,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23528,7 +23528,7 @@
     "name": "Klingt",
     "regionId": 10000028,
     "security": 0.302147,
-    "costIndex": 0.0129,
+    "costIndex": 0.0128,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23696,7 +23696,7 @@
     "name": "Korama",
     "regionId": 10000016,
     "security": 0.770922,
-    "costIndex": 0.0935,
+    "costIndex": 0.0934,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23760,8 +23760,8 @@
     "name": "KQK1-2",
     "regionId": 10000023,
     "security": -0.160657,
-    "costIndex": 0.0561,
-    "reactionCostIndex": 0.0557
+    "costIndex": 0.056,
+    "reactionCostIndex": 0.0569
   },
   {
     "systemId": 30002452,
@@ -23816,8 +23816,8 @@
     "name": "KRUN-N",
     "regionId": 10000003,
     "security": -0.386697,
-    "costIndex": 0.0273,
-    "reactionCostIndex": 0.0628
+    "costIndex": 0.0272,
+    "reactionCostIndex": 0.0627
   },
   {
     "systemId": 30000807,
@@ -23872,7 +23872,7 @@
     "name": "Kubinen",
     "regionId": 10000033,
     "security": 0.416024,
-    "costIndex": 0.0488,
+    "costIndex": 0.0487,
     "reactionCostIndex": 0.045
   },
   {
@@ -23904,7 +23904,7 @@
     "name": "Kulelen",
     "regionId": 10000033,
     "security": 0.475369,
-    "costIndex": 0.0386,
+    "costIndex": 0.0385,
     "reactionCostIndex": 0.0014
   },
   {
@@ -23928,7 +23928,7 @@
     "name": "Kuomi",
     "regionId": 10000038,
     "security": 0.567863,
-    "costIndex": 0.0402,
+    "costIndex": 0.0401,
     "reactionCostIndex": 0.0014
   },
   {
@@ -24072,7 +24072,7 @@
     "name": "L-6W1J",
     "regionId": 10000050,
     "security": -0.140219,
-    "costIndex": 0.0414,
+    "costIndex": 0.0413,
     "reactionCostIndex": 0.0244
   },
   {
@@ -24136,7 +24136,7 @@
     "name": "L-FM3P",
     "regionId": 10000006,
     "security": -0.170869,
-    "costIndex": 0.0247,
+    "costIndex": 0.0246,
     "reactionCostIndex": 0.0142
   },
   {
@@ -24288,7 +24288,7 @@
     "name": "L-Z9KJ",
     "regionId": 10000006,
     "security": -0.346744,
-    "costIndex": 0.0186,
+    "costIndex": 0.0185,
     "reactionCostIndex": 0.0277
   },
   {
@@ -24360,7 +24360,7 @@
     "name": "L4X-1V",
     "regionId": 10000027,
     "security": -0.100333,
-    "costIndex": 0.0284,
+    "costIndex": 0.0283,
     "reactionCostIndex": 0.0521
   },
   {
@@ -24377,7 +24377,7 @@
     "regionId": 10000009,
     "security": -0.651106,
     "costIndex": 0.0206,
-    "reactionCostIndex": 0.0385
+    "reactionCostIndex": 0.0384
   },
   {
     "systemId": 30004944,
@@ -24776,7 +24776,7 @@
     "name": "Leurtmar",
     "regionId": 10000042,
     "security": 0.949,
-    "costIndex": 0.0252,
+    "costIndex": 0.0253,
     "reactionCostIndex": 0.0014
   },
   {
@@ -24784,7 +24784,7 @@
     "name": "Leva",
     "regionId": 10000065,
     "security": 0.617346,
-    "costIndex": 0.0408,
+    "costIndex": 0.0407,
     "reactionCostIndex": 0.0014
   },
   {
@@ -24904,7 +24904,7 @@
     "name": "Ligare",
     "regionId": 10001004,
     "security": 1,
-    "costIndex": 0.0151,
+    "costIndex": 0.0152,
     "reactionCostIndex": 0.0014
   },
   {
@@ -24936,7 +24936,7 @@
     "name": "Lirsautton",
     "regionId": 10000037,
     "security": 0.835556,
-    "costIndex": 0.0278,
+    "costIndex": 0.0277,
     "reactionCostIndex": 0.0014
   },
   {
@@ -24960,7 +24960,7 @@
     "name": "Litiura",
     "regionId": 10000016,
     "security": 0.489405,
-    "costIndex": 0.0355,
+    "costIndex": 0.0354,
     "reactionCostIndex": 0.0014
   },
   {
@@ -25048,7 +25048,7 @@
     "name": "LN-56V",
     "regionId": 10000025,
     "security": -0.218239,
-    "costIndex": 0.0594,
+    "costIndex": 0.0593,
     "reactionCostIndex": 0.0794
   },
   {
@@ -25120,7 +25120,7 @@
     "name": "Lower Debyl",
     "regionId": 10000036,
     "security": 0.600679,
-    "costIndex": 0.0216,
+    "costIndex": 0.0215,
     "reactionCostIndex": 0.0014
   },
   {
@@ -25248,15 +25248,15 @@
     "name": "LS9B-9",
     "regionId": 10000003,
     "security": -0.19893,
-    "costIndex": 0.0279,
-    "reactionCostIndex": 0.0519
+    "costIndex": 0.0278,
+    "reactionCostIndex": 0.0518
   },
   {
     "systemId": 30003334,
     "name": "LSC4-P",
     "regionId": 10000041,
     "security": -0.314841,
-    "costIndex": 0.005,
+    "costIndex": 0.0049,
     "reactionCostIndex": 0.0014
   },
   {
@@ -25344,7 +25344,7 @@
     "name": "Luse",
     "regionId": 10000068,
     "security": 0.892424,
-    "costIndex": 0.0127,
+    "costIndex": 0.0126,
     "reactionCostIndex": 0.0014
   },
   {
@@ -25448,7 +25448,7 @@
     "name": "M-4KDB",
     "regionId": 10000061,
     "security": -0.252358,
-    "costIndex": 0.0326,
+    "costIndex": 0.0325,
     "reactionCostIndex": 0.0307
   },
   {
@@ -25488,8 +25488,8 @@
     "name": "M-CNUD",
     "regionId": 10000007,
     "security": -0.043403,
-    "costIndex": 0.0572,
-    "reactionCostIndex": 0.0575
+    "costIndex": 0.0571,
+    "reactionCostIndex": 0.0574
   },
   {
     "systemId": 30000922,
@@ -25592,7 +25592,7 @@
     "name": "M-OEE8",
     "regionId": 10000010,
     "security": -0.218329,
-    "costIndex": 0.0221,
+    "costIndex": 0.022,
     "reactionCostIndex": 0.0251
   },
   {
@@ -25600,7 +25600,7 @@
     "name": "M-PGT0",
     "regionId": 10000056,
     "security": -0.484561,
-    "costIndex": 0.0124,
+    "costIndex": 0.0132,
     "reactionCostIndex": 0.0492
   },
   {
@@ -25760,8 +25760,8 @@
     "name": "M3-KAQ",
     "regionId": 10000006,
     "security": -0.315805,
-    "costIndex": 0.0328,
-    "reactionCostIndex": 0.0749
+    "costIndex": 0.0327,
+    "reactionCostIndex": 0.0748
   },
   {
     "systemId": 30000761,
@@ -25920,7 +25920,7 @@
     "name": "Magiko",
     "regionId": 10000030,
     "security": 0.938302,
-    "costIndex": 0.0319,
+    "costIndex": 0.0318,
     "reactionCostIndex": 0.0014
   },
   {
@@ -25976,7 +25976,7 @@
     "name": "Maila",
     "regionId": 10000002,
     "security": 0.440715,
-    "costIndex": 0.0179,
+    "costIndex": 0.0178,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26016,7 +26016,7 @@
     "name": "Malma",
     "regionId": 10000067,
     "security": 0.533899,
-    "costIndex": 0.0119,
+    "costIndex": 0.0124,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26056,7 +26056,7 @@
     "name": "Manarq",
     "regionId": 10000067,
     "security": 0.815666,
-    "costIndex": 0.0547,
+    "costIndex": 0.0546,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26096,7 +26096,7 @@
     "name": "Manjonakko",
     "regionId": 10000033,
     "security": 0.334717,
-    "costIndex": 0.0408,
+    "costIndex": 0.0407,
     "reactionCostIndex": 0.0588
   },
   {
@@ -26120,7 +26120,7 @@
     "name": "Mara",
     "regionId": 10000016,
     "security": 0.419988,
-    "costIndex": 0.0513,
+    "costIndex": 0.0512,
     "reactionCostIndex": 0.0183
   },
   {
@@ -26144,7 +26144,7 @@
     "name": "Martha",
     "regionId": 10000043,
     "security": 0.67464,
-    "costIndex": 0.0204,
+    "costIndex": 0.0203,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26225,7 +26225,7 @@
     "regionId": 10000042,
     "security": 0.348949,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.0238
+    "reactionCostIndex": 0.0237
   },
   {
     "systemId": 30003034,
@@ -26248,7 +26248,7 @@
     "name": "Matyas",
     "regionId": 10000020,
     "security": 0.554138,
-    "costIndex": 0.0206,
+    "costIndex": 0.0205,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26256,7 +26256,7 @@
     "name": "Maurasi",
     "regionId": 10000002,
     "security": 0.912748,
-    "costIndex": 0.0613,
+    "costIndex": 0.0612,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26264,7 +26264,7 @@
     "name": "Maut",
     "regionId": 10000048,
     "security": 0.248017,
-    "costIndex": 0.0035,
+    "costIndex": 0.0034,
     "reactionCostIndex": 0.0067
   },
   {
@@ -26289,7 +26289,7 @@
     "regionId": 10000014,
     "security": -0.453532,
     "costIndex": 0.0098,
-    "reactionCostIndex": 0.0343
+    "reactionCostIndex": 0.0342
   },
   {
     "systemId": 30001832,
@@ -26320,7 +26320,7 @@
     "name": "MC6O-F",
     "regionId": 10000003,
     "security": -0.280435,
-    "costIndex": 0.0503,
+    "costIndex": 0.0502,
     "reactionCostIndex": 0.049
   },
   {
@@ -26352,7 +26352,7 @@
     "name": "Mehatoor",
     "regionId": 10000036,
     "security": 0.659473,
-    "costIndex": 0.0364,
+    "costIndex": 0.0365,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26440,7 +26440,7 @@
     "name": "Mesokel",
     "regionId": 10000064,
     "security": 0.857655,
-    "costIndex": 0.0095,
+    "costIndex": 0.0096,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26640,7 +26640,7 @@
     "name": "Mirilene",
     "regionId": 10000032,
     "security": 0.779691,
-    "costIndex": 0.0281,
+    "costIndex": 0.028,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26696,7 +26696,7 @@
     "name": "Mista",
     "regionId": 10000043,
     "security": 0.53738,
-    "costIndex": 0.0216,
+    "costIndex": 0.0215,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26704,7 +26704,7 @@
     "name": "Mitsolen",
     "regionId": 10000002,
     "security": 0.633706,
-    "costIndex": 0.0307,
+    "costIndex": 0.0306,
     "reactionCostIndex": 0.0014
   },
   {
@@ -26712,7 +26712,7 @@
     "name": "Miyeli",
     "regionId": 10000043,
     "security": 0.376772,
-    "costIndex": 0.0261,
+    "costIndex": 0.0262,
     "reactionCostIndex": 0.0233
   },
   {
@@ -26744,7 +26744,7 @@
     "name": "MJI3-8",
     "regionId": 10000010,
     "security": -0.204502,
-    "costIndex": 0.0083,
+    "costIndex": 0.0082,
     "reactionCostIndex": 0.0187
   },
   {
@@ -26793,7 +26793,7 @@
     "regionId": 10000006,
     "security": -0.196437,
     "costIndex": 0.0604,
-    "reactionCostIndex": 0.0521
+    "reactionCostIndex": 0.052
   },
   {
     "systemId": 30001913,
@@ -26952,7 +26952,7 @@
     "name": "Mora",
     "regionId": 10000065,
     "security": 0.932524,
-    "costIndex": 0.0264,
+    "costIndex": 0.0265,
     "reactionCostIndex": 0.0014
   },
   {
@@ -27008,7 +27008,7 @@
     "name": "Motsu",
     "regionId": 10000033,
     "security": 0.872794,
-    "costIndex": 0.0163,
+    "costIndex": 0.0162,
     "reactionCostIndex": 0.0014
   },
   {
@@ -27113,7 +27113,7 @@
     "regionId": 10000009,
     "security": -0.276212,
     "costIndex": 0.0382,
-    "reactionCostIndex": 0.0536
+    "reactionCostIndex": 0.0535
   },
   {
     "systemId": 30000864,
@@ -27240,7 +27240,7 @@
     "name": "Muvolailen",
     "regionId": 10000033,
     "security": 0.708087,
-    "costIndex": 0.1102,
+    "costIndex": 0.1101,
     "reactionCostIndex": 0.0014
   },
   {
@@ -27273,7 +27273,7 @@
     "regionId": 10000006,
     "security": -0.307662,
     "costIndex": 0.048,
-    "reactionCostIndex": 0.0577
+    "reactionCostIndex": 0.0576
   },
   {
     "systemId": 30002913,
@@ -27305,7 +27305,7 @@
     "regionId": 10000014,
     "security": -0.08608,
     "costIndex": 0.0045,
-    "reactionCostIndex": 0.0127
+    "reactionCostIndex": 0.0126
   },
   {
     "systemId": 30003022,
@@ -27369,7 +27369,7 @@
     "regionId": 10000003,
     "security": -0.392558,
     "costIndex": 0.0108,
-    "reactionCostIndex": 0.1294
+    "reactionCostIndex": 0.1293
   },
   {
     "systemId": 30000915,
@@ -27385,7 +27385,7 @@
     "regionId": 10000031,
     "security": -0.398714,
     "costIndex": 0.0244,
-    "reactionCostIndex": 0.0129
+    "reactionCostIndex": 0.0128
   },
   {
     "systemId": 30001209,
@@ -27480,7 +27480,7 @@
     "name": "N-HSK0",
     "regionId": 10000003,
     "security": -0.36044,
-    "costIndex": 0.0223,
+    "costIndex": 0.0222,
     "reactionCostIndex": 0.0316
   },
   {
@@ -27512,7 +27512,7 @@
     "name": "N-O53U",
     "regionId": 10000009,
     "security": -0.425858,
-    "costIndex": 0.0439,
+    "costIndex": 0.0438,
     "reactionCostIndex": 0.0141
   },
   {
@@ -27616,7 +27616,7 @@
     "name": "N5Y-4N",
     "regionId": 10000015,
     "security": -0.245205,
-    "costIndex": 0.0181,
+    "costIndex": 0.018,
     "reactionCostIndex": 0.0014
   },
   {
@@ -27640,7 +27640,7 @@
     "name": "N7-BIY",
     "regionId": 10000009,
     "security": -0.646398,
-    "costIndex": 0.0328,
+    "costIndex": 0.0332,
     "reactionCostIndex": 0.0234
   },
   {
@@ -27704,7 +27704,7 @@
     "name": "Naga",
     "regionId": 10000054,
     "security": 0.033684,
-    "costIndex": 0.0134,
+    "costIndex": 0.0135,
     "reactionCostIndex": 0.0163
   },
   {
@@ -27721,7 +27721,7 @@
     "regionId": 10000043,
     "security": 0.309692,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.038
+    "reactionCostIndex": 0.0381
   },
   {
     "systemId": 30005069,
@@ -28088,7 +28088,7 @@
     "name": "Nema",
     "regionId": 10000054,
     "security": 0.306848,
-    "costIndex": 0.0037,
+    "costIndex": 0.0036,
     "reactionCostIndex": 0.0014
   },
   {
@@ -28128,7 +28128,7 @@
     "name": "New Caldari",
     "regionId": 10000002,
     "security": 0.949,
-    "costIndex": 0.0313,
+    "costIndex": 0.032,
     "reactionCostIndex": 0.0014
   },
   {
@@ -28152,7 +28152,7 @@
     "name": "Neyi",
     "regionId": 10000049,
     "security": 0.809547,
-    "costIndex": 0.0091,
+    "costIndex": 0.009,
     "reactionCostIndex": 0.0014
   },
   {
@@ -28376,7 +28376,7 @@
     "name": "Nisuwa",
     "regionId": 10000069,
     "security": 0.309433,
-    "costIndex": 0.0638,
+    "costIndex": 0.0637,
     "reactionCostIndex": 0.0813
   },
   {
@@ -28384,7 +28384,7 @@
     "name": "Niyabainen",
     "regionId": 10000002,
     "security": 0.949,
-    "costIndex": 0.075,
+    "costIndex": 0.0752,
     "reactionCostIndex": 0.0014
   },
   {
@@ -28401,7 +28401,7 @@
     "regionId": 10000010,
     "security": -0.721263,
     "costIndex": 0.0058,
-    "reactionCostIndex": 0.0243
+    "reactionCostIndex": 0.0242
   },
   {
     "systemId": 30000902,
@@ -28425,7 +28425,7 @@
     "regionId": 10000010,
     "security": -0.255748,
     "costIndex": 0.0422,
-    "reactionCostIndex": 0.0781
+    "reactionCostIndex": 0.078
   },
   {
     "systemId": 30004476,
@@ -28528,7 +28528,7 @@
     "name": "Notoras",
     "regionId": 10000069,
     "security": 0.188791,
-    "costIndex": 0.0291,
+    "costIndex": 0.029,
     "reactionCostIndex": 0.0192
   },
   {
@@ -28824,7 +28824,7 @@
     "name": "O-97ZG",
     "regionId": 10000059,
     "security": -0.060439,
-    "costIndex": 0.0152,
+    "costIndex": 0.0151,
     "reactionCostIndex": 0.0137
   },
   {
@@ -28832,8 +28832,8 @@
     "name": "O-9G5Y",
     "regionId": 10000009,
     "security": -0.520979,
-    "costIndex": 0.0335,
-    "reactionCostIndex": 0.0593
+    "costIndex": 0.0334,
+    "reactionCostIndex": 0.0592
   },
   {
     "systemId": 30002034,
@@ -29089,7 +29089,7 @@
     "regionId": 10000005,
     "security": -0.252721,
     "costIndex": 0.0152,
-    "reactionCostIndex": 0.025
+    "reactionCostIndex": 0.0249
   },
   {
     "systemId": 30002851,
@@ -29129,7 +29129,7 @@
     "regionId": 10000059,
     "security": -0.060432,
     "costIndex": 0.0644,
-    "reactionCostIndex": 0.0626
+    "reactionCostIndex": 0.0627
   },
   {
     "systemId": 30002884,
@@ -29233,7 +29233,7 @@
     "regionId": 10000064,
     "security": 0.423577,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.0655
+    "reactionCostIndex": 0.0654
   },
   {
     "systemId": 30000155,
@@ -29321,7 +29321,7 @@
     "regionId": 10000028,
     "security": 0.370781,
     "costIndex": 0.0131,
-    "reactionCostIndex": 0.0288
+    "reactionCostIndex": 0.0287
   },
   {
     "systemId": 30003470,
@@ -29376,7 +29376,7 @@
     "name": "Odotte",
     "regionId": 10000032,
     "security": 0.871647,
-    "costIndex": 0.0334,
+    "costIndex": 0.0333,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29520,7 +29520,7 @@
     "name": "Ohide",
     "regionId": 10000036,
     "security": 0.573907,
-    "costIndex": 0.0257,
+    "costIndex": 0.0256,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29528,7 +29528,7 @@
     "name": "Ohkunen",
     "regionId": 10000002,
     "security": 0.384887,
-    "costIndex": 0.0147,
+    "costIndex": 0.0148,
     "reactionCostIndex": 0.019
   },
   {
@@ -29536,7 +29536,7 @@
     "name": "Ohmahailen",
     "regionId": 10000002,
     "security": 0.663811,
-    "costIndex": 0.0454,
+    "costIndex": 0.0456,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29584,7 +29584,7 @@
     "name": "Oimmo",
     "regionId": 10000016,
     "security": 0.463883,
-    "costIndex": 0.0484,
+    "costIndex": 0.0483,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29640,7 +29640,7 @@
     "name": "Oisio",
     "regionId": 10000033,
     "security": 0.533575,
-    "costIndex": 0.0293,
+    "costIndex": 0.0294,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29704,7 +29704,7 @@
     "name": "Okkamon",
     "regionId": 10000069,
     "security": 0.285364,
-    "costIndex": 0.0066,
+    "costIndex": 0.007,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29720,7 +29720,7 @@
     "name": "Olbra",
     "regionId": 10000042,
     "security": 0.938167,
-    "costIndex": 0.0207,
+    "costIndex": 0.0206,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29736,7 +29736,7 @@
     "name": "Olelon",
     "regionId": 10000032,
     "security": 0.920964,
-    "costIndex": 0.0211,
+    "costIndex": 0.021,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29753,7 +29753,7 @@
     "regionId": 10000030,
     "security": 0.438684,
     "costIndex": 0.0166,
-    "reactionCostIndex": 0.0522
+    "reactionCostIndex": 0.0524
   },
   {
     "systemId": 30003058,
@@ -29776,7 +29776,7 @@
     "name": "Olo",
     "regionId": 10000002,
     "security": 0.676041,
-    "costIndex": 0.024,
+    "costIndex": 0.0241,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29808,7 +29808,7 @@
     "name": "Ommare",
     "regionId": 10000064,
     "security": 0.726706,
-    "costIndex": 0.0197,
+    "costIndex": 0.0196,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29864,7 +29864,7 @@
     "name": "Onnamon",
     "regionId": 10000069,
     "security": 0.555534,
-    "costIndex": 0.0403,
+    "costIndex": 0.0402,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29880,7 +29880,7 @@
     "name": "Ono",
     "regionId": 10000033,
     "security": 0.794424,
-    "costIndex": 0.0486,
+    "costIndex": 0.0485,
     "reactionCostIndex": 0.0014
   },
   {
@@ -29904,7 +29904,7 @@
     "name": "Onuse",
     "regionId": 10000002,
     "security": 0.740427,
-    "costIndex": 0.0343,
+    "costIndex": 0.0342,
     "reactionCostIndex": 0.0014
   },
   {
@@ -30040,7 +30040,7 @@
     "name": "Orkashu",
     "regionId": 10000043,
     "security": 0.825926,
-    "costIndex": 0.0197,
+    "costIndex": 0.0196,
     "reactionCostIndex": 0.0014
   },
   {
@@ -30160,7 +30160,7 @@
     "name": "Ostingele",
     "regionId": 10000048,
     "security": 0.172621,
-    "costIndex": 0.0145,
+    "costIndex": 0.0146,
     "reactionCostIndex": 0.0014
   },
   {
@@ -30168,7 +30168,7 @@
     "name": "Osvestmunnur",
     "regionId": 10000042,
     "security": 0.513562,
-    "costIndex": 0.0316,
+    "costIndex": 0.0315,
     "reactionCostIndex": 0.0014
   },
   {
@@ -30192,8 +30192,8 @@
     "name": "OSY-UD",
     "regionId": 10000012,
     "security": -0.159361,
-    "costIndex": 0.0228,
-    "reactionCostIndex": 0.033
+    "costIndex": 0.0227,
+    "reactionCostIndex": 0.0331
   },
   {
     "systemId": 30005274,
@@ -30216,7 +30216,7 @@
     "name": "Otanuomi",
     "regionId": 10000070,
     "security": -1,
-    "costIndex": 0.0164,
+    "costIndex": 0.0163,
     "reactionCostIndex": 0.0014
   },
   {
@@ -30240,7 +30240,7 @@
     "name": "Otitoh",
     "regionId": 10000002,
     "security": 0.481667,
-    "costIndex": 0.0203,
+    "costIndex": 0.0202,
     "reactionCostIndex": 0.0014
   },
   {
@@ -30265,7 +30265,7 @@
     "regionId": 10000033,
     "security": 0.39809,
     "costIndex": 0.0371,
-    "reactionCostIndex": 0.0438
+    "reactionCostIndex": 0.0437
   },
   {
     "systemId": 30000172,
@@ -30305,7 +30305,7 @@
     "regionId": 10000016,
     "security": 0.349161,
     "costIndex": 0.0175,
-    "reactionCostIndex": 0.0461
+    "reactionCostIndex": 0.046
   },
   {
     "systemId": 30000194,
@@ -30832,7 +30832,7 @@
     "name": "Palas",
     "regionId": 10000049,
     "security": 0.505996,
-    "costIndex": 0.0194,
+    "costIndex": 0.0195,
     "reactionCostIndex": 0.0014
   },
   {
@@ -30864,7 +30864,7 @@
     "name": "Pamirasu",
     "regionId": 10001004,
     "security": 1,
-    "costIndex": 0.0183,
+    "costIndex": 0.0184,
     "reactionCostIndex": 0.0014
   },
   {
@@ -30920,7 +30920,7 @@
     "name": "Pasha",
     "regionId": 10000020,
     "security": 0.914349,
-    "costIndex": 0.0172,
+    "costIndex": 0.0171,
     "reactionCostIndex": 0.0014
   },
   {
@@ -31032,8 +31032,8 @@
     "name": "PE-SAM",
     "regionId": 10000066,
     "security": -0.354531,
-    "costIndex": 0.0279,
-    "reactionCostIndex": 0.0322
+    "costIndex": 0.0281,
+    "reactionCostIndex": 0.0321
   },
   {
     "systemId": 30000379,
@@ -31064,7 +31064,7 @@
     "name": "Pelille",
     "regionId": 10000048,
     "security": 0.214825,
-    "costIndex": 0.022,
+    "costIndex": 0.0219,
     "reactionCostIndex": 0.0014
   },
   {
@@ -31144,7 +31144,7 @@
     "name": "Perimeter",
     "regionId": 10000002,
     "security": 0.949,
-    "costIndex": 0.0502,
+    "costIndex": 0.0505,
     "reactionCostIndex": 0.0014,
     "hubId": "jita"
   },
@@ -31234,7 +31234,7 @@
     "regionId": 10000025,
     "security": -0.241709,
     "costIndex": 0.019,
-    "reactionCostIndex": 0.0293
+    "reactionCostIndex": 0.0292
   },
   {
     "systemId": 30001707,
@@ -31265,7 +31265,7 @@
     "name": "Piekura",
     "regionId": 10000016,
     "security": 0.50597,
-    "costIndex": 0.0556,
+    "costIndex": 0.0555,
     "reactionCostIndex": 0.0014
   },
   {
@@ -31305,7 +31305,7 @@
     "name": "Pirohdim",
     "regionId": 10000001,
     "security": 0.628696,
-    "costIndex": 0.0247,
+    "costIndex": 0.025,
     "reactionCostIndex": 0.0014
   },
   {
@@ -31338,7 +31338,7 @@
     "regionId": 10000003,
     "security": -0.423653,
     "costIndex": 0.0315,
-    "reactionCostIndex": 0.0455
+    "reactionCostIndex": 0.0454
   },
   {
     "systemId": 30004411,
@@ -31425,7 +31425,7 @@
     "name": "Poinen",
     "regionId": 10000002,
     "security": 0.558053,
-    "costIndex": 0.0333,
+    "costIndex": 0.0332,
     "reactionCostIndex": 0.0014
   },
   {
@@ -31601,8 +31601,8 @@
     "name": "PT-21C",
     "regionId": 10000009,
     "security": -0.176723,
-    "costIndex": 0.0332,
-    "reactionCostIndex": 0.0346
+    "costIndex": 0.0331,
+    "reactionCostIndex": 0.0345
   },
   {
     "systemId": 30005162,
@@ -31793,7 +31793,7 @@
     "name": "Q-3HS5",
     "regionId": 10000009,
     "security": -0.578873,
-    "costIndex": 0.0523,
+    "costIndex": 0.0522,
     "reactionCostIndex": 0.0812
   },
   {
@@ -31873,7 +31873,7 @@
     "name": "Q-HJ97",
     "regionId": 10000025,
     "security": -0.416475,
-    "costIndex": 0.0203,
+    "costIndex": 0.0202,
     "reactionCostIndex": 0.0083
   },
   {
@@ -31913,7 +31913,7 @@
     "name": "Q-L07F",
     "regionId": 10000003,
     "security": -0.322347,
-    "costIndex": 0.0104,
+    "costIndex": 0.0103,
     "reactionCostIndex": 0.0375
   },
   {
@@ -32081,7 +32081,7 @@
     "name": "Q4C-S5",
     "regionId": 10000008,
     "security": -0.679239,
-    "costIndex": 0.046,
+    "costIndex": 0.0461,
     "reactionCostIndex": 0.0394
   },
   {
@@ -32105,7 +32105,7 @@
     "name": "Q7-FZ8",
     "regionId": 10000009,
     "security": -0.546487,
-    "costIndex": 0.028,
+    "costIndex": 0.0279,
     "reactionCostIndex": 0.0558
   },
   {
@@ -32241,7 +32241,7 @@
     "name": "QFEW-K",
     "regionId": 10000012,
     "security": -0.130312,
-    "costIndex": 0.041,
+    "costIndex": 0.0409,
     "reactionCostIndex": 0.0261
   },
   {
@@ -32265,7 +32265,7 @@
     "name": "QFIU-K",
     "regionId": 10000039,
     "security": -0.357982,
-    "costIndex": 0.0289,
+    "costIndex": 0.0288,
     "reactionCostIndex": 0.0215
   },
   {
@@ -32777,7 +32777,7 @@
     "name": "R-ARKN",
     "regionId": 10000039,
     "security": -0.254933,
-    "costIndex": 0.0607,
+    "costIndex": 0.0609,
     "reactionCostIndex": 0.071
   },
   {
@@ -32985,8 +32985,8 @@
     "name": "R3W-XU",
     "regionId": 10000058,
     "security": -0.106247,
-    "costIndex": 0.0434,
-    "reactionCostIndex": 0.0787
+    "costIndex": 0.0433,
+    "reactionCostIndex": 0.0789
   },
   {
     "systemId": 30004473,
@@ -33066,7 +33066,7 @@
     "regionId": 10000009,
     "security": -0.060729,
     "costIndex": 0.0468,
-    "reactionCostIndex": 0.0502
+    "reactionCostIndex": 0.0501
   },
   {
     "systemId": 30004485,
@@ -33089,7 +33089,7 @@
     "name": "Raa",
     "regionId": 10000036,
     "security": 0.309657,
-    "costIndex": 0.0151,
+    "costIndex": 0.0152,
     "reactionCostIndex": 0.0316
   },
   {
@@ -33097,7 +33097,7 @@
     "name": "Radima",
     "regionId": 10000001,
     "security": 0.75392,
-    "costIndex": 0.0155,
+    "costIndex": 0.0158,
     "reactionCostIndex": 0.0014
   },
   {
@@ -33169,8 +33169,8 @@
     "name": "Rakapas",
     "regionId": 10000069,
     "security": 0.22278,
-    "costIndex": 0.0515,
-    "reactionCostIndex": 0.0681
+    "costIndex": 0.0514,
+    "reactionCostIndex": 0.0683
   },
   {
     "systemId": 30002239,
@@ -33226,7 +33226,7 @@
     "regionId": 10000043,
     "security": 0.441866,
     "costIndex": 0.0233,
-    "reactionCostIndex": 0.0144
+    "reactionCostIndex": 0.0143
   },
   {
     "systemId": 30003495,
@@ -33241,7 +33241,7 @@
     "name": "Raren",
     "regionId": 10000043,
     "security": 0.506317,
-    "costIndex": 0.0198,
+    "costIndex": 0.0197,
     "reactionCostIndex": 0.0014
   },
   {
@@ -33393,7 +33393,7 @@
     "name": "Reisen",
     "regionId": 10000002,
     "security": 0.518561,
-    "costIndex": 0.0166,
+    "costIndex": 0.0167,
     "reactionCostIndex": 0.0014
   },
   {
@@ -33425,7 +33425,7 @@
     "name": "Rens",
     "regionId": 10000030,
     "security": 0.894582,
-    "costIndex": 0.0367,
+    "costIndex": 0.0368,
     "reactionCostIndex": 0.0014,
     "hubId": "rens"
   },
@@ -33450,7 +33450,7 @@
     "name": "Repute",
     "regionId": 10001004,
     "security": 1,
-    "costIndex": 0.0045,
+    "costIndex": 0.0048,
     "reactionCostIndex": 0.0014
   },
   {
@@ -33459,7 +33459,7 @@
     "regionId": 10000009,
     "security": -0.220318,
     "costIndex": 0.0459,
-    "reactionCostIndex": 0.1377
+    "reactionCostIndex": 0.1376
   },
   {
     "systemId": 30002056,
@@ -33651,7 +33651,7 @@
     "regionId": 10000049,
     "security": 0.449848,
     "costIndex": 0.0247,
-    "reactionCostIndex": 0.0246
+    "reactionCostIndex": 0.0245
   },
   {
     "systemId": 30002241,
@@ -33834,7 +33834,7 @@
     "name": "Rohamaa",
     "regionId": 10000069,
     "security": 0.504717,
-    "costIndex": 0.0054,
+    "costIndex": 0.0053,
     "reactionCostIndex": 0.0014
   },
   {
@@ -33850,7 +33850,7 @@
     "name": "ROJ-B0",
     "regionId": 10000009,
     "security": -0.190917,
-    "costIndex": 0.0095,
+    "costIndex": 0.0094,
     "reactionCostIndex": 0.0157
   },
   {
@@ -34154,7 +34154,7 @@
     "name": "RVCZ-C",
     "regionId": 10000003,
     "security": -0.142496,
-    "costIndex": 0.0306,
+    "costIndex": 0.0305,
     "reactionCostIndex": 0.0313
   },
   {
@@ -34203,14 +34203,14 @@
     "regionId": 10000008,
     "security": -0.883893,
     "costIndex": 0.0569,
-    "reactionCostIndex": 0.0704
+    "reactionCostIndex": 0.0703
   },
   {
     "systemId": 30003410,
     "name": "Ryddinjorn",
     "regionId": 10000042,
     "security": 0.949,
-    "costIndex": 0.0076,
+    "costIndex": 0.0075,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34338,7 +34338,7 @@
     "name": "S-DN5M",
     "regionId": 10000035,
     "security": -0.852784,
-    "costIndex": 0.0196,
+    "costIndex": 0.0195,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34403,7 +34403,7 @@
     "regionId": 10000003,
     "security": -0.281587,
     "costIndex": 0.0336,
-    "reactionCostIndex": 0.0394
+    "reactionCostIndex": 0.0393
   },
   {
     "systemId": 30000388,
@@ -34531,7 +34531,7 @@
     "regionId": 10000010,
     "security": -0.204552,
     "costIndex": 0.0246,
-    "reactionCostIndex": 0.0245
+    "reactionCostIndex": 0.0244
   },
   {
     "systemId": 30001891,
@@ -34570,7 +34570,7 @@
     "name": "Saatuban",
     "regionId": 10000016,
     "security": 0.549477,
-    "costIndex": 0.0466,
+    "costIndex": 0.0468,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34618,7 +34618,7 @@
     "name": "Safizon",
     "regionId": 10000043,
     "security": 0.8099,
-    "costIndex": 0.0167,
+    "costIndex": 0.0168,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34642,7 +34642,7 @@
     "name": "Sagain",
     "regionId": 10000020,
     "security": 0.43391,
-    "costIndex": 0.0029,
+    "costIndex": 0.0028,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34650,7 +34650,7 @@
     "name": "SAH-AD",
     "regionId": 10000027,
     "security": -0.247389,
-    "costIndex": 0.0062,
+    "costIndex": 0.0061,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34682,8 +34682,8 @@
     "name": "Sahtogas",
     "regionId": 10000038,
     "security": 0.279867,
-    "costIndex": 0.0231,
-    "reactionCostIndex": 0.0715
+    "costIndex": 0.0236,
+    "reactionCostIndex": 0.0714
   },
   {
     "systemId": 30000508,
@@ -34706,7 +34706,7 @@
     "name": "Saikamon",
     "regionId": 10000038,
     "security": 0.412492,
-    "costIndex": 0.016,
+    "costIndex": 0.0159,
     "reactionCostIndex": 0.0564
   },
   {
@@ -34722,7 +34722,7 @@
     "name": "Saila",
     "regionId": 10000033,
     "security": 0.893457,
-    "costIndex": 0.0266,
+    "costIndex": 0.0265,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34746,8 +34746,8 @@
     "name": "Sakht",
     "regionId": 10000054,
     "security": 0.041499,
-    "costIndex": 0.0457,
-    "reactionCostIndex": 0.0506
+    "costIndex": 0.0459,
+    "reactionCostIndex": 0.0505
   },
   {
     "systemId": 30002215,
@@ -34770,7 +34770,7 @@
     "name": "Sakkikainen",
     "regionId": 10000002,
     "security": 0.594889,
-    "costIndex": 0.0233,
+    "costIndex": 0.0232,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34810,7 +34810,7 @@
     "name": "Samanuni",
     "regionId": 10000069,
     "security": 0.652785,
-    "costIndex": 0.0225,
+    "costIndex": 0.0224,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34834,7 +34834,7 @@
     "name": "Santola",
     "regionId": 10000033,
     "security": 0.829998,
-    "costIndex": 0.032,
+    "costIndex": 0.0319,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34850,7 +34850,7 @@
     "name": "Saranen",
     "regionId": 10000016,
     "security": 0.096294,
-    "costIndex": 0.0078,
+    "costIndex": 0.0077,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34858,7 +34858,7 @@
     "name": "Sarekuwa",
     "regionId": 10000016,
     "security": 0.936502,
-    "costIndex": 0.0836,
+    "costIndex": 0.0835,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34890,7 +34890,7 @@
     "name": "Sarum Prime",
     "regionId": 10000043,
     "security": 0.949,
-    "costIndex": 0.0481,
+    "costIndex": 0.0482,
     "reactionCostIndex": 0.0014
   },
   {
@@ -34938,7 +34938,7 @@
     "name": "Sayartchen",
     "regionId": 10000043,
     "security": 0.789506,
-    "costIndex": 0.0113,
+    "costIndex": 0.0112,
     "reactionCostIndex": 0.0014
   },
   {
@@ -35018,7 +35018,7 @@
     "name": "Scuelazyns",
     "regionId": 10000037,
     "security": 0.641687,
-    "costIndex": 0.0112,
+    "costIndex": 0.0113,
     "reactionCostIndex": 0.0014
   },
   {
@@ -35058,7 +35058,7 @@
     "name": "Sehmy",
     "regionId": 10000065,
     "security": 0.949,
-    "costIndex": 0.0132,
+    "costIndex": 0.0131,
     "reactionCostIndex": 0.0014
   },
   {
@@ -35259,7 +35259,7 @@
     "regionId": 10000043,
     "security": 0.34858,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.0166
+    "reactionCostIndex": 0.0165
   },
   {
     "systemId": 30004231,
@@ -35426,7 +35426,7 @@
     "name": "Shesha",
     "regionId": 10000020,
     "security": 0.939664,
-    "costIndex": 0.0233,
+    "costIndex": 0.0232,
     "reactionCostIndex": 0.0014
   },
   {
@@ -35523,14 +35523,14 @@
     "regionId": 10000043,
     "security": 0.171405,
     "costIndex": 0.0101,
-    "reactionCostIndex": 0.0272
+    "reactionCostIndex": 0.0271
   },
   {
     "systemId": 30003557,
     "name": "Sieh",
     "regionId": 10000043,
     "security": 0.27801,
-    "costIndex": 0.0054,
+    "costIndex": 0.0053,
     "reactionCostIndex": 0.0079
   },
   {
@@ -35586,7 +35586,7 @@
     "name": "Sinid",
     "regionId": 10000020,
     "security": 0.729366,
-    "costIndex": 0.0048,
+    "costIndex": 0.0049,
     "reactionCostIndex": 0.0014
   },
   {
@@ -35594,7 +35594,7 @@
     "name": "Sirekur",
     "regionId": 10000042,
     "security": 0.311342,
-    "costIndex": 0.0033,
+    "costIndex": 0.0034,
     "reactionCostIndex": 0.0014
   },
   {
@@ -35730,7 +35730,7 @@
     "name": "Slays",
     "regionId": 10000048,
     "security": 0.487171,
-    "costIndex": 0.0239,
+    "costIndex": 0.0242,
     "reactionCostIndex": 0.0014
   },
   {
@@ -35762,8 +35762,8 @@
     "name": "SN9-3Z",
     "regionId": 10000009,
     "security": -0.143522,
-    "costIndex": 0.0273,
-    "reactionCostIndex": 0.0431
+    "costIndex": 0.0272,
+    "reactionCostIndex": 0.043
   },
   {
     "systemId": 30003152,
@@ -35930,7 +35930,7 @@
     "name": "Sotrentaira",
     "regionId": 10000016,
     "security": 0.51257,
-    "costIndex": 0.0534,
+    "costIndex": 0.0533,
     "reactionCostIndex": 0.0014
   },
   {
@@ -35963,7 +35963,7 @@
     "regionId": 10000025,
     "security": -0.18178,
     "costIndex": 0.0034,
-    "reactionCostIndex": 0.0184
+    "reactionCostIndex": 0.0183
   },
   {
     "systemId": 30004570,
@@ -36107,7 +36107,7 @@
     "regionId": 10000033,
     "security": 0.311136,
     "costIndex": 0.0499,
-    "reactionCostIndex": 0.0451
+    "reactionCostIndex": 0.045
   },
   {
     "systemId": 30002200,
@@ -36122,7 +36122,7 @@
     "name": "Suner",
     "regionId": 10000052,
     "security": 0.869107,
-    "costIndex": 0.0043,
+    "costIndex": 0.0042,
     "reactionCostIndex": 0.0014
   },
   {
@@ -36138,7 +36138,7 @@
     "name": "Suroken",
     "regionId": 10000033,
     "security": 0.729161,
-    "costIndex": 0.037,
+    "costIndex": 0.0371,
     "reactionCostIndex": 0.0014
   },
   {
@@ -36314,7 +36314,7 @@
     "name": "T-HMWP",
     "regionId": 10000040,
     "security": -0.216697,
-    "costIndex": 0.0574,
+    "costIndex": 0.0582,
     "reactionCostIndex": 0.0509
   },
   {
@@ -36354,7 +36354,7 @@
     "name": "T-LIWS",
     "regionId": 10000041,
     "security": -0.06625,
-    "costIndex": 0.0116,
+    "costIndex": 0.0115,
     "reactionCostIndex": 0.0102
   },
   {
@@ -36370,7 +36370,7 @@
     "name": "T-NNJZ",
     "regionId": 10000022,
     "security": -0.302784,
-    "costIndex": 0.0267,
+    "costIndex": 0.0266,
     "reactionCostIndex": 0.0287
   },
   {
@@ -36426,8 +36426,8 @@
     "name": "T-ZWA1",
     "regionId": 10000003,
     "security": -0.751692,
-    "costIndex": 0.0353,
-    "reactionCostIndex": 0.0479
+    "costIndex": 0.0357,
+    "reactionCostIndex": 0.0478
   },
   {
     "systemId": 30001771,
@@ -36442,8 +36442,8 @@
     "name": "T2-V8F",
     "regionId": 10000061,
     "security": -0.250457,
-    "costIndex": 0.0397,
-    "reactionCostIndex": 0.0503
+    "costIndex": 0.0396,
+    "reactionCostIndex": 0.0504
   },
   {
     "systemId": 30003287,
@@ -36586,7 +36586,7 @@
     "name": "Tama",
     "regionId": 10000033,
     "security": 0.282556,
-    "costIndex": 0.0471,
+    "costIndex": 0.047,
     "reactionCostIndex": 0.0641
   },
   {
@@ -36682,7 +36682,7 @@
     "name": "Tash-Murkon Prime",
     "regionId": 10000020,
     "security": 0.832134,
-    "costIndex": 0.0479,
+    "costIndex": 0.0478,
     "reactionCostIndex": 0.0014
   },
   {
@@ -36714,7 +36714,7 @@
     "name": "TCAG-3",
     "regionId": 10000063,
     "security": -0.372875,
-    "costIndex": 0.0435,
+    "costIndex": 0.0438,
     "reactionCostIndex": 0.0572
   },
   {
@@ -36778,7 +36778,7 @@
     "name": "Tekaima",
     "regionId": 10000067,
     "security": 0.594752,
-    "costIndex": 0.0074,
+    "costIndex": 0.0076,
     "reactionCostIndex": 0.0014
   },
   {
@@ -36818,7 +36818,7 @@
     "name": "Teonusude",
     "regionId": 10000028,
     "security": 0.586314,
-    "costIndex": 0.0241,
+    "costIndex": 0.024,
     "reactionCostIndex": 0.0014
   },
   {
@@ -36842,7 +36842,7 @@
     "name": "Teskanen",
     "regionId": 10000069,
     "security": 0.287172,
-    "costIndex": 0.0063,
+    "costIndex": 0.0066,
     "reactionCostIndex": 0.0014
   },
   {
@@ -37002,7 +37002,7 @@
     "name": "Tindfjalla",
     "regionId": 10001004,
     "security": 1,
-    "costIndex": 0.0031,
+    "costIndex": 0.003,
     "reactionCostIndex": 0.0014
   },
   {
@@ -37026,7 +37026,7 @@
     "name": "Tisot",
     "regionId": 10000054,
     "security": 0.089876,
-    "costIndex": 0.0058,
+    "costIndex": 0.0057,
     "reactionCostIndex": 0.0014
   },
   {
@@ -37170,7 +37170,7 @@
     "name": "Torrinos",
     "regionId": 10000016,
     "security": 0.519668,
-    "costIndex": 0.0371,
+    "costIndex": 0.037,
     "reactionCostIndex": 0.0014
   },
   {
@@ -37354,7 +37354,7 @@
     "name": "Tsuguwa",
     "regionId": 10000016,
     "security": 0.769323,
-    "costIndex": 0.0527,
+    "costIndex": 0.0526,
     "reactionCostIndex": 0.0014
   },
   {
@@ -37362,7 +37362,7 @@
     "name": "Tsukuras",
     "regionId": 10000016,
     "security": 0.732158,
-    "costIndex": 0.0545,
+    "costIndex": 0.0544,
     "reactionCostIndex": 0.0014
   },
   {
@@ -37426,7 +37426,7 @@
     "name": "Tunttaras",
     "regionId": 10000016,
     "security": 0.885312,
-    "costIndex": 0.0554,
+    "costIndex": 0.0553,
     "reactionCostIndex": 0.0014
   },
   {
@@ -37434,7 +37434,7 @@
     "name": "Tunudan",
     "regionId": 10000070,
     "security": -1,
-    "costIndex": 0.005,
+    "costIndex": 0.0049,
     "reactionCostIndex": 0.0014
   },
   {
@@ -37490,7 +37490,7 @@
     "name": "TVN-FM",
     "regionId": 10000003,
     "security": -0.645799,
-    "costIndex": 0.0281,
+    "costIndex": 0.028,
     "reactionCostIndex": 0.0303
   },
   {
@@ -37530,7 +37530,7 @@
     "name": "TY2X-C",
     "regionId": 10000061,
     "security": -0.155575,
-    "costIndex": 0.0221,
+    "costIndex": 0.022,
     "reactionCostIndex": 0.0338
   },
   {
@@ -37554,7 +37554,7 @@
     "name": "Tzashrah",
     "regionId": 10000049,
     "security": 0.534552,
-    "costIndex": 0.0092,
+    "costIndex": 0.0091,
     "reactionCostIndex": 0.0014
   },
   {
@@ -37578,8 +37578,8 @@
     "name": "TZN-2V",
     "regionId": 10000009,
     "security": -0.152677,
-    "costIndex": 0.0363,
-    "reactionCostIndex": 0.0999
+    "costIndex": 0.0369,
+    "reactionCostIndex": 0.0998
   },
   {
     "systemId": 30002957,
@@ -37738,7 +37738,7 @@
     "name": "U-SOH2",
     "regionId": 10000058,
     "security": -0.687591,
-    "costIndex": 0.0136,
+    "costIndex": 0.0135,
     "reactionCostIndex": 0.02
   },
   {
@@ -37746,7 +37746,7 @@
     "name": "U-TJ7Y",
     "regionId": 10000035,
     "security": -0.727356,
-    "costIndex": 0.0126,
+    "costIndex": 0.0127,
     "reactionCostIndex": 0.0257
   },
   {
@@ -37754,7 +37754,7 @@
     "name": "U-UTU9",
     "regionId": 10000009,
     "security": -0.04209,
-    "costIndex": 0.0165,
+    "costIndex": 0.0166,
     "reactionCostIndex": 0.0137
   },
   {
@@ -37763,7 +37763,7 @@
     "regionId": 10000010,
     "security": -0.159317,
     "costIndex": 0.0459,
-    "reactionCostIndex": 0.0785
+    "reactionCostIndex": 0.0784
   },
   {
     "systemId": 30005131,
@@ -37819,7 +37819,7 @@
     "regionId": 10000006,
     "security": -0.266764,
     "costIndex": 0.0081,
-    "reactionCostIndex": 0.0623
+    "reactionCostIndex": 0.0622
   },
   {
     "systemId": 30000329,
@@ -37842,7 +37842,7 @@
     "name": "U2-28D",
     "regionId": 10000008,
     "security": -0.341332,
-    "costIndex": 0.0191,
+    "costIndex": 0.019,
     "reactionCostIndex": 0.0014
   },
   {
@@ -38018,7 +38018,7 @@
     "name": "Uadelah",
     "regionId": 10000036,
     "security": 0.829694,
-    "costIndex": 0.0184,
+    "costIndex": 0.0183,
     "reactionCostIndex": 0.0014
   },
   {
@@ -38027,7 +38027,7 @@
     "regionId": 10000021,
     "security": -0.227917,
     "costIndex": 0.0292,
-    "reactionCostIndex": 0.0516
+    "reactionCostIndex": 0.0515
   },
   {
     "systemId": 30002101,
@@ -38218,7 +38218,7 @@
     "name": "Uedama",
     "regionId": 10000033,
     "security": 0.50544,
-    "costIndex": 0.0642,
+    "costIndex": 0.0641,
     "reactionCostIndex": 0.0014
   },
   {
@@ -38234,7 +38234,7 @@
     "name": "Uemisaisen",
     "regionId": 10000016,
     "security": 0.605931,
-    "costIndex": 0.0285,
+    "costIndex": 0.0286,
     "reactionCostIndex": 0.0014
   },
   {
@@ -38274,7 +38274,7 @@
     "name": "Uesuro",
     "regionId": 10000016,
     "security": 0.523532,
-    "costIndex": 0.0212,
+    "costIndex": 0.0211,
     "reactionCostIndex": 0.0014
   },
   {
@@ -38466,8 +38466,8 @@
     "name": "UM-SCG",
     "regionId": 10000006,
     "security": -0.305073,
-    "costIndex": 0.0333,
-    "reactionCostIndex": 0.0311
+    "costIndex": 0.0338,
+    "reactionCostIndex": 0.031
   },
   {
     "systemId": 30000911,
@@ -38482,15 +38482,15 @@
     "name": "UMI-KK",
     "regionId": 10000010,
     "security": -0.169479,
-    "costIndex": 0.0298,
-    "reactionCostIndex": 0.0299
+    "costIndex": 0.03,
+    "reactionCostIndex": 0.0301
   },
   {
     "systemId": 30000184,
     "name": "Uminas",
     "regionId": 10000002,
     "security": 0.483909,
-    "costIndex": 0.0283,
+    "costIndex": 0.0285,
     "reactionCostIndex": 0.0014
   },
   {
@@ -38498,7 +38498,7 @@
     "name": "Umokka",
     "regionId": 10000016,
     "security": 0.561301,
-    "costIndex": 0.0364,
+    "costIndex": 0.0363,
     "reactionCostIndex": 0.0014
   },
   {
@@ -38578,7 +38578,7 @@
     "name": "Uosusuokko",
     "regionId": 10000016,
     "security": 0.694322,
-    "costIndex": 0.031,
+    "costIndex": 0.0309,
     "reactionCostIndex": 0.0014
   },
   {
@@ -38659,7 +38659,7 @@
     "regionId": 10000055,
     "security": -0.165458,
     "costIndex": 0.0393,
-    "reactionCostIndex": 0.0352
+    "reactionCostIndex": 0.0353
   },
   {
     "systemId": 30003955,
@@ -38730,7 +38730,7 @@
     "name": "Usi",
     "regionId": 10000033,
     "security": 0.543759,
-    "costIndex": 0.0296,
+    "costIndex": 0.0295,
     "reactionCostIndex": 0.0014
   },
   {
@@ -38826,8 +38826,8 @@
     "name": "Uuna",
     "regionId": 10000033,
     "security": 0.383502,
-    "costIndex": 0.0681,
-    "reactionCostIndex": 0.0492
+    "costIndex": 0.0684,
+    "reactionCostIndex": 0.0506
   },
   {
     "systemId": 30003077,
@@ -38866,7 +38866,7 @@
     "name": "UY5A-D",
     "regionId": 10000006,
     "security": -0.404798,
-    "costIndex": 0.0129,
+    "costIndex": 0.0128,
     "reactionCostIndex": 0.0014
   },
   {
@@ -39035,7 +39035,7 @@
     "regionId": 10000003,
     "security": -0.763534,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.1341
+    "reactionCostIndex": 0.134
   },
   {
     "systemId": 30000248,
@@ -39059,7 +39059,7 @@
     "regionId": 10000009,
     "security": -0.232104,
     "costIndex": 0.0127,
-    "reactionCostIndex": 0.0519
+    "reactionCostIndex": 0.0518
   },
   {
     "systemId": 30000694,
@@ -39187,7 +39187,7 @@
     "regionId": 10000058,
     "security": -0.559553,
     "costIndex": 0.0384,
-    "reactionCostIndex": 0.0643
+    "reactionCostIndex": 0.0642
   },
   {
     "systemId": 30000888,
@@ -39402,7 +39402,7 @@
     "name": "Vay",
     "regionId": 10000068,
     "security": 0.758522,
-    "costIndex": 0.0179,
+    "costIndex": 0.018,
     "reactionCostIndex": 0.0014
   },
   {
@@ -39466,7 +39466,7 @@
     "name": "Veisto",
     "regionId": 10000016,
     "security": 0.842495,
-    "costIndex": 0.0654,
+    "costIndex": 0.0653,
     "reactionCostIndex": 0.0014
   },
   {
@@ -39474,7 +39474,7 @@
     "name": "Vellaine",
     "regionId": 10000016,
     "security": 0.581139,
-    "costIndex": 0.0601,
+    "costIndex": 0.06,
     "reactionCostIndex": 0.0014
   },
   {
@@ -39674,7 +39674,7 @@
     "name": "VJ0-81",
     "regionId": 10000057,
     "security": -0.031962,
-    "costIndex": 0.0168,
+    "costIndex": 0.0167,
     "reactionCostIndex": 0.0014
   },
   {
@@ -39778,7 +39778,7 @@
     "name": "VORM-W",
     "regionId": 10000003,
     "security": -0.558546,
-    "costIndex": 0.037,
+    "costIndex": 0.0378,
     "reactionCostIndex": 0.019
   },
   {
@@ -39866,7 +39866,7 @@
     "name": "VT-G2P",
     "regionId": 10000050,
     "security": -0.56689,
-    "costIndex": 0.0519,
+    "costIndex": 0.052,
     "reactionCostIndex": 0.0589
   },
   {
@@ -39882,8 +39882,8 @@
     "name": "VUAC-Y",
     "regionId": 10000039,
     "security": -0.308028,
-    "costIndex": 0.0538,
-    "reactionCostIndex": 0.084
+    "costIndex": 0.0537,
+    "reactionCostIndex": 0.0839
   },
   {
     "systemId": 30004890,
@@ -39906,7 +39906,7 @@
     "name": "Vuorrassi",
     "regionId": 10000016,
     "security": 0.528345,
-    "costIndex": 0.0283,
+    "costIndex": 0.0282,
     "reactionCostIndex": 0.0014
   },
   {
@@ -40027,7 +40027,7 @@
     "regionId": 10000061,
     "security": -0.288007,
     "costIndex": 0.0351,
-    "reactionCostIndex": 0.0538
+    "reactionCostIndex": 0.0537
   },
   {
     "systemId": 30002497,
@@ -40082,7 +40082,7 @@
     "name": "W-FHWJ",
     "regionId": 10000025,
     "security": -0.235296,
-    "costIndex": 0.0096,
+    "costIndex": 0.0095,
     "reactionCostIndex": 0.0014
   },
   {
@@ -40162,8 +40162,8 @@
     "name": "W-UQA5",
     "regionId": 10000010,
     "security": -0.302784,
-    "costIndex": 0.0388,
-    "reactionCostIndex": 0.0809
+    "costIndex": 0.0389,
+    "reactionCostIndex": 0.0808
   },
   {
     "systemId": 30001897,
@@ -40378,7 +40378,7 @@
     "name": "Waskisen",
     "regionId": 10000033,
     "security": 0.685588,
-    "costIndex": 0.0402,
+    "costIndex": 0.0403,
     "reactionCostIndex": 0.0014
   },
   {
@@ -40675,7 +40675,7 @@
     "regionId": 10000008,
     "security": -0.789404,
     "costIndex": 0.0084,
-    "reactionCostIndex": 0.012
+    "reactionCostIndex": 0.0119
   },
   {
     "systemId": 30000928,
@@ -40762,7 +40762,7 @@
     "name": "Wuos",
     "regionId": 10000002,
     "security": 0.561774,
-    "costIndex": 0.0165,
+    "costIndex": 0.0164,
     "reactionCostIndex": 0.0014
   },
   {
@@ -40826,7 +40826,7 @@
     "name": "WX-6UX",
     "regionId": 10000039,
     "security": -0.728552,
-    "costIndex": 0.0201,
+    "costIndex": 0.02,
     "reactionCostIndex": 0.0139
   },
   {
@@ -40851,7 +40851,7 @@
     "regionId": 10000025,
     "security": -0.604062,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.058
+    "reactionCostIndex": 0.0579
   },
   {
     "systemId": 30005016,
@@ -40882,7 +40882,7 @@
     "name": "X-31TE",
     "regionId": 10000005,
     "security": -0.201282,
-    "costIndex": 0.0398,
+    "costIndex": 0.0397,
     "reactionCostIndex": 0.0216
   },
   {
@@ -41082,8 +41082,8 @@
     "name": "X1-IZ0",
     "regionId": 10000009,
     "security": -0.590191,
-    "costIndex": 0.0274,
-    "reactionCostIndex": 0.0645
+    "costIndex": 0.0273,
+    "reactionCostIndex": 0.0644
   },
   {
     "systemId": 30001835,
@@ -41099,14 +41099,14 @@
     "regionId": 10000013,
     "security": -0.241532,
     "costIndex": 0.0367,
-    "reactionCostIndex": 0.0349
+    "reactionCostIndex": 0.0348
   },
   {
     "systemId": 30000713,
     "name": "X2-ZA5",
     "regionId": 10000008,
     "security": -0.900585,
-    "costIndex": 0.0211,
+    "costIndex": 0.021,
     "reactionCostIndex": 0.0014
   },
   {
@@ -41162,7 +41162,7 @@
     "name": "X47L-Q",
     "regionId": 10000023,
     "security": -0.250256,
-    "costIndex": 0.0077,
+    "costIndex": 0.0076,
     "reactionCostIndex": 0.0014
   },
   {
@@ -41338,7 +41338,7 @@
     "name": "XF-PWO",
     "regionId": 10000003,
     "security": -0.312208,
-    "costIndex": 0.0375,
+    "costIndex": 0.0374,
     "reactionCostIndex": 0.0014
   },
   {
@@ -41411,7 +41411,7 @@
     "regionId": 10000009,
     "security": -0.145224,
     "costIndex": 0.0354,
-    "reactionCostIndex": 0.0538
+    "reactionCostIndex": 0.0537
   },
   {
     "systemId": 30003263,
@@ -41475,7 +41475,7 @@
     "regionId": 10000009,
     "security": -0.155019,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.1322
+    "reactionCostIndex": 0.1321
   },
   {
     "systemId": 30000585,
@@ -41499,7 +41499,7 @@
     "regionId": 10000025,
     "security": -0.543662,
     "costIndex": 0.009,
-    "reactionCostIndex": 0.0223
+    "reactionCostIndex": 0.0222
   },
   {
     "systemId": 30003313,
@@ -41594,7 +41594,7 @@
     "name": "XUW-3X",
     "regionId": 10000058,
     "security": -0.234768,
-    "costIndex": 0.023,
+    "costIndex": 0.0229,
     "reactionCostIndex": 0.0054
   },
   {
@@ -41730,8 +41730,8 @@
     "name": "Y-1W01",
     "regionId": 10000058,
     "security": -0.128049,
-    "costIndex": 0.0316,
-    "reactionCostIndex": 0.0494
+    "costIndex": 0.0315,
+    "reactionCostIndex": 0.0493
   },
   {
     "systemId": 30004665,
@@ -41754,8 +41754,8 @@
     "name": "Y-4U62",
     "regionId": 10000022,
     "security": -0.057834,
-    "costIndex": 0.0271,
-    "reactionCostIndex": 0.0319
+    "costIndex": 0.0275,
+    "reactionCostIndex": 0.0322
   },
   {
     "systemId": 30001498,
@@ -41908,7 +41908,7 @@
     "regionId": 10000061,
     "security": -0.280437,
     "costIndex": 0.0263,
-    "reactionCostIndex": 0.0298
+    "reactionCostIndex": 0.0297
   },
   {
     "systemId": 30001255,
@@ -42004,7 +42004,7 @@
     "regionId": 10000003,
     "security": -0.439537,
     "costIndex": 0.0267,
-    "reactionCostIndex": 0.0322
+    "reactionCostIndex": 0.0321
   },
   {
     "systemId": 30001846,
@@ -42219,7 +42219,7 @@
     "name": "Yasud",
     "regionId": 10000020,
     "security": 0.628312,
-    "costIndex": 0.0106,
+    "costIndex": 0.0105,
     "reactionCostIndex": 0.0014
   },
   {
@@ -42348,7 +42348,7 @@
     "regionId": 10000006,
     "security": -0.199527,
     "costIndex": 0.0209,
-    "reactionCostIndex": 0.0303
+    "reactionCostIndex": 0.0302
   },
   {
     "systemId": 30001204,
@@ -42427,7 +42427,7 @@
     "name": "Ylandoki",
     "regionId": 10000016,
     "security": 0.832837,
-    "costIndex": 0.0484,
+    "costIndex": 0.0483,
     "reactionCostIndex": 0.0014
   },
   {
@@ -42452,7 +42452,7 @@
     "regionId": 10000003,
     "security": -0.416894,
     "costIndex": 0.0488,
-    "reactionCostIndex": 0.0788
+    "reactionCostIndex": 0.0787
   },
   {
     "systemId": 30002432,
@@ -42475,7 +42475,7 @@
     "name": "Yona",
     "regionId": 10000064,
     "security": 0.82519,
-    "costIndex": 0.0129,
+    "costIndex": 0.013,
     "reactionCostIndex": 0.0014
   },
   {
@@ -42523,8 +42523,8 @@
     "name": "YPW-M4",
     "regionId": 10000009,
     "security": -0.542441,
-    "costIndex": 0.0389,
-    "reactionCostIndex": 0.031
+    "costIndex": 0.039,
+    "reactionCostIndex": 0.0309
   },
   {
     "systemId": 30003753,
@@ -42667,8 +42667,8 @@
     "name": "YVBE-E",
     "regionId": 10000058,
     "security": -0.284407,
-    "costIndex": 0.0249,
-    "reactionCostIndex": 0.0504
+    "costIndex": 0.0248,
+    "reactionCostIndex": 0.0509
   },
   {
     "systemId": 30003591,
@@ -42723,7 +42723,7 @@
     "name": "YXIB-I",
     "regionId": 10000003,
     "security": -0.506995,
-    "costIndex": 0.0398,
+    "costIndex": 0.0397,
     "reactionCostIndex": 0.0341
   },
   {
@@ -42731,7 +42731,7 @@
     "name": "YZ-LQL",
     "regionId": 10000058,
     "security": -0.107308,
-    "costIndex": 0.0112,
+    "costIndex": 0.0111,
     "reactionCostIndex": 0.0014
   },
   {
@@ -42795,7 +42795,7 @@
     "name": "Z-8Q65",
     "regionId": 10000003,
     "security": -0.774685,
-    "costIndex": 0.0135,
+    "costIndex": 0.0134,
     "reactionCostIndex": 0.0369
   },
   {
@@ -42867,7 +42867,7 @@
     "name": "Z-GY5S",
     "regionId": 10000015,
     "security": -0.11335,
-    "costIndex": 0.0037,
+    "costIndex": 0.0036,
     "reactionCostIndex": 0.0014
   },
   {
@@ -42892,7 +42892,7 @@
     "regionId": 10000055,
     "security": -0.626729,
     "costIndex": 0.0014,
-    "reactionCostIndex": 0.0656
+    "reactionCostIndex": 0.0655
   },
   {
     "systemId": 30001613,
@@ -42987,7 +42987,7 @@
     "name": "Z-XMUC",
     "regionId": 10000022,
     "security": -0.132023,
-    "costIndex": 0.0356,
+    "costIndex": 0.0355,
     "reactionCostIndex": 0.0091
   },
   {
@@ -43180,7 +43180,7 @@
     "regionId": 10000043,
     "security": 0.379878,
     "costIndex": 0.0114,
-    "reactionCostIndex": 0.0262
+    "reactionCostIndex": 0.0264
   },
   {
     "systemId": 30005211,
@@ -43195,7 +43195,7 @@
     "name": "Zarzakh",
     "regionId": 10001000,
     "security": -1,
-    "costIndex": 0.0301,
+    "costIndex": 0.03,
     "reactionCostIndex": 0.0014
   },
   {
@@ -43499,7 +43499,7 @@
     "name": "ZJA-6U",
     "regionId": 10000025,
     "security": -0.570409,
-    "costIndex": 0.0047,
+    "costIndex": 0.0046,
     "reactionCostIndex": 0.0014
   },
   {
@@ -43563,7 +43563,7 @@
     "name": "ZLZ-1Z",
     "regionId": 10000003,
     "security": -0.171072,
-    "costIndex": 0.0063,
+    "costIndex": 0.0062,
     "reactionCostIndex": 0.0014
   },
   {
@@ -43604,7 +43604,7 @@
     "regionId": 10000009,
     "security": -0.294007,
     "costIndex": 0.0541,
-    "reactionCostIndex": 0.0652
+    "reactionCostIndex": 0.0651
   },
   {
     "systemId": 30004882,
@@ -43651,7 +43651,7 @@
     "name": "Zororzih",
     "regionId": 10000052,
     "security": 0.742152,
-    "costIndex": 0.029,
+    "costIndex": 0.0289,
     "reactionCostIndex": 0.0014
   },
   {
@@ -43835,8 +43835,8 @@
     "name": "ZXJ-71",
     "regionId": 10000050,
     "security": -0.679756,
-    "costIndex": 0.0171,
-    "reactionCostIndex": 0.0281
+    "costIndex": 0.0172,
+    "reactionCostIndex": 0.0317
   },
   {
     "systemId": 30004437,
