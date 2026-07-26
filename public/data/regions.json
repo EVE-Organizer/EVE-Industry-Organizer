@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-18T05:56:59.159Z",
+  "generatedAt": "2026-07-26T05:57:02.334Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -9,8 +9,8 @@
       "buildSystemName": "J105443",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000007,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000007
     },
     {
       "regionId": 11000002,
@@ -20,8 +20,8 @@
       "buildSystemName": "J125209",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000140,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000140
     },
     {
       "regionId": 11000003,
@@ -31,8 +31,8 @@
       "buildSystemName": "J142136",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000293,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000293
     },
     {
       "regionId": 10000019,
@@ -42,8 +42,8 @@
       "buildSystemName": "0IRK-R",
       "buildSystemSecurity": -0.006288,
       "costIndex": 0.0014,
-      "marketSystemId": 30001643,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001643
     },
     {
       "regionId": 12000001,
@@ -53,8 +53,8 @@
       "buildSystemName": "AD001",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 32000001,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 32000001
     },
     {
       "regionId": 12000002,
@@ -64,8 +64,8 @@
       "buildSystemName": "AD041",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 32000041,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 32000041
     },
     {
       "regionId": 12000003,
@@ -75,8 +75,8 @@
       "buildSystemName": "AD081",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 32000081,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 32000081
     },
     {
       "regionId": 12000004,
@@ -86,8 +86,8 @@
       "buildSystemName": "AD121",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 32000121,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 32000121
     },
     {
       "regionId": 12000005,
@@ -97,8 +97,8 @@
       "buildSystemName": "AD161",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 32000161,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 32000161
     },
     {
       "regionId": 10000054,
@@ -108,8 +108,8 @@
       "buildSystemName": "Zaveral",
       "buildSystemSecurity": 0.61743,
       "costIndex": 0.0014,
-      "marketSystemId": 30004290,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004290
     },
     {
       "regionId": 11000004,
@@ -119,8 +119,8 @@
       "buildSystemName": "J164417",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000355,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000355
     },
     {
       "regionId": 11000005,
@@ -130,8 +130,8 @@
       "buildSystemName": "J103716",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000459,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000459
     },
     {
       "regionId": 11000006,
@@ -141,8 +141,8 @@
       "buildSystemName": "J150807",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000561,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000561
     },
     {
       "regionId": 11000007,
@@ -152,8 +152,8 @@
       "buildSystemName": "J150627",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000702,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000702
     },
     {
       "regionId": 11000008,
@@ -163,8 +163,8 @@
       "buildSystemName": "J112505",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000752,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000752
     },
     {
       "regionId": 10000069,
@@ -174,8 +174,8 @@
       "buildSystemName": "Tsuruma",
       "buildSystemSecurity": 0.542633,
       "costIndex": 0.0014,
-      "marketSystemId": 30045327,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30045327
     },
     {
       "regionId": 10000055,
@@ -185,8 +185,8 @@
       "buildSystemName": "NLPB-0",
       "buildSystemSecurity": -0.06435,
       "costIndex": 0.0014,
-      "marketSystemId": 30004338,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004338
     },
     {
       "regionId": 11000009,
@@ -196,8 +196,8 @@
       "buildSystemName": "J160650",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000880,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000880
     },
     {
       "regionId": 11000010,
@@ -207,8 +207,8 @@
       "buildSystemName": "J165302",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000936,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000936
     },
     {
       "regionId": 11000011,
@@ -218,8 +218,8 @@
       "buildSystemName": "J152143",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000987,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000987
     },
     {
       "regionId": 11000012,
@@ -229,8 +229,8 @@
       "buildSystemName": "J121856",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001073,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001073
     },
     {
       "regionId": 11000013,
@@ -240,8 +240,8 @@
       "buildSystemName": "J164338",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001178,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001178
     },
     {
       "regionId": 11000014,
@@ -251,8 +251,8 @@
       "buildSystemName": "J105447",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001221,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001221
     },
     {
       "regionId": 11000015,
@@ -262,8 +262,8 @@
       "buildSystemName": "J143614",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001317,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001317
     },
     {
       "regionId": 10000007,
@@ -273,8 +273,8 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "marketSystemId": 30000621,
-      "reactionCostIndex": 0.0132
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000621
     },
     {
       "regionId": 10000014,
@@ -284,8 +284,8 @@
       "buildSystemName": "Q-S7ZD",
       "buildSystemSecurity": -0.03271,
       "costIndex": 0.0014,
-      "marketSystemId": 30001196,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001196
     },
     {
       "regionId": 10000051,
@@ -295,8 +295,8 @@
       "buildSystemName": "QXW-PV",
       "buildSystemSecurity": -0.002045,
       "costIndex": 0.0014,
-      "marketSystemId": 30004041,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004041
     },
     {
       "regionId": 10000053,
@@ -306,8 +306,8 @@
       "buildSystemName": "FV1-RQ",
       "buildSystemSecurity": -0.086176,
       "costIndex": 0.0014,
-      "marketSystemId": 30004197,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004197
     },
     {
       "regionId": 10000012,
@@ -317,8 +317,8 @@
       "buildSystemName": "MDD-79",
       "buildSystemSecurity": -0.005198,
       "costIndex": 0.0014,
-      "marketSystemId": 30001027,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001027
     },
     {
       "regionId": 11000016,
@@ -328,8 +328,8 @@
       "buildSystemName": "J160225",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001375,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001375
     },
     {
       "regionId": 11000017,
@@ -339,8 +339,8 @@
       "buildSystemName": "J224148",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001435,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001435
     },
     {
       "regionId": 11000018,
@@ -350,8 +350,8 @@
       "buildSystemName": "J162226",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001460,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001460
     },
     {
       "regionId": 11000019,
@@ -361,8 +361,8 @@
       "buildSystemName": "J143946",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001506,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001506
     },
     {
       "regionId": 11000020,
@@ -372,8 +372,8 @@
       "buildSystemName": "J171225",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001600,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001600
     },
     {
       "regionId": 11000021,
@@ -383,8 +383,8 @@
       "buildSystemName": "J162231",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001650,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001650
     },
     {
       "regionId": 11000022,
@@ -394,8 +394,8 @@
       "buildSystemName": "J122728",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001765,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001765
     },
     {
       "regionId": 11000023,
@@ -405,8 +405,8 @@
       "buildSystemName": "J225530",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001852,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001852
     },
     {
       "regionId": 10000035,
@@ -416,19 +416,19 @@
       "buildSystemName": "R8S-1K",
       "buildSystemSecurity": -0.057461,
       "costIndex": 0.0014,
-      "marketSystemId": 30002894,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002894
     },
     {
       "regionId": 10000060,
       "name": "Delve",
       "securityClass": "nullsec",
-      "buildSystemId": 30004706,
-      "buildSystemName": "UHKL-N",
-      "buildSystemSecurity": -0.005241,
+      "buildSystemId": 30004717,
+      "buildSystemName": "AJI-MA",
+      "buildSystemSecurity": -0.009191,
       "costIndex": 0.0014,
-      "marketSystemId": 30004717,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004717
     },
     {
       "regionId": 10000001,
@@ -438,8 +438,8 @@
       "buildSystemName": "Nirbhi",
       "buildSystemSecurity": 0.882116,
       "costIndex": 0.0014,
-      "marketSystemId": 30000008,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000008
     },
     {
       "regionId": 10000005,
@@ -449,8 +449,8 @@
       "buildSystemName": "Q0J-RH",
       "buildSystemSecurity": -0.135172,
       "costIndex": 0.0014,
-      "marketSystemId": 30000507,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000507
     },
     {
       "regionId": 10000036,
@@ -460,8 +460,8 @@
       "buildSystemName": "Hati",
       "buildSystemSecurity": 0.849035,
       "costIndex": 0.0014,
-      "marketSystemId": 30002994,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002994
     },
     {
       "regionId": 10000043,
@@ -471,8 +471,8 @@
       "buildSystemName": "Mabnen",
       "buildSystemSecurity": 0.940368,
       "costIndex": 0.0014,
-      "marketSystemId": 30002187,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002187
     },
     {
       "regionId": 11000024,
@@ -482,8 +482,8 @@
       "buildSystemName": "J152820",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001880,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001880
     },
     {
       "regionId": 11000025,
@@ -493,8 +493,8 @@
       "buildSystemName": "J143740",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31001968,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31001968
     },
     {
       "regionId": 11000026,
@@ -504,8 +504,8 @@
       "buildSystemName": "J164900",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31002061,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31002061
     },
     {
       "regionId": 11000027,
@@ -515,8 +515,8 @@
       "buildSystemName": "J162753",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31002126,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31002126
     },
     {
       "regionId": 11000028,
@@ -526,8 +526,8 @@
       "buildSystemName": "J115644",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31002194,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31002194
     },
     {
       "regionId": 11000029,
@@ -537,8 +537,8 @@
       "buildSystemName": "J171722",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31002283,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31002283
     },
     {
       "regionId": 10000039,
@@ -548,19 +548,19 @@
       "buildSystemName": "Q1-R7K",
       "buildSystemSecurity": -0.008621,
       "costIndex": 0.0014,
-      "marketSystemId": 30003146,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003146
     },
     {
       "regionId": 10000064,
       "name": "Essence",
       "securityClass": "highsec",
-      "buildSystemId": 30005025,
-      "buildSystemName": "Derririntel",
-      "buildSystemSecurity": 0.818801,
+      "buildSystemId": 30004974,
+      "buildSystemName": "Jolevier",
+      "buildSystemSecurity": 0.876884,
       "costIndex": 0.0014,
-      "marketSystemId": 30005025,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004974
     },
     {
       "regionId": 10000027,
@@ -570,8 +570,8 @@
       "buildSystemName": "WPV-JN",
       "buildSystemSecurity": -0.000393,
       "costIndex": 0.0014,
-      "marketSystemId": 30002371,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002371
     },
     {
       "regionId": 10000037,
@@ -581,8 +581,8 @@
       "buildSystemName": "Blameston",
       "buildSystemSecurity": 0.949,
       "costIndex": 0.0014,
-      "marketSystemId": 30003026,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003026
     },
     {
       "regionId": 10001004,
@@ -592,8 +592,8 @@
       "buildSystemName": "Gallant",
       "buildSystemSecurity": 1,
       "costIndex": 0.0014,
-      "marketSystemId": 30100033,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30100033
     },
     {
       "regionId": 11000030,
@@ -603,8 +603,8 @@
       "buildSystemName": "J104859",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31002367,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31002367
     },
     {
       "regionId": 10000046,
@@ -614,8 +614,8 @@
       "buildSystemName": "O-CNPR",
       "buildSystemSecurity": -0.234771,
       "costIndex": 0.0014,
-      "marketSystemId": 30003683,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003683
     },
     {
       "regionId": 10000056,
@@ -625,8 +625,8 @@
       "buildSystemName": "2UK4-N",
       "buildSystemSecurity": -0.111597,
       "costIndex": 0.0014,
-      "marketSystemId": 30004447,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004447
     },
     {
       "regionId": 10000058,
@@ -636,8 +636,8 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "marketSystemId": 30004552,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004552
     },
     {
       "regionId": 11000031,
@@ -647,8 +647,8 @@
       "buildSystemName": "Thera",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000005,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000005
     },
     {
       "regionId": 10000029,
@@ -658,8 +658,8 @@
       "buildSystemName": "E-91FV",
       "buildSystemSecurity": -0.015812,
       "costIndex": 0.0014,
-      "marketSystemId": 30002477,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002477
     },
     {
       "regionId": 10000067,
@@ -669,8 +669,8 @@
       "buildSystemName": "Ourapheh",
       "buildSystemSecurity": 0.86196,
       "costIndex": 0.0014,
-      "marketSystemId": 30005203,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30005203
     },
     {
       "regionId": 19000001,
@@ -680,8 +680,8 @@
       "buildSystemName": "GPMS-01",
       "buildSystemSecurity": 1,
       "costIndex": 1,
-      "marketSystemId": 36000001,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 36000001
     },
     {
       "regionId": 10000011,
@@ -691,8 +691,8 @@
       "buildSystemName": "6WT-BE",
       "buildSystemSecurity": -0.001181,
       "costIndex": 0.0014,
-      "marketSystemId": 30000967,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000967
     },
     {
       "regionId": 11000032,
@@ -702,8 +702,8 @@
       "buildSystemName": "J000895",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31002580,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31002580
     },
     {
       "regionId": 10000030,
@@ -713,19 +713,19 @@
       "buildSystemName": "Ivar",
       "buildSystemSecurity": 0.949,
       "costIndex": 0.0014,
-      "marketSystemId": 30002510,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002510
     },
     {
       "regionId": 10000025,
       "name": "Immensea",
       "securityClass": "nullsec",
-      "buildSystemId": 30002152,
-      "buildSystemName": "F76-8Q",
-      "buildSystemSecurity": -0.060216,
+      "buildSystemId": 30002106,
+      "buildSystemName": "PPFB-U",
+      "buildSystemSecurity": -0.074166,
       "costIndex": 0.0014,
-      "marketSystemId": 30002152,
-      "reactionCostIndex": 0.0293
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002106
     },
     {
       "regionId": 10000031,
@@ -735,8 +735,8 @@
       "buildSystemName": "A1BK-A",
       "buildSystemSecurity": -0.048078,
       "costIndex": 0.0014,
-      "marketSystemId": 30002611,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002611
     },
     {
       "regionId": 10000009,
@@ -746,8 +746,8 @@
       "buildSystemName": "QYD-WK",
       "buildSystemSecurity": -0.044587,
       "costIndex": 0.0014,
-      "marketSystemId": 30000767,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000767
     },
     {
       "regionId": 10000017,
@@ -757,8 +757,8 @@
       "buildSystemName": "6-23NU",
       "buildSystemSecurity": -0.008158,
       "costIndex": 0.0014,
-      "marketSystemId": 30001503,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001503
     },
     {
       "regionId": 11000033,
@@ -768,8 +768,8 @@
       "buildSystemName": "Sentinel MZ",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 31000001,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 31000001
     },
     {
       "regionId": 10000052,
@@ -779,8 +779,8 @@
       "buildSystemName": "Hapala",
       "buildSystemSecurity": 0.882674,
       "costIndex": 0.0014,
-      "marketSystemId": 30004145,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004145
     },
     {
       "regionId": 10000049,
@@ -790,8 +790,8 @@
       "buildSystemName": "Gousoviba",
       "buildSystemSecurity": 0.901234,
       "costIndex": 0.0014,
-      "marketSystemId": 30003858,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003858
     },
     {
       "regionId": 10000065,
@@ -801,8 +801,8 @@
       "buildSystemName": "Nakregde",
       "buildSystemSecurity": 0.830615,
       "costIndex": 0.0014,
-      "marketSystemId": 30005043,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30005043
     },
     {
       "regionId": 10000016,
@@ -812,8 +812,8 @@
       "buildSystemName": "Kuoka",
       "buildSystemSecurity": 0.576705,
       "costIndex": 0.0014,
-      "marketSystemId": 30001415,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001415
     },
     {
       "regionId": 10000013,
@@ -823,19 +823,19 @@
       "buildSystemName": "2FL-5W",
       "buildSystemSecurity": -0.024807,
       "costIndex": 0.0014,
-      "marketSystemId": 30001136,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001136
     },
     {
       "regionId": 10000042,
       "name": "Metropolis",
       "securityClass": "highsec",
-      "buildSystemId": 30003403,
-      "buildSystemName": "Meimungen",
-      "buildSystemSecurity": 0.907195,
+      "buildSystemId": 30013410,
+      "buildSystemName": "Abrat",
+      "buildSystemSecurity": 0.949,
       "costIndex": 0.0014,
-      "marketSystemId": 30002053,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002053
     },
     {
       "regionId": 10000028,
@@ -845,8 +845,8 @@
       "buildSystemName": "Orien",
       "buildSystemSecurity": 0.804725,
       "costIndex": 0.0014,
-      "marketSystemId": 30002399,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002399
     },
     {
       "regionId": 10000040,
@@ -856,8 +856,8 @@
       "buildSystemName": "9G5J-1",
       "buildSystemSecurity": -0.028074,
       "costIndex": 0.0014,
-      "marketSystemId": 30003249,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003249
     },
     {
       "regionId": 10000062,
@@ -867,8 +867,8 @@
       "buildSystemName": "ZJG-7D",
       "buildSystemSecurity": -0.082345,
       "costIndex": 0.0014,
-      "marketSystemId": 30004888,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004888
     },
     {
       "regionId": 10000021,
@@ -878,8 +878,8 @@
       "buildSystemName": "TFPT-U",
       "buildSystemSecurity": -0.01,
       "costIndex": 0.0014,
-      "marketSystemId": 30001760,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001760
     },
     {
       "regionId": 10000057,
@@ -889,8 +889,8 @@
       "buildSystemName": "BMU-V1",
       "buildSystemSecurity": -0.000519,
       "costIndex": 0.0014,
-      "marketSystemId": 30004539,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004539
     },
     {
       "regionId": 10000059,
@@ -900,8 +900,8 @@
       "buildSystemName": "S-KU8B",
       "buildSystemSecurity": -0.03065,
       "costIndex": 0.0014,
-      "marketSystemId": 30004683,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004683
     },
     {
       "regionId": 10000063,
@@ -911,8 +911,8 @@
       "buildSystemName": "35-JWD",
       "buildSystemSecurity": -0.016609,
       "costIndex": 0.0014,
-      "marketSystemId": 30004928,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004928
     },
     {
       "regionId": 10000066,
@@ -922,8 +922,8 @@
       "buildSystemName": "B9N2-2",
       "buildSystemSecurity": -0.061793,
       "costIndex": 0.0014,
-      "marketSystemId": 30005127,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30005127
     },
     {
       "regionId": 10000048,
@@ -933,8 +933,8 @@
       "buildSystemName": "Osmallanais",
       "buildSystemSecurity": 0.755543,
       "costIndex": 0.0014,
-      "marketSystemId": 30003812,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003812
     },
     {
       "regionId": 10000070,
@@ -944,8 +944,8 @@
       "buildSystemName": "Kuharah",
       "buildSystemSecurity": -1,
       "costIndex": 0.0014,
-      "marketSystemId": 30000021,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000021
     },
     {
       "regionId": 10000047,
@@ -955,8 +955,8 @@
       "buildSystemName": "TXJ-II",
       "buildSystemSecurity": -0.021664,
       "costIndex": 0.0014,
-      "marketSystemId": 30003726,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003726
     },
     {
       "regionId": 10000023,
@@ -966,8 +966,8 @@
       "buildSystemName": "DT-TCD",
       "buildSystemSecurity": -0.021529,
       "costIndex": 0.0014,
-      "marketSystemId": 30002041,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002041
     },
     {
       "regionId": 10000050,
@@ -977,8 +977,8 @@
       "buildSystemName": "A-BO4V",
       "buildSystemSecurity": -0.004645,
       "costIndex": 0.0014,
-      "marketSystemId": 30003967,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003967
     },
     {
       "regionId": 10000008,
@@ -988,8 +988,8 @@
       "buildSystemName": "A-80UA",
       "buildSystemSecurity": -0.006942,
       "costIndex": 0.0014,
-      "marketSystemId": 30000702,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000702
     },
     {
       "regionId": 10000032,
@@ -999,8 +999,8 @@
       "buildSystemName": "Agrallarier",
       "buildSystemSecurity": 0.850284,
       "costIndex": 0.0014,
-      "marketSystemId": 30002659,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002659
     },
     {
       "regionId": 10000044,
@@ -1010,8 +1010,8 @@
       "buildSystemName": "Lazer",
       "buildSystemSecurity": 0.790979,
       "costIndex": 0.0014,
-      "marketSystemId": 30003592,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003592
     },
     {
       "regionId": 10000022,
@@ -1021,8 +1021,8 @@
       "buildSystemName": "BF-FVB",
       "buildSystemSecurity": -0.002907,
       "costIndex": 0.0014,
-      "marketSystemId": 30001885,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001885
     },
     {
       "regionId": 10000041,
@@ -1032,8 +1032,8 @@
       "buildSystemName": "5KS-AB",
       "buildSystemSecurity": -0.002059,
       "costIndex": 0.0014,
-      "marketSystemId": 30003348,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003348
     },
     {
       "regionId": 10000020,
@@ -1043,8 +1043,8 @@
       "buildSystemName": "Rand",
       "buildSystemSecurity": 0.866089,
       "costIndex": 0.0014,
-      "marketSystemId": 30001725,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001727
     },
     {
       "regionId": 10000045,
@@ -1054,8 +1054,8 @@
       "buildSystemName": "PNS7-J",
       "buildSystemSecurity": -0.05072,
       "costIndex": 0.0014,
-      "marketSystemId": 30003613,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003613
     },
     {
       "regionId": 10000061,
@@ -1065,8 +1065,8 @@
       "buildSystemName": "WB-AYY",
       "buildSystemSecurity": -0.054353,
       "costIndex": 0.0014,
-      "marketSystemId": 30004803,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30004803
     },
     {
       "regionId": 10000038,
@@ -1076,8 +1076,8 @@
       "buildSystemName": "Junsen",
       "buildSystemSecurity": 0.809591,
       "costIndex": 0.0014,
-      "marketSystemId": 30003083,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30003083
     },
     {
       "regionId": 10000033,
@@ -1087,8 +1087,8 @@
       "buildSystemName": "Kassigainen",
       "buildSystemSecurity": 0.915852,
       "costIndex": 0.0014,
-      "marketSystemId": 30002761,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002761
     },
     {
       "regionId": 10000002,
@@ -1098,8 +1098,8 @@
       "buildSystemName": "Mahtista",
       "buildSystemSecurity": 0.658238,
       "costIndex": 0.0014,
-      "marketSystemId": 30000142,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000142
     },
     {
       "regionId": 10000034,
@@ -1109,8 +1109,8 @@
       "buildSystemName": "EPCD-D",
       "buildSystemSecurity": -0.012715,
       "costIndex": 0.0014,
-      "marketSystemId": 30002845,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002845
     },
     {
       "regionId": 10000018,
@@ -1120,8 +1120,8 @@
       "buildSystemName": "XR-ZL7",
       "buildSystemSecurity": -0.084715,
       "costIndex": 0.0014,
-      "marketSystemId": 30001584,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001584
     },
     {
       "regionId": 10000010,
@@ -1131,8 +1131,8 @@
       "buildSystemName": "Y-PZHM",
       "buildSystemSecurity": -0.092418,
       "costIndex": 0.0014,
-      "marketSystemId": 30000884,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000884
     },
     {
       "regionId": 10000004,
@@ -1142,8 +1142,8 @@
       "buildSystemName": "1TS-WN",
       "buildSystemSecurity": -0.000001,
       "costIndex": 0.0014,
-      "marketSystemId": 30000424,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000424
     },
     {
       "regionId": 10000003,
@@ -1153,8 +1153,8 @@
       "buildSystemName": "WMBZ-U",
       "buildSystemSecurity": -0.086599,
       "costIndex": 0.0014,
-      "marketSystemId": 30000315,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000315
     },
     {
       "regionId": 10000015,
@@ -1164,8 +1164,8 @@
       "buildSystemName": "H-S5BM",
       "buildSystemSecurity": -0.066827,
       "costIndex": 0.0014,
-      "marketSystemId": 30001343,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30001343
     },
     {
       "regionId": 10000068,
@@ -1175,8 +1175,8 @@
       "buildSystemName": "Merolles",
       "buildSystemSecurity": 0.884628,
       "costIndex": 0.0014,
-      "marketSystemId": 30005303,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30005303
     },
     {
       "regionId": 14000001,
@@ -1186,8 +1186,8 @@
       "buildSystemName": "V-001",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 34000001,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 34000001
     },
     {
       "regionId": 14000002,
@@ -1197,8 +1197,8 @@
       "buildSystemName": "V-041",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 34000041,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 34000041
     },
     {
       "regionId": 14000003,
@@ -1208,8 +1208,8 @@
       "buildSystemName": "V-081",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 34000081,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 34000081
     },
     {
       "regionId": 14000004,
@@ -1219,8 +1219,8 @@
       "buildSystemName": "V-121",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 34000121,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 34000121
     },
     {
       "regionId": 14000005,
@@ -1230,8 +1230,8 @@
       "buildSystemName": "V-161",
       "buildSystemSecurity": -0.99,
       "costIndex": 1,
-      "marketSystemId": 34000161,
-      "reactionCostIndex": 1
+      "reactionCostIndex": 1,
+      "marketSystemId": 34000161
     },
     {
       "regionId": 10000006,
@@ -1241,8 +1241,8 @@
       "buildSystemName": "C-62I5",
       "buildSystemSecurity": -0.117561,
       "costIndex": 0.0014,
-      "marketSystemId": 30000550,
-      "reactionCostIndex": 0.0014
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30000550
     },
     {
       "regionId": 10001000,
@@ -1251,9 +1251,9 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0304,
-      "marketSystemId": 30100000,
-      "reactionCostIndex": 0.0014
+      "costIndex": 0.0301,
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30100000
     }
   ]
 }

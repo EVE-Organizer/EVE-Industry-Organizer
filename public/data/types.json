@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-19T09:58:36.342Z",
+  "generatedAt": "2026-07-26T08:26:05.010Z",
   "types": [
     {
       "typeId": 18,
@@ -300864,6 +300864,17 @@
       "iconUrl": "https://images.evetech.net/types/95747/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95747/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95747/bp?size=32"
+    },
+    {
+      "typeId": 95813,
+      "name": "Fabricated 100 - Limited",
+      "group": "Ship SKIN Design Element",
+      "category": "Personalization",
+      "volume": 0.1,
+      "description": "A license for the single use of a pattern in SKIN sequencing, once activated and inside your SKINR collection.\n\nThe digital sequence of this pattern license has been bound, and though it can only be used once no sequence binders are required when it is consumed in the sequencing of a SKIN license.",
+      "iconUrl": "https://images.evetech.net/types/95813/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95813/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95813/bp?size=32"
     }
   ]
 }
