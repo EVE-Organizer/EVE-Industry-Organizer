@@ -53,8 +53,6 @@ jobs:
   update-data:
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    env:
-      NODE_OPTIONS: '--unbuffered'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -74,6 +72,8 @@ jobs:
 
       - name: Run data script
         run: |
+          set -euo pipefail
+          echo "Starting data update at $(date -u +%Y-%m-%dT%H:%M:%SZ) — progress logs stream below:"
           if [ "${{ github.event_name }}" = "schedule" ]; then
             pnpm run fetch-data
           elif [ "${{ inputs.script }}" = "rebuild-market:hub" ]; then
