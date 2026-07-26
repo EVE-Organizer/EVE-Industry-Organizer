@@ -14,6 +14,7 @@ import {
   MINING_SPACES,
   MINING_SUBTYPES,
   collectMiningPriceTypeIds,
+  DEFAULT_MINING_IPH_SORT_KEY,
   MINING_IPH_PATHS,
   miningDisplayVolume,
   miningVolumeLabel,
@@ -279,7 +280,7 @@ export function MiningIskHrPage() {
   const [foundIn, setFoundIn] = useState<MiningSpaceClass[]>([])
   const [focusTypeId, setFocusTypeId] = useState<number | null>(null)
   const [priceWindow, setPriceWindow] = useState<TimeRange>(settings.priceWindow)
-  const [sortKey, setSortKey] = useState<MiningIphSortKey>('raw')
+  const [sortKey, setSortKey] = useState<MiningIphSortKey>(DEFAULT_MINING_IPH_SORT_KEY)
   const [breakdown, setBreakdown] = useState<{
     row: MiningRankedRow
     focusPath: MiningIphFocusPath
@@ -300,13 +301,13 @@ export function MiningIskHrPage() {
   useEffect(() => {
     if (subtype === 'gas') {
       setFocusTypeId(null)
-      setSortKey((prev) => (prev === 'focus' ? 'raw' : prev))
+      setSortKey((prev) => (prev === 'focus' ? DEFAULT_MINING_IPH_SORT_KEY : prev))
       return
     }
     if (focusTypeId == null) return
     if (!focusOptions.some((o) => o.typeId === focusTypeId)) {
       setFocusTypeId(null)
-      setSortKey((prev) => (prev === 'focus' ? 'raw' : prev))
+      setSortKey((prev) => (prev === 'focus' ? DEFAULT_MINING_IPH_SORT_KEY : prev))
     }
   }, [subtype, focusOptions, focusTypeId])
 
@@ -500,7 +501,7 @@ export function MiningIskHrPage() {
   function onFocusChange(next: number | null) {
     startTransition(() => {
       setFocusTypeId(next)
-      setSortKey(next != null ? 'focus' : 'raw')
+      setSortKey(next != null ? 'focus' : DEFAULT_MINING_IPH_SORT_KEY)
     })
   }
 
@@ -714,7 +715,7 @@ export function MiningIskHrPage() {
 
       {/* Desktop table */}
       <div className="hidden lg:block overflow-x-auto rounded-xl border border-eve-border/90 bg-base-200/70 shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04),0_8px_24px_-12px_rgb(0_0_0_/_0.55)]">
-        <table className="table table-compact w-full">
+        <table className="table table-compact table-striped w-full">
           <thead>
             <tr>
               <th className="w-10">#</th>

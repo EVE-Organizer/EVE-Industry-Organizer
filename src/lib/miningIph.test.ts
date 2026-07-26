@@ -313,6 +313,62 @@ describe('rankMiningIph', () => {
     expect(rows[0].volDayCompressed).toBe(3057)
     expect(rows[0].volDay).toBe(3057)
     expect(miningDisplayVolume(rows[0], 'raw')).toBe(3057)
+    expect(miningDisplayVolume(rows[0], 'compressed')).toBe(3057)
+  })
+
+  it('prefers raw hub volume when compressed volume is thin (secondary hub)', () => {
+    const rakoveneMining: MiningData = {
+      generatedAt: '',
+      defaults: { m3PerHr: 50_400, reprocessYield: 0.5 },
+      focusOutputs: { ore: [], moon: [], ice: [], gas: [] },
+      items: [
+        {
+          typeId: 52315,
+          name: 'Rakovene',
+          group: 'Rakovene',
+          volume: 16,
+          portionSize: 100,
+          subtype: 'ore',
+          foundIn: ['nullsec'],
+          compressedTypeId: 62579,
+          reprocess: [
+            { typeId: 34, quantityPerBatch: 40000 },
+            { typeId: 37, quantityPerBatch: 3200 },
+            { typeId: 39, quantityPerBatch: 200 },
+          ],
+          iconUrl: '',
+        },
+      ],
+    }
+    const hub: HubMarketData = {
+      regionId: 10000042,
+      marketSystemId: 30002053,
+      buildSystemId: 30002053,
+      costIndex: 0.01,
+      prices: { '52315': 3261, '62579': 12650, '34': 4, '37': 50, '39': 1200 },
+      products: {
+        '52315': { '1y': { avgPrice: 3261, avgVolume: 209.4, high: 19000, low: 0.01 } },
+        '62579': { '1m': { avgPrice: 12650, avgVolume: 1, high: 12650, low: 12650 } },
+      },
+    }
+    const spot = new Map([
+      [52315, 3261],
+      [62579, 12650],
+      [34, 4],
+      [37, 50],
+      [39, 1200],
+    ])
+    const rows = rankMiningIph(rakoveneMining, hub, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1m',
+      priceMethod: 'sell_orders',
+    })
+    expect(rows).toHaveLength(1)
+    expect(rows[0].volDayRaw).toBe(209.4)
+    expect(rows[0].volDayCompressed).toBe(1)
+    expect(miningDisplayVolume(rows[0], 'compressed')).toBe(209.4)
   })
 
   it('sortMiningRows does not rewrite volDay', () => {

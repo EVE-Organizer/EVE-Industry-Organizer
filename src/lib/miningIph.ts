@@ -36,6 +36,8 @@ export const DEFAULT_MINING_M3_PER_HR_BY_SUBTYPE: Record<MiningSubtype, number> 
 /** Labeled default reprocess yield (NPC-ish / unskilled structure). */
 export const DEFAULT_REPROCESS_YIELD = 0.5
 
+export const DEFAULT_MINING_IPH_SORT_KEY: MiningIphSortKey = 'compressed'
+
 export const MINING_SUBTYPES: { id: MiningSubtype; label: string }[] = [
   { id: 'moon', label: 'Moon' },
   { id: 'ore', label: 'Ore' },
@@ -113,10 +115,10 @@ export function miningDisplayVolume(
 ): number {
   switch (sortKey) {
     case 'raw':
-    case 'vol':
-      return miningLiquidityVolume(row)
     case 'compressed':
-      return row.volDayCompressed ?? row.volDay
+    case 'vol':
+      // Same liquidity proxy for every direct-sale path (raw or compressed).
+      return miningLiquidityVolume(row)
     case 'focus':
       return row.volDayFocus ?? row.volDay
     case 'minerals':

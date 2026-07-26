@@ -3,6 +3,10 @@
   th {
     @apply py-2 px-3 text-sm;
   }
+
+  &.table-striped tbody tr:nth-child(odd) {
+    @apply bg-base-300/20;
+  }
 }
 
 // Animated underline on hover; use with text-inherit or text-primary as needed.
