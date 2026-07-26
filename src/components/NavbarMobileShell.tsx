@@ -4,8 +4,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { EveNavAuth } from '@/components/EveNavAuth'
 import { NavbarHubSelect } from '@/components/NavbarHubSelect'
 import { NavbarItemSearch } from '@/components/NavbarItemSearch'
-
-type NavLinkItem = { to: string; label: string }
+import type { MobileNavEntry } from '@/components/NavbarNav'
 
 function NavbarBrand() {
   return (
@@ -16,7 +15,7 @@ function NavbarBrand() {
   )
 }
 
-export function NavbarMobileShell({ links }: { links: NavLinkItem[] }) {
+export function NavbarMobileShell({ links }: { links: MobileNavEntry[] }) {
   const shellRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
@@ -73,19 +72,25 @@ export function NavbarMobileShell({ links }: { links: NavLinkItem[] }) {
           onClick={() => setMenuOpen(false)}
         />
         <nav id="app-mobile-nav-menu" className="app-navbar__mobile-menu" aria-label="Main">
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.to === '/'}
-              className={({ isActive }) =>
-                `app-navbar__mobile-menu-link ${isActive ? 'app-navbar__mobile-menu-link--active' : ''}`
-              }
-              onClick={() => setMenuOpen(false)}
-            >
-              {l.label}
-            </NavLink>
-          ))}
+          {links.map((entry) =>
+            entry.kind === 'section' ? (
+              <p key={`section-${entry.label}`} className="app-navbar__mobile-menu-section">
+                {entry.label}
+              </p>
+            ) : (
+              <NavLink
+                key={entry.to}
+                to={entry.to}
+                end={entry.end ?? false}
+                className={({ isActive }) =>
+                  `app-navbar__mobile-menu-link ${entry.indent ? 'app-navbar__mobile-menu-link--indent' : ''} ${isActive ? 'app-navbar__mobile-menu-link--active' : ''}`
+                }
+                onClick={() => setMenuOpen(false)}
+              >
+                {entry.label}
+              </NavLink>
+            ),
+          )}
         </nav>
       </>,
       document.body,

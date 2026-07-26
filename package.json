@@ -15,6 +15,7 @@
     "rebuild-market:dev": "MARKET_HISTORY_LIMIT=500 node scripts/rebuild-market.mjs",
     "rebuild-contracts": "node scripts/rebuild-contracts.mjs",
     "rebuild-map": "node scripts/rebuild-map.mjs",
+    "rebuild-mining": "node scripts/rebuild-mining.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

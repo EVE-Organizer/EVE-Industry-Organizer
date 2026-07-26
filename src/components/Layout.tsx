@@ -4,14 +4,7 @@ import { EveNavAuth } from '@/components/EveNavAuth'
 import { NavbarHubSelect } from '@/components/NavbarHubSelect'
 import { NavbarItemSearch } from '@/components/NavbarItemSearch'
 import { NavbarMobileShell } from '@/components/NavbarMobileShell'
-
-const links = [
-  { to: '/', label: 'Blueprints' },
-  { to: '/plan', label: 'Plan' },
-  { to: '/map', label: 'Map' },
-  { to: '/jobs', label: 'Jobs' },
-  { to: '/settings', label: 'Settings' },
-]
+import { NavbarNav, flattenNavForMobile, NAV_ITEMS } from '@/components/NavbarNav'
 
 function NavbarBrand() {
   return (
@@ -30,25 +23,6 @@ function NavbarTools() {
       <span className="app-navbar__tool-sep" aria-hidden />
       <NavbarItemSearch />
     </div>
-  )
-}
-
-function NavbarNav() {
-  return (
-    <nav className="app-navbar__nav" aria-label="Main">
-      {links.map((l) => (
-        <NavLink
-          key={l.to}
-          to={l.to}
-          end={l.to === '/'}
-          className={({ isActive }) =>
-            `app-navbar__nav-link ${isActive ? 'app-navbar__nav-link--active' : ''}`
-          }
-        >
-          {l.label}
-        </NavLink>
-      ))}
-    </nav>
   )
 }
 
@@ -73,7 +47,7 @@ export function Layout() {
           </div>
         </div>
 
-        <NavbarMobileShell links={links} />
+        <NavbarMobileShell links={flattenNavForMobile(NAV_ITEMS)} />
       </header>
 
       <main

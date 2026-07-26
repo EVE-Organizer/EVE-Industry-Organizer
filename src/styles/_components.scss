@@ -1153,15 +1153,6 @@
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
-  &__mobile-menu-link {
-    @apply rounded-lg px-3 py-3 text-sm font-medium text-base-content/70 transition-colors;
-    @apply hover:bg-base-300/50 hover:text-base-content;
-
-    &--active {
-      @apply border border-primary/30 bg-primary/10 text-primary;
-    }
-  }
-
   &__brand {
     @apply shrink-0 text-base font-bold leading-tight text-primary transition-opacity hover:opacity-90;
 
@@ -1241,6 +1232,54 @@
 
     &--active {
       @apply border-primary/30 bg-primary/10 text-primary shadow-sm;
+    }
+  }
+
+  &__nav-caret {
+    @apply ml-1 text-[10px] opacity-60;
+  }
+
+  &__nav-menu {
+    @apply relative;
+
+    &--open .app-navbar__nav-link {
+      @apply border-primary/20 bg-base-200/80 text-base-content;
+    }
+  }
+
+  &__nav-dropdown {
+    /* pt-1 (not mt-1): padding stays inside the hover target so the menu
+       does not close when moving from the trigger into the panel. */
+    @apply absolute right-0 top-full z-[70] min-w-[9rem] pt-1;
+  }
+
+  &__nav-dropdown-panel {
+    @apply rounded-lg border border-eve-border bg-base-200 p-1 shadow-xl;
+  }
+
+  &__nav-dropdown-link {
+    @apply block rounded-md px-3 py-2 text-xs font-medium text-base-content/70 transition-colors;
+    @apply hover:bg-base-300/50 hover:text-base-content;
+
+    &--active {
+      @apply bg-primary/10 text-primary;
+    }
+  }
+
+  &__mobile-menu-section {
+    @apply px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wide text-base-content/40;
+  }
+
+  &__mobile-menu-link {
+    @apply rounded-lg px-3 py-3 text-sm font-medium text-base-content/70 transition-colors;
+    @apply hover:bg-base-300/50 hover:text-base-content;
+
+    &--indent {
+      @apply ml-2 pl-4;
+    }
+
+    &--active {
+      @apply border border-primary/30 bg-primary/10 text-primary;
     }
   }
 

@@ -901,3 +901,70 @@ export const MINERAL_TYPE_IDS: Record<keyof MineralStock, number> = {
   zydrine: 39,
   megacyte: 40,
 }
+
+export type MiningSubtype = 'ore' | 'moon' | 'ice' | 'gas'
+export type MiningSpaceClass = 'highsec' | 'lowsec' | 'nullsec' | 'wormhole'
+
+export interface MiningReprocessMat {
+  typeId: number
+  quantityPerBatch: number
+}
+
+export interface MiningItem {
+  typeId: number
+  name: string
+  group: string
+  volume: number
+  portionSize: number
+  subtype: MiningSubtype
+  foundIn: MiningSpaceClass[]
+  compressedTypeId: number | null
+  reprocess: MiningReprocessMat[]
+  iconUrl: string
+}
+
+export interface MiningFocusOutput {
+  typeId: number
+  name: string
+}
+
+export interface MiningData {
+  generatedAt: string
+  defaults: {
+    m3PerHr: number
+    reprocessYield: number
+  }
+  focusOutputs: Record<MiningSubtype, MiningFocusOutput[]>
+  items: MiningItem[]
+}
+
+export type MiningIphSortKey = 'raw' | 'compressed' | 'minerals' | 'focus' | 'vol'
+
+export interface MiningReprocessLine {
+  typeId: number
+  name: string
+  qtyPerM3: number
+  price: number
+  iskPerHr: number
+}
+
+export interface MiningRankedRow {
+  item: MiningItem
+  rawPrice: number
+  compressedPrice: number | null
+  rawValuePerM3: number
+  compressedValuePerM3: number | null
+  mineralsValuePerM3: number
+  rawIph: number
+  compressedIph: number | null
+  mineralsIph: number
+  focusIph: number | null
+  focusTypeId: number | null
+  /** Volume shown in the table (matches active sort column). */
+  volDay: number
+  volDayRaw?: number
+  volDayCompressed?: number
+  volDayMinerals?: number
+  volDayFocus?: number
+  reprocessLines: MiningReprocessLine[]
+}

@@ -1,4 +1,5 @@
-import { readFileSync, renameSync, writeFileSync } from 'fs'
+import { readFileSync, renameSync, writeFileSync, existsSync } from 'fs'
+import { join } from 'path'
 import { fetchCostIndices, fetchFuzzworkPrices, REGION_IDS } from './market-prices.mjs'
 import { HUB_MARKET_SYSTEMS } from './regions.mjs'
 
@@ -335,7 +336,15 @@ export async function buildMarketData(blueprints, regions, stations, options = {
   const productTypeIds = [...new Set(blueprints.map((b) => b.productTypeId))]
   const blueprintTypeIds = [...new Set(blueprints.map((b) => b.blueprintTypeId))]
   const materialTypeIds = [...new Set(blueprints.flatMap((b) => b.materials.map((m) => m.typeId)))]
-  const historyTypeIds = [...new Set([...productTypeIds, ...blueprintTypeIds, ...materialTypeIds])]
+  const miningTypeIds = collectMiningTypeIds()
+  const historyTypeIds = [
+    ...new Set([
+      ...productTypeIds,
+      ...blueprintTypeIds,
+      ...materialTypeIds,
+      ...miningTypeIds,
+    ]),
+  ]
 
   const stationToSystem = new Map(
     stations.map((s) => [s.stationId ?? s.stationID, s.systemId ?? num(s.solarSystemID)]),
@@ -456,6 +465,24 @@ export async function buildMarketData(blueprints, regions, stations, options = {
   return market
 }
 
+function collectMiningTypeIds() {
+  const ids = new Set()
+  try {
+    const miningPath = join(process.cwd(), 'public/data/mining.json')
+    if (!existsSync(miningPath)) return []
+    const mining = JSON.parse(readFileSync(miningPath, 'utf8'))
+    for (const item of mining.items ?? []) {
+      if (/compress/i.test(item.name ?? '')) continue
+      ids.add(item.typeId)
+      if (item.compressedTypeId != null) ids.add(item.compressedTypeId)
+      for (const mat of item.reprocess ?? []) ids.add(mat.typeId)
+    }
+  } catch {
+    // mining.json optional until rebuild-mining has been run
+  }
+  return [...ids]
+}
+
 function collectTypeIds(blueprints) {
   const ids = new Set()
   for (const bp of blueprints) {
@@ -464,6 +491,7 @@ function collectTypeIds(blueprints) {
     for (const m of bp.materials) ids.add(m.typeId)
     for (const d of bp.invention?.datacores ?? []) ids.add(d.typeId)
   }
+  for (const id of collectMiningTypeIds()) ids.add(id)
   return [...ids]
 }
 

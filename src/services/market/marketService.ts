@@ -434,6 +434,96 @@ export async function getPricesForTypes(
   return map
 }
 
+async function fetchFuzzworkBuyPrices(
+  typeIds: number[],
+  regionId: number,
+): Promise<Map<number, number>> {
+  const map = new Map<number, number>()
+  if (!typeIds.length) return map
+
+  for (let i = 0; i < typeIds.length; i += 100) {
+    const chunk = typeIds.slice(i, i + 100)
+    await throttle()
+    const url = `${FUZZWORK_BASE}/?types=${chunk.join(',')}&region=${regionId}`
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`Fuzzwork bulk failed: ${res.status}`)
+    const data = (await res.json()) as Record<string, { buy?: { max?: number | string } }>
+    for (const typeId of chunk) {
+      map.set(typeId, normalizeMarketPrice(data[String(typeId)]?.buy?.max))
+    }
+  }
+  return map
+}
+
+/** Avg daily traded volume for a price window (from ESI history). */
+export async function getAvgVolumesForTypes(
+  typeIds: number[],
+  hub: HubId = 'jita',
+  range: TimeRange = '1m',
+): Promise<Map<number, number>> {
+  const map = new Map<number, number>()
+  const unique = [...new Set(typeIds.filter((id) => id > 0))]
+  if (!unique.length) return map
+
+  await batchProcess(unique, 4, 0, async (typeId) => {
+    const { history } = await getMarketHistory(typeId, hub, range)
+    if (!history.length) {
+      map.set(typeId, 0)
+      return
+    }
+    const avg = history.reduce((sum, row) => sum + row.volume, 0) / history.length
+    map.set(typeId, avg)
+  })
+  return map
+}
+
+/** Bulk hub buy (max) quotes; same cache keys as getHubQuotes buy side. */
+export async function getBuyPricesForTypes(
+  typeIds: number[],
+  hub: HubId = 'jita',
+  forceRefresh = false,
+): Promise<Map<number, number>> {
+  const regionId = REGION_IDS[hub]
+  const map = new Map<number, number>()
+  const missing: number[] = []
+
+  for (const typeId of typeIds) {
+    const key = cacheKey('price', 'buy', { typeId, regionId })
+    if (!forceRefresh) {
+      const cached = getCached<number>(key)
+      if (cached && !cached.stale) {
+        map.set(typeId, normalizeMarketPrice(cached.data))
+        continue
+      }
+    }
+    missing.push(typeId)
+  }
+
+  if (missing.length) {
+    try {
+      const bulk = await fetchFuzzworkBuyPrices(missing, regionId)
+      for (const typeId of missing) {
+        const price = bulk.get(typeId) ?? 0
+        map.set(typeId, price)
+        setCached(
+          cacheKey('price', 'buy', { typeId, regionId }),
+          price,
+          'fuzzwork',
+          TTL.price.fresh,
+          TTL.price.stale,
+        )
+      }
+    } catch {
+      await batchProcess(missing, 5, 0, async (typeId) => {
+        const { buy } = await getHubQuotes(typeId, hub, forceRefresh)
+        map.set(typeId, buy)
+      })
+    }
+  }
+
+  return map
+}
+
 export interface SystemKillsMap {
   [systemId: number]: { shipKills: number; podKills: number }
 }
