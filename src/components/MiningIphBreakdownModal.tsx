@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { MiningIphFocusPath } from '@/lib/miningIph'
 import type { MiningRankedRow, TimeRange, TypeInfo } from '@/types'
-import { MINING_IPH_PATHS, miningVolumeLabel } from '@/lib/miningIph'
+import {
+  MINING_IPH_PATHS,
+  MINING_IPH_PATH_ORDER,
+  miningPathHasPriceData,
+  miningVolumeLabel,
+  resolveMiningBreakdownPath,
+} from '@/lib/miningIph'
 import { EveImage } from '@/components/EveImage'
 import { MiningSpaceBadges } from '@/components/MiningSpaceBadges'
 import { formatDecimal, formatIsk, formatQuantity } from '@/lib/profit'
@@ -34,7 +40,7 @@ export function MiningIphBreakdownModal({
   const [activePath, setActivePath] = useState<MiningIphFocusPath>(initialFocusPath)
 
   useEffect(() => {
-    if (row) setActivePath(initialFocusPath)
+    if (row) setActivePath(resolveMiningBreakdownPath(row, initialFocusPath))
   }, [row?.item.typeId, initialFocusPath, row])
 
   if (!row) return null
@@ -43,6 +49,8 @@ export function MiningIphBreakdownModal({
   const itemHref = appRoute(`item/${item.typeId}`)
   const priceLabel = priceMethod === 'buy_orders' ? 'buy orders' : 'sell orders'
   const volLabel = miningVolumeLabel(window)
+  const pathsWithPrice = MINING_IPH_PATH_ORDER.filter((path) => miningPathHasPriceData(path, row))
+  const pathsWithoutPrice = MINING_IPH_PATH_ORDER.filter((path) => !miningPathHasPriceData(path, row))
 
   return (
     <dialog className="modal modal-open">
@@ -67,56 +75,85 @@ export function MiningIphBreakdownModal({
         </div>
 
         <div className="px-5 py-4 overflow-y-auto space-y-4 flex-1 min-h-0">
-          <section
-            role="tablist"
-            aria-label="Valuation path"
-            className="grid grid-cols-1 sm:grid-cols-3 gap-2"
-          >
-            <PathStat
-              label={MINING_IPH_PATHS.raw.label}
-              value={row.rawIph}
-              detail={`${formatIsk(row.rawValuePerM3)}/m³`}
-              active={activePath === 'raw'}
-              onClick={() => setActivePath('raw')}
-            />
-            <PathStat
-              label={MINING_IPH_PATHS.compressed.label}
-              value={row.compressedIph}
-              detail={
-                row.compressedValuePerM3 != null
-                  ? `${formatIsk(row.compressedValuePerM3)}/m³`
-                  : 'No compressed type'
-              }
-              active={activePath === 'compressed'}
-              onClick={() => setActivePath('compressed')}
-            />
-            <PathStat
-              label={MINING_IPH_PATHS.minerals.label}
-              value={row.mineralsIph}
-              detail={`${formatIsk(row.mineralsValuePerM3)}/m³`}
-              active={activePath === 'minerals'}
-              onClick={() => setActivePath('minerals')}
-            />
-          </section>
+          {pathsWithPrice.length > 0 ? (
+            <section
+              role="tablist"
+              aria-label="Valuation path"
+              className={`grid gap-2 ${
+                pathsWithPrice.length === 1
+                  ? 'grid-cols-1'
+                  : pathsWithPrice.length === 2
+                    ? 'grid-cols-1 sm:grid-cols-2'
+                    : 'grid-cols-1 sm:grid-cols-3'
+              }`}
+            >
+              {pathsWithPrice.map((path) => (
+                <PathStat
+                  key={path}
+                  path={path}
+                  row={row}
+                  active={activePath === path}
+                  onClick={() => setActivePath(path)}
+                />
+              ))}
+            </section>
+          ) : null}
+
+          {pathsWithoutPrice.length > 0 ? (
+            <section aria-label="No price data" className="space-y-2">
+              {pathsWithPrice.length > 0 ? (
+                <p className="text-[11px] uppercase tracking-wide opacity-50">No price data</p>
+              ) : null}
+              <div
+                role="tablist"
+                className={`grid gap-2 ${
+                  pathsWithoutPrice.length === 1
+                    ? 'grid-cols-1'
+                    : pathsWithoutPrice.length === 2
+                      ? 'grid-cols-1 sm:grid-cols-2'
+                      : 'grid-cols-1 sm:grid-cols-3'
+                }`}
+              >
+                {pathsWithoutPrice.map((path) => (
+                  <PathStat
+                    key={path}
+                    path={path}
+                    row={row}
+                    active={activePath === path}
+                    onClick={() => setActivePath(path)}
+                    unavailable
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           {activePath === 'raw' ? (
-            <RawPathDetail
-              row={row}
-              m3PerHr={m3PerHr}
-              window={window}
-              volLabel={volLabel}
-              priceLabel={priceLabel}
-            />
+            miningPathHasPriceData('raw', row) ? (
+              <RawPathDetail
+                row={row}
+                m3PerHr={m3PerHr}
+                window={window}
+                volLabel={volLabel}
+                priceLabel={priceLabel}
+              />
+            ) : (
+              <NoPriceDataDetail path="raw" window={window} priceLabel={priceLabel} />
+            )
           ) : activePath === 'compressed' ? (
-            <CompressedPathDetail
-              row={row}
-              m3PerHr={m3PerHr}
-              window={window}
-              volLabel={volLabel}
-              priceLabel={priceLabel}
-              typeMap={typeMap}
-            />
-          ) : (
+            miningPathHasPriceData('compressed', row) ? (
+              <CompressedPathDetail
+                row={row}
+                m3PerHr={m3PerHr}
+                window={window}
+                volLabel={volLabel}
+                priceLabel={priceLabel}
+                typeMap={typeMap}
+              />
+            ) : (
+              <NoPriceDataDetail path="compressed" window={window} priceLabel={priceLabel} />
+            )
+          ) : miningPathHasPriceData('minerals', row) ? (
             <ReprocessPathDetail
               row={row}
               m3PerHr={m3PerHr}
@@ -126,6 +163,8 @@ export function MiningIphBreakdownModal({
               volLabel={volLabel}
               priceLabel={priceLabel}
             />
+          ) : (
+            <NoPriceDataDetail path="minerals" window={window} priceLabel={priceLabel} />
           )}
 
           <p className="text-xs opacity-50">
@@ -224,12 +263,18 @@ function CompressedPathDetail({
       : null
   const compressedHref = compressedId != null ? appRoute(`item/${compressedId}`) : null
 
-  if (compressedId == null || row.compressedPrice == null || row.compressedValuePerM3 == null) {
+  if (compressedId == null) {
     return (
       <section className="rounded-lg border border-eve-border bg-base-300/20 px-4 py-3">
         <h4 className="text-sm font-semibold">{MINING_IPH_PATHS.compressed.label}</h4>
         <p className="text-sm opacity-60 mt-1">This item has no compressed market type.</p>
       </section>
+    )
+  }
+
+  if (row.compressedPrice == null || row.compressedPrice <= 0 || row.compressedValuePerM3 == null) {
+    return (
+      <NoPriceDataDetail path="compressed" window={window} priceLabel={priceLabel} />
     )
   }
 
@@ -412,36 +457,71 @@ function DetailRow({
   )
 }
 
+function NoPriceDataDetail({
+  path,
+  window,
+  priceLabel,
+}: {
+  path: MiningIphFocusPath
+  window: TimeRange
+  priceLabel: string
+}) {
+  return (
+    <section className="rounded-lg border border-eve-border bg-base-300/20 px-4 py-3">
+      <h4 className="text-sm font-semibold">{MINING_IPH_PATHS[path].label}</h4>
+      <p className="text-sm opacity-60 mt-1">
+        No price data for this path at the hub ({priceLabel}, {window} window).
+      </p>
+    </section>
+  )
+}
+
 function PathStat({
-  label,
-  value,
-  detail,
+  path,
+  row,
   active = false,
   onClick,
+  unavailable = false,
 }: {
-  label: string
-  value: number | null
-  detail: string
+  path: MiningIphFocusPath
+  row: MiningRankedRow
   active?: boolean
   onClick: () => void
+  unavailable?: boolean
 }) {
+  const label = MINING_IPH_PATHS[path].label
+  const value =
+    path === 'raw' ? row.rawIph : path === 'compressed' ? row.compressedIph : row.mineralsIph
+  const detail =
+    path === 'raw'
+      ? `${formatIsk(row.rawValuePerM3)}/m³`
+      : path === 'compressed'
+        ? row.compressedValuePerM3 != null
+          ? `${formatIsk(row.compressedValuePerM3)}/m³`
+          : 'No compressed type'
+        : `${formatIsk(row.mineralsValuePerM3)}/m³`
+
   return (
     <button
       type="button"
       role="tab"
       aria-selected={active}
       className={`rounded-lg border px-3 py-3 text-left w-full transition-colors cursor-pointer ${
-        active
-          ? 'border-primary/40 bg-primary/10 ring-1 ring-primary/20'
-          : 'border-eve-border bg-base-300/20 hover:bg-base-300/40 hover:border-eve-border/80'
+        unavailable
+          ? active
+            ? 'border-eve-border bg-base-300/30 opacity-80'
+            : 'border-eve-border/70 bg-base-300/10 opacity-60 hover:opacity-80'
+          : active
+            ? 'border-primary/40 bg-primary/10 ring-1 ring-primary/20'
+            : 'border-eve-border bg-base-300/20 hover:bg-base-300/40 hover:border-eve-border/80'
       }`}
       onClick={onClick}
     >
       <p className="text-[11px] uppercase tracking-wide opacity-50">{label}</p>
-      <p className="text-lg font-semibold tabular-nums mt-1">
-        {value == null || value <= 0 ? '—' : formatIsk(value)}
+      <p className={`text-lg font-semibold tabular-nums mt-1 ${unavailable ? 'text-sm font-normal opacity-70' : ''}`}>
+        {unavailable ? 'No price data' : value == null || value <= 0 ? '—' : formatIsk(value)}
       </p>
-      <p className="text-[11px] opacity-60 mt-1">{detail}</p>
+      {!unavailable ? <p className="text-[11px] opacity-60 mt-1">{detail}</p> : null}
     </button>
   )
 }

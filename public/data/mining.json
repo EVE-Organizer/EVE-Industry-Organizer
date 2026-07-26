@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-26T08:43:35.708Z",
+  "generatedAt": "2026-07-26T09:19:25.958Z",
   "defaults": {
     "m3PerHr": 50400,
     "m3PerHrBySubtype": {
@@ -2056,7 +2056,8 @@
       "subtype": "ore",
       "foundIn": [
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62548,
       "reprocess": [
@@ -2080,7 +2081,8 @@
       "subtype": "ore",
       "foundIn": [
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62549,
       "reprocess": [
@@ -2104,7 +2106,8 @@
       "subtype": "ore",
       "foundIn": [
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62550,
       "reprocess": [
@@ -2128,7 +2131,8 @@
       "subtype": "ore",
       "foundIn": [
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62544,
       "reprocess": [
@@ -2152,7 +2156,8 @@
       "subtype": "ore",
       "foundIn": [
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62545,
       "reprocess": [
@@ -2176,7 +2181,8 @@
       "subtype": "ore",
       "foundIn": [
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62546,
       "reprocess": [
@@ -2302,7 +2308,8 @@
       "subtype": "ore",
       "foundIn": [
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62540,
       "reprocess": [
@@ -2326,7 +2333,8 @@
       "subtype": "ore",
       "foundIn": [
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62541,
       "reprocess": [
@@ -2350,7 +2358,8 @@
       "subtype": "ore",
       "foundIn": [
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62542,
       "reprocess": [
@@ -2403,6 +2412,7 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
+        "highsec",
         "lowsec",
         "nullsec",
         "wormhole"
@@ -2428,6 +2438,7 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
+        "highsec",
         "lowsec",
         "nullsec",
         "wormhole"
@@ -2453,6 +2464,7 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
+        "highsec",
         "lowsec",
         "nullsec",
         "wormhole"
@@ -3063,8 +3075,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
+        "highsec",
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62532,
       "reprocess": [
@@ -3087,8 +3101,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
+        "highsec",
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62533,
       "reprocess": [
@@ -3111,8 +3127,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
+        "highsec",
         "lowsec",
-        "nullsec"
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62534,
       "reprocess": [
@@ -3159,7 +3177,9 @@
       "subtype": "ore",
       "foundIn": [
         "highsec",
-        "lowsec"
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62528,
       "reprocess": [
@@ -3183,7 +3203,9 @@
       "subtype": "ore",
       "foundIn": [
         "highsec",
-        "lowsec"
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62529,
       "reprocess": [
@@ -3207,7 +3229,9 @@
       "subtype": "ore",
       "foundIn": [
         "highsec",
-        "lowsec"
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62530,
       "reprocess": [
@@ -3288,7 +3312,9 @@
       "subtype": "ore",
       "foundIn": [
         "highsec",
-        "lowsec"
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62524,
       "reprocess": [
@@ -3312,7 +3338,9 @@
       "subtype": "ore",
       "foundIn": [
         "highsec",
-        "lowsec"
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": null,
       "reprocess": [
@@ -3336,7 +3364,9 @@
       "subtype": "ore",
       "foundIn": [
         "highsec",
-        "lowsec"
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62525,
       "reprocess": [
@@ -3360,7 +3390,9 @@
       "subtype": "ore",
       "foundIn": [
         "highsec",
-        "lowsec"
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62526,
       "reprocess": [
@@ -3621,7 +3653,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
-        "highsec"
+        "highsec",
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62520,
       "reprocess": [
@@ -3644,7 +3679,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
-        "highsec"
+        "highsec",
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 92374,
       "reprocess": [
@@ -3667,7 +3705,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
-        "highsec"
+        "highsec",
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62521,
       "reprocess": [
@@ -3690,7 +3731,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
-        "highsec"
+        "highsec",
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62522,
       "reprocess": [
@@ -4377,7 +4421,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
-        "highsec"
+        "highsec",
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62516,
       "reprocess": [
@@ -4396,7 +4443,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
-        "highsec"
+        "highsec",
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 92372,
       "reprocess": [
@@ -4415,7 +4465,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
-        "highsec"
+        "highsec",
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62517,
       "reprocess": [
@@ -4434,7 +4487,10 @@
       "portionSize": 100,
       "subtype": "ore",
       "foundIn": [
-        "highsec"
+        "highsec",
+        "lowsec",
+        "nullsec",
+        "wormhole"
       ],
       "compressedTypeId": 62518,
       "reprocess": [

@@ -1,6 +1,6 @@
 import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry, StructureType } from '@/types'
 import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS, STRUCTURE_HULL_PRESETS, type MiningBuffId, type MiningBoostSpace, type MiningShipId } from '@/types'
-import { DEFAULT_MINING_SHIP_ID, normalizeMiningBoostSpace, normalizeMiningBuffIds, normalizeMiningShipId } from '@/lib/miningShipPresets'
+import { DEFAULT_MINING_SHIP_ID, normalizeMiningBoostSpace, normalizeMiningBuffIds, normalizeMiningFleetSize, normalizeMiningShipId } from '@/lib/miningShipPresets'
 import { SKILL_FIELDS, enforceSkillPrerequisites } from '@/lib/skillFields'
 import { normalizeBpoLifetimeRunsByCategory } from '@/lib/bpoLifetime'
 import {
@@ -174,6 +174,7 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
       normalizeMiningBoostSpace(rest.miningBoostSpace as MiningBoostSpace | undefined),
     ),
     miningBoostSpace: normalizeMiningBoostSpace(rest.miningBoostSpace as MiningBoostSpace | undefined),
+    miningFleetSize: normalizeMiningFleetSize(rest.miningFleetSize as number | undefined),
   }
 }
 

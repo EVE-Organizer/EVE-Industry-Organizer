@@ -9,7 +9,7 @@ import {
   buildTypeMap,
   getHubMarket,
 } from '@/services/data/sdeLoader'
-import { getBuyPricesForTypes, getAvgVolumesForTypes, getPricesForTypes } from '@/services/market/marketService'
+import { getBuyPricesForTypes, getAvgVolumesForTypes } from '@/services/market/marketService'
 import {
   MINING_SPACES,
   MINING_SUBTYPES,
@@ -17,6 +17,7 @@ import {
   DEFAULT_MINING_IPH_SORT_KEY,
   MINING_IPH_PATHS,
   miningDisplayVolume,
+  miningPathDisplayIph,
   miningVolumeLabel,
   rankMiningIph,
   sortMiningRows,
@@ -25,15 +26,17 @@ import {
 import {
   normalizeMiningShipId,
   normalizeMiningBoostSpace,
+  normalizeMiningFleetSize,
   inferMiningBoostSpace,
   toggleMiningBuffId,
   resolveUserMiningM3PerHr,
 } from '@/lib/miningShipPresets'
 import { formatIsk, formatQuantity } from '@/lib/profit'
+import { buildWindowPriceMap } from '@/lib/ranking'
 import { appRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
-import { HUBS, type MiningBuffId, type MiningIphSortKey, type MiningRankedRow, type MiningShipId, type MiningSpaceClass, type MiningSubtype, type TimeRange } from '@/types'
+import { HUBS, DEFAULT_SETTINGS, type MiningBuffId, type MiningIphSortKey, type MiningRankedRow, type MiningShipId, type MiningSpaceClass, type MiningSubtype, type TimeRange } from '@/types'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { EveImage } from '@/components/EveImage'
 import { InfoTooltip } from '@/components/InfoTooltip'
@@ -66,7 +69,7 @@ const FOUND_IN_HINT =
 const MATERIAL_HINT =
   'Rank ores by how much of one reprocess output you get per hour (e.g. Mexallon/hr). All = total reprocess ISK/hr.'
 const PRICE_METHOD_HINT =
-  'Sell = window average at the hub. Buy = instant sell to buy orders.'
+  'Sell = hub average for the selected window. Buy = instant sell to buy orders (window applies to reprocess minerals only).'
 
 function FiltersIcon({ className }: { className?: string }) {
   return (
@@ -279,7 +282,6 @@ export function MiningIskHrPage() {
   const [subtype, setSubtype] = useState<MiningSubtype>('ore')
   const [foundIn, setFoundIn] = useState<MiningSpaceClass[]>([])
   const [focusTypeId, setFocusTypeId] = useState<number | null>(null)
-  const [priceWindow, setPriceWindow] = useState<TimeRange>(settings.priceWindow)
   const [sortKey, setSortKey] = useState<MiningIphSortKey>(DEFAULT_MINING_IPH_SORT_KEY)
   const [breakdown, setBreakdown] = useState<{
     row: MiningRankedRow
@@ -288,10 +290,7 @@ export function MiningIskHrPage() {
 
   const hub = settings.primaryHub
   const hubName = HUBS.find((h) => h.id === hub)?.name ?? hub
-
-  useEffect(() => {
-    setPriceWindow(settings.priceWindow)
-  }, [settings.priceWindow])
+  const priceWindow = settings.priceWindow ?? DEFAULT_SETTINGS.priceWindow
 
   const focusOptions = useMemo(() => {
     if (!mining || subtype === 'gas') return []
@@ -322,22 +321,10 @@ export function MiningIskHrPage() {
     [mining, subtype],
   )
 
-  const missingSellIds = useMemo(() => {
-    if (!staticSpot || !miningTypeIds.length) return [] as number[]
-    return miningTypeIds.filter((id) => !(staticSpot.get(id) && staticSpot.get(id)! > 0))
-  }, [staticSpot, miningTypeIds])
-
   const missingBuyIds = useMemo(() => {
     if (settings.priceMethod !== 'buy_orders' || !miningTypeIds.length) return [] as number[]
     return miningTypeIds.filter((id) => !(staticBuy?.get(id) && staticBuy.get(id)! > 0))
   }, [settings.priceMethod, miningTypeIds, staticBuy])
-
-  const { data: liveSellPrices } = useQuery({
-    queryKey: ['mining-live-sell', hub, missingSellIds.join(',')],
-    queryFn: () => getPricesForTypes(missingSellIds, hub),
-    enabled: missingSellIds.length > 0,
-    staleTime: 5 * 60_000,
-  })
 
   const { data: liveBuyPrices } = useQuery({
     queryKey: ['mining-live-buy', hub, missingBuyIds.join(',')],
@@ -346,15 +333,11 @@ export function MiningIskHrPage() {
     staleTime: 5 * 60_000,
   })
 
-  const spotPrices = useMemo(() => {
-    if (!staticSpot) return null
-    if (!liveSellPrices?.size) return staticSpot
-    const merged = new Map(staticSpot)
-    for (const [id, price] of liveSellPrices) {
-      if (price > 0) merged.set(id, price)
-    }
-    return merged
-  }, [staticSpot, liveSellPrices])
+  /** Hub window averages — same path as Blueprints / Plan (buildWindowPriceMap on static hub data). */
+  const windowSell = useMemo(() => {
+    if (!hubMarket) return null
+    return buildWindowPriceMap(hubMarket, priceWindow, buildPriceMap(hubMarket))
+  }, [hubMarket, priceWindow])
 
   const buyPrices = useMemo(() => {
     const base = staticBuy ?? new Map<number, number>()
@@ -421,27 +404,36 @@ export function MiningIskHrPage() {
 
   const miningShipId = normalizeMiningShipId(settings.miningShipId, subtype)
   const miningBuffIds = settings.miningBuffIds ?? []
+  const miningFleetSize = normalizeMiningFleetSize(settings.miningFleetSize)
   const miningBoostSpace = inferMiningBoostSpace(
     miningBuffIds,
     normalizeMiningBoostSpace(settings.miningBoostSpace),
   )
-  const m3PerHr = resolveUserMiningM3PerHr(subtype, miningShipId, miningBuffIds, miningBoostSpace)
+  const m3PerHr = resolveUserMiningM3PerHr(
+    subtype,
+    miningShipId,
+    miningBuffIds,
+    miningBoostSpace,
+    miningFleetSize,
+  )
 
   const rankedRows = useMemo(() => {
-    if (!mining || !hubMarketWithVolumes || !spotPrices) return []
-    return rankMiningIph(mining, hubMarketWithVolumes, spotPrices, buyPrices, typeMap, {
+    if (!mining || !hubMarketWithVolumes || !windowSell) return []
+    return rankMiningIph(mining, hubMarketWithVolumes, staticSpot ?? new Map(), buyPrices, typeMap, {
       subtype,
       foundIn,
       focusTypeId,
       window: priceWindow,
       priceMethod: settings.priceMethod,
+      sellPrices: windowSell,
       reprocessYield: mining.defaults.reprocessYield,
       m3PerHr,
     })
   }, [
     mining,
     hubMarketWithVolumes,
-    spotPrices,
+    windowSell,
+    staticSpot,
     buyPrices,
     typeMap,
     subtype,
@@ -456,6 +448,11 @@ export function MiningIskHrPage() {
     () => sortMiningRows(rankedRows, sortKey, true),
     [rankedRows, sortKey],
   )
+
+  const breakdownRow = useMemo(() => {
+    if (!breakdown) return null
+    return rows.find((r) => r.item.typeId === breakdown.row.item.typeId) ?? breakdown.row
+  }, [breakdown, rows])
 
   const focusName =
     focusTypeId != null ? focusOptions.find((o) => o.typeId === focusTypeId)?.name ?? null : null
@@ -480,10 +477,9 @@ export function MiningIskHrPage() {
   }
 
   function onPriceWindowChange(next: TimeRange) {
-    startTransition(() => {
-      setPriceWindow(next)
-      updateSettings({ priceWindow: next })
-    })
+    if (next === priceWindow) return
+    setBreakdown(null)
+    updateSettings({ priceWindow: next })
   }
 
   function onPriceMethodChange(next: (typeof PRICE_METHODS)[number]['id']) {
@@ -507,6 +503,10 @@ export function MiningIskHrPage() {
 
   function openBreakdown(row: MiningRankedRow, focusPath: MiningIphFocusPath = 'raw') {
     setBreakdown({ row, focusPath })
+  }
+
+  function onMiningFleetSizeChange(next: number) {
+    startTransition(() => updateSettings({ miningFleetSize: normalizeMiningFleetSize(next) }))
   }
 
   function onMiningShipChange(next: MiningShipId) {
@@ -707,8 +707,10 @@ export function MiningIskHrPage() {
             shipId={miningShipId}
             buffIds={miningBuffIds}
             boostSpace={miningBoostSpace}
+            fleetSize={miningFleetSize}
             onShipChange={onMiningShipChange}
             onBuffToggle={onMiningBuffToggle}
+            onFleetSizeChange={onMiningFleetSizeChange}
           />
         </div>
       </section>
@@ -760,17 +762,17 @@ export function MiningIskHrPage() {
                   <MiningSpaceBadges spaces={row.item.foundIn} />
                 </td>
                 <IphCell
-                  value={row.rawIph}
+                  value={miningPathDisplayIph('raw', row)}
                   onClick={() => openBreakdown(row, 'raw')}
                   ariaLabel={`Raw ISK per hour breakdown for ${row.item.name}`}
                 />
                 <IphCell
-                  value={row.compressedIph}
+                  value={miningPathDisplayIph('compressed', row)}
                   onClick={() => openBreakdown(row, 'compressed')}
                   ariaLabel={`Compressed ISK per hour breakdown for ${row.item.name}`}
                 />
                 <IphCell
-                  value={row.mineralsIph}
+                  value={miningPathDisplayIph('minerals', row)}
                   onClick={() => openBreakdown(row, 'minerals')}
                   ariaLabel={`Reprocess ISK per hour breakdown for ${row.item.name}`}
                 />
@@ -813,17 +815,17 @@ export function MiningIskHrPage() {
             <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
               <MobileIph
                 label={MINING_IPH_PATHS.raw.label}
-                value={row.rawIph}
+                value={miningPathDisplayIph('raw', row)}
                 onClick={() => openBreakdown(row, 'raw')}
               />
               <MobileIph
                 label={MINING_IPH_PATHS.compressed.label}
-                value={row.compressedIph}
+                value={miningPathDisplayIph('compressed', row)}
                 onClick={() => openBreakdown(row, 'compressed')}
               />
               <MobileIph
                 label={MINING_IPH_PATHS.minerals.label}
-                value={row.mineralsIph}
+                value={miningPathDisplayIph('minerals', row)}
                 onClick={() => openBreakdown(row, 'minerals')}
               />
               {focusTypeId != null && focusName ? (
@@ -838,7 +840,7 @@ export function MiningIskHrPage() {
       </div>
 
       <MiningIphBreakdownModal
-        row={breakdown?.row ?? null}
+        row={breakdownRow}
         initialFocusPath={breakdown?.focusPath ?? 'raw'}
         m3PerHr={m3PerHr}
         reprocessYield={reprocessYield}

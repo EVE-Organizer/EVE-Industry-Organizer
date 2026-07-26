@@ -16,24 +16,37 @@ const SDE_BASE = 'https://www.fuzzwork.co.uk/dump/latest/csv'
 
 const ORE_MINERAL_IDS = [34, 35, 36, 37, 38, 39, 40]
 
-/** Classic belt ore security (base name → spaces). Variants inherit via group. */
+/**
+ * Classic belt ore security (base name → spaces). Variants inherit via group.
+ * Tiers are cumulative (CCP chart: "X and lower"); highsec floor is 0.5.
+ * Faction-specific spawns are unioned (no faction filter in the app).
+ */
+const ALL_BELT_SPACES = ['highsec', 'lowsec', 'nullsec', 'wormhole']
+const LOW_NULL_WH = ['lowsec', 'nullsec', 'wormhole']
+const NULL_WH = ['nullsec', 'wormhole']
+
 const ORE_FOUND_IN = {
-  Veldspar: ['highsec'],
-  Scordite: ['highsec'],
-  Pyroxeres: ['highsec', 'lowsec'],
-  Plagioclase: ['highsec', 'lowsec'],
-  Omber: ['lowsec', 'nullsec'],
-  Kernite: ['lowsec', 'nullsec', 'wormhole'],
-  Jaspet: ['lowsec', 'nullsec'],
-  Hemorphite: ['lowsec', 'nullsec'],
-  Hedbergite: ['lowsec', 'nullsec'],
-  Gneiss: ['nullsec', 'wormhole'],
-  DarkOchre: ['nullsec', 'wormhole'],
-  'Dark Ochre': ['nullsec', 'wormhole'],
-  Crokite: ['nullsec', 'wormhole'],
-  Bistot: ['nullsec', 'wormhole'],
-  Arkonor: ['nullsec', 'wormhole'],
-  Spodumain: ['nullsec', 'wormhole'],
+  // 1.0 and lower — everywhere belts spawn.
+  Veldspar: ALL_BELT_SPACES,
+  Scordite: ALL_BELT_SPACES,
+  // 0.9 and lower (Amarr/Caldari Pyroxeres; Gallente/Minmatar Plagioclase).
+  Pyroxeres: ALL_BELT_SPACES,
+  Plagioclase: ALL_BELT_SPACES,
+  // 0.7 and lower (Amarr Kernite; Caldari Plagioclase; Gallente/Minmatar Omber).
+  Omber: ALL_BELT_SPACES,
+  Kernite: ALL_BELT_SPACES,
+  // 0.4 and lower (Amarr/Gallente Jaspet; Caldari/Minmatar Kernite).
+  Jaspet: LOW_NULL_WH,
+  // 0.2 and lower.
+  Hemorphite: LOW_NULL_WH,
+  Hedbergite: LOW_NULL_WH,
+  Gneiss: NULL_WH,
+  DarkOchre: NULL_WH,
+  'Dark Ochre': NULL_WH,
+  Crokite: NULL_WH,
+  Bistot: NULL_WH,
+  Arkonor: NULL_WH,
+  Spodumain: NULL_WH,
   Mercoxit: ['nullsec'],
   Bezdnacine: ['nullsec'],
   Rakovene: ['nullsec'],

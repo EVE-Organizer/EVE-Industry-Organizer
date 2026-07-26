@@ -100,6 +100,45 @@ export const MINING_IPH_PATHS = {
   },
 } as const
 
+export const MINING_IPH_PATH_ORDER: MiningIphFocusPath[] = ['raw', 'compressed', 'minerals']
+
+export function miningPathHasPriceData(path: MiningIphFocusPath, row: MiningRankedRow): boolean {
+  switch (path) {
+    case 'raw':
+      // Below 1 ISK the unit price rounds to "0 ISK" in the UI (thin or missing hub quotes).
+      return row.rawPrice >= 1
+    case 'compressed':
+      return row.compressedPrice != null && row.compressedPrice >= 1
+    case 'minerals':
+      return row.mineralsIph > 0 && row.reprocessLines.some((line) => line.price >= 1)
+  }
+}
+
+/** Prefer a path that has hub prices; fall back to the requested path. */
+export function resolveMiningBreakdownPath(
+  row: MiningRankedRow,
+  preferred: MiningIphFocusPath,
+): MiningIphFocusPath {
+  if (miningPathHasPriceData(preferred, row)) return preferred
+  return MINING_IPH_PATH_ORDER.find((path) => miningPathHasPriceData(path, row)) ?? preferred
+}
+
+/** ISK/hr for table/sort, or null when hub quotes are missing or dust-thin. */
+export function miningPathDisplayIph(
+  path: MiningIphFocusPath,
+  row: MiningRankedRow,
+): number | null {
+  if (!miningPathHasPriceData(path, row)) return null
+  switch (path) {
+    case 'raw':
+      return row.rawIph
+    case 'compressed':
+      return row.compressedIph
+    case 'minerals':
+      return row.mineralsIph
+  }
+}
+
 /** Prefer compressed hub volume when the raw market is thin. */
 export function miningLiquidityVolume(row: MiningRankedRow): number {
   const raw = row.volDayRaw ?? 0
@@ -134,16 +173,17 @@ export function shouldIncludeMiningRow(
   switch (subtype) {
     case 'ore':
     case 'ice': {
-      const hasRaw = (row.volDayRaw ?? 0) > 0 && row.rawIph > 0
+      const hasRaw =
+        (row.volDayRaw ?? 0) > 0 && miningPathHasPriceData('raw', row)
       const hasComp =
-        (row.volDayCompressed ?? 0) > 0 && (row.compressedIph ?? 0) > 0
+        (row.volDayCompressed ?? 0) > 0 && miningPathHasPriceData('compressed', row)
       return hasRaw || hasComp
     }
     case 'gas':
-      if ((row.volDayRaw ?? 0) > 0 && row.rawIph > 0) return true
-      return row.mineralsIph > 0 && (row.volDayMinerals ?? 0) > 0
+      if ((row.volDayRaw ?? 0) > 0 && miningPathHasPriceData('raw', row)) return true
+      return miningPathHasPriceData('minerals', row) && (row.volDayMinerals ?? 0) > 0
     case 'moon':
-      return row.mineralsIph > 0 && (row.volDayMinerals ?? 0) > 0
+      return miningPathHasPriceData('minerals', row) && (row.volDayMinerals ?? 0) > 0
     default:
       return true
   }
@@ -171,16 +211,21 @@ export function collectMiningPriceTypeIds(
   return [...ids]
 }
 
-function priceOf(
+function materialPrice(typeId: number, windowSell: Map<number, number>): number {
+  return windowSell.get(typeId) ?? 0
+}
+
+/** Raw/compressed sale price; reprocess outputs always use window sell (see materialPrice). */
+function productPrice(
   typeId: number,
-  windowPrices: Map<number, number>,
+  windowSell: Map<number, number>,
   buyPrices: Map<number, number> | null,
   priceMethod: 'sell_orders' | 'buy_orders',
 ): number {
   if (priceMethod === 'buy_orders') {
     return buyPrices?.get(typeId) ?? 0
   }
-  return windowPrices.get(typeId) ?? 0
+  return windowSell.get(typeId) ?? 0
 }
 
 function avgVolumeOf(hubMarket: HubMarketData, typeId: number, window: TimeRange): number {
@@ -204,9 +249,7 @@ function topMineralTypeId(lines: MiningReprocessLine[]): number | null {
 
 function buildReprocessLines(
   item: MiningItem,
-  windowPrices: Map<number, number>,
-  buyPrices: Map<number, number> | null,
-  priceMethod: 'sell_orders' | 'buy_orders',
+  windowSell: Map<number, number>,
   typeName: (typeId: number) => string,
   m3PerHr: number,
   yieldFactor: number,
@@ -217,7 +260,7 @@ function buildReprocessLines(
   const lines: MiningReprocessLine[] = []
 
   for (const mat of item.reprocess) {
-    const price = priceOf(mat.typeId, windowPrices, buyPrices, priceMethod)
+    const price = materialPrice(mat.typeId, windowSell)
     const qtyPerM3 = mat.quantityPerBatch * batchesPerM3 * yieldFactor
     const iskPerHr = qtyPerM3 * price * m3PerHr
     lines.push({
@@ -236,7 +279,7 @@ export function rankMiningItem(
   item: MiningItem,
   hubMarket: HubMarketData,
   window: TimeRange,
-  windowPrices: Map<number, number>,
+  windowSell: Map<number, number>,
   buyPrices: Map<number, number> | null,
   priceMethod: 'sell_orders' | 'buy_orders',
   typeName: (typeId: number) => string,
@@ -248,7 +291,7 @@ export function rankMiningItem(
 ): MiningRankedRow | null {
   if (!(item.volume > 0)) return null
 
-  const rawPrice = priceOf(item.typeId, windowPrices, buyPrices, priceMethod)
+  const rawPrice = productPrice(item.typeId, windowSell, buyPrices, priceMethod)
   const rawValuePerM3 = rawPrice > 0 ? rawPrice / item.volume : 0
   const rawIph = rawValuePerM3 * opts.m3PerHr
 
@@ -256,7 +299,7 @@ export function rankMiningItem(
   let compressedValuePerM3: number | null = null
   let compressedIph: number | null = null
   if (item.compressedTypeId != null) {
-    const cPrice = priceOf(item.compressedTypeId, windowPrices, buyPrices, priceMethod)
+    const cPrice = productPrice(item.compressedTypeId, windowSell, buyPrices, priceMethod)
     if (cPrice > 0) {
       compressedPrice = cPrice
       compressedValuePerM3 = cPrice / item.volume
@@ -266,9 +309,7 @@ export function rankMiningItem(
 
   const reprocessLines = buildReprocessLines(
     item,
-    windowPrices,
-    buyPrices,
-    priceMethod,
+    windowSell,
     typeName,
     opts.m3PerHr,
     opts.reprocessYield,
@@ -334,11 +375,11 @@ export function sortMiningRows(
   const value = (row: MiningRankedRow): number => {
     switch (sortKey) {
       case 'raw':
-        return row.rawIph
+        return miningPathDisplayIph('raw', row) ?? -1
       case 'compressed':
-        return row.compressedIph ?? -1
+        return miningPathDisplayIph('compressed', row) ?? -1
       case 'minerals':
-        return row.mineralsIph
+        return miningPathDisplayIph('minerals', row) ?? -1
       case 'focus':
         return row.focusQtyPerHr ?? -1
       case 'vol':
@@ -365,6 +406,8 @@ export interface RankMiningOptions {
   focusTypeId: number | null
   window: TimeRange
   priceMethod: 'sell_orders' | 'buy_orders'
+  /** Hub sell-side window averages (same as Blueprints buildWindowPriceMap). */
+  sellPrices?: Map<number, number>
   m3PerHr?: number
   reprocessYield?: number
   sortKey?: MiningIphSortKey
@@ -386,7 +429,8 @@ export function rankMiningIph(
   const typeName = (typeId: number) => typeMap.get(typeId)?.name ?? `Type ${typeId}`
   const foundFilter = options.foundIn
 
-  const windowPrices = buildWindowPriceMap(hubMarket, options.window, spotPrices)
+  const windowSell =
+    options.sellPrices ?? buildWindowPriceMap(hubMarket, options.window, spotPrices)
 
   const rows: MiningRankedRow[] = []
   for (const item of mining.items) {
@@ -398,7 +442,7 @@ export function rankMiningIph(
       item,
       hubMarket,
       options.window,
-      windowPrices,
+      windowSell,
       buyPrices,
       options.priceMethod,
       typeName,

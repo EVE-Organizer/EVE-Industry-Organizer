@@ -463,16 +463,27 @@ export function formatBuffPercent(multiplier: number): string {
   return pct > 0 ? `+${pct}%` : `${pct}%`
 }
 
+export const DEFAULT_MINING_FLEET_SIZE = 1
+export const MAX_MINING_FLEET_SIZE = 99
+
+export function normalizeMiningFleetSize(size: number | undefined): number {
+  const n = Math.floor(Number(size))
+  if (!Number.isFinite(n) || n < 1) return DEFAULT_MINING_FLEET_SIZE
+  return Math.min(n, MAX_MINING_FLEET_SIZE)
+}
+
 export function resolveUserMiningM3PerHr(
   subtype: MiningSubtype,
   shipId: MiningShipId | undefined,
   buffIds: readonly MiningBuffId[],
   boostSpace: MiningBoostSpace = DEFAULT_MINING_BOOST_SPACE,
+  fleetSize: number = DEFAULT_MINING_FLEET_SIZE,
 ): number {
   const ship = getMiningShip(normalizeMiningShipId(shipId, subtype))
   const base = ship.m3PerHrBySubtype[subtype] ?? DEFAULT_MINING_M3_PER_HR_BY_SUBTYPE[subtype]
   const active = applicableMiningBuffIds(shipId, subtype, buffIds, boostSpace)
-  return Math.round(base * miningBuffMultiplier(active))
+  const perShip = base * miningBuffMultiplier(active)
+  return Math.round(perShip * normalizeMiningFleetSize(fleetSize))
 }
 
 export function resolveUserMiningBaseM3PerHr(
@@ -489,6 +500,7 @@ export function formatMiningSetupSummary(
   buffIds: readonly MiningBuffId[],
   m3PerHr: number,
   boostSpace: MiningBoostSpace = DEFAULT_MINING_BOOST_SPACE,
+  fleetSize: number = DEFAULT_MINING_FLEET_SIZE,
 ): string {
   const ship = getMiningShip(normalizeMiningShipId(shipId, subtype))
   const space = normalizeMiningBoostSpace(boostSpace)
@@ -497,7 +509,9 @@ export function formatMiningSetupSummary(
     .map((id) => BUFF_BY_ID.get(id)?.shortLabel)
     .filter(Boolean) as string[]
   const buffPart = buffLabels.length > 0 ? buffLabels.join(' + ') : 'Hull only'
-  return `${ship.label} · ${buffPart} · ${m3PerHr.toLocaleString()} m³/hr`
+  const fleet = normalizeMiningFleetSize(fleetSize)
+  const fleetPart = fleet > 1 ? `${fleet}× ` : ''
+  return `${fleetPart}${ship.label} · ${buffPart} · ${m3PerHr.toLocaleString()} m³/hr`
 }
 
 /** Clear fleet buffs that do not apply after a boost-space change. */

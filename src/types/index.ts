@@ -347,6 +347,8 @@ export interface GlobalSettings {
   miningBuffIds?: MiningBuffId[]
   /** Where you mine with fleet boosts (Orca in HS, Rorqual in LS/NS/WH). */
   miningBoostSpace?: MiningBoostSpace
+  /** Identical mining ships in your fleet (scales m³/hr and ISK/hr). */
+  miningFleetSize?: number
 }
 
 /** Global settings plus per-job run count for manufacturing cost and profit math. */
@@ -817,6 +819,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   miningShipId: 'retriever',
   miningBuffIds: [],
   miningBoostSpace: 'highsec',
+  miningFleetSize: 1,
 }
 
 /** T2 invented blueprint copy base efficiency without a decryptor. */

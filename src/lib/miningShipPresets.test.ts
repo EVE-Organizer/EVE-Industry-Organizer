@@ -8,6 +8,7 @@ import {
   miningBuffsForContext,
   miningBuffsForSetup,
   normalizeMiningShipId,
+  normalizeMiningFleetSize,
   resolveUserMiningM3PerHr,
   toggleMiningBuffId,
 } from '@/lib/miningShipPresets'
@@ -121,5 +122,15 @@ describe('miningShipPresets', () => {
 
   it('lists all nine mining hulls', () => {
     expect(MINING_SHIPS).toHaveLength(9)
+  })
+
+  it('scales m³/hr by fleet size', () => {
+    expect(normalizeMiningFleetSize(undefined)).toBe(1)
+    expect(normalizeMiningFleetSize(0)).toBe(1)
+    expect(normalizeMiningFleetSize(5)).toBe(5)
+    expect(normalizeMiningFleetSize(150)).toBe(99)
+
+    const solo = resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1)
+    expect(resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 5)).toBe(solo * 5)
   })
 })

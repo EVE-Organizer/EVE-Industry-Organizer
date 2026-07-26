@@ -1,10 +1,15 @@
+import { readFileSync } from 'fs'
 import { describe, expect, it } from 'vitest'
+import { buildWindowPriceMap } from '@/lib/ranking'
 import {
   miningDisplayVolume,
+  miningPathHasPriceData,
   rankMiningIph,
+  resolveMiningBreakdownPath,
   sortMiningRows,
 } from '@/lib/miningIph'
-import type { HubMarketData, MiningData, TypeInfo } from '@/types'
+import { buildPriceMap, buildTypeMap, getHubMarket } from '@/services/data/sdeLoader'
+import type { HubMarketData, MiningData, MarketData, TypeInfo } from '@/types'
 
 const mining: MiningData = {
   generatedAt: '',
@@ -26,12 +31,24 @@ const mining: MiningData = {
       volume: 0.35,
       portionSize: 100,
       subtype: 'ore',
-      foundIn: ['highsec', 'lowsec'],
+      foundIn: ['highsec', 'lowsec', 'nullsec', 'wormhole'],
       compressedTypeId: 62528,
       reprocess: [
         { typeId: 34, quantityPerBatch: 175 },
         { typeId: 36, quantityPerBatch: 70 },
       ],
+      iconUrl: '',
+    },
+    {
+      typeId: 11396,
+      name: 'Mercoxit',
+      group: 'Mercoxit',
+      volume: 0.6,
+      portionSize: 100,
+      subtype: 'ore',
+      foundIn: ['nullsec'],
+      compressedTypeId: null,
+      reprocess: [{ typeId: 40, quantityPerBatch: 140 }],
       iconUrl: '',
     },
     {
@@ -41,7 +58,7 @@ const mining: MiningData = {
       volume: 0.1,
       portionSize: 100,
       subtype: 'ore',
-      foundIn: ['highsec'],
+      foundIn: ['highsec', 'lowsec', 'nullsec', 'wormhole'],
       compressedTypeId: 62516,
       reprocess: [{ typeId: 34, quantityPerBatch: 400 }],
       iconUrl: '',
@@ -102,16 +119,152 @@ describe('rankMiningIph', () => {
     expect(rows[0].focusQtyPerHr).toBeGreaterThan(0)
   })
 
+  it('uses hub window average sell prices instead of spot', () => {
+    const windowedHub: HubMarketData = {
+      ...hubMarket,
+      prices: { '18': 99, '1230': 99, '34': 99, '36': 99 },
+      products: {
+        '18': {
+          '1w': { avgPrice: 10, avgVolume: 1000, high: 10, low: 10 },
+          '1m': { avgPrice: 20, avgVolume: 1000, high: 20, low: 20 },
+        },
+        '1230': {
+          '1w': { avgPrice: 5, avgVolume: 1000, high: 5, low: 5 },
+          '1m': { avgPrice: 8, avgVolume: 1000, high: 8, low: 8 },
+        },
+        '34': { '1w': { avgPrice: 4, avgVolume: 1e9, high: 4, low: 4 } },
+        '36': { '1w': { avgPrice: 50, avgVolume: 1e6, high: 50, low: 50 } },
+      },
+    }
+    const spot = new Map<number, number>([
+      [18, 99],
+      [1230, 99],
+      [34, 99],
+      [36, 99],
+    ])
+    const sell1w = buildWindowPriceMap(windowedHub, '1w', spot)
+    const sell1m = buildWindowPriceMap(windowedHub, '1m', spot)
+    const rows1w = rankMiningIph(mining, windowedHub, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1w',
+      priceMethod: 'sell_orders',
+      sellPrices: sell1w,
+    })
+    const rows1m = rankMiningIph(mining, windowedHub, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1m',
+      priceMethod: 'sell_orders',
+      sellPrices: sell1m,
+    })
+    const plagi1w = rows1w.find((r) => r.item.typeId === 18)
+    const plagi1m = rows1m.find((r) => r.item.typeId === 18)
+    expect(plagi1w?.rawPrice).toBe(10)
+    expect(plagi1m?.rawPrice).toBe(20)
+    expect(plagi1w?.rawIph).not.toBe(plagi1m?.rawIph)
+  })
+
+  it('treats dust raw quotes as missing price data', () => {
+    const dustRow = {
+      ...mining.items[0],
+      typeId: 999,
+      name: 'Dust Ore',
+    }
+    const row = {
+      item: dustRow,
+      rawPrice: 0.02,
+      compressedPrice: 1000,
+      rawValuePerM3: 0.001,
+      compressedValuePerM3: 50,
+      mineralsValuePerM3: 0,
+      rawIph: 30,
+      compressedIph: 50_000,
+      mineralsIph: 0,
+      focusIph: null,
+      focusQtyPerHr: null,
+      focusTypeId: null,
+      volDayRaw: 12,
+      volDayCompressed: 100,
+      volDayMinerals: 0,
+      volDayFocus: null,
+      volDay: 100,
+      reprocessLines: [],
+    }
+    expect(miningPathHasPriceData('raw', row)).toBe(false)
+    expect(miningPathHasPriceData('compressed', row)).toBe(true)
+    expect(resolveMiningBreakdownPath(row, 'raw')).toBe('compressed')
+  })
+
+  it('reprocess minerals always use window sell averages (like blueprint material buys)', () => {
+    const windowedHub: HubMarketData = {
+      ...hubMarket,
+      prices: { '18': 99, '34': 99 },
+      buyPrices: { '18': 5, '34': 2 },
+      products: {
+        '18': {
+          '1w': { avgPrice: 10, avgVolume: 1000, high: 10, low: 10 },
+          '1m': { avgPrice: 10, avgVolume: 1000, high: 10, low: 10 },
+        },
+        '34': {
+          '1w': { avgPrice: 4, avgVolume: 1e9, high: 4, low: 4 },
+          '1m': { avgPrice: 8, avgVolume: 1e9, high: 8, low: 8 },
+        },
+      },
+    }
+    const oreOnly: MiningData = {
+      ...mining,
+      items: [mining.items[0]],
+    }
+    const spot = new Map<number, number>([
+      [18, 99],
+      [34, 99],
+    ])
+    const buy = new Map<number, number>([
+      [18, 5],
+      [34, 2],
+    ])
+    const sell1w = buildWindowPriceMap(windowedHub, '1w', spot)
+    const sell1m = buildWindowPriceMap(windowedHub, '1m', spot)
+    const rows1w = rankMiningIph(oreOnly, windowedHub, spot, buy, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1w',
+      priceMethod: 'buy_orders',
+      sellPrices: sell1w,
+      sortKey: 'minerals',
+    })
+    const rows1m = rankMiningIph(oreOnly, windowedHub, spot, buy, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1m',
+      priceMethod: 'buy_orders',
+      sellPrices: sell1m,
+      sortKey: 'minerals',
+    })
+    expect(rows1w[0]?.rawPrice).toBe(5)
+    expect(rows1m[0]?.rawPrice).toBe(5)
+    expect(rows1w[0]?.mineralsIph).not.toBe(rows1m[0]?.mineralsIph)
+  })
+
   it('requires every selected Found in space (AND)', () => {
     const spot = new Map(Object.entries(hubMarket.prices).map(([k, v]) => [Number(k), v]))
-    const rows = rankMiningIph(mining, hubMarket, spot, null, typeMap, {
+    const beltMining: MiningData = {
+      ...mining,
+      items: [mining.items[0], mining.items[1]],
+    }
+    const rows = rankMiningIph(beltMining, hubMarket, spot, null, typeMap, {
       subtype: 'ore',
       foundIn: ['highsec', 'lowsec'],
       focusTypeId: null,
       window: 'all',
       priceMethod: 'sell_orders',
     })
-    // Plagioclase is HS+LS; Veldspar is HS only.
+    // Plagioclase spans HS+LS; Mercoxit is null-only.
     expect(rows.every((r) => r.item.name === 'Plagioclase')).toBe(true)
     expect(rows).toHaveLength(1)
   })
@@ -492,5 +645,47 @@ describe('rankMiningIph', () => {
     })
     expect(rows).toHaveLength(1)
     expect(rows[0].item.name).toBe('Hiemal Tricarboxyl Vapor')
+  })
+
+  it('uses real hub window averages that differ by window (Jita Plagioclase)', () => {
+    const market = JSON.parse(
+      readFileSync('public/data/market.json', 'utf8'),
+    ) as MarketData
+    const miningData = JSON.parse(
+      readFileSync('public/data/mining.json', 'utf8'),
+    ) as MiningData
+    const typesRaw = JSON.parse(readFileSync('public/data/types.json', 'utf8')) as
+      | { types: Parameters<typeof buildTypeMap>[0] }
+      | Parameters<typeof buildTypeMap>[0]
+    const types = Array.isArray(typesRaw) ? typesRaw : typesRaw.types
+    const hubMarket = getHubMarket(market, 'jita')!
+    const spot = buildPriceMap(hubMarket)
+    const typeMap = buildTypeMap(types)
+    const sell1w = buildWindowPriceMap(hubMarket, '1w', spot)
+    const sell1m = buildWindowPriceMap(hubMarket, '1m', spot)
+
+    const rows1w = rankMiningIph(miningData, hubMarket, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1w',
+      priceMethod: 'sell_orders',
+      sellPrices: sell1w,
+    })
+    const rows1m = rankMiningIph(miningData, hubMarket, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1m',
+      priceMethod: 'sell_orders',
+      sellPrices: sell1m,
+    })
+
+    const plagi1w = rows1w.find((r) => r.item.name === 'Plagioclase')
+    const plagi1m = rows1m.find((r) => r.item.name === 'Plagioclase')
+    expect(plagi1w?.rawPrice).toBe(hubMarket.products['18']?.['1w']?.avgPrice)
+    expect(plagi1m?.rawPrice).toBe(hubMarket.products['18']?.['1m']?.avgPrice)
+    expect(plagi1w?.rawPrice).not.toBe(plagi1m?.rawPrice)
+    expect(plagi1w?.rawIph).not.toBe(plagi1m?.rawIph)
   })
 })

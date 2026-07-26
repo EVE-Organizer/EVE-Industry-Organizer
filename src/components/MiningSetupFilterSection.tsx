@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { MiningBuffId, MiningShipId } from '@/lib/miningShipPresets'
 import {
   MINING_SHIPS,
@@ -11,6 +12,7 @@ import {
   miningShipSupportsSubtype,
   normalizeMiningBoostSpace,
   normalizeMiningShipId,
+  normalizeMiningFleetSize,
   resolveUserMiningBaseM3PerHr,
   resolveUserMiningM3PerHr,
   type MiningBoostSpace,
@@ -109,13 +111,59 @@ function BuffChip({
   )
 }
 
+function FleetSizeInput({
+  value,
+  onCommit,
+}: {
+  value: number
+  onCommit: (size: number) => void
+}) {
+  const [draft, setDraft] = useState<string | null>(null)
+  const display = draft ?? String(value)
+
+  function commit() {
+    const parsed = parseInt(draft ?? String(value), 10)
+    setDraft(null)
+    if (!Number.isFinite(parsed) || parsed < 1) return
+    const next = normalizeMiningFleetSize(parsed)
+    if (next !== value) onCommit(next)
+  }
+
+  return (
+    <input
+      type="number"
+      className="input input-bordered input-xs w-full max-w-[5.5rem] tabular-nums"
+      step={1}
+      min={1}
+      max={99}
+      value={display}
+      aria-label="Number of mining ships"
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          commit()
+          e.currentTarget.blur()
+        }
+        if (e.key === 'Escape') {
+          setDraft(null)
+          e.currentTarget.blur()
+        }
+      }}
+    />
+  )
+}
+
 export interface MiningSetupFilterSectionProps {
   subtype: MiningSubtype
   shipId: MiningShipId
   buffIds: MiningBuffId[]
   boostSpace: MiningBoostSpace
+  fleetSize: number
   onShipChange: (id: MiningShipId) => void
   onBuffToggle: (id: MiningBuffId) => void
+  onFleetSizeChange: (size: number) => void
 }
 
 /** Collapsed-by-default ship and buff picker for mining m³/hr scale. */
@@ -124,8 +172,10 @@ export function MiningSetupFilterSection({
   shipId,
   buffIds,
   boostSpace,
+  fleetSize,
   onShipChange,
   onBuffToggle,
+  onFleetSizeChange,
 }: MiningSetupFilterSectionProps) {
   const space = inferMiningBoostSpace(buffIds, normalizeMiningBoostSpace(boostSpace))
   const effectiveShipId = normalizeMiningShipId(shipId, subtype)
@@ -133,9 +183,24 @@ export function MiningSetupFilterSection({
   const supportedCount = MINING_SHIPS.filter((s) => miningShipSupportsSubtype(s, subtype)).length
   const activeBuffIds = applicableMiningBuffIds(effectiveShipId, subtype, buffIds, space)
   const buffs = miningBuffsForSetup(effectiveShipId, subtype, activeBuffIds)
+  const effectiveFleetSize = normalizeMiningFleetSize(fleetSize)
   const baseM3 = resolveUserMiningBaseM3PerHr(subtype, effectiveShipId)
-  const m3PerHr = resolveUserMiningM3PerHr(subtype, effectiveShipId, buffIds, space)
-  const summary = formatMiningSetupSummary(subtype, effectiveShipId, buffIds, m3PerHr, space)
+  const m3PerHr = resolveUserMiningM3PerHr(
+    subtype,
+    effectiveShipId,
+    buffIds,
+    space,
+    effectiveFleetSize,
+  )
+  const perShipM3 = resolveUserMiningM3PerHr(subtype, effectiveShipId, buffIds, space, 1)
+  const summary = formatMiningSetupSummary(
+    subtype,
+    effectiveShipId,
+    buffIds,
+    m3PerHr,
+    space,
+    effectiveFleetSize,
+  )
   const hasBuffs = activeBuffIds.length > 0
 
   return (
@@ -173,6 +238,14 @@ export function MiningSetupFilterSection({
           </div>
         </div>
 
+        <div className="mining-filters__setup-row">
+          <SetupLabel
+            label="Mining ships"
+            hint="Number of identical mining ships on grid. Scales m³/hr and ISK/hr rankings; fleet boosts apply to each ship."
+          />
+          <FleetSizeInput value={effectiveFleetSize} onCommit={onFleetSizeChange} />
+        </div>
+
         <div className="mining-filters__setup-rate-card">
           <div className="mining-filters__setup-rate-main">
             <span className="mining-filters__setup-rate-value tabular-nums">
@@ -181,13 +254,27 @@ export function MiningSetupFilterSection({
             <span className="mining-filters__setup-rate-unit">m³/hr</span>
           </div>
           <div className="mining-filters__setup-rate-meta">
-            <span className="tabular-nums">{ship.label}</span>
-            <span className="opacity-40" aria-hidden>
-              ·
-            </span>
-            <span className="tabular-nums opacity-60">
-              {hasBuffs ? `${baseM3.toLocaleString()} base` : 'hull only'}
-            </span>
+            {effectiveFleetSize > 1 ? (
+              <>
+                <span className="tabular-nums">{effectiveFleetSize}× {ship.label}</span>
+                <span className="opacity-40" aria-hidden>
+                  ·
+                </span>
+                <span className="tabular-nums opacity-60">
+                  {perShipM3.toLocaleString()} each
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="tabular-nums">{ship.label}</span>
+                <span className="opacity-40" aria-hidden>
+                  ·
+                </span>
+                <span className="tabular-nums opacity-60">
+                  {hasBuffs ? `${baseM3.toLocaleString()} base` : 'hull only'}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
