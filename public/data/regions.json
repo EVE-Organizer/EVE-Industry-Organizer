@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-26T08:26:45.787Z",
+  "generatedAt": "2026-07-27T06:55:11.526Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -807,13 +807,13 @@
     {
       "regionId": 10000016,
       "name": "Lonetrek",
-      "securityClass": "highsec",
-      "buildSystemId": 30001415,
-      "buildSystemName": "Kuoka",
-      "buildSystemSecurity": 0.576705,
+      "securityClass": "lowsec",
+      "buildSystemId": 30001435,
+      "buildSystemName": "Ohbochi",
+      "buildSystemSecurity": 0.410927,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30001415
+      "marketSystemId": 30001435
     },
     {
       "regionId": 10000013,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.03,
+      "costIndex": 0.0298,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
