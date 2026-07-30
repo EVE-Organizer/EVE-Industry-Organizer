@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-26T08:26:45.787Z",
+  "generatedAt": "2026-07-30T06:19:37.989Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -544,12 +544,12 @@
       "regionId": 10000039,
       "name": "Esoteria",
       "securityClass": "nullsec",
-      "buildSystemId": 30003146,
-      "buildSystemName": "Q1-R7K",
-      "buildSystemSecurity": -0.008621,
+      "buildSystemId": 30003140,
+      "buildSystemName": "IR-FDV",
+      "buildSystemSecurity": -0.02318,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30003146
+      "marketSystemId": 30003140
     },
     {
       "regionId": 10000064,
@@ -807,13 +807,13 @@
     {
       "regionId": 10000016,
       "name": "Lonetrek",
-      "securityClass": "highsec",
-      "buildSystemId": 30001415,
-      "buildSystemName": "Kuoka",
-      "buildSystemSecurity": 0.576705,
+      "securityClass": "lowsec",
+      "buildSystemId": 30001435,
+      "buildSystemName": "Ohbochi",
+      "buildSystemSecurity": 0.410927,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30001415
+      "marketSystemId": 30001435
     },
     {
       "regionId": 10000013,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.03,
+      "costIndex": 0.0287,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }

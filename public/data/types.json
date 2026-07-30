@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-26T08:30:46.566Z",
+  "generatedAt": "2026-07-30T06:24:09.920Z",
   "types": [
     {
       "typeId": 18,
@@ -87255,7 +87255,7 @@
       "group": "Trade",
       "category": "Skill",
       "volume": 0.01,
-      "description": "This skill allows you to create formal agreements with other characters. \n\nFor each level of this skill the number of outstanding contracts is increased by four (up to a maximum of 21 at level 5)",
+      "description": "This skill allows you to create formal agreements with other characters. \n\nFor each level of this skill the number of outstanding contracts is increased by four (up to a maximum of 21 at level 5).",
       "iconUrl": "https://images.evetech.net/types/25235/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/25235/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/25235/bp?size=32"
@@ -104085,7 +104085,7 @@
       "group": "Cynosural Field Generator",
       "category": "Module",
       "volume": 25,
-      "description": "Generates an undetectable cynosural field which only Black Ops jump drives can lock on to.\n\nNote: Can only be fitted to Black Ops, Blockade Runners, Covert Ops, Etana, Prospect, Stealth Bombers and Force Recon Ships, as well as Strategic Cruisers equipped with Covert Reconfiguration Subsystems.",
+      "description": "Generates an undetectable cynosural field which only Black Ops jump drives can lock on to.\n\nNote: Can only be fitted to Black Ops, Blockade Runners, Covert Ops, Etana, Rabisu, Prospect, Stealth Bombers and Force Recon Ships, as well as Strategic Cruisers equipped with Covert Reconfiguration Subsystems.",
       "iconUrl": "https://images.evetech.net/types/28646/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/28646/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/28646/bp?size=32"
@@ -253795,7 +253795,7 @@
       "group": "Trade",
       "category": "Skill",
       "volume": 0.01,
-      "description": "This skill allows you to create formal agreements with other characters. \n\nFor each level of this skill the number of outstanding contracts is increased by four (up to a maximum of 41 at level 5)",
+      "description": "This skill allows you to create formal agreements with other characters. \n\nFor each level of this skill the number of outstanding contracts is increased by four (up to a maximum of 41 at level 5).",
       "iconUrl": "https://images.evetech.net/types/73912/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/73912/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/73912/bp?size=32"
