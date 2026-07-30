@@ -974,6 +974,7 @@ export function PlanPage() {
                   <div className="plan-price-bar">
                     <EconomicsFilterSection
                       layout="bar"
+                      barVariant="plan"
                       values={{
                         priceMethod: activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
                         priceWindow: activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow,

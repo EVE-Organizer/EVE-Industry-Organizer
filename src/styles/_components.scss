@@ -852,6 +852,26 @@
   &__haul-text {
     @apply inline-flex items-center gap-1.5 text-sm text-base-content/75;
   }
+
+  &--plan {
+    @apply sm:items-center;
+
+    .economics-filter-bar__haul {
+      @apply sm:ml-0;
+    }
+  }
+
+  &__trail {
+    @apply flex min-w-0 flex-wrap items-end gap-2 self-start sm:ml-auto sm:self-auto;
+  }
+
+  &__method-select {
+    @apply flex min-w-0 flex-col gap-1;
+  }
+
+  &__select {
+    @apply min-w-[5.5rem] h-8 min-h-0;
+  }
 }
 
 .manufacturing-slots {

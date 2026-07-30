@@ -69,6 +69,90 @@ interface EconomicsFilterSectionProps {
   className?: string
   /** `stack` = card layout; `bar` = compact horizontal strip. */
   layout?: 'stack' | 'bar'
+  /** Plan bar: window first, buy/sell select grouped left of Include hauling. */
+  barVariant?: 'default' | 'plan'
+}
+
+function PriceMethodChips({
+  value,
+  onChange,
+}: {
+  value: GlobalSettings['priceMethod']
+  onChange: (priceMethod: GlobalSettings['priceMethod']) => void
+}) {
+  return (
+    <div role="group" aria-label="Price method" className="economics-filter-bar__chips">
+      <button
+        type="button"
+        aria-pressed={value === 'sell_orders'}
+        className={`economics-filter-bar__chip${
+          value === 'sell_orders' ? ' economics-filter-bar__chip--active' : ''
+        }`}
+        onClick={() => onChange('sell_orders')}
+      >
+        Sell
+      </button>
+      <button
+        type="button"
+        aria-pressed={value === 'buy_orders'}
+        className={`economics-filter-bar__chip${
+          value === 'buy_orders' ? ' economics-filter-bar__chip--active' : ''
+        }`}
+        onClick={() => onChange('buy_orders')}
+      >
+        Buy
+      </button>
+    </div>
+  )
+}
+
+function PriceWindowChips({
+  value,
+  onChange,
+}: {
+  value: TimeRange
+  onChange: (priceWindow: TimeRange) => void
+}) {
+  return (
+    <div role="group" aria-label="Price window" className="economics-filter-bar__chips">
+      {TIME_WINDOWS.map((r) => (
+        <button
+          key={r}
+          type="button"
+          aria-pressed={value === r}
+          className={`economics-filter-bar__chip${
+            value === r ? ' economics-filter-bar__chip--active' : ''
+          }`}
+          onClick={() => onChange(r)}
+        >
+          {r}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function IncludeHaulToggle({
+  checked,
+  onChange,
+}: {
+  checked: boolean
+  onChange: (includeHaulCost: boolean) => void
+}) {
+  return (
+    <label className="economics-filter-bar__haul">
+      <input
+        type="checkbox"
+        className="toggle toggle-sm toggle-primary"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      <span className="economics-filter-bar__haul-text">
+        Include hauling
+        <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.includeHaulCost} />
+      </span>
+    </label>
+  )
 }
 
 /** Shared price method / window / haul controls for Blueprints and Plan. */
@@ -80,8 +164,53 @@ export function EconomicsFilterSection({
   hint = 'Hub is in the navbar. Market data and haul below.',
   className,
   layout = 'stack',
+  barVariant = 'default',
 }: EconomicsFilterSectionProps) {
   if (layout === 'bar') {
+    if (barVariant === 'plan') {
+      return (
+        <div className={`economics-filter-bar economics-filter-bar--plan ${className ?? ''}`.trim()}>
+          {children}
+          <div className="economics-filter-bar__window">
+            <span className="economics-filter-bar__label">
+              Price window
+              <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.priceWindow} />
+            </span>
+            <PriceWindowChips
+              value={values.priceWindow}
+              onChange={(priceWindow) => onChange({ priceWindow })}
+            />
+          </div>
+
+          <div className="economics-filter-bar__trail">
+            <label className="economics-filter-bar__method-select">
+              <span className="economics-filter-bar__label">
+                Price method
+                <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.priceMethod} />
+              </span>
+              <select
+                className="select select-bordered select-xs economics-filter-bar__select"
+                value={values.priceMethod}
+                aria-label="Price method"
+                onChange={(e) =>
+                  onChange({
+                    priceMethod: e.target.value as GlobalSettings['priceMethod'],
+                  })
+                }
+              >
+                <option value="sell_orders">Sell</option>
+                <option value="buy_orders">Buy</option>
+              </select>
+            </label>
+            <IncludeHaulToggle
+              checked={values.includeHaulCost}
+              onChange={(includeHaulCost) => onChange({ includeHaulCost })}
+            />
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className={`economics-filter-bar ${className ?? ''}`.trim()}>
         {children}
@@ -90,28 +219,10 @@ export function EconomicsFilterSection({
             Price method
             <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.priceMethod} />
           </span>
-          <div role="group" aria-label="Price method" className="economics-filter-bar__chips">
-            <button
-              type="button"
-              aria-pressed={values.priceMethod === 'sell_orders'}
-              className={`economics-filter-bar__chip${
-                values.priceMethod === 'sell_orders' ? ' economics-filter-bar__chip--active' : ''
-              }`}
-              onClick={() => onChange({ priceMethod: 'sell_orders' })}
-            >
-              Sell
-            </button>
-            <button
-              type="button"
-              aria-pressed={values.priceMethod === 'buy_orders'}
-              className={`economics-filter-bar__chip${
-                values.priceMethod === 'buy_orders' ? ' economics-filter-bar__chip--active' : ''
-              }`}
-              onClick={() => onChange({ priceMethod: 'buy_orders' })}
-            >
-              Buy
-            </button>
-          </div>
+          <PriceMethodChips
+            value={values.priceMethod}
+            onChange={(priceMethod) => onChange({ priceMethod })}
+          />
         </label>
 
         <div className="economics-filter-bar__window">
@@ -119,35 +230,16 @@ export function EconomicsFilterSection({
             Price window
             <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.priceWindow} />
           </span>
-          <div role="group" aria-label="Price window" className="economics-filter-bar__chips">
-            {TIME_WINDOWS.map((r) => (
-              <button
-                key={r}
-                type="button"
-                aria-pressed={values.priceWindow === r}
-                className={`economics-filter-bar__chip${
-                  values.priceWindow === r ? ' economics-filter-bar__chip--active' : ''
-                }`}
-                onClick={() => onChange({ priceWindow: r })}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
+          <PriceWindowChips
+            value={values.priceWindow}
+            onChange={(priceWindow) => onChange({ priceWindow })}
+          />
         </div>
 
-        <label className="economics-filter-bar__haul">
-          <input
-            type="checkbox"
-            className="toggle toggle-sm toggle-primary"
-            checked={values.includeHaulCost}
-            onChange={(e) => onChange({ includeHaulCost: e.target.checked })}
-          />
-          <span className="economics-filter-bar__haul-text">
-            Include hauling
-            <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.includeHaulCost} />
-          </span>
-        </label>
+        <IncludeHaulToggle
+          checked={values.includeHaulCost}
+          onChange={(includeHaulCost) => onChange({ includeHaulCost })}
+        />
       </div>
     )
   }
