@@ -1,10 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react'
+import { createPortal } from 'react-dom'
 import { PlanProductIcon, PLAN_ROW_ICON_SIZE } from '@/components/plan/PlanProductIcon'
 import type { BlueprintInfo, BlueprintTier, SkillLevels, TypeInfo } from '@/types'
 import { isReactionRecipe } from '@/lib/recipes'
 import { meetsBuildRequirements } from '@/lib/buildRequirements'
 
 const MAX_RESULTS = 12
+const MENU_GAP_PX = 6
+const MENU_Z_INDEX = 60
 
 type PickerItem = {
   productTypeId: number
@@ -77,9 +88,11 @@ export function BlueprintSearchPicker({
   skills,
 }: BlueprintSearchPickerProps) {
   const rootRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLUListElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
 
   useEffect(() => {
     if (!autoFocus) return
@@ -134,15 +147,40 @@ export function BlueprintSearchPicker({
 
   const showFavorites = open && query.trim().length < 2 && favorites.length > 0
   const showSearch = open && query.trim().length >= 2
+  const showMenu = showFavorites || showSearch
   const items = showFavorites ? favorites : filtered
+
+  const updateMenuPosition = useCallback(() => {
+    const input = inputRef.current
+    if (!input) return
+    const rect = input.getBoundingClientRect()
+    setMenuStyle({
+      position: 'fixed',
+      top: rect.bottom + MENU_GAP_PX,
+      left: rect.left,
+      width: rect.width,
+      zIndex: MENU_Z_INDEX,
+    })
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!showMenu) return
+    updateMenuPosition()
+    window.addEventListener('scroll', updateMenuPosition, true)
+    window.addEventListener('resize', updateMenuPosition)
+    return () => {
+      window.removeEventListener('scroll', updateMenuPosition, true)
+      window.removeEventListener('resize', updateMenuPosition)
+    }
+  }, [showMenu, updateMenuPosition])
 
   useEffect(() => {
     if (!open) return
     function onMouseDown(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) {
-        setOpen(false)
-        setQuery('')
-      }
+      const target = e.target as Node
+      if (rootRef.current?.contains(target) || menuRef.current?.contains(target)) return
+      setOpen(false)
+      setQuery('')
     }
     document.addEventListener('mousedown', onMouseDown)
     return () => document.removeEventListener('mousedown', onMouseDown)
@@ -188,44 +226,51 @@ export function BlueprintSearchPicker({
         }}
         onFocus={() => setOpen(true)}
       />
-      {(showFavorites || showSearch) && (
-        <ul className="plan-search-wrap__menu absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto rounded-xl border border-eve-border bg-base-200 p-1 shadow-xl">
-          {showFavorites ? (
-            <li className="px-2.5 py-1.5 text-[10px] uppercase tracking-wide opacity-40">Favorites</li>
-          ) : null}
-          {items.length === 0 ? (
-            <li className="px-3 py-2 text-xs opacity-50">No blueprints match</li>
-          ) : (
-            items.map((item) => (
-              <li key={item.productTypeId}>
-                <button
-                  type="button"
-                  className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg hover:bg-base-300/80 text-left transition-colors"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => select(item.productTypeId)}
-                >
-                  <PlanProductIcon
-                    productTypeId={item.productTypeId}
-                    blueprintTypeId={item.blueprintTypeId}
-                    size={PLAN_ROW_ICON_SIZE}
-                    alt={item.name}
-                    lazy={false}
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm truncate">{item.name}</span>
-                    <span className="block text-[10px] opacity-50 truncate">
-                      {blueprintByProduct.get(item.productTypeId) &&
-                      isReactionRecipe(blueprintByProduct.get(item.productTypeId)!)
-                        ? 'Reaction'
-                        : item.group}
+      {showMenu &&
+        createPortal(
+          <ul
+            ref={menuRef}
+            className="plan-search-wrap__menu"
+            style={menuStyle}
+            role="listbox"
+          >
+            {showFavorites ? (
+              <li className="px-2.5 py-1.5 text-[10px] uppercase tracking-wide opacity-40">Favorites</li>
+            ) : null}
+            {items.length === 0 ? (
+              <li className="px-3 py-2 text-xs opacity-50">No blueprints match</li>
+            ) : (
+              items.map((item) => (
+                <li key={item.productTypeId}>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg hover:bg-base-300/80 text-left transition-colors"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => select(item.productTypeId)}
+                  >
+                    <PlanProductIcon
+                      productTypeId={item.productTypeId}
+                      blueprintTypeId={item.blueprintTypeId}
+                      size={PLAN_ROW_ICON_SIZE}
+                      alt={item.name}
+                      lazy={false}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm truncate">{item.name}</span>
+                      <span className="block text-[10px] opacity-50 truncate">
+                        {blueprintByProduct.get(item.productTypeId) &&
+                        isReactionRecipe(blueprintByProduct.get(item.productTypeId)!)
+                          ? 'Reaction'
+                          : item.group}
+                      </span>
                     </span>
-                  </span>
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
-      )}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>,
+          document.body,
+        )}
     </div>
   )
 }

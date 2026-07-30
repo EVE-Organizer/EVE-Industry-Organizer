@@ -383,17 +383,24 @@
     @apply flex flex-col gap-3 pb-4;
 
     &:has(.plan-search-wrap--open) {
-      @apply relative z-50;
-
       /* Jobs table sits below in DOM and steals clicks once the plan grows. */
       ~ * {
         pointer-events: none;
+      }
+
+      .plan-build-card__search {
+        @apply relative z-10;
+      }
+
+      .plan-price-bar,
+      .plan-build-card__hint {
+        @apply relative z-0 pointer-events-none;
       }
     }
   }
 
   &__search {
-    @apply relative z-0 flex flex-col gap-2;
+    @apply relative flex flex-col gap-2;
   }
 
   &__search-label {
@@ -1122,7 +1129,11 @@
   @apply relative w-full;
 
   &--open {
-    @apply z-50;
+    @apply z-10;
+  }
+
+  &__menu {
+    @apply max-h-64 overflow-y-auto rounded-xl border border-eve-border bg-base-200 p-1 shadow-xl;
   }
 
   &__icon {
