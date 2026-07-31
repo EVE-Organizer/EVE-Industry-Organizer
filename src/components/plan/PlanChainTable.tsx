@@ -16,6 +16,7 @@ import { packagedBuyNodesFromPlan } from '@/lib/planPackagedBuy'
 import { toBuyQuantity } from '@/lib/locationInventory'
 import { planBuildVsBuyFootnote } from '@/lib/planBuildVsBuy'
 import { SHARED_MATERIALS_ICON_TYPE_ID } from '@/lib/eveImages'
+import { PlanBuyPriceCell } from '@/components/plan/PlanBuyPriceCell'
 import { PlanBlueprintItemName } from '@/components/plan/PlanBlueprintItemName'
 import { supplySlotsForComponent } from '@/lib/supplyChainSlots'
 import { nodeHaulInVolumeM3, nodeHaulOutVolumeM3 } from '@/lib/planHaulVolume'
@@ -178,7 +179,9 @@ interface PlanChainTableProps {
   manufactureRows?: ManufactureDisplayRow[]
   planRoots?: PlanRootEntry[]
   skillSlots: number
+  hubPrices: Map<number, number>
   onToggleMode?: (productTypeId: number) => void
+  onSetBuyPrice?: (productTypeId: number, price: number | null) => void
   onOpenGraph: (productTypeId: number) => void
   onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
@@ -622,19 +625,16 @@ function HaveQtyCell({
   return <span className="tabular-nums text-sm">{formatGraphQuantity(have)}</span>
 }
 
-function PriceCell({ node }: { node: PlanNode }) {
-  if (node.unitPrice == null || node.unitPrice <= 0) {
-    return <span className="text-sm opacity-40">—</span>
-  }
-
-  return (
-    <div className="tabular-nums text-sm leading-snug">
-      <span>{formatIsk(node.unitPrice)}</span>
-      {node.buyCost != null && node.buyCost > 0 ? (
-        <span className="block text-[10px] opacity-60">{formatIsk(node.buyCost)} total</span>
-      ) : null}
-    </div>
-  )
+function PriceCell({
+  node,
+  hubPrices,
+  onSetBuyPrice,
+}: {
+  node: PlanNode
+  hubPrices: Map<number, number>
+  onSetBuyPrice?: (productTypeId: number, price: number | null) => void
+}) {
+  return <PlanBuyPriceCell node={node} hubPrices={hubPrices} onSetBuyPrice={onSetBuyPrice} />
 }
 
 function BuyTableRow({
@@ -642,6 +642,7 @@ function BuyTableRow({
   expanded,
   onToggleCollapse,
   onToggleMode,
+  onSetBuyPrice,
   onOpenGraph,
   blueprintTypeIdByProduct,
   nodesById,
@@ -649,11 +650,13 @@ function BuyTableRow({
   showInventory,
   typeVolumes,
   groupHaulVolumeM3,
+  hubPrices,
 }: {
   row: PlanBuyTableRow
   expanded: boolean
   onToggleCollapse: (key: string) => void
   onToggleMode?: (productTypeId: number) => void
+  onSetBuyPrice?: (productTypeId: number, price: number | null) => void
   onOpenGraph: (productTypeId: number) => void
   onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
@@ -662,6 +665,7 @@ function BuyTableRow({
   showInventory: boolean
   typeVolumes: Map<number, number>
   groupHaulVolumeM3: Map<string, number>
+  hubPrices: Map<number, number>
 }) {
   if (row.kind === 'group') {
     return (
@@ -761,7 +765,7 @@ function BuyTableRow({
           />
         </td>
         <td className={`${PRICE_COL_CLASS} align-top py-2 pr-1`}>
-          <PriceCell node={row.node} />
+          <PriceCell node={row.node} hubPrices={hubPrices} onSetBuyPrice={onSetBuyPrice} />
         </td>
         <td className={`${VOLUME_COL_CLASS} align-top py-2`} />
         <td className={`${SOURCE_COL_CLASS} align-top py-2 pr-2`}>
@@ -800,7 +804,7 @@ function BuyTableRow({
         />
       </td>
       <td className={`${PRICE_COL_CLASS} align-top py-2 pr-1`}>
-        <PriceCell node={row.node} />
+        <PriceCell node={row.node} hubPrices={hubPrices} onSetBuyPrice={onSetBuyPrice} />
       </td>
       <td className={`${VOLUME_COL_CLASS} align-top py-2`}>
         <VolumeCell m3={haulInM3} />
@@ -816,20 +820,24 @@ function BuySection({
   allNodes,
   buyNodes,
   onToggleMode,
+  onSetBuyPrice,
   onOpenGraph,
   blueprintTypeIdByProduct,
   inventoryByTypeId,
   showInventory,
   typeVolumes,
+  hubPrices,
 }: {
   allNodes: PlanNode[]
   buyNodes: PlanNode[]
   onToggleMode?: (productTypeId: number) => void
+  onSetBuyPrice?: (productTypeId: number, price: number | null) => void
   onOpenGraph: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
   inventoryByTypeId?: Map<number, number> | null
   showInventory: boolean
   typeVolumes: Map<number, number>
+  hubPrices: Map<number, number>
 }) {
   const buyGroups = useMemo(() => buildBuyGroups(allNodes, buyNodes), [allNodes, buyNodes])
 
@@ -936,7 +944,7 @@ function BuySection({
               </Tooltip>
             </th>
             <th className={`${PRICE_COL_CLASS} pr-1`}>
-              <Tooltip text="Hub sell price per unit and line total (price × qty)" placement="top">
+              <Tooltip text="Hub sell price per unit and line total. Set a custom price when the hub has no listing." placement="top">
                 <span className="cursor-help border-b border-dotted border-current/40">Price</span>
               </Tooltip>
             </th>
@@ -956,6 +964,7 @@ function BuySection({
               expanded={rowExpanded(row)}
               onToggleCollapse={toggleCollapse}
               onToggleMode={onToggleMode}
+              onSetBuyPrice={onSetBuyPrice}
               onOpenGraph={onOpenGraph}
               blueprintTypeIdByProduct={blueprintTypeIdByProduct}
               nodesById={nodesById}
@@ -963,6 +972,7 @@ function BuySection({
               showInventory={showInventory}
               typeVolumes={typeVolumes}
               groupHaulVolumeM3={groupHaulVolumeM3}
+              hubPrices={hubPrices}
             />
           ))}
         </tbody>
@@ -991,7 +1001,9 @@ export function PlanChainTable({
   manufactureRows,
   planRoots,
   skillSlots,
+  hubPrices,
   onToggleMode,
+  onSetBuyPrice,
   onOpenGraph,
   onOpenMeTe,
   blueprintTypeIdByProduct,
@@ -1038,11 +1050,13 @@ export function PlanChainTable({
           allNodes={nodes}
           buyNodes={allBuyNodes}
           onToggleMode={onToggleMode}
+          onSetBuyPrice={onSetBuyPrice}
           onOpenGraph={onOpenGraph}
           blueprintTypeIdByProduct={blueprintTypeIdByProduct}
           inventoryByTypeId={inventoryByTypeId}
           showInventory={showInventory}
           typeVolumes={typeVolumes}
+          hubPrices={hubPrices}
         />
       ) : null}
 

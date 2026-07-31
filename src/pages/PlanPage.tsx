@@ -32,6 +32,7 @@ import {
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
 import { buildWindowPriceMap, resolveHubHaulRates } from '@/lib/ranking'
+import { mergePlanBuyPrices } from '@/lib/planBuyPrices'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/lib/planTreeLines'
 import { buildManufactureDisplayRows } from '@/lib/planManufactureDisplay'
@@ -260,13 +261,18 @@ export function PlanPage() {
   }, [typeMap])
   const buyHubId = activeSettings.primaryHub
   const sellHubId = activeSettings.sellHubId ?? buyHubId
-  const prices = useMemo(() => {
+  const hubPrices = useMemo(() => {
     if (!data) return new Map<number, number>()
     const hubMarket = getHubMarket(data.market, buyHubId)
     if (!hubMarket) return new Map<number, number>()
     const window = activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow
     return buildWindowPriceMap(hubMarket, window, buildPriceMap(hubMarket))
   }, [data, buyHubId, activeSettings.priceWindow])
+
+  const prices = useMemo(() => {
+    if (!activeTemplate) return hubPrices
+    return mergePlanBuyPrices(hubPrices, activeTemplate.nodeOverrides)
+  }, [hubPrices, activeTemplate])
 
   const sellPrices = useMemo(() => {
     if (!data) return new Map<number, number>()
@@ -793,6 +799,35 @@ export function PlanPage() {
     [isSharedView, blueprints, storeSettings, updatePlanTemplate],
   )
 
+  const saveBuyPrice = useCallback(
+    (productTypeId: number, buyPrice: number | null) => {
+      if (isSharedView) return
+      const template = selectedPlanTemplateFromStore()
+      if (!template) return
+
+      const current = template.nodeOverrides[productTypeId] ?? {}
+      let nextEntry: PlanNodeOverride
+      if (buyPrice == null || buyPrice <= 0) {
+        const { buyPrice: _buyPrice, ...rest } = current
+        nextEntry = rest
+      } else {
+        nextEntry = { ...current, buyPrice }
+      }
+
+      const nextOverrides = { ...template.nodeOverrides }
+      if (Object.keys(nextEntry).length === 0) {
+        delete nextOverrides[productTypeId]
+      } else {
+        nextOverrides[productTypeId] = nextEntry
+      }
+
+      updatePlanTemplate(template.id, {
+        nodeOverrides: nextOverrides,
+      })
+    },
+    [isSharedView, updatePlanTemplate],
+  )
+
   const graphBlueprint = useMemo(() => {
     if (graphProductTypeId == null) return null
     return getBlueprintForProduct(blueprints, graphProductTypeId) ?? null
@@ -1110,7 +1145,9 @@ export function PlanPage() {
                 manufactureRows={manufactureRows}
                 planRoots={activeTemplate.roots}
                 skillSlots={slots}
+                hubPrices={hubPrices}
                 onToggleMode={isSharedView ? undefined : toggleMode}
+                onSetBuyPrice={isSharedView ? undefined : saveBuyPrice}
                 onOpenGraph={openGraph}
                 onOpenMeTe={openMeTe}
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}

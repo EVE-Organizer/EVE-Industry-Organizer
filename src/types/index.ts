@@ -403,6 +403,8 @@ export interface PlanNodeOverride {
   forceInclude?: boolean
   me?: number
   te?: number
+  /** Manual buy price when the hub has no market price for this type. */
+  buyPrice?: number
 }
 
 export interface ManufacturingPlanTemplate {
