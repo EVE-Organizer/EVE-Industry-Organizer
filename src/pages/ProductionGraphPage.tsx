@@ -98,7 +98,8 @@ export function ProductionGraphPage() {
         variant="page"
         blueprint={blueprint}
         rankedRow={rankedRow}
-        hub={query.hub}
+        buyHub={query.hub}
+        sellHub={settings.sellHubId ?? query.hub}
         priceWindow={query.window}
         settings={manufacturingSettings}
         onProductChange={handleProductChange}

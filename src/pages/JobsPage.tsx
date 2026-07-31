@@ -552,7 +552,8 @@ export function JobsPage() {
         <BlueprintGraphModal
           variant="modal"
           blueprint={graphBlueprint}
-          hub={settings.primaryHub}
+          buyHub={settings.primaryHub}
+          sellHub={settings.sellHubId ?? settings.primaryHub}
           settings={manufacturingSettings}
           onClose={() => setGraphProductTypeId(null)}
           onOpenPage={openGraphPage}

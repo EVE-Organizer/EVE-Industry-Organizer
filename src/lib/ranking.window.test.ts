@@ -328,6 +328,53 @@ describe('market-aware blueprint ranking', () => {
     expect(withoutRow!.netProfit).toBeGreaterThan(withRow!.netProfit)
   })
 
+  it('uses sell hub for product revenue when sellHubId differs from primaryHub', () => {
+    const crossHubFilters = {
+      minSetupCost: 0,
+      maxSetupCost: Number.MAX_SAFE_INTEGER,
+      buildableOnly: false,
+      tiers: ['t1'] as const,
+      productGroups: ['Projectile Ammo'],
+    }
+    const settings: ManufacturingSettings = {
+      ...DEFAULT_SETTINGS,
+      batchSize: DEFAULT_BATCH_SIZE,
+      meDefault: 10,
+      teDefault: 20,
+      primaryHub: 'jita',
+      sellHubId: 'amarr',
+    }
+    const jitaRows = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      'jita',
+      '1w',
+      { ...settings, sellHubId: 'jita' },
+      crossHubFilters,
+    )
+    const amarrSellRows = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      'jita',
+      '1w',
+      settings,
+      crossHubFilters,
+    )
+
+    const jitaAmmo = jitaRows.find((r) => r.blueprint.productTypeId === PROJECTILE_AMMO)
+    const amarrSellAmmo = amarrSellRows.find((r) => r.blueprint.productTypeId === PROJECTILE_AMMO)
+    expect(jitaAmmo).toBeDefined()
+    expect(amarrSellAmmo).toBeDefined()
+    expect(jitaAmmo!.setupCost).toBe(amarrSellAmmo!.setupCost)
+    expect(jitaAmmo!.iphBreakdown.sellPricePerUnit).not.toBe(
+      amarrSellAmmo!.iphBreakdown.sellPricePerUnit,
+    )
+  })
+
   it('ranks faction blueprints as BPCs with no BPO acquisition cost', () => {
     const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
     const rows = rankBlueprintsFromMarket(

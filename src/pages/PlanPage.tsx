@@ -258,46 +258,67 @@ export function PlanPage() {
     }
     return map
   }, [typeMap])
+  const buyHubId = activeSettings.primaryHub
+  const sellHubId = activeSettings.sellHubId ?? buyHubId
   const prices = useMemo(() => {
     if (!data) return new Map<number, number>()
-    const hubMarket = getHubMarket(data.market, activeSettings.primaryHub)
+    const hubMarket = getHubMarket(data.market, buyHubId)
     if (!hubMarket) return new Map<number, number>()
     const window = activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow
     return buildWindowPriceMap(hubMarket, window, buildPriceMap(hubMarket))
-  }, [data, activeSettings.primaryHub, activeSettings.priceWindow])
+  }, [data, buyHubId, activeSettings.priceWindow])
+
+  const sellPrices = useMemo(() => {
+    if (!data) return new Map<number, number>()
+    const hubMarket = getHubMarket(data.market, sellHubId)
+    if (!hubMarket) return new Map<number, number>()
+    const window = activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow
+    return buildWindowPriceMap(hubMarket, window, buildPriceMap(hubMarket))
+  }, [data, sellHubId, activeSettings.priceWindow])
 
   const buyPrices = useMemo(() => {
     if (!data) return new Map<number, number>()
-    const hubMarket = getHubMarket(data.market, activeSettings.primaryHub)
+    const hubMarket = getHubMarket(data.market, sellHubId)
     if (!hubMarket) return new Map<number, number>()
     return buildBuyPriceMap(hubMarket)
-  }, [data, activeSettings.primaryHub])
+  }, [data, sellHubId])
 
-  const hubMarket = data ? getHubMarket(data.market, activeSettings.primaryHub) : null
+  const buyHubMarket = data ? getHubMarket(data.market, buyHubId) : null
+  const sellHubMarket = data ? getHubMarket(data.market, sellHubId) : null
   const mfgSystemId = activeSettings.manufacturingSystemId
   const reactionSystemId = activeSettings.reactionFacility?.reactionSystemId ?? mfgSystemId
   const buildSystemId = useMemo(() => {
-    if (!data || !hubMarket) return mfgSystemId
-    return resolveBuildSystem(data.systems, data.regions, hubMarket, mfgSystemId).buildSystemId
-  }, [data, hubMarket, mfgSystemId])
+    if (!data || !buyHubMarket) return mfgSystemId
+    return resolveBuildSystem(data.systems, data.regions, buyHubMarket, mfgSystemId).buildSystemId
+  }, [data, buyHubMarket, mfgSystemId])
   const planHaulRates = useMemo(() => {
-    if (!data || !hubMarket) return undefined
-    return resolveHubHaulRates(data.market.haulRates, hubMarket.marketSystemId, buildSystemId)
-  }, [data, hubMarket, buildSystemId])
+    if (!data || !buyHubMarket) return undefined
+    const sellMarketSystemId = sellHubMarket?.marketSystemId ?? buyHubMarket.marketSystemId
+    return resolveHubHaulRates(
+      data.market.haulRates,
+      buyHubMarket.marketSystemId,
+      buildSystemId,
+      sellMarketSystemId,
+    )
+  }, [data, buyHubMarket, sellHubMarket, buildSystemId])
   const haulApplicable = useMemo(() => {
-    if (!hubMarket) return false
-    return hubMarket.marketSystemId !== buildSystemId
-  }, [hubMarket, buildSystemId])
+    if (!buyHubMarket) return false
+    const sellMarketSystemId = sellHubMarket?.marketSystemId ?? buyHubMarket.marketSystemId
+    return (
+      buyHubMarket.marketSystemId !== buildSystemId || sellMarketSystemId !== buildSystemId
+    )
+  }, [buyHubMarket, sellHubMarket, buildSystemId])
   const systemCostIndex = useMemo(() => {
-    if (!data || !hubMarket) return 0.01
-    return resolveBuildSystem(data.systems, data.regions, hubMarket, mfgSystemId).costIndex
-  }, [data, hubMarket, mfgSystemId])
+    if (!data || !buyHubMarket) return 0.01
+    return resolveBuildSystem(data.systems, data.regions, buyHubMarket, mfgSystemId).costIndex
+  }, [data, buyHubMarket, mfgSystemId])
   const reactionCostIndex = useMemo(() => {
-    if (!data || !hubMarket) return systemCostIndex
-    return resolveBuildSystem(data.systems, data.regions, hubMarket, reactionSystemId)
+    if (!data || !buyHubMarket) return systemCostIndex
+    return resolveBuildSystem(data.systems, data.regions, buyHubMarket, reactionSystemId)
       .reactionCostIndex
-  }, [data, hubMarket, reactionSystemId, systemCostIndex])
-  const hubName = HUBS.find((h) => h.id === activeSettings.primaryHub)?.name ?? 'Hub'
+  }, [data, buyHubMarket, reactionSystemId, systemCostIndex])
+  const buyHubName = HUBS.find((h) => h.id === buyHubId)?.name ?? 'Hub'
+  const sellHubName = HUBS.find((h) => h.id === sellHubId)?.name ?? buyHubName
 
   const expandInput = useMemo(
     () =>
@@ -404,12 +425,12 @@ export function PlanPage() {
     return computePlanProfitSummary(
       activeTemplate,
       expandInput,
-      prices,
+      sellPrices,
       buyPrices,
       jobTimeHoursByRootId,
       planProfitOptions,
     )
-  }, [activeTemplate, expandInput, prices, buyPrices, blueprints, activeSettings, planProfitOptions])
+  }, [activeTemplate, expandInput, sellPrices, buyPrices, blueprints, activeSettings, planProfitOptions])
 
   const profitByRootId = useMemo(
     () => new Map(profitSummary.rootRows.map((row) => [row.rootId, row])),
@@ -443,7 +464,7 @@ export function PlanPage() {
       root,
       blueprint,
       expandInput,
-      prices,
+      sellPrices,
       buyPrices,
       jobHours,
       productName,
@@ -455,7 +476,7 @@ export function PlanPage() {
     expandInput,
     blueprints,
     typeMap,
-    prices,
+    sellPrices,
     buyPrices,
     activeSettings,
     planProfitOptions,
@@ -932,7 +953,8 @@ export function PlanPage() {
 
           <PlanProfitSummaryPanel
             summary={profitSummary}
-            hubName={hubName}
+            buyHubName={buyHubName}
+            sellHubName={sellHubName}
             priceMethod={activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod}
             includeHaulCost={activeSettings.includeHaulCost ?? true}
             haulApplicable={haulApplicable}
@@ -1151,7 +1173,8 @@ export function PlanPage() {
         <BlueprintGraphModal
           variant="modal"
           blueprint={graphBlueprint}
-          hub={activeSettings.primaryHub}
+          buyHub={buyHubId}
+          sellHub={sellHubId}
           settings={manufacturingSettings}
           getPlanRuns={getPlanRuns}
           onClose={() => setGraphProductTypeId(null)}

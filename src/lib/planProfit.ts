@@ -195,12 +195,13 @@ export function computeRootProfitRow(
   const outputQty = root.runs * blueprint.productQuantity
 
   let setupCost: number
+  const buyHubPrices = expandInput.prices
   if (rootMode === 'buy') {
-    setupCost = (sellPrices.get(blueprint.productTypeId) ?? 0) * outputQty
+    setupCost = (buyHubPrices.get(blueprint.productTypeId) ?? 0) * outputQty
   } else {
     const chainCost = computePlanRootBuildCost(blueprint, root.runs, expandInput, buildCostCache)
     setupCost =
-      chainCost + packagedSelfBuyCost(blueprint, root.runs, sellPrices, settings, meTeOverride)
+      chainCost + packagedSelfBuyCost(blueprint, root.runs, buyHubPrices, settings, meTeOverride)
   }
 
   const { haulIn, haulOut } = rootHaulIsk(root, blueprint, expandInput, outputQty, options)

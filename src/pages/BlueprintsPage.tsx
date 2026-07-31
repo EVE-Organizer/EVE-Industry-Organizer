@@ -150,6 +150,7 @@ export function BlueprintsPage() {
   } = useHaulRouteRisk({
     sde,
     primaryHub: rankingQuery.hub,
+    sellHub: settings.sellHubId ?? rankingQuery.hub,
     manufacturingSystemId: rankingQuery.mfgSystem,
     hubName: activeHub?.name ?? rankingQuery.hub,
   })
@@ -352,7 +353,8 @@ export function BlueprintsPage() {
           variant="modal"
           blueprint={graphRow.blueprint}
           rankedRow={graphRow}
-          hub={rankingQuery.hub}
+          buyHub={rankingQuery.hub}
+          sellHub={settings.sellHubId ?? rankingQuery.hub}
           priceWindow={rankingQuery.window}
           settings={manufacturingSettings}
           shareSearch={searchParams.toString()}

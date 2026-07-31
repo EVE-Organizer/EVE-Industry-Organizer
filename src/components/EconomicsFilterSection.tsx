@@ -161,7 +161,7 @@ export function EconomicsFilterSection({
   onChange,
   children,
   title = 'Where & prices',
-  hint = 'Hub is in the navbar. Market data and haul below.',
+  hint = 'Buy and sell hubs are in the navbar. Market data and haul below.',
   className,
   layout = 'stack',
   barVariant = 'default',

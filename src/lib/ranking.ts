@@ -120,14 +120,15 @@ function resolveHaulRate(
   return { iskPerM3: medianValidIskPerM3(haulRates), valid: true }
 }
 
-/** Hub ↔ build-system haul rates (materials in, products out). */
+/** Buy-hub → factory and factory → sell-hub haul rates. */
 export function resolveHubHaulRates(
   haulRates: MarketData['haulRates'],
-  marketSystemId: number,
+  buyMarketSystemId: number,
   buildSystemId: number,
+  sellMarketSystemId: number = buyMarketSystemId,
 ): { haulInIskPerM3: number; haulOutIskPerM3: number } {
-  const haulInRate = resolveHaulRate(haulRates, marketSystemId, buildSystemId)
-  const haulOutRate = resolveHaulRate(haulRates, buildSystemId, marketSystemId)
+  const haulInRate = resolveHaulRate(haulRates, buyMarketSystemId, buildSystemId)
+  const haulOutRate = resolveHaulRate(haulRates, buildSystemId, sellMarketSystemId)
   const haulFallback = medianValidIskPerM3(haulRates)
   return {
     haulInIskPerM3: haulInRate?.iskPerM3 ?? haulFallback,
@@ -137,27 +138,26 @@ export function resolveHubHaulRates(
 
 function hasValidPrices(
   blueprint: BlueprintInfo,
-  spotPrices: Map<number, number>,
-  windowPrices: Map<number, number>,
-  avgPrice: number,
+  materialWindowPrices: Map<number, number>,
+  productSellPrice: number,
   settings: ManufacturingSettings,
-  buyPrices: Map<number, number>,
+  productBuyPrices: Map<number, number>,
 ): boolean {
   const priceMethod = settings.priceMethod
   if (settings.includeBlueprintCost && blueprint.tier === 't2') {
     // T2 has no BPO market: needs invention data and datacore prices instead.
     if (!blueprint.invention) return false
     for (const d of blueprint.invention.datacores) {
-      if ((windowPrices.get(d.typeId) ?? 0) <= 0) return false
+      if ((materialWindowPrices.get(d.typeId) ?? 0) <= 0) return false
     }
   }
   if (priceMethod === 'buy_orders') {
-    if ((buyPrices.get(blueprint.productTypeId) ?? 0) <= 0) return false
-  } else if (!avgPrice || avgPrice <= 0) {
+    if ((productBuyPrices.get(blueprint.productTypeId) ?? 0) <= 0) return false
+  } else if (!productSellPrice || productSellPrice <= 0) {
     return false
   }
   for (const mat of blueprint.materials) {
-    if ((windowPrices.get(mat.typeId) ?? 0) <= 0) return false
+    if ((materialWindowPrices.get(mat.typeId) ?? 0) <= 0) return false
   }
   return true
 }
@@ -239,9 +239,9 @@ function computeRow(
   blueprint: BlueprintInfo,
   product: TypeInfo,
   windowSummary: ProductWindowSummary,
-  spotPrices: Map<number, number>,
-  windowPrices: Map<number, number>,
-  buyPrices: Map<number, number>,
+  buySpotPrices: Map<number, number>,
+  materialWindowPrices: Map<number, number>,
+  productBuyPrices: Map<number, number>,
   settings: ManufacturingSettings,
   regionCostIndex: number,
   reactionCostIndex: number,
@@ -249,7 +249,7 @@ function computeRow(
   haulOutIskPerM3: number,
   includeHaulCost: boolean,
   typeVolumes: Map<number, number>,
-  hubMarket: HubMarketData,
+  buyHubMarket: HubMarketData,
   window: TimeRange,
   advancedIndustry: number,
   feeRates: ReturnType<typeof tradingFeeRates>,
@@ -257,11 +257,10 @@ function computeRow(
   if (
     !hasValidPrices(
       blueprint,
-      spotPrices,
-      windowPrices,
+      materialWindowPrices,
       windowSummary.avgPrice,
       settings,
-      buyPrices,
+      productBuyPrices,
     )
   ) {
     return null
@@ -278,9 +277,9 @@ function computeRow(
   const priceCtx: PriceContext = {
     hubId: settings.primaryHub,
     window,
-    spotSell: spotPrices,
-    buyOrders: buyPrices,
-    windowSell: windowPrices,
+    spotSell: buySpotPrices,
+    buyOrders: productBuyPrices,
+    windowSell: materialWindowPrices,
     priceMethod: settings.priceMethod,
   }
 
@@ -289,10 +288,10 @@ function computeRow(
     product,
     settings,
     runs,
-    prices: windowPrices,
+    prices: materialWindowPrices,
     systemCostIndex: regionCostIndex,
     reactionCostIndex,
-    hubMarket,
+    hubMarket: buyHubMarket,
     priceCtx,
     haulInIskPerM3,
     haulOutIskPerM3,
@@ -326,7 +325,7 @@ function computeRow(
 
   const sellPricePerUnit =
     settings.priceMethod === 'buy_orders'
-      ? (buyPrices.get(blueprint.productTypeId) ?? 0)
+      ? (productBuyPrices.get(blueprint.productTypeId) ?? 0)
       : windowSummary.avgPrice
   const usesBuyOrders = settings.priceMethod === 'buy_orders'
   const {
@@ -479,23 +478,29 @@ export function rankBlueprintsFromMarket(
   filters: RankingFilters,
   systems: SystemInfo[] = [],
 ): RankedBlueprintRow[] {
-  const hubMarket = getHubMarket(market, hub)
-  if (!hubMarket) return []
+  const buyHubMarket = getHubMarket(market, hub)
+  if (!buyHubMarket) return []
+
+  const sellHubId = settings.sellHubId ?? hub
+  const sellHubMarket = getHubMarket(market, sellHubId) ?? buyHubMarket
 
   const { buildSystemId, costIndex: resolvedCostIndex, reactionCostIndex: resolvedReactionIndex } =
-    resolveBuildSystem(systems, regions, hubMarket, settings.manufacturingSystemId)
+    resolveBuildSystem(systems, regions, buyHubMarket, settings.manufacturingSystemId)
   const reactionCostIndex =
     typeof resolvedReactionIndex === 'number' ? resolvedReactionIndex : resolvedCostIndex
 
-  const spotPrices = buildPriceMap(hubMarket)
-  const buyPrices = buildBuyPriceMap(hubMarket)
-  const windowPrices = buildWindowPriceMap(hubMarket, window, spotPrices)
-  const marketSystemId = hubMarket.marketSystemId
+  const buySpotPrices = buildPriceMap(buyHubMarket)
+  const materialWindowPrices = buildWindowPriceMap(buyHubMarket, window, buySpotPrices)
+  const productBuyPrices = buildBuyPriceMap(sellHubMarket)
+  const sellSpotPrices = buildPriceMap(sellHubMarket)
+  const buyMarketSystemId = buyHubMarket.marketSystemId
+  const sellMarketSystemId = sellHubMarket.marketSystemId
   const includeHaulCost = filters.includeHaulCost ?? settings.includeHaulCost ?? true
   const { haulInIskPerM3, haulOutIskPerM3 } = resolveHubHaulRates(
     market.haulRates,
-    marketSystemId,
+    buyMarketSystemId,
     buildSystemId,
+    sellMarketSystemId,
   )
 
   const typeVolumes = new Map<number, number>()
@@ -524,11 +529,11 @@ export function rankBlueprintsFromMarket(
 
     const product = typeMap.get(bp.productTypeId)!
 
-    let summary = resolveWindowSummary(hubMarket, bp.productTypeId, window, spotPrices)
+    let summary = resolveWindowSummary(sellHubMarket, bp.productTypeId, window, sellSpotPrices)
     if (
       !summary &&
       settings.priceMethod === 'buy_orders' &&
-      (buyPrices.get(bp.productTypeId) ?? 0) > 0
+      (productBuyPrices.get(bp.productTypeId) ?? 0) > 0
     ) {
       summary = { avgPrice: 0, avgVolume: 0, high: 0, low: 0 }
     }
@@ -538,9 +543,9 @@ export function rankBlueprintsFromMarket(
       bp,
       product,
       summary,
-      spotPrices,
-      windowPrices,
-      buyPrices,
+      buySpotPrices,
+      materialWindowPrices,
+      productBuyPrices,
       settings,
       resolvedCostIndex,
       reactionCostIndex,
@@ -548,7 +553,7 @@ export function rankBlueprintsFromMarket(
       haulOutIskPerM3,
       includeHaulCost,
       typeVolumes,
-      hubMarket,
+      buyHubMarket,
       window,
       advancedIndustry,
       feeRates,

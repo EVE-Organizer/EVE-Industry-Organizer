@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { HubId } from '@/types'
+import { HUBS, type HubId } from '@/types'
 import { computeRouteDanger, type RouteDangerResult } from '@/lib/routeDanger'
 import { buildHaulerTypeIds, enrichRouteJumps, shouldCheckCamp } from '@/lib/routeCamp'
 import { getHubMarket, resolveBuildSystem } from '@/services/data/sdeLoader'
@@ -15,6 +15,7 @@ export interface HaulRouteLabels {
 interface UseHaulRouteRiskOptions {
   sde: SdeData | undefined
   primaryHub: HubId
+  sellHub?: HubId
   manufacturingSystemId: number
   hubName: string
 }
@@ -29,12 +30,20 @@ function haulRouteError(from: number, to: number, result: { route: number[]; sou
   return null
 }
 
+function hubSystemName(sde: SdeData, hubId: HubId, fallbackName: string): string {
+  const marketSystemId = getHubMarket(sde.market, hubId)?.marketSystemId
+  if (!marketSystemId) return fallbackName
+  return sde.systems.find((s) => s.systemId === marketSystemId)?.name ?? fallbackName
+}
+
 export function useHaulRouteRisk({
   sde,
   primaryHub,
+  sellHub: sellHubProp,
   manufacturingSystemId,
   hubName,
 }: UseHaulRouteRiskOptions) {
+  const sellHub = sellHubProp ?? primaryHub
   const [haulIn, setHaulIn] = useState<RouteDangerResult | null>(null)
   const [haulOut, setHaulOut] = useState<RouteDangerResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -44,14 +53,13 @@ export function useHaulRouteRisk({
 
   const buildSystem = sde?.systems.find((s) => s.systemId === manufacturingSystemId)
   const buildSystemName = buildSystem?.name ?? `System ${manufacturingSystemId}`
-  const marketSystemId = sde ? getHubMarket(sde.market, primaryHub)?.marketSystemId : undefined
-  const marketSystem = marketSystemId
-    ? sde?.systems.find((s) => s.systemId === marketSystemId)
-    : undefined
-  const marketName = marketSystem?.name ?? hubName
+  const buyHubName = sde ? hubSystemName(sde, primaryHub, hubName) : hubName
+  const sellHubName = sde
+    ? hubSystemName(sde, sellHub, HUBS.find((h) => h.id === sellHub)?.name ?? sellHub)
+    : (HUBS.find((h) => h.id === sellHub)?.name ?? sellHub)
   const labels: HaulRouteLabels = {
-    haulInLabel: `${marketName} → ${buildSystemName}`,
-    haulOutLabel: `${buildSystemName} → ${marketName}`,
+    haulInLabel: `${buyHubName} → ${buildSystemName}`,
+    haulOutLabel: `${buildSystemName} → ${sellHubName}`,
   }
 
   useEffect(() => {
@@ -63,21 +71,23 @@ export function useHaulRouteRisk({
       return
     }
 
-    const hubMarket = getHubMarket(sde.market, primaryHub)
-    if (!hubMarket) {
+    const buyHubMarket = getHubMarket(sde.market, primaryHub)
+    if (!buyHubMarket) {
       setHaulIn(null)
       setHaulOut(null)
       setError(null)
       setLoading(false)
       return
     }
+    const sellHubMarket = getHubMarket(sde.market, sellHub) ?? buyHubMarket
 
     const fetchId = ++fetchIdRef.current
-    const marketSystemId = hubMarket.marketSystemId
+    const buyMarketSystemId = buyHubMarket.marketSystemId
+    const sellMarketSystemId = sellHubMarket.marketSystemId
     const { buildSystemId } = resolveBuildSystem(
       sde.systems,
       sde.regions,
-      hubMarket,
+      buyHubMarket,
       manufacturingSystemId,
     )
 
@@ -98,13 +108,13 @@ export function useHaulRouteRisk({
         }
 
         const [inRoute, outRoute] = await Promise.all([
-          getRoute(marketSystemId, buildSystemId),
-          getRoute(buildSystemId, marketSystemId),
+          getRoute(buyMarketSystemId, buildSystemId),
+          getRoute(buildSystemId, sellMarketSystemId),
         ])
 
         const routeError =
-          haulRouteError(marketSystemId, buildSystemId, inRoute) ??
-          haulRouteError(buildSystemId, marketSystemId, outRoute)
+          haulRouteError(buyMarketSystemId, buildSystemId, inRoute) ??
+          haulRouteError(buildSystemId, sellMarketSystemId, outRoute)
         if (routeError) {
           if (fetchId !== fetchIdRef.current) return
           setError(routeError)
@@ -158,7 +168,7 @@ export function useHaulRouteRisk({
         }
       }
     })()
-  }, [sde, primaryHub, manufacturingSystemId, haulerTypeIds])
+  }, [sde, primaryHub, sellHub, manufacturingSystemId, haulerTypeIds])
 
   return { haulIn, haulOut, error, loading, labels }
 }

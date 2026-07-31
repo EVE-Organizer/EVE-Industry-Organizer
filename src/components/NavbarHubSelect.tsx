@@ -3,13 +3,14 @@ import { HUBS, type HubId } from '@/types'
 import { useAppStore } from '@/stores/appStore'
 
 export function NavbarHubSelect() {
-  const hub = useAppStore((s) => s.userData.settings.primaryHub)
+  const buyHub = useAppStore((s) => s.userData.settings.primaryHub)
+  const sellHub = useAppStore((s) => s.userData.settings.sellHubId ?? s.userData.settings.primaryHub)
   const productionLocationId = useAppStore((s) => s.userData.settings.productionLocationId)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  function setHub(nextHub: HubId) {
+  function setBuyHub(nextHub: HubId) {
     const hubConfig = HUBS.find((h) => h.id === nextHub)
     updateSettings({
       primaryHub: nextHub,
@@ -26,21 +27,42 @@ export function NavbarHubSelect() {
     }
   }
 
+  function setSellHub(nextHub: HubId) {
+    updateSettings({ sellHubId: nextHub })
+  }
+
   return (
-    <label className="navbar-hub-select">
-      <span className="navbar-hub-select__label">Hub</span>
-      <select
-        className="navbar-hub-select__input select select-xs"
-        value={hub}
-        onChange={(e) => setHub(e.target.value as HubId)}
-        aria-label="Trade hub"
-      >
-        {HUBS.map((h) => (
-          <option key={h.id} value={h.id}>
-            {h.name}
-          </option>
-        ))}
-      </select>
-    </label>
+    <div className="navbar-hub-select-group">
+      <label className="navbar-hub-select">
+        <span className="navbar-hub-select__label">Buy</span>
+        <select
+          className="navbar-hub-select__input select select-xs"
+          value={buyHub}
+          onChange={(e) => setBuyHub(e.target.value as HubId)}
+          aria-label="Buy from hub"
+        >
+          {HUBS.map((h) => (
+            <option key={h.id} value={h.id}>
+              {h.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="navbar-hub-select">
+        <span className="navbar-hub-select__label">Sell</span>
+        <select
+          className="navbar-hub-select__input select select-xs"
+          value={sellHub}
+          onChange={(e) => setSellHub(e.target.value as HubId)}
+          aria-label="Sell to hub"
+        >
+          {HUBS.map((h) => (
+            <option key={h.id} value={h.id}>
+              {h.name}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
   )
 }

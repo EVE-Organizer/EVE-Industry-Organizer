@@ -64,7 +64,8 @@ import { InfoTooltip } from '@/components/InfoTooltip'
 interface BlueprintGraphModalProps {
   blueprint: BlueprintInfo | null
   rankedRow?: RankedBlueprintRow | null
-  hub: GlobalSettings['primaryHub']
+  buyHub: GlobalSettings['primaryHub']
+  sellHub?: GlobalSettings['primaryHub']
   priceWindow?: TimeRange
   settings: ManufacturingSettings
   onClose: () => void
@@ -192,7 +193,8 @@ const WINDOW_LABELS: Record<TimeRange, string> = {
 }
 
 interface GraphPriceLabels {
-  hubName: string
+  buyHubName: string
+  sellHubName: string
   materialPrice: string
   outputPrice: string
   buildSystemName: string
@@ -211,23 +213,26 @@ const GraphNavContext = createContext<GraphNavContextValue | null>(null)
 type NodeInteraction = 'drag' | 'graph' | 'item'
 
 function buildGraphPriceLabels(
-  hub: GlobalSettings['primaryHub'],
+  buyHub: GlobalSettings['primaryHub'],
+  sellHub: GlobalSettings['primaryHub'],
   window: TimeRange,
   priceMethod: ManufacturingSettings['priceMethod'],
   buildSystemName: string,
 ): GraphPriceLabels {
-  const hubName = HUBS.find((h) => h.id === hub)?.name ?? hub
+  const buyHubName = HUBS.find((h) => h.id === buyHub)?.name ?? buyHub
+  const sellHubName = HUBS.find((h) => h.id === sellHub)?.name ?? sellHub
   const windowLabel = WINDOW_LABELS[window]
   const materialPrice = `${windowLabel} avg sell`
   const outputPrice = priceMethod === 'buy_orders' ? 'Buy order' : `${windowLabel} avg sell`
 
   return {
-    hubName,
+    buyHubName,
+    sellHubName,
     materialPrice,
     outputPrice,
     buildSystemName,
-    materialUnitLabel: `${materialPrice} @ ${hubName}`,
-    outputUnitLabel: `${outputPrice} @ ${hubName}`,
+    materialUnitLabel: `${materialPrice} @ ${buyHubName}`,
+    outputUnitLabel: `${outputPrice} @ ${sellHubName}`,
   }
 }
 
@@ -246,7 +251,14 @@ function GraphPriceSourceBar({ source }: { source: GraphPriceLabels }) {
   return (
     <div className="flex flex-nowrap items-center gap-x-2 gap-y-0 text-xs mb-3 shrink-0 min-w-0 overflow-x-auto scrollbar-thin">
       <span className="shrink-0 font-medium opacity-60">Data from</span>
-      <SourceChip label="Hub" value={source.hubName} />
+      {source.buyHubName === source.sellHubName ? (
+        <SourceChip label="Hub" value={source.buyHubName} />
+      ) : (
+        <>
+          <SourceChip label="Buy" value={source.buyHubName} />
+          <SourceChip label="Sell" value={source.sellHubName} />
+        </>
+      )}
       <SourceChip label="Materials" value={source.materialPrice} />
       <SourceChip label="Revenue" value={source.outputPrice} />
       <SourceChip label="Job cost" value={source.buildSystemName} />
@@ -499,6 +511,7 @@ function buildOutputSummary(
   root: SupplyChainNode,
   blueprint: BlueprintInfo,
   settings: ManufacturingSettings,
+  sellPrices: Map<number, number>,
   buyPrices?: Map<number, number>,
 ): OutputSummary {
   const runs = settings.batchSize
@@ -506,8 +519,8 @@ function buildOutputSummary(
   const outputQty = root.quantity
   const sellPrice =
     settings.priceMethod === 'buy_orders'
-      ? (buyPrices?.get(blueprint.productTypeId) ?? root.unitPrice)
-      : root.unitPrice
+      ? (buyPrices?.get(blueprint.productTypeId) ?? 0)
+      : (sellPrices.get(blueprint.productTypeId) ?? root.unitPrice)
 
   const bpoChild = root.children?.find((c) => c.mode === 'blueprint')
   const materialChildren = root.children?.filter((c) => c.mode !== 'blueprint') ?? []
@@ -1468,9 +1481,10 @@ function attachOutputSummary(
   root: SupplyChainNode,
   blueprint: BlueprintInfo,
   settings: ManufacturingSettings,
+  sellPrices: Map<number, number>,
   buyPrices?: Map<number, number>,
 ): Node[] {
-  const summary = buildOutputSummary(root, blueprint, settings, buyPrices)
+  const summary = buildOutputSummary(root, blueprint, settings, sellPrices, buyPrices)
   return nodes.map((node) => {
     if ((node.data as SupplyNodeData).role !== 'root') return node
     return {
@@ -1666,7 +1680,8 @@ function GraphProductionControls({
 export function BlueprintGraphModal({
   blueprint,
   rankedRow: _rankedRow,
-  hub,
+  buyHub,
+  sellHub: sellHubProp,
   priceWindow = DEFAULT_SETTINGS.priceWindow,
   settings,
   onClose,
@@ -1676,6 +1691,7 @@ export function BlueprintGraphModal({
   variant = 'modal',
   getPlanRuns,
 }: BlueprintGraphModalProps) {
+  const sellHub = sellHubProp ?? buyHub
   const { data: sde } = useSdeData()
   const [activeBlueprint, setActiveBlueprint] = useState(blueprint)
   const entryProductTypeIdRef = useRef(blueprint?.productTypeId)
@@ -1778,46 +1794,55 @@ export function BlueprintGraphModal({
 
   const priceLabels = useMemo(() => {
     if (!sde) return null
-    const hubMarket = getHubMarket(sde.market, hub)
-    if (!hubMarket) return null
+    const buyHubMarket = getHubMarket(sde.market, buyHub)
+    if (!buyHubMarket) return null
     const { buildSystemId } = resolveBuildSystem(
       sde.systems,
       sde.regions,
-      hubMarket,
+      buyHubMarket,
       settings.manufacturingSystemId,
     )
-    const hubConfig = HUBS.find((h) => h.id === hub)
+    const hubConfig = HUBS.find((h) => h.id === buyHub)
     const buildSystemName =
       sde.systems.find((s) => s.systemId === buildSystemId)?.name ??
       hubConfig?.buildSystemName ??
       'hub default'
-    return buildGraphPriceLabels(hub, priceWindow, settings.priceMethod, buildSystemName)
-  }, [sde, hub, priceWindow, settings.manufacturingSystemId, settings.priceMethod])
+    return buildGraphPriceLabels(
+      buyHub,
+      sellHub,
+      priceWindow,
+      settings.priceMethod,
+      buildSystemName,
+    )
+  }, [sde, buyHub, sellHub, priceWindow, settings.manufacturingSystemId, settings.priceMethod])
 
   const layout = useMemo(() => {
     if (!sde || !activeBlueprint) return { nodes: [], edges: [] }
-    const hubMarket = getHubMarket(sde.market, hub)
-    if (!hubMarket) return { nodes: [], edges: [] }
+    const buyHubMarket = getHubMarket(sde.market, buyHub)
+    if (!buyHubMarket) return { nodes: [], edges: [] }
+    const sellHubMarket = getHubMarket(sde.market, sellHub) ?? buyHubMarket
 
     const reactionSystemId =
       settings.reactionFacility?.reactionSystemId ?? settings.manufacturingSystemId
     const { costIndex } = resolveBuildSystem(
       sde.systems,
       sde.regions,
-      hubMarket,
+      buyHubMarket,
       settings.manufacturingSystemId,
     )
     const { reactionCostIndex: reactionIndexForSystem } = resolveBuildSystem(
       sde.systems,
       sde.regions,
-      hubMarket,
+      buyHubMarket,
       reactionSystemId,
     )
 
     const typeMap = buildTypeMap(sde.types)
-    const spotPrices = buildPriceMap(hubMarket)
-    const buyPrices = buildBuyPriceMap(hubMarket)
-    const prices = buildWindowPriceMap(hubMarket, priceWindow, spotPrices)
+    const spotPrices = buildPriceMap(buyHubMarket)
+    const buyPrices = buildBuyPriceMap(sellHubMarket)
+    const prices = buildWindowPriceMap(buyHubMarket, priceWindow, spotPrices)
+    const sellSpotPrices = buildPriceMap(sellHubMarket)
+    const sellPrices = buildWindowPriceMap(sellHubMarket, priceWindow, sellSpotPrices)
     const allBlueprints = getAllBlueprints(sde.registry)
     const buildTargets = findBuildTargetDetails(
       allBlueprints,
@@ -1845,6 +1870,7 @@ export function BlueprintGraphModal({
       chain,
       activeBlueprint,
       graphSettings,
+      sellPrices,
       buyPrices,
     )
     const withTargets = attachBuildTargetNodes(withSummary, flow.edges, buildTargets, sourceName)
@@ -1853,7 +1879,7 @@ export function BlueprintGraphModal({
       nodes: markNavigableNodes(aligned.nodes, blueprintByProduct),
       edges: aligned.edges,
     }
-  }, [sde, activeBlueprint, hub, priceWindow, graphSettings, settings, blueprintByProduct])
+  }, [sde, activeBlueprint, buyHub, sellHub, priceWindow, graphSettings, settings, blueprintByProduct])
 
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(layout.nodes)
   const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState(layout.edges)

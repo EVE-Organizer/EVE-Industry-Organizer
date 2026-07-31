@@ -5,7 +5,8 @@ import { ScoreBar } from '@/components/ScoreBar'
 
 interface PlanProfitSummaryProps {
   summary: PlanProfitSummary
-  hubName: string
+  buyHubName: string
+  sellHubName: string
   priceMethod: GlobalSettings['priceMethod']
   includeHaulCost: boolean
   haulApplicable: boolean
@@ -36,7 +37,8 @@ function ProfitMetric({
 
 export function PlanProfitSummaryPanel({
   summary,
-  hubName,
+  buyHubName,
+  sellHubName,
   priceMethod,
   includeHaulCost,
   haulApplicable,
@@ -52,6 +54,12 @@ export function PlanProfitSummaryPanel({
     : includeHaulCost
       ? 'haul included'
       : 'haul excluded'
+  const hubLabel =
+    buyHubName === sellHubName
+      ? `${buyHubName} hub`
+      : `buy ${buyHubName} · sell ${sellHubName}`
+  const profitHint =
+    haulApplicable && includeHaulCost ? 'Revenue − setup − haul out' : 'Revenue − setup'
 
   return (
     <section className="plan-profit-panel" aria-label="Plan profit summary">
@@ -59,7 +67,7 @@ export function PlanProfitSummaryPanel({
         <div>
           <h2 className="plan-profit-panel__title">Plan economics</h2>
           <p className="plan-profit-panel__subtitle">
-            {hubName} hub · {priceLabel} · {haulLabel}
+            {hubLabel} · {priceLabel} · {haulLabel}
           </p>
         </div>
         {!summary.hasPrices ? (
@@ -74,7 +82,7 @@ export function PlanProfitSummaryPanel({
           label="Profit"
           value={formatIsk(summary.netProfit)}
           tone={profitTone}
-          hint="Revenue − setup"
+          hint={profitHint}
         />
         <ProfitMetric
           label="Margin"

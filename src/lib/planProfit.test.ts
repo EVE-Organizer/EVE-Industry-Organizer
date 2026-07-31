@@ -296,4 +296,40 @@ describe('planProfit', () => {
       withHaul.netRevenue - withHaul.setupCost - (100 * 1 * 200),
     )
   })
+
+  it('uses buy-hub prices for setup and sell-hub prices for revenue', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [
+      { id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 },
+    ]
+    const buyHubPrices = new Map([
+      [34, 5],
+      [100, 50],
+    ])
+    const sellHubSellPrices = new Map([[100, 2000]])
+    const sellHubBuyPrices = new Map([[100, 1800]])
+    const expandInput: ExpandPlanInput = {
+      template,
+      blueprints,
+      typeMap,
+      prices: buyHubPrices,
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+
+    const row = computeRootProfitRow(
+      template.roots[0],
+      widget,
+      expandInput,
+      sellHubSellPrices,
+      sellHubBuyPrices,
+      10,
+    )
+
+    expect(row.setupCost).toBeGreaterThan(0)
+    expect(row.setupCost).toBeLessThan(100 * 2000)
+    expect(row.sellPricePerUnit).toBe(2000)
+    expect(row.netRevenue).toBeGreaterThan(row.setupCost)
+  })
 })

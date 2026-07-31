@@ -261,6 +261,26 @@ export function CommonSettingsSection({ settings, onChange, size = 'md' }: Setti
       </SettingField>
 
       <SettingField
+        label="Sell hub"
+        tooltip={GLOBAL_SETTING_TOOLTIPS.sellHubId}
+        size={size}
+      >
+        <select
+          className={selectClass}
+          value={settings.sellHubId ?? settings.primaryHub}
+          onChange={(e) =>
+            onChange({ sellHubId: e.target.value as GlobalSettings['sellHubId'] })
+          }
+        >
+          {HUBS.map((h) => (
+            <option key={h.id} value={h.id}>
+              {h.name}
+            </option>
+          ))}
+        </select>
+      </SettingField>
+
+      <SettingField
         label="Price method"
         tooltip={GLOBAL_SETTING_TOOLTIPS.priceMethod}
         size={size}
