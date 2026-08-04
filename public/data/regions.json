@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-03T06:51:58.230Z",
+  "generatedAt": "2026-08-04T06:20:01.435Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -169,13 +169,13 @@
     {
       "regionId": 10000069,
       "name": "Black Rise",
-      "securityClass": "highsec",
-      "buildSystemId": 30045327,
-      "buildSystemName": "Tsuruma",
-      "buildSystemSecurity": 0.542633,
+      "securityClass": "lowsec",
+      "buildSystemId": 30045342,
+      "buildSystemName": "Akidagi",
+      "buildSystemSecurity": 0.444939,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30045327
+      "marketSystemId": 30045342
     },
     {
       "regionId": 10000055,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0167,
+      "reactionCostIndex": 0.0176,
       "marketSystemId": 30000621
     },
     {
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0286,
+      "costIndex": 0.0287,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
