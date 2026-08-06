@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-05T08:52:04.925Z",
+  "generatedAt": "2026-08-06T06:29:32.331Z",
   "types": [
     {
       "typeId": 18,
@@ -300875,6 +300875,105 @@
       "iconUrl": "https://images.evetech.net/types/95813/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95813/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95813/bp?size=32"
+    },
+    {
+      "typeId": 96040,
+      "name": "Apostle Khanid Cyber Knight SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "description": "Designed to honor of the Cyber knights of the Khanid Kingdom. The Cyber Knights combine ancient principles of service with modern augmentations. They are the ultimate marriage of honor and innovation, a proud symbol of the Khanid Kingdom.\n\n- From the archives of Khanid Prime.",
+      "iconUrl": "https://images.evetech.net/types/96040/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96040/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96040/bp?size=32"
+    },
+    {
+      "typeId": 96041,
+      "name": "Apocalypse Khanid Cyber Knight SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "description": "Designed to honor of the Cyber knights of the Khanid Kingdom. The Cyber Knights combine ancient principles of service with modern augmentations. They are the ultimate marriage of honor and innovation, a proud symbol of the Khanid Kingdom.\n\n- From the archives of Khanid Prime.",
+      "iconUrl": "https://images.evetech.net/types/96041/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96041/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96041/bp?size=32"
+    },
+    {
+      "typeId": 96042,
+      "name": "Amarr Shuttle Khanid Cyber Knight SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "description": "Designed to honor of the Cyber knights of the Khanid Kingdom. The Cyber Knights combine ancient principles of service with modern augmentations. They are the ultimate marriage of honor and innovation, a proud symbol of the Khanid Kingdom.\n\n- From the archives of Khanid Prime.",
+      "iconUrl": "https://images.evetech.net/types/96042/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96042/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96042/bp?size=32"
+    },
+    {
+      "typeId": 96043,
+      "name": "Dragoon Navy Issue Khanid Cyber Knight SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "description": "Designed to honor of the Cyber knights of the Khanid Kingdom. The Cyber Knights combine ancient principles of service with modern augmentations. They are the ultimate marriage of honor and innovation, a proud symbol of the Khanid Kingdom.\n\n- From the archives of Khanid Prime.",
+      "iconUrl": "https://images.evetech.net/types/96043/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96043/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96043/bp?size=32"
+    },
+    {
+      "typeId": 96044,
+      "name": "Harbinger Khanid Cyber Knight SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "description": "Designed to honor of the Cyber knights of the Khanid Kingdom. The Cyber Knights combine ancient principles of service with modern augmentations. They are the ultimate marriage of honor and innovation, a proud symbol of the Khanid Kingdom.\n\n- From the archives of Khanid Prime.",
+      "iconUrl": "https://images.evetech.net/types/96044/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96044/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96044/bp?size=32"
+    },
+    {
+      "typeId": 96045,
+      "name": "Tormentor Khanid Cyber Knight SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "description": "Designed to honor of the Cyber knights of the Khanid Kingdom. The Cyber Knights combine ancient principles of service with modern augmentations. They are the ultimate marriage of honor and innovation, a proud symbol of the Khanid Kingdom.\n\n- From the archives of Khanid Prime.",
+      "iconUrl": "https://images.evetech.net/types/96045/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96045/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96045/bp?size=32"
+    },
+    {
+      "typeId": 96046,
+      "name": "Sigil Khanid Cyber Knight SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "description": "Designed to honor of the Cyber knights of the Khanid Kingdom. The Cyber Knights combine ancient principles of service with modern augmentations. They are the ultimate marriage of honor and innovation, a proud symbol of the Khanid Kingdom.\n\n- From the archives of Khanid Prime.",
+      "iconUrl": "https://images.evetech.net/types/96046/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96046/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96046/bp?size=32"
+    },
+    {
+      "typeId": 96047,
+      "name": "Augoror Khanid Cyber Knight SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "description": "Designed to honor of the Cyber knights of the Khanid Kingdom. The Cyber Knights combine ancient principles of service with modern augmentations. They are the ultimate marriage of honor and innovation, a proud symbol of the Khanid Kingdom.\n\n- From the archives of Khanid Prime.",
+      "iconUrl": "https://images.evetech.net/types/96047/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96047/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96047/bp?size=32"
+    },
+    {
+      "typeId": 96048,
+      "name": "Coercer Khanid Cyber Knight SKIN",
+      "group": "Permanent SKIN",
+      "category": "SKINs",
+      "volume": 0.01,
+      "description": "Designed to honor of the Cyber knights of the Khanid Kingdom. The Cyber Knights combine ancient principles of service with modern augmentations. They are the ultimate marriage of honor and innovation, a proud symbol of the Khanid Kingdom.\n\n- From the archives of Khanid Prime.",
+      "iconUrl": "https://images.evetech.net/types/96048/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96048/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96048/bp?size=32"
     }
   ]
 }
