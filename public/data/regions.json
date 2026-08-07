@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-06T06:22:45.730Z",
+  "generatedAt": "2026-08-07T05:27:46.201Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0191,
+      "reactionCostIndex": 0.0196,
       "marketSystemId": 30000621
     },
     {
@@ -995,9 +995,9 @@
       "regionId": 10000032,
       "name": "Sinq Laison",
       "securityClass": "highsec",
-      "buildSystemId": 30002658,
-      "buildSystemName": "Agrallarier",
-      "buildSystemSecurity": 0.850284,
+      "buildSystemId": 30002712,
+      "buildSystemName": "Alillere",
+      "buildSystemSecurity": 0.847828,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30002659
@@ -1171,12 +1171,12 @@
       "regionId": 10000068,
       "name": "Verge Vendor",
       "securityClass": "highsec",
-      "buildSystemId": 30005303,
-      "buildSystemName": "Merolles",
-      "buildSystemSecurity": 0.884628,
+      "buildSystemId": 30005314,
+      "buildSystemName": "Theruesse",
+      "buildSystemSecurity": 0.879221,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30005303
+      "marketSystemId": 30005314
     },
     {
       "regionId": 14000001,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0298,
+      "costIndex": 0.0306,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
