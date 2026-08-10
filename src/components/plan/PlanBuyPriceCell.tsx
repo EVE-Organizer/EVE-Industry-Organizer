@@ -1,103 +1,190 @@
-import { useRef, useState } from 'react'
-import { Tooltip } from '@/components/Tooltip'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatIsk } from '@/lib/profit'
-import type { PlanNode } from '@/types'
+import {
+  PLAN_DEFAULT_BUY_HUB,
+  type PlanBuyPriceSource,
+} from '@/lib/planBuyPrices'
+import type { HubId, PlanNode, PlanNodeOverride } from '@/types'
+import { HUBS } from '@/types'
 
-function BuyPriceInput({
-  unitPrice,
-  onCommit,
-  onCancel,
+export function PlanBuyPriceCell({
+  node,
+  hubPricesByHub,
+  defaultBuyHub = PLAN_DEFAULT_BUY_HUB,
+  nodeOverride,
+  onSetBuyPriceSource,
 }: {
-  unitPrice: number
-  onCommit: (price: number | null) => void
-  onCancel: () => void
+  node: PlanNode
+  hubPricesByHub: Map<HubId, Map<number, number>>
+  defaultBuyHub?: HubId
+  nodeOverride?: PlanNodeOverride
+  onSetBuyPriceSource?: (productTypeId: number, source: PlanBuyPriceSource | null) => void
 }) {
-  const [draft, setDraft] = useState(unitPrice > 0 ? String(unitPrice) : '')
+  const rootRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [open, setOpen] = useState(false)
+  const [draft, setDraft] = useState('')
   const committedRef = useRef(false)
 
-  function commit(fromBlur = false) {
-    if (committedRef.current) return
+  const canEdit = onSetBuyPriceSource != null
+  const unitPrice = node.unitPrice ?? 0
+  const isCustom = nodeOverride?.buyPrice != null && nodeOverride.buyPrice > 0
+  const activeHub = isCustom ? null : (nodeOverride?.buyHub ?? defaultBuyHub)
+  const defaultHubName = HUBS.find((h) => h.id === defaultBuyHub)?.name ?? defaultBuyHub
+  const sourceLabel = isCustom
+    ? 'custom'
+    : (HUBS.find((h) => h.id === activeHub)?.name ?? defaultHubName)
+
+  const hubRows = useMemo(
+    () =>
+      HUBS.map((hub) => ({
+        id: hub.id,
+        name: hub.name,
+        price: hubPricesByHub.get(hub.id)?.get(node.productTypeId) ?? 0,
+      })),
+    [hubPricesByHub, node.productTypeId],
+  )
+
+  useEffect(() => {
+    if (!open) return
+    function onMouseDown(e: MouseEvent) {
+      if (!rootRef.current?.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    return () => document.removeEventListener('mousedown', onMouseDown)
+  }, [open])
+
+  function openEditor() {
+    committedRef.current = false
+    setDraft(unitPrice > 0 ? String(unitPrice) : '')
+    setOpen(true)
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
+
+  function closeEditor() {
+    setOpen(false)
+    committedRef.current = false
+  }
+
+  function commitCustom(fromBlur = false) {
+    if (committedRef.current || !onSetBuyPriceSource) return
 
     const trimmed = draft.trim().replace(/,/g, '')
     if (!trimmed) {
       if (fromBlur) {
         if (unitPrice > 0) {
           committedRef.current = true
-          onCommit(null)
-        } else {
-          onCancel()
+          onSetBuyPriceSource(node.productTypeId, null)
         }
+        closeEditor()
         return
       }
       committedRef.current = true
-      onCommit(null)
+      onSetBuyPriceSource(node.productTypeId, null)
+      closeEditor()
       return
     }
 
     const parsed = Number(trimmed)
     if (!Number.isFinite(parsed) || parsed <= 0) {
-      onCancel()
+      closeEditor()
       return
     }
 
     committedRef.current = true
-    onCommit(Math.round(parsed))
+    onSetBuyPriceSource(node.productTypeId, { price: Math.round(parsed) })
+    closeEditor()
   }
 
-  return (
-    <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
-      <input
-        type="text"
-        inputMode="numeric"
-        className="input input-bordered input-xs w-[6.5rem] tabular-nums text-right"
-        placeholder="ISK"
-        aria-label="Custom buy price in ISK"
-        autoFocus
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={() => commit(true)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault()
-            commit()
-          }
-          if (e.key === 'Escape') {
-            e.preventDefault()
-            onCancel()
-          }
-        }}
-      />
-    </div>
+  function selectHub(hubId: HubId) {
+    if (!onSetBuyPriceSource) return
+    committedRef.current = true
+    if (hubId === defaultBuyHub) {
+      onSetBuyPriceSource(node.productTypeId, null)
+    } else {
+      onSetBuyPriceSource(node.productTypeId, { hub: hubId })
+    }
+    closeEditor()
+  }
+
+  const priceFootnote = (
+    <>
+      {node.buyCost != null && node.buyCost > 0 ? (
+        <span className="block text-[10px] opacity-60">{formatIsk(node.buyCost)} total</span>
+      ) : null}
+    </>
   )
-}
 
-export function PlanBuyPriceCell({
-  node,
-  hubPrices,
-  onSetBuyPrice,
-}: {
-  node: PlanNode
-  hubPrices: Map<number, number>
-  onSetBuyPrice?: (productTypeId: number, price: number | null) => void
-}) {
-  const [editing, setEditing] = useState(false)
-  const hubPrice = hubPrices.get(node.productTypeId) ?? 0
-  const hasHubPrice = hubPrice > 0
-  const unitPrice = node.unitPrice ?? 0
-  const isCustom = unitPrice > 0 && !hasHubPrice
-  const canEdit = !hasHubPrice && onSetBuyPrice != null
-
-  if (editing && canEdit) {
+  if (open && canEdit) {
     return (
-      <BuyPriceInput
-        key={unitPrice}
-        unitPrice={unitPrice}
-        onCommit={(price) => {
-          onSetBuyPrice!(node.productTypeId, price)
-          setEditing(false)
-        }}
-        onCancel={() => setEditing(false)}
-      />
+      <div
+        ref={rootRef}
+        className="relative flex flex-col items-end"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative w-[7.5rem]">
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="numeric"
+            className="input input-bordered input-xs w-full tabular-nums text-right pr-5"
+            placeholder="ISK"
+            aria-label="Buy price or hub"
+            role="combobox"
+            aria-expanded={true}
+            aria-autocomplete="list"
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={() => commitCustom(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                commitCustom()
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault()
+                closeEditor()
+              }
+            }}
+          />
+          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] opacity-40" aria-hidden>
+            ▾
+          </span>
+        </div>
+        <ul
+          className="absolute right-0 top-full z-30 mt-1 w-44 overflow-hidden rounded-lg border border-eve-border bg-base-200 shadow-lg"
+          role="listbox"
+        >
+          {hubRows.map((row) => {
+            const selected = !isCustom && activeHub === row.id
+            return (
+              <li key={row.id} role="option" aria-selected={selected}>
+                <button
+                  type="button"
+                  className={`flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-xs hover:bg-base-300/80 ${
+                    selected ? 'bg-primary/10 text-primary' : ''
+                  }`}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => selectHub(row.id)}
+                >
+                  <span className="truncate">{row.name}</span>
+                  <span className="tabular-nums shrink-0 opacity-70">
+                    {row.price > 0 ? formatIsk(row.price) : '—'}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+          <li className="px-2.5 py-1.5 text-[10px] opacity-50 border-t border-eve-border">
+            Type a custom price in ISK
+          </li>
+        </ul>
+        <span className="text-[10px] opacity-50 mt-0.5">{sourceLabel}</span>
+        {priceFootnote}
+      </div>
     )
   }
 
@@ -105,43 +192,40 @@ export function PlanBuyPriceCell({
     return (
       <div className="tabular-nums text-sm leading-snug">
         {canEdit ? (
-          <Tooltip text="No hub price. Click to edit your custom buy price." placement="top">
-            <button
-              type="button"
-              className="text-left hover:underline decoration-dotted underline-offset-2"
-              onClick={(e) => {
-                e.stopPropagation()
-                setEditing(true)
-              }}
-            >
-              {formatIsk(unitPrice)}
-            </button>
-          </Tooltip>
+          <button
+            type="button"
+            className="text-left hover:underline decoration-dotted underline-offset-2"
+            onClick={(e) => {
+              e.stopPropagation()
+              openEditor()
+            }}
+          >
+            {formatIsk(unitPrice)}
+          </button>
         ) : (
           <span>{formatIsk(unitPrice)}</span>
         )}
-        {isCustom ? <span className="block text-[10px] opacity-50">custom</span> : null}
-        {node.buyCost != null && node.buyCost > 0 ? (
-          <span className="block text-[10px] opacity-60">{formatIsk(node.buyCost)} total</span>
-        ) : null}
+        <span className="block text-[10px] opacity-50">{sourceLabel}</span>
+        {priceFootnote}
       </div>
     )
   }
 
   if (canEdit) {
     return (
-      <Tooltip text="No hub price. Set a custom buy price for cost totals." placement="top">
+      <div onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
           className="text-xs text-warning hover:underline decoration-dotted underline-offset-2"
           onClick={(e) => {
             e.stopPropagation()
-            setEditing(true)
+            openEditor()
           }}
         >
           Set price
         </button>
-      </Tooltip>
+        {priceFootnote}
+      </div>
     )
   }
 

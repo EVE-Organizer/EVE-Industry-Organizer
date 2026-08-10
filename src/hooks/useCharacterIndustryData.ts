@@ -38,7 +38,7 @@ export function characterIndustryJobsQueryOptions(characterId: number, forceRefr
     queryKey: ['character-industry-jobs', characterId] as const,
     staleTime: CHARACTER_DATA_STALE_MS,
     gcTime: CHARACTER_DATA_GC_MS,
-    refetchOnMount: false as const,
+    refetchOnMount: true as const,
     queryFn: fetchCharacterIndustryJobsQueryFn(characterId, forceRefresh),
   }
 }
@@ -99,7 +99,7 @@ export function useProductionLocations(characterId: number | null | undefined) {
     enabled: characterId != null,
     staleTime: CHARACTER_DATA_STALE_MS,
     gcTime: CHARACTER_DATA_GC_MS,
-    refetchOnMount: false,
+    refetchOnMount: true,
     queryFn: async (): Promise<ProductionLocation[]> => {
       const accessToken = await getValidAccessToken(characterId!)
       if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
@@ -146,34 +146,62 @@ export function useProductionLocations(characterId: number | null | undefined) {
   })
 }
 
+function fetchLocationInventoryQueryFn(
+  characterId: number,
+  locationId: number,
+  forceRefresh = false,
+) {
+  return async (): Promise<Map<number, number>> => {
+    const accessToken = await getValidAccessToken(characterId)
+    if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
+
+    const characterAssets = await fetchCharacterAssets(characterId, accessToken, { forceRefresh })
+    let allAssets = [...characterAssets]
+
+    const corporationId = await fetchCharacterCorporationId(characterId)
+    if (corporationId) {
+      try {
+        const corpAssets = await fetchCorporationAssets(corporationId, accessToken, { forceRefresh })
+        allAssets = [...allAssets, ...corpAssets]
+      } catch {
+        // Corp assets unavailable without roles; character assets still count.
+      }
+    }
+
+    return aggregateAssetsAtLocation(allAssets, locationId)
+  }
+}
+
+export function locationInventoryQueryOptions(
+  characterId: number,
+  locationId: number,
+  forceRefresh = false,
+) {
+  return {
+    queryKey: ['location-inventory', characterId, locationId] as const,
+    staleTime: CHARACTER_DATA_STALE_MS,
+    gcTime: CHARACTER_DATA_GC_MS,
+    refetchOnMount: true as const,
+    queryFn: fetchLocationInventoryQueryFn(characterId, locationId, forceRefresh),
+  }
+}
+
 export function useLocationInventory(
   characterId: number | null | undefined,
   locationId: number | null | undefined,
 ) {
-  return useQuery({
-    queryKey: ['location-inventory', characterId, locationId],
+  const queryClient = useQueryClient()
+  const query = useQuery({
+    ...locationInventoryQueryOptions(characterId!, locationId!),
     enabled: characterId != null && locationId != null,
-    staleTime: CHARACTER_DATA_STALE_MS,
-    gcTime: CHARACTER_DATA_GC_MS,
-    refetchOnMount: false,
-    queryFn: async (): Promise<Map<number, number>> => {
-      const accessToken = await getValidAccessToken(characterId!)
-      if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
-
-      const characterAssets = await fetchCharacterAssets(characterId!, accessToken)
-      let allAssets = [...characterAssets]
-
-      const corporationId = await fetchCharacterCorporationId(characterId!)
-      if (corporationId) {
-        try {
-          const corpAssets = await fetchCorporationAssets(corporationId, accessToken)
-          allAssets = [...allAssets, ...corpAssets]
-        } catch {
-          // Corp assets unavailable without roles; character assets still count.
-        }
-      }
-
-      return aggregateAssetsAtLocation(allAssets, locationId!)
-    },
   })
+
+  const refresh = () => {
+    if (characterId == null || locationId == null) return query.refetch()
+    return queryClient.fetchQuery({
+      ...locationInventoryQueryOptions(characterId, locationId, true),
+    })
+  }
+
+  return { ...query, refetch: refresh }
 }

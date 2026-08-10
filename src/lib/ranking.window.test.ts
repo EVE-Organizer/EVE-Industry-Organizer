@@ -4,6 +4,7 @@ import { applyME, estimateJobCost, estimatedItemValue, materialCost } from '@/li
 import { WIDER_TIME_RANGES } from '@/lib/profit'
 import { marketAwareIph, rankBlueprintsFromMarket } from '@/lib/ranking'
 import { buildPriceMap, buildTypeMap, getHubMarket } from '@/services/data/sdeLoader'
+import { buildWindowPriceMap } from '@/lib/ranking'
 import { DEFAULT_SETTINGS, DEFAULT_BATCH_SIZE, type ManufacturingSettings } from '@/types'
 import type { BlueprintRegistry, MarketData, RegionsData, TimeRange, TypeInfo } from '@/types'
 
@@ -146,6 +147,17 @@ describe('window-based material costs', () => {
     expect(ammo1y).toBeDefined()
     expect(ammo1y!.avgVolume).toBe(ammoHistory['1y']!.avgVolume)
     expect(ammo1y!.avgVolume).not.toBe(ammoHistory['1m']!.avgVolume)
+  })
+
+  it('all window uses spot sell price instead of all-time average when listed', () => {
+    const market = loadFixture<MarketData>('public/data/market.json')
+    const hubMarket = getHubMarket(market, 'jita')!
+    const spot = buildPriceMap(hubMarket)
+    const allPrices = buildWindowPriceMap(hubMarket, 'all', spot)
+
+    expect(spot.get(25600)).toBeGreaterThan(40_000)
+    expect(hubMarket.products['25600']?.all?.avgPrice).toBeLessThan(30_000)
+    expect(allPrices.get(25600)).toBe(spot.get(25600))
   })
 })
 

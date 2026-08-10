@@ -33,6 +33,7 @@ import {
 } from '@/services/data/sdeLoader'
 import { buildWindowPriceMap, resolveHubHaulRates } from '@/lib/ranking'
 import { mergePlanBuyPrices } from '@/lib/planBuyPrices'
+import type { PlanBuyPriceSource } from '@/lib/planBuyPrices'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/lib/planTreeLines'
 import { buildManufactureDisplayRows } from '@/lib/planManufactureDisplay'
@@ -54,7 +55,7 @@ import {
   sharedPayloadToTemplate,
 } from '@/lib/planShare'
 import { formatDecimal } from '@/lib/profit'
-import { DEFAULT_BATCH_SIZE, DEFAULT_SETTINGS, HUBS } from '@/types'
+import { DEFAULT_BATCH_SIZE, DEFAULT_SETTINGS, HUBS, type HubId } from '@/types'
 import type {
   GlobalSettings,
   ManufacturingPlanTemplate,
@@ -261,18 +262,25 @@ export function PlanPage() {
   }, [typeMap])
   const buyHubId = activeSettings.primaryHub
   const sellHubId = activeSettings.sellHubId ?? buyHubId
-  const hubPrices = useMemo(() => {
-    if (!data) return new Map<number, number>()
-    const hubMarket = getHubMarket(data.market, buyHubId)
-    if (!hubMarket) return new Map<number, number>()
+  const hubPricesByHub = useMemo(() => {
+    if (!data) return new Map<HubId, Map<number, number>>()
     const window = activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow
-    return buildWindowPriceMap(hubMarket, window, buildPriceMap(hubMarket))
-  }, [data, buyHubId, activeSettings.priceWindow])
+    const maps = new Map<HubId, Map<number, number>>()
+    for (const hub of HUBS) {
+      const hubMarket = getHubMarket(data.market, hub.id)
+      if (!hubMarket) continue
+      maps.set(
+        hub.id,
+        buildWindowPriceMap(hubMarket, window, buildPriceMap(hubMarket)),
+      )
+    }
+    return maps
+  }, [data, activeSettings.priceWindow])
 
   const prices = useMemo(() => {
-    if (!activeTemplate) return hubPrices
-    return mergePlanBuyPrices(hubPrices, activeTemplate.nodeOverrides)
-  }, [hubPrices, activeTemplate])
+    if (!activeTemplate) return hubPricesByHub.get(buyHubId) ?? new Map<number, number>()
+    return mergePlanBuyPrices(hubPricesByHub, activeTemplate.nodeOverrides, buyHubId)
+  }, [hubPricesByHub, activeTemplate, buyHubId])
 
   const sellPrices = useMemo(() => {
     if (!data) return new Map<number, number>()
@@ -389,7 +397,7 @@ export function PlanPage() {
   const slots = manufacturingSlotsFromSkills(activeSettings.skills)
 
   const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
-  const { data: locationInventory } = useLocationInventory(
+  const { data: locationInventory, refetch: refetchLocationInventory, isFetching: isRefreshingInventory } = useLocationInventory(
     activeCharacterId,
     activeSettings.productionLocationId,
   )
@@ -799,19 +807,29 @@ export function PlanPage() {
     [isSharedView, blueprints, storeSettings, updatePlanTemplate],
   )
 
-  const saveBuyPrice = useCallback(
-    (productTypeId: number, buyPrice: number | null) => {
+  const saveBuyPriceSource = useCallback(
+    (productTypeId: number, source: PlanBuyPriceSource | null) => {
       if (isSharedView) return
       const template = selectedPlanTemplateFromStore()
       if (!template) return
 
       const current = template.nodeOverrides[productTypeId] ?? {}
       let nextEntry: PlanNodeOverride
-      if (buyPrice == null || buyPrice <= 0) {
-        const { buyPrice: _buyPrice, ...rest } = current
+
+      if (source == null) {
+        const { buyHub: _buyHub, buyPrice: _buyPrice, ...rest } = current
         nextEntry = rest
+      } else if ('hub' in source) {
+        const { buyPrice: _buyPrice, ...rest } = current
+        if (source.hub === 'jita') {
+          const { buyHub: _buyHub, ...withoutHub } = rest
+          nextEntry = withoutHub
+        } else {
+          nextEntry = { ...rest, buyHub: source.hub }
+        }
       } else {
-        nextEntry = { ...current, buyPrice }
+        const { buyHub: _buyHub, ...rest } = current
+        nextEntry = { ...rest, buyPrice: source.price }
       }
 
       const nextOverrides = { ...template.nodeOverrides }
@@ -1011,6 +1029,10 @@ export function PlanPage() {
                     onChange={isSharedView ? () => {} : updateSettings}
                     systems={data.systems}
                     regions={data.regions}
+                    onRefreshInventory={
+                      isSharedView ? undefined : () => void refetchLocationInventory()
+                    }
+                    isRefreshingInventory={isRefreshingInventory}
                   />
                 </div>
               ) : null}
@@ -1145,9 +1167,11 @@ export function PlanPage() {
                 manufactureRows={manufactureRows}
                 planRoots={activeTemplate.roots}
                 skillSlots={slots}
-                hubPrices={hubPrices}
+                hubPricesByHub={hubPricesByHub}
+                defaultBuyHub={buyHubId}
+                nodeOverrides={activeTemplate.nodeOverrides}
                 onToggleMode={isSharedView ? undefined : toggleMode}
-                onSetBuyPrice={isSharedView ? undefined : saveBuyPrice}
+                onSetBuyPriceSource={isSharedView ? undefined : saveBuyPriceSource}
                 onOpenGraph={openGraph}
                 onOpenMeTe={openMeTe}
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}

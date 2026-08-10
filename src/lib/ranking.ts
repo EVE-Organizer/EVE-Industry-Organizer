@@ -168,6 +168,16 @@ export function buildWindowPriceMap(
   spot: Map<number, number>,
 ): Map<number, number> {
   const map = new Map(spot)
+  // "All" = current sell orders (spot). All-time history only fills types with no listing.
+  if (window === 'all') {
+    for (const [key, byWindow] of Object.entries(hubMarket.products)) {
+      const typeId = Number(key)
+      if ((map.get(typeId) ?? 0) > 0) continue
+      const summary = byWindow.all
+      if (summary?.avgPrice && summary.avgPrice > 0) map.set(typeId, summary.avgPrice)
+    }
+    return map
+  }
   for (const [key, byWindow] of Object.entries(hubMarket.products)) {
     const summary = pickHistoryWindow(byWindow, window)
     if (summary?.avgPrice && summary.avgPrice > 0) map.set(Number(key), summary.avgPrice)
@@ -205,6 +215,18 @@ function resolveWindowSummary(
   prices: Map<number, number>,
 ): ProductWindowSummary | null {
   const productHistory = hubMarket.products[String(productTypeId)]
+  const spot = prices.get(productTypeId) ?? 0
+
+  if (window === 'all' && spot > 0) {
+    const hist = productHistory?.all
+    return {
+      avgPrice: spot,
+      avgVolume: hist?.avgVolume ?? 0,
+      high: spot,
+      low: spot,
+    }
+  }
+
   if (productHistory) {
     const windowSummary = pickHistoryWindow(productHistory, window)
     if (!windowSummary) return null
@@ -219,8 +241,6 @@ function resolveWindowSummary(
 
   // No batch history: spot price only applies to "all" (current sell orders).
   if (window !== 'all') return null
-
-  const spot = prices.get(productTypeId) ?? 0
   if (spot <= 0) return null
 
   return { avgPrice: spot, avgVolume: 0, high: spot, low: spot }

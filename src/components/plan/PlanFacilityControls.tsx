@@ -12,6 +12,8 @@ interface PlanFacilityControlsProps {
   regions: RegionsData
   hint?: string
   className?: string
+  onRefreshInventory?: () => void
+  isRefreshingInventory?: boolean
 }
 
 export function PlanFacilityControls({
@@ -21,6 +23,8 @@ export function PlanFacilityControls({
   regions,
   hint = "Rig bonuses and owner tax are in Settings. Changes here apply to this plan's cost estimates.",
   className = '',
+  onRefreshInventory,
+  isRefreshingInventory = false,
 }: PlanFacilityControlsProps) {
   const facility = settings.reactionFacility
   const buildSystemLocked = settings.productionLocationId != null
@@ -30,17 +34,31 @@ export function PlanFacilityControls({
     <div className={`plan-facility-controls ${className}`.trim()}>
       <div className="plan-facility-controls__grid">
         <div className="plan-facility-controls__field">
-          <FormFieldLabel
-            label="Manufacturing location"
-            tooltip={GLOBAL_SETTING_TOOLTIPS.structureType}
-            size="sm"
-          />
-          <ManufacturingLocationPicker
-            settings={settings}
-            onChange={onChange}
-            size="sm"
-            showInventoryHint
-          />
+          <div className="flex items-end gap-2">
+            <div className="min-w-0 flex-1">
+              <FormFieldLabel
+                label="Manufacturing location"
+                tooltip={GLOBAL_SETTING_TOOLTIPS.structureType}
+                size="sm"
+              />
+              <ManufacturingLocationPicker
+                settings={settings}
+                onChange={onChange}
+                size="sm"
+                showInventoryHint
+              />
+            </div>
+            {settings.productionLocationId != null && onRefreshInventory ? (
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm shrink-0"
+                disabled={isRefreshingInventory}
+                onClick={() => void onRefreshInventory()}
+              >
+                {isRefreshingInventory ? 'Refreshing…' : 'Refresh'}
+              </button>
+            ) : null}
+          </div>
         </div>
 
         <div className="plan-facility-controls__field">

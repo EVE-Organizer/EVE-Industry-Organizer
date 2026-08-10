@@ -10,7 +10,7 @@ export const GLOBAL_SETTING_TOOLTIPS = {
   priceMethod:
     'How manufactured output is priced at the sell hub. Sell orders use window average or current sell listings (includes broker fee). Buy orders use the best buy order for an instant sale (no broker fee, lower price). Material costs always use sell-side prices at the buy hub.',
   priceWindow:
-    'Market history window used for material costs at the buy hub and (when selling via sell orders) product revenue at the sell hub. Spot sell prices fill gaps when history is missing.',
+    'Market history window for material costs at the buy hub and (when selling via sell orders) product revenue at the sell hub. All uses current sell listings; 1d–1y use history averages. Spot fills gaps when history is missing.',
   includeHaulCost:
     'Haul in (materials from buy hub to build system) is added to setup cost; haul out (products to sell hub) is subtracted from profit. Turn off if you build and sell locally or haul on your own.',
   includeBlueprintCost:

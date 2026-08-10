@@ -82,7 +82,7 @@ export async function esiAuthGet<T>(
   const key = options?.cacheKey ?? cacheKey('esi-auth', path, {})
   const cached = !options?.skipCache ? getCached<T>(key) : null
 
-  if (!options?.skipCache && cached && !options?.forceRefresh) {
+  if (!options?.skipCache && cached && !cached.stale && !options?.forceRefresh) {
     return cached.data
   }
 
@@ -94,7 +94,12 @@ export async function esiAuthGet<T>(
     try {
       return await fetchAndCache<T>(url, accessToken, key, options)
     } catch (err) {
-      if (cached && (options?.forceRefresh || (err instanceof EsiAuthError && isRateLimited(err.status)))) {
+      if (
+        cached &&
+        (options?.forceRefresh ||
+          cached.stale ||
+          (err instanceof EsiAuthError && isRateLimited(err.status)))
+      ) {
         return cached.data
       }
       throw err
@@ -102,18 +107,20 @@ export async function esiAuthGet<T>(
   })
 }
 
-function getCachedPages<T>(cacheSegment: string): T[][] | null {
+function getCachedPages<T>(cacheSegment: string): { pages: T[][]; stale: boolean } | null {
   const pages: T[][] = []
+  let stale = false
   let page = 1
   while (true) {
     const pageKey = cacheKey('esi-auth', cacheSegment, { page })
     const cached = getCached<T[]>(pageKey)
     if (!cached) break
+    if (cached.stale) stale = true
     pages.push(cached.data)
     if (cached.data.length === 0) break
     page += 1
   }
-  return pages.length > 0 ? pages : null
+  return pages.length > 0 ? { pages, stale } : null
 }
 
 function pageMetaKey(cacheSegment: string): string {
@@ -173,14 +180,14 @@ export async function esiAuthGetAllPages<T>(
 ): Promise<T[]> {
   if (!options?.skipCache && !options?.forceRefresh) {
     const cachedPages = getCachedPages<T>(cacheSegment)
-    if (cachedPages && isPageCacheComplete(cacheSegment, cachedPages)) {
-      return cachedPages.flat()
+    if (cachedPages && !cachedPages.stale && isPageCacheComplete(cacheSegment, cachedPages.pages)) {
+      return cachedPages.pages.flat()
     }
   }
 
   if (esiPaused()) {
     const cachedPages = getCachedPages<T>(cacheSegment)
-    if (cachedPages) return cachedPages.flat()
+    if (cachedPages) return cachedPages.pages.flat()
   }
 
   const results: T[] = []
@@ -195,7 +202,7 @@ export async function esiAuthGetAllPages<T>(
     const cached = !options?.skipCache && !options?.forceRefresh ? getCached<T[]>(key) : null
     let pageData: T[]
 
-    if (cached && !options?.forceRefresh) {
+    if (cached && !cached.stale && !options?.forceRefresh) {
       pageData = cached.data
       const meta = getCached<{ totalPages: number }>(pageMetaKey(cacheSegment))
       if (meta) totalPages = meta.data.totalPages
@@ -211,7 +218,7 @@ export async function esiAuthGetAllPages<T>(
           pageData = cached.data
         } else if (err instanceof EsiAuthError && isRateLimited(err.status)) {
           const fallback = getCachedPages<T>(cacheSegment)
-          if (fallback) return fallback.flat()
+          if (fallback) return fallback.pages.flat()
           throw err
         } else {
           throw err

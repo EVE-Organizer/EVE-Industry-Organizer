@@ -403,7 +403,9 @@ export interface PlanNodeOverride {
   forceInclude?: boolean
   me?: number
   te?: number
-  /** Manual buy price when the hub has no market price for this type. */
+  /** Per-item buy hub for live market price; omit = Jita default. */
+  buyHub?: HubId
+  /** Custom buy price in ISK; mutually exclusive with buyHub. */
   buyPrice?: number
 }
 
