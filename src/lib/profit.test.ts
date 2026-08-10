@@ -107,6 +107,12 @@ describe('formatIsk', () => {
     expect(formatIsk(2_500_000_000)).toBe('2.50B ISK')
     expect(formatIsk(Number.POSITIVE_INFINITY)).toBe('∞')
   })
+
+  it('shows decimals for cheap unit prices under 100 ISK', () => {
+    expect(formatIsk(3.45)).toBe('3.45 ISK')
+    expect(formatIsk(42.5)).toBe('42.5 ISK')
+    expect(formatIsk(99.9)).toBe('99.9 ISK')
+  })
 })
 
 describe('formatGraphUnitIsk', () => {

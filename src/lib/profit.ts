@@ -36,6 +36,13 @@ export function filterHistoryByRange(history: MarketHistoryEntry[], range: TimeR
   return trimHistoryByDays(history, days)
 }
 
+/** Sub-1K ISK: show decimals for cheap unit prices (minerals, ammo). */
+function formatSubKIsk(value: number): string {
+  const abs = Math.abs(value)
+  const decimals = abs >= 100 ? 0 : abs >= 10 ? 1 : 2
+  return formatNumber(value, decimals)
+}
+
 export function formatIsk(value: number): string {
   if (!Number.isFinite(value)) return '∞'
   if (Math.abs(value) >= 1_000_000_000) {
@@ -47,7 +54,7 @@ export function formatIsk(value: number): string {
   if (Math.abs(value) >= 1_000) {
     return `${formatNumber(value / 1_000, 1)}K ISK`
   }
-  return `${formatNumber(value, 0)} ISK`
+  return `${formatSubKIsk(value)} ISK`
 }
 
 /** Compact amount + unit for setup budget inputs (M/B only). */
@@ -149,7 +156,7 @@ export function formatGraphUnitIsk(value: number): string {
   if (Math.abs(value) >= 1_000) {
     return `${trimCompactDecimal(value / 1_000, 1)}k ISK`
   }
-  return `${formatNumber(value, 0)} ISK`
+  return `${formatSubKIsk(value)} ISK`
 }
 
 /** Job duration for UI: days, hr, min, or sec. */
