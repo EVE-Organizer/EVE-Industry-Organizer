@@ -1,5 +1,6 @@
 import type { EsiFetchOptions } from '@/services/character/esiAuthFetch'
-import { esiAuthGet, esiAuthGetAllPages, esiPublicGet } from '@/services/character/esiAuthFetch'
+import { EsiAuthError, esiAuthGet, esiAuthGetAllPages, esiPublicGet } from '@/services/character/esiAuthFetch'
+import { setCached, TTL } from '@/services/cache/cacheStore'
 import type { EsiAsset } from '@/services/character/characterAssetsService'
 
 export interface EsiCharacterPublic {
@@ -63,25 +64,22 @@ export async function fetchCorporationAssets(
 
 export async function fetchUniverseStructure(
   structureId: number,
-  accessToken?: string,
+  accessToken: string,
 ): Promise<EsiUniverseStructure | null> {
   const cacheKey = `esi:structure:${structureId}`
 
-  if (accessToken) {
-    try {
-      return await esiAuthGet<EsiUniverseStructure>(
-        `/universe/structures/${structureId}/`,
-        accessToken,
-        { cacheKey },
-      )
-    } catch {
-      // Fall back to the public endpoint for structures that do not need auth.
+  try {
+    return await esiAuthGet<EsiUniverseStructure>(
+      `/universe/structures/${structureId}/`,
+      accessToken,
+      { cacheKey },
+    )
+  } catch (err) {
+    if (err instanceof EsiAuthError && err.status === 403) {
+      setCached(cacheKey, null, 'esi-auth', TTL.failed.fresh, TTL.failed.stale)
     }
+    return null
   }
-
-  return esiPublicGet<EsiUniverseStructure>(`/universe/structures/${structureId}/`, {
-    cacheKey: `${cacheKey}:public`,
-  })
 }
 
 export async function fetchUniverseStation(stationId: number): Promise<EsiStation | null> {

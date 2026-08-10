@@ -5,7 +5,7 @@ import { EveImage } from '@/components/EveImage'
 import { JobCostFormula, jobCostStepTitle } from '@/components/JobCostFormula'
 import { formatFacilityBonusLine } from '@/lib/facilityModifiers'
 import { isPlayerStructure } from '@/lib/structureSettings'
-import { BPO_LIFETIME_CATEGORY_LABELS } from '@/lib/bpoLifetime'
+import { blueprintJitaFallbackNote } from '@/lib/blueprintCostDisplay'
 
 interface IphBreakdownModalProps {
   row: RankedBlueprintRow | null
@@ -356,22 +356,43 @@ export function IphBreakdownModal({
                   <strong>{formatIsk(iph.bpoCost)}</strong>
                 </CalcStep>
               </StepCard>
+            ) : iph.blueprintCost.mode === 'bpc' ? (
+              <StepCard
+                step={5}
+                title="Blueprint (BPC contract)"
+                note={
+                  blueprintJitaFallbackNote(iph.blueprintCost) ??
+                  'No BPO listing at your hub, so the batch uses a public BPC contract price.'
+                }
+                result={formatIsk(iph.bpoCost)}
+                resultLabel="BPC cost"
+              >
+                <CalcStep label="Buyout ÷ runs × batch">
+                  {formatIsk(iph.blueprintCost.bpcBuyout ?? 0)} ÷{' '}
+                  {formatQuantity(iph.blueprintCost.bpcRuns ?? 0)} ={' '}
+                  {formatIsk(iph.blueprintCost.bpcCostPerRun ?? 0)}/run
+                </CalcStep>
+                <CalcStep label="Charged this batch">
+                  {formatIsk(iph.blueprintCost.bpcCostPerRun ?? 0)} × {iph.runs} runs ={' '}
+                  <strong>{formatIsk(iph.bpoCost)}</strong>
+                </CalcStep>
+              </StepCard>
             ) : (
               <StepCard
                 step={5}
-                title="Blueprint (BPO, amortized)"
-                note="T1 BPOs are reusable, so the price and research are spread over the blueprint lifetime."
+                title="Blueprint (BPO, reusable)"
+                note={
+                  blueprintJitaFallbackNote(iph.blueprintCost) ??
+                  'T1 BPOs are reusable forever. Purchase price counts toward upfront capital, not per-batch profit.'
+                }
                 result={formatIsk(iph.bpoCost)}
                 resultLabel="BPO cost"
               >
-                <CalcStep label="(Price + research) ÷ lifetime × runs">
-                  ({formatIsk(iph.blueprintCost.bpoUnitPrice ?? 0)} +{' '}
-                  {formatIsk(iph.blueprintCost.researchFee ?? 0)}) ÷{' '}
-                  {formatQuantity(iph.blueprintCost.lifetimeRuns ?? 0)}
-                  {iph.blueprintCost.lifetimeCategory
-                    ? ` (${BPO_LIFETIME_CATEGORY_LABELS[iph.blueprintCost.lifetimeCategory]})`
-                    : ''}{' '}
-                  × {iph.runs} = <strong>{formatIsk(iph.bpoCost)}</strong>
+                <CalcStep label="Buy once (full price)">
+                  <strong>{formatIsk(iph.blueprintCost.bpoUnitPrice ?? 0)}</strong>
+                </CalcStep>
+                <CalcStep label="Charged this batch">
+                  <strong>{formatIsk(iph.bpoCost)}</strong>
                 </CalcStep>
               </StepCard>
             )}

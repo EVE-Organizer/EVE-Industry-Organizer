@@ -325,11 +325,9 @@ export interface GlobalSettings {
   priceWindow: TimeRange
   /** Include haul in/out in setup and profit (Plan + Blueprints default). */
   includeHaulCost: boolean
-  /** Per product-category assumed BPO lifetime runs for T1 amortization. */
-  blueprintLifetimeRunsByCategory: BpoLifetimeRunsByCategory
   /** Assumed level (0-5) for invention encryption + datacore skills, used to estimate T2 success chance. */
   inventionSkillLevel: number
-  /** Include blueprint acquisition cost (amortized BPO / invention) in profit and budget. */
+  /** Include blueprint acquisition cost (BPO upfront / BPC per batch / invention) in profit and budget. */
   includeBlueprintCost: boolean
   /** Assumed manufacturing and market skill levels used in profit and ranking calculations. */
   skills: SkillLevels
@@ -618,20 +616,25 @@ export interface SetupCostBreakdown {
 
 /** How a blueprint's acquisition cost is charged into a batch. */
 export interface BlueprintCostBreakdown {
-  mode: 'bpo' | 'invention' | 'faction_bpc'
-  /** Amortized (T1/faction) or consumable (T2) cost charged into this batch's profit. */
+  mode: 'bpo' | 'bpc' | 'invention' | 'faction_bpc'
+  /** Consumable (BPC/T2) cost charged into this batch's profit; reusable BPO is 0. */
   charged: number
   /** Full cash to acquire the blueprint upfront for this batch. */
   upfront: number
   /** Charge products (ammo, scripts) skip blueprint cost: one cheap BPO makes huge volume. */
   chargeExcluded?: boolean
-  /** Hub has no sell order or history for this BPO; charged/upfront blueprint cost is 0. */
+  /** No BPO or BPC price at selected hub or Jita; charged/upfront blueprint cost is 0. */
   bpoPriceMissing?: boolean
-  /** T1/faction (BPO). */
+  /** Buy hub used for materials; blueprint may still come from sourceHub. */
+  selectedHub?: HubId
+  /** Hub where BPO/BPC acquisition price was resolved. */
+  sourceHub?: HubId
+  /** T1 reusable BPO. */
   bpoUnitPrice?: number
-  researchFee?: number
-  lifetimeRuns?: number
-  lifetimeCategory?: BpoLifetimeCategoryKey
+  /** T1 consumable BPC from contracts. */
+  bpcCostPerRun?: number
+  bpcRuns?: number
+  bpcBuyout?: number
   /** T2 (invention). */
   datacoreCost?: number
   inventionChance?: number
@@ -741,31 +744,6 @@ export interface SupplyChainNode {
   productTypeId?: number
 }
 
-export const BPO_LIFETIME_CATEGORY_KEYS = [
-  'ship',
-  'module',
-  'drone',
-  'deployable',
-  'structure',
-  'default',
-] as const
-
-export type BpoLifetimeCategoryKey = (typeof BPO_LIFETIME_CATEGORY_KEYS)[number]
-
-export type BpoLifetimeRunsByCategory = Record<BpoLifetimeCategoryKey, number>
-
-export const DEFAULT_BPO_LIFETIME_RUNS_BY_CATEGORY: BpoLifetimeRunsByCategory = {
-  ship: 50,
-  module: 500,
-  drone: 2000,
-  deployable: 30,
-  structure: 20,
-  default: 500,
-}
-
-export const MIN_BLUEPRINT_LIFETIME_RUNS = 1
-export const MAX_BLUEPRINT_LIFETIME_RUNS = 100_000
-
 export const DEFAULT_SKILL_LEVEL = 3
 
 export const DEFAULT_SKILLS: SkillLevels = {
@@ -811,7 +789,6 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   priceMethod: 'sell_orders',
   priceWindow: '1m',
   includeHaulCost: true,
-  blueprintLifetimeRunsByCategory: { ...DEFAULT_BPO_LIFETIME_RUNS_BY_CATEGORY },
   inventionSkillLevel: 4,
   includeBlueprintCost: true,
   skills: { ...DEFAULT_SKILLS },

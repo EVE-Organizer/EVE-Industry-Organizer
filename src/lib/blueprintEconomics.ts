@@ -10,6 +10,7 @@
 import type {
   BlueprintCostBreakdown,
   BlueprintInfo,
+  ContractsData,
   GlobalSettings,
   HubId,
   HubMarketData,
@@ -20,9 +21,7 @@ import type {
 } from '@/types'
 import {
   applyME,
-  amortizedBpoCost,
   estimateJobCost,
-  estimateResearchFee,
   estimatedItemValue,
   inventionBlueprintCostPerRun,
   materialCost,
@@ -30,14 +29,11 @@ import {
   revenueFromSale,
   totalManufacturingCost,
 } from '@/lib/cost'
+import { resolveBpcCostPerRun } from '@/lib/bpcContracts'
 import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
 import { skillLevel } from '@/lib/skillFields'
 import { tradingFeeRates } from '@/lib/tradingFees'
-import {
-  lifetimeCategoryKeyFromProductCategory,
-  resolveBlueprintLifetimeRuns,
-} from '@/lib/bpoLifetime'
 import { manufacturingFacilityDetail } from '@/lib/facilityModifiers'
 
 export type EconomicsMode = 'flat' | 'planChain'
@@ -96,8 +92,10 @@ export function bpoUnitPrice(
   blueprintTypeId: number,
   hubMarket: HubMarketData | null | undefined,
   ctx: PriceContext,
+  spotSell?: Map<number, number>,
 ): number {
-  const spot = ctx.spotSell.get(blueprintTypeId) ?? 0
+  const spots = spotSell ?? ctx.spotSell
+  const spot = spots.get(blueprintTypeId) ?? 0
   if (spot > 0) return spot
   if (!hubMarket) return 0
   const history = hubMarket.products[String(blueprintTypeId)]
@@ -117,7 +115,12 @@ export interface FlatSetupInput {
   prices: Map<number, number>
   systemCostIndex: number
   reactionCostIndex: number
+  hubId?: HubId
   hubMarket?: HubMarketData | null
+  jitaHubMarket?: HubMarketData | null
+  spotPrices?: Map<number, number>
+  jitaSpotPrices?: Map<number, number>
+  contracts?: ContractsData | null
   priceCtx?: PriceContext
   haulInIskPerM3?: number
   haulOutIskPerM3?: number
@@ -139,14 +142,123 @@ function isChargeProduct(category: string | undefined): boolean {
   return category === 'Charge'
 }
 
+interface T1AcquisitionResult {
+  charged: number
+  upfront: number
+  bpoUnitPrice: number
+  breakdown: BlueprintCostBreakdown
+}
+
+function resolveT1BlueprintAcquisition(
+  blueprint: BlueprintInfo,
+  include: boolean,
+  runs: number,
+  selectedHub: HubId,
+  hubMarket: HubMarketData | null | undefined,
+  jitaHubMarket: HubMarketData | null | undefined,
+  spotPrices: Map<number, number> | undefined,
+  jitaSpotPrices: Map<number, number> | undefined,
+  contracts: ContractsData | null | undefined,
+  priceCtx: PriceContext | undefined,
+  isCharge: boolean,
+): T1AcquisitionResult {
+  const baseBreakdown = {
+    chargeExcluded: isCharge,
+    selectedHub,
+  }
+
+  if (!include) {
+    return {
+      charged: 0,
+      upfront: 0,
+      bpoUnitPrice: 0,
+      breakdown: {
+        mode: 'bpo',
+        charged: 0,
+        upfront: 0,
+        ...baseBreakdown,
+      },
+    }
+  }
+
+  const tryBpo = (hub: HubId, market: HubMarketData | null | undefined): number => {
+    if (!priceCtx || !market) return 0
+    const spots = hub === 'jita' ? jitaSpotPrices : spotPrices
+    return bpoUnitPrice(blueprint.blueprintTypeId, market, priceCtx, spots)
+  }
+
+  const tryBpc = (hub: HubId) => resolveBpcCostPerRun(contracts, blueprint.blueprintTypeId, hub)
+
+  const hubsToTry: HubId[] = selectedHub === 'jita' ? ['jita'] : [selectedHub, 'jita']
+
+  for (const hub of hubsToTry) {
+    const market = hub === 'jita' ? jitaHubMarket : hubMarket
+    const bpoPrice = tryBpo(hub, market)
+    if (bpoPrice > 0) {
+      return {
+        charged: 0,
+        upfront: bpoPrice,
+        bpoUnitPrice: bpoPrice,
+        breakdown: {
+          mode: 'bpo',
+          charged: 0,
+          upfront: bpoPrice,
+          sourceHub: hub,
+          bpoUnitPrice: bpoPrice,
+          ...baseBreakdown,
+        },
+      }
+    }
+  }
+
+  for (const hub of hubsToTry) {
+    const bpc = tryBpc(hub)
+    if (bpc) {
+      const charged = bpc.costPerRun * runs
+      return {
+        charged,
+        upfront: charged,
+        bpoUnitPrice: 0,
+        breakdown: {
+          mode: 'bpc',
+          charged,
+          upfront: charged,
+          sourceHub: hub,
+          bpcCostPerRun: bpc.costPerRun,
+          bpcRuns: bpc.runs,
+          bpcBuyout: bpc.buyout,
+          ...baseBreakdown,
+        },
+      }
+    }
+  }
+
+  return {
+    charged: 0,
+    upfront: 0,
+    bpoUnitPrice: 0,
+    breakdown: {
+      mode: 'bpo',
+      charged: 0,
+      upfront: 0,
+      bpoPriceMissing: true,
+      ...baseBreakdown,
+    },
+  }
+}
+
 function computeBlueprintAcquisition(
   blueprint: BlueprintInfo,
   settings: ManufacturingSettings,
   prices: Map<number, number>,
-  systemCostIndex: number,
   runs: number,
   productCategory: string | undefined,
+  selectedHub: HubId,
   hubMarket: HubMarketData | null | undefined,
+  jitaHubMarket: HubMarketData | null | undefined,
+  spotPrices: Map<number, number> | undefined,
+  jitaSpotPrices: Map<number, number> | undefined,
+  contracts: ContractsData | null | undefined,
   priceCtx: PriceContext | undefined,
 ): { charged: number; upfront: number; bpoUnitPrice: number; breakdown: BlueprintCostBreakdown } {
   const isCharge = isChargeProduct(productCategory)
@@ -171,6 +283,7 @@ function computeBlueprintAcquisition(
         charged,
         upfront: charged,
         chargeExcluded: isCharge,
+        selectedHub,
         datacoreCost: r.datacoreCost,
         inventionChance: r.chance,
         runsPerBPC: inv.runsPerBPC,
@@ -190,43 +303,24 @@ function computeBlueprintAcquisition(
         charged: 0,
         upfront: 0,
         chargeExcluded: isCharge,
+        selectedHub,
       },
     }
   }
 
-  const unit =
-    priceCtx && hubMarket
-      ? bpoUnitPrice(blueprint.blueprintTypeId, hubMarket, priceCtx)
-      : (prices.get(blueprint.blueprintTypeId) ?? 0)
-  const bpoPriceMissing = include && unit <= 0
-  const baseRunMaterialValue = materialCost(blueprint.materials, prices)
-  const researchFee = estimateResearchFee(baseRunMaterialValue, systemCostIndex)
-  const lifetimeCategory = lifetimeCategoryKeyFromProductCategory(productCategory)
-  const lifetimeRuns = resolveBlueprintLifetimeRuns(
-    productCategory,
-    settings.blueprintLifetimeRunsByCategory,
+  return resolveT1BlueprintAcquisition(
+    blueprint,
+    include,
+    runs,
+    selectedHub,
+    hubMarket,
+    jitaHubMarket,
+    spotPrices,
+    jitaSpotPrices,
+    contracts,
+    priceCtx,
+    isCharge,
   )
-  const charged =
-    include && !bpoPriceMissing
-      ? amortizedBpoCost(unit, researchFee, lifetimeRuns, runs)
-      : 0
-  const upfront = include && !bpoPriceMissing ? unit : 0
-  return {
-    charged,
-    upfront,
-    bpoUnitPrice: unit,
-    breakdown: {
-      mode: 'bpo',
-      charged,
-      upfront,
-      chargeExcluded: isCharge,
-      bpoPriceMissing: bpoPriceMissing || undefined,
-      bpoUnitPrice: unit,
-      researchFee,
-      lifetimeRuns,
-      lifetimeCategory,
-    },
-  }
 }
 
 /** Flat single-recipe setup (Blueprints ranking / Plan parity for all-mineral T1). */
@@ -239,7 +333,12 @@ export function computeFlatSetup(input: FlatSetupInput): FlatSetupResult {
     prices,
     systemCostIndex,
     reactionCostIndex,
+    hubId = settings.primaryHub,
     hubMarket,
+    jitaHubMarket,
+    spotPrices,
+    jitaSpotPrices,
+    contracts,
     priceCtx,
     haulInIskPerM3 = 0,
     haulOutIskPerM3 = 0,
@@ -272,10 +371,14 @@ export function computeFlatSetup(input: FlatSetupInput): FlatSetupResult {
     blueprint,
     settings,
     prices,
-    systemCostIndex,
     runs,
     product.category,
+    hubId,
     hubMarket,
+    jitaHubMarket,
+    spotPrices,
+    jitaSpotPrices,
+    contracts,
     priceCtx,
   )
 

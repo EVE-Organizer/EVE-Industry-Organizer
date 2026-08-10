@@ -15,6 +15,5 @@ export function planExpansionSettingsKey(settings: GlobalSettings): string {
     structureTaxPercent: settings.structureTaxPercent,
     reactionFacility: settings.reactionFacility,
     includeBlueprintCost: settings.includeBlueprintCost,
-    blueprintLifetimeRunsByCategory: settings.blueprintLifetimeRunsByCategory,
   })
 }

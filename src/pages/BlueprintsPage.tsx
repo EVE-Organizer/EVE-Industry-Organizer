@@ -186,6 +186,7 @@ export function BlueprintsPage() {
         sortDirection: rankingQuery.sortDir,
       },
       sde.systems,
+      sde.contracts,
     )
   }, [
     sde,
@@ -227,6 +228,7 @@ export function BlueprintsPage() {
         limit: productTypeIds.length,
       },
       sde.systems,
+      sde.contracts,
     )
     const byProductId = new Map(ranked.map((r) => [r.blueprint.productTypeId, r]))
     return [...watchlist].reverse().map((w) => ({

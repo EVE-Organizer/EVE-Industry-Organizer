@@ -14,9 +14,7 @@ export const GLOBAL_SETTING_TOOLTIPS = {
   includeHaulCost:
     'Haul in (materials from buy hub to build system) is added to setup cost; haul out (products to sell hub) is subtracted from profit. Turn off if you build and sell locally or haul on your own.',
   includeBlueprintCost:
-    'Include the blueprint cost in profit and budget. T1 spreads the BPO purchase plus research over a category-specific lifetime; T2 charges the full invention cost (datacores divided by success chance) every batch. Charges (ammo, scripts) are excluded. Turn off to compare operating profit only.',
-  blueprintLifetimeRunsByCategory:
-    'Assumed manufacturing runs per BPO over its useful life, by product type. Purchase price and research are divided by this number. Charges are excluded entirely. Does not affect T2.',
+    'Include blueprint cost in profit and budget. T1 BPOs count as upfront capital only (reusable forever). When no BPO is listed at your hub, BPC contract prices are used (Jita fallback). T2 charges full invention per batch. Charges (ammo, scripts) are excluded. Turn off to compare operating profit only.',
   inventionSkillLevel:
     'Assumed level (0-5) for your invention encryption and datacore skills. Higher levels raise the T2 success chance, which lowers the invention cost charged per run.',
   structureType:

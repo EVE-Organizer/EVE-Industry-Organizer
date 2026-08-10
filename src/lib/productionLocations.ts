@@ -27,14 +27,10 @@ function placeholderName(kind: ProductionLocation['kind'], locationId: number): 
 
 function needsLocationEnrichment(loc: ProductionLocation): boolean {
   if (loc.kind === 'structure') {
-    return (
-      loc.structureTypeId == null ||
-      loc.solarSystemId === 0 ||
-      loc.name.startsWith('Facility ') ||
-      loc.name.startsWith('Structure ') ||
-      loc.name.startsWith('Station ') ||
-      loc.name.startsWith('Location ')
-    )
+    // Player structures require auth; skip lookup when corp data already has system and type.
+    if (loc.solarSystemId > 0 && loc.structureTypeId != null) return false
+
+    return loc.structureTypeId == null || loc.solarSystemId === 0
   }
 
   return (
@@ -112,7 +108,7 @@ export async function buildProductionLocations(input: {
 
   for (const structure of input.corpStructures) {
     addBuildLocation(byId, structure.structure_id, 'corp_structure', {
-      name: `Structure ${structure.structure_id}`,
+      name: structure.name ?? placeholderName('structure', structure.structure_id),
       solarSystemId: structure.system_id,
       structureTypeId: structure.type_id,
     })

@@ -5,7 +5,7 @@ import { EveImage } from '@/components/EveImage'
 import { JobCostFormula, jobCostStepTitle } from '@/components/JobCostFormula'
 import { formatFacilityBonusLine } from '@/lib/facilityModifiers'
 import { isPlayerStructure } from '@/lib/structureSettings'
-import { BPO_LIFETIME_CATEGORY_LABELS } from '@/lib/bpoLifetime'
+import { blueprintJitaFallbackNote } from '@/lib/blueprintCostDisplay'
 
 interface SetupCostModalProps {
   row: RankedBlueprintRow | null
@@ -145,36 +145,55 @@ function BlueprintCostSection({
     )
   }
 
+  if (breakdown.mode === 'bpc') {
+    const jitaNote = blueprintJitaFallbackNote(breakdown)
+    return (
+      <section>
+        <h4 className="font-semibold text-sm mb-2">
+          2. Blueprint <span className="badge badge-warning badge-xs">BPC</span>
+        </h4>
+        {jitaNote ? <p className="text-xs text-warning mb-2">{jitaNote}</p> : null}
+        <p className="text-xs opacity-60 mb-2">
+          No BPO listing at your hub, so the batch uses a public BPC contract price.
+        </p>
+        <div className="font-mono text-xs sm:text-sm space-y-1 break-all">
+          <div>
+            Contract buyout: <strong>{formatIsk(breakdown.bpcBuyout ?? 0)}</strong> for{' '}
+            <strong>{formatQuantity(breakdown.bpcRuns ?? 0)}</strong> runs
+          </div>
+          <div>
+            Cost per run: <strong>{formatIsk(breakdown.bpcCostPerRun ?? 0)}</strong>
+          </div>
+          <div>
+            Charged this batch: {formatIsk(breakdown.bpcCostPerRun ?? 0)} × {runs} ={' '}
+            <strong>{formatIsk(breakdown.charged)}</strong>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  const jitaNote = blueprintJitaFallbackNote(breakdown)
   return (
     <section>
       <h4 className="font-semibold text-sm mb-2">
         2. Blueprint <span className="badge badge-info badge-xs">BPO</span>
       </h4>
+      {jitaNote ? <p className="text-xs text-warning mb-2">{jitaNote}</p> : null}
       <p className="text-xs opacity-60 mb-2">
-        T1 BPOs are reusable, so the purchase price and research are spread over the blueprint
-        lifetime.
+        T1 BPOs are reusable forever. The purchase price counts toward upfront capital, not per-batch
+        profit.
       </p>
       <div className="font-mono text-xs sm:text-sm space-y-1 break-all">
         <div>
           Buy once (full price): <strong>{formatIsk(breakdown.bpoUnitPrice ?? 0)}</strong>
         </div>
         <div>
-          ME/TE research (one-time, est.): <strong>{formatIsk(breakdown.researchFee ?? 0)}</strong>
+          Charged this batch: <strong>{formatIsk(breakdown.charged)}</strong>
         </div>
-        <div>
-          Lifetime: <strong>{formatQuantity(breakdown.lifetimeRuns ?? 0)}</strong> runs
-          {breakdown.lifetimeCategory ? (
-            <span className="opacity-70"> ({BPO_LIFETIME_CATEGORY_LABELS[breakdown.lifetimeCategory]})</span>
-          ) : null}
-        </div>
-        <div>
-          Charged this batch: ({formatIsk(breakdown.bpoUnitPrice ?? 0)} +{' '}
-          {formatIsk(breakdown.researchFee ?? 0)}) ÷ {formatQuantity(breakdown.lifetimeRuns ?? 0)}{' '}
-          × {runs} = <strong>{formatIsk(breakdown.charged)}</strong>
-        </div>
-        {(breakdown.bpoUnitPrice ?? 0) <= 0 ? (
+        {(breakdown.bpoUnitPrice ?? 0) <= 0 && breakdown.bpoPriceMissing ? (
           <span className="text-xs opacity-60 block">
-            No hub BPO price found, so blueprint cost is treated as 0.
+            No BPO or BPC price found at your hub or Jita.
           </span>
         ) : null}
       </div>
@@ -318,8 +337,8 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
         <div className="px-5 py-3 border-t border-eve-border bg-base-200/40 text-[11px] opacity-60 space-y-1">
           <p>
             Setup = blueprint + materials + job cost
-            {b.haulExcluded ? '' : ' + haul in'}. T1 blueprint cost is amortized over its lifetime; T2
-            charges the full invention cost per batch; faction BPCs carry no ISK acquisition cost.
+            {b.haulExcluded ? '' : ' + haul in'}. T1 BPOs are upfront capital only; BPC copies are
+            charged per batch; T2 charges full invention; faction BPCs carry no ISK acquisition cost.
             {b.haulExcluded
               ? ' Haul in and haul out are excluded from this ranking.'
               : ` Haul out (${formatIsk(row.haulOut)}) is subtracted separately in profit, not included here.`}

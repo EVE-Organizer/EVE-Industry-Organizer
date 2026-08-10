@@ -4,13 +4,9 @@ import {
   HUBS,
   MAX_ME,
   MAX_TE,
-  BPO_LIFETIME_CATEGORY_KEYS,
-  MIN_BLUEPRINT_LIFETIME_RUNS,
-  MAX_BLUEPRINT_LIFETIME_RUNS,
   REACTION_FAMILY_GROUPS,
   STRUCTURE_HULL_PRESETS,
 } from '@/types'
-import { formatQuantity } from '@/lib/profit'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
@@ -27,7 +23,6 @@ import {
 import { ManufacturingLocationPicker } from '@/components/ManufacturingLocationPicker'
 import { RefineryLocationPicker } from '@/components/RefineryLocationPicker'
 import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
-import { BPO_LIFETIME_CATEGORY_LABELS, clampLifetimeRuns } from '@/lib/bpoLifetime'
 
 export interface SettingsSectionProps {
   settings: GlobalSettings
@@ -572,7 +567,6 @@ export function ReactionFacilitySection({
 }
 
 export function BpoCostSettingsSection({ settings, onChange, size = 'md' }: SettingsSectionProps) {
-  const inputClass = size === 'sm' ? 'input input-bordered input-sm' : 'input input-bordered'
   const gap = sectionGap(size)
 
   return (
@@ -591,37 +585,9 @@ export function BpoCostSettingsSection({ settings, onChange, size = 'md' }: Sett
       {settings.includeBlueprintCost ? (
         <>
           <p className="text-xs opacity-60">
-            BPO lifetime by product type. Charges (ammo, scripts) are excluded from blueprint cost.
+            T1 BPOs are treated as reusable (upfront capital only). When no BPO is listed, BPC
+            contract prices are used. Charges (ammo, scripts) are excluded.
           </p>
-          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${gap}`}>
-            {BPO_LIFETIME_CATEGORY_KEYS.map((key) => (
-              <SettingField
-                key={key}
-                label={`${BPO_LIFETIME_CATEGORY_LABELS[key]} lifetime`}
-                tooltip={GLOBAL_SETTING_TOOLTIPS.blueprintLifetimeRunsByCategory}
-                size={size}
-                valueLabel={formatQuantity(settings.blueprintLifetimeRunsByCategory[key])}
-              >
-                <input
-                  type="number"
-                  min={MIN_BLUEPRINT_LIFETIME_RUNS}
-                  max={MAX_BLUEPRINT_LIFETIME_RUNS}
-                  step={key === 'ship' || key === 'deployable' || key === 'structure' ? 10 : 50}
-                  className={inputClass}
-                  value={settings.blueprintLifetimeRunsByCategory[key]}
-                  onChange={(e) =>
-                    onChange({
-                      blueprintLifetimeRunsByCategory: {
-                        ...settings.blueprintLifetimeRunsByCategory,
-                        [key]: clampLifetimeRuns(+e.target.value),
-                      },
-                    })
-                  }
-                  aria-label={`${BPO_LIFETIME_CATEGORY_LABELS[key]} BPO lifetime runs`}
-                />
-              </SettingField>
-            ))}
-          </div>
           <div className="max-w-sm">
             <SettingField
               label="Invention skill level"
@@ -642,8 +608,7 @@ export function BpoCostSettingsSection({ settings, onChange, size = 'md' }: Sett
         </>
       ) : (
         <p className="text-xs opacity-60">
-          Profit and budget ignore BPO purchase and invention costs. Turn on to amortize T1 BPOs or
-          charge full T2 invention per batch.
+          Profit and budget ignore BPO purchase, BPC copies, and invention costs.
         </p>
       )}
     </div>

@@ -1,5 +1,5 @@
 ---
-description: Force Composer 2.5 for all Task subagents
+description: Inherit parent model for all Task subagents
 alwaysApply: true
 ---
 
@@ -8,10 +8,11 @@ alwaysApply: true
 When launching any subagent via the Task tool, always set:
 
 ```
-model: "composer-2.5"
+model: "inherit"
 ```
 
 - Do this for every `subagent_type` (explore, generalPurpose, shell, bugbot, security-review, etc.).
-- Do not omit `model` (omitting inherits the parent model).
+- `inherit` is the valid Task slug; it runs the subagent on the same model as the parent agent (Composer).
+- Do not use `composer-2.5` — that slug is invalid and causes "Couldn't start" failures.
 - Do not use other model slugs unless the user explicitly names a different model in that message.
-- Prefer `composer-2.5` over `composer-2.5-fast` unless the user asks for fast.
+- If the user asks for a faster subagent, use `composer-2.5-fast`.

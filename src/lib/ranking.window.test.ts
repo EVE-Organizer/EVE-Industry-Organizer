@@ -239,7 +239,7 @@ describe('market-aware blueprint ranking', () => {
     expect(iceCompression!.setupBreakdown.bpoUnitPrice).toBeGreaterThan(0)
   })
 
-  it('excludes T1 blueprints with no hub BPO price when blueprint cost is included', () => {
+  it('excludes T1 blueprints with no BPO or BPC price when blueprint cost is included', () => {
     const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
     const rows = rankBlueprintsFromMarket(
       registry,
@@ -262,7 +262,12 @@ describe('market-aware blueprint ranking', () => {
       expect(row.setupBreakdown.blueprintCost.bpoPriceMissing).toBeUndefined()
       // Charges intentionally skip the BPO cost, so they may lack a hub BPO price.
       if (row.setupBreakdown.blueprintCost.chargeExcluded) continue
-      expect(row.setupBreakdown.bpoUnitPrice).toBeGreaterThan(0)
+      const bc = row.setupBreakdown.blueprintCost
+      if (bc.mode === 'bpc') {
+        expect(bc.bpcCostPerRun).toBeGreaterThan(0)
+      } else {
+        expect(row.setupBreakdown.bpoUnitPrice).toBeGreaterThan(0)
+      }
     }
   })
 

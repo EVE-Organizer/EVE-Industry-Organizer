@@ -364,17 +364,6 @@ export function estimateResearchFee(baseRunMaterialValue: number, systemCostInde
   return baseRunMaterialValue * systemCostIndex * RESEARCH_FEE_FACTOR
 }
 
-/** T1/faction BPO: spread purchase price + research over its assumed lifetime, charged per batch. */
-export function amortizedBpoCost(
-  bpoPrice: number,
-  researchFee: number,
-  lifetimeRuns: number,
-  runs: number,
-): number {
-  if (lifetimeRuns <= 0) return 0
-  return ((bpoPrice + researchFee) / lifetimeRuns) * runs
-}
-
 export interface InventionCostResult {
   datacoreCost: number
   attemptCost: number

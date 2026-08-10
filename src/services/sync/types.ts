@@ -2,7 +2,6 @@ import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTem
 import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS, STRUCTURE_HULL_PRESETS, type MiningBuffId, type MiningBoostSpace, type MiningShipId } from '@/types'
 import { DEFAULT_MINING_SHIP_ID, normalizeMiningBoostSpace, normalizeMiningBuffIds, normalizeMiningFleetSize, normalizeMiningShipId } from '@/lib/miningShipPresets'
 import { SKILL_FIELDS, enforceSkillPrerequisites } from '@/lib/skillFields'
-import { normalizeBpoLifetimeRunsByCategory } from '@/lib/bpoLifetime'
 import {
   migrateManufacturingRigs,
   normalizeReactionFacility,
@@ -17,8 +16,6 @@ type LegacySettings = Partial<Omit<GlobalSettings, 'skills'>> & {
   brokerFeePercent?: number
   salesTaxPercent?: number
   batchSize?: number
-  /** Pre-category lifetime setting; migrated into blueprintLifetimeRunsByCategory.default. */
-  blueprintLifetimeRuns?: number
 }
 
 type LegacyUserData = Partial<UserData> & {
@@ -69,7 +66,6 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     brokerFeePercent: _bf,
     salesTaxPercent: _st,
     batchSize: _batchSize,
-    blueprintLifetimeRuns: legacyLifetimeRuns,
     skills: parsedSkills,
     manufacturingRigs: parsedRigs,
     reactionFacility: parsedReactionFacility,
@@ -155,10 +151,6 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     priceMethod: rest.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
     priceWindow: rest.priceWindow ?? DEFAULT_SETTINGS.priceWindow,
     includeHaulCost: rest.includeHaulCost ?? DEFAULT_SETTINGS.includeHaulCost,
-    blueprintLifetimeRunsByCategory: normalizeBpoLifetimeRunsByCategory(
-      rest.blueprintLifetimeRunsByCategory,
-      legacyLifetimeRuns,
-    ),
     skills: normalizeSkillLevels(parsedSkills),
     productionCharacterId: rest.productionCharacterId ?? null,
     productionLocationId: rest.productionLocationId ?? null,

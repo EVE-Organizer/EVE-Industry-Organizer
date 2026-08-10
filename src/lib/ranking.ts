@@ -2,6 +2,7 @@ import type {
   BlueprintTier,
   BlueprintInfo,
   BlueprintRegistry,
+  ContractsData,
   ManufacturingSettings,
   HubId,
   HubMarketData,
@@ -270,9 +271,13 @@ function computeRow(
   includeHaulCost: boolean,
   typeVolumes: Map<number, number>,
   buyHubMarket: HubMarketData,
+  jitaHubMarket: HubMarketData | null,
+  jitaSpotPrices: Map<number, number>,
+  buyHub: HubId,
   window: TimeRange,
   advancedIndustry: number,
   feeRates: ReturnType<typeof tradingFeeRates>,
+  contracts: ContractsData | null | undefined,
 ): RankedBlueprintRow | null {
   if (
     !hasValidPrices(
@@ -295,7 +300,7 @@ function computeRow(
   const industry = skillLevel(settings.skills, 'industry')
 
   const priceCtx: PriceContext = {
-    hubId: settings.primaryHub,
+    hubId: buyHub,
     window,
     spotSell: buySpotPrices,
     buyOrders: productBuyPrices,
@@ -311,7 +316,12 @@ function computeRow(
     prices: materialWindowPrices,
     systemCostIndex: regionCostIndex,
     reactionCostIndex,
+    hubId: buyHub,
     hubMarket: buyHubMarket,
+    jitaHubMarket,
+    spotPrices: buySpotPrices,
+    jitaSpotPrices,
+    contracts,
     priceCtx,
     haulInIskPerM3,
     haulOutIskPerM3,
@@ -497,9 +507,13 @@ export function rankBlueprintsFromMarket(
   settings: ManufacturingSettings,
   filters: RankingFilters,
   systems: SystemInfo[] = [],
+  contracts: ContractsData | null | undefined = null,
 ): RankedBlueprintRow[] {
   const buyHubMarket = getHubMarket(market, hub)
   if (!buyHubMarket) return []
+
+  const jitaHubMarket = hub === 'jita' ? buyHubMarket : getHubMarket(market, 'jita')
+  const jitaSpotPrices = jitaHubMarket ? buildPriceMap(jitaHubMarket) : new Map<number, number>()
 
   const sellHubId = settings.sellHubId ?? hub
   const sellHubMarket = getHubMarket(market, sellHubId) ?? buyHubMarket
@@ -574,9 +588,13 @@ export function rankBlueprintsFromMarket(
       includeHaulCost,
       typeVolumes,
       buyHubMarket,
+      jitaHubMarket,
+      jitaSpotPrices,
+      hub,
       window,
       advancedIndustry,
       feeRates,
+      contracts,
     )
     if (!row) continue
     if (row.upfrontCapital < filters.minSetupCost) continue

@@ -151,8 +151,8 @@ export function SettingsPage() {
 
       <Panel title="BPO cost">
         <p className="text-xs opacity-70 mb-3">
-          Spread BPO purchase and research over assumed lifetime runs, or charge full T2 invention
-          per batch.
+          T1 BPOs count as upfront capital (reusable forever). Missing hub listings fall back to
+          BPC contracts or Jita. T2 invention is charged per batch.
         </p>
         <BpoCostSettingsSection
           size="sm"

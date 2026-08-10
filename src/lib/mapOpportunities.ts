@@ -216,6 +216,7 @@ export function buildMapOpportunities(input: MapOpportunityInput): MapOpportunit
       buildableOnly: false,
     },
     sde.systems,
+    sde.contracts,
   )
 
   const rows: MapOpportunityRow[] = []
