@@ -463,8 +463,20 @@ export function JobsPage() {
               <h2 className="plan-build-card__title">
                 {activeTab === 'manufacturing' ? 'Manufacturing timeline' : 'Research timeline'}
               </h2>
-              <button type="button" className="btn btn-ghost btn-xs ml-auto" disabled={isFetching} onClick={() => void refetch()}>
-                {isFetching ? 'Refreshing…' : 'Refresh'}
+              <button
+                type="button"
+                className="btn btn-outline btn-sm shrink-0 ml-auto gap-2"
+                disabled={isFetching}
+                onClick={() => void refetch()}
+              >
+                {isFetching ? (
+                  <>
+                    <span className="loading loading-spinner loading-xs" />
+                    Refreshing…
+                  </>
+                ) : (
+                  'Refresh'
+                )}
               </button>
             </div>
             <div className="plan-build-card__body plan-timeline__body">

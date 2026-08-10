@@ -76,6 +76,27 @@ describe('esiAuthGet', () => {
     expect(getCached(key)?.data).toEqual([{ job_id: 99 }])
   })
 
+  it('refetches fresh localStorage cache when forceRefresh is set', async () => {
+    const key = 'esi:jobs:123'
+    setCached(key, [{ job_id: 1 }], 'esi-auth', TTL.characterData.fresh, TTL.characterData.stale)
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [{ job_id: 99 }],
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const data = await esiAuthGet('/characters/123/industry/jobs/', 'token', {
+      cacheKey: key,
+      forceRefresh: true,
+    })
+
+    expect(data).toEqual([{ job_id: 99 }])
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(getCached(key)?.data).toEqual([{ job_id: 99 }])
+  })
+
   it('falls back to stale cache on rate limit when force refreshing', async () => {
     const key = 'esi:jobs:123'
     const now = Date.now()

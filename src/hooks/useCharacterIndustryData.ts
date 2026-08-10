@@ -50,11 +50,14 @@ export function useCharacterIndustryJobs(characterId: number | null | undefined)
     enabled: characterId != null,
   })
 
-  const refresh = () => {
+  const refresh = async () => {
     if (characterId == null) return query.refetch()
-    return queryClient.fetchQuery({
-      ...characterIndustryJobsQueryOptions(characterId, true),
+    // Mark stale first; fetchQuery skips the network call while React Query data is still fresh.
+    await queryClient.invalidateQueries({
+      queryKey: ['character-industry-jobs', characterId],
+      refetchType: 'none',
     })
+    return queryClient.fetchQuery(characterIndustryJobsQueryOptions(characterId, true))
   }
 
   return { ...query, refetch: refresh }
@@ -196,11 +199,15 @@ export function useLocationInventory(
     enabled: characterId != null && locationId != null,
   })
 
-  const refresh = () => {
+  const refresh = async () => {
     if (characterId == null || locationId == null) return query.refetch()
-    return queryClient.fetchQuery({
-      ...locationInventoryQueryOptions(characterId, locationId, true),
+    await queryClient.invalidateQueries({
+      queryKey: ['location-inventory', characterId, locationId],
+      refetchType: 'none',
     })
+    return queryClient.fetchQuery(
+      locationInventoryQueryOptions(characterId, locationId, true),
+    )
   }
 
   return { ...query, refetch: refresh }
