@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-30T06:19:37.989Z",
+  "generatedAt": "2026-08-10T05:16:56.928Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -169,13 +169,13 @@
     {
       "regionId": 10000069,
       "name": "Black Rise",
-      "securityClass": "highsec",
-      "buildSystemId": 30045327,
-      "buildSystemName": "Tsuruma",
-      "buildSystemSecurity": 0.542633,
+      "securityClass": "lowsec",
+      "buildSystemId": 30045342,
+      "buildSystemName": "Akidagi",
+      "buildSystemSecurity": 0.444939,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30045327
+      "marketSystemId": 30045342
     },
     {
       "regionId": 10000055,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0014,
+      "reactionCostIndex": 0.0211,
       "marketSystemId": 30000621
     },
     {
@@ -830,8 +830,8 @@
       "regionId": 10000042,
       "name": "Metropolis",
       "securityClass": "highsec",
-      "buildSystemId": 30013410,
-      "buildSystemName": "Abrat",
+      "buildSystemId": 30022505,
+      "buildSystemName": "Orgron",
       "buildSystemSecurity": 0.949,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
@@ -995,9 +995,9 @@
       "regionId": 10000032,
       "name": "Sinq Laison",
       "securityClass": "highsec",
-      "buildSystemId": 30002658,
-      "buildSystemName": "Agrallarier",
-      "buildSystemSecurity": 0.850284,
+      "buildSystemId": 30002712,
+      "buildSystemName": "Alillere",
+      "buildSystemSecurity": 0.847828,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30002659
@@ -1171,12 +1171,12 @@
       "regionId": 10000068,
       "name": "Verge Vendor",
       "securityClass": "highsec",
-      "buildSystemId": 30005303,
-      "buildSystemName": "Merolles",
-      "buildSystemSecurity": 0.884628,
+      "buildSystemId": 30005314,
+      "buildSystemName": "Theruesse",
+      "buildSystemSecurity": 0.879221,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30005303
+      "marketSystemId": 30005314
     },
     {
       "regionId": 14000001,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0287,
+      "costIndex": 0.0317,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
