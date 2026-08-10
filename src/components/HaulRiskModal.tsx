@@ -1,23 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { CampLevel } from '@/lib/routeCamp'
-import { campLevelBadgeClass, CAMP_COLUMN_TOOLTIP } from '@/lib/routeCamp'
-import { gateKillBand, gateKillBandBadgeClass, explainGateIntel } from '@/lib/gateIntel'
 import {
   countNotableJumps,
   filterNotableJumps,
-  gateCheckUrl,
   haulRiskTriggerSummary,
-  jumpRowHighlightClass,
   parseRouteLabel,
   routeHasUrgentCamp,
+  routeRiskToolUrl,
   worseDangerBand,
   worstJump,
 } from '@/lib/haulRiskDisplay'
-import type { DangerBand, RouteDangerResult, RouteJumpDanger } from '@/lib/routeDanger'
-import { dangerBand, dangerBandBadgeClass } from '@/lib/routeDanger'
-import { formatDecimal } from '@/lib/profit'
-import { InfoTooltip } from '@/components/InfoTooltip'
+import type { DangerBand, RouteDangerResult } from '@/lib/routeDanger'
+import { dangerBandBadgeClass } from '@/lib/routeDanger'
+import { RouteRiskJumpTable } from '@/components/routeRisk/RouteRiskJumpTable'
 import { Tooltip } from '@/components/Tooltip'
 
 type RouteTab = 'in' | 'out'
@@ -31,142 +26,6 @@ interface HaulRiskModalProps {
   gateIntelLoading?: boolean
   haulInLabel: string
   haulOutLabel: string
-}
-
-function campLevelLabel(level: CampLevel | undefined): string {
-  return level ?? 'None'
-}
-
-function GateIntelCell({ jump }: { jump: RouteDangerResult['jumps'][number] }) {
-  const intel = jump.gateIntel
-  const gateBand = gateKillBand(intel?.gateKillCount ?? 0)
-  const gateTooltip = intel ? explainGateIntel(intel) : 'No gate kills in the last hour.'
-
-  const flags: { key: string; label: string; className: string }[] = []
-  if (intel?.smartbombs) flags.push({ key: 'sb', label: 'SB', className: 'badge-error' })
-  if (intel?.hictors) flags.push({ key: 'hic', label: 'HIC', className: 'badge-error' })
-  if (intel?.dictors) flags.push({ key: 'dic', label: 'Dic', className: 'badge-warning' })
-
-  return (
-    <Tooltip text={gateTooltip} placement="top">
-      <span className="inline-flex items-center gap-1.5">
-        <span className={`badge badge-xs tabular-nums ${gateKillBandBadgeClass(gateBand)}`}>
-          {intel?.gateKillCount ?? 0}
-        </span>
-        {flags.length ? (
-          <span className="inline-flex gap-0.5">
-            {flags.map((flag) => (
-              <span key={flag.key} className={`badge badge-xs ${flag.className}`}>
-                {flag.label}
-              </span>
-            ))}
-          </span>
-        ) : null}
-      </span>
-    </Tooltip>
-  )
-}
-
-function RouteJumpTable({
-  jumps,
-  totalJumps,
-  showAll,
-  gateIntelLoading,
-}: {
-  jumps: RouteJumpDanger[]
-  totalJumps: number
-  showAll: boolean
-  gateIntelLoading: boolean
-}) {
-  if (!jumps.length) {
-    return (
-      <div className="haul-risk-modal__empty flex flex-col items-center justify-center gap-2 py-10 px-4 text-center">
-        {showAll ? (
-          <p className="text-sm opacity-50">No route data.</p>
-        ) : (
-          <>
-            <p className="text-sm font-medium text-success">No risky systems flagged</p>
-            <p className="text-xs opacity-60 max-w-sm">
-              Nothing stood out on gate intel, camps, or route danger. Turn on “Show all jumps” to
-              review every system.
-            </p>
-          </>
-        )}
-      </div>
-    )
-  }
-
-  return (
-    <div className="haul-risk-modal__table-scroll overflow-x-auto">
-      <table className="table table-compact w-full">
-        <thead className="bg-base-300/95 sticky top-0 z-10">
-          <tr className="text-xs">
-            <th>System</th>
-            <th>Sec</th>
-            <th>Risk</th>
-            <th>
-              <span className="inline-flex items-center gap-1">
-                Gate (1h)
-                <InfoTooltip
-                  text="Gate kills and smartbomb / bubble ship flags from zKillboard (last hour)."
-                  placement="top"
-                />
-              </span>
-            </th>
-            <th>
-              <span className="inline-flex items-center gap-1">
-                Camp
-                <InfoTooltip text={CAMP_COLUMN_TOOLTIP} placement="top" />
-              </span>
-            </th>
-            <th className="hidden sm:table-cell">24h kills</th>
-          </tr>
-        </thead>
-        <tbody>
-          {jumps.map((jump) => (
-            <tr
-              key={jump.systemId}
-              className={`text-sm ${jumpRowHighlightClass(jump)}`}
-            >
-              <td className="max-w-[11rem] truncate font-medium">{jump.systemName}</td>
-              <td className="tabular-nums">{formatDecimal(jump.security, 1)}</td>
-              <td>
-                <span className={`badge badge-xs ${dangerBandBadgeClass(dangerBand(jump.danger))}`}>
-                  {dangerBand(jump.danger)}
-                </span>
-              </td>
-              <td>
-                {gateIntelLoading && !jump.gateIntel ? (
-                  <span className="text-xs opacity-40">…</span>
-                ) : (
-                  <GateIntelCell jump={jump} />
-                )}
-              </td>
-              <td>
-                <Tooltip text={jump.campReason ?? 'No camp data for this system.'} placement="left">
-                  <span
-                    className={`badge badge-xs ${campLevelBadgeClass(jump.campLevel ?? 'None')}`}
-                    aria-label={jump.campReason}
-                    tabIndex={0}
-                  >
-                    {campLevelLabel(jump.campLevel)}
-                  </span>
-                </Tooltip>
-              </td>
-              <td className="tabular-nums whitespace-nowrap hidden sm:table-cell opacity-70">
-                {jump.shipKills}s / {jump.podKills}p
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {!showAll && totalJumps > jumps.length ? (
-        <p className="text-[11px] opacity-50 px-3 py-2 border-t border-eve-border">
-          Showing {jumps.length} of {totalJumps} systems with elevated risk or gate activity.
-        </p>
-      ) : null}
-    </div>
-  )
 }
 
 function RouteSummaryStrip({
@@ -249,10 +108,10 @@ export function HaulRiskModal({
     return showAllJumps ? activeRoute.jumps : filterNotableJumps(activeRoute.jumps)
   }, [activeRoute, showAllJumps])
 
-  const gateCheckLink = useMemo(() => {
+  const routeRiskLink = useMemo(() => {
     const parsed = parseRouteLabel(activeLabel)
     if (!parsed) return null
-    return gateCheckUrl(parsed.from, parsed.to)
+    return routeRiskToolUrl(parsed.from, parsed.to)
   }, [activeLabel])
 
   if (!open) return null
@@ -330,18 +189,20 @@ export function HaulRiskModal({
                   />
                   <span className="label-text text-xs">Show all jumps</span>
                 </label>
-                {gateCheckLink ? (
-                  <Link to={gateCheckLink} className="link link-hover text-xs" onClick={onClose}>
-                    Open in Gate check →
+                {routeRiskLink ? (
+                  <Link to={routeRiskLink} className="link link-hover text-xs" onClick={onClose}>
+                    Open in Route risk →
                   </Link>
                 ) : null}
               </div>
 
-              <RouteJumpTable
+              <RouteRiskJumpTable
                 jumps={displayedJumps}
                 totalJumps={activeRoute?.jumps.length ?? 0}
                 showAll={showAllJumps}
                 gateIntelLoading={gateIntelLoading}
+                scrollClassName="haul-risk-modal__table-scroll"
+                emptyClassName="haul-risk-modal__empty"
               />
             </>
           )}

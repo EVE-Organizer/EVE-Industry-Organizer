@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { GateCheckLegend, GateCheckResultsTable } from '@/components/gateCheck/GateCheckResults'
 import { MapSystemSearch } from '@/components/map/MapSystemSearch'
 import { LoadingState, PageHeader } from '@/components/Layout'
+import { RouteRiskJumpTable, RouteRiskLegend } from '@/components/routeRisk/RouteRiskJumpTable'
+import { RouteSummaryBar } from '@/components/routeRisk/RouteSummaryBar'
+import { filterNotableJumps } from '@/lib/haulRiskDisplay'
+import { dangerBandBadgeClass } from '@/lib/routeDanger'
 import {
   findSystemByName,
   parseRouteFlag,
@@ -51,7 +54,7 @@ function SelectedSystemField({
   )
 }
 
-export function GateCheckPage() {
+export function RouteRiskPage() {
   const { data: mapData, isLoading: mapLoading } = useMapData()
   const { data: sde, isLoading: sdeLoading } = useSdeData()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -64,6 +67,7 @@ export function GateCheckPage() {
   const [flag, setFlag] = useState<RouteFlag>(() => parseRouteFlag(searchParams.get('flag')))
   const [avoidSystemIds, setAvoidSystemIds] = useState<number[]>([])
   const [avoidPickerOpen, setAvoidPickerOpen] = useState(false)
+  const [showAllJumps, setShowAllJumps] = useState(false)
 
   const fromName = fromSystemId != null ? (systemsById.get(fromSystemId)?.name ?? '') : ''
   const toName = toSystemId != null ? (systemsById.get(toSystemId)?.name ?? '') : ''
@@ -94,6 +98,10 @@ export function GateCheckPage() {
     }
     setFlag(parseRouteFlag(searchParams.get('flag')))
   }, [systems, systemsByName, searchParams])
+
+  useEffect(() => {
+    setShowAllJumps(false)
+  }, [fromSystemId, toSystemId, flag, avoidSystemIds])
 
   const syncUrl = useCallback(
     (nextFrom: number | null, nextTo: number | null, nextFlag: RouteFlag) => {
@@ -151,6 +159,11 @@ export function GateCheckPage() {
     [avoidSystemIds, systemsById],
   )
 
+  const displayedJumps = useMemo(() => {
+    if (!result) return []
+    return showAllJumps ? result.route.jumps : filterNotableJumps(result.route.jumps)
+  }, [result, showAllJumps])
+
   if (mapLoading || sdeLoading) {
     return <LoadingState />
   }
@@ -158,8 +171,8 @@ export function GateCheckPage() {
   return (
     <div className="flex flex-col min-h-0 gap-6">
       <PageHeader
-        title="Gate check"
-        subtitle="Check gate kills, smartbombs, and bubble ships on your route before you jump."
+        title="Route risk"
+        subtitle="Route danger, gate kills, smartbombs, bubble ships, and camp hints before you jump."
       />
 
       <section className="card bg-base-200 border border-eve-border">
@@ -247,10 +260,10 @@ export function GateCheckPage() {
             <button
               type="button"
               className="btn btn-primary"
-              disabled={!canCheck || loading || gateIntelLoading}
+              disabled={!canCheck || loading}
               onClick={() => void checkRoute()}
             >
-              {loading ? 'Loading route…' : gateIntelLoading ? 'Loading gate intel…' : 'Check route'}
+              {loading ? 'Loading route…' : 'Check route'}
             </button>
             {!canCheck && fromSystemId != null && toSystemId != null ? (
               <span className="text-xs opacity-60">Pick different origin and destination.</span>
@@ -266,41 +279,68 @@ export function GateCheckPage() {
       ) : null}
 
       {result ? (
-        <section className="card bg-base-200 border border-eve-border">
-          <div className="card-body gap-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-base font-semibold">Route</h2>
-                <p className="text-xs opacity-60 mt-1">
-                  {result.fromName} → {result.toName} · {result.route.gateJumps} jump
-                  {result.route.gateJumps === 1 ? '' : 's'} · {routeFlagLabel(flag)}
-                </p>
+        <section className="route-risk-panel card bg-base-200 border border-eve-border">
+          <div className="card-body gap-4 p-0 overflow-hidden">
+            <div className="px-5 pt-5 pb-3 border-b border-eve-border flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-base font-semibold">Results</h2>
+                  <span className={`badge ${dangerBandBadgeClass(result.route.band)}`}>
+                    {result.route.band}
+                  </span>
+                  {gateIntelLoading ? (
+                    <span className="text-xs opacity-60 inline-flex items-center gap-1.5">
+                      <span className="loading loading-spinner loading-xs" />
+                      Gate intel…
+                    </span>
+                  ) : null}
+                </div>
               </div>
-              {gateIntelLoading ? (
-                <span className="text-xs opacity-60 flex items-center gap-2 shrink-0">
-                  <span className="loading loading-spinner loading-xs" />
-                  Gate intel…
-                </span>
-              ) : null}
             </div>
-            <GateCheckResultsTable
-              jumps={result.route.jumps}
-              fromName={result.fromName}
-              toName={result.toName}
-              gateIntelLoading={gateIntelLoading}
-            />
+
+            <div className="px-5 flex flex-col gap-4 pb-5">
+              <RouteSummaryBar
+                label={`${result.fromName} → ${result.toName}`}
+                route={result.route}
+                meta={routeFlagLabel(flag)}
+              />
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <label className="label cursor-pointer gap-2 py-0">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-xs checkbox-primary"
+                    checked={showAllJumps}
+                    onChange={(e) => setShowAllJumps(e.target.checked)}
+                  />
+                  <span className="label-text text-xs">Show all jumps</span>
+                </label>
+              </div>
+
+              <RouteRiskJumpTable
+                jumps={displayedJumps}
+                totalJumps={result.route.jumps.length}
+                showAll={showAllJumps}
+                gateIntelLoading={gateIntelLoading}
+              />
+            </div>
+
+            <div className="px-5 py-3 border-t border-eve-border bg-base-200/40 text-[11px] opacity-50">
+              Risk uses security and ESI 24h kills. Gate and camp hints use zKillboard (1h gates, 2h
+              haulers). Not local intel.
+            </div>
           </div>
         </section>
       ) : null}
 
       <section className="card bg-base-200/60 border border-eve-border">
         <div className="card-body">
-          <GateCheckLegend />
-          <p className="text-[11px] opacity-50 mt-3">
-            Gate intel comes from zKillboard killmails in the last hour. This is not live local intel.
-          </p>
+          <RouteRiskLegend />
         </div>
       </section>
     </div>
   )
 }
+
+/** @deprecated Use RouteRiskPage */
+export const GateCheckPage = RouteRiskPage

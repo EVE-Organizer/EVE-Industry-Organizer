@@ -326,6 +326,18 @@
   }
 }
 
+.route-risk {
+  &__table-scroll {
+    @apply rounded-lg border border-eve-border overflow-y-auto min-h-0 shrink-0;
+    height: min(28rem, 50dvh);
+  }
+
+  &__empty {
+    @apply rounded-lg border border-dashed border-eve-border bg-base-200/30;
+    min-height: 10rem;
+  }
+}
+
 .plan-template-rail {
   @apply inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-eve-border bg-base-300/25 p-1;
 }

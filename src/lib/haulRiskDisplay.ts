@@ -78,9 +78,15 @@ export function parseRouteLabel(label: string): { from: string; to: string } | n
   return { from: parts[0], to: parts[1] }
 }
 
+export function routeRiskToolUrl(fromLabel: string, toLabel: string, flag = 'secure'): string {
+  const params = new URLSearchParams({ from: fromLabel, to: toLabel })
+  if (flag !== 'secure') params.set('flag', flag)
+  return `/tools/route-risk?${params.toString()}`
+}
+
+/** @deprecated Use routeRiskToolUrl */
 export function gateCheckUrl(fromLabel: string, toLabel: string): string {
-  const params = new URLSearchParams({ from: fromLabel, to: toLabel, flag: 'secure' })
-  return `/tools/gate-check?${params.toString()}`
+  return routeRiskToolUrl(fromLabel, toLabel)
 }
 
 export function jumpRowHighlightClass(jump: RouteJumpDanger): string {

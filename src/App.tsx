@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Layout } from '@/components/Layout'
 import { useAppStore } from '@/stores/appStore'
@@ -11,7 +11,7 @@ import { MapPage } from '@/pages/MapPage'
 import { JobsPage } from '@/pages/JobsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { MiningIskHrPage } from '@/pages/MiningIskHrPage'
-import { GateCheckPage } from '@/pages/GateCheckPage'
+import { RouteRiskPage } from '@/pages/RouteRiskPage'
 import { AuthCallbackPage } from '@/pages/AuthCallbackPage'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -27,6 +27,11 @@ const queryClient = new QueryClient({
 function LegacyBlueprintRedirect() {
   const { typeId } = useParams()
   return <Navigate to={`/item/${typeId}`} replace />
+}
+
+function LegacyGateCheckRedirect() {
+  const { search } = useLocation()
+  return <Navigate to={`/tools/route-risk${search}`} replace />
 }
 
 function AppRoutes() {
@@ -61,7 +66,8 @@ function AppRoutes() {
         <Route path="/plan" element={<PlanPage />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/jobs" element={<JobsPage />} />
-        <Route path="/tools/gate-check" element={<GateCheckPage />} />
+        <Route path="/tools/route-risk" element={<RouteRiskPage />} />
+        <Route path="/tools/gate-check" element={<LegacyGateCheckRedirect />} />
         <Route path="/tools/mining" element={<MiningIskHrPage />} />
         <Route path="/isk-hr" element={<Navigate to="/tools/mining" replace />} />
         <Route path="/isk-hr/mining" element={<Navigate to="/tools/mining" replace />} />
