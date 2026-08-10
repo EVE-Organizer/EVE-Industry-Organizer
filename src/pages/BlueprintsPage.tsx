@@ -178,6 +178,7 @@ export function BlueprintsPage() {
         minSetupCost,
         maxSetupCost,
         buildableOnly: rankingQuery.buildableOnly,
+        requireBlueprintPrice: rankingQuery.requireBlueprintPrice,
         includeHaulCost: rankingQuery.includeHaul,
         minVolume: rankingQuery.minVolume,
         tiers: rankingQuery.tiers,
@@ -199,6 +200,7 @@ export function BlueprintsPage() {
     minSetupCost,
     maxSetupCost,
     rankingQuery.buildableOnly,
+    rankingQuery.requireBlueprintPrice,
     rankingQuery.includeHaul,
     rankingQuery.minVolume,
     rankingQuery.tiers,
@@ -296,7 +298,7 @@ export function BlueprintsPage() {
 
       {rows.length === 0 && (
         <p className="text-sm opacity-60 mb-4">
-          No blueprints match filters. Try widening the setup budget, lowering min volume, changing hub/region, picking another group, relaxing tier filters
+          No blueprints match filters. Try widening the setup budget, lowering min volume, changing hub/region, picking another group, relaxing tier filters, or turning off Require BPO/BPC price
           {rankingQuery.window !== 'all'
             ? ', or switch window to All to rank by current sell price when history is missing.'
             : '.'}

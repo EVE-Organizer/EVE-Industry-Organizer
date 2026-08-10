@@ -71,6 +71,11 @@ export interface RankingFilters {
   buildableOnly: boolean
   /** When false, haul in/out are excluded from setup and profit. Defaults to true. */
   includeHaulCost?: boolean
+  /**
+   * When true, hide T1 rows with no market BPO and no public BPC (including charges).
+   * Defaults to false for callers; the Blueprints page defaults this on in the query UI.
+   */
+  requireBlueprintPrice?: boolean
   tiers?: BlueprintTier[]
   productGroups?: string[]
   /** Rank only these product type IDs (ignores tier/group filters). */
@@ -331,7 +336,15 @@ function computeRow(
     volumeCapDays: MAX_DAYS_TO_CLEAR,
   })
 
-  if (flat.setup.blueprintCost.bpoPriceMissing) return null
+  // Non-charge T1 with blueprint cost on: missing BPO/BPC is not rankable.
+  // Charges (and includeBlueprintCost off) may still rank unless requireBlueprintPrice is set.
+  if (
+    flat.setup.blueprintCost.bpoPriceMissing &&
+    settings.includeBlueprintCost &&
+    !flat.setup.blueprintCost.chargeExcluded
+  ) {
+    return null
+  }
 
   const setupBreakdown = flat.setup
   const {
@@ -606,6 +619,9 @@ export function rankBlueprintsFromMarket(
     }
     if ((filters.minVolume ?? 0) > 0 && row.avgVolume < filters.minVolume!) continue
     if (filters.buildableOnly && !meetsBuildRequirements(bp, settings.skills)) continue
+    if (filters.requireBlueprintPrice && row.setupBreakdown.blueprintCost.bpoPriceMissing) {
+      continue
+    }
     rows.push(row)
   }
 

@@ -66,6 +66,7 @@ export const BlueprintQueryFilters = forwardRef<
       query.window,
       query.priceMethod,
       query.buildableOnly,
+      query.requireBlueprintPrice,
       query.includeHaul,
       query.sortBy,
       query.sortDir,

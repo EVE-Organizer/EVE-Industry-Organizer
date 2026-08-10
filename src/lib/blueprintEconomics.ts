@@ -167,20 +167,6 @@ function resolveT1BlueprintAcquisition(
     selectedHub,
   }
 
-  if (!include) {
-    return {
-      charged: 0,
-      upfront: 0,
-      bpoUnitPrice: 0,
-      breakdown: {
-        mode: 'bpo',
-        charged: 0,
-        upfront: 0,
-        ...baseBreakdown,
-      },
-    }
-  }
-
   const tryBpo = (hub: HubId, market: HubMarketData | null | undefined): number => {
     if (!priceCtx || !market) return 0
     const spots = hub === 'jita' ? jitaSpotPrices : spotPrices
@@ -191,20 +177,23 @@ function resolveT1BlueprintAcquisition(
 
   const hubsToTry: HubId[] = selectedHub === 'jita' ? ['jita'] : [selectedHub, 'jita']
 
+  // Always resolve availability (including charges / includeBlueprintCost off) so ranking
+  // can filter unlisted BPOs. Cost is only applied when `include` is true.
   for (const hub of hubsToTry) {
     const market = hub === 'jita' ? jitaHubMarket : hubMarket
-    const bpoPrice = tryBpo(hub, market)
-    if (bpoPrice > 0) {
+    const price = tryBpo(hub, market)
+    if (price > 0) {
+      const upfront = include ? price : 0
       return {
         charged: 0,
-        upfront: bpoPrice,
-        bpoUnitPrice: bpoPrice,
+        upfront,
+        bpoUnitPrice: include ? price : 0,
         breakdown: {
           mode: 'bpo',
           charged: 0,
-          upfront: bpoPrice,
+          upfront,
           sourceHub: hub,
-          bpoUnitPrice: bpoPrice,
+          ...(include ? { bpoUnitPrice: price } : {}),
           ...baseBreakdown,
         },
       }
@@ -214,7 +203,7 @@ function resolveT1BlueprintAcquisition(
   for (const hub of hubsToTry) {
     const bpc = tryBpc(hub)
     if (bpc) {
-      const charged = bpc.costPerRun * runs
+      const charged = include ? bpc.costPerRun * runs : 0
       return {
         charged,
         upfront: charged,
@@ -224,9 +213,13 @@ function resolveT1BlueprintAcquisition(
           charged,
           upfront: charged,
           sourceHub: hub,
-          bpcCostPerRun: bpc.costPerRun,
-          bpcRuns: bpc.runs,
-          bpcBuyout: bpc.buyout,
+          ...(include
+            ? {
+                bpcCostPerRun: bpc.costPerRun,
+                bpcRuns: bpc.runs,
+                bpcBuyout: bpc.buyout,
+              }
+            : {}),
           ...baseBreakdown,
         },
       }

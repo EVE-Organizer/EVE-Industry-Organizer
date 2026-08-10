@@ -26,6 +26,11 @@ export interface BlueprintQuery {
   budgetMinSlider: number
   budgetMaxSlider: number
   buildableOnly: boolean
+  /**
+   * Hide T1 blueprints with no market BPO and no public BPC at the selected hub or Jita.
+   * Also covers charges (e.g. Condenser Packs) that skip blueprint cost but still have no listing.
+   */
+  requireBlueprintPrice: boolean
   includeHaul: boolean
   /** Minimum average daily hub volume (0 = no filter). Uses the selected price window. */
   minVolume: number
@@ -53,6 +58,7 @@ export function defaultQuery(settings: GlobalSettings): BlueprintQuery {
     budgetMinSlider: setupBudgetToSlider(defaultMinSetupCost()),
     budgetMaxSlider: setupBudgetToSlider(defaultMaxSetupCost()),
     buildableOnly: false,
+    requireBlueprintPrice: true,
     includeHaul: settings.includeHaulCost ?? true,
     minVolume: 100,
     batchSize: DEFAULT_BATCH_SIZE,
@@ -75,6 +81,9 @@ export function queryToSearchParams(q: BlueprintQuery, settings: GlobalSettings)
   if (q.budgetMinSlider !== def.budgetMinSlider) p.set('bmin', String(q.budgetMinSlider))
   if (q.budgetMaxSlider !== def.budgetMaxSlider) p.set('bmax', String(q.budgetMaxSlider))
   if (q.buildableOnly !== def.buildableOnly) p.set('buildable', '1')
+  if (q.requireBlueprintPrice !== def.requireBlueprintPrice) {
+    p.set('bpprice', q.requireBlueprintPrice ? '1' : '0')
+  }
   if (q.includeHaul !== def.includeHaul) p.set('haul', q.includeHaul ? '1' : '0')
   if (q.minVolume !== def.minVolume) p.set('vmin', String(q.minVolume))
   if (q.batchSize !== def.batchSize) p.set('batch', String(q.batchSize))
@@ -124,6 +133,10 @@ export function searchParamsToQuery(
 
   const buildableOnly = params.get('buildable') === '1'
 
+  const rawBpPrice = params.get('bpprice')
+  const requireBlueprintPrice =
+    rawBpPrice === null ? def.requireBlueprintPrice : rawBpPrice === '1'
+
   const rawHaul = params.get('haul')
   const includeHaul = rawHaul === null ? def.includeHaul : rawHaul === '1'
 
@@ -155,6 +168,7 @@ export function searchParamsToQuery(
     budgetMinSlider,
     budgetMaxSlider,
     buildableOnly,
+    requireBlueprintPrice,
     includeHaul,
     minVolume,
     batchSize,

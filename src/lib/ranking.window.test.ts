@@ -204,6 +204,7 @@ describe('market-aware blueprint ranking', () => {
         minSetupCost: 0,
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
+        requireBlueprintPrice: false,
         tiers: ['t1'],
         productGroups: ['Condenser Pack'],
       },
@@ -212,7 +213,31 @@ describe('market-aware blueprint ranking', () => {
     const condenser = rows.find((r) => r.blueprint.productTypeId === CONDENSER_GALVASURGE)
     expect(condenser).toBeDefined()
     expect(condenser!.setupBreakdown.blueprintCost.chargeExcluded).toBe(true)
+    expect(condenser!.setupBreakdown.blueprintCost.bpoPriceMissing).toBe(true)
     expect(condenser!.setupBreakdown.bpoCost).toBe(0)
+  })
+
+  it('hides charge blueprints with no BPO/BPC when requireBlueprintPrice is on', () => {
+    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
+    const rows = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      'jita',
+      '1w',
+      settings,
+      {
+        minSetupCost: 0,
+        maxSetupCost: Number.MAX_SAFE_INTEGER,
+        buildableOnly: false,
+        requireBlueprintPrice: true,
+        tiers: ['t1'],
+        productGroups: ['Condenser Pack'],
+      },
+    )
+
+    expect(rows.find((r) => r.blueprint.productTypeId === CONDENSER_GALVASURGE)).toBeUndefined()
   })
 
   it('includes T1 ice compression BPOs once blueprint BPO types are in types.json', () => {
@@ -253,6 +278,7 @@ describe('market-aware blueprint ranking', () => {
         minSetupCost: 0,
         maxSetupCost: Number.MAX_SAFE_INTEGER,
         buildableOnly: false,
+        requireBlueprintPrice: true,
         tiers: ['t1'],
       },
     )

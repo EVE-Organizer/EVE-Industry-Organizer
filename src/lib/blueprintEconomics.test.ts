@@ -326,7 +326,7 @@ describe('computeFlatSetup', () => {
     expect(setup.blueprintCost.bpoPriceMissing).toBe(true)
   })
 
-  it('skips acquisition lookup when includeBlueprintCost is off', () => {
+  it('detects missing blueprint price when includeBlueprintCost is off but charges nothing', () => {
     const blueprint = mockBlueprint(100, 10100)
     const settings = { ...DEFAULT_SETTINGS, batchSize: 100, includeBlueprintCost: false }
     const spot = new Map<number, number>()
@@ -348,6 +348,7 @@ describe('computeFlatSetup', () => {
     })
 
     expect(setup.bpoCost).toBe(0)
-    expect(setup.blueprintCost.bpoPriceMissing).toBeUndefined()
+    expect(setup.blueprintCost.charged).toBe(0)
+    expect(setup.blueprintCost.bpoPriceMissing).toBe(true)
   })
 })

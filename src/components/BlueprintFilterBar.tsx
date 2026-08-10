@@ -17,6 +17,7 @@ import {
   FilterSection,
 } from '@/components/EconomicsFilterSection'
 import { BlueprintPickerFilterSection } from '@/components/BlueprintPickerFilterSection'
+import { InfoTooltip } from '@/components/InfoTooltip'
 import { formatAvgVolume, formatInputDecimal, formatNumber } from '@/lib/profit'
 import type { GlobalSettings } from '@/types'
 
@@ -151,6 +152,20 @@ export function BlueprintFilterBar({
             title="Catalog"
             hint="Tier, product group, and buildable-only."
             className="blueprint-filters__card"
+            extraAvailability={
+              <label className="label cursor-pointer gap-2 justify-start py-0 min-h-0">
+                <input
+                  type="checkbox"
+                  className="checkbox checkbox-sm"
+                  checked={query.requireBlueprintPrice}
+                  onChange={(e) => onChange({ requireBlueprintPrice: e.target.checked })}
+                />
+                <span className="label-text text-sm inline-flex items-center gap-1.5">
+                  Require BPO/BPC price
+                  <InfoTooltip text="Hide T1 blueprints with no market BPO and no public BPC contract at your hub or Jita. Also hides charges like Condenser Packs that skip blueprint cost but still have no listing." />
+                </span>
+              </label>
+            }
           />
 
           <FilterSection
