@@ -1,5 +1,6 @@
 import type { CampLevel } from '@/lib/routeCamp'
 import { campLevelBadgeClass, CAMP_COLUMN_TOOLTIP } from '@/lib/routeCamp'
+import { gateKillBand, gateKillBandBadgeClass, explainGateIntel } from '@/lib/gateIntel'
 import type { DangerBand, RouteDangerResult } from '@/lib/routeDanger'
 import { dangerBand, dangerBandBadgeClass } from '@/lib/routeDanger'
 import { formatDecimal } from '@/lib/profit'
@@ -20,6 +21,25 @@ function campLevelLabel(level: CampLevel | undefined): string {
   return level ?? 'None'
 }
 
+function HaulGateFlags({ jump }: { jump: RouteDangerResult['jumps'][number] }) {
+  const intel = jump.gateIntel
+  if (!intel) return <span className="text-xs opacity-40">—</span>
+  const badges: { key: string; label: string; className: string }[] = []
+  if (intel.smartbombs) badges.push({ key: 'sb', label: 'SB', className: 'badge-error' })
+  if (intel.hictors) badges.push({ key: 'hic', label: 'HIC', className: 'badge-error' })
+  if (intel.dictors) badges.push({ key: 'dic', label: 'Dic', className: 'badge-warning' })
+  if (!badges.length) return <span className="text-xs opacity-40">—</span>
+  return (
+    <span className="inline-flex flex-wrap gap-1">
+      {badges.map((badge) => (
+        <span key={badge.key} className={`badge badge-xs ${badge.className}`}>
+          {badge.label}
+        </span>
+      ))}
+    </span>
+  )
+}
+
 function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
   if (!jumps.length) {
     return (
@@ -38,6 +58,8 @@ function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
             <th>Sec</th>
             <th>Kills (24h)</th>
             <th>Risk</th>
+            <th>Gate (1h)</th>
+            <th>Flags</th>
             <th>
               <span className="inline-flex items-center gap-1">
                 Camp
@@ -47,7 +69,11 @@ function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
           </tr>
         </thead>
         <tbody>
-          {jumps.map((jump) => (
+          {jumps.map((jump) => {
+            const intel = jump.gateIntel
+            const gateBand = gateKillBand(intel?.gateKillCount ?? 0)
+            const gateTooltip = intel ? explainGateIntel(intel) : 'No gate kills in the last hour.'
+            return (
             <tr key={jump.systemId} className="text-sm">
               <td className="max-w-[10rem] truncate">{jump.systemName}</td>
               <td className="tabular-nums">{formatDecimal(jump.security, 1)}</td>
@@ -58,6 +84,18 @@ function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
                 <span className={`badge badge-xs ${dangerBandBadgeClass(dangerBand(jump.danger))}`}>
                   {dangerBand(jump.danger)}
                 </span>
+              </td>
+              <td>
+                <Tooltip text={gateTooltip} placement="top">
+                  <span className={`badge badge-xs tabular-nums ${gateKillBandBadgeClass(gateBand)}`}>
+                    {intel?.gateKillCount ?? 0}
+                  </span>
+                </Tooltip>
+              </td>
+              <td>
+                <Tooltip text={gateTooltip} placement="top">
+                  <HaulGateFlags jump={jump} />
+                </Tooltip>
               </td>
               <td>
                 <Tooltip
@@ -74,7 +112,8 @@ function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
                 </Tooltip>
               </td>
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </table>
     </div>
@@ -163,7 +202,7 @@ export function HaulRiskModal({
         <div className="px-5 py-3 border-t border-eve-border bg-base-200/40 text-[11px] opacity-50 space-y-1">
           <p>Risk scores combine system security and ship/pod kills from the last 24 hours (ESI).</p>
           <p>
-            Camp levels use hauler kills from the last 2 hours on zKillboard. They are a hint, not local intel.
+            Gate kills (1h), smartbomb/HIC/dictor flags, and camp levels use zKillboard data. Hauler kills use a 2 hour window. This is a hint, not local intel.
           </p>
         </div>
       </div>

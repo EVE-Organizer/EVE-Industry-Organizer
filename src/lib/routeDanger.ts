@@ -1,4 +1,5 @@
 import type { CampLevel } from '@/lib/routeCamp'
+import type { SystemGateIntel } from '@/lib/gateIntel'
 
 export interface SystemKillStats {
   systemId: number
@@ -68,6 +69,7 @@ export interface RouteJumpDanger {
   campLevel?: CampLevel
   recentHaulerKills?: number
   campReason?: string
+  gateIntel?: SystemGateIntel
 }
 
 export interface RouteDangerResult {

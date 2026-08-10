@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { ISK_HR_ENABLED, isIskHrPath } from '@/lib/iskHrNav'
+import { TOOLS_NAV_ITEMS, isToolsPath } from '@/lib/toolsNav'
 
 export type NavItem =
   | { kind: 'link'; to: string; label: string }
@@ -13,9 +13,9 @@ export const NAV_ITEMS: NavItem[] = [
   { kind: 'link', to: '/jobs', label: 'Jobs' },
   {
     kind: 'menu',
-    id: 'isk-hr',
-    label: 'ISK/HR',
-    children: ISK_HR_ENABLED.map((c) => ({ to: c.to, label: c.label })),
+    id: 'tools',
+    label: 'Tools',
+    children: TOOLS_NAV_ITEMS.map((item) => ({ to: item.to, label: item.label })),
   },
   { kind: 'link', to: '/settings', label: 'Settings' },
 ]
@@ -45,7 +45,7 @@ function NavbarDropdown({ item }: { item: Extract<NavItem, { kind: 'menu' }> }) 
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
   const location = useLocation()
-  const parentActive = item.id === 'isk-hr' ? isIskHrPath(location.pathname) : false
+  const parentActive = item.id === 'tools' ? isToolsPath(location.pathname) : false
 
   useEffect(() => {
     setOpen(false)

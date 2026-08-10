@@ -8,6 +8,7 @@ import {
 } from '@/types/map'
 import type { SdeData } from '@/services/data/sdeLoader'
 import { buildHaulerTypeIds, enrichRouteJumps, shouldCheckCamp } from '@/lib/routeCamp'
+import { loadGateIntel } from '@/services/data/gateIntelLoader'
 import { computeRouteDanger } from '@/lib/routeDanger'
 import {
   pickWarCandidates,
@@ -28,6 +29,7 @@ import {
   sanitizeKillRefs,
   type ZkillKillRef,
 } from '@/services/market/zkillService'
+import { getRouteGateIntel } from '@/services/market/zkillGateIntel'
 import {
   buildWarOverlayCacheParams,
   getWarOverlayBase,
@@ -382,6 +384,8 @@ export function useMapOverlays({
             return shouldCheckCamp(systemId, security)
           })
           const haulerKills = await getRouteHaulerKillCounts(campCandidates, haulerTypeIds)
+          const gateLookup = await loadGateIntel()
+          const gateIntelBySystem = await getRouteGateIntel(routeIds, gateLookup)
           const killMap = new Map(
             Object.entries(kills).map(([id, k]) => [
               Number(id),
@@ -394,8 +398,8 @@ export function useMapOverlays({
           }
           const inDanger = computeRouteDanger(inRoute.route, names, securities, killMap)
           const outDanger = computeRouteDanger(outRoute.route, names, securities, killMap)
-          const enrichedIn = enrichRouteJumps(inDanger, haulerKills)
-          const enrichedOut = enrichRouteJumps(outDanger, haulerKills)
+          const enrichedIn = enrichRouteJumps(inDanger, haulerKills, gateIntelBySystem)
+          const enrichedOut = enrichRouteJumps(outDanger, haulerKills, gateIntelBySystem)
           campSystemIds = new Set(
             [...enrichedIn.jumps, ...enrichedOut.jumps]
               .filter((j) => j.campLevel !== 'None')

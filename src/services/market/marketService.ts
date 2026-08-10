@@ -569,12 +569,31 @@ export async function getSystemKills(forceRefresh = false): Promise<{
   })
 }
 
+export type RouteFlag = 'secure' | 'shortest' | 'insecure'
+
+export interface RouteOptions {
+  flag?: RouteFlag
+  avoidSystemIds?: number[]
+  forceRefresh?: boolean
+}
+
+function normalizeRouteOptions(options: RouteOptions | boolean = {}): RouteOptions {
+  if (typeof options === 'boolean') return { forceRefresh: options }
+  return options
+}
+
 export async function getRoute(
   originSystemId: number,
   destinationSystemId: number,
-  forceRefresh = false,
+  options: RouteOptions | boolean = {},
 ): Promise<{ route: number[]; source: string; fetchedAt: number }> {
-  const key = cacheKey('esi', 'route', { originSystemId, destinationSystemId })
+  const { flag = 'secure', avoidSystemIds = [], forceRefresh = false } = normalizeRouteOptions(options)
+  const key = cacheKey('esi', 'route', {
+    originSystemId,
+    destinationSystemId,
+    flag,
+    avoidSystemIds: [...avoidSystemIds].sort((a, b) => a - b),
+  })
 
   if (!forceRefresh) {
     const cached = getCached<number[]>(key)
@@ -587,7 +606,10 @@ export async function getRoute(
     const cached = getCached<number[]>(key)
     try {
       await throttle()
-      const url = `${ESI_BASE}/route/${originSystemId}/${destinationSystemId}/?flag=secure`
+      const avoidQuery = avoidSystemIds.map((id) => `avoid=${id}`).join('&')
+      const flagQuery = `flag=${flag}`
+      const query = avoidQuery ? `${flagQuery}&${avoidQuery}` : flagQuery
+      const url = `${ESI_BASE}/route/${originSystemId}/${destinationSystemId}/?${query}`
       const res = await fetch(url)
       noteEsiResponse(res)
       if (res.status === 404) {

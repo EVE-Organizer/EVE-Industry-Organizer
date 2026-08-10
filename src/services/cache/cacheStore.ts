@@ -126,6 +126,7 @@ export const TTL = {
   systemKills: { fresh: 10 * 60 * 1000, stale: 60 * 60 * 1000 },
   route: { fresh: 24 * 60 * 60 * 1000, stale: 7 * 24 * 60 * 60 * 1000 },
   zkillCamp: { fresh: 60 * 60 * 1000, stale: 60 * 60 * 1000 },
+  zkillGateIntel: { fresh: 60 * 60 * 1000, stale: 60 * 60 * 1000 },
   failed: { fresh: 5 * 60 * 1000, stale: 5 * 60 * 1000 },
   characterData: { fresh: 10 * 60 * 1000, stale: 24 * 60 * 60 * 1000 },
   universeLocation: { fresh: 24 * 60 * 60 * 1000, stale: 7 * 24 * 60 * 60 * 1000 },

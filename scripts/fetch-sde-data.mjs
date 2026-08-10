@@ -30,6 +30,7 @@ import {
 import { HUBS, resolveSellSystemId } from './lib/hubs.mjs'
 import { buildAllTypeRecords } from './lib/type-records.mjs'
 import { buildMapData, systemsFromSdeJsonl } from './lib/map-data.mjs'
+import { buildGateIntelData } from './lib/gate-intel-data.mjs'
 import { loadMapSolarSystemsJsonl } from './lib/sde-jsonl.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -51,6 +52,7 @@ const REQUIRED_CSVS = [
   'mapSolarSystems',
   'mapSolarSystemJumps',
   'mapRegions',
+  'mapDenormalize',
   'staStations',
 ]
 
@@ -373,6 +375,10 @@ async function main() {
           })
           ctx.mapSystems = systemsFromSdeJsonl(ctx.mapSolarSystemsJsonl)
           ctx.mapData = buildMapData(ctx.mapSystems, ctx.csvData.mapSolarSystemJumps)
+          ctx.gateIntel = buildGateIntelData({
+            invTypes: ctx.csvData.invTypes,
+            mapDenormalize: ctx.csvData.mapDenormalize,
+          })
           task.title = `Cost indices and regions · ${ctx.regions.regions.length} regions, ${ctx.systems.length} industry systems`
           } finally {
             stopElapsed()
@@ -408,6 +414,7 @@ async function main() {
             ['systems.json', ctx.systems],
             ['stations.json', ctx.stations],
             ['map.json', ctx.mapData],
+            ['gateIntel.json', ctx.gateIntel],
           ]
           const startedAt = Date.now()
           for (let i = 0; i < outputs.length; i++) {

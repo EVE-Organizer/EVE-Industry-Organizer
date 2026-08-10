@@ -1,5 +1,7 @@
 import type { TypeInfo } from '@/types'
+import type { SystemGateIntel } from '@/lib/gateIntel'
 import type { RouteDangerResult, RouteJumpDanger } from '@/lib/routeDanger'
+import { explainGateIntel } from '@/lib/gateIntel'
 import { formatDecimal } from '@/lib/profit'
 
 export type CampLevel = 'None' | 'Possible' | 'Likely'
@@ -37,7 +39,14 @@ export function classifyCampLevel(
   security: number,
   haulerKills2h: number,
   shipKills24h: number,
+  gateIntel?: SystemGateIntel | null,
 ): CampLevel {
+  if (gateIntel) {
+    if (gateIntel.smartbombs || gateIntel.hictors || gateIntel.dictors || gateIntel.gateKillCount >= 3) {
+      return 'Likely'
+    }
+    if (gateIntel.gateKillCount >= 1) return 'Possible'
+  }
   if (haulerKills2h >= 2) return 'Likely'
   if (haulerKills2h >= 1) {
     if (KNOWN_PIPE_SYSTEM_IDS.has(systemId) || security < 0.45) return 'Likely'
@@ -57,13 +66,17 @@ export interface CampLevelContext {
   security: number
   haulerKills2h: number
   shipKills24h: number
+  gateIntel?: SystemGateIntel | null
 }
 
 export const CAMP_COLUMN_TOOLTIP =
-  'Gate camps are players parked at stargates to catch haulers. Levels use hauler kills from zKillboard (last 2h), known pipe systems, and 24h kill counts. This is not local intel.'
+  'Gate camps are players parked at stargates to catch haulers. Uses zKill gate kills (1h), hauler kills (2h), smartbomb/HIC/dictor flags, known pipes, and 24h kill counts. Not local intel.'
 
 export function explainCampLevel(ctx: CampLevelContext): string {
-  const { systemId, security, haulerKills2h, shipKills24h } = ctx
+  const { systemId, security, haulerKills2h, shipKills24h, gateIntel } = ctx
+  if (gateIntel && (gateIntel.gateKillCount > 0 || gateIntel.smartbombs || gateIntel.dictors || gateIntel.hictors)) {
+    return explainGateIntel(gateIntel)
+  }
   const isPipe = KNOWN_PIPE_SYSTEM_IDS.has(systemId)
   const isLowsec = security > 0 && security < 0.45
   const haulerPhrase =
@@ -116,18 +129,28 @@ export function shouldCheckCamp(systemId: number, security: number): boolean {
 export function enrichJumpsWithCamp(
   jumps: RouteJumpDanger[],
   haulerKillsBySystem: Map<number, number>,
+  gateIntelBySystem?: Map<number, SystemGateIntel>,
 ): RouteJumpDanger[] {
   return jumps.map((jump) => {
     const recentHaulerKills = haulerKillsBySystem.get(jump.systemId) ?? 0
+    const gateIntel = gateIntelBySystem?.get(jump.systemId) ?? jump.gateIntel ?? null
     return {
       ...jump,
+      gateIntel: gateIntel ?? undefined,
       recentHaulerKills,
-      campLevel: classifyCampLevel(jump.systemId, jump.security, recentHaulerKills, jump.shipKills),
+      campLevel: classifyCampLevel(
+        jump.systemId,
+        jump.security,
+        recentHaulerKills,
+        jump.shipKills,
+        gateIntel,
+      ),
       campReason: explainCampLevel({
         systemId: jump.systemId,
         security: jump.security,
         haulerKills2h: recentHaulerKills,
         shipKills24h: jump.shipKills,
+        gateIntel,
       }),
     }
   })
@@ -136,9 +159,10 @@ export function enrichJumpsWithCamp(
 export function enrichRouteJumps(
   route: RouteDangerResult,
   haulerKillsBySystem: Map<number, number>,
+  gateIntelBySystem?: Map<number, SystemGateIntel>,
 ): RouteDangerResult {
   return {
     ...route,
-    jumps: enrichJumpsWithCamp(route.jumps, haulerKillsBySystem),
+    jumps: enrichJumpsWithCamp(route.jumps, haulerKillsBySystem, gateIntelBySystem),
   }
 }

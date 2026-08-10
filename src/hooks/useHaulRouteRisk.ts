@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { HUBS, type HubId } from '@/types'
 import { computeRouteDanger, type RouteDangerResult } from '@/lib/routeDanger'
 import { buildHaulerTypeIds, enrichRouteJumps, shouldCheckCamp } from '@/lib/routeCamp'
+import { loadGateIntel } from '@/services/data/gateIntelLoader'
 import { getHubMarket, resolveBuildSystem } from '@/services/data/sdeLoader'
 import { getRoute, getSystemInfo, getSystemKills } from '@/services/market/marketService'
 import { getRouteHaulerKillCounts } from '@/services/market/zkillService'
+import { getRouteGateIntel } from '@/services/market/zkillGateIntel'
 import type { SdeData } from '@/services/data/sdeLoader'
 
 export interface HaulRouteLabels {
@@ -153,10 +155,13 @@ export function useHaulRouteRisk({
             ? await getRouteHaulerKillCounts(campSystemIds, haulerTypeIds)
             : new Map<number, number>()
 
+        const gateLookup = await loadGateIntel()
+        const gateIntelBySystem = await getRouteGateIntel(routeSystemIds, gateLookup)
+
         if (fetchId !== fetchIdRef.current) return
 
-        setHaulIn(enrichRouteJumps(inResult, haulerKillsBySystem))
-        setHaulOut(enrichRouteJumps(outResult, haulerKillsBySystem))
+        setHaulIn(enrichRouteJumps(inResult, haulerKillsBySystem, gateIntelBySystem))
+        setHaulOut(enrichRouteJumps(outResult, haulerKillsBySystem, gateIntelBySystem))
       } catch {
         if (fetchId !== fetchIdRef.current) return
         setHaulIn(null)

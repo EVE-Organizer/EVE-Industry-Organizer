@@ -11,6 +11,7 @@ import { MapPage } from '@/pages/MapPage'
 import { JobsPage } from '@/pages/JobsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { MiningIskHrPage } from '@/pages/MiningIskHrPage'
+import { GateCheckPage } from '@/pages/GateCheckPage'
 import { AuthCallbackPage } from '@/pages/AuthCallbackPage'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -60,8 +61,10 @@ function AppRoutes() {
         <Route path="/plan" element={<PlanPage />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/jobs" element={<JobsPage />} />
-        <Route path="/isk-hr" element={<Navigate to="/isk-hr/mining" replace />} />
-        <Route path="/isk-hr/mining" element={<MiningIskHrPage />} />
+        <Route path="/tools/gate-check" element={<GateCheckPage />} />
+        <Route path="/tools/mining" element={<MiningIskHrPage />} />
+        <Route path="/isk-hr" element={<Navigate to="/tools/mining" replace />} />
+        <Route path="/isk-hr/mining" element={<Navigate to="/tools/mining" replace />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/accounts" element={<Navigate to="/settings" replace />} />

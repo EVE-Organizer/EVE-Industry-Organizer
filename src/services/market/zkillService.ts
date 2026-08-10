@@ -49,6 +49,8 @@ export interface ZkillKillRef {
 
     hash: string
 
+    locationID?: number
+
     npc?: boolean
 
     solo?: boolean
