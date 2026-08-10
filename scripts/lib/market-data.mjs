@@ -445,6 +445,9 @@ export async function buildMarketData(blueprints, regions, stations, options = {
             }
           : null,
       })
+    } else {
+      const preserved = Object.keys(products).length
+      emit({ phase: 'history_preserved', hubId, preserved })
     }
 
     emit({ phase: 'courier', hubId })

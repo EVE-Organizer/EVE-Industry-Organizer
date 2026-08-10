@@ -4,6 +4,8 @@
  *
  * Run: node scripts/fetch-sde-data.mjs
  * Then: node scripts/rebuild-market.mjs  (or set MARKET_HISTORY_LIMIT for faster dev)
+ *
+ * CI daily schedule uses MARKET_SKIP_HISTORY=1 (prices + SDE; history preserved).
  */
 import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import { dirname, join } from 'path'
@@ -177,6 +179,21 @@ function buildIndustrySystems(hubs, stations, mapSolarSystems, costIndices) {
   return results.sort((a, b) => a.name.localeCompare(b.name))
 }
 
+async function runPool(items, concurrency, worker) {
+  if (!items.length) return
+  let next = 0
+  async function runWorker() {
+    while (true) {
+      const index = next++
+      if (index >= items.length) break
+      await worker(items[index], index)
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker()),
+  )
+}
+
 function buildHubStations(hubs, stations, systems, regions) {
   const stationById = new Map(stations.map((station) => [station.stationID, station]))
   const systemById = new Map(systems.map((system) => [system.solarSystemID, system]))
@@ -273,12 +290,12 @@ async function main() {
           const csvData = {}
           const total = REQUIRED_CSVS.length
           const startedAt = Date.now()
-          for (let i = 0; i < total; i++) {
-            const name = REQUIRED_CSVS[i]
-            updateTaskProgress(task, `Download SDE CSVs · ${name}`, i, total, startedAt)
-            csvData[name] = await fetchCsv(SDE_BASE, name, { silent: isInteractive() })
-            updateTaskProgress(task, `Download SDE CSVs · ${name}`, i + 1, total, startedAt)
-          }
+          let completed = 0
+          await runPool(REQUIRED_CSVS, 6, async (name) => {
+            csvData[name] = await fetchCsv(SDE_BASE, name, { silent: true })
+            completed++
+            updateTaskProgress(task, `Download SDE CSVs · ${name}`, completed, total, startedAt)
+          })
           ctx.csvData = csvData
           task.title = `Download SDE CSVs · ${total} files · ${formatDuration(Date.now() - startedAt)}`
         },
@@ -352,6 +369,7 @@ async function main() {
           )
           ctx.mapSolarSystemsJsonl = await loadMapSolarSystemsJsonl({
             zipPath: existsSync(localSdeZip) ? localSdeZip : undefined,
+            cacheZipPath: localSdeZip,
           })
           ctx.mapSystems = systemsFromSdeJsonl(ctx.mapSolarSystemsJsonl)
           ctx.mapData = buildMapData(ctx.mapSystems, ctx.csvData.mapSolarSystemJumps)

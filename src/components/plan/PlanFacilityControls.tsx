@@ -12,8 +12,8 @@ interface PlanFacilityControlsProps {
   regions: RegionsData
   hint?: string
   className?: string
-  onRefreshInventory?: () => void
-  isRefreshingInventory?: boolean
+  onRefresh?: () => void
+  isRefreshing?: boolean
 }
 
 export function PlanFacilityControls({
@@ -23,8 +23,8 @@ export function PlanFacilityControls({
   regions,
   hint = "Rig bonuses and owner tax are in Settings. Changes here apply to this plan's cost estimates.",
   className = '',
-  onRefreshInventory,
-  isRefreshingInventory = false,
+  onRefresh,
+  isRefreshing = false,
 }: PlanFacilityControlsProps) {
   const facility = settings.reactionFacility
   const buildSystemLocked = settings.productionLocationId != null
@@ -48,14 +48,21 @@ export function PlanFacilityControls({
                 showInventoryHint
               />
             </div>
-            {settings.productionLocationId != null && onRefreshInventory ? (
+            {settings.productionLocationId != null && onRefresh ? (
               <button
                 type="button"
-                className="btn btn-ghost btn-sm shrink-0"
-                disabled={isRefreshingInventory}
-                onClick={() => void onRefreshInventory()}
+                className="btn btn-ghost btn-sm shrink-0 gap-2"
+                disabled={isRefreshing}
+                onClick={() => void onRefresh()}
               >
-                {isRefreshingInventory ? 'Refreshing…' : 'Refresh'}
+                {isRefreshing ? (
+                  <>
+                    <span className="loading loading-spinner loading-xs" />
+                    Refreshing…
+                  </>
+                ) : (
+                  'Refresh'
+                )}
               </button>
             ) : null}
           </div>

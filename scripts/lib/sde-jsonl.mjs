@@ -1,4 +1,4 @@
-import { createReadStream, existsSync, writeFileSync } from 'fs'
+import { createReadStream, existsSync, writeFileSync, copyFileSync } from 'fs'
 import { createInterface } from 'readline'
 import { execFileSync } from 'child_process'
 import { tmpdir } from 'os'
@@ -58,17 +58,25 @@ function extractJsonlFromZip(zipPath, entryName = MAP_SOLAR_SYSTEMS_ENTRY) {
 
 /**
  * Load mapSolarSystems records from official SDE JSONL zip.
- * @param {{ zipPath?: string }} [options] - Use an existing zip (e.g. tmp-sde-jsonl.zip) to skip download.
+ * @param {{ zipPath?: string, cacheZipPath?: string }} [options]
+ *   zipPath — use existing zip (e.g. tmp-sde-jsonl.zip) to skip download.
+ *   cacheZipPath — copy downloaded zip here for CI cache (e.g. tmp-sde-jsonl.zip).
  */
 export async function loadMapSolarSystemsJsonl(options = {}) {
   let zipPath = options.zipPath
 
   if (!zipPath || !existsSync(zipPath)) {
     const buildNumber = await fetchSdeBuildNumber()
-    zipPath = join(tmpdir(), `eve-sde-${buildNumber}-jsonl.zip`)
-    if (!existsSync(zipPath)) {
+    const downloadedPath = join(tmpdir(), `eve-sde-${buildNumber}-jsonl.zip`)
+    if (!existsSync(downloadedPath)) {
       console.log(`Downloading SDE build ${buildNumber}...`)
-      await downloadToFile(sdeZipUrl(buildNumber), zipPath)
+      await downloadToFile(sdeZipUrl(buildNumber), downloadedPath)
+    }
+    if (options.cacheZipPath) {
+      copyFileSync(downloadedPath, options.cacheZipPath)
+      zipPath = options.cacheZipPath
+    } else {
+      zipPath = downloadedPath
     }
   }
 

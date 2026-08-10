@@ -178,6 +178,10 @@ export function createProgressHandler({ hubIds, skipHistory = false, onEvent }) 
       } else if (event.phase === 'history_done') {
         const suffix = event.errors ? ` · ${event.errors} skipped` : ''
         console.log(`  ${event.hubId} · history done${suffix}`)
+      } else if (event.phase === 'history_preserved') {
+        console.log(
+          `  ${event.hubId} · history preserved · ${event.preserved.toLocaleString()} products`,
+        )
       } else if (event.phase === 'courier_done') {
         console.log(`  ${event.hubId} · courier done`)
       } else if (event.phase === 'haul_rates_done') {

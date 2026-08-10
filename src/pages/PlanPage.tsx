@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { Panel } from '@/components/Panel'
@@ -396,11 +397,38 @@ export function PlanPage() {
 
   const slots = manufacturingSlotsFromSkills(activeSettings.skills)
 
+  const queryClient = useQueryClient()
   const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
-  const { data: locationInventory, refetch: refetchLocationInventory, isFetching: isRefreshingInventory } = useLocationInventory(
+  const syncSkills = useAuthStore((s) => s.syncSkills)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const { data: locationInventory, refetch: refetchLocationInventory } = useLocationInventory(
     activeCharacterId,
     activeSettings.productionLocationId,
   )
+
+  const handlePlanRefresh = useCallback(async () => {
+    if (activeCharacterId == null) return
+    setIsRefreshing(true)
+    try {
+      await Promise.all([
+        syncSkills(activeCharacterId),
+        activeSettings.productionLocationId != null
+          ? refetchLocationInventory()
+          : Promise.resolve(),
+      ])
+      await queryClient.invalidateQueries({
+        queryKey: ['production-locations', activeCharacterId],
+      })
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [
+    activeCharacterId,
+    activeSettings.productionLocationId,
+    syncSkills,
+    refetchLocationInventory,
+    queryClient,
+  ])
 
   const rootRunsTotal = useMemo(
     () => (activeTemplate ? activeTemplate.roots.reduce((sum, r) => sum + r.runs, 0) : 0),
@@ -1029,10 +1057,8 @@ export function PlanPage() {
                     onChange={isSharedView ? () => {} : updateSettings}
                     systems={data.systems}
                     regions={data.regions}
-                    onRefreshInventory={
-                      isSharedView ? undefined : () => void refetchLocationInventory()
-                    }
-                    isRefreshingInventory={isRefreshingInventory}
+                    onRefresh={isSharedView ? undefined : () => void handlePlanRefresh()}
+                    isRefreshing={isRefreshing}
                   />
                 </div>
               ) : null}

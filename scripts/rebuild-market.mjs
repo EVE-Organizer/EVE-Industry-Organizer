@@ -6,6 +6,9 @@
  * History is incremental: skips products fetched within 24h and writes
  * market.json after each batch of 100 new history fetches.
  *
+ * CI: daily fetch-data uses MARKET_SKIP_HISTORY=1 (prices only).
+ * CI: weekly schedule runs one hub per matrix job, merged via merge-market-hubs.mjs.
+ *
  * Run: node scripts/rebuild-market.mjs [hub]
  *      node scripts/rebuild-market.mjs jita
  *      node scripts/rebuild-market.mjs jita,amarr

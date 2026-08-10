@@ -2,9 +2,39 @@ import { HUB_REGION_IDS as REGION_IDS } from './hubs.mjs'
 
 const FUZZWORK_BASE = 'https://market.fuzzwork.co.uk/aggregates'
 const ESI_BASE = 'https://esi.evetech.net/latest'
+const CHUNK_SIZE = 100
+const CHUNK_CONCURRENCY = 3
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function runPool(items, concurrency, worker) {
+  if (!items.length) return
+  let next = 0
+  async function runWorker() {
+    while (true) {
+      const index = next++
+      if (index >= items.length) break
+      await worker(items[index], index)
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker()),
+  )
+}
+
+async function fetchPriceChunk(chunk, regionId, attempt = 0) {
+  const url = `${FUZZWORK_BASE}/?types=${chunk.join(',')}&region=${regionId}`
+  const res = await fetch(url)
+  if (res.status === 429 || res.status >= 500) {
+    if (attempt >= 5) throw new Error(`Fuzzwork bulk failed: ${res.status}`)
+    const retryAfter = Number(res.headers.get('retry-after')) || 2 ** attempt
+    await sleep(retryAfter * 1000)
+    return fetchPriceChunk(chunk, regionId, attempt + 1)
+  }
+  if (!res.ok) throw new Error(`Fuzzwork bulk failed: ${res.status}`)
+  return res.json()
 }
 
 export async function fetchFuzzworkPrices(typeIds, regionId, options = {}) {
@@ -13,25 +43,23 @@ export async function fetchFuzzworkPrices(typeIds, regionId, options = {}) {
   const buy = new Map()
   if (!typeIds.length) return { sell, buy }
 
-  const chunkSize = 100
-  const chunkCount = Math.ceil(typeIds.length / chunkSize)
+  const chunks = []
+  for (let i = 0; i < typeIds.length; i += CHUNK_SIZE) {
+    chunks.push(typeIds.slice(i, i + CHUNK_SIZE))
+  }
+  const chunkCount = chunks.length
+  let completed = 0
 
-  for (let i = 0; i < typeIds.length; i += chunkSize) {
-    const chunk = typeIds.slice(i, i + chunkSize)
-    const url = `${FUZZWORK_BASE}/?types=${chunk.join(',')}&region=${regionId}`
-    const res = await fetch(url)
-    if (!res.ok) throw new Error(`Fuzzwork bulk failed: ${res.status}`)
-    const data = await res.json()
+  await runPool(chunks, CHUNK_CONCURRENCY, async (chunk) => {
+    const data = await fetchPriceChunk(chunk, regionId)
     for (const typeId of chunk) {
       const row = data[String(typeId)]
       sell.set(typeId, row?.sell?.min ?? 0)
       buy.set(typeId, row?.buy?.max ?? 0)
     }
-    if (onChunk) {
-      onChunk(Math.floor(i / chunkSize) + 1, chunkCount)
-    }
-    if (i + chunkSize < typeIds.length) await sleep(200)
-  }
+    completed++
+    if (onChunk) onChunk(completed, chunkCount)
+  })
 
   return { sell, buy }
 }

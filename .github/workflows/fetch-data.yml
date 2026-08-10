@@ -1,9 +1,13 @@
 name: Update data
 
+# Daily 04:00 UTC — SDE + spot prices + haul (MARKET_SKIP_HISTORY=1, ~minutes).
+# Weekly Sun 05:00 UTC — ESI history per hub in parallel, then merge (~1 hub wall time).
+# Manual workflow_dispatch — pick any script from package.json.
+
 on:
   schedule:
-    # Daily at 04:00 UTC (SDE dump and ESI cost indices refresh overnight)
     - cron: '0 4 * * *'
+    - cron: '0 5 * * 0'
   workflow_dispatch:
     inputs:
       script:
@@ -50,9 +54,81 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  update-data:
+  daily-data:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 4 * * *'
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Resolve SDE build for cache key
+        id: sde-build
+        run: |
+          build=$(node --input-type=module -e "import { fetchSdeBuildNumber } from './scripts/lib/sde-jsonl.mjs'; console.log(await fetchSdeBuildNumber())")
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: tmp-sde-jsonl.zip
+          key: sde-jsonl-${{ steps.sde-build.outputs.build }}
+          restore-keys: sde-jsonl-
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Fetch SDE and prices (history preserved)
+        run: |
+          set -euo pipefail
+          echo "Daily update at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          MARKET_SKIP_HISTORY=1 pnpm run fetch-data
+
+      - name: Commit and push data updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.nade.io"
+          git add public/data/
+          if git diff --staged --quiet; then
+            echo "No data changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: update data (fetch-data:prices)"
+          max_attempts=5
+          for attempt in $(seq 1 "$max_attempts"); do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              echo "Rebase conflict with latest main; aborting data push"
+              git rebase --abort
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              echo "Pushed data update on attempt $attempt"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt/$max_attempts), retrying..."
+            sleep 5
+          done
+          echo "Failed to push data update after $max_attempts attempts"
+          exit 1
+
+  weekly-history:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 5 * * 0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        hub: [jita, amarr, dodixie, rens, hek, ympwl]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -70,13 +146,112 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Rebuild history for hub
+        run: |
+          set -euo pipefail
+          echo "Weekly history for ${{ matrix.hub }} at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          pnpm run rebuild-market:hub -- "${{ matrix.hub }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: market-${{ matrix.hub }}
+          path: public/data/market.json
+          retention-days: 1
+
+  merge-history:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 5 * * 0'
+    needs: weekly-history
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: market-*
+          merge-multiple: true
+          path: hub-artifacts
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Merge hub market artifacts
+        run: |
+          set -euo pipefail
+          node scripts/merge-market-hubs.mjs public/data/market.json hub-artifacts
+
+      - name: Commit and push merged history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.nade.io"
+          git add public/data/market.json
+          if git diff --staged --quiet; then
+            echo "No history changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: update data (rebuild-market:history)"
+          max_attempts=5
+          for attempt in $(seq 1 "$max_attempts"); do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              echo "Rebase conflict with latest main; aborting data push"
+              git rebase --abort
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              echo "Pushed history update on attempt $attempt"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt/$max_attempts), retrying..."
+            sleep 5
+          done
+          echo "Failed to push history update after $max_attempts attempts"
+          exit 1
+
+  manual-update:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Resolve SDE build for cache key
+        if: inputs.script == 'fetch-data' || inputs.script == 'rebuild-market:fast'
+        id: sde-build
+        run: |
+          build=$(node --input-type=module -e "import { fetchSdeBuildNumber } from './scripts/lib/sde-jsonl.mjs'; console.log(await fetchSdeBuildNumber())")
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        if: inputs.script == 'fetch-data' || inputs.script == 'rebuild-market:fast'
+        with:
+          path: tmp-sde-jsonl.zip
+          key: sde-jsonl-${{ steps.sde-build.outputs.build }}
+          restore-keys: sde-jsonl-
+
+      - run: pnpm install --frozen-lockfile
+
       - name: Run data script
         run: |
           set -euo pipefail
-          echo "Starting data update at $(date -u +%Y-%m-%dT%H:%M:%SZ) — progress logs stream below:"
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            pnpm run fetch-data
-          elif [ "${{ inputs.script }}" = "rebuild-market:hub" ]; then
+          echo "Manual update at $(date -u +%Y-%m-%dT%H:%M:%SZ) — script: ${{ inputs.script }}"
+          if [ "${{ inputs.script }}" = "rebuild-market:hub" ]; then
             hubs=()
             [ "${{ inputs.hub_jita }}" = "true" ] && hubs+=("jita")
             [ "${{ inputs.hub_amarr }}" = "true" ] && hubs+=("amarr")
@@ -103,10 +278,7 @@ jobs:
             echo "No data changes to commit"
             exit 0
           fi
-
-          script="${{ github.event_name == 'schedule' && 'fetch-data' || inputs.script }}"
-          git commit -m "chore: update data ($script)"
-
+          git commit -m "chore: update data (${{ inputs.script }})"
           max_attempts=5
           for attempt in $(seq 1 "$max_attempts"); do
             git fetch origin main
@@ -122,6 +294,5 @@ jobs:
             echo "Push rejected (attempt $attempt/$max_attempts), retrying..."
             sleep 5
           done
-
           echo "Failed to push data update after $max_attempts attempts"
           exit 1
