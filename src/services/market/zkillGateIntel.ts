@@ -13,6 +13,7 @@ import {
   throttle,
   throttleZkill,
 } from '@/services/market/requestQueue'
+import { shouldCheckCamp } from '@/lib/routeCamp'
 import { getSystemWarKillRefs, type ZkillKillRef } from '@/services/market/zkillService'
 
 const ZKILL_BASE = 'https://zkillboard.com/api'
@@ -20,8 +21,9 @@ const ESI_BASE = 'https://esi.evetech.net/latest'
 const USER_AGENT = 'EVE-Industry-Organizer/1.0 (frontend gate intel)'
 
 export const GATE_INTEL_PAST_SECONDS = 3600
-const MAX_GATE_DETAIL_CHECKS = 12
-const ZKILL_BATCH_SIZE = 4
+const MAX_GATE_DETAIL_CHECKS = 4
+const ZKILL_BATCH_SIZE = 8
+const ZKILL_BATCH_DELAY_MS = 0
 
 interface ZkillAttackerRow {
   ship_type_id?: number
@@ -34,10 +36,6 @@ interface ZkillKillListRow extends ZkillKillRef {
 
 function zkillGateIntelKey(systemId: number): string {
   return cacheKey('zkill', 'gateIntel', { systemId, pastSeconds: GATE_INTEL_PAST_SECONDS })
-}
-
-function routeGateIntelBatchKey(systemIds: number[]): string {
-  return cacheKey('zkill', 'routeGateIntelBatch', { systemIds })
 }
 
 function refLocationId(ref: ZkillKillListRow): number | null {
@@ -65,12 +63,17 @@ function needsAttackerDetail(ref: ZkillKillListRow, lookup: GateIntelLookup): bo
   if (locationId == null || !lookup.gatesByLocationId.has(locationId)) return false
   const attackers = refAttackers(ref)
   if (!attackers?.length) return true
-  return !attackers.some(
-    (a) =>
-      (a.weaponTypeId != null && lookup.smartBombTypeIds.has(a.weaponTypeId)) ||
-      (a.shipTypeId != null &&
-        (lookup.interdictorTypeIds.has(a.shipTypeId) || lookup.hicTypeIds.has(a.shipTypeId))),
-  )
+  return attackers.every((a) => a.shipTypeId == null && a.weaponTypeId == null)
+}
+
+/** Skip zKill when highsec is quiet; still check lowsec, pipes, and active systems. */
+export function shouldFetchGateIntel(
+  systemId: number,
+  security: number,
+  shipKills24h: number,
+): boolean {
+  if (shouldCheckCamp(systemId, security)) return true
+  return shipKills24h > 0
 }
 
 async function fetchKillmailAttackers(
@@ -191,27 +194,47 @@ export async function getSystemGateIntel(
   })
 }
 
+export interface RouteGateIntelOptions {
+  securities?: Map<number, number>
+  shipKillsBySystem?: Map<number, number>
+  onSystemIntel?: (systemId: number, intel: SystemGateIntel) => void
+}
+
 export async function getRouteGateIntel(
   systemIds: number[],
   lookup: GateIntelLookup,
+  options: RouteGateIntelOptions = {},
 ): Promise<Map<number, SystemGateIntel>> {
   if (systemIds.length === 0) return new Map()
 
+  const { securities, shipKillsBySystem, onSystemIntel } = options
   const sortedIds = [...new Set(systemIds)].sort((a, b) => a - b)
-  const batchKey = routeGateIntelBatchKey(sortedIds)
+  const intelBySystem = new Map<number, SystemGateIntel>()
+  const fetchIds: number[] = []
 
-  return dedupe(batchKey, async () => {
-    const intelBySystem = new Map<number, SystemGateIntel>()
-    await batchProcess(
-      sortedIds,
-      ZKILL_BATCH_SIZE,
-      80,
-      async (systemId) => {
-        const intel = await getSystemGateIntel(systemId, lookup)
-        intelBySystem.set(systemId, intel)
-      },
-      throttleZkill,
-    )
-    return intelBySystem
-  })
+  for (const systemId of sortedIds) {
+    const security = securities?.get(systemId) ?? 0
+    const shipKills = shipKillsBySystem?.get(systemId) ?? 0
+    if (!shouldFetchGateIntel(systemId, security, shipKills)) {
+      const empty = emptySystemGateIntel()
+      intelBySystem.set(systemId, empty)
+      onSystemIntel?.(systemId, empty)
+      continue
+    }
+    fetchIds.push(systemId)
+  }
+
+  await batchProcess(
+    fetchIds,
+    ZKILL_BATCH_SIZE,
+    ZKILL_BATCH_DELAY_MS,
+    async (systemId) => {
+      const intel = await getSystemGateIntel(systemId, lookup)
+      intelBySystem.set(systemId, intel)
+      onSystemIntel?.(systemId, intel)
+    },
+    throttleZkill,
+  )
+
+  return intelBySystem
 }

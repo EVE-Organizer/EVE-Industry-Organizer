@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { computeRouteDanger, type RouteDangerResult } from '@/lib/routeDanger'
-import { enrichRouteJumps } from '@/lib/routeCamp'
+import { enrichJumpsWithCamp } from '@/lib/routeCamp'
 import { loadGateIntel } from '@/services/data/gateIntelLoader'
 import { getRoute, getSystemInfo, getSystemKills, type RouteFlag } from '@/services/market/marketService'
 import { getRouteGateIntel } from '@/services/market/zkillGateIntel'
@@ -22,6 +22,20 @@ interface UseGateCheckRouteOptions {
   systemsById: Map<number, MapSystem>
 }
 
+function mergeGateIntelIntoRoute(
+  route: RouteDangerResult,
+  systemId: number,
+  gateIntelBySystem: Map<number, import('@/lib/gateIntel').SystemGateIntel>,
+): RouteDangerResult {
+  const jumps = route.jumps.map((jump) => {
+    if (jump.systemId !== systemId) return jump
+    const gateIntel = gateIntelBySystem.get(systemId)
+    if (!gateIntel) return jump
+    return enrichJumpsWithCamp([jump], new Map(), gateIntelBySystem)[0]!
+  })
+  return { ...route, jumps }
+}
+
 export function useGateCheckRoute({
   fromSystemId,
   toSystemId,
@@ -32,6 +46,7 @@ export function useGateCheckRoute({
   const [result, setResult] = useState<GateCheckResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [gateIntelLoading, setGateIntelLoading] = useState(false)
   const fetchIdRef = useRef(0)
 
   const canCheck = fromSystemId != null && toSystemId != null && fromSystemId !== toSystemId
@@ -41,6 +56,7 @@ export function useGateCheckRoute({
 
     const fetchId = ++fetchIdRef.current
     setLoading(true)
+    setGateIntelLoading(false)
     setError(null)
     setResult(null)
 
@@ -65,21 +81,25 @@ export function useGateCheckRoute({
       const routeSystemIds = routeRes.route
       const securities = new Map<number, number>()
       const names = new Map<number, string>()
+      const missingSystemIds: number[] = []
 
       for (const systemId of routeSystemIds) {
         const known = systemsById.get(systemId)
         if (known) {
           names.set(systemId, known.name)
           securities.set(systemId, known.security)
+        } else {
+          missingSystemIds.push(systemId)
         }
       }
 
-      for (const systemId of routeSystemIds) {
-        if (names.has(systemId)) continue
-        const info = await getSystemInfo(systemId)
+      if (missingSystemIds.length) {
+        const infos = await Promise.all(missingSystemIds.map((id) => getSystemInfo(id)))
         if (fetchId !== fetchIdRef.current) return
-        names.set(systemId, info.name)
-        securities.set(systemId, info.security)
+        for (const info of infos) {
+          names.set(info.systemId, info.name)
+          securities.set(info.systemId, info.security)
+        }
       }
 
       const killMap = new Map(
@@ -88,22 +108,49 @@ export function useGateCheckRoute({
           { systemId: Number(id), shipKills: k.shipKills, podKills: k.podKills },
         ]),
       )
+      const shipKillsBySystem = new Map<number, number>(
+        routeSystemIds.map((id) => [id, killMap.get(id)?.shipKills ?? 0]),
+      )
 
       const routeDanger = computeRouteDanger(routeRes.route, names, securities, killMap)
-      const gateIntelBySystem = await getRouteGateIntel(routeSystemIds, gateLookup)
-      if (fetchId !== fetchIdRef.current) return
-
-      const enriched = enrichRouteJumps(routeDanger, new Map(), gateIntelBySystem)
       const fromName = names.get(fromSystemId) ?? `System ${fromSystemId}`
       const toName = names.get(toSystemId) ?? `System ${toSystemId}`
 
-      setResult({ route: enriched, fromName, toName })
+      setResult({ route: routeDanger, fromName, toName })
+      setLoading(false)
+      setGateIntelLoading(true)
+
+      const gateIntelBySystem = new Map<number, import('@/lib/gateIntel').SystemGateIntel>()
+
+      await getRouteGateIntel(routeSystemIds, gateLookup, {
+        securities,
+        shipKillsBySystem,
+        onSystemIntel: (systemId, intel) => {
+          if (fetchId !== fetchIdRef.current) return
+          gateIntelBySystem.set(systemId, intel)
+          setResult((prev) => {
+            if (!prev) return prev
+            const enriched = mergeGateIntelIntoRoute(prev.route, systemId, gateIntelBySystem)
+            return { ...prev, route: enriched }
+          })
+        },
+      })
+
+      if (fetchId !== fetchIdRef.current) return
+
+      const enriched = enrichJumpsWithCamp(routeDanger.jumps, new Map(), gateIntelBySystem)
+      setResult({
+        route: { ...routeDanger, jumps: enriched },
+        fromName,
+        toName,
+      })
     } catch {
       if (fetchId !== fetchIdRef.current) return
       setError('Could not load route or gate intel.')
     } finally {
       if (fetchId === fetchIdRef.current) {
         setLoading(false)
+        setGateIntelLoading(false)
       }
     }
   }, [avoidSystemIds, canCheck, flag, fromSystemId, systemsById, toSystemId])
@@ -111,9 +158,10 @@ export function useGateCheckRoute({
   useEffect(() => {
     setResult(null)
     setError(null)
+    setGateIntelLoading(false)
   }, [fromSystemId, toSystemId, flag, avoidSystemIds])
 
-  return { result, error, loading, canCheck, checkRoute }
+  return { result, error, loading, gateIntelLoading, canCheck, checkRoute }
 }
 
 export function findSystemByName(

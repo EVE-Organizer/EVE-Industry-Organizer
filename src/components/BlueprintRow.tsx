@@ -28,6 +28,9 @@ export interface BlueprintItemProps {
   haulOut: RouteDangerResult | null
   haulError: string | null
   dangerLoading: boolean
+  gateIntelLoading?: boolean
+  haulInLabel?: string
+  haulOutLabel?: string
 }
 
 function BlueprintMetaLine({ row }: { row: RankedBlueprintRow }) {
@@ -70,7 +73,7 @@ function BlueprintItemName({
 }
 
 export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps) {
-  const { row, rank, skills, watched, onWatch, onOpenGraph, onOpenSetup, onOpenIph, onOpenHaulRisk, haulIn, haulOut, haulError, dangerLoading } = props
+  const { row, rank, skills, watched, onWatch, onOpenGraph, onOpenSetup, onOpenIph, onOpenHaulRisk, haulIn, haulOut, haulError, dangerLoading, gateIntelLoading, haulInLabel, haulOutLabel } = props
   const missingSkills = getMissingBuildSkills(row.blueprint, skills)
 
   return (
@@ -121,6 +124,9 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
           haulOut={haulOut}
           error={haulError}
           loading={dangerLoading}
+          gateIntelLoading={gateIntelLoading}
+          haulInLabel={haulInLabel}
+          haulOutLabel={haulOutLabel}
           onOpen={onOpenHaulRisk}
         />
       </td>
@@ -156,7 +162,7 @@ function MobileStat({
 }
 
 export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: BlueprintItemProps) {
-  const { row, rank, skills, watched, onWatch, onOpenGraph, onOpenSetup, onOpenIph, onOpenHaulRisk, haulIn, haulOut, haulError, dangerLoading } = props
+  const { row, rank, skills, watched, onWatch, onOpenGraph, onOpenSetup, onOpenIph, onOpenHaulRisk, haulIn, haulOut, haulError, dangerLoading, gateIntelLoading, haulInLabel, haulOutLabel } = props
   const missingSkills = getMissingBuildSkills(row.blueprint, skills)
 
   return (
@@ -239,6 +245,9 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
             haulOut={haulOut}
             error={haulError}
             loading={dangerLoading}
+            gateIntelLoading={gateIntelLoading}
+            haulInLabel={haulInLabel}
+            haulOutLabel={haulOutLabel}
             onOpen={onOpenHaulRisk}
           />
         </MobileStat>

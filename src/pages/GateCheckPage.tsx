@@ -12,6 +12,7 @@ import {
 } from '@/hooks/useGateCheckRoute'
 import { useMapData } from '@/hooks/useMapData'
 import { useSdeData } from '@/hooks/useSdeData'
+import { loadGateIntel } from '@/services/data/gateIntelLoader'
 import type { RouteFlag } from '@/services/market/marketService'
 
 const ROUTE_FLAGS: RouteFlag[] = ['secure', 'shortest', 'insecure']
@@ -67,13 +68,17 @@ export function GateCheckPage() {
   const fromName = fromSystemId != null ? (systemsById.get(fromSystemId)?.name ?? '') : ''
   const toName = toSystemId != null ? (systemsById.get(toSystemId)?.name ?? '') : ''
 
-  const { result, error, loading, canCheck, checkRoute } = useGateCheckRoute({
+  const { result, error, loading, gateIntelLoading, canCheck, checkRoute } = useGateCheckRoute({
     fromSystemId,
     toSystemId,
     flag,
     avoidSystemIds,
     systemsById,
   })
+
+  useEffect(() => {
+    void loadGateIntel()
+  }, [])
 
   useEffect(() => {
     if (!systems.length) return
@@ -242,10 +247,10 @@ export function GateCheckPage() {
             <button
               type="button"
               className="btn btn-primary"
-              disabled={!canCheck || loading}
+              disabled={!canCheck || loading || gateIntelLoading}
               onClick={() => void checkRoute()}
             >
-              {loading ? 'Checking…' : 'Check route'}
+              {loading ? 'Loading route…' : gateIntelLoading ? 'Loading gate intel…' : 'Check route'}
             </button>
             {!canCheck && fromSystemId != null && toSystemId != null ? (
               <span className="text-xs opacity-60">Pick different origin and destination.</span>
@@ -263,17 +268,26 @@ export function GateCheckPage() {
       {result ? (
         <section className="card bg-base-200 border border-eve-border">
           <div className="card-body gap-4">
-            <div>
-              <h2 className="text-base font-semibold">Route</h2>
-              <p className="text-xs opacity-60 mt-1">
-                {result.fromName} → {result.toName} · {result.route.gateJumps} jump
-                {result.route.gateJumps === 1 ? '' : 's'} · {routeFlagLabel(flag)}
-              </p>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold">Route</h2>
+                <p className="text-xs opacity-60 mt-1">
+                  {result.fromName} → {result.toName} · {result.route.gateJumps} jump
+                  {result.route.gateJumps === 1 ? '' : 's'} · {routeFlagLabel(flag)}
+                </p>
+              </div>
+              {gateIntelLoading ? (
+                <span className="text-xs opacity-60 flex items-center gap-2 shrink-0">
+                  <span className="loading loading-spinner loading-xs" />
+                  Gate intel…
+                </span>
+              ) : null}
             </div>
             <GateCheckResultsTable
               jumps={result.route.jumps}
               fromName={result.fromName}
               toName={result.toName}
+              gateIntelLoading={gateIntelLoading}
             />
           </div>
         </section>

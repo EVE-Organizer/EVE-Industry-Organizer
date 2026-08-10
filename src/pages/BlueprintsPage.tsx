@@ -146,6 +146,7 @@ export function BlueprintsPage() {
     haulOut: haulOutDanger,
     error: haulDangerError,
     loading: dangerLoading,
+    gateIntelLoading,
     labels: haulLabels,
   } = useHaulRouteRisk({
     sde,
@@ -287,6 +288,9 @@ export function BlueprintsPage() {
         haulOut={haulOutDanger}
         haulError={haulDangerError}
         dangerLoading={dangerLoading}
+        gateIntelLoading={gateIntelLoading}
+        haulInLabel={haulLabels.haulInLabel}
+        haulOutLabel={haulLabels.haulOutLabel}
         onToggle={toggleWatchlist}
         onOpenGraph={openGraph}
         onOpenSetup={setSetupDetailRow}
@@ -316,6 +320,9 @@ export function BlueprintsPage() {
           haulOutDanger={haulOutDanger}
           haulDangerError={haulDangerError}
           dangerLoading={dangerLoading}
+          gateIntelLoading={gateIntelLoading}
+          haulInLabel={haulLabels.haulInLabel}
+          haulOutLabel={haulLabels.haulOutLabel}
           onSort={handleSort}
           onOpenGraph={openGraph}
           onOpenSetup={setSetupDetailRow}
@@ -348,6 +355,7 @@ export function BlueprintsPage() {
         haulIn={haulInDanger}
         haulOut={haulOutDanger}
         loading={dangerLoading}
+        gateIntelLoading={gateIntelLoading}
         haulInLabel={haulLabels.haulInLabel}
         haulOutLabel={haulLabels.haulOutLabel}
       />
@@ -380,6 +388,9 @@ const BlueprintResults = memo(function BlueprintResults({
   haulOutDanger,
   haulDangerError,
   dangerLoading,
+  gateIntelLoading,
+  haulInLabel,
+  haulOutLabel,
   onSort,
   onOpenGraph,
   onOpenSetup,
@@ -395,6 +406,9 @@ const BlueprintResults = memo(function BlueprintResults({
   haulOutDanger: RouteDangerResult | null
   haulDangerError: string | null
   dangerLoading: boolean
+  gateIntelLoading: boolean
+  haulInLabel: string
+  haulOutLabel: string
   onSort: (key: BlueprintSortKey) => void
   onOpenGraph: (row: RankedBlueprintRow) => void
   onOpenSetup: (row: RankedBlueprintRow) => void
@@ -469,6 +483,9 @@ const BlueprintResults = memo(function BlueprintResults({
                 haulOut={haulOutDanger}
                 haulError={haulDangerError}
                 dangerLoading={dangerLoading}
+                gateIntelLoading={gateIntelLoading}
+                haulInLabel={haulInLabel}
+                haulOutLabel={haulOutLabel}
               />
             ))}
           </tbody>
@@ -492,6 +509,9 @@ const BlueprintResults = memo(function BlueprintResults({
             haulOut={haulOutDanger}
             haulError={haulDangerError}
             dangerLoading={dangerLoading}
+            gateIntelLoading={gateIntelLoading}
+            haulInLabel={haulInLabel}
+            haulOutLabel={haulOutLabel}
           />
         ))}
       </div>

@@ -1,11 +1,26 @@
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { CampLevel } from '@/lib/routeCamp'
 import { campLevelBadgeClass, CAMP_COLUMN_TOOLTIP } from '@/lib/routeCamp'
 import { gateKillBand, gateKillBandBadgeClass, explainGateIntel } from '@/lib/gateIntel'
-import type { DangerBand, RouteDangerResult } from '@/lib/routeDanger'
+import {
+  countNotableJumps,
+  filterNotableJumps,
+  gateCheckUrl,
+  haulRiskTriggerSummary,
+  jumpRowHighlightClass,
+  parseRouteLabel,
+  routeHasUrgentCamp,
+  worseDangerBand,
+  worstJump,
+} from '@/lib/haulRiskDisplay'
+import type { DangerBand, RouteDangerResult, RouteJumpDanger } from '@/lib/routeDanger'
 import { dangerBand, dangerBandBadgeClass } from '@/lib/routeDanger'
 import { formatDecimal } from '@/lib/profit'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { Tooltip } from '@/components/Tooltip'
+
+type RouteTab = 'in' | 'out'
 
 interface HaulRiskModalProps {
   open: boolean
@@ -13,6 +28,7 @@ interface HaulRiskModalProps {
   haulIn: RouteDangerResult | null
   haulOut: RouteDangerResult | null
   loading: boolean
+  gateIntelLoading?: boolean
   haulInLabel: string
   haulOutLabel: string
 }
@@ -21,30 +37,61 @@ function campLevelLabel(level: CampLevel | undefined): string {
   return level ?? 'None'
 }
 
-function HaulGateFlags({ jump }: { jump: RouteDangerResult['jumps'][number] }) {
+function GateIntelCell({ jump }: { jump: RouteDangerResult['jumps'][number] }) {
   const intel = jump.gateIntel
-  if (!intel) return <span className="text-xs opacity-40">—</span>
-  const badges: { key: string; label: string; className: string }[] = []
-  if (intel.smartbombs) badges.push({ key: 'sb', label: 'SB', className: 'badge-error' })
-  if (intel.hictors) badges.push({ key: 'hic', label: 'HIC', className: 'badge-error' })
-  if (intel.dictors) badges.push({ key: 'dic', label: 'Dic', className: 'badge-warning' })
-  if (!badges.length) return <span className="text-xs opacity-40">—</span>
+  const gateBand = gateKillBand(intel?.gateKillCount ?? 0)
+  const gateTooltip = intel ? explainGateIntel(intel) : 'No gate kills in the last hour.'
+
+  const flags: { key: string; label: string; className: string }[] = []
+  if (intel?.smartbombs) flags.push({ key: 'sb', label: 'SB', className: 'badge-error' })
+  if (intel?.hictors) flags.push({ key: 'hic', label: 'HIC', className: 'badge-error' })
+  if (intel?.dictors) flags.push({ key: 'dic', label: 'Dic', className: 'badge-warning' })
+
   return (
-    <span className="inline-flex flex-wrap gap-1">
-      {badges.map((badge) => (
-        <span key={badge.key} className={`badge badge-xs ${badge.className}`}>
-          {badge.label}
+    <Tooltip text={gateTooltip} placement="top">
+      <span className="inline-flex items-center gap-1.5">
+        <span className={`badge badge-xs tabular-nums ${gateKillBandBadgeClass(gateBand)}`}>
+          {intel?.gateKillCount ?? 0}
         </span>
-      ))}
-    </span>
+        {flags.length ? (
+          <span className="inline-flex gap-0.5">
+            {flags.map((flag) => (
+              <span key={flag.key} className={`badge badge-xs ${flag.className}`}>
+                {flag.label}
+              </span>
+            ))}
+          </span>
+        ) : null}
+      </span>
+    </Tooltip>
   )
 }
 
-function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
+function RouteJumpTable({
+  jumps,
+  totalJumps,
+  showAll,
+  gateIntelLoading,
+}: {
+  jumps: RouteJumpDanger[]
+  totalJumps: number
+  showAll: boolean
+  gateIntelLoading: boolean
+}) {
   if (!jumps.length) {
     return (
-      <div className="haul-risk-modal__table-scroll flex items-center justify-center">
-        <p className="text-sm opacity-50">No route data</p>
+      <div className="haul-risk-modal__empty flex flex-col items-center justify-center gap-2 py-10 px-4 text-center">
+        {showAll ? (
+          <p className="text-sm opacity-50">No route data.</p>
+        ) : (
+          <>
+            <p className="text-sm font-medium text-success">No risky systems flagged</p>
+            <p className="text-xs opacity-60 max-w-sm">
+              Nothing stood out on gate intel, camps, or route danger. Turn on “Show all jumps” to
+              review every system.
+            </p>
+          </>
+        )}
       </div>
     )
   }
@@ -56,52 +103,47 @@ function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
           <tr className="text-xs">
             <th>System</th>
             <th>Sec</th>
-            <th>Kills (24h)</th>
             <th>Risk</th>
-            <th>Gate (1h)</th>
-            <th>Flags</th>
+            <th>
+              <span className="inline-flex items-center gap-1">
+                Gate (1h)
+                <InfoTooltip
+                  text="Gate kills and smartbomb / bubble ship flags from zKillboard (last hour)."
+                  placement="top"
+                />
+              </span>
+            </th>
             <th>
               <span className="inline-flex items-center gap-1">
                 Camp
                 <InfoTooltip text={CAMP_COLUMN_TOOLTIP} placement="top" />
               </span>
             </th>
+            <th className="hidden sm:table-cell">24h kills</th>
           </tr>
         </thead>
         <tbody>
-          {jumps.map((jump) => {
-            const intel = jump.gateIntel
-            const gateBand = gateKillBand(intel?.gateKillCount ?? 0)
-            const gateTooltip = intel ? explainGateIntel(intel) : 'No gate kills in the last hour.'
-            return (
-            <tr key={jump.systemId} className="text-sm">
-              <td className="max-w-[10rem] truncate">{jump.systemName}</td>
+          {jumps.map((jump) => (
+            <tr
+              key={jump.systemId}
+              className={`text-sm ${jumpRowHighlightClass(jump)}`}
+            >
+              <td className="max-w-[11rem] truncate font-medium">{jump.systemName}</td>
               <td className="tabular-nums">{formatDecimal(jump.security, 1)}</td>
-              <td className="tabular-nums whitespace-nowrap">
-                {jump.shipKills}s / {jump.podKills}p
-              </td>
               <td>
                 <span className={`badge badge-xs ${dangerBandBadgeClass(dangerBand(jump.danger))}`}>
                   {dangerBand(jump.danger)}
                 </span>
               </td>
               <td>
-                <Tooltip text={gateTooltip} placement="top">
-                  <span className={`badge badge-xs tabular-nums ${gateKillBandBadgeClass(gateBand)}`}>
-                    {intel?.gateKillCount ?? 0}
-                  </span>
-                </Tooltip>
+                {gateIntelLoading && !jump.gateIntel ? (
+                  <span className="text-xs opacity-40">…</span>
+                ) : (
+                  <GateIntelCell jump={jump} />
+                )}
               </td>
               <td>
-                <Tooltip text={gateTooltip} placement="top">
-                  <HaulGateFlags jump={jump} />
-                </Tooltip>
-              </td>
-              <td>
-                <Tooltip
-                  text={jump.campReason ?? 'No camp data for this system.'}
-                  placement="left"
-                >
+                <Tooltip text={jump.campReason ?? 'No camp data for this system.'} placement="left">
                   <span
                     className={`badge badge-xs ${campLevelBadgeClass(jump.campLevel ?? 'None')}`}
                     aria-label={jump.campReason}
@@ -111,44 +153,62 @@ function RouteJumpTable({ jumps }: { jumps: RouteDangerResult['jumps'] }) {
                   </span>
                 </Tooltip>
               </td>
+              <td className="tabular-nums whitespace-nowrap hidden sm:table-cell opacity-70">
+                {jump.shipKills}s / {jump.podKills}p
+              </td>
             </tr>
-            )
-          })}
+          ))}
         </tbody>
       </table>
+      {!showAll && totalJumps > jumps.length ? (
+        <p className="text-[11px] opacity-50 px-3 py-2 border-t border-eve-border">
+          Showing {jumps.length} of {totalJumps} systems with elevated risk or gate activity.
+        </p>
+      ) : null}
     </div>
   )
 }
 
-function RouteSummaryCard({
-  title,
-  routeLabel,
+function RouteSummaryStrip({
+  direction,
+  label,
   route,
+  active,
+  onSelect,
 }: {
-  title: string
-  routeLabel: string
+  direction: 'in' | 'out'
+  label: string
   route: RouteDangerResult
+  active: boolean
+  onSelect: () => void
 }) {
+  const notable = countNotableJumps(route.jumps)
+  const worst = worstJump(route.jumps)
+  const urgent = routeHasUrgentCamp(route)
+
   return (
-    <section className="haul-risk-modal__route card bg-base-200/60 border border-eve-border flex flex-col min-h-0">
-      <div className="card-body p-4 gap-3 flex flex-col min-h-0">
-        <div className="flex items-center justify-between gap-3 shrink-0">
-          <div className="min-w-0 flex-1">
-            <h4 className="text-sm font-semibold">{title}</h4>
-            <p className="haul-risk-modal__route-label text-xs opacity-60 mt-1">{routeLabel}</p>
-          </div>
-          <div className="text-right shrink-0">
-            <span className={`badge ${dangerBandBadgeClass(route.band)} badge-md font-semibold`}>
-              {route.band}
-            </span>
-          </div>
-        </div>
-        <p className="text-[11px] opacity-50 shrink-0">
-          {route.gateJumps} jump{route.gateJumps === 1 ? '' : 's'} · worst system sets route risk
-        </p>
-        <RouteJumpTable jumps={route.jumps} />
-      </div>
-    </section>
+    <button
+      type="button"
+      className={`haul-risk-modal__route-tab ${active ? 'haul-risk-modal__route-tab--active' : ''}`}
+      onClick={onSelect}
+      aria-pressed={active}
+    >
+      <span className="haul-risk-modal__route-tab-head">
+        <span className="text-xs font-semibold uppercase tracking-wide opacity-70">
+          {direction === 'in' ? 'Haul in' : 'Haul out'}
+        </span>
+        <span className={`badge badge-sm ${dangerBandBadgeClass(route.band)}`}>{route.band}</span>
+      </span>
+      <span className="haul-risk-modal__route-tab-label">{label}</span>
+      <span className="haul-risk-modal__route-tab-meta">
+        {route.gateJumps} jump{route.gateJumps === 1 ? '' : 's'}
+        {notable ? ` · ${notable} to watch` : ' · clear'}
+        {urgent ? ' · camp likely' : ''}
+        {worst && (route.band === 'High' || route.band === 'Critical')
+          ? ` · worst: ${worst.systemName}`
+          : ''}
+      </span>
+    </button>
   )
 }
 
@@ -158,19 +218,68 @@ export function HaulRiskModal({
   haulIn,
   haulOut,
   loading,
+  gateIntelLoading = false,
   haulInLabel,
   haulOutLabel,
 }: HaulRiskModalProps) {
+  const [activeTab, setActiveTab] = useState<RouteTab>('in')
+  const [showAllJumps, setShowAllJumps] = useState(false)
+
+  const defaultTab = useMemo<RouteTab>(() => {
+    if (!haulIn || !haulOut) return 'in'
+    if (haulOut.band !== haulIn.band) {
+      return worseDangerBand(haulOut.band, haulIn.band) === haulOut.band ? 'out' : 'in'
+    }
+    const outNotable = countNotableJumps(haulOut.jumps)
+    const inNotable = countNotableJumps(haulIn.jumps)
+    return outNotable > inNotable ? 'out' : 'in'
+  }, [haulIn, haulOut])
+
+  useEffect(() => {
+    if (open) {
+      setActiveTab(defaultTab)
+      setShowAllJumps(false)
+    }
+  }, [open, defaultTab, haulInLabel, haulOutLabel])
+
+  const activeRoute = activeTab === 'in' ? haulIn : haulOut
+  const activeLabel = activeTab === 'in' ? haulInLabel : haulOutLabel
+  const displayedJumps = useMemo(() => {
+    if (!activeRoute) return []
+    return showAllJumps ? activeRoute.jumps : filterNotableJumps(activeRoute.jumps)
+  }, [activeRoute, showAllJumps])
+
+  const gateCheckLink = useMemo(() => {
+    const parsed = parseRouteLabel(activeLabel)
+    if (!parsed) return null
+    return gateCheckUrl(parsed.from, parsed.to)
+  }, [activeLabel])
+
   if (!open) return null
+
+  const overallBand =
+    haulIn && haulOut ? worseDangerBand(haulIn.band, haulOut.band) : haulIn?.band ?? haulOut?.band
 
   return (
     <dialog className="modal modal-open">
       <div className="modal-box haul-risk-modal__box w-full p-0 overflow-hidden">
         <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-eve-border">
           <div className="min-w-0">
-            <h3 className="font-bold text-lg">Haul route risk</h3>
-            <p className="text-xs opacity-60 mt-1">
-              Materials from hub market to build system; finished goods back to market.
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="font-bold text-lg">Haul route risk</h3>
+              {overallBand && !loading ? (
+                <span className={`badge ${dangerBandBadgeClass(overallBand)}`}>{overallBand}</span>
+              ) : null}
+              {gateIntelLoading ? (
+                <span className="text-xs opacity-60 inline-flex items-center gap-1.5">
+                  <span className="loading loading-spinner loading-xs" />
+                  Gate intel…
+                </span>
+              ) : null}
+            </div>
+            <p className="text-xs opacity-60 mt-1 max-w-xl">
+              Same secure routes for every blueprint with your current buy hub, build system, and sell
+              hub. Materials in from market; finished goods back out.
             </p>
           </div>
           <button type="button" className="btn btn-sm btn-circle btn-ghost shrink-0" onClick={onClose}>
@@ -178,10 +287,11 @@ export function HaulRiskModal({
           </button>
         </div>
 
-        <div className="px-5 py-4 shrink-0">
+        <div className="px-5 py-4 flex flex-col gap-4 min-h-0">
           {loading && (
             <div className="flex items-center justify-center py-16 text-sm opacity-60">
-              Loading route and kill data…
+              <span className="loading loading-spinner loading-sm mr-2" />
+              Loading routes…
             </div>
           )}
 
@@ -192,18 +302,54 @@ export function HaulRiskModal({
           )}
 
           {!loading && haulIn && haulOut && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-              <RouteSummaryCard title="Haul in" routeLabel={haulInLabel} route={haulIn} />
-              <RouteSummaryCard title="Haul out" routeLabel={haulOutLabel} route={haulOut} />
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <RouteSummaryStrip
+                  direction="in"
+                  label={haulInLabel}
+                  route={haulIn}
+                  active={activeTab === 'in'}
+                  onSelect={() => setActiveTab('in')}
+                />
+                <RouteSummaryStrip
+                  direction="out"
+                  label={haulOutLabel}
+                  route={haulOut}
+                  active={activeTab === 'out'}
+                  onSelect={() => setActiveTab('out')}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <label className="label cursor-pointer gap-2 py-0">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-xs checkbox-primary"
+                    checked={showAllJumps}
+                    onChange={(e) => setShowAllJumps(e.target.checked)}
+                  />
+                  <span className="label-text text-xs">Show all jumps</span>
+                </label>
+                {gateCheckLink ? (
+                  <Link to={gateCheckLink} className="link link-hover text-xs" onClick={onClose}>
+                    Open in Gate check →
+                  </Link>
+                ) : null}
+              </div>
+
+              <RouteJumpTable
+                jumps={displayedJumps}
+                totalJumps={activeRoute?.jumps.length ?? 0}
+                showAll={showAllJumps}
+                gateIntelLoading={gateIntelLoading}
+              />
+            </>
           )}
         </div>
 
-        <div className="px-5 py-3 border-t border-eve-border bg-base-200/40 text-[11px] opacity-50 space-y-1">
-          <p>Risk scores combine system security and ship/pod kills from the last 24 hours (ESI).</p>
-          <p>
-            Gate kills (1h), smartbomb/HIC/dictor flags, and camp levels use zKillboard data. Hauler kills use a 2 hour window. This is a hint, not local intel.
-          </p>
+        <div className="px-5 py-3 border-t border-eve-border bg-base-200/40 text-[11px] opacity-50">
+          Risk uses security and ESI 24h kills. Gate and camp hints use zKillboard (1h gates, 2h
+          haulers). Not local intel.
         </div>
       </div>
       <form method="dialog" className="modal-backdrop">
@@ -220,6 +366,9 @@ interface HaulRiskTriggerProps {
   haulOut: RouteDangerResult | null
   error?: string | null
   loading: boolean
+  gateIntelLoading?: boolean
+  haulInLabel?: string
+  haulOutLabel?: string
   onOpen: () => void
 }
 
@@ -257,24 +406,55 @@ function HaulFailIcon({ className }: { className?: string }) {
   )
 }
 
-function RiskIcon({ direction, band }: { direction: 'in' | 'out'; band: DangerBand }) {
+function RiskIcon({
+  direction,
+  band,
+  urgent,
+}: {
+  direction: 'in' | 'out'
+  band: DangerBand
+  urgent?: boolean
+}) {
   const Icon = direction === 'in' ? HaulInIcon : HaulOutIcon
   const dirLabel = direction === 'in' ? 'Haul in' : 'Haul out'
 
   return (
     <span
-      className={`inline-flex items-center justify-center w-5 h-5 rounded ${dangerBandBadgeClass(band)}`}
-      title={`${dirLabel}: ${band}`}
+      className={`relative inline-flex items-center justify-center w-5 h-5 rounded ${dangerBandBadgeClass(band)}`}
     >
       <Icon className="w-3 h-3 shrink-0" />
-      <span className="sr-only">{dirLabel}: {band}</span>
+      {urgent ? (
+        <span
+          className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-error ring-1 ring-base-100"
+          aria-hidden
+        />
+      ) : null}
+      <span className="sr-only">
+        {dirLabel}: {band}
+        {urgent ? ', camp likely' : ''}
+      </span>
     </span>
   )
 }
 
-export function HaulRiskTrigger({ haulIn, haulOut, error, loading, onOpen }: HaulRiskTriggerProps) {
+export function HaulRiskTrigger({
+  haulIn,
+  haulOut,
+  error,
+  loading,
+  gateIntelLoading,
+  haulInLabel,
+  haulOutLabel,
+  onOpen,
+}: HaulRiskTriggerProps) {
   if (loading) {
-    return <span className="text-xs opacity-40">…</span>
+    return (
+      <Tooltip text="Loading haul routes…" placement="left">
+        <span className="inline-flex items-center justify-center w-[2.625rem] text-xs opacity-40">
+          <span className="loading loading-spinner loading-xs" />
+        </span>
+      </Tooltip>
+    )
   }
 
   if (error) {
@@ -299,18 +479,28 @@ export function HaulRiskTrigger({ haulIn, haulOut, error, loading, onOpen }: Hau
     return <span className="text-xs opacity-50">—</span>
   }
 
+  const tooltip =
+    haulInLabel && haulOutLabel
+      ? haulRiskTriggerSummary(haulIn, haulOut, haulInLabel, haulOutLabel)
+      : `Haul in: ${haulIn.band}. Haul out: ${haulOut.band}. Click for details.`
+
+  const inUrgent = routeHasUrgentCamp(haulIn)
+  const outUrgent = routeHasUrgentCamp(haulOut)
+
   return (
-    <button
-      type="button"
-      className="inline-flex items-center gap-0.5 hover:opacity-80 transition-opacity"
-      onClick={(e) => {
-        e.stopPropagation()
-        onOpen()
-      }}
-      aria-label={`Haul risk: in ${haulIn.band}, out ${haulOut.band}. Open details.`}
-    >
-      <RiskIcon direction="in" band={haulIn.band} />
-      <RiskIcon direction="out" band={haulOut.band} />
-    </button>
+    <Tooltip text={gateIntelLoading ? `${tooltip}\n(Gate intel still loading.)` : tooltip} placement="left">
+      <button
+        type="button"
+        className="inline-flex items-center gap-0.5 hover:opacity-80 transition-opacity"
+        onClick={(e) => {
+          e.stopPropagation()
+          onOpen()
+        }}
+        aria-label={`Haul risk: in ${haulIn.band}, out ${haulOut.band}. Open details.`}
+      >
+        <RiskIcon direction="in" band={haulIn.band} urgent={inUrgent} />
+        <RiskIcon direction="out" band={haulOut.band} urgent={outUrgent} />
+      </button>
+    </Tooltip>
   )
 }

@@ -25,10 +25,12 @@ export function GateCheckResultsTable({
   jumps,
   fromName,
   toName,
+  gateIntelLoading = false,
 }: {
   jumps: RouteDangerResult['jumps']
   fromName: string
   toName: string
+  gateIntelLoading?: boolean
 }) {
   if (!jumps.length) {
     return <p className="text-sm opacity-50 py-8 text-center">No route data.</p>
@@ -60,16 +62,24 @@ export function GateCheckResultsTable({
                   {jump.shipKills}s / {jump.podKills}p
                 </td>
                 <td>
-                  <Tooltip text={gateTooltip} placement="top">
-                    <span className={`badge badge-xs tabular-nums ${gateKillBandBadgeClass(band)}`}>
-                      {intel?.gateKillCount ?? 0}
-                    </span>
-                  </Tooltip>
+                  {gateIntelLoading && intel == null ? (
+                    <span className="text-xs opacity-40">…</span>
+                  ) : (
+                    <Tooltip text={gateTooltip} placement="top">
+                      <span className={`badge badge-xs tabular-nums ${gateKillBandBadgeClass(band)}`}>
+                        {intel?.gateKillCount ?? 0}
+                      </span>
+                    </Tooltip>
+                  )}
                 </td>
                 <td>
-                  <Tooltip text={gateTooltip} placement="top">
-                    <GateFlagBadges intel={intel} />
-                  </Tooltip>
+                  {gateIntelLoading && intel == null ? (
+                    <span className="text-xs opacity-40">…</span>
+                  ) : (
+                    <Tooltip text={gateTooltip} placement="top">
+                      <GateFlagBadges intel={intel} />
+                    </Tooltip>
+                  )}
                 </td>
                 <td className="text-right whitespace-nowrap">
                   <a

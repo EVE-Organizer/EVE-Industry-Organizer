@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { HUBS, type HubId } from '@/types'
 import { computeRouteDanger, type RouteDangerResult } from '@/lib/routeDanger'
 import { buildHaulerTypeIds, enrichRouteJumps, shouldCheckCamp } from '@/lib/routeCamp'
+import type { SystemGateIntel } from '@/lib/gateIntel'
 import { loadGateIntel } from '@/services/data/gateIntelLoader'
 import { getHubMarket, resolveBuildSystem } from '@/services/data/sdeLoader'
 import { getRoute, getSystemInfo, getSystemKills } from '@/services/market/marketService'
@@ -50,6 +51,7 @@ export function useHaulRouteRisk({
   const [haulOut, setHaulOut] = useState<RouteDangerResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [gateIntelLoading, setGateIntelLoading] = useState(false)
   const fetchIdRef = useRef(0)
   const haulerTypeIds = useMemo(() => (sde ? buildHaulerTypeIds(sde.types) : null), [sde])
 
@@ -70,6 +72,7 @@ export function useHaulRouteRisk({
       setHaulOut(null)
       setError(null)
       setLoading(false)
+      setGateIntelLoading(false)
       return
     }
 
@@ -79,6 +82,7 @@ export function useHaulRouteRisk({
       setHaulOut(null)
       setError(null)
       setLoading(false)
+      setGateIntelLoading(false)
       return
     }
     const sellHubMarket = getHubMarket(sde.market, sellHub) ?? buyHubMarket
@@ -97,6 +101,7 @@ export function useHaulRouteRisk({
     setHaulOut(null)
     setError(null)
     setLoading(true)
+    setGateIntelLoading(false)
 
     ;(async () => {
       try {
@@ -124,14 +129,15 @@ export function useHaulRouteRisk({
         }
 
         const routeSystemIds = [...new Set([...inRoute.route, ...outRoute.route])]
-        for (const systemId of routeSystemIds) {
-          if (names.has(systemId)) continue
-          const info = await getSystemInfo(systemId)
-          names.set(systemId, info.name)
-          securities.set(systemId, info.security)
+        const missingSystemIds = routeSystemIds.filter((id) => !names.has(id))
+        if (missingSystemIds.length) {
+          const infos = await Promise.all(missingSystemIds.map((id) => getSystemInfo(id)))
+          if (fetchId !== fetchIdRef.current) return
+          for (const info of infos) {
+            names.set(info.systemId, info.name)
+            securities.set(info.systemId, info.security)
+          }
         }
-
-        if (fetchId !== fetchIdRef.current) return
 
         const killMap = new Map(
           Object.entries(kills).map(([id, k]) => [
@@ -142,6 +148,12 @@ export function useHaulRouteRisk({
 
         const inResult = computeRouteDanger(inRoute.route, names, securities, killMap)
         const outResult = computeRouteDanger(outRoute.route, names, securities, killMap)
+
+        if (fetchId !== fetchIdRef.current) return
+        setHaulIn(inResult)
+        setHaulOut(outResult)
+        setLoading(false)
+        setGateIntelLoading(true)
 
         const campSystemIds = [
           ...new Set([...inRoute.route, ...outRoute.route].filter((systemId) => {
@@ -155,13 +167,33 @@ export function useHaulRouteRisk({
             ? await getRouteHaulerKillCounts(campSystemIds, haulerTypeIds)
             : new Map<number, number>()
 
-        const gateLookup = await loadGateIntel()
-        const gateIntelBySystem = await getRouteGateIntel(routeSystemIds, gateLookup)
-
         if (fetchId !== fetchIdRef.current) return
 
-        setHaulIn(enrichRouteJumps(inResult, haulerKillsBySystem, gateIntelBySystem))
-        setHaulOut(enrichRouteJumps(outResult, haulerKillsBySystem, gateIntelBySystem))
+        const gateLookup = await loadGateIntel()
+        const shipKillsBySystem = new Map<number, number>(
+          routeSystemIds.map((id) => [id, killMap.get(id)?.shipKills ?? 0]),
+        )
+        const gateIntelBySystem = new Map<number, SystemGateIntel>()
+
+        const applyEnrichment = () => {
+          if (fetchId !== fetchIdRef.current) return
+          setHaulIn(enrichRouteJumps(inResult, haulerKillsBySystem, gateIntelBySystem))
+          setHaulOut(enrichRouteJumps(outResult, haulerKillsBySystem, gateIntelBySystem))
+        }
+
+        applyEnrichment()
+
+        await getRouteGateIntel(routeSystemIds, gateLookup, {
+          securities,
+          shipKillsBySystem,
+          onSystemIntel: (systemId, intel) => {
+            gateIntelBySystem.set(systemId, intel)
+            applyEnrichment()
+          },
+        })
+
+        if (fetchId !== fetchIdRef.current) return
+        applyEnrichment()
       } catch {
         if (fetchId !== fetchIdRef.current) return
         setHaulIn(null)
@@ -170,10 +202,11 @@ export function useHaulRouteRisk({
       } finally {
         if (fetchId === fetchIdRef.current) {
           setLoading(false)
+          setGateIntelLoading(false)
         }
       }
     })()
   }, [sde, primaryHub, sellHub, manufacturingSystemId, haulerTypeIds])
 
-  return { haulIn, haulOut, error, loading, labels }
+  return { haulIn, haulOut, error, loading, gateIntelLoading, labels }
 }

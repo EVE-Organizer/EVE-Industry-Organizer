@@ -21,6 +21,9 @@ interface FavoriteItemsSectionProps {
   haulOut: RouteDangerResult | null
   haulError: string | null
   dangerLoading: boolean
+  gateIntelLoading?: boolean
+  haulInLabel?: string
+  haulOutLabel?: string
   onToggle: (productTypeId: number) => void
   onOpenGraph: (row: RankedBlueprintRow) => void
   onOpenSetup: (row: RankedBlueprintRow) => void
@@ -35,6 +38,9 @@ function favoriteItemProps(
   haulOut: RouteDangerResult | null,
   haulError: string | null,
   dangerLoading: boolean,
+  gateIntelLoading: boolean | undefined,
+  haulInLabel: string | undefined,
+  haulOutLabel: string | undefined,
   onToggle: (productTypeId: number) => void,
   onOpenGraph: (row: RankedBlueprintRow) => void,
   onOpenSetup: (row: RankedBlueprintRow) => void,
@@ -56,6 +62,9 @@ function favoriteItemProps(
     haulOut,
     haulError,
     dangerLoading,
+    gateIntelLoading,
+    haulInLabel,
+    haulOutLabel,
   }
 }
 
@@ -66,6 +75,9 @@ export function FavoriteItemsSection({
   haulOut,
   haulError,
   dangerLoading,
+  gateIntelLoading,
+  haulInLabel,
+  haulOutLabel,
   onToggle,
   onOpenGraph,
   onOpenSetup,
@@ -108,6 +120,9 @@ export function FavoriteItemsSection({
                       haulOut,
                       haulError,
                       dangerLoading,
+                      gateIntelLoading,
+                      haulInLabel,
+                      haulOutLabel,
                       onToggle,
                       onOpenGraph,
                       onOpenSetup,
@@ -140,6 +155,9 @@ export function FavoriteItemsSection({
                   haulOut,
                   haulError,
                   dangerLoading,
+                  gateIntelLoading,
+                  haulInLabel,
+                  haulOutLabel,
                   onToggle,
                   onOpenGraph,
                   onOpenSetup,

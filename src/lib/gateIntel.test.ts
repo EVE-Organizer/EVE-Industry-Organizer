@@ -8,6 +8,7 @@ import {
 } from '@/lib/gateIntel'
 import { buildGateIntelLookup } from '@/services/data/gateIntelLoader'
 import { classifyCampLevel } from '@/lib/routeCamp'
+import { shouldFetchGateIntel } from '@/services/market/zkillGateIntel'
 
 const lookup = buildGateIntelLookup({
   generatedAt: '2026-01-01T00:00:00.000Z',
@@ -82,6 +83,15 @@ describe('explainGateIntel', () => {
     expect(text).toContain('2 gate kills')
     expect(text).toContain('Uedama IV - Stargate')
     expect(text).toContain('Smartbombs')
+  })
+})
+
+describe('shouldFetchGateIntel', () => {
+  it('skips quiet highsec but keeps lowsec and pipes', () => {
+    expect(shouldFetchGateIntel(30000142, 0.9, 0)).toBe(false)
+    expect(shouldFetchGateIntel(30000142, 0.9, 3)).toBe(true)
+    expect(shouldFetchGateIntel(30002768, 0.4, 0)).toBe(true)
+    expect(shouldFetchGateIntel(30002768, 0.9, 0)).toBe(true)
   })
 })
 

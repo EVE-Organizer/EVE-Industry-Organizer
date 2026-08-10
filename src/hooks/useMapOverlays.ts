@@ -384,14 +384,20 @@ export function useMapOverlays({
             return shouldCheckCamp(systemId, security)
           })
           const haulerKills = await getRouteHaulerKillCounts(campCandidates, haulerTypeIds)
-          const gateLookup = await loadGateIntel()
-          const gateIntelBySystem = await getRouteGateIntel(routeIds, gateLookup)
           const killMap = new Map(
             Object.entries(kills).map(([id, k]) => [
               Number(id),
               { systemId: Number(id), shipKills: k.shipKills, podKills: k.podKills },
             ]),
           )
+          const gateLookup = await loadGateIntel()
+          const shipKillsBySystem = new Map<number, number>(
+            routeIds.map((id) => [id, killMap.get(id)?.shipKills ?? 0]),
+          )
+          const gateIntelBySystem = await getRouteGateIntel(routeIds, gateLookup, {
+            securities,
+            shipKillsBySystem,
+          })
           const names = new Map<number, string>()
           for (const id of routeIds) {
             names.set(id, graph.systems.get(id)?.name ?? `System ${id}`)
