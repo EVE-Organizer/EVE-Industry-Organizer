@@ -113,6 +113,10 @@ describe('formatIsk', () => {
     expect(formatIsk(42.5)).toBe('42.5 ISK')
     expect(formatIsk(99.9)).toBe('99.9 ISK')
   })
+
+  it('formats zero without fractional digits', () => {
+    expect(formatIsk(0)).toBe('0 ISK')
+  })
 })
 
 describe('formatGraphUnitIsk', () => {

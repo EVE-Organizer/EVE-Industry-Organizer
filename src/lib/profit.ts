@@ -38,6 +38,7 @@ export function filterHistoryByRange(history: MarketHistoryEntry[], range: TimeR
 
 /** Sub-1K ISK: show decimals for cheap unit prices (minerals, ammo). */
 function formatSubKIsk(value: number): string {
+  if (value === 0) return '0'
   const abs = Math.abs(value)
   const decimals = abs >= 100 ? 0 : abs >= 10 ? 1 : 2
   return formatNumber(value, decimals)
