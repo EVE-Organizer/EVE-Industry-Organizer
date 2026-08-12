@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-11T04:59:22.619Z",
+  "generatedAt": "2026-08-12T05:25:17.357Z",
   "types": [
     {
       "typeId": 18,
@@ -14429,7 +14429,7 @@
       "category": "Commodity",
       "volume": 30,
       "mass": 200,
-      "description": "An elite corporate assassin, whose services are available usually only to the wealthiest and most discreet clientele. His track record of killings reaches far beyond Caldari space, with known “hits” recorded as far away as the Amarr and Gallente homeworlds. His weapon of choice is a highly-modified laser sniper rifle that he has proven effective at ranges up to and including three kilometers. Of course, he also utilizes a variety of other weapons, particularly for close range work. These include untraceable poisons, obscure neurotoxins, and, a variety of small arms and knives all, again, highly customized. He has a unblemished kill record, with no known failures, over a period of at least the last 20 years. When ultra-wealthy corporate executives require a more direct response to individuals who threaten their company's profitability, this is one of the few contract killers than can actually be trusted not only to accomplish the most difficult missions, but also to keep any such business dealings to himself. In short, he knows how to keep his mouth shut. These factors make him a highly desirable contractor for tasks requiring his unique skill set.",
+      "description": "An elite corporate assassin, whose services are available usually only to the wealthiest and most discreet clientele. His track record of killings reaches far beyond Caldari space, with known “hits” recorded as far away as the Amarr and Gallente homeworlds. His weapon of choice is a highly-modified laser sniper rifle that he has proven effective at ranges up to and including three kilometers. Of course, he also utilizes a variety of other weapons, particularly for close range work. These include untraceable poisons, obscure neurotoxins, and, a variety of small arms and knives all, again, highly customized. He has a unblemished kill record, with no known failures, over a period of at least the last 20 years. When ultra-wealthy corporate executives require a more direct response to individuals who threaten their company's profitability, this is one of the few contract killers that can actually be trusted not only to accomplish the most difficult missions, but also to keep any such business dealings to himself. In short, he knows how to keep his mouth shut. These factors make him a highly desirable contractor for tasks requiring his unique skill set.",
       "iconUrl": "https://images.evetech.net/types/2983/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/2983/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/2983/bp?size=32"
@@ -14441,7 +14441,7 @@
       "category": "Commodity",
       "volume": 300,
       "mass": 200,
-      "description": "An elite corporate assassin, whose services are available usually only to the wealthiest and most discreet clientele. His track record of killings reaches far beyond Caldari space, with known “hits” recorded as far away as the Amarr and Gallente homeworlds. His weapon of choice is a highly-modified laser sniper rifle that he has proven effective at ranges up to and including three kilometers. Of course, he also utilizes a variety of other weapons, particularly for close range work. These include untraceable poisons, obscure neurotoxins, and, a variety of small arms and knives all, again, highly customized. He has a unblemished kill record, with no known failures, over a period of at least the last 20 years. When ultra-wealthy corporate executives require a more direct response to individuals who threaten their company's profitability, this is one of the few contract killers than can actually be trusted not only to accomplish the most difficult missions, but also to keep any such business dealings to himself. In short, he knows how to keep his mouth shut. These factors make him a highly desirable contractor for tasks requiring his unique skill set.",
+      "description": "An elite corporate assassin, whose services are available usually only to the wealthiest and most discreet clientele. His track record of killings reaches far beyond Caldari space, with known “hits” recorded as far away as the Amarr and Gallente homeworlds. His weapon of choice is a highly-modified laser sniper rifle that he has proven effective at ranges up to and including three kilometers. Of course, he also utilizes a variety of other weapons, particularly for close range work. These include untraceable poisons, obscure neurotoxins, and, a variety of small arms and knives all, again, highly customized. He has a unblemished kill record, with no known failures, over a period of at least the last 20 years. When ultra-wealthy corporate executives require a more direct response to individuals who threaten their company's profitability, this is one of the few contract killers that can actually be trusted not only to accomplish the most difficult missions, but also to keep any such business dealings to himself. In short, he knows how to keep his mouth shut. These factors make him a highly desirable contractor for tasks requiring his unique skill set.",
       "iconUrl": "https://images.evetech.net/types/2984/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/2984/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/2984/bp?size=32"
@@ -18331,7 +18331,7 @@
       "group": "Corporation Management",
       "category": "Skill",
       "volume": 0.01,
-      "description": "Basic corporation operation. +20 corporation members allowed per level.\n\nNote: The CEO must update his corporation through the corporation user interface before the skill takes effect",
+      "description": "Basic corporation operation. +20 corporation members allowed per level.\n\nNote: The CEO must update their corporation through the corporation user interface before the skill takes effect",
       "iconUrl": "https://images.evetech.net/types/3363/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/3363/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/3363/bp?size=32"
@@ -20688,7 +20688,7 @@
       "group": "Corporation Management",
       "category": "Skill",
       "volume": 0.01,
-      "description": "Advanced corporation operation. +100 members per level.\n\nNote: The CEO must update his corporation through the corporation user interface before the skill takes effect.",
+      "description": "Advanced corporation operation. +100 members per level.\n\nNote: The CEO must update their corporation through the corporation user interface before the skill takes effect.",
       "iconUrl": "https://images.evetech.net/types/3731/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/3731/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/3731/bp?size=32"
@@ -20699,7 +20699,7 @@
       "group": "Corporation Management",
       "category": "Skill",
       "volume": 0.01,
-      "description": "Advanced corporation operation. +400 corporation members allowed per level. \n\nNote: The CEO must update his corporation through the corporation user interface before the skill takes effect.",
+      "description": "Advanced corporation operation. +400 corporation members allowed per level. \n\nNote: The CEO must update their corporation through the corporation user interface before the skill takes effect.",
       "iconUrl": "https://images.evetech.net/types/3732/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/3732/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/3732/bp?size=32"
@@ -35508,7 +35508,7 @@
       "group": "Corporation Management",
       "category": "Skill",
       "volume": 0.01,
-      "description": "Advanced corporation operation. +2000 corporation members allowed per level. \n\nNote: The CEO must update his corporation through the corporation user interface before the skill takes effect.",
+      "description": "Advanced corporation operation. +2000 corporation members allowed per level. \n\nNote: The CEO must update their corporation through the corporation user interface before the skill takes effect.",
       "iconUrl": "https://images.evetech.net/types/12241/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/12241/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/12241/bp?size=32"
@@ -181484,7 +181484,7 @@
       "category": "Structure Module",
       "volume": 10,
       "mass": 200,
-      "description": "The Standup M-Set Moon Drilling Stability I rig provides a means for structure operators to improve the fine control their moon drill service modules have over the moon chunk extracted by their Upwell Refinery structures. The benefits of this rig include a longer period of time in which a moon chunk can be manually fractured before it fractures on its own, a more compact asteroid field, and longer lasting asteroids created by the chunk fracture.\n\nStandup is a proprietary system that uses a Structure Autonomous Nanoassembly Device (Upwell) containing integrated template software, a nanoassembler array and sufficient nanomass to enable the construction of a variety of service modules, structure modules and structure rigs when inserted into the appropriate slots on a structure built with Upwell technology.\n\nNote: Only one rig of the same type, counting both tech variations, may be fitted at the same time on a structure.",
+      "description": "The Standup M-Set Moon Drilling Stability I rig provides a means for structure operators to improve the fine control of their moon drill service modules have over the moon chunk extracted by their Upwell Refinery structures. The benefits of this rig include a longer period of time in which a moon chunk can be manually fractured before it fractures on its own, a more compact asteroid field, and longer lasting asteroids created by the chunk fracture.\n\nStandup is a proprietary system that uses a Structure Autonomous Nanoassembly Device (Upwell) containing integrated template software, a nanoassembler array and sufficient nanomass to enable the construction of a variety of service modules, structure modules and structure rigs when inserted into the appropriate slots on a structure built with Upwell technology.\n\nNote: Only one rig of the same type, counting both tech variations, may be fitted at the same time on a structure.",
       "iconUrl": "https://images.evetech.net/types/46325/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/46325/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/46325/bp?size=32"
@@ -181496,7 +181496,7 @@
       "category": "Structure Module",
       "volume": 10,
       "mass": 200,
-      "description": "The Standup M-Set Moon Drilling Stability II rig provides a means for structure operators to improve the fine control their moon drill service modules have over the moon chunk extracted by their Upwell Refinery structures. The benefits of this rig include a longer period of time in which a moon chunk can be manually fractured before it fractures on its own, a more compact asteroid field, and longer lasting asteroids created by the chunk fracture.\n\nStandup is a proprietary system that uses a Structure Autonomous Nanoassembly Device (Upwell) containing integrated template software, a nanoassembler array and sufficient nanomass to enable the construction of a variety of service modules, structure modules and structure rigs when inserted into the appropriate slots on a structure built with Upwell technology.\n\nNote: Only one rig of the same type, counting both tech variations, may be fitted at the same time on a structure.",
+      "description": "The Standup M-Set Moon Drilling Stability II rig provides a means for structure operators to improve the fine control of their moon drill service modules have over the moon chunk extracted by their Upwell Refinery structures. The benefits of this rig include a longer period of time in which a moon chunk can be manually fractured before it fractures on its own, a more compact asteroid field, and longer lasting asteroids created by the chunk fracture.\n\nStandup is a proprietary system that uses a Structure Autonomous Nanoassembly Device (Upwell) containing integrated template software, a nanoassembler array and sufficient nanomass to enable the construction of a variety of service modules, structure modules and structure rigs when inserted into the appropriate slots on a structure built with Upwell technology.\n\nNote: Only one rig of the same type, counting both tech variations, may be fitted at the same time on a structure.",
       "iconUrl": "https://images.evetech.net/types/46326/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/46326/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/46326/bp?size=32"
@@ -214346,7 +214346,7 @@
       "group": "Permanent SKIN",
       "category": "SKINs",
       "volume": 0.01,
-      "description": "Noting the unusual effects that can be obtained when incorporating Triglavian subroutines and traces of Abyssal materials into nanocoatings, a commercial product was developed that replicates the look of dark matter fields that  suffuse certain Abyssal Deadspace pockets.",
+      "description": "Noting the unusual effects that can be obtained when incorporating Triglavian subroutines and traces of Abyssal materials into nanocoatings, a commercial product was developed that replicates the look of dark matter fields that suffuse certain Abyssal Deadspace pockets.",
       "iconUrl": "https://images.evetech.net/types/53963/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/53963/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/53963/bp?size=32"
@@ -270426,7 +270426,7 @@
       "group": "Navigation",
       "category": "Skill",
       "volume": 0.01,
-      "description": "Skill for the generation of jump portals to distant solar systems. \n\n100% increase to the maximum number of ships that can be moved with a capital ship conduit jump per level.",
+      "description": "Skill for the generation of jump portals to distant solar systems. \n\nEach level increases the number of ships that can be moved with a capital ship conduit jump by 5 per level.",
       "iconUrl": "https://images.evetech.net/types/83094/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/83094/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/83094/bp?size=32"
@@ -291351,7 +291351,7 @@
       "group": "Resource Processing",
       "category": "Skill",
       "volume": 0.01,
-      "description": "Skill at maximizing the chance of a mining critical success when using a mining lasers or ice harvester.\n10% bonus to mining laser and ice harvester critical success chance per skill level.",
+      "description": "Skill at maximizing the chance of a mining critical success when using a mining laser or ice harvester.\n10% bonus to mining laser and ice harvester critical success chance per skill level.",
       "iconUrl": "https://images.evetech.net/types/90727/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/90727/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/90727/bp?size=32"
@@ -300175,7 +300175,7 @@
     },
     {
       "typeId": 95445,
-      "name": "Defiant Latten Matte - Limited",
+      "name": "Shapash Corporation Emblem",
       "group": "Ship Emblems",
       "category": "Personalization",
       "volume": 0,
