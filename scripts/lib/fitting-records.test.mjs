@@ -23,4 +23,17 @@ describe('buildFittingRecords', () => {
     expect(items[1].skills).toEqual([[3331, 5]])
     expect(items[2]).toMatchObject({ slot: 'high', pg: 13, cpu: 19 })
   })
+
+  it('stores rig size, meta, and calibration', () => {
+    const items = buildFittingRecords(
+      [
+        { typeID: '3', attributeID: '1153', valueInt: '', valueFloat: '200' },
+        { typeID: '3', attributeID: '1547', valueInt: '', valueFloat: '1' },
+        { typeID: '3', attributeID: '422', valueInt: '', valueFloat: '2' },
+      ],
+      [{ typeID: '3', effectID: '2663' }],
+      [{ typeId: 3, category: 'Module' }],
+    )
+    expect(items[3]).toMatchObject({ slot: 'rig', cal: 200, rigSize: 1, meta: 2 })
+  })
 })

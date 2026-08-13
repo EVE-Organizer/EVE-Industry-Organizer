@@ -18,6 +18,8 @@ const ATTR = {
   cpu: '50',
   cal: '1153',
   calOut: '1132',
+  meta: '422',
+  rigSize: '1547',
   skillPairs: [
     ['182', '277'],
     ['183', '278'],
@@ -81,6 +83,8 @@ export function buildFittingRecords(typeAttributes, typeEffects, typeRecords) {
     const cpuOut = attrValue(attrs, ATTR.cpuOut)
     const cal = attrValue(attrs, ATTR.cal)
     const calOut = attrValue(attrs, ATTR.calOut)
+    const meta = attrValue(attrs, ATTR.meta)
+    const rigSize = attrValue(attrs, ATTR.rigSize)
     const skills = []
     for (const [skillAttr, levelAttr] of ATTR.skillPairs) {
       const skillId = attrValue(attrs, skillAttr)
@@ -98,6 +102,8 @@ export function buildFittingRecords(typeAttributes, typeEffects, typeRecords) {
       cpuOut === 0 &&
       cal === 0 &&
       calOut === 0 &&
+      meta === 0 &&
+      rigSize === 0 &&
       skills.length === 0
     ) {
       if (slot === 'module' || slot === 'implant') continue
@@ -110,6 +116,8 @@ export function buildFittingRecords(typeAttributes, typeEffects, typeRecords) {
     if (cpuOut > 0) record.cpuOut = cpuOut
     if (cal > 0) record.cal = cal
     if (calOut > 0) record.calOut = calOut
+    if (meta > 0) record.meta = meta
+    if (rigSize > 0) record.rigSize = rigSize
     if (skills.length) record.skills = skills
     items[type.typeId] = record
   }

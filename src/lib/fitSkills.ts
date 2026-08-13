@@ -12,6 +12,8 @@ export interface FittingItemRecord {
   cpuOut?: number
   cal?: number
   calOut?: number
+  meta?: number
+  rigSize?: number
   skills?: [number, number][]
 }
 
@@ -27,6 +29,39 @@ export const FITTING_SKILL_IDS = {
   energyGridUpgrades: 3424,
   electronicsUpgrades: 3427,
 } as const
+
+export const RIGGING_SKILL_IDS = {
+  juryRigging: 26252,
+  armor: 26253,
+  astronautics: 26254,
+  drones: 26255,
+  electronicSuperiority: 26256,
+  energyWeapon: 26258,
+  projectileWeapon: 26257,
+  hybridWeapon: 26259,
+  launcher: 26260,
+  shield: 26261,
+} as const
+
+/** T2 rigs need the matching skill at IV. T1 still lists it at I so rigging shows up under skills to fit. */
+const RIG_GROUP_SKILL: Record<string, number> = {
+  'Rig Armor': RIGGING_SKILL_IDS.armor,
+  'Rig Shield': RIGGING_SKILL_IDS.shield,
+  'Rig Drones': RIGGING_SKILL_IDS.drones,
+  'Rig Navigation': RIGGING_SKILL_IDS.astronautics,
+  'Rig Anchor': RIGGING_SKILL_IDS.astronautics,
+  'Rig Core': RIGGING_SKILL_IDS.electronicSuperiority,
+  'Rig Electronic Systems': RIGGING_SKILL_IDS.electronicSuperiority,
+  'Rig Scanning': RIGGING_SKILL_IDS.electronicSuperiority,
+  'Rig Targeting': RIGGING_SKILL_IDS.electronicSuperiority,
+  'Rig Resource Processing': RIGGING_SKILL_IDS.electronicSuperiority,
+  'Rig Energy Weapon': RIGGING_SKILL_IDS.energyWeapon,
+  'Rig Hybrid Weapon': RIGGING_SKILL_IDS.hybridWeapon,
+  'Rig Projectile Weapon': RIGGING_SKILL_IDS.projectileWeapon,
+  'Rig Launcher': RIGGING_SKILL_IDS.launcher,
+}
+
+const RIGGING_SKILL_SET = new Set<number>(Object.values(RIGGING_SKILL_IDS))
 
 const FITTING_SKILL_SET = new Set<number>(Object.values(FITTING_SKILL_IDS))
 
@@ -54,6 +89,7 @@ export interface FitPiece {
   required: { skillId: number; level: number }[]
   enough: boolean
   missing: { skillId: number; name: string; need: number; have: number }[]
+  sizeOk: boolean
 }
 
 export interface ResourceCheck {
@@ -86,6 +122,7 @@ export interface FitSkillAnalysis {
   hullTypeId: number | null
   unresolved: string[]
   online: boolean
+  rigSizeOk: boolean
   pg: ResourceCheck
   cpu: ResourceCheck
   cal: ResourceCheck
@@ -170,6 +207,18 @@ export function formatTrainTime(minutes: number): string {
 
 function groupOf(type: TypeInfo | undefined): string {
   return type?.group ?? ''
+}
+
+function isTech2Rig(record: FittingItemRecord, name: string): boolean {
+  if ((record.meta ?? 0) >= 2) return true
+  return /\sII$/.test(name)
+}
+
+export function riggingSkillsFor(group: string, name: string, record: FittingItemRecord): { skillId: number; level: number }[] {
+  if (record.slot !== 'rig' && !group.startsWith('Rig ')) return []
+  const skillId = RIG_GROUP_SKILL[group]
+  if (!skillId) return []
+  return [{ skillId, level: isTech2Rig(record, name) ? 4 : 1 }]
 }
 
 function isWeaponGroup(group: string): boolean {
@@ -274,12 +323,19 @@ export function analyzeFit(options: {
         cal: 0,
         required: [],
         enough: false,
+        sizeOk: true,
         missing: [{ skillId: 0, name: 'Unknown type', need: 1, have: 0 }],
       })
       return
     }
     const record = fittingByTypeId.get(type.typeId) ?? { slot: fallbackSlot }
-    const required = (record.skills ?? []).map(([skillId, level]) => ({ skillId, level }))
+    const required = [
+      ...(record.skills ?? []).map(([skillId, level]) => ({ skillId, level })),
+      ...riggingSkillsFor(type.group, type.name, record),
+    ]
+    const hullRigSize = hullRecord?.rigSize ?? 0
+    const sizeOk =
+      record.slot !== 'rig' || hullRigSize === 0 || (record.rigSize ?? 0) === 0 || record.rigSize === hullRigSize
     const missing = required
       .filter((req) => (characterLevels.get(req.skillId) ?? 0) < req.level)
       .map((req) => ({
@@ -288,6 +344,9 @@ export function analyzeFit(options: {
         need: req.level,
         have: characterLevels.get(req.skillId) ?? 0,
       }))
+    if (!sizeOk) {
+      missing.push({ skillId: 0, name: 'Wrong rig size', need: hullRigSize, have: record.rigSize ?? 0 })
+    }
     pieces.push({
       name: type.name,
       typeId: type.typeId,
@@ -298,6 +357,7 @@ export function analyzeFit(options: {
       cal: record.cal ?? 0,
       required,
       enough: missing.length === 0,
+      sizeOk,
       missing,
     })
     if (record.slot !== 'charge') {
@@ -336,14 +396,21 @@ export function analyzeFit(options: {
   const cpuOutBase = hullRecord?.cpuOut ?? 0
   const calOut = hullRecord?.calOut ?? 0
 
-  function check(levels: Record<number, number>): { pg: ResourceCheck; cpu: ResourceCheck; cal: ResourceCheck; online: boolean } {
+  function check(levels: Record<number, number>): {
+    pg: ResourceCheck
+    cpu: ResourceCheck
+    cal: ResourceCheck
+    rigSizeOk: boolean
+    online: boolean
+  } {
     const used = usedResources(modulePieces, levels)
     const pgOut = shipOutput(pgOutBase, levels[FITTING_SKILL_IDS.powerGridManagement] ?? 0)
     const cpuOut = shipOutput(cpuOutBase, levels[FITTING_SKILL_IDS.cpuManagement] ?? 0)
     const pg = { used: used.pg, output: pgOut, ok: used.pg <= pgOut + 1e-6 }
     const cpu = { used: used.cpu, output: cpuOut, ok: used.cpu <= cpuOut + 1e-6 }
     const cal = { used: used.cal, output: calOut, ok: calOut === 0 || used.cal <= calOut + 1e-6 }
-    return { pg, cpu, cal, online: pg.ok && cpu.ok && cal.ok }
+    const rigSizeOk = pieces.every((p) => p.sizeOk)
+    return { pg, cpu, cal, rigSizeOk, online: pg.ok && cpu.ok && cal.ok && rigSizeOk }
   }
 
   const fittingLevels = cheapestFittingLevels({
@@ -400,6 +467,7 @@ export function analyzeFit(options: {
     hullTypeId: hullType?.typeId ?? null,
     unresolved: [...new Set(unresolved)],
     online: withFitting.online,
+    rigSizeOk: withFitting.rigSizeOk,
     pg: withFitting.pg,
     cpu: withFitting.cpu,
     cal: withFitting.cal,
@@ -455,7 +523,7 @@ function toGapRows(
       need,
       have: trained,
       enough: trained >= need,
-      kind: FITTING_SKILL_SET.has(skillId) ? 'fitting' : kind,
+      kind: FITTING_SKILL_SET.has(skillId) || RIGGING_SKILL_SET.has(skillId) ? 'fitting' : kind,
     })
   }
   rows.sort((a, b) => Number(a.enough) - Number(b.enough) || a.name.localeCompare(b.name))

@@ -26,12 +26,16 @@ const types: TypeInfo[] = [
   typeInfo(11393, 'Retribution', 'Assault Frigate', 'Ship'),
   typeInfo(3033, 'Small Focused Beam Laser II', 'Energy Weapon', 'Module'),
   typeInfo(2364, 'Heat Sink II', 'Heat Sink', 'Module'),
+  typeInfo(31454, 'Small Energy Collision Accelerator I', 'Rig Energy Weapon', 'Module'),
+  typeInfo(31460, 'Small Energy Collision Accelerator II', 'Rig Energy Weapon', 'Module'),
 ]
 
 const fitting = new Map<number, FittingItemRecord>([
-  [11393, { slot: 'ship', pgOut: 62, cpuOut: 140, skills: [[3331, 5], [12095, 1]] }],
+  [11393, { slot: 'ship', pgOut: 62, cpuOut: 140, calOut: 400, rigSize: 1, skills: [[3331, 5], [12095, 1]] }],
   [3033, { slot: 'high', pg: 13, cpu: 19, skills: [[3303, 5]] }],
   [2364, { slot: 'low', pg: 1, cpu: 30, skills: [[3318, 4]] }],
+  [31454, { slot: 'rig', cal: 200, rigSize: 1, meta: 1 }],
+  [31460, { slot: 'rig', cal: 300, rigSize: 1, meta: 2 }],
 ])
 
 const skills: SkillInfo[] = [
@@ -42,6 +46,8 @@ const skills: SkillInfo[] = [
   { skillId: 3413, name: 'Power Grid Management', rank: 1, prerequisites: [], iconUrl: '' },
   { skillId: 3426, name: 'CPU Management', rank: 1, prerequisites: [], iconUrl: '' },
   { skillId: 11207, name: 'Advanced Weapon Upgrades', rank: 6, prerequisites: [{ skillId: 3318, level: 4 }], iconUrl: '' },
+  { skillId: 26252, name: 'Jury Rigging', rank: 2, prerequisites: [], iconUrl: '' },
+  { skillId: 26258, name: 'Energy Weapon Rigging', rank: 3, prerequisites: [{ skillId: 26252, level: 3 }], iconUrl: '' },
 ]
 
 describe('fitSkills', () => {
@@ -79,5 +85,33 @@ Small Focused Beam Laser II
     expect(analysis.owned.some((p) => p.name === 'Heat Sink II')).toBe(true)
     expect(analysis.queueFits.length).toBeGreaterThan(0)
     expect(analysis.pg.output).toBeGreaterThan(0)
+  })
+
+  it('adds energy weapon rigging for T1 rigs and IV for T2', () => {
+    const t1 = analyzeFit({
+      parsed: parseEft('[Retribution, Rigs]\nSmall Energy Collision Accelerator I\n'),
+      typesByName: buildTypeNameIndex(types),
+      fittingByTypeId: fitting,
+      skills,
+      characterLevels: new Map(),
+      role: 'general',
+      budgetDays: 30,
+    })
+    expect(t1.fitSkills.some((row) => row.skillId === 26258 && row.need === 1)).toBe(true)
+    expect(t1.owned.find((p) => p.slot === 'rig')?.cal).toBe(200)
+    expect(t1.cal.used).toBe(200)
+    expect(t1.cal.output).toBe(400)
+
+    const t2 = analyzeFit({
+      parsed: parseEft('[Retribution, Rigs]\nSmall Energy Collision Accelerator II\n'),
+      typesByName: buildTypeNameIndex(types),
+      fittingByTypeId: fitting,
+      skills,
+      characterLevels: new Map(),
+      role: 'general',
+      budgetDays: 30,
+    })
+    expect(t2.fitSkills.some((row) => row.skillId === 26258 && row.need === 4)).toBe(true)
+    expect(t2.queueFits.some((item) => item.skillId === 26252 && item.to >= 3)).toBe(true)
   })
 })
