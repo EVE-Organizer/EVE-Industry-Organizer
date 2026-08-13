@@ -20,6 +20,7 @@ const ATTR = {
   calOut: '1132',
   meta: '422',
   rigSize: '1547',
+  drawback: '1138',
   skillPairs: [
     ['182', '277'],
     ['183', '278'],
@@ -29,6 +30,10 @@ const ATTR = {
     ['1290', '1288'],
   ],
 }
+
+const DRAWBACK_EFFECT_IDS = new Set([
+  2706, 2707, 2708, 2712, 2713, 2714, 2716, 2717, 2718, 3528, 5267, 5268, 5868, 5951,
+])
 
 const EFFECT_SLOT = {
   11: 'low',
@@ -66,10 +71,15 @@ export function buildFittingRecords(typeAttributes, typeEffects, typeRecords) {
   }
 
   const slotByType = new Map()
+  const drawbackEffectsByType = new Map()
   for (const row of typeEffects) {
-    const slot = EFFECT_SLOT[num(row.effectID)]
-    if (!slot) continue
-    slotByType.set(row.typeID, slot)
+    const effectId = num(row.effectID)
+    const slot = EFFECT_SLOT[effectId]
+    if (slot) slotByType.set(row.typeID, slot)
+    if (DRAWBACK_EFFECT_IDS.has(effectId)) {
+      if (!drawbackEffectsByType.has(row.typeID)) drawbackEffectsByType.set(row.typeID, [])
+      drawbackEffectsByType.get(row.typeID).push(effectId)
+    }
   }
 
   const items = {}
@@ -85,6 +95,7 @@ export function buildFittingRecords(typeAttributes, typeEffects, typeRecords) {
     const calOut = attrValue(attrs, ATTR.calOut)
     const meta = attrValue(attrs, ATTR.meta)
     const rigSize = attrValue(attrs, ATTR.rigSize)
+    const drawback = attrValue(attrs, ATTR.drawback)
     const skills = []
     for (const [skillAttr, levelAttr] of ATTR.skillPairs) {
       const skillId = attrValue(attrs, skillAttr)
@@ -104,6 +115,7 @@ export function buildFittingRecords(typeAttributes, typeEffects, typeRecords) {
       calOut === 0 &&
       meta === 0 &&
       rigSize === 0 &&
+      drawback === 0 &&
       skills.length === 0
     ) {
       if (slot === 'module' || slot === 'implant') continue
@@ -118,6 +130,9 @@ export function buildFittingRecords(typeAttributes, typeEffects, typeRecords) {
     if (calOut > 0) record.calOut = calOut
     if (meta > 0) record.meta = meta
     if (rigSize > 0) record.rigSize = rigSize
+    if (drawback !== 0) record.drawback = drawback
+    const de = drawbackEffectsByType.get(typeKey) ?? drawbackEffectsByType.get(String(type.typeId))
+    if (de?.length) record.de = de
     if (skills.length) record.skills = skills
     items[type.typeId] = record
   }

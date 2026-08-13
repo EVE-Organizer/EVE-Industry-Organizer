@@ -36,4 +36,16 @@ describe('buildFittingRecords', () => {
     )
     expect(items[3]).toMatchObject({ slot: 'rig', cal: 200, rigSize: 1, meta: 2 })
   })
+
+  it('stores rig drawback percent and effect ids', () => {
+    const items = buildFittingRecords(
+      [{ typeID: '4', attributeID: '1138', valueInt: '', valueFloat: '10' }],
+      [
+        { typeID: '4', effectID: '2663' },
+        { typeID: '4', effectID: '2706' },
+      ],
+      [{ typeId: 4, category: 'Module' }],
+    )
+    expect(items[4]).toMatchObject({ slot: 'rig', drawback: 10, de: [2706] })
+  })
 })
