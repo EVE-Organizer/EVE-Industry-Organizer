@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-12T05:24:33.951Z",
+  "generatedAt": "2026-08-13T05:27:21.831Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0225,
+      "reactionCostIndex": 0.0232,
       "marketSystemId": 30000621
     },
     {
