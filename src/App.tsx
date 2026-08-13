@@ -71,7 +71,6 @@ function AppRoutes() {
         <Route path="/tools/fit-skills" element={<FitSkillsPage />} />
         <Route path="/tools/gate-check" element={<LegacyGateCheckRedirect />} />
         <Route path="/tools/mining" element={<MiningIskHrPage />} />
-        <Route path="/tools/fit-skills" element={<FitSkillFinderPage />} />
         <Route path="/isk-hr" element={<Navigate to="/tools/mining" replace />} />
         <Route path="/isk-hr/mining" element={<Navigate to="/tools/mining" replace />} />
         <Route path="/settings" element={<SettingsPage />} />

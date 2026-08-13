@@ -50,7 +50,6 @@ const REQUIRED_CSVS = [
   'invCategories',
   'invMetaTypes',
   'dgmTypeAttributes',
-  'dgmTypeEffects',
   'mapSolarSystems',
   'mapSolarSystemJumps',
   'mapRegions',
@@ -348,11 +347,6 @@ async function main() {
             categoryById,
             blueprints.map((bp) => bp.blueprintTypeId),
           )
-          ctx.fittingItems = buildFittingRecords(
-            ctx.csvData.dgmTypeAttributes,
-            ctx.csvData.dgmTypeEffects,
-            ctx.typeRecords,
-          )
           ctx.stations = buildHubStations(
             HUBS,
             ctx.csvData.staStations,
@@ -432,7 +426,6 @@ async function main() {
             ['stations.json', ctx.stations],
             ['map.json', ctx.mapData],
             ['gateIntel.json', ctx.gateIntel],
-            ['fitting.json', { generatedAt: new Date().toISOString(), items: ctx.fittingItems }],
           ]
           const startedAt = Date.now()
           for (let i = 0; i < outputs.length; i++) {
