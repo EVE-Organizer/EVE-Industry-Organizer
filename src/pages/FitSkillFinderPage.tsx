@@ -330,7 +330,9 @@ export function FitSkillFinderPage() {
               <p className={`text-sm ${analysis.online ? 'text-success' : 'text-warning'}`}>
                 {analysis.online
                   ? 'This hull can go online with the fitting skills below.'
-                  : 'This hull is over PG, CPU, or calibration even at max fitting skills (no hull bonuses).'}
+                  : analysis.rigSizeOk
+                    ? 'This hull is over PG, CPU, or calibration even at max fitting skills (no hull bonuses).'
+                    : 'A rig is the wrong size for this hull.'}
               </p>
             </div>
           </div>
@@ -398,8 +400,12 @@ export function FitSkillFinderPage() {
                           <span className="text-success">Yes</span>
                         ) : (
                           <span className="text-warning">
-                            {piece.missing.map((m) => `${m.name} ${formatSkillLevel(m.need)}`).join(', ') ||
-                              'No'}
+                            {!piece.sizeOk
+                              ? 'Wrong size'
+                              : piece.missing
+                                  .filter((m) => m.skillId !== 0)
+                                  .map((m) => `${m.name} ${formatSkillLevel(m.need)}`)
+                                  .join(', ') || 'No'}
                           </span>
                         )}
                       </td>
