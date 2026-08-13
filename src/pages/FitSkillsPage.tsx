@@ -179,8 +179,8 @@ export function FitSkillsPage() {
           <Panel
             title={analysis.fitName ? `${analysis.shipName}: ${analysis.fitName}` : analysis.shipName}
             actions={
-              <span className={`badge ${analysis.fits ? 'badge-success' : 'badge-error'}`}>
-                {analysis.fits ? 'CPU/PG ok' : 'CPU/PG short'}
+              <span className={`badge ${analysis.possible ? 'badge-success' : 'badge-error'}`}>
+                {analysis.possible ? 'Fits at skills V' : 'Cannot fit at skills V'}
               </span>
             }
           >
@@ -190,8 +190,9 @@ export function FitSkillsPage() {
               </p>
             ) : null}
             <p className="text-xs opacity-70 mb-3">
-              CPU and powergrid use {trained ? "this character's skills" : 'untrained (level 0) skills'}.
-              Sign in and compare a character to check a real skill sheet.
+              {trained
+                ? "CPU and powergrid below use this character's skills. The badge is whether the hull can online the fit with all fitting skills at V."
+                : 'CPU and powergrid below assume all fitting skills at V (CPU/PGM, Weapon Upgrades, AWU, rigging).'}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <LoadBar
@@ -209,11 +210,19 @@ export function FitSkillsPage() {
                 format={formatMw}
               />
             </div>
+            {trained && analysis.possible && !analysis.fits ? (
+              <p className="text-sm text-warning mt-3">
+                This hull can online the fit at skills V ({formatCpu(analysis.maxLoad.cpuUsed)} /{' '}
+                {formatCpu(analysis.maxLoad.cpuOutput)} CPU, {formatMw(analysis.maxLoad.powerUsed)} /{' '}
+                {formatMw(analysis.maxLoad.powerOutput)} PG). This character is still short.
+              </p>
+            ) : null}
             {!analysis.possible ? (
               <p className="text-sm text-error mt-3">
-                This hull cannot online the fit even at all fitting skills V.
+                This hull cannot online the fit even with CPU Management, Power Grid Management,
+                Weapon Upgrades, Advanced Weapon Upgrades, and matching rigging at V.
               </p>
-            ) : analysis.minLevels && !analysis.fits ? (
+            ) : analysis.minLevels && trained && !analysis.fits ? (
               <p className="text-xs opacity-70 mt-3">
                 One combo that fits: CPU Management {roman(analysis.minLevels.cpuManagement)},
                 Power Grid Management {roman(analysis.minLevels.powerGridManagement)}, Weapon
@@ -232,13 +241,13 @@ export function FitSkillsPage() {
               <p className="text-sm text-success mb-3">
                 {trained
                   ? 'This character can online the fit.'
-                  : 'No skill gaps at the listed levels.'}
+                  : 'CPU and powergrid work at skills V. Train the list below to actually fly it.'}
               </p>
             ) : (
               <p className="text-sm text-error mb-3">
                 {gaps.length} skill{gaps.length === 1 ? '' : 's'} below the level needed to fly this
                 fit
-                {!trained ? ' (treated as untrained until you compare a character)' : ''}.
+                {!trained ? ' (no character loaded, trained column is 0)' : ''}.
               </p>
             )}
             <div className="overflow-x-auto">

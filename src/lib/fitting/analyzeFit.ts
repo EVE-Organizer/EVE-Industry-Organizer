@@ -2,9 +2,9 @@ import type { SkillInfo } from '@/types'
 import { parseEft } from '@/lib/fitting/parseEft'
 import {
   computeFitLoad,
-  emptyFittingLevels,
   expandPrerequisites,
   levelsFromSkillMap,
+  maxFittingLevels,
   mergeFittingSkills,
   minFittingLevels,
   requiredSkills,
@@ -19,12 +19,13 @@ export interface FitAnalysis {
   fitName: string
   unknown: string[]
   load: FitLoad
+  maxLoad: FitLoad
   minLevels: FittingLevels | null
   minLoad: FitLoad | null
   skills: FitSkillRow[]
-  /** True when the current skill map (untrained = 0) can online CPU and PG. */
+  /** True when the displayed load (sheet, or all-V if none) can online CPU and PG. */
   fits: boolean
-  /** True when some skill combo at V or below can online the hull. */
+  /** True when all fitting skills at V can online the hull. */
   possible: boolean
 }
 
@@ -37,26 +38,28 @@ export function analyzeFit(
   const parsed = parseEft(eft)
   const { ship, items, unknown } = resolveFit(parsed, index)
   const required = requiredSkills(ship, items, skills)
-  const currentLevels = trained ? levelsFromSkillMap(trained) : emptyFittingLevels()
-  const load = computeFitLoad(ship, items, currentLevels)
+  const maxLoad = computeFitLoad(ship, items, maxFittingLevels())
+  const sheetLoad = trained
+    ? computeFitLoad(ship, items, levelsFromSkillMap(trained))
+    : null
+  const load = sheetLoad ?? maxLoad
   const min = minFittingLevels(ship, items, required, skills, trained)
-  const displayRequired =
-    load.cpuOk && load.powerOk
-      ? required
-      : expandPrerequisites(
-          min ? mergeFittingSkills(required, min.levels) : required,
-          skills,
-        )
+  const needFittingExtras = !trained || !load.cpuOk || !load.powerOk
+  const displayRequired = expandPrerequisites(
+    needFittingExtras && min ? mergeFittingSkills(required, min.levels) : required,
+    skills,
+  )
   return {
     parsed,
     shipName: ship.name,
     fitName: parsed.fitName,
     unknown,
     load,
+    maxLoad,
     minLevels: min?.levels ?? null,
     minLoad: min?.load ?? null,
     skills: skillRows(displayRequired, skills, trained),
     fits: load.cpuOk && load.powerOk,
-    possible: min != null,
+    possible: maxLoad.cpuOk && maxLoad.powerOk,
   }
 }

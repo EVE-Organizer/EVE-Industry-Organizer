@@ -74,6 +74,31 @@ export function emptyFittingLevels(): FittingLevels {
   }
 }
 
+/** All fitting skills at V, including every rigging family. */
+export function maxFittingLevels(): FittingLevels {
+  const rigging: Record<string, number> = {}
+  for (const family of Object.keys(RIGGING_SKILL_BY_FAMILY)) {
+    rigging[family] = 5
+  }
+  return {
+    cpuManagement: 5,
+    powerGridManagement: 5,
+    weaponUpgrades: 5,
+    advancedWeaponUpgrades: 5,
+    electronicsUpgrades: 5,
+    rigging,
+  }
+}
+
+/** EVE fitting window compares one decimal place. */
+export function eveFits(used: number, output: number): boolean {
+  return Math.round(used * 10) / 10 <= Math.round(output * 10) / 10 + 1e-9
+}
+
+function roundFit(value: number): number {
+  return Math.round(value * 100) / 100
+}
+
 export function levelsFromSkillMap(trained: Map<number, number>): FittingLevels {
   const rigging: Record<string, number> = {}
   for (const [family, skillId] of Object.entries(RIGGING_SKILL_BY_FAMILY)) {
@@ -117,7 +142,7 @@ export function moduleCpu(item: FittingType, levels: FittingLevels, rigs: Fittin
   if (item.weapon) cpu *= 1 - 0.05 * levels.weaponUpgrades
   if (item.electronicsUpgrades) cpu *= 1 - 0.05 * levels.electronicsUpgrades
   cpu *= drawbackMultiplier(item, rigs, levels, 'cpu')
-  return cpu
+  return roundFit(cpu)
 }
 
 export function modulePower(item: FittingType, levels: FittingLevels, rigs: FittingType[]): number {
@@ -126,7 +151,7 @@ export function modulePower(item: FittingType, levels: FittingLevels, rigs: Fitt
     power *= 1 - 0.02 * levels.advancedWeaponUpgrades
   }
   power *= drawbackMultiplier(item, rigs, levels, 'power')
-  return power
+  return roundFit(power)
 }
 
 export function computeFitLoad(
@@ -142,15 +167,17 @@ export function computeFitLoad(
     cpuUsed += moduleCpu(item.type, levels, rigs) * item.quantity
     powerUsed += modulePower(item.type, levels, rigs) * item.quantity
   }
-  const cpuOutput = (ship.cpuOutput ?? 0) * (1 + 0.05 * levels.cpuManagement)
-  const powerOutput = (ship.powerOutput ?? 0) * (1 + 0.05 * levels.powerGridManagement)
+  const cpuOutput = roundFit((ship.cpuOutput ?? 0) * (1 + 0.05 * levels.cpuManagement))
+  const powerOutput = roundFit((ship.powerOutput ?? 0) * (1 + 0.05 * levels.powerGridManagement))
+  cpuUsed = roundFit(cpuUsed)
+  powerUsed = roundFit(powerUsed)
   return {
     cpuUsed,
     cpuOutput,
     powerUsed,
     powerOutput,
-    cpuOk: cpuUsed <= cpuOutput + 1e-6,
-    powerOk: powerUsed <= powerOutput + 1e-6,
+    cpuOk: eveFits(cpuUsed, cpuOutput),
+    powerOk: eveFits(powerUsed, powerOutput),
   }
 }
 

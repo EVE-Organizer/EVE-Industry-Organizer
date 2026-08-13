@@ -10,6 +10,7 @@ import {
   WEAPON_UPGRADES,
   buildFittingIndex,
   computeFitLoad,
+  maxFittingLevels,
   minFittingLevels,
   requiredSkills,
   resolveFit,
@@ -17,6 +18,27 @@ import {
 import { analyzeFit } from '@/lib/fitting/analyzeFit'
 import type { FittingData } from '@/lib/fitting/types'
 import type { SkillInfo } from '@/types'
+
+const PULSE_KITE_EFT = `[Retribution, Pulse kite]
+
+Imperial Navy Heat Sink
+Imperial Navy Heat Sink
+Centii A-Type Thermal Coating
+Dark Blood Multispectrum Coating
+Heat Sink II
+
+Coreli A-Type 1MN Afterburner
+Republic Fleet Small Cap Battery
+
+Coreli A-Type Small Remote Armor Repairer
+Small Focused Pulse Laser II
+Small Focused Pulse Laser II
+Small Focused Pulse Laser II
+Small Focused Pulse Laser II
+
+Small Energy Burst Aerator II
+Small Thermal Armor Reinforcer II
+`
 
 const RETRIBUTION_EFT = `[Retribution, DPS T5/T6 Firestorm]
 
@@ -127,8 +149,10 @@ describe('Retribution Firestorm fit', () => {
 
   it('treats a missing skill sheet as untrained, not already qualified', () => {
     const analysis = analyzeFit(RETRIBUTION_EFT, index, skills)
-    expect(analysis.fits).toBe(false)
-    expect(analysis.load.cpuOk).toBe(false)
+    expect(analysis.possible).toBe(true)
+    expect(analysis.fits).toBe(true)
+    expect(analysis.maxLoad.cpuOk).toBe(true)
+    expect(analysis.maxLoad.powerOk).toBe(true)
     expect(analysis.skills.length).toBeGreaterThan(0)
     expect(analysis.skills.every((row) => row.trained === 0)).toBe(true)
     expect(analysis.skills.some((row) => row.trained < row.required)).toBe(true)
@@ -147,6 +171,21 @@ describe('Retribution Firestorm fit', () => {
     const wu = short.skills.find((row) => row.skillId === WEAPON_UPGRADES)
     expect(wu?.trained).toBe(4)
     expect(wu?.required).toBe(5)
+  })
+
+  it('online a pulse kite Retribution when all fitting skills are V', () => {
+    const analysis = analyzeFit(PULSE_KITE_EFT, index, skills)
+    expect(analysis.possible).toBe(true)
+    expect(analysis.fits).toBe(true)
+    const max = computeFitLoad(
+      resolveFit(parseEft(PULSE_KITE_EFT), index).ship,
+      resolveFit(parseEft(PULSE_KITE_EFT), index).items,
+      maxFittingLevels(),
+    )
+    expect(max.cpuOk).toBe(true)
+    expect(max.powerOk).toBe(true)
+    expect(max.cpuUsed).toBeLessThanOrEqual(max.cpuOutput)
+    expect(max.powerUsed).toBeLessThanOrEqual(max.powerOutput)
   })
 })
 
