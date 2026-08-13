@@ -12,6 +12,7 @@ import { JobsPage } from '@/pages/JobsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { MiningIskHrPage } from '@/pages/MiningIskHrPage'
 import { RouteRiskPage } from '@/pages/RouteRiskPage'
+import { FitSkillFinderPage } from '@/pages/FitSkillFinderPage'
 import { AuthCallbackPage } from '@/pages/AuthCallbackPage'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -69,6 +70,7 @@ function AppRoutes() {
         <Route path="/tools/route-risk" element={<RouteRiskPage />} />
         <Route path="/tools/gate-check" element={<LegacyGateCheckRedirect />} />
         <Route path="/tools/mining" element={<MiningIskHrPage />} />
+        <Route path="/tools/fit-skills" element={<FitSkillFinderPage />} />
         <Route path="/isk-hr" element={<Navigate to="/tools/mining" replace />} />
         <Route path="/isk-hr/mining" element={<Navigate to="/tools/mining" replace />} />
         <Route path="/settings" element={<SettingsPage />} />
