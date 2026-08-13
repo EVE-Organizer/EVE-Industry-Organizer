@@ -211,15 +211,28 @@ function extraSp(skillId: number, from: number, to: number, skills: SkillInfoLit
   return spToLevel(rank, to) - spToLevel(rank, from)
 }
 
-function floorsFromRequired(required: Map<number, number>): FittingLevels {
+function floorsFromRequired(
+  required: Map<number, number>,
+  trained?: Map<number, number>,
+): FittingLevels {
+  const have = trained ? levelsFromSkillMap(trained) : emptyFittingLevels()
   const levels = emptyFittingLevels()
-  levels.cpuManagement = required.get(CPU_MANAGEMENT) ?? 0
-  levels.powerGridManagement = required.get(POWER_GRID_MANAGEMENT) ?? 0
-  levels.weaponUpgrades = required.get(WEAPON_UPGRADES) ?? 0
-  levels.advancedWeaponUpgrades = required.get(ADVANCED_WEAPON_UPGRADES) ?? 0
-  levels.electronicsUpgrades = required.get(ELECTRONICS_UPGRADES) ?? 0
+  levels.cpuManagement = Math.max(required.get(CPU_MANAGEMENT) ?? 0, have.cpuManagement)
+  levels.powerGridManagement = Math.max(
+    required.get(POWER_GRID_MANAGEMENT) ?? 0,
+    have.powerGridManagement,
+  )
+  levels.weaponUpgrades = Math.max(required.get(WEAPON_UPGRADES) ?? 0, have.weaponUpgrades)
+  levels.advancedWeaponUpgrades = Math.max(
+    required.get(ADVANCED_WEAPON_UPGRADES) ?? 0,
+    have.advancedWeaponUpgrades,
+  )
+  levels.electronicsUpgrades = Math.max(
+    required.get(ELECTRONICS_UPGRADES) ?? 0,
+    have.electronicsUpgrades,
+  )
   for (const [family, skillId] of Object.entries(RIGGING_SKILL_BY_FAMILY)) {
-    levels.rigging[family] = required.get(skillId) ?? 0
+    levels.rigging[family] = Math.max(required.get(skillId) ?? 0, have.rigging[family] ?? 0)
   }
   return levels
 }
@@ -251,8 +264,9 @@ export function minFittingLevels(
   items: ResolvedFitItem[],
   required: Map<number, number>,
   skills: SkillInfoLite[],
+  trained?: Map<number, number>,
 ): { levels: FittingLevels; load: FitLoad } | null {
-  const floors = floorsFromRequired(required)
+  const floors = floorsFromRequired(required, trained)
   const families = [...usedFamilies(items)]
   let best: { levels: FittingLevels; load: FitLoad; sp: number } | null = null
 
@@ -324,7 +338,7 @@ export function skillRows(
       skillId,
       name: info?.name ?? `Skill ${skillId}`,
       required: level,
-      trained: trained?.get(skillId),
+      trained: trained?.get(skillId) ?? 0,
       rank: info?.rank ?? 1,
     })
   }

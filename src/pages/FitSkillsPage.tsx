@@ -121,7 +121,7 @@ export function FitSkillsPage() {
     )
   }
 
-  const load = analysis?.minLoad ?? analysis?.load
+  const load = analysis?.load
   const gaps = analysis?.skills.filter((row) => (row.trained ?? 0) < row.required) ?? []
 
   return (
@@ -180,7 +180,7 @@ export function FitSkillsPage() {
             title={analysis.fitName ? `${analysis.shipName}: ${analysis.fitName}` : analysis.shipName}
             actions={
               <span className={`badge ${analysis.fits ? 'badge-success' : 'badge-error'}`}>
-                {analysis.fits ? 'Fits' : 'Does not fit'}
+                {analysis.fits ? 'CPU/PG ok' : 'CPU/PG short'}
               </span>
             }
           >
@@ -189,6 +189,10 @@ export function FitSkillsPage() {
                 Unknown items: {analysis.unknown.join(', ')}
               </p>
             ) : null}
+            <p className="text-xs opacity-70 mb-3">
+              CPU and powergrid use {trained ? "this character's skills" : 'untrained (level 0) skills'}.
+              Sign in and compare a character to check a real skill sheet.
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <LoadBar
                 label="CPU"
@@ -205,9 +209,13 @@ export function FitSkillsPage() {
                 format={formatMw}
               />
             </div>
-            {analysis.minLevels ? (
+            {!analysis.possible ? (
+              <p className="text-sm text-error mt-3">
+                This hull cannot online the fit even at all fitting skills V.
+              </p>
+            ) : analysis.minLevels && !analysis.fits ? (
               <p className="text-xs opacity-70 mt-3">
-                Minimum fitting skills: CPU Management {roman(analysis.minLevels.cpuManagement)},
+                One combo that fits: CPU Management {roman(analysis.minLevels.cpuManagement)},
                 Power Grid Management {roman(analysis.minLevels.powerGridManagement)}, Weapon
                 Upgrades {roman(analysis.minLevels.weaponUpgrades)}, Advanced Weapon Upgrades{' '}
                 {roman(analysis.minLevels.advancedWeaponUpgrades)}
@@ -216,34 +224,43 @@ export function FitSkillsPage() {
                   : ''}
                 .
               </p>
-            ) : (
-              <p className="text-sm text-error mt-3">
-                This hull cannot online the fit even at all fitting skills V.
-              </p>
-            )}
+            ) : null}
           </Panel>
 
           <Panel title="Skills to fly">
-            {trained && gaps.length === 0 ? (
-              <p className="text-sm text-success mb-3">This character can online the fit.</p>
-            ) : null}
+            {gaps.length === 0 && analysis.fits ? (
+              <p className="text-sm text-success mb-3">
+                {trained
+                  ? 'This character can online the fit.'
+                  : 'No skill gaps at the listed levels.'}
+              </p>
+            ) : (
+              <p className="text-sm text-error mb-3">
+                {gaps.length} skill{gaps.length === 1 ? '' : 's'} below the level needed to fly this
+                fit
+                {!trained ? ' (treated as untrained until you compare a character)' : ''}.
+              </p>
+            )}
             <div className="overflow-x-auto">
               <table className="table table-sm">
                 <thead>
                   <tr>
                     <th>Skill</th>
                     <th>Need</th>
-                    {trained ? <th>Trained</th> : null}
+                    <th>Trained</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {analysis.skills.map((row) => {
-                    const short = trained != null && (row.trained ?? 0) < row.required
+                    const have = row.trained ?? 0
+                    const short = have < row.required
                     return (
-                      <tr key={row.skillId} className={short ? 'text-error' : undefined}>
+                      <tr key={row.skillId} className={short ? 'text-error' : 'text-success'}>
                         <td>{row.name}</td>
                         <td>{roman(row.required)}</td>
-                        {trained ? <td>{roman(row.trained ?? 0)}</td> : null}
+                        <td>{roman(have)}</td>
+                        <td>{short ? 'Missing' : 'Ok'}</td>
                       </tr>
                     )
                   })}

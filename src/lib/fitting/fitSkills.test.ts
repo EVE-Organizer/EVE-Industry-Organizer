@@ -114,7 +114,7 @@ describe('Retribution Firestorm fit', () => {
 
   it('lists Aurora crystal skill and Heat Sink II Weapon Upgrades', () => {
     const analysis = analyzeFit(RETRIBUTION_EFT, index, skills)
-    expect(analysis.fits).toBe(true)
+    expect(analysis.possible).toBe(true)
     expect(analysis.unknown).toEqual([])
     const names = Object.fromEntries(analysis.skills.map((row) => [row.name, row.required]))
     expect(names['Small Beam Laser Specialization']).toBeGreaterThanOrEqual(1)
@@ -123,6 +123,30 @@ describe('Retribution Firestorm fit', () => {
     expect(names['Advanced Weapon Upgrades']).toBe(4)
     expect(names['Assault Frigates']).toBe(1)
     expect(names['Jury Rigging']).toBeGreaterThanOrEqual(3)
+  })
+
+  it('treats a missing skill sheet as untrained, not already qualified', () => {
+    const analysis = analyzeFit(RETRIBUTION_EFT, index, skills)
+    expect(analysis.fits).toBe(false)
+    expect(analysis.load.cpuOk).toBe(false)
+    expect(analysis.skills.length).toBeGreaterThan(0)
+    expect(analysis.skills.every((row) => row.trained === 0)).toBe(true)
+    expect(analysis.skills.some((row) => row.trained < row.required)).toBe(true)
+  })
+
+  it('only reports ready when the character actually has the skills', () => {
+    const needed = analyzeFit(RETRIBUTION_EFT, index, skills)
+    const trained = new Map(needed.skills.map((row) => [row.skillId, row.required]))
+    const ready = analyzeFit(RETRIBUTION_EFT, index, skills, trained)
+    expect(ready.fits).toBe(true)
+    expect(ready.skills.every((row) => row.trained >= row.required)).toBe(true)
+
+    trained.set(WEAPON_UPGRADES, 4)
+    const short = analyzeFit(RETRIBUTION_EFT, index, skills, trained)
+    expect(short.fits).toBe(false)
+    const wu = short.skills.find((row) => row.skillId === WEAPON_UPGRADES)
+    expect(wu?.trained).toBe(4)
+    expect(wu?.required).toBe(5)
   })
 })
 
