@@ -31,6 +31,8 @@ export interface BlueprintQuery {
    * Also covers charges (e.g. Condenser Packs) that skip blueprint cost but still have no listing.
    */
   requireBlueprintPrice: boolean
+  /** When false, reaction formulas are excluded from ranking. */
+  includeFormulas: boolean
   includeHaul: boolean
   /** Minimum average daily hub volume (0 = no filter). Uses the selected price window. */
   minVolume: number
@@ -59,6 +61,7 @@ export function defaultQuery(settings: GlobalSettings): BlueprintQuery {
     budgetMaxSlider: setupBudgetToSlider(defaultMaxSetupCost()),
     buildableOnly: false,
     requireBlueprintPrice: true,
+    includeFormulas: true,
     includeHaul: settings.includeHaulCost ?? true,
     minVolume: 100,
     batchSize: DEFAULT_BATCH_SIZE,
@@ -83,6 +86,9 @@ export function queryToSearchParams(q: BlueprintQuery, settings: GlobalSettings)
   if (q.buildableOnly !== def.buildableOnly) p.set('buildable', '1')
   if (q.requireBlueprintPrice !== def.requireBlueprintPrice) {
     p.set('bpprice', q.requireBlueprintPrice ? '1' : '0')
+  }
+  if (q.includeFormulas !== def.includeFormulas) {
+    p.set('formulas', q.includeFormulas ? '1' : '0')
   }
   if (q.includeHaul !== def.includeHaul) p.set('haul', q.includeHaul ? '1' : '0')
   if (q.minVolume !== def.minVolume) p.set('vmin', String(q.minVolume))
@@ -137,6 +143,9 @@ export function searchParamsToQuery(
   const requireBlueprintPrice =
     rawBpPrice === null ? def.requireBlueprintPrice : rawBpPrice === '1'
 
+  const rawFormulas = params.get('formulas')
+  const includeFormulas = rawFormulas === null ? def.includeFormulas : rawFormulas === '1'
+
   const rawHaul = params.get('haul')
   const includeHaul = rawHaul === null ? def.includeHaul : rawHaul === '1'
 
@@ -169,6 +178,7 @@ export function searchParamsToQuery(
     budgetMaxSlider,
     buildableOnly,
     requireBlueprintPrice,
+    includeFormulas,
     includeHaul,
     minVolume,
     batchSize,

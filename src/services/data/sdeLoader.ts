@@ -58,12 +58,19 @@ export function buildTypeMap(types: TypeInfo[]): Map<number, TypeInfo> {
   return new Map(types.map((t) => [t.typeId, t]))
 }
 
+export interface RankableBlueprintOptions {
+  /** When false, reaction formulas are excluded. Defaults to true. */
+  includeFormulas?: boolean
+}
+
 /** Rankings skip types absent from types.json (unpublished products, unknown BPOs). */
 export function isRankableBlueprint(
   blueprint: BlueprintInfo,
   typeMap: Map<number, TypeInfo>,
+  options: RankableBlueprintOptions = {},
 ): boolean {
-  if (isReactionRecipe(blueprint)) return false
+  const includeFormulas = options.includeFormulas ?? true
+  if (isReactionRecipe(blueprint) && !includeFormulas) return false
   if (!typeMap.has(blueprint.productTypeId)) return false
   if (blueprint.tier === 't1' && !typeMap.has(blueprint.blueprintTypeId)) return false
   return true

@@ -18,13 +18,16 @@ import type {
 import { MAX_BATCH_SIZE, MIN_BATCH_SIZE } from '@/types'
 import {
   advancedIndustryTimeFactor,
+  applyReactionTime,
   applyTE,
   blueprintMeTe,
   industryTimeFactor,
-  resolveStructureModifiers,
+  reactionsTimeFactor,
   revenueFromSale,
   teTimeFactor,
 } from '@/lib/cost'
+import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
+import { isReactionRecipe } from '@/lib/recipes'
 import { computeFlatSetup, type PriceContext } from '@/lib/blueprintEconomics'
 import { meetsBuildRequirements } from '@/lib/buildRequirements'
 import { skillLevel } from '@/lib/skillFields'
@@ -80,6 +83,8 @@ export interface RankingFilters {
   productGroups?: string[]
   /** Rank only these product type IDs (ignores tier/group filters). */
   productTypeIds?: number[]
+  /** When false, reaction formulas are excluded. Defaults to true. */
+  includeFormulas?: boolean
   /** Minimum avg daily hub volume (0 = no filter). Uses the same window as price. */
   minVolume?: number
   sortBy?: BlueprintSortKey
@@ -300,8 +305,8 @@ function computeRow(
   const runs = resolveRankingRuns(settings.batchSize, blueprint.productQuantity, avgVolume)
   if (runs === null) return null
 
-  const { me, te } = blueprintMeTe(blueprint.tier, settings)
-  const structure = resolveStructureModifiers(settings)
+  const { me, te } = blueprintMeTe(blueprint.tier, settings, blueprint)
+  const structure = resolveRecipeModifiers(settings, blueprint)
   const industry = skillLevel(settings.skills, 'industry')
 
   const priceCtx: PriceContext = {
@@ -382,18 +387,28 @@ function computeRow(
   const netProfit = netRevenue - setupCost - haulOut
   const margin = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
   const baseTimePerRunSeconds = blueprint.manufacturingTime
-  const teFactor = teTimeFactor(te)
-  const industryFactor = industryTimeFactor(industry)
+  const isReaction = isReactionRecipe(blueprint)
+  const reactionsSkill = skillLevel(settings.skills, 'reactions')
+  const teFactor = isReaction ? 1 : teTimeFactor(te)
+  const industryFactor = isReaction ? 1 : industryTimeFactor(industry)
   const structureTeFactor = 1 - structure.teBonusPercent / 100
-  const advancedIndustryFactor = advancedIndustryTimeFactor(advancedIndustry)
-  const jobTimeSeconds = applyTE(
-    baseTimePerRunSeconds,
-    te,
-    runs,
-    industry,
-    advancedIndustry,
-    structure.teBonusPercent,
-  )
+  const advancedIndustryFactor = isReaction ? 1 : advancedIndustryTimeFactor(advancedIndustry)
+  const reactionsFactor = reactionsTimeFactor(reactionsSkill)
+  const jobTimeSeconds = isReaction
+    ? applyReactionTime(
+        baseTimePerRunSeconds,
+        runs,
+        reactionsSkill,
+        structure.teBonusPercent,
+      )
+    : applyTE(
+        baseTimePerRunSeconds,
+        te,
+        runs,
+        industry,
+        advancedIndustry,
+        structure.teBonusPercent,
+      )
   const jobHours = jobTimeSeconds / 3600
   const daysToClear = avgVolume > 0 ? outputQty / avgVolume : Infinity
   const { iph, marketShare, competitionFactor } = marketAwareIph(
@@ -409,9 +424,12 @@ function computeRow(
   const realizedDailyProfit = sellablePerDay * profitPerUnit * competitionFactor
   const iphBreakdown: IphBreakdown = {
     me,
-    te,
-    industry,
-    advancedIndustry,
+    te: isReaction ? 0 : te,
+    industry: isReaction ? 0 : industry,
+    advancedIndustry: isReaction ? 0 : advancedIndustry,
+    ...(isReaction
+      ? { reactions: reactionsSkill, reactionsTimeFactor: reactionsFactor }
+      : {}),
     batchSizeSetting: settings.batchSize,
     productQuantity: blueprint.productQuantity,
     avgVolume,
@@ -556,13 +574,16 @@ export function rankBlueprintsFromMarket(
   }
 
   const tiers = filters.tiers ?? []
+  const includeFormulas = filters.includeFormulas ?? true
   const productTypeFilter =
     filters.productTypeIds && filters.productTypeIds.length > 0
       ? new Set(filters.productTypeIds)
       : null
   const blueprints = productTypeFilter
     ? registry.blueprints.filter((bp) => productTypeFilter.has(bp.productTypeId))
-    : filterBlueprints(registry.blueprints, tiers, filters.productGroups)
+    : filterBlueprints(registry.blueprints, tiers, filters.productGroups, {
+        includeReactions: includeFormulas,
+      })
   const advancedIndustry = skillLevel(settings.skills, 'advancedIndustry')
   const feeRates = tradingFeeRates(
     skillLevel(settings.skills, 'accounting'),
@@ -572,7 +593,7 @@ export function rankBlueprintsFromMarket(
   const rows: RankedBlueprintRow[] = []
   for (const bp of blueprints) {
     if (isPlaceholderManufacturingBlueprint(bp)) continue
-    if (!isRankableBlueprint(bp, typeMap)) continue
+    if (!isRankableBlueprint(bp, typeMap, { includeFormulas })) continue
 
     const product = typeMap.get(bp.productTypeId)!
 

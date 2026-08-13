@@ -7,9 +7,9 @@ import {
 import { expandManufacturingPlan } from '@/lib/manufacturingPlan'
 import { buildSupplyChain } from '@/lib/supplyChain'
 import { rankBlueprintsFromMarket } from '@/lib/ranking'
-import { buildTypeMap, getAllBlueprints, getBlueprintForProduct } from '@/services/data/sdeLoader'
+import { buildTypeMap, getAllBlueprints, getBlueprintForProduct, isRankableBlueprint } from '@/services/data/sdeLoader'
 import type { BlueprintRegistry, GlobalSettings, TypeInfo } from '@/types'
-import { DEFAULT_SETTINGS } from '@/types'
+import { DEFAULT_BATCH_SIZE, DEFAULT_SETTINGS } from '@/types'
 
 function loadFixture<T>(path: string): T {
   return JSON.parse(readFileSync(path, 'utf8')) as T
@@ -177,7 +177,7 @@ describe('reaction formulas', () => {
     expect(chromide?.mode).toBe('react')
   })
 
-  it('excludes reaction products from manufacturing rankings', () => {
+  it('excludes reaction products when includeFormulas is false', () => {
     const market = loadFixture<import('@/types').MarketData>('public/data/market.json')
     const regions = loadFixture<import('@/types').RegionsData>('public/data/regions.json')
     const systems = loadFixture<import('@/types').SystemInfo[]>('public/data/systems.json')
@@ -190,10 +190,73 @@ describe('reaction formulas', () => {
       DEFAULT_SETTINGS.primaryHub,
       '1m',
       DEFAULT_SETTINGS,
-      { tiers: ['t1'], productTypeIds: [16671], limit: 10 },
+      { tiers: ['t1'], productTypeIds: [16671], includeFormulas: false, limit: 10 },
       systems,
     )
 
     expect(rows).toHaveLength(0)
+  })
+
+  it('includes reaction products when includeFormulas is true', () => {
+    const market = loadFixture<import('@/types').MarketData>('public/data/market.json')
+    const regions = loadFixture<import('@/types').RegionsData>('public/data/regions.json')
+    const systems = loadFixture<import('@/types').SystemInfo[]>('public/data/systems.json')
+    const tc = getBlueprintForProduct(blueprints, 16671)!
+    expect(isRankableBlueprint(tc, typeMap, { includeFormulas: true })).toBe(true)
+
+    const rows = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      DEFAULT_SETTINGS.primaryHub,
+      '1m',
+      { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, includeBlueprintCost: false },
+      {
+        tiers: ['t1'],
+        productTypeIds: [16671],
+        includeFormulas: true,
+        requireBlueprintPrice: false,
+        minSetupCost: 0,
+        maxSetupCost: Number.POSITIVE_INFINITY,
+        minVolume: 0,
+        limit: 10,
+      },
+      systems,
+    )
+
+    expect(rows.length).toBeGreaterThan(0)
+    expect(rows[0]!.blueprint.productTypeId).toBe(16671)
+    expect(rows[0]!.blueprint.kind).toBe('reaction')
+    expect(rows[0]!.iphBreakdown.reactions).toBe(DEFAULT_SETTINGS.skills.reactions ?? 0)
+    expect(rows[0]!.iphBreakdown.reactionsTimeFactor).toBeDefined()
+  })
+
+  it('includes reaction formulas in catalog ranking when includeFormulas is true', () => {
+    const market = loadFixture<import('@/types').MarketData>('public/data/market.json')
+    const regions = loadFixture<import('@/types').RegionsData>('public/data/regions.json')
+    const systems = loadFixture<import('@/types').SystemInfo[]>('public/data/systems.json')
+
+    const rows = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      DEFAULT_SETTINGS.primaryHub,
+      '1m',
+      { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, includeBlueprintCost: false },
+      {
+        tiers: ['t1'],
+        includeFormulas: true,
+        requireBlueprintPrice: false,
+        minSetupCost: 0,
+        maxSetupCost: Number.POSITIVE_INFINITY,
+        minVolume: 0,
+        limit: 500,
+      },
+      systems,
+    )
+
+    expect(rows.some((r) => r.blueprint.kind === 'reaction')).toBe(true)
   })
 })

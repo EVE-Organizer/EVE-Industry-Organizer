@@ -142,6 +142,7 @@ export function IphBreakdownModal({
 
   const b = row.setupBreakdown
   const iph = row.iphBreakdown
+  const isReaction = row.blueprint.kind === 'reaction'
   const jobHours = iph.jobTimeSeconds / 3600
   const usesBuyOrders = iph.priceMethod === 'buy_orders'
   const priceUnitLabel = usesBuyOrders ? 'Buy order price' : 'Sell/avg price'
@@ -188,19 +189,34 @@ export function IphBreakdownModal({
           <div className="space-y-4">
             <StepCard
               step={1}
-              title="Blueprint skills"
-              note="From global settings. Per-BPO ME/TE overrides are not applied in rankings."
+              title={isReaction ? 'Formula skills' : 'Blueprint skills'}
+              note={
+                isReaction
+                  ? 'Reaction formulas use Reactions skill and refinery bonuses from Settings. ME and TE do not apply.'
+                  : 'From global settings. Per-BPO ME/TE overrides are not applied in rankings.'
+              }
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <SkillTile label="ME" value={iph.me} detail="1% less material per level" />
-                <SkillTile label="TE" value={iph.te} detail="1% faster jobs per TE point (0–20)" />
-                <SkillTile
-                  label="Adv. Industry"
-                  value={iph.advancedIndustry}
-                  detail="3% faster jobs per level"
-                />
-              </div>
-              {isPlayerStructure(iph.structureType) ? (
+              {isReaction ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <SkillTile label="ME" value={0} detail="Reactions do not use ME" />
+                  <SkillTile
+                    label="Reactions"
+                    value={iph.reactions ?? 0}
+                    detail="4% faster jobs per level"
+                  />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <SkillTile label="ME" value={iph.me} detail="1% less material per level" />
+                  <SkillTile label="TE" value={iph.te} detail="1% faster jobs per TE point (0–20)" />
+                  <SkillTile
+                    label="Adv. Industry"
+                    value={iph.advancedIndustry}
+                    detail="3% faster jobs per level"
+                  />
+                </div>
+              )}
+              {isPlayerStructure(iph.structureType) && !isReaction ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
                   <SkillTile
                     label="Struct. ME"
@@ -227,6 +243,24 @@ export function IphBreakdownModal({
                   />
                 </div>
               ) : null}
+              {isReaction && iph.structureTeBonusPercent > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                  <SkillTile
+                    label="Refinery TE"
+                    value={
+                      iph.facilityBonus
+                        ? formatFacilityBonusLine(iph.facilityBonus, 'te')
+                        : `${formatDecimal(iph.structureTeBonusPercent, 1)}%`
+                    }
+                    detail="Hull + rig time reduction from Settings refinery"
+                  />
+                  <SkillTile
+                    label="Owner tax"
+                    value={`${formatDecimal(iph.structureTaxPercent, 1)}%`}
+                    detail="Reaction tax on job fee"
+                  />
+                </div>
+              ) : null}
             </StepCard>
 
             <StepCard
@@ -249,31 +283,55 @@ export function IphBreakdownModal({
               <CalcStep label="Base time per run">
                 {formatDuration(iph.baseTimePerRunSeconds)}
               </CalcStep>
-              <CalcStep label="TE factor">
-                1 − ({iph.te} × 1%) = <strong>{formatDecimal(iph.teTimeFactor, 4)}</strong>
-              </CalcStep>
-              <CalcStep label="Industry factor">
-                1 − ({iph.industry} × 4%) ={' '}
-                <strong>{formatDecimal(iph.industryTimeFactor, 4)}</strong>
-              </CalcStep>
-              {isPlayerStructure(iph.structureType) && iph.structureTeBonusPercent > 0 ? (
-                <CalcStep label="Structure TE factor">
-                  1 − {formatDecimal(iph.structureTeBonusPercent, 1)}% ={' '}
-                  <strong>{formatDecimal(iph.structureTeTimeFactor, 4)}</strong>
-                </CalcStep>
-              ) : null}
-              <CalcStep label="Advanced Industry factor">
-                1 − ({iph.advancedIndustry} × 3%) ={' '}
-                <strong>{formatDecimal(iph.advancedIndustryTimeFactor, 4)}</strong>
-              </CalcStep>
-              <CalcStep label="Multiply">
-                {formatDuration(iph.baseTimePerRunSeconds)} × {iph.runs} runs ×{' '}
-                {formatDecimal(iph.teTimeFactor, 4)} × {formatDecimal(iph.industryTimeFactor, 4)}
-                {isPlayerStructure(iph.structureType) && iph.structureTeBonusPercent > 0
-                  ? ` × ${formatDecimal(iph.structureTeTimeFactor, 4)}`
-                  : ''}{' '}
-                × {formatDecimal(iph.advancedIndustryTimeFactor, 4)}
-              </CalcStep>
+              {isReaction ? (
+                <>
+                  <CalcStep label="Reactions factor">
+                    1 − ({iph.reactions ?? 0} × 4%) ={' '}
+                    <strong>{formatDecimal(iph.reactionsTimeFactor ?? 1, 4)}</strong>
+                  </CalcStep>
+                  {iph.structureTeBonusPercent > 0 ? (
+                    <CalcStep label="Refinery TE factor">
+                      1 − {formatDecimal(iph.structureTeBonusPercent, 1)}% ={' '}
+                      <strong>{formatDecimal(iph.structureTeTimeFactor, 4)}</strong>
+                    </CalcStep>
+                  ) : null}
+                  <CalcStep label="Multiply">
+                    {formatDuration(iph.baseTimePerRunSeconds)} × {iph.runs} runs ×{' '}
+                    {formatDecimal(iph.reactionsTimeFactor ?? 1, 4)}
+                    {iph.structureTeBonusPercent > 0
+                      ? ` × ${formatDecimal(iph.structureTeTimeFactor, 4)}`
+                      : ''}
+                  </CalcStep>
+                </>
+              ) : (
+                <>
+                  <CalcStep label="TE factor">
+                    1 − ({iph.te} × 1%) = <strong>{formatDecimal(iph.teTimeFactor, 4)}</strong>
+                  </CalcStep>
+                  <CalcStep label="Industry factor">
+                    1 − ({iph.industry} × 4%) ={' '}
+                    <strong>{formatDecimal(iph.industryTimeFactor, 4)}</strong>
+                  </CalcStep>
+                  {isPlayerStructure(iph.structureType) && iph.structureTeBonusPercent > 0 ? (
+                    <CalcStep label="Structure TE factor">
+                      1 − {formatDecimal(iph.structureTeBonusPercent, 1)}% ={' '}
+                      <strong>{formatDecimal(iph.structureTeTimeFactor, 4)}</strong>
+                    </CalcStep>
+                  ) : null}
+                  <CalcStep label="Advanced Industry factor">
+                    1 − ({iph.advancedIndustry} × 3%) ={' '}
+                    <strong>{formatDecimal(iph.advancedIndustryTimeFactor, 4)}</strong>
+                  </CalcStep>
+                  <CalcStep label="Multiply">
+                    {formatDuration(iph.baseTimePerRunSeconds)} × {iph.runs} runs ×{' '}
+                    {formatDecimal(iph.teTimeFactor, 4)} × {formatDecimal(iph.industryTimeFactor, 4)}
+                    {isPlayerStructure(iph.structureType) && iph.structureTeBonusPercent > 0
+                      ? ` × ${formatDecimal(iph.structureTeTimeFactor, 4)}`
+                      : ''}{' '}
+                    × {formatDecimal(iph.advancedIndustryTimeFactor, 4)}
+                  </CalcStep>
+                </>
+              )}
             </StepCard>
           </div>
 

@@ -648,6 +648,10 @@ export interface IphBreakdown {
   te: number
   industry: number
   advancedIndustry: number
+  /** Reactions skill level; set for reaction formulas only. */
+  reactions?: number
+  /** 1 − (reactions × 4%); set for reaction formulas only. */
+  reactionsTimeFactor?: number
   batchSizeSetting: number
   productQuantity: number
   avgVolume: number
