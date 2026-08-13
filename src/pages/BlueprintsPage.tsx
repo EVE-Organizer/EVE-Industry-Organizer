@@ -133,8 +133,13 @@ export function BlueprintsPage() {
 
   const productGroupTree = useMemo(() => {
     if (!sde) return []
-    return buildProductGroupTree(sde.registry.blueprints, rankingQuery.tiers, typeMap)
-  }, [sde, rankingQuery.tiers, typeMap])
+    return buildProductGroupTree(
+      sde.registry.blueprints,
+      rankingQuery.tiers,
+      typeMap,
+      rankingQuery.recipeKinds,
+    )
+  }, [sde, rankingQuery.tiers, rankingQuery.recipeKinds, typeMap])
 
   const watchlistIds = useMemo(
     () => new Set(watchlist.map((w) => w.productTypeId)),
@@ -180,7 +185,7 @@ export function BlueprintsPage() {
         maxSetupCost,
         buildableOnly: rankingQuery.buildableOnly,
         requireBlueprintPrice: rankingQuery.requireBlueprintPrice,
-        includeFormulas: rankingQuery.includeFormulas,
+        recipeKinds: rankingQuery.recipeKinds,
         includeHaulCost: rankingQuery.includeHaul,
         minVolume: rankingQuery.minVolume,
         tiers: rankingQuery.tiers,
@@ -203,7 +208,7 @@ export function BlueprintsPage() {
     maxSetupCost,
     rankingQuery.buildableOnly,
     rankingQuery.requireBlueprintPrice,
-    rankingQuery.includeFormulas,
+    rankingQuery.recipeKinds,
     rankingQuery.includeHaul,
     rankingQuery.minVolume,
     rankingQuery.tiers,
@@ -227,7 +232,7 @@ export function BlueprintsPage() {
         minSetupCost: 0,
         maxSetupCost: Number.POSITIVE_INFINITY,
         buildableOnly: false,
-        includeFormulas: true,
+        recipeKinds: ['manufacturing', 'reaction'],
         includeHaulCost: rankingQuery.includeHaul,
         minVolume: 0,
         productTypeIds,

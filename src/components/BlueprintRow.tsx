@@ -38,6 +38,9 @@ function BlueprintMetaLine({ row }: { row: RankedBlueprintRow }) {
     <span className="text-[10px] flex items-center gap-1 flex-wrap">
       <span className="opacity-50 flex items-center gap-1">
         <span className="badge badge-xs badge-ghost shrink-0">{tierLabel(row.blueprint.tier)}</span>
+        {row.blueprint.kind === 'reaction' ? (
+          <span className="badge badge-xs badge-outline badge-info shrink-0">Formula</span>
+        ) : null}
         {row.product.group}
       </span>
       {row.jobTimeSeconds > 0 ? (

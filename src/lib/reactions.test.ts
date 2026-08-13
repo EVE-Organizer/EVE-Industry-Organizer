@@ -177,7 +177,7 @@ describe('reaction formulas', () => {
     expect(chromide?.mode).toBe('react')
   })
 
-  it('excludes reaction products when includeFormulas is false', () => {
+  it('excludes reaction products when recipeKinds is manufacturing only', () => {
     const market = loadFixture<import('@/types').MarketData>('public/data/market.json')
     const regions = loadFixture<import('@/types').RegionsData>('public/data/regions.json')
     const systems = loadFixture<import('@/types').SystemInfo[]>('public/data/systems.json')
@@ -190,19 +190,19 @@ describe('reaction formulas', () => {
       DEFAULT_SETTINGS.primaryHub,
       '1m',
       DEFAULT_SETTINGS,
-      { tiers: ['t1'], productTypeIds: [16671], includeFormulas: false, limit: 10 },
+      { tiers: ['t1'], productTypeIds: [16671], recipeKinds: ['manufacturing'], limit: 10 },
       systems,
     )
 
     expect(rows).toHaveLength(0)
   })
 
-  it('includes reaction products when includeFormulas is true', () => {
+  it('includes reaction products when recipeKinds includes reaction', () => {
     const market = loadFixture<import('@/types').MarketData>('public/data/market.json')
     const regions = loadFixture<import('@/types').RegionsData>('public/data/regions.json')
     const systems = loadFixture<import('@/types').SystemInfo[]>('public/data/systems.json')
     const tc = getBlueprintForProduct(blueprints, 16671)!
-    expect(isRankableBlueprint(tc, typeMap, { includeFormulas: true })).toBe(true)
+    expect(isRankableBlueprint(tc, typeMap)).toBe(true)
 
     const rows = rankBlueprintsFromMarket(
       registry,
@@ -215,7 +215,7 @@ describe('reaction formulas', () => {
       {
         tiers: ['t1'],
         productTypeIds: [16671],
-        includeFormulas: true,
+        recipeKinds: ['reaction'],
         requireBlueprintPrice: false,
         minSetupCost: 0,
         maxSetupCost: Number.POSITIVE_INFINITY,
@@ -232,7 +232,7 @@ describe('reaction formulas', () => {
     expect(rows[0]!.iphBreakdown.reactionsTimeFactor).toBeDefined()
   })
 
-  it('includes reaction formulas in catalog ranking when includeFormulas is true', () => {
+  it('includes reaction formulas in catalog ranking when recipeKinds includes reaction', () => {
     const market = loadFixture<import('@/types').MarketData>('public/data/market.json')
     const regions = loadFixture<import('@/types').RegionsData>('public/data/regions.json')
     const systems = loadFixture<import('@/types').SystemInfo[]>('public/data/systems.json')
@@ -247,7 +247,7 @@ describe('reaction formulas', () => {
       { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, includeBlueprintCost: false },
       {
         tiers: ['t1'],
-        includeFormulas: true,
+        recipeKinds: ['reaction'],
         requireBlueprintPrice: false,
         minSetupCost: 0,
         maxSetupCost: Number.POSITIVE_INFINITY,

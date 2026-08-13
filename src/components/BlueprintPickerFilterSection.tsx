@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
-import type { BlueprintTier } from '@/types'
-import { BLUEPRINT_TIERS } from '@/types'
+import type { BlueprintTier, RecipeKind } from '@/types'
+import { BLUEPRINT_TIERS, RANKING_RECIPE_KINDS } from '@/types'
 import type { ProductGroupCategoryNode } from '@/services/data/sdeLoader'
+import { RECIPE_KIND_LABELS } from '@/lib/blueprintQuery'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { EveImage } from '@/components/EveImage'
@@ -13,6 +14,8 @@ export interface BlueprintPickerFilterValues {
   tiers: BlueprintTier[]
   groups: string[]
   buildableOnly: boolean
+  /** Ranking page only: which recipe types to include. */
+  recipeKinds?: RecipeKind[]
 }
 
 interface BlueprintPickerFilterSectionProps {
@@ -69,8 +72,44 @@ export function BlueprintPickerFilterSection({
     onChange({ tiers, groups: [] })
   }
 
+  function toggleRecipeKind(kind: RecipeKind) {
+    const current = values.recipeKinds ?? [...RANKING_RECIPE_KINDS]
+    const active = current.includes(kind)
+    if (active && current.length === 1) return
+    const recipeKinds = active
+      ? current.filter((k) => k !== kind)
+      : [...current, kind]
+    onChange({ recipeKinds, groups: [] })
+  }
+
   return (
     <FilterSection title={title} hint={hint} className={className}>
+      {values.recipeKinds ? (
+        <div className="shrink-0">
+          <FormFieldLabel
+            label="Recipe type"
+            tooltip="Choose manufacturing BPOs, reaction formulas, or both. With both selected, the table shows the top items across all types."
+            size="sm"
+          />
+          <div
+            role="group"
+            aria-label="Recipe type"
+            className="grid grid-cols-2 gap-2 w-full min-w-0 mt-1"
+          >
+            {RANKING_RECIPE_KINDS.map((kind) => (
+              <FilterChip
+                key={kind}
+                active={(values.recipeKinds ?? RANKING_RECIPE_KINDS).includes(kind)}
+                onClick={() => toggleRecipeKind(kind)}
+                className="min-w-0 justify-center py-2.5"
+              >
+                <span className="text-xs font-medium">{RECIPE_KIND_LABELS[kind]}</span>
+              </FilterChip>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className="shrink-0">
         <FormFieldLabel label="Tier" size="sm" />
         <div

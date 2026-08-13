@@ -10,11 +10,13 @@ import type {
   ProductWindowSummary,
   IphBreakdown,
   RankedBlueprintRow,
+  RecipeKind,
   RegionsData,
   SystemInfo,
   TimeRange,
   TypeInfo,
 } from '@/types'
+import { DEFAULT_RECIPE_KINDS } from '@/types'
 import { MAX_BATCH_SIZE, MIN_BATCH_SIZE } from '@/types'
 import {
   advancedIndustryTimeFactor,
@@ -37,6 +39,7 @@ import {
   buildPriceMap,
   buildBuyPriceMap,
   filterBlueprints,
+  filterByRecipeKinds,
   getHubMarket,
   isRankableBlueprint,
   resolveBuildSystem,
@@ -83,8 +86,8 @@ export interface RankingFilters {
   productGroups?: string[]
   /** Rank only these product type IDs (ignores tier/group filters). */
   productTypeIds?: number[]
-  /** When false, reaction formulas are excluded. Defaults to true. */
-  includeFormulas?: boolean
+  /** Manufacturing BPOs and/or reaction formulas to rank. Default: both. */
+  recipeKinds?: RecipeKind[]
   /** Minimum avg daily hub volume (0 = no filter). Uses the same window as price. */
   minVolume?: number
   sortBy?: BlueprintSortKey
@@ -574,16 +577,17 @@ export function rankBlueprintsFromMarket(
   }
 
   const tiers = filters.tiers ?? []
-  const includeFormulas = filters.includeFormulas ?? true
+  const recipeKinds = filters.recipeKinds?.length ? filters.recipeKinds : DEFAULT_RECIPE_KINDS
   const productTypeFilter =
     filters.productTypeIds && filters.productTypeIds.length > 0
       ? new Set(filters.productTypeIds)
       : null
   const blueprints = productTypeFilter
-    ? registry.blueprints.filter((bp) => productTypeFilter.has(bp.productTypeId))
-    : filterBlueprints(registry.blueprints, tiers, filters.productGroups, {
-        includeReactions: includeFormulas,
-      })
+    ? filterByRecipeKinds(
+        registry.blueprints.filter((bp) => productTypeFilter.has(bp.productTypeId)),
+        recipeKinds,
+      )
+    : filterBlueprints(registry.blueprints, tiers, filters.productGroups, { recipeKinds })
   const advancedIndustry = skillLevel(settings.skills, 'advancedIndustry')
   const feeRates = tradingFeeRates(
     skillLevel(settings.skills, 'accounting'),
@@ -593,7 +597,7 @@ export function rankBlueprintsFromMarket(
   const rows: RankedBlueprintRow[] = []
   for (const bp of blueprints) {
     if (isPlaceholderManufacturingBlueprint(bp)) continue
-    if (!isRankableBlueprint(bp, typeMap, { includeFormulas })) continue
+    if (!isRankableBlueprint(bp, typeMap)) continue
 
     const product = typeMap.get(bp.productTypeId)!
 

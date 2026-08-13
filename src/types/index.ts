@@ -13,6 +13,10 @@ export const BLUEPRINT_TIERS: BlueprintTier[] = ['t1', 't2', 'faction']
 
 export type RecipeKind = 'manufacturing' | 'reaction'
 
+/** Recipe kinds shown in blueprint ranking filters. */
+export const RANKING_RECIPE_KINDS: RecipeKind[] = ['manufacturing', 'reaction']
+export const DEFAULT_RECIPE_KINDS: RecipeKind[] = ['manufacturing', 'reaction']
+
 export type ReactionFamily = 'composite' | 'biochemical' | 'polymer' | 'molecular'
 
 export type TimeRange = '1d' | '1w' | '1m' | '1y' | 'all'

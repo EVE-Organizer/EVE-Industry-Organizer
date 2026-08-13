@@ -1,11 +1,13 @@
-import type { BlueprintTier, GlobalSettings, HubId, TimeRange } from '@/types'
+import type { BlueprintTier, GlobalSettings, HubId, RecipeKind, TimeRange } from '@/types'
 import {
   BLUEPRINT_TIERS,
   DEFAULT_BATCH_SIZE,
+  DEFAULT_RECIPE_KINDS,
   DEFAULT_SETTINGS,
   HUBS,
   MAX_BATCH_SIZE,
   MIN_BATCH_SIZE,
+  RANKING_RECIPE_KINDS,
 } from '@/types'
 import type { BlueprintSortKey, SortDirection } from '@/lib/ranking'
 import {
@@ -31,8 +33,8 @@ export interface BlueprintQuery {
    * Also covers charges (e.g. Condenser Packs) that skip blueprint cost but still have no listing.
    */
   requireBlueprintPrice: boolean
-  /** When false, reaction formulas are excluded from ranking. */
-  includeFormulas: boolean
+  /** Manufacturing BPOs and/or reaction formulas to rank. Default: both. */
+  recipeKinds: RecipeKind[]
   includeHaul: boolean
   /** Minimum average daily hub volume (0 = no filter). Uses the selected price window. */
   minVolume: number
@@ -49,6 +51,19 @@ const VALID_SORT_KEYS: BlueprintSortKey[] = ['setupCost', 'netProfit', 'iph', 'm
 const VALID_SORT_DIRS: SortDirection[] = ['asc', 'desc']
 const VALID_HUBS: HubId[] = HUBS.map((hub) => hub.id)
 
+const VALID_RECIPE_KINDS = new Set<string>(RANKING_RECIPE_KINDS)
+
+export const RECIPE_KIND_LABELS: Record<RecipeKind, string> = {
+  manufacturing: 'Blueprints',
+  reaction: 'Formulas',
+}
+
+export function recipeKindsEqual(a: RecipeKind[], b: RecipeKind[]): boolean {
+  if (a.length !== b.length) return false
+  const sorted = (kinds: RecipeKind[]) => [...kinds].sort().join(',')
+  return sorted(a) === sorted(b)
+}
+
 export function defaultQuery(settings: GlobalSettings): BlueprintQuery {
   return {
     hub: settings.primaryHub,
@@ -61,7 +76,7 @@ export function defaultQuery(settings: GlobalSettings): BlueprintQuery {
     budgetMaxSlider: setupBudgetToSlider(defaultMaxSetupCost()),
     buildableOnly: false,
     requireBlueprintPrice: true,
-    includeFormulas: true,
+    recipeKinds: [...DEFAULT_RECIPE_KINDS],
     includeHaul: settings.includeHaulCost ?? true,
     minVolume: 100,
     batchSize: DEFAULT_BATCH_SIZE,
@@ -87,8 +102,8 @@ export function queryToSearchParams(q: BlueprintQuery, settings: GlobalSettings)
   if (q.requireBlueprintPrice !== def.requireBlueprintPrice) {
     p.set('bpprice', q.requireBlueprintPrice ? '1' : '0')
   }
-  if (q.includeFormulas !== def.includeFormulas) {
-    p.set('formulas', q.includeFormulas ? '1' : '0')
+  if (!recipeKindsEqual(q.recipeKinds, def.recipeKinds)) {
+    p.set('recipe', q.recipeKinds.join(','))
   }
   if (q.includeHaul !== def.includeHaul) p.set('haul', q.includeHaul ? '1' : '0')
   if (q.minVolume !== def.minVolume) p.set('vmin', String(q.minVolume))
@@ -143,8 +158,12 @@ export function searchParamsToQuery(
   const requireBlueprintPrice =
     rawBpPrice === null ? def.requireBlueprintPrice : rawBpPrice === '1'
 
+  const rawRecipe = params.get('recipe')
   const rawFormulas = params.get('formulas')
-  const includeFormulas = rawFormulas === null ? def.includeFormulas : rawFormulas === '1'
+  let recipeKinds = parseRecipeKinds(rawRecipe, def.recipeKinds)
+  if (rawFormulas === '0' && rawRecipe === null) {
+    recipeKinds = ['manufacturing']
+  }
 
   const rawHaul = params.get('haul')
   const includeHaul = rawHaul === null ? def.includeHaul : rawHaul === '1'
@@ -178,7 +197,7 @@ export function searchParamsToQuery(
     budgetMaxSlider,
     buildableOnly,
     requireBlueprintPrice,
-    includeFormulas,
+    recipeKinds,
     includeHaul,
     minVolume,
     batchSize,
@@ -191,6 +210,20 @@ export function formatGroupFilterSubtitle(groups: string[]): string {
   if (groups.length === 0) return ''
   if (groups.length === 1) return ` in ${groups[0]}`
   return ` in ${groups.length} groups`
+}
+
+function parseRecipeKinds(raw: string | null, fallback: RecipeKind[]): RecipeKind[] {
+  if (raw === null) return fallback
+  if (raw === '' || raw === 'all') return [...DEFAULT_RECIPE_KINDS]
+  const parsed = [
+    ...new Set(
+      raw
+        .split(',')
+        .map((k) => k.trim())
+        .filter((k): k is RecipeKind => VALID_RECIPE_KINDS.has(k)),
+    ),
+  ]
+  return parsed.length > 0 ? parsed : fallback
 }
 
 function parseGroups(raw: string | null, fallback: string[]): string[] {

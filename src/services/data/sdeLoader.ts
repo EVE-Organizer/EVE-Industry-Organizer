@@ -13,7 +13,7 @@ import type {
   SystemInfo,
   TypeInfo,
 } from '@/types'
-import { isManufacturingRecipe, isReactionRecipe } from '@/lib/recipes'
+import { DEFAULT_RECIPE_KINDS } from '@/types'
 import { publicDataUrl } from '@/lib/paths'
 
 export interface SdeData {
@@ -58,22 +58,28 @@ export function buildTypeMap(types: TypeInfo[]): Map<number, TypeInfo> {
   return new Map(types.map((t) => [t.typeId, t]))
 }
 
-export interface RankableBlueprintOptions {
-  /** When false, reaction formulas are excluded. Defaults to true. */
-  includeFormulas?: boolean
-}
-
 /** Rankings skip types absent from types.json (unpublished products, unknown BPOs). */
 export function isRankableBlueprint(
   blueprint: BlueprintInfo,
   typeMap: Map<number, TypeInfo>,
-  options: RankableBlueprintOptions = {},
 ): boolean {
-  const includeFormulas = options.includeFormulas ?? true
-  if (isReactionRecipe(blueprint) && !includeFormulas) return false
   if (!typeMap.has(blueprint.productTypeId)) return false
   if (blueprint.tier === 't1' && !typeMap.has(blueprint.blueprintTypeId)) return false
   return true
+}
+
+export function recipeKindOf(blueprint: BlueprintInfo): RecipeKind {
+  return blueprint.kind ?? 'manufacturing'
+}
+
+export function filterByRecipeKinds(
+  blueprints: BlueprintInfo[],
+  recipeKinds?: RecipeKind[],
+): BlueprintInfo[] {
+  const kinds = recipeKinds?.length ? recipeKinds : DEFAULT_RECIPE_KINDS
+  if (kinds.length >= DEFAULT_RECIPE_KINDS.length) return blueprints
+  const allowed = new Set(kinds)
+  return blueprints.filter((b) => allowed.has(recipeKindOf(b)))
 }
 
 export function buildRegionMap(regions: RegionsData): Map<number, RegionInfo> {
@@ -165,11 +171,9 @@ export function filterBlueprints(
   blueprints: BlueprintInfo[],
   tiers: BlueprintTier[],
   productGroups?: string[],
-  options?: { includeReactions?: boolean },
+  options?: { recipeKinds?: RecipeKind[] },
 ): BlueprintInfo[] {
-  let result = options?.includeReactions
-    ? blueprints
-    : blueprints.filter((b) => isManufacturingRecipe(b))
+  let result = filterByRecipeKinds(blueprints, options?.recipeKinds)
   if (tiers.length > 0) {
     const allowed = new Set(tiers)
     result = result.filter((b) => allowed.has(b.tier))
@@ -199,8 +203,9 @@ export function buildProductGroupTree(
   blueprints: BlueprintInfo[],
   tiers: BlueprintTier[],
   typeMap: Map<number, TypeInfo>,
+  recipeKinds?: RecipeKind[],
 ): ProductGroupCategoryNode[] {
-  const filtered = filterBlueprints(blueprints, tiers)
+  const filtered = filterBlueprints(blueprints, tiers, undefined, { recipeKinds })
   const byGroup = new Map<string, ProductGroupEntry>()
   const itemNamesByGroup = new Map<string, Set<string>>()
 
