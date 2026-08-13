@@ -8,6 +8,7 @@ describe('isToolsPath', () => {
     expect(isToolsPath('/tools/gate-check')).toBe(true)
     expect(isToolsPath('/tools/mining')).toBe(true)
     expect(isToolsPath('/tools/fit-skills')).toBe(true)
+    expect(isToolsPath('/tools/character-plan')).toBe(true)
   })
 
   it('does not match unrelated routes', () => {

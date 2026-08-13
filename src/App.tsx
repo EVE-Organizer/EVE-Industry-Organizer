@@ -13,6 +13,7 @@ import { SettingsPage } from '@/pages/SettingsPage'
 import { MiningIskHrPage } from '@/pages/MiningIskHrPage'
 import { RouteRiskPage } from '@/pages/RouteRiskPage'
 import { FitSkillsPage } from '@/pages/FitSkillsPage'
+import { CharacterPlanPage } from '@/pages/CharacterPlanPage'
 import { AuthCallbackPage } from '@/pages/AuthCallbackPage'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -69,6 +70,7 @@ function AppRoutes() {
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/tools/route-risk" element={<RouteRiskPage />} />
         <Route path="/tools/fit-skills" element={<FitSkillsPage />} />
+        <Route path="/tools/character-plan" element={<CharacterPlanPage />} />
         <Route path="/tools/gate-check" element={<LegacyGateCheckRedirect />} />
         <Route path="/tools/mining" element={<MiningIskHrPage />} />
         <Route path="/isk-hr" element={<Navigate to="/tools/mining" replace />} />
