@@ -16,7 +16,9 @@ import {
   resolveFit,
 } from '@/lib/fitting/fitSkills'
 import { analyzeFit } from '@/lib/fitting/analyzeFit'
-import type { FittingData } from '@/lib/fitting/types'
+import { SAMPLE_RETRIBUTION_EFT as RETRIBUTION_EFT } from '@/lib/fitting/sampleEft'
+import { formatFittingCombo, groupFitSkills, skillGroupName } from '@/lib/fitting/skillDisplay'
+import type { FittingData, FitSkillRow } from '@/lib/fitting/types'
 import type { SkillInfo } from '@/types'
 
 const PULSE_KITE_EFT = `[Retribution, Pulse kite]
@@ -38,30 +40,6 @@ Small Focused Pulse Laser II
 
 Small Energy Burst Aerator II
 Small Thermal Armor Reinforcer II
-`
-
-const RETRIBUTION_EFT = `[Retribution, DPS T5/T6 Firestorm]
-
-Imperial Navy Heat Sink
-Imperial Navy Heat Sink
-Centii A-Type Thermal Coating
-Dark Blood Multispectrum Coating
-Heat Sink II
-
-Coreli A-Type 1MN Afterburner
-Republic Fleet Small Cap Battery
-
-Coreli A-Type Small Remote Armor Repairer
-Small Focused Beam Laser II
-Small Focused Beam Laser II
-Small Focused Beam Laser II
-Small Focused Beam Laser II
-
-Small Energy Burst Aerator II
-Small Thermal Armor Reinforcer II
-
-Aurora S x4
-Gleam S x4
 `
 
 function loadFitting() {
@@ -196,5 +174,32 @@ describe('fitting skill ids', () => {
     expect(WEAPON_UPGRADES).toBe(3318)
     expect(ADVANCED_WEAPON_UPGRADES).toBe(11207)
     expect(ENERGY_WEAPON_RIGGING).toBe(26258)
+  })
+})
+
+describe('skillDisplay', () => {
+  it('groups fitting, ship, and gunnery rows', () => {
+    const rows: FitSkillRow[] = [
+      { skillId: WEAPON_UPGRADES, name: 'Weapon Upgrades', required: 5, trained: 0, rank: 2 },
+      { skillId: 12095, name: 'Assault Frigates', required: 1, trained: 0, rank: 4 },
+      { skillId: 11083, name: 'Small Beam Laser Specialization', required: 1, trained: 0, rank: 3 },
+    ]
+    expect(skillGroupName(rows[0])).toBe('Fitting')
+    expect(skillGroupName(rows[1])).toBe('Ship')
+    expect(skillGroupName(rows[2])).toBe('Gunnery')
+    expect(groupFitSkills(rows).map((group) => group.title)).toEqual(['Fitting', 'Ship', 'Gunnery'])
+  })
+
+  it('formats a fitting combo without empty rigging', () => {
+    expect(
+      formatFittingCombo({
+        cpuManagement: 5,
+        powerGridManagement: 5,
+        weaponUpgrades: 5,
+        advancedWeaponUpgrades: 4,
+        electronicsUpgrades: 0,
+        rigging: { energy: 5 },
+      }),
+    ).toContain('Energy Weapon Rigging V')
   })
 })
