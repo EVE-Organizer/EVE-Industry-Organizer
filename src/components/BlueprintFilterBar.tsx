@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react'
 import { MAX_BATCH_SIZE, MIN_BATCH_SIZE } from '@/types'
 import type { SdeData, ProductGroupCategoryNode } from '@/services/data/sdeLoader'
+import { findProductGroupEntry } from '@/services/data/sdeLoader'
 import {
   clampBatchSize,
   clampMinVolume,
   defaultQuery,
   MAX_MIN_VOLUME_SLIDER,
+  recipeKindsEqual,
   type BlueprintQuery,
 } from '@/lib/blueprintQuery'
 import { useAppStore } from '@/stores/appStore'
@@ -19,7 +21,8 @@ import {
 import { BlueprintPickerFilterSection } from '@/components/BlueprintPickerFilterSection'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { formatAvgVolume, formatInputDecimal, formatNumber } from '@/lib/profit'
-import type { GlobalSettings } from '@/types'
+import type { GlobalSettings, RecipeKind } from '@/types'
+import { DEFAULT_RECIPE_KINDS } from '@/types'
 
 interface BlueprintFilterBarProps {
   query: BlueprintQuery
@@ -44,6 +47,25 @@ function LimitsTile({
       {children}
     </div>
   )
+}
+
+function recipeKindsForSelectedGroups(
+  groups: string[],
+  tree: ProductGroupCategoryNode[],
+  current: RecipeKind[],
+): RecipeKind[] {
+  if (groups.length === 0) return current
+
+  const needed = new Set<RecipeKind>()
+  for (const name of groups) {
+    const entry = findProductGroupEntry(tree, name)
+    for (const kind of entry?.recipeKinds ?? DEFAULT_RECIPE_KINDS) {
+      needed.add(kind)
+    }
+  }
+
+  const next = DEFAULT_RECIPE_KINDS.filter((kind) => needed.has(kind))
+  return next.length > 0 ? next : current
 }
 
 export function BlueprintFilterBar({
@@ -148,7 +170,22 @@ export function BlueprintFilterBar({
               buildableOnly: query.buildableOnly,
               recipeKinds: query.recipeKinds,
             }}
-            onChange={(patch) => onChange(patch)}
+            onChange={(patch) => {
+              if (patch.groups) {
+                const recipeKinds = recipeKindsForSelectedGroups(
+                  patch.groups,
+                  productGroupTree,
+                  query.recipeKinds,
+                )
+                onChange(
+                  recipeKindsEqual(recipeKinds, query.recipeKinds)
+                    ? patch
+                    : { ...patch, recipeKinds },
+                )
+                return
+              }
+              onChange(patch)
+            }}
             productGroupTree={productGroupTree}
             title="Catalog"
             hint="Recipe type, tier, product group, and buildable-only."

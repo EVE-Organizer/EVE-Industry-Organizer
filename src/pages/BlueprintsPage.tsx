@@ -1,7 +1,7 @@
 import { memo, useCallback, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { RankedBlueprintRow, ManufacturingSettings, SkillLevels } from '@/types'
-import { HUBS } from '@/types'
+import { HUBS, DEFAULT_RECIPE_KINDS } from '@/types'
 import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
 import { useHaulRouteRisk } from '@/hooks/useHaulRouteRisk'
@@ -13,7 +13,7 @@ import {
   BlueprintQueryFilters,
   type BlueprintQueryFiltersHandle,
 } from '@/components/BlueprintQueryFilters'
-import { defaultQuery, formatGroupFilterSubtitle, type BlueprintQuery } from '@/lib/blueprintQuery'
+import { defaultQuery, formatGroupFilterSubtitle, recipeKindsEqual, type BlueprintQuery } from '@/lib/blueprintQuery'
 import {
   MAX_DAYS_TO_CLEAR,
   TOP_N,
@@ -137,9 +137,9 @@ export function BlueprintsPage() {
       sde.registry.blueprints,
       rankingQuery.tiers,
       typeMap,
-      rankingQuery.recipeKinds,
+      DEFAULT_RECIPE_KINDS,
     )
-  }, [sde, rankingQuery.tiers, rankingQuery.recipeKinds, typeMap])
+  }, [sde, rankingQuery.tiers, typeMap])
 
   const watchlistIds = useMemo(
     () => new Set(watchlist.map((w) => w.productTypeId)),
@@ -272,13 +272,18 @@ export function BlueprintsPage() {
     ? new Date(sde.market.generatedAt).toLocaleString()
     : undefined
 
+  const rankingBothKinds = recipeKindsEqual(rankingQuery.recipeKinds, DEFAULT_RECIPE_KINDS)
+  const rankingLimitLabel = rankingBothKinds
+    ? `Top ${TOP_N} per recipe type`
+    : `Top ${TOP_N}`
+
   if (isLoading) return <LoadingState />
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <PageHeader
         title="Top Blueprints"
-        subtitle={`Top ${TOP_N}${formatGroupFilterSubtitle(rankingQuery.groups)} by ${SORT_LABELS[rankingQuery.sortBy]} · sized to ${MAX_DAYS_TO_CLEAR} days of hub volume${marketUpdated ? ` · market ${marketUpdated}` : ''}`}
+        subtitle={`${rankingLimitLabel}${formatGroupFilterSubtitle(rankingQuery.groups)} by ${SORT_LABELS[rankingQuery.sortBy]} · sized to ${MAX_DAYS_TO_CLEAR} days of hub volume${marketUpdated ? ` · market ${marketUpdated}` : ''}`}
       />
 
       <BlueprintQueryFilters

@@ -243,6 +243,15 @@ function CollapsibleGroupList({
                             lazy={false}
                           />
                           <span className="truncate">{group.name}</span>
+                          {group.recipeKinds.length === 1 &&
+                          group.recipeKinds[0] === 'reaction' ? (
+                            <span className="badge badge-xs badge-outline badge-info shrink-0">
+                              Formula
+                            </span>
+                          ) : group.recipeKinds.includes('reaction') &&
+                            group.recipeKinds.includes('manufacturing') ? (
+                            <span className="badge badge-xs badge-ghost shrink-0">Both</span>
+                          ) : null}
                         </label>
                       </li>
                     ))}

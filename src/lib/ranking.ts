@@ -42,6 +42,7 @@ import {
   filterByRecipeKinds,
   getHubMarket,
   isRankableBlueprint,
+  recipeKindOf,
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
 
@@ -106,6 +107,29 @@ export function sortBlueprintRows(
 ): RankedBlueprintRow[] {
   const factor = direction === 'asc' ? 1 : -1
   return [...rows].sort((a, b) => factor * (a[key] - b[key]))
+}
+
+/** When both recipe kinds are ranked, keep top N per kind so formulas are not crowded out. */
+export function finalizeRankedRows(
+  rows: RankedBlueprintRow[],
+  filters: Pick<RankingFilters, 'sortBy' | 'sortDirection' | 'limit' | 'recipeKinds'>,
+): RankedBlueprintRow[] {
+  const sortBy = filters.sortBy ?? 'iph'
+  const sortDirection = filters.sortDirection ?? 'desc'
+  const limit = filters.limit ?? TOP_N
+  const kinds = filters.recipeKinds?.length ? filters.recipeKinds : DEFAULT_RECIPE_KINDS
+
+  if (kinds.length >= DEFAULT_RECIPE_KINDS.length) {
+    const merged: RankedBlueprintRow[] = []
+    for (const kind of DEFAULT_RECIPE_KINDS) {
+      if (!kinds.includes(kind)) continue
+      const kindRows = rows.filter((r) => recipeKindOf(r.blueprint) === kind)
+      merged.push(...sortBlueprintRows(kindRows, sortBy, sortDirection).slice(0, limit))
+    }
+    return sortBlueprintRows(merged, sortBy, sortDirection)
+  }
+
+  return sortBlueprintRows(rows, sortBy, sortDirection).slice(0, limit)
 }
 
 function haulRouteKey(from: number, to: number): string {
@@ -650,11 +674,7 @@ export function rankBlueprintsFromMarket(
     rows.push(row)
   }
 
-  const sortBy = filters.sortBy ?? 'iph'
-  const sortDirection = filters.sortDirection ?? 'desc'
-
-  const limit = filters.limit ?? TOP_N
-  return sortBlueprintRows(rows, sortBy, sortDirection).slice(0, limit)
+  return finalizeRankedRows(rows, filters)
 }
 
 export function defaultMinSetupCost(): number {

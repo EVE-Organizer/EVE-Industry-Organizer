@@ -191,6 +191,8 @@ export interface ProductGroupEntry {
   iconTypeId: number
   /** Product type names in this group (for search). */
   itemNames: string[]
+  /** Recipe types present in this group (manufacturing BPO and/or reaction formula). */
+  recipeKinds: RecipeKind[]
 }
 
 export interface ProductGroupCategoryNode {
@@ -208,12 +210,18 @@ export function buildProductGroupTree(
   const filtered = filterBlueprints(blueprints, tiers, undefined, { recipeKinds })
   const byGroup = new Map<string, ProductGroupEntry>()
   const itemNamesByGroup = new Map<string, Set<string>>()
+  const kindsByGroup = new Map<string, Set<RecipeKind>>()
 
   for (const bp of filtered) {
     if (!isRankableBlueprint(bp, typeMap)) continue
 
     const type = typeMap.get(bp.productTypeId)
     const productName = type?.name
+    const kind = recipeKindOf(bp)
+
+    const kinds = kindsByGroup.get(bp.productGroup) ?? new Set<RecipeKind>()
+    kinds.add(kind)
+    kindsByGroup.set(bp.productGroup, kinds)
 
     if (!byGroup.has(bp.productGroup)) {
       byGroup.set(bp.productGroup, {
@@ -221,6 +229,7 @@ export function buildProductGroupTree(
         category: type?.category ?? 'Other',
         iconTypeId: bp.productTypeId,
         itemNames: [],
+        recipeKinds: [],
       })
     }
 
@@ -238,6 +247,11 @@ export function buildProductGroupTree(
     }
   }
 
+  for (const [groupName, entry] of byGroup) {
+    const kinds = kindsByGroup.get(groupName)
+    entry.recipeKinds = kinds ? [...kinds].sort() : []
+  }
+
   const byCategory = new Map<string, ProductGroupEntry[]>()
   for (const entry of byGroup.values()) {
     const list = byCategory.get(entry.category) ?? []
@@ -251,6 +265,17 @@ export function buildProductGroupTree(
       category,
       groups: groups.sort((a, b) => a.name.localeCompare(b.name)),
     }))
+}
+
+export function findProductGroupEntry(
+  tree: ProductGroupCategoryNode[],
+  groupName: string,
+): ProductGroupEntry | undefined {
+  for (const node of tree) {
+    const entry = node.groups.find((g) => g.name === groupName)
+    if (entry) return entry
+  }
+  return undefined
 }
 
 export function buildSkillMap(skills: SkillInfo[]): Map<number, SkillInfo> {
