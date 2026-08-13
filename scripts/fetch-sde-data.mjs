@@ -29,6 +29,7 @@ import {
 } from './lib/run-progress.mjs'
 import { HUBS, resolveSellSystemId } from './lib/hubs.mjs'
 import { buildAllTypeRecords } from './lib/type-records.mjs'
+import { buildFittingRecords } from './lib/fitting-records.mjs'
 import { buildMapData, systemsFromSdeJsonl } from './lib/map-data.mjs'
 import { buildGateIntelData } from './lib/gate-intel-data.mjs'
 import { loadMapSolarSystemsJsonl } from './lib/sde-jsonl.mjs'
@@ -49,6 +50,7 @@ const REQUIRED_CSVS = [
   'invCategories',
   'invMetaTypes',
   'dgmTypeAttributes',
+  'dgmTypeEffects',
   'mapSolarSystems',
   'mapSolarSystemJumps',
   'mapRegions',
@@ -340,6 +342,11 @@ async function main() {
             categoryById,
             blueprints.map((bp) => bp.blueprintTypeId),
           )
+          ctx.fittingItems = buildFittingRecords(
+            ctx.csvData.dgmTypeAttributes,
+            ctx.csvData.dgmTypeEffects,
+            ctx.typeRecords,
+          )
           ctx.stations = buildHubStations(
             HUBS,
             ctx.csvData.staStations,
@@ -403,7 +410,10 @@ async function main() {
             blueprints: ctx.blueprints,
           }
           const write = (name, data) =>
-            writeFileSync(join(outDir, name), JSON.stringify(data, null, 2))
+            writeFileSync(
+              join(outDir, name),
+              name === 'fitting.json' ? JSON.stringify(data) : JSON.stringify(data, null, 2),
+            )
 
           const outputs = [
             ['types.json', { generatedAt: new Date().toISOString(), types: ctx.typeRecords }],
@@ -415,6 +425,7 @@ async function main() {
             ['stations.json', ctx.stations],
             ['map.json', ctx.mapData],
             ['gateIntel.json', ctx.gateIntel],
+            ['fitting.json', { generatedAt: new Date().toISOString(), items: ctx.fittingItems }],
           ]
           const startedAt = Date.now()
           for (let i = 0; i < outputs.length; i++) {
