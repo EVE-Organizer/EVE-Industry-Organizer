@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "fetch-data": "node scripts/fetch-sde-data.mjs",
     "rebuild-types": "node scripts/rebuild-types.mjs",
+    "rebuild-fitting": "node scripts/rebuild-fitting.mjs",
     "rebuild-market": "node scripts/rebuild-market.mjs",
     "rebuild-market:hub": "node scripts/rebuild-market.mjs",
     "rebuild-market:fast": "MARKET_SKIP_HISTORY=1 node scripts/rebuild-market.mjs",

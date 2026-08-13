@@ -6,6 +6,7 @@ export interface ToolsNavItem {
 
 export const TOOLS_NAV_ITEMS: ToolsNavItem[] = [
   { id: 'route-risk', label: 'Route risk', to: '/tools/route-risk' },
+  { id: 'fit-skills', label: 'Fit skills', to: '/tools/fit-skills' },
   { id: 'mining', label: 'Mining', to: '/tools/mining' },
 ]
 

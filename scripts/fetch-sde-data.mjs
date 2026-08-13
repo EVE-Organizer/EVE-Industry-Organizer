@@ -29,6 +29,7 @@ import {
 } from './lib/run-progress.mjs'
 import { HUBS, resolveSellSystemId } from './lib/hubs.mjs'
 import { buildAllTypeRecords } from './lib/type-records.mjs'
+import { buildFittingRecords } from './lib/fitting-records.mjs'
 import { buildMapData, systemsFromSdeJsonl } from './lib/map-data.mjs'
 import { buildGateIntelData } from './lib/gate-intel-data.mjs'
 import { loadMapSolarSystemsJsonl } from './lib/sde-jsonl.mjs'
@@ -334,6 +335,12 @@ async function main() {
           })
 
           ctx.blueprints = blueprints
+          ctx.fittingTypes = buildFittingRecords(
+            types,
+            groups,
+            categories,
+            ctx.csvData.dgmTypeAttributes,
+          )
           ctx.typeRecords = buildAllTypeRecords(
             types,
             groupById,
@@ -403,7 +410,10 @@ async function main() {
             blueprints: ctx.blueprints,
           }
           const write = (name, data) =>
-            writeFileSync(join(outDir, name), JSON.stringify(data, null, 2))
+            writeFileSync(
+              join(outDir, name),
+              JSON.stringify(data, null, name === 'fitting.json' ? 0 : 2),
+            )
 
           const outputs = [
             ['types.json', { generatedAt: new Date().toISOString(), types: ctx.typeRecords }],
@@ -411,6 +421,7 @@ async function main() {
             ['regions.json', ctx.regions],
             ['market.json', ctx.market],
             ['skills.json', ctx.skills],
+            ['fitting.json', { generatedAt: new Date().toISOString(), types: ctx.fittingTypes }],
             ['systems.json', ctx.systems],
             ['stations.json', ctx.stations],
             ['map.json', ctx.mapData],
