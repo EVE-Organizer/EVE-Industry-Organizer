@@ -330,10 +330,14 @@ export function FitSkillFinderPage() {
               </h2>
               <p className={`text-sm ${analysis.online ? 'text-success' : 'text-warning'}`}>
                 {analysis.online
-                  ? 'This hull can go online with the fitting skills below.'
-                  : analysis.rigSizeOk
-                    ? 'This hull is over PG, CPU, or calibration even at max fitting skills (no hull bonuses).'
-                    : 'A rig is the wrong size for this hull.'}
+                  ? 'PG and CPU work if you train the fitting skills below, including rigging that cuts drawback.'
+                  : !analysis.pg.ok
+                    ? `Over powergrid (${analysis.pg.used.toFixed(1)} / ${analysis.pg.output.toFixed(1)}). Train PGM, AWU, and the matching rigging skill.`
+                    : !analysis.cpu.ok
+                      ? `Over CPU (${analysis.cpu.used.toFixed(1)} / ${analysis.cpu.output.toFixed(1)}). Train CPU Management, Weapon Upgrades, and any CPU-drawback rigging.`
+                      : analysis.rigSizeOk
+                        ? `Over calibration (${analysis.cal.used.toFixed(0)} / ${analysis.cal.output.toFixed(0)}).`
+                        : 'A rig is the wrong size for this hull.'}
               </p>
             </div>
           </div>
@@ -360,7 +364,8 @@ export function FitSkillFinderPage() {
             <Panel title="Rig drawback">
               <p className="text-xs opacity-70 mb-2">
                 Each level of the matching rigging skill reduces this penalty by 10%, so V cuts it in half.
-                Laser, hybrid, and projectile PG, launcher CPU, and CPU output feed the online check.
+                The "To fit" column is after the queued rigging level. Laser, hybrid, and projectile PG,
+                launcher CPU, and CPU output feed the online check.
               </p>
               <div className="overflow-x-auto">
                 <table className="table table-sm">
@@ -368,7 +373,7 @@ export function FitSkillFinderPage() {
                     <tr>
                       <th>Rig</th>
                       <th>Penalty</th>
-                      <th>Now</th>
+                      <th>To fit</th>
                       <th>At V</th>
                     </tr>
                   </thead>
