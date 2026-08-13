@@ -12,6 +12,7 @@ import {
   analyzeFit,
   buildTypeNameIndex,
   esiLevelsFromSkills,
+  formatDrawbackPct,
   formatGapLevel,
   formatTrainTime,
   parsePastedSkillLevels,
@@ -354,6 +355,45 @@ export function FitSkillFinderPage() {
               accent={analysis.cal.ok ? 'success' : 'warning'}
             />
           </div>
+
+          {analysis.rigDrawbacks.length ? (
+            <Panel title="Rig drawback">
+              <p className="text-xs opacity-70 mb-2">
+                Each level of the matching rigging skill reduces this penalty by 10%, so V cuts it in half.
+                Laser, hybrid, and projectile PG, launcher CPU, and CPU output feed the online check.
+              </p>
+              <div className="overflow-x-auto">
+                <table className="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Rig</th>
+                      <th>Penalty</th>
+                      <th>Now</th>
+                      <th>At V</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analysis.rigDrawbacks.map((row, index) => (
+                      <tr key={`${row.typeId}-${row.label}-${index}`}>
+                        <td>
+                          <span className="inline-flex items-center gap-2 min-w-0">
+                            <EveImage id={row.typeId} size={24} alt="" className="size-6" />
+                            <span>{row.name}</span>
+                          </span>
+                        </td>
+                        <td>
+                          {row.label}
+                          {row.affectsFit ? <span className="opacity-50"> · fit</span> : null}
+                        </td>
+                        <td>{formatDrawbackPct(row.nowPct)}</td>
+                        <td>{formatDrawbackPct(row.atVPct)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Panel>
+          ) : null}
 
           {analysis.unresolved.length ? (
             <p className="text-sm text-warning">

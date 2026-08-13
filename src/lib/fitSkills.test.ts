@@ -3,6 +3,7 @@ import { parseEft } from '@/lib/eftParse'
 import {
   analyzeFit,
   buildTypeNameIndex,
+  effectiveDrawbackPct,
   parsePastedSkillLevels,
   skillpointsBetween,
   type FittingItemRecord,
@@ -34,8 +35,8 @@ const fitting = new Map<number, FittingItemRecord>([
   [11393, { slot: 'ship', pgOut: 62, cpuOut: 140, calOut: 400, rigSize: 1, skills: [[3331, 5], [12095, 1]] }],
   [3033, { slot: 'high', pg: 13, cpu: 19, skills: [[3303, 5]] }],
   [2364, { slot: 'low', pg: 1, cpu: 30, skills: [[3318, 4]] }],
-  [31454, { slot: 'rig', cal: 200, rigSize: 1, meta: 1 }],
-  [31460, { slot: 'rig', cal: 300, rigSize: 1, meta: 2 }],
+  [31454, { slot: 'rig', cal: 200, rigSize: 1, meta: 1, drawback: 10, de: [2706] }],
+  [31460, { slot: 'rig', cal: 300, rigSize: 1, meta: 2, drawback: 10, de: [2706] }],
 ])
 
 const skills: SkillInfo[] = [
@@ -113,5 +114,40 @@ Small Focused Beam Laser II
     })
     expect(t2.fitSkills.some((row) => row.skillId === 26258 && row.need === 4)).toBe(true)
     expect(t2.queueFits.some((item) => item.skillId === 26252 && item.to >= 3)).toBe(true)
+  })
+
+  it('applies energy weapon PG drawback and halves it at rigging V', () => {
+    expect(effectiveDrawbackPct(10, 0)).toBe(10)
+    expect(effectiveDrawbackPct(10, 5)).toBe(5)
+
+    const none = analyzeFit({
+      parsed: parseEft(`[Retribution, Rigs]
+Small Focused Beam Laser II
+Small Energy Collision Accelerator I
+`),
+      typesByName: buildTypeNameIndex(types),
+      fittingByTypeId: fitting,
+      skills,
+      characterLevels: new Map(),
+      role: 'general',
+      budgetDays: 7,
+    })
+    expect(none.rigDrawbacks[0]).toMatchObject({ label: 'Laser PG', nowPct: 10, atVPct: 5, affectsFit: true })
+    expect(none.pg.used).toBeCloseTo(13 * 1.1, 5)
+
+    const trained = analyzeFit({
+      parsed: parseEft(`[Retribution, Rigs]
+Small Focused Beam Laser II
+Small Energy Collision Accelerator I
+`),
+      typesByName: buildTypeNameIndex(types),
+      fittingByTypeId: fitting,
+      skills,
+      characterLevels: new Map([[26258, 5]]),
+      role: 'general',
+      budgetDays: 7,
+    })
+    expect(trained.rigDrawbacks[0]?.nowPct).toBe(5)
+    expect(trained.pg.used).toBeCloseTo(13 * 1.05, 5)
   })
 })

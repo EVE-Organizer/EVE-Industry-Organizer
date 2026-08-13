@@ -14,6 +14,8 @@ export interface FittingItemRecord {
   calOut?: number
   meta?: number
   rigSize?: number
+  drawback?: number
+  de?: number[]
   skills?: [number, number][]
 }
 
@@ -63,6 +65,56 @@ const RIG_GROUP_SKILL: Record<string, number> = {
 
 const RIGGING_SKILL_SET = new Set<number>(Object.values(RIGGING_SKILL_IDS))
 
+const DRAWBACK_LABELS: Record<number, string> = {
+  2706: 'Laser PG',
+  2707: 'Hybrid PG',
+  2708: 'Projectile PG',
+  2712: 'Armor HP',
+  2713: 'CPU output',
+  2714: 'Launcher CPU',
+  2716: 'Signature',
+  2717: 'Agility',
+  2718: 'Shield HP',
+  3528: 'Cap recharge',
+  5267: 'Repairer PG',
+  5268: 'Cap repairer PG',
+  5868: 'Cargo',
+  5951: 'Warp speed',
+}
+
+const FIT_PG_DRAWBACK_IDS = new Set([2706, 2707, 2708, 5267, 5268])
+const FIT_CPU_DRAWBACK_IDS = new Set([2713, 2714])
+
+/** ponytail: standard stacking, not a full dogma sim. */
+const STACKING = [1, 0.86911998, 0.57058314, 0.28295522, 0.10599055]
+
+export function effectiveDrawbackPct(basePct: number, skillLevel: number): number {
+  return basePct * (1 - 0.1 * Math.min(5, Math.max(0, skillLevel)))
+}
+
+export function stackedPercentMult(percents: number[]): number {
+  if (!percents.length) return 1
+  const sorted = [...percents].sort((a, b) => Math.abs(b) - Math.abs(a))
+  let mult = 1
+  for (let i = 0; i < sorted.length; i++) {
+    mult *= 1 + (sorted[i]! / 100) * (STACKING[i] ?? 0)
+  }
+  return mult
+}
+
+function drawbackHitsModulePg(effectId: number, group: string): boolean {
+  if (effectId === 2706) return group === 'Energy Weapon'
+  if (effectId === 2707) return group === 'Hybrid Weapon'
+  if (effectId === 2708) return group === 'Projectile Weapon'
+  if (effectId === 5267) return /repair/i.test(group)
+  if (effectId === 5268) return /capacitor booster|energy transfer|remote capacitor/i.test(group)
+  return false
+}
+
+function drawbackHitsModuleCpu(effectId: number, group: string): boolean {
+  return effectId === 2714 && /launcher/i.test(group)
+}
+
 const FITTING_SKILL_SET = new Set<number>(Object.values(FITTING_SKILL_IDS))
 
 /** CCP rank-1 skillpoints to reach each level. */
@@ -107,6 +159,19 @@ export interface SkillGapRow {
   kind: 'fit' | 'use' | 'fitting'
 }
 
+export interface RigDrawbackRow {
+  name: string
+  typeId: number
+  label: string
+  basePct: number
+  nowPct: number
+  atVPct: number
+  skillId: number
+  skillName: string
+  skillLevel: number
+  affectsFit: boolean
+}
+
 export interface TrainQueueItem {
   skillId: number
   name: string
@@ -126,6 +191,7 @@ export interface FitSkillAnalysis {
   pg: ResourceCheck
   cpu: ResourceCheck
   cal: ResourceCheck
+  rigDrawbacks: RigDrawbackRow[]
   fittingLevels: Record<number, number>
   pieces: FitPiece[]
   fitSkills: SkillGapRow[]
@@ -205,6 +271,12 @@ export function formatTrainTime(minutes: number): string {
   return `${(hours / 24).toFixed(1)}d`
 }
 
+export function formatDrawbackPct(pct: number): string {
+  if (pct === 0) return '0%'
+  const rounded = Math.round(pct * 10) / 10
+  return `${rounded > 0 ? '+' : ''}${rounded.toFixed(1)}%`
+}
+
 function groupOf(type: TypeInfo | undefined): string {
   return type?.group ?? ''
 }
@@ -261,18 +333,44 @@ function shipOutput(base: number, bonusSkillLevel: number): number {
 function usedResources(
   pieces: { record: FittingItemRecord; group: string; quantity: number }[],
   levels: Record<number, number>,
-): { pg: number; cpu: number; cal: number } {
+  characterLevels: Map<number, number>,
+): { pg: number; cpu: number; cal: number; cpuOutMult: number } {
+  const rigs = pieces.filter((piece) => piece.record.slot === 'rig')
+
+  function percentsFor(match: (effectId: number, group: string) => boolean, group: string): number[] {
+    const percents: number[] = []
+    for (const rig of rigs) {
+      const effects = rig.record.de ?? []
+      if (!effects.some((effectId) => match(effectId, group))) continue
+      const skillId = RIG_GROUP_SKILL[rig.group]
+      const skillLevel = skillId != null ? (characterLevels.get(skillId) ?? 0) : 0
+      percents.push(effectiveDrawbackPct(rig.record.drawback ?? 0, skillLevel))
+    }
+    return percents
+  }
+
+  const cpuOutMult = stackedPercentMult(percentsFor((effectId) => effectId === 2713, ''))
   let pg = 0
   let cpu = 0
   let cal = 0
   for (const piece of pieces) {
     const slot = piece.record.slot
     if (slot === 'charge' || slot === 'drone' || slot === 'implant' || slot === 'ship') continue
-    pg += (piece.record.pg ?? 0) * pgMult(piece.record, piece.group, levels)
-    cpu += (piece.record.cpu ?? 0) * cpuMult(piece.record, piece.group, levels)
+    const pgMultNow =
+      (piece.record.pg ?? 0) === 0
+        ? 0
+        : pgMult(piece.record, piece.group, levels) *
+          stackedPercentMult(percentsFor(drawbackHitsModulePg, piece.group))
+    const cpuMultNow =
+      (piece.record.cpu ?? 0) === 0
+        ? 0
+        : cpuMult(piece.record, piece.group, levels) *
+          stackedPercentMult(percentsFor(drawbackHitsModuleCpu, piece.group))
+    pg += (piece.record.pg ?? 0) * pgMultNow
+    cpu += (piece.record.cpu ?? 0) * cpuMultNow
     cal += piece.record.cal ?? 0
   }
-  return { pg, cpu, cal }
+  return { pg, cpu, cal, cpuOutMult }
 }
 
 export function analyzeFit(options: {
@@ -403,9 +501,10 @@ export function analyzeFit(options: {
     rigSizeOk: boolean
     online: boolean
   } {
-    const used = usedResources(modulePieces, levels)
+    const used = usedResources(modulePieces, levels, characterLevels)
     const pgOut = shipOutput(pgOutBase, levels[FITTING_SKILL_IDS.powerGridManagement] ?? 0)
-    const cpuOut = shipOutput(cpuOutBase, levels[FITTING_SKILL_IDS.cpuManagement] ?? 0)
+    const cpuOut =
+      shipOutput(cpuOutBase, levels[FITTING_SKILL_IDS.cpuManagement] ?? 0) * used.cpuOutMult
     const pg = { used: used.pg, output: pgOut, ok: used.pg <= pgOut + 1e-6 }
     const cpu = { used: used.cpu, output: cpuOut, ok: used.cpu <= cpuOut + 1e-6 }
     const cal = { used: used.cal, output: calOut, ok: calOut === 0 || used.cal <= calOut + 1e-6 }
@@ -471,6 +570,7 @@ export function analyzeFit(options: {
     pg: withFitting.pg,
     cpu: withFitting.cpu,
     cal: withFitting.cal,
+    rigDrawbacks: collectRigDrawbacks(pieces, typesByName, fittingByTypeId, characterLevels, skillById),
     fittingLevels,
     pieces,
     fitSkills,
@@ -506,6 +606,42 @@ function extraSkillsForRole(
     return LOGI_SUPPORT_IDS
   }
   return []
+}
+
+function collectRigDrawbacks(
+  pieces: FitPiece[],
+  typesByName: Map<string, TypeInfo>,
+  fittingByTypeId: Map<number, FittingItemRecord>,
+  characterLevels: Map<number, number>,
+  skillById: Map<number, SkillInfo>,
+): RigDrawbackRow[] {
+  const rows: RigDrawbackRow[] = []
+  for (const piece of pieces) {
+    if (piece.slot !== 'rig' || piece.typeId == null) continue
+    const record = fittingByTypeId.get(piece.typeId)
+    if (!record) continue
+    const group = typesByName.get(piece.name.toLowerCase())?.group ?? ''
+    const skillId = RIG_GROUP_SKILL[group] ?? 0
+    const skillLevel = skillId ? (characterLevels.get(skillId) ?? 0) : 0
+    const basePct = record.drawback ?? 0
+    for (const effectId of record.de ?? []) {
+      const label = DRAWBACK_LABELS[effectId]
+      if (!label) continue
+      rows.push({
+        name: piece.name,
+        typeId: piece.typeId,
+        label,
+        basePct,
+        nowPct: effectiveDrawbackPct(basePct, skillLevel),
+        atVPct: effectiveDrawbackPct(basePct, 5),
+        skillId,
+        skillName: skillById.get(skillId)?.name ?? 'Rigging',
+        skillLevel,
+        affectsFit: FIT_PG_DRAWBACK_IDS.has(effectId) || FIT_CPU_DRAWBACK_IDS.has(effectId),
+      })
+    }
+  }
+  return rows
 }
 
 function toGapRows(
