@@ -2,50 +2,54 @@ import { describe, expect, it } from 'vitest'
 import { buildFittingRecords } from './fitting-records.mjs'
 
 describe('buildFittingRecords', () => {
-  it('maps ship output to 11/48 and module usage to 30/50', () => {
-    const items = buildFittingRecords(
-      [
-        { typeID: '1', attributeID: '11', valueInt: '', valueFloat: '62' },
-        { typeID: '1', attributeID: '48', valueInt: '', valueFloat: '140' },
-        { typeID: '1', attributeID: '1132', valueInt: '', valueFloat: '400' },
-        { typeID: '1', attributeID: '182', valueInt: '', valueFloat: '3331' },
-        { typeID: '1', attributeID: '277', valueInt: '', valueFloat: '5' },
-        { typeID: '2', attributeID: '30', valueInt: '', valueFloat: '13' },
-        { typeID: '2', attributeID: '50', valueInt: '', valueFloat: '19' },
-      ],
-      [{ typeID: '2', effectID: '12' }],
-      [
-        { typeId: 1, category: 'Ship' },
-        { typeId: 2, category: 'Module' },
-      ],
-    )
-    expect(items[1]).toMatchObject({ slot: 'ship', pgOut: 62, cpuOut: 140, calOut: 400 })
-    expect(items[1].skills).toEqual([[3331, 5]])
-    expect(items[2]).toMatchObject({ slot: 'high', pg: 13, cpu: 19 })
+  it('keeps ships and weapons with cpu/pg and skills', () => {
+    const types = [
+      { typeID: '11393', typeName: 'Retribution', groupID: '324', published: '1' },
+      { typeID: '3033', typeName: 'Small Focused Beam Laser II', groupID: '53', published: '1' },
+      { typeID: '1', typeName: 'Skipped skin', groupID: '1', published: '1' },
+    ]
+    const groups = [
+      { groupID: '324', groupName: 'Assault Frigate', categoryID: '6' },
+      { groupID: '53', groupName: 'Energy Weapon', categoryID: '7' },
+      { groupID: '1', groupName: 'Skin', categoryID: '91' },
+    ]
+    const categories = [
+      { categoryID: '6', categoryName: 'Ship' },
+      { categoryID: '7', categoryName: 'Module' },
+      { categoryID: '91', categoryName: 'Apparel' },
+    ]
+    const typeAttributes = [
+      { typeID: '11393', attributeID: '11', valueFloat: '62' },
+      { typeID: '11393', attributeID: '48', valueFloat: '140' },
+      { typeID: '11393', attributeID: '182', valueFloat: '3331' },
+      { typeID: '11393', attributeID: '277', valueFloat: '5' },
+      { typeID: '3033', attributeID: '30', valueFloat: '13' },
+      { typeID: '3033', attributeID: '50', valueFloat: '19' },
+      { typeID: '3033', attributeID: '182', valueFloat: '3303' },
+      { typeID: '3033', attributeID: '277', valueFloat: '5' },
+    ]
+
+    const records = buildFittingRecords(types, groups, categories, typeAttributes)
+    expect(records.map((row) => row.name)).toEqual(['Small Focused Beam Laser II', 'Retribution'])
+    expect(records[1].cpuOutput).toBe(140)
+    expect(records[1].powerOutput).toBe(62)
+    expect(records[0].cpu).toBe(19)
+    expect(records[0].power).toBe(13)
+    expect(records[0].weapon).toBe('turret')
+    expect(records[0].family).toBe('energy')
   })
 
-  it('stores rig size, meta, and calibration', () => {
-    const items = buildFittingRecords(
-      [
-        { typeID: '3', attributeID: '1153', valueInt: '', valueFloat: '200' },
-        { typeID: '3', attributeID: '1547', valueInt: '', valueFloat: '1' },
-        { typeID: '3', attributeID: '422', valueInt: '', valueFloat: '2' },
-      ],
-      [{ typeID: '3', effectID: '2663' }],
-      [{ typeId: 3, category: 'Module' }],
-    )
-    expect(items[3]).toMatchObject({ slot: 'rig', cal: 200, rigSize: 1, meta: 2 })
-  })
-
-  it('stores rig drawback percent and effect ids', () => {
-    const items = buildFittingRecords(
-      [{ typeID: '4', attributeID: '1138', valueInt: '', valueFloat: '10' }],
-      [
-        { typeID: '4', effectID: '2663' },
-        { typeID: '4', effectID: '2706' },
-      ],
-      [{ typeId: 4, category: 'Module' }],
-    )
-    expect(items[4]).toMatchObject({ slot: 'rig', drawback: 10, de: [2706] })
+  it('tags energy burst aerators as power drawback on energy weapons', () => {
+    const types = [
+      { typeID: '31448', typeName: 'Small Energy Burst Aerator II', groupID: '775', published: '1' },
+    ]
+    const groups = [{ groupID: '775', groupName: 'Rig Energy Weapon', categoryID: '7' }]
+    const categories = [{ categoryID: '7', categoryName: 'Module' }]
+    const typeAttributes = [
+      { typeID: '31448', attributeID: '204', valueFloat: '0.85' },
+      { typeID: '31448', attributeID: '1138', valueFloat: '10' },
+    ]
+    const [rig] = buildFittingRecords(types, groups, categories, typeAttributes)
+    expect(rig.rigDrawback).toEqual({ family: 'energy', stat: 'power', pct: 10 })
   })
 })

@@ -336,6 +336,12 @@ async function main() {
           })
 
           ctx.blueprints = blueprints
+          ctx.fittingTypes = buildFittingRecords(
+            types,
+            groups,
+            categories,
+            ctx.csvData.dgmTypeAttributes,
+          )
           ctx.typeRecords = buildAllTypeRecords(
             types,
             groupById,
@@ -412,7 +418,7 @@ async function main() {
           const write = (name, data) =>
             writeFileSync(
               join(outDir, name),
-              name === 'fitting.json' ? JSON.stringify(data) : JSON.stringify(data, null, 2),
+              JSON.stringify(data, null, name === 'fitting.json' ? 0 : 2),
             )
 
           const outputs = [
@@ -421,6 +427,7 @@ async function main() {
             ['regions.json', ctx.regions],
             ['market.json', ctx.market],
             ['skills.json', ctx.skills],
+            ['fitting.json', { generatedAt: new Date().toISOString(), types: ctx.fittingTypes }],
             ['systems.json', ctx.systems],
             ['stations.json', ctx.stations],
             ['map.json', ctx.mapData],
