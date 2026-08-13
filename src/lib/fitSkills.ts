@@ -333,7 +333,6 @@ function shipOutput(base: number, bonusSkillLevel: number): number {
 function usedResources(
   pieces: { record: FittingItemRecord; group: string; quantity: number }[],
   levels: Record<number, number>,
-  characterLevels: Map<number, number>,
 ): { pg: number; cpu: number; cal: number; cpuOutMult: number } {
   const rigs = pieces.filter((piece) => piece.record.slot === 'rig')
 
@@ -343,7 +342,7 @@ function usedResources(
       const effects = rig.record.de ?? []
       if (!effects.some((effectId) => match(effectId, group))) continue
       const skillId = RIG_GROUP_SKILL[rig.group]
-      const skillLevel = skillId != null ? (characterLevels.get(skillId) ?? 0) : 0
+      const skillLevel = skillId != null ? (levels[skillId] ?? 0) : 0
       percents.push(effectiveDrawbackPct(rig.record.drawback ?? 0, skillLevel))
     }
     return percents
@@ -404,7 +403,8 @@ export function analyzeFit(options: {
   if (parsed.hullName && !hullType) unresolved.push(parsed.hullName)
   const hullRecord = hullType ? fittingByTypeId.get(hullType.typeId) : undefined
 
-  const modulePieces: { record: FittingItemRecord; group: string; quantity: number }[] = []
+  const modulePieces: { record: FittingItemRecord; group: string; quantity: number; name: string }[] =
+    []
   const pieces: FitPiece[] = []
 
   function addPiece(name: string, quantity: number, fallbackSlot: FitSlot): void {
@@ -426,7 +426,8 @@ export function analyzeFit(options: {
       })
       return
     }
-    const record = fittingByTypeId.get(type.typeId) ?? { slot: fallbackSlot }
+    const record = { ...(fittingByTypeId.get(type.typeId) ?? { slot: fallbackSlot }) }
+    if (type.category === 'Implant' || type.group === 'Booster') record.slot = 'implant'
     const required = [
       ...(record.skills ?? []).map(([skillId, level]) => ({ skillId, level })),
       ...riggingSkillsFor(type.group, type.name, record),
@@ -459,7 +460,7 @@ export function analyzeFit(options: {
       missing,
     })
     if (record.slot !== 'charge') {
-      modulePieces.push({ record, group: groupOf(type), quantity })
+      modulePieces.push({ record, group: groupOf(type), quantity, name: type.name })
     }
   }
 
@@ -490,9 +491,35 @@ export function analyzeFit(options: {
     [FITTING_SKILL_IDS.electronicsUpgrades]: characterLevels.get(FITTING_SKILL_IDS.electronicsUpgrades) ?? 0,
   }
 
+  const drawbackSkills: { id: number; min: number }[] = []
+  const drawbackSkillMins = new Map<number, number>()
+  for (const piece of modulePieces) {
+    if (piece.record.slot !== 'rig') continue
+    const skillId = RIG_GROUP_SKILL[piece.group]
+    if (skillId == null) continue
+    const affectsFit = (piece.record.de ?? []).some(
+      (effectId) => FIT_PG_DRAWBACK_IDS.has(effectId) || FIT_CPU_DRAWBACK_IDS.has(effectId),
+    )
+    if (!affectsFit) continue
+    const min = isTech2Rig(piece.record, piece.name) ? 4 : 0
+    drawbackSkillMins.set(skillId, Math.max(drawbackSkillMins.get(skillId) ?? 0, min))
+  }
+  for (const [id, min] of drawbackSkillMins) {
+    currentFitting[id] = characterLevels.get(id) ?? 0
+    drawbackSkills.push({ id, min })
+  }
+
   const pgOutBase = hullRecord?.pgOut ?? 0
   const cpuOutBase = hullRecord?.cpuOut ?? 0
   const calOut = hullRecord?.calOut ?? 0
+
+  function mergeLevels(fitting: Record<number, number>): Record<number, number> {
+    const merged = { ...fitting }
+    for (const [skillId, level] of characterLevels) {
+      merged[skillId] = Math.max(merged[skillId] ?? 0, level)
+    }
+    return merged
+  }
 
   function check(levels: Record<number, number>): {
     pg: ResourceCheck
@@ -501,7 +528,7 @@ export function analyzeFit(options: {
     rigSizeOk: boolean
     online: boolean
   } {
-    const used = usedResources(modulePieces, levels, characterLevels)
+    const used = usedResources(modulePieces, mergeLevels(levels))
     const pgOut = shipOutput(pgOutBase, levels[FITTING_SKILL_IDS.powerGridManagement] ?? 0)
     const cpuOut =
       shipOutput(cpuOutBase, levels[FITTING_SKILL_IDS.cpuManagement] ?? 0) * used.cpuOutMult
@@ -521,6 +548,7 @@ export function analyzeFit(options: {
     needShield,
     needEgu,
     needEu,
+    extra: drawbackSkills,
     skillById,
     fits: (levels) => check(levels).online,
   })
@@ -530,7 +558,8 @@ export function analyzeFit(options: {
   const requiredUse = new Map<number, number>()
 
   for (const piece of pieces) {
-    const isUse = piece.slot === 'charge' || piece.slot === 'drone'
+    const isUse =
+      piece.slot === 'charge' || piece.slot === 'drone' || piece.slot === 'implant'
     for (const req of piece.required) {
       const target = isUse ? requiredUse : requiredFit
       target.set(req.skillId, Math.max(target.get(req.skillId) ?? 0, req.level))
@@ -570,7 +599,13 @@ export function analyzeFit(options: {
     pg: withFitting.pg,
     cpu: withFitting.cpu,
     cal: withFitting.cal,
-    rigDrawbacks: collectRigDrawbacks(pieces, typesByName, fittingByTypeId, characterLevels, skillById),
+    rigDrawbacks: collectRigDrawbacks(
+      pieces,
+      typesByName,
+      fittingByTypeId,
+      mergeLevels(fittingLevels),
+      skillById,
+    ),
     fittingLevels,
     pieces,
     fitSkills,
@@ -612,7 +647,7 @@ function collectRigDrawbacks(
   pieces: FitPiece[],
   typesByName: Map<string, TypeInfo>,
   fittingByTypeId: Map<number, FittingItemRecord>,
-  characterLevels: Map<number, number>,
+  plannedLevels: Record<number, number>,
   skillById: Map<number, SkillInfo>,
 ): RigDrawbackRow[] {
   const rows: RigDrawbackRow[] = []
@@ -622,7 +657,7 @@ function collectRigDrawbacks(
     if (!record) continue
     const group = typesByName.get(piece.name.toLowerCase())?.group ?? ''
     const skillId = RIG_GROUP_SKILL[group] ?? 0
-    const skillLevel = skillId ? (characterLevels.get(skillId) ?? 0) : 0
+    const skillLevel = skillId ? (plannedLevels[skillId] ?? 0) : 0
     const basePct = record.drawback ?? 0
     for (const effectId of record.de ?? []) {
       const label = DRAWBACK_LABELS[effectId]
@@ -756,6 +791,7 @@ function cheapestFittingLevels(options: {
   needShield: boolean
   needEgu: boolean
   needEu: boolean
+  extra?: { id: number; min: number }[]
   skillById: Map<number, SkillInfo>
   fits: (levels: Record<number, number>) => boolean
 }): Record<number, number> {
@@ -767,8 +803,16 @@ function cheapestFittingLevels(options: {
   if (options.needShield) ids.push(FITTING_SKILL_IDS.shieldUpgrades)
   if (options.needEgu) ids.push(FITTING_SKILL_IDS.energyGridUpgrades)
   if (options.needEu) ids.push(FITTING_SKILL_IDS.electronicsUpgrades)
+  const extraMin = new Map<number, number>()
+  for (const extra of options.extra ?? []) {
+    extraMin.set(extra.id, extra.min)
+    if (!ids.includes(extra.id)) ids.push(extra.id)
+  }
 
   const start = { ...options.current }
+  for (const [id, min] of extraMin) {
+    start[id] = Math.max(start[id] ?? 0, min)
+  }
   if (options.fits(start)) return start
   if (!ids.length) return start
 
@@ -793,7 +837,7 @@ function cheapestFittingLevels(options: {
       return
     }
     const id = ids[index]!
-    const from = options.current[id] ?? 0
+    const from = Math.max(options.current[id] ?? 0, extraMin.get(id) ?? 0)
     for (let level = from; level <= 5; level++) {
       rec(index + 1, { ...levels, [id]: level })
     }

@@ -14,7 +14,7 @@ export interface ParsedEftFit {
 
 const HEADER_RE = /^\s*\[([^,\]]+)(?:\s*,\s*([^\]]+))?\]\s*$/
 const EMPTY_RE = /^\[empty/i
-const QTY_RE = /^(.*?)\s+x\s*(\d+)\s*$/i
+const QTY_RE = /^(.*?)\s+x\s*(\d+)?\s*$/i
 
 export function parseEft(text: string): ParsedEftFit {
   const rawLines = text.replace(/^\uFEFF/, '').split(/\r?\n/)
@@ -46,7 +46,7 @@ export function parseEft(text: string): ParsedEftFit {
     const [itemPart, chargePart] = splitCharge(trimmed)
     const qtyMatch = QTY_RE.exec(itemPart)
     const name = (qtyMatch ? qtyMatch[1]! : itemPart).trim()
-    const quantity = qtyMatch ? Number(qtyMatch[2]) : 1
+    const quantity = qtyMatch?.[2] ? Number(qtyMatch[2]) : 1
     if (!name) continue
     lines.push({
       name,

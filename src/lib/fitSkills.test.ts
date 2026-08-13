@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { parseEft } from '@/lib/eftParse'
 import {
@@ -113,6 +114,7 @@ Small Focused Beam Laser II
       budgetDays: 30,
     })
     expect(t2.fitSkills.some((row) => row.skillId === 26258 && row.need === 4)).toBe(true)
+    expect(t2.rigDrawbacks[0]?.nowPct).toBe(6)
     expect(t2.queueFits.some((item) => item.skillId === 26252 && item.to >= 3)).toBe(true)
   })
 
@@ -149,5 +151,50 @@ Small Energy Collision Accelerator I
     })
     expect(trained.rigDrawbacks[0]?.nowPct).toBe(5)
     expect(trained.pg.used).toBeCloseTo(13 * 1.05, 5)
+  })
+
+  it('onlines the firestorm retribution using energy weapon rigging to cut laser PG', () => {
+    const typesRaw = JSON.parse(readFileSync('public/data/types.json', 'utf8')) as { types?: TypeInfo[] }
+    const typesAll: TypeInfo[] = typesRaw.types ?? (typesRaw as unknown as TypeInfo[])
+    const skillsAll: SkillInfo[] = JSON.parse(readFileSync('public/data/skills.json', 'utf8')) as SkillInfo[]
+    const fittingFile = JSON.parse(readFileSync('public/data/fitting.json', 'utf8')) as {
+      items: Record<string, FittingItemRecord>
+    }
+    const fittingByTypeId = new Map<number, FittingItemRecord>()
+    for (const [id, record] of Object.entries(fittingFile.items)) {
+      fittingByTypeId.set(Number(id), record)
+    }
+
+    const analysis = analyzeFit({
+      parsed: parseEft(`[Retribution, DPS T5/T6 Firestorm]
+Imperial Navy Heat Sink
+Imperial Navy Heat Sink
+Centii A-Type Thermal Coating
+Dark Blood Multispectrum Coating
+Heat Sink II
+Coreli A-Type 1MN Afterburner
+Republic Fleet Small Cap Battery
+Coreli A-Type Small Remote Armor Repairer
+Small Focused Beam Laser II
+Small Focused Beam Laser II
+Small Focused Beam Laser II
+Small Focused Beam Laser II
+Small Energy Burst Aerator II
+Small Thermal Armor Reinforcer II
+`),
+      typesByName: buildTypeNameIndex(typesAll),
+      fittingByTypeId,
+      skills: skillsAll,
+      characterLevels: new Map(),
+      role: 'dps',
+      budgetDays: 90,
+    })
+
+    expect(analysis.online).toBe(true)
+    expect(analysis.pg.ok).toBe(true)
+    expect(analysis.cpu.ok).toBe(true)
+    expect(analysis.fittingLevels[26258]).toBeGreaterThanOrEqual(4)
+    expect(analysis.rigDrawbacks.find((row) => row.label === 'Laser PG')?.nowPct).toBeLessThan(10)
+    expect(analysis.fitSkills.some((row) => row.skillId === 26258 && row.need >= 4)).toBe(true)
   })
 })

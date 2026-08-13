@@ -31,4 +31,10 @@ describe('parseEft', () => {
     expect(fit.hullName).toBe('Rifter')
     expect(fit.lines).toHaveLength(1)
   })
+
+  it('strips a trailing x without a count', () => {
+    const fit = parseEft("[Rifter]\nInherent Implants 'Lancer' Small Energy Turret SE-603 x\n")
+    expect(fit.lines[0]?.name).toBe("Inherent Implants 'Lancer' Small Energy Turret SE-603")
+    expect(fit.lines[0]?.quantity).toBe(1)
+  })
 })
