@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-14T05:25:02.089Z",
+  "generatedAt": "2026-08-15T04:20:54.089Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -104,12 +104,12 @@
       "regionId": 10000054,
       "name": "Aridia",
       "securityClass": "highsec",
-      "buildSystemId": 30004290,
-      "buildSystemName": "Zaveral",
-      "buildSystemSecurity": 0.61743,
+      "buildSystemId": 30004251,
+      "buildSystemName": "Mishi",
+      "buildSystemSecurity": 0.714664,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30004290
+      "marketSystemId": 30004251
     },
     {
       "regionId": 11000004,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0235,
+      "reactionCostIndex": 0.024,
       "marketSystemId": 30000621
     },
     {
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0341,
+      "costIndex": 0.0347,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
