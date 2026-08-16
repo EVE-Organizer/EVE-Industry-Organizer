@@ -7,6 +7,8 @@ import {
   EVE_ATTRIBUTES,
   effectiveAttributes,
   remainingRemapPoints,
+  temporaryBoostTotal,
+  uniformTemporaryBoost,
 } from '@/lib/skillAttributes'
 import {
   ATTRIBUTE_ICON_TYPE_IDS,
@@ -20,6 +22,7 @@ import type { EveAttributeId } from '@/types'
 interface SkillsAttributesPanelProps {
   bases: AttributeMap
   implants: ImplantBonuses
+  temporaryBoost: AttributeMap
   seedImplants: ImplantBonuses
   hasEsiData: boolean
   onBaseChange: (next: AttributeMap) => void
@@ -81,6 +84,7 @@ function AttributeBaseInput({
 export function SkillsAttributesPanel({
   bases,
   implants,
+  temporaryBoost,
   seedImplants,
   hasEsiData,
   onBaseChange,
@@ -88,9 +92,11 @@ export function SkillsAttributesPanel({
   onResetRemap,
   onResetImplants,
 }: SkillsAttributesPanelProps) {
-  const effective = effectiveAttributes(bases, implants)
+  const effective = effectiveAttributes(bases, implants, temporaryBoost)
   const remaining = remainingRemapPoints(bases)
   const implantsDirty = EVE_ATTRIBUTES.some((key) => implants[key] !== seedImplants[key])
+  const activeBoost = temporaryBoostTotal(temporaryBoost)
+  const uniformBoost = uniformTemporaryBoost(temporaryBoost)
 
   function setBase(key: EveAttributeId, next: number) {
     const current = bases[key]
@@ -113,12 +119,18 @@ export function SkillsAttributesPanel({
           <p className="text-[11px] text-warning/80 mt-0.5 leading-snug">
             Session-only remap and implants.
             {hasEsiData ? ' Synced from EVE.' : ' Sign in to sync.'}
+            {activeBoost > 0 ? (
+              <>
+                {' '}
+                {uniformBoost != null
+                  ? `Active boost: +${uniformBoost} to all attributes (not part of remap).`
+                  : `Active boost: +${activeBoost} total (not part of remap).`}
+              </>
+            ) : null}
           </p>
         </div>
         <div className="skills-attr__header-meta">
-          <p
-            className={`text-[11px] tabular-nums shrink-0 ${remaining < 0 ? 'text-error' : 'opacity-60'}`}
-          >
+          <p className="text-[11px] tabular-nums shrink-0 opacity-60">
             Remap left: <strong>{remaining}</strong>
           </p>
           <div className="flex flex-wrap gap-1">

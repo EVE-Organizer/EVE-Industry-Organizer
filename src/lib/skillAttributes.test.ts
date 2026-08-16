@@ -49,7 +49,7 @@ describe('skillAttributes', () => {
   })
 
   it('subtracts implants from ESI sheet totals to recover remap bases', () => {
-    const neural = basesFromEsiTotals(
+    const remap = basesFromEsiTotals(
       {
         intelligence: 25,
         memory: 24,
@@ -59,11 +59,33 @@ describe('skillAttributes', () => {
       },
       { intelligence: 5, memory: 4, perception: 2, willpower: 0, charisma: 1 },
     )
-    expect(remainingRemapPoints(neural)).toBe(0)
-    expect(neural.intelligence).toBe(20)
-    expect(neural.memory).toBe(20)
-    expect(neural.perception).toBe(20)
-    expect(neural.charisma).toBe(19)
+    expect(remainingRemapPoints(remap.bases)).toBe(0)
+    expect(remap.temporaryBoost.intelligence).toBe(0)
+    expect(remap.bases.intelligence).toBe(20)
+    expect(remap.bases.memory).toBe(20)
+    expect(remap.bases.perception).toBe(20)
+    expect(remap.bases.charisma).toBe(19)
+  })
+
+  it('separates cerebral accelerator boosts from the remap pool', () => {
+    const implants = { intelligence: 4, memory: 4, perception: 4, willpower: 4, charisma: 0 }
+    const totals = {
+      intelligence: 31,
+      memory: 31,
+      perception: 31,
+      willpower: 31,
+      charisma: 26,
+    }
+    const remap = basesFromEsiTotals(totals, implants)
+    expect(remainingRemapPoints(remap.bases)).toBe(0)
+    expect(
+      remap.bases.intelligence +
+        remap.bases.memory +
+        remap.bases.perception +
+        remap.bases.willpower +
+        remap.bases.charisma,
+    ).toBe(ATTRIBUTE_TOTAL_POINTS)
+    expect(effectiveAttributes(remap.bases, implants, remap.temporaryBoost)).toEqual(totals)
   })
 })
 

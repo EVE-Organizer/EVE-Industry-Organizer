@@ -18,6 +18,7 @@ import {
   defaultAttributes,
   defaultImplants,
   effectiveAttributes,
+  zeroTemporaryBoost,
   type AttributeMap,
   type ImplantBonuses,
 } from '@/lib/skillAttributes'
@@ -90,8 +91,10 @@ export function SkillsPage() {
 
   const [seedBases, setSeedBases] = useState<AttributeMap>(() => defaultAttributes())
   const [seedImplants, setSeedImplants] = useState<ImplantBonuses>(() => defaultImplants())
+  const [seedTemporaryBoost, setSeedTemporaryBoost] = useState<AttributeMap>(() => zeroTemporaryBoost())
   const [bases, setBases] = useState<AttributeMap>(() => defaultAttributes())
   const [implants, setImplants] = useState<ImplantBonuses>(() => defaultImplants())
+  const [temporaryBoost, setTemporaryBoost] = useState<AttributeMap>(() => zeroTemporaryBoost())
 
   useEffect(() => {
     if (!esiAttrs) return
@@ -103,17 +106,22 @@ export function SkillsPage() {
       descriptions.set(typeId, typeMap.get(typeId)?.description)
     }
     const bonuses = fittedImplantsFromTypeIds(typeIds, descriptions).bonuses
-    const neural = basesFromEsiTotals(esiAttributesToMap(esiAttrs), bonuses)
+    const remap = basesFromEsiTotals(esiAttributesToMap(esiAttrs), bonuses)
     setSeedImplants(bonuses)
     setImplants(bonuses)
-    setSeedBases(neural)
-    setBases(neural)
+    setSeedTemporaryBoost(remap.temporaryBoost)
+    setTemporaryBoost(remap.temporaryBoost)
+    setSeedBases(remap.bases)
+    setBases(remap.bases)
   }, [esiAttrs, esiImplants, implantsFetched, implantsError, characterId, typeMap])
 
-  const effective = useMemo(() => effectiveAttributes(bases, implants), [bases, implants])
+  const effective = useMemo(
+    () => effectiveAttributes(bases, implants, temporaryBoost),
+    [bases, implants, temporaryBoost],
+  )
   const seedEffective = useMemo(
-    () => effectiveAttributes(seedBases, seedImplants),
-    [seedBases, seedImplants],
+    () => effectiveAttributes(seedBases, seedImplants, seedTemporaryBoost),
+    [seedBases, seedImplants, seedTemporaryBoost],
   )
 
   const impact = useMemo(
@@ -149,7 +157,7 @@ export function SkillsPage() {
 
   const queueFinishSeconds = useMemo(() => {
     if (!activeQueueEntry?.finish_date || !activeQueueEntry.start_date) return null
-    const seedEffective = effectiveAttributes(seedBases, seedImplants)
+    const seedEffective = effectiveAttributes(seedBases, seedImplants, seedTemporaryBoost)
     const oldSpm = spPerMinuteForSkill(seedEffective, trainingAttrs)
     const finishMs = scaledQueueFinishMs(
       activeQueueEntry.finish_date,
@@ -249,6 +257,7 @@ export function SkillsPage() {
       <SkillsAttributesPanel
         bases={bases}
         implants={implants}
+        temporaryBoost={temporaryBoost}
         seedImplants={seedImplants}
         hasEsiData={Boolean(esiAttrs || esiImplants)}
         onBaseChange={setBases}
