@@ -1,6 +1,7 @@
 import { memo, useCallback, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { RankedBlueprintRow, ManufacturingSettings, SkillLevels } from '@/types'
+import { hubDisplayName } from '@/lib/hubDisplay'
 import { HUBS, DEFAULT_RECIPE_KINDS } from '@/types'
 import { useAppStore } from '@/stores/appStore'
 import { useSdeData } from '@/hooks/useSdeData'
@@ -158,7 +159,7 @@ export function BlueprintsPage() {
     primaryHub: rankingQuery.hub,
     sellHub: settings.sellHubId ?? rankingQuery.hub,
     manufacturingSystemId: rankingQuery.mfgSystem,
-    hubName: activeHub?.name ?? rankingQuery.hub,
+    hubName: activeHub ? hubDisplayName(activeHub.id) : rankingQuery.hub,
   })
 
   const minSetupCost = useMemo(

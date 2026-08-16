@@ -1,30 +1,36 @@
 import { Link } from 'react-router-dom'
-import type { BlueprintInfo, SkillInfo, TypeInfo } from '@/types'
+import { useMemo } from 'react'
+import type { BlueprintInfo, GlobalSettings, ManufacturingSettings, SkillInfo } from '@/types'
+import { DEFAULT_BATCH_SIZE } from '@/types'
 import { isReactionRecipe } from '@/lib/recipes'
 import { formatDuration, formatGraphQuantity } from '@/lib/profit'
 import { formatSkillLevel, skillIconUrl } from '@/lib/skillFields'
 import { productionGraphRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
 import { ItemSection } from '@/components/item/ItemSection'
-import { ItemRecipeGraph } from '@/components/item/ItemRecipeGraph'
+import { BlueprintGraphModal } from '@/components/BlueprintGraphModal'
 import { AddToPlanMenu } from '@/components/plan/AddToPlanMenu'
 
 interface ItemRecipePanelProps {
   blueprint: BlueprintInfo
-  typeMap: Map<number, TypeInfo>
   skillNameMap: Map<string, SkillInfo>
   productName: string
+  settings: GlobalSettings
   className?: string
 }
 
 export function ItemRecipePanel({
   blueprint,
-  typeMap,
   skillNameMap,
   productName,
+  settings,
   className,
 }: ItemRecipePanelProps) {
   const isReaction = isReactionRecipe(blueprint)
+  const graphSettings = useMemo(
+    (): ManufacturingSettings => ({ ...settings, batchSize: DEFAULT_BATCH_SIZE }),
+    [settings],
+  )
 
   return (
     <ItemSection title="Industry" subtitle={productName} className={className}>
@@ -43,7 +49,7 @@ export function ItemRecipePanel({
             className={textLinkClass('text-primary text-xs')}
             to={productionGraphRoute(blueprint.productTypeId)}
           >
-            Production graph →
+            Open full graph →
           </Link>
         </div>
       </div>
@@ -80,12 +86,16 @@ export function ItemRecipePanel({
       ) : null}
 
       <h3 className="text-[10px] font-medium uppercase tracking-wide text-base-content/45 mb-1.5">
-        {isReaction ? 'Reaction flow' : 'Manufacturing flow'} (per run)
+        {isReaction ? 'Reaction supply chain' : 'Manufacturing supply chain'}
       </h3>
-      <ItemRecipeGraph
+      <BlueprintGraphModal
+        variant="inline"
         blueprint={blueprint}
-        typeMap={typeMap}
-        productName={productName}
+        buyHub={settings.primaryHub}
+        sellHub={settings.sellHubId ?? settings.primaryHub}
+        priceWindow={settings.priceWindow}
+        settings={graphSettings}
+        onClose={() => {}}
       />
     </ItemSection>
   )

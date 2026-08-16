@@ -36,6 +36,7 @@ import { buildWindowPriceMap } from '@/lib/ranking'
 import { appRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
+import { hubDisplayName } from '@/lib/hubDisplay'
 import { HUBS, DEFAULT_SETTINGS, type MiningBuffId, type MiningIphSortKey, type MiningRankedRow, type MiningShipId, type MiningSpaceClass, type MiningSubtype, type TimeRange } from '@/types'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { EveImage } from '@/components/EveImage'
@@ -289,7 +290,7 @@ export function MiningIskHrPage() {
   } | null>(null)
 
   const hub = settings.primaryHub
-  const hubName = HUBS.find((h) => h.id === hub)?.name ?? hub
+  const hubName = hubDisplayName(hub)
   const priceWindow = settings.priceWindow ?? DEFAULT_SETTINGS.priceWindow
 
   const focusOptions = useMemo(() => {

@@ -53,10 +53,25 @@
   }
 
   &.btn-primary {
+    @apply border-primary/45 text-primary;
+    background-color: rgb(245 166 35 / 0.12);
+    background-image: linear-gradient(
+      165deg,
+      rgb(245 166 35 / 0.24) 0%,
+      rgb(245 166 35 / 0.08) 100%
+    );
     box-shadow:
-      0 0 0 1px rgb(245 166 35 / 0.3),
-      0 4px 14px -4px rgb(245 166 35 / 0.55),
-      0 2px 6px rgb(0 0 0 / 0.35);
+      inset 0 1px 0 0 rgb(255 255 255 / 0.06),
+      0 0 0 1px rgb(245 166 35 / 0.22);
+
+    &:hover {
+      background-color: rgb(245 166 35 / 0.16);
+      background-image: linear-gradient(
+        165deg,
+        rgb(245 166 35 / 0.3) 0%,
+        rgb(245 166 35 / 0.1) 100%
+      );
+    }
   }
 }
 
@@ -521,6 +536,14 @@
   box-shadow:
     inset 0 1px 0 0 rgb(255 255 255 / 0.04),
     0 4px 14px -8px rgb(0 0 0 / 0.5);
+}
+
+.filter-field {
+  @apply flex min-w-0 shrink-0 flex-col;
+
+  &__control {
+    @apply mt-0.5 border-t border-eve-border/55 pt-2;
+  }
 }
 
 .blueprint-filters {
@@ -1869,62 +1892,6 @@
 
   &:hover {
     @apply bg-base-300/35 border-eve-border/80;
-  }
-}
-
-.item-recipe-graph {
-  @apply rounded-md border border-eve-border/60 bg-base-300/20 overflow-hidden;
-
-  &__shell {
-    @apply flex flex-col gap-1.5;
-  }
-
-  &__hint {
-    @apply px-2.5 pt-2 text-[10px] text-base-content/40;
-  }
-
-  &__canvas {
-    @apply w-full min-h-[15rem];
-
-    .react-flow__edges {
-      z-index: 0;
-    }
-
-    .react-flow__nodes {
-      z-index: 1;
-    }
-
-    .react-flow__pane {
-      cursor: grab;
-    }
-
-    .react-flow__pane:active {
-      cursor: grabbing;
-    }
-  }
-
-  &__node {
-    @apply relative z-[2] box-border flex items-center gap-2 h-full w-full overflow-hidden rounded-md border border-eve-border/60 bg-base-200 px-2.5 py-2 shadow-sm;
-
-    &--input {
-      @apply cursor-pointer transition-colors;
-
-      &:hover {
-        @apply bg-base-300 border-eve-border/80;
-      }
-    }
-
-    &--blueprint {
-      @apply cursor-pointer border-info/35 bg-base-200 transition-colors;
-
-      &:hover {
-        @apply bg-info/10 border-info/50;
-      }
-    }
-
-    &--output {
-      @apply border-primary/30 bg-base-200;
-    }
   }
 }
 

@@ -48,6 +48,14 @@ export const HUBS = [
     sellSystemId: 30003726,
     sellStationName: 'Y-MPWL',
   },
+  {
+    hubId: 'vale',
+    regionId: 10000003,
+    marketSystemId: 30000240,
+    buildSystemId: 30000288,
+    sellSystemId: 30000240,
+    sellStationName: '4-HWWF',
+  },
 ]
 
 export const HUB_REGION_IDS = Object.fromEntries(HUBS.map((hub) => [hub.hubId, hub.regionId]))

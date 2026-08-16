@@ -13,8 +13,8 @@ describe('blueprintJitaFallbackNote', () => {
   }
 
   it('returns a note when source is Jita and selected hub is not', () => {
-    expect(blueprintJitaFallbackNote(base)).toContain('Jita')
-    expect(blueprintJitaFallbackNote(base)).toContain('Amarr')
+    expect(blueprintJitaFallbackNote(base)).toContain('The Forge (Jita)')
+    expect(blueprintJitaFallbackNote(base)).toContain('Domain (Amarr)')
   })
 
   it('returns null when selected hub is already Jita', () => {

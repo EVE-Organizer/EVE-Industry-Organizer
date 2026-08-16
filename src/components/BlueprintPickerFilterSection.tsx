@@ -3,11 +3,17 @@ import type { BlueprintTier, RecipeKind } from '@/types'
 import { BLUEPRINT_TIERS, RANKING_RECIPE_KINDS } from '@/types'
 import type { ProductGroupCategoryNode } from '@/services/data/sdeLoader'
 import { RECIPE_KIND_LABELS } from '@/lib/blueprintQuery'
-import { FormFieldLabel } from '@/components/FormFieldLabel'
+import { FilterField } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { EveImage } from '@/components/EveImage'
 import { ProductGroupPicker } from '@/components/ProductGroupPicker'
-import { TIER_FILTER_LABELS, TIER_IMAGE_VARIANTS, TIER_TYPE_IDS } from '@/lib/eveImages'
+import {
+  RECIPE_KIND_IMAGE_VARIANTS,
+  RECIPE_KIND_TYPE_IDS,
+  TIER_FILTER_LABELS,
+  TIER_IMAGE_VARIANTS,
+  TIER_TYPE_IDS,
+} from '@/lib/eveImages'
 import { FilterSection } from '@/components/EconomicsFilterSection'
 
 export interface BlueprintPickerFilterValues {
@@ -85,37 +91,45 @@ export function BlueprintPickerFilterSection({
   return (
     <FilterSection title={title} hint={hint} className={className}>
       {values.recipeKinds ? (
-        <div className="shrink-0">
-          <FormFieldLabel
-            label="Recipe type"
-            tooltip="Choose manufacturing BPOs, reaction formulas, or both. With both selected, the table shows the top items across all types."
-            size="sm"
-          />
+        <FilterField
+          label="Recipe type"
+          tooltip="Choose manufacturing BPOs, reaction formulas, or both. With both selected, the table shows the top items across all types."
+        >
           <div
             role="group"
             aria-label="Recipe type"
-            className="grid grid-cols-2 gap-2 w-full min-w-0 mt-1"
+            className="grid grid-cols-2 gap-2 w-full min-w-0"
           >
             {RANKING_RECIPE_KINDS.map((kind) => (
               <FilterChip
                 key={kind}
                 active={(values.recipeKinds ?? RANKING_RECIPE_KINDS).includes(kind)}
                 onClick={() => toggleRecipeKind(kind)}
-                className="min-w-0 justify-center py-2.5"
+                tall
+                className="min-w-0 justify-center"
               >
+                <span className="rounded-md bg-base-100/90 p-1 shadow-sm">
+                  <EveImage
+                    id={RECIPE_KIND_TYPE_IDS[kind]}
+                    variant={RECIPE_KIND_IMAGE_VARIANTS[kind]}
+                    size={40}
+                    framed
+                    alt=""
+                    lazy={false}
+                  />
+                </span>
                 <span className="text-xs font-medium">{RECIPE_KIND_LABELS[kind]}</span>
               </FilterChip>
             ))}
           </div>
-        </div>
+        </FilterField>
       ) : null}
 
-      <div className="shrink-0">
-        <FormFieldLabel label="Tier" size="sm" />
+      <FilterField label="Tier">
         <div
           role="group"
           aria-label="Blueprint tier"
-          className="grid grid-cols-3 gap-2 w-full min-w-0 mt-1"
+          className="grid grid-cols-3 gap-2 w-full min-w-0"
         >
           {BLUEPRINT_TIERS.map((t) => (
             <FilterChip
@@ -139,14 +153,12 @@ export function BlueprintPickerFilterSection({
             </FilterChip>
           ))}
         </div>
-      </div>
+      </FilterField>
 
-      <div className="flex flex-col gap-2 min-w-0">
-        <FormFieldLabel
-          label="Product group"
-          tooltip="Check groups to limit results. Leave none selected for all groups."
-          size="sm"
-        />
+      <FilterField
+        label="Product group"
+        tooltip="Check groups to limit results. Leave none selected for all groups."
+      >
         <ProductGroupPicker
           variant="panel"
           value={values.groups}
@@ -154,7 +166,7 @@ export function BlueprintPickerFilterSection({
           tree={productGroupTree}
           className="w-full"
         />
-      </div>
+      </FilterField>
 
       <div className="rounded-md border border-eve-border bg-base-300/10 px-3 py-2.5 flex flex-col gap-2">
         <label className="label cursor-pointer gap-2 justify-start py-0 min-h-0">

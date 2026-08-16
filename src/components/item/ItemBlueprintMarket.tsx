@@ -37,7 +37,7 @@ const TAB_COPY: Record<
     label: 'BPC contracts',
     hint: 'Public blueprint copy contracts in the hub region',
     title: 'Blueprint copies',
-    subtitle: (hubName) => `Contract listings in the ${hubName} region`,
+    subtitle: (hubName) => `Contract listings in ${hubName}`,
   },
 }
 

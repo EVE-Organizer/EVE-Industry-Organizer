@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { InfoTooltip } from '@/components/InfoTooltip'
 
 interface FormFieldLabelProps {
@@ -24,6 +25,26 @@ export function FormFieldLabel({
       {valueLabel != null && (
         <span className="label-text-alt text-primary tabular-nums">{valueLabel}</span>
       )}
+    </div>
+  )
+}
+
+/** Label + divider + control stack for filter panels (Recipe type, Tier, etc.). */
+export function FilterField({
+  label,
+  tooltip,
+  children,
+  className = '',
+}: {
+  label: string
+  tooltip?: string
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <div className={`filter-field ${className}`.trim()}>
+      <FormFieldLabel label={label} tooltip={tooltip} size="sm" />
+      <div className="filter-field__control">{children}</div>
     </div>
   )
 }

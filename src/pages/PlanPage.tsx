@@ -55,6 +55,7 @@ import {
   planShareUrl,
   sharedPayloadToTemplate,
 } from '@/lib/planShare'
+import { hubDisplayName } from '@/lib/hubDisplay'
 import { formatDecimal } from '@/lib/profit'
 import { DEFAULT_BATCH_SIZE, DEFAULT_SETTINGS, HUBS, type HubId } from '@/types'
 import type {
@@ -332,8 +333,8 @@ export function PlanPage() {
     return resolveBuildSystem(data.systems, data.regions, buyHubMarket, reactionSystemId)
       .reactionCostIndex
   }, [data, buyHubMarket, reactionSystemId, systemCostIndex])
-  const buyHubName = HUBS.find((h) => h.id === buyHubId)?.name ?? 'Hub'
-  const sellHubName = HUBS.find((h) => h.id === sellHubId)?.name ?? buyHubName
+  const buyHubName = hubDisplayName(buyHubId)
+  const sellHubName = hubDisplayName(sellHubId)
 
   const expandInput = useMemo(
     () =>

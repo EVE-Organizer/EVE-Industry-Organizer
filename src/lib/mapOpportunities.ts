@@ -1,3 +1,4 @@
+import { hubDisplayName } from '@/lib/hubDisplay'
 import type { HubId, ManufacturingSettings, RankedBlueprintRow } from '@/types'
 import { DEFAULT_SETTINGS, HUBS } from '@/types'
 import type {
@@ -259,7 +260,7 @@ export function buildMapOpportunities(input: MapOpportunityInput): MapOpportunit
       iph: row.iph,
       margin: row.margin,
       sellHubId,
-      sellHubName: hubConfig?.name ?? sellHubId,
+      sellHubName: hubConfig ? hubDisplayName(hubConfig.id) : sellHubId,
       sellPrice,
       priceVsPrimaryPct,
       spikeRatio,

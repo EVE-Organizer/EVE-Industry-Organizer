@@ -12,6 +12,7 @@ import { buildMapGraph } from '@/services/data/mapLoader'
 import { buildMapOpportunities } from '@/lib/mapOpportunities'
 import { getHubMarket } from '@/services/data/sdeLoader'
 import { useAppStore } from '@/stores/appStore'
+import { hubDisplayName } from '@/lib/hubDisplay'
 import { DEFAULT_BATCH_SIZE, HUBS } from '@/types'
 import type { HubId } from '@/types'
 import { DEFAULT_MAP_LAYERS, type MapLayers, type WarIntelAnchor, type WarIntelRadius, type WarIntelWindow, type WarTheater } from '@/types/map'
@@ -136,7 +137,7 @@ export function MapPage() {
   }, [sde, opportunities])
 
   const factorySystem = sde?.systems.find((s) => s.systemId === manufacturingSystemId)
-  const buyHubName = HUBS.find((h) => h.id === primaryHub)?.name ?? primaryHub
+  const buyHubName = hubDisplayName(primaryHub)
 
   const warCount = useMemo(
     () => overlays.warTheaters.reduce((sum, t) => sum + t.systemIds.length, 0),

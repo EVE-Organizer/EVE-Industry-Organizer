@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { HUBS } from '@/types'
+import { hubDisplayName } from '@/lib/hubDisplay'
 import type { WarTheater } from '@/types/map'
 import { formatIsk } from '@/lib/profit'
 import { formatTheaterLastActivity } from '@/lib/warActivity'
@@ -37,9 +37,7 @@ export function WarTheaterModal({
     theater.systemNames.length > 1
       ? `${theater.focalSystemName} +${theater.systemNames.length - 1}`
       : theater.focalSystemName
-  const hubName = theater.nearestHubId
-    ? (HUBS.find((h) => h.id === theater.nearestHubId)?.name ?? theater.nearestHubId)
-    : null
+  const hubName = theater.nearestHubId ? hubDisplayName(theater.nearestHubId) : null
 
   const defaultHeight = useMemo(() => {
     const hostH = overlayRoot?.clientHeight ?? 0

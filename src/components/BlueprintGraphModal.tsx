@@ -27,6 +27,7 @@ import {
 import '@xyflow/react/dist/style.css'
 import type { BlueprintInfo, GlobalSettings, ManufacturingSettings, RankedBlueprintRow, SupplyChainNode, TimeRange } from '@/types'
 import { DEFAULT_SETTINGS, HUBS } from '@/types'
+import { hubDisplayName } from '@/lib/hubDisplay'
 import { useSdeData } from '@/hooks/useSdeData'
 import {
   buildPriceMap,
@@ -73,10 +74,12 @@ interface BlueprintGraphModalProps {
   /** Query string for share links when not on the graph page URL. */
   shareSearch?: string
   onOpenPage?: (productTypeId: number) => void
-  variant?: 'modal' | 'page'
+  variant?: 'modal' | 'page' | 'inline'
   /** Runs from an active manufacturing plan (supply chain / roots). */
   getPlanRuns?: (productTypeId: number) => number | undefined
 }
+
+type GraphVariant = NonNullable<BlueprintGraphModalProps['variant']>
 
 function graphShareHref(productTypeId: number, search: string): string {
   const route = productionGraphRoute(productTypeId).replace(/^\//, '')
@@ -123,7 +126,7 @@ function GraphHeaderTitle({
   productName: string
   productTypeId: number
   search?: string
-  variant: 'modal' | 'page'
+  variant: GraphVariant
   onOpenPage?: (productTypeId: number) => void
 }) {
   const navigate = useNavigate()
@@ -219,8 +222,8 @@ function buildGraphPriceLabels(
   priceMethod: ManufacturingSettings['priceMethod'],
   buildSystemName: string,
 ): GraphPriceLabels {
-  const buyHubName = HUBS.find((h) => h.id === buyHub)?.name ?? buyHub
-  const sellHubName = HUBS.find((h) => h.id === sellHub)?.name ?? sellHub
+  const buyHubName = hubDisplayName(buyHub)
+  const sellHubName = hubDisplayName(sellHub)
   const windowLabel = WINDOW_LABELS[window]
   const materialPrice = `${windowLabel} avg sell`
   const outputPrice = priceMethod === 'buy_orders' ? 'Buy order' : `${windowLabel} avg sell`
@@ -1902,36 +1905,56 @@ export function BlueprintGraphModal({
   const shellClassName =
     variant === 'page'
       ? 'flex flex-col flex-1 w-full min-h-[calc(100dvh-11rem)] lg:min-h-0'
-      : 'flex flex-col h-full min-h-0'
+      : variant === 'inline'
+        ? 'flex flex-col w-full min-h-0'
+        : 'flex flex-col h-full min-h-0'
+
+  const graphCanvasClassName =
+    variant === 'inline'
+      ? 'relative h-[min(28rem,50vh)] min-h-[18rem] sm:min-h-[22rem] border border-eve-border rounded-lg overflow-hidden bg-base-300/20'
+      : 'relative flex-1 min-h-0 min-h-[16rem] sm:min-h-[20rem] border border-eve-border rounded-lg overflow-hidden bg-base-300/20'
 
   const graphPanel = (
     <div className={shellClassName}>
-      <header className="flex items-start justify-between gap-2 mb-2 shrink-0 min-w-0">
-        <div className="flex items-start gap-2 min-w-0 flex-1">
-          {canGoBack ? (
-            <button type="button" className="btn btn-xs btn-ghost shrink-0 mt-0.5" onClick={goBack}>
+      {variant === 'inline' ? (
+        canGoBack ? (
+          <header className="flex items-center gap-2 mb-2 shrink-0 min-w-0">
+            <button type="button" className="btn btn-xs btn-ghost shrink-0" onClick={goBack}>
               ← Back
             </button>
-          ) : null}
-          <GraphHeaderTitle
-            productName={activeProductName}
-            productTypeId={activeBlueprint.productTypeId}
-            search={shareSearch}
-            variant={variant}
-            onOpenPage={onOpenPage}
-          />
-        </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            type="button"
-            className="btn btn-sm btn-circle btn-ghost"
-            onClick={onClose}
-            aria-label="Close production graph"
-          >
-            ✕
-          </button>
-        </div>
-      </header>
+            <p className="text-sm font-semibold truncate min-w-0" title={activeProductName}>
+              {activeProductName}
+            </p>
+          </header>
+        ) : null
+      ) : (
+        <header className="flex items-start justify-between gap-2 mb-2 shrink-0 min-w-0">
+          <div className="flex items-start gap-2 min-w-0 flex-1">
+            {canGoBack ? (
+              <button type="button" className="btn btn-xs btn-ghost shrink-0 mt-0.5" onClick={goBack}>
+                ← Back
+              </button>
+            ) : null}
+            <GraphHeaderTitle
+              productName={activeProductName}
+              productTypeId={activeBlueprint.productTypeId}
+              search={shareSearch}
+              variant={variant}
+              onOpenPage={onOpenPage}
+            />
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              className="btn btn-sm btn-circle btn-ghost"
+              onClick={onClose}
+              aria-label="Close production graph"
+            >
+              ✕
+            </button>
+          </div>
+        </header>
+      )}
       {priceLabels ? <GraphPriceSourceBar source={priceLabels} /> : null}
       <GraphProductionControls
         blueprint={activeBlueprint}
@@ -1941,7 +1964,7 @@ export function BlueprintGraphModal({
         onRunsChange={handleRunsChange}
         onJobTimeChange={handleJobTimeChange}
       />
-      <div className="relative flex-1 min-h-0 min-h-[16rem] sm:min-h-[20rem] border border-eve-border rounded-lg overflow-hidden bg-base-300/20">
+      <div className={graphCanvasClassName}>
         {flowNodes.length > 0 ? (
           <GraphPriceContext.Provider value={priceLabels}>
             <GraphNavContext.Provider value={graphNav}>
@@ -1966,7 +1989,7 @@ export function BlueprintGraphModal({
     </div>
   )
 
-  if (variant === 'page') {
+  if (variant === 'page' || variant === 'inline') {
     return graphPanel
   }
 

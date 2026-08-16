@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { HUBS } from '@/types'
+import { hubDisplayName } from '@/lib/hubDisplay'
 import type {
   WarActivityResult,
   WarTheater,
@@ -287,9 +287,7 @@ function TheaterRow({
     theater.systemNames.length > 1
       ? `${theater.focalSystemName} +${theater.systemNames.length - 1}`
       : theater.focalSystemName
-  const hubName = theater.nearestHubId
-    ? (HUBS.find((h) => h.id === theater.nearestHubId)?.name ?? theater.nearestHubId)
-    : null
+  const hubName = theater.nearestHubId ? hubDisplayName(theater.nearestHubId) : null
   const restockLabel =
     theater.nearestHubSystemId === manufacturingSystemId && factoryName
       ? factoryName

@@ -2,7 +2,7 @@ import type { HubId } from '@/types'
 import { HUBS } from '@/types'
 import type { MapGraph } from '@/types/map'
 
-const HUB_PRIORITY: HubId[] = ['jita', 'amarr', 'dodixie', 'rens', 'hek', 'ympwl']
+const HUB_PRIORITY: HubId[] = ['jita', 'amarr', 'dodixie', 'rens', 'hek', 'ympwl', 'vale']
 
 export interface NearestHubResult {
   hubId: HubId

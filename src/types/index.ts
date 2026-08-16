@@ -1,4 +1,4 @@
-export type HubId = 'jita' | 'amarr' | 'dodixie' | 'rens' | 'hek' | 'ympwl'
+export type HubId = 'jita' | 'amarr' | 'dodixie' | 'rens' | 'hek' | 'ympwl' | 'vale'
 
 export const MAX_ME = 10
 export const MAX_TE = 20
@@ -882,6 +882,17 @@ export const HUBS: HubConfig[] = [
     buildSystemName: 'Y-MPWL',
     marketSystemId: 30003726,
   },
+  {
+    id: 'vale',
+    name: '4-HWWF',
+    regionId: 10000003,
+    regionName: 'Vale of the Silent',
+    sellStationId: 0,
+    sellStationName: '4-HWWF',
+    buildSystemId: 30000288,
+    buildSystemName: '1W-0KS',
+    marketSystemId: 30000240,
+  },
 ]
 
 export const REGION_IDS: Record<HubId, number> = {
@@ -891,6 +902,7 @@ export const REGION_IDS: Record<HubId, number> = {
   rens: 10000030,
   hek: 10000042,
   ympwl: 10000047,
+  vale: 10000003,
 }
 
 export const MINERAL_TYPE_IDS: Record<keyof MineralStock, number> = {

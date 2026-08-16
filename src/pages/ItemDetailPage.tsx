@@ -17,13 +17,14 @@ import { getHubQuotes } from '@/services/market/marketService'
 import { getBpcContracts } from '@/lib/bpcContracts'
 import { formatDecimal, formatIsk } from '@/lib/profit'
 import { tierLabel } from '@/lib/blueprintGroups'
-import { HUBS } from '@/types'
+import { hubDisplayName } from '@/lib/hubDisplay'
 import { PageHeader, LoadingState, LastUpdated } from '@/components/Layout'
 import { textLinkClass } from '@/lib/textLink'
 import { EveImage } from '@/components/EveImage'
 import { ItemSection } from '@/components/item/ItemSection'
 import { ItemMetric } from '@/components/item/ItemMetric'
 import { ItemBlueprintMarket } from '@/components/item/ItemBlueprintMarket'
+import { ItemLiveQuoteNotice } from '@/components/item/ItemLiveQuoteNotice'
 import { ItemMarketHistory } from '@/components/item/ItemMarketHistory'
 import { ItemRecipePanel } from '@/components/item/ItemRecipePanel'
 
@@ -53,7 +54,7 @@ export function ItemDetailPage() {
 
   const numericId = Number(typeId ?? 0)
   const hub = settings.primaryHub
-  const hubName = HUBS.find((h) => h.id === hub)?.name ?? hub
+  const hubName = hubDisplayName(hub)
 
   const typeMap = useMemo(() => (sde ? buildTypeMap(sde.types) : new Map()), [sde])
   const skillNameMap = useMemo(
@@ -198,6 +199,8 @@ export function ItemDetailPage() {
           </>
         }
       >
+        <ItemLiveQuoteNotice />
+
         <dl className="item-section__metrics">
           <ItemMetric
             variant="inline"
@@ -283,9 +286,9 @@ export function ItemDetailPage() {
       {blueprint && manufacturedProduct ? (
         <ItemRecipePanel
           blueprint={blueprint}
-          typeMap={typeMap}
           skillNameMap={skillNameMap}
           productName={manufacturedProduct.name}
+          settings={settings}
           className="mb-6"
         />
       ) : (

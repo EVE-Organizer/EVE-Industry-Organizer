@@ -1,4 +1,4 @@
-import type { BlueprintTier, HubId, MineralStock } from '@/types'
+import type { BlueprintTier, HubId, MineralStock, RecipeKind } from '@/types'
 import { MINERAL_TYPE_IDS } from '@/types'
 
 /** EVE Image Service only accepts these sizes (see ESI image server docs). */
@@ -104,6 +104,17 @@ export const TIER_FILTER_LABELS: Record<BlueprintTier, string> = {
   faction: 'Faction',
 }
 
+/** Representative blueprint/formula icons for recipe kind filters. */
+export const RECIPE_KIND_TYPE_IDS: Record<RecipeKind, number> = {
+  manufacturing: 3842, // Large Shield Extender II BPO (not product 3841)
+  reaction: 46204, // Titanium Carbide Reaction Formula
+}
+
+export const RECIPE_KIND_IMAGE_VARIANTS: Record<RecipeKind, ImageVariant> = {
+  manufacturing: 'bp',
+  reaction: 'bp',
+}
+
 /** Blueprint filter icon fallback. */
 export const NAV_TYPE_IDS = {
   blueprints: 3841,
@@ -126,4 +137,5 @@ export const HUB_FACTION_IDS: Record<HubId, number> = {
   rens: 500003,
   hek: 500003,
   ympwl: 500002,
+  vale: 500010,
 }

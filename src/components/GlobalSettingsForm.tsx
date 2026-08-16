@@ -10,6 +10,7 @@ import {
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
+import { formatHubLabel } from '@/lib/hubDisplay'
 import {
   isPlayerStructure,
   isPresetPlayerStructure,
@@ -249,7 +250,7 @@ export function CommonSettingsSection({ settings, onChange, size = 'md' }: Setti
         >
           {HUBS.map((h) => (
             <option key={h.id} value={h.id}>
-              {h.name}
+              {formatHubLabel(h)}
             </option>
           ))}
         </select>
@@ -269,7 +270,7 @@ export function CommonSettingsSection({ settings, onChange, size = 'md' }: Setti
         >
           {HUBS.map((h) => (
             <option key={h.id} value={h.id}>
-              {h.name}
+              {formatHubLabel(h)}
             </option>
           ))}
         </select>

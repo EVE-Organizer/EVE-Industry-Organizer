@@ -1,4 +1,5 @@
 import { useLocation, useSearchParams } from 'react-router-dom'
+import { formatHubLabel } from '@/lib/hubDisplay'
 import { HUBS, type HubId } from '@/types'
 import { useAppStore } from '@/stores/appStore'
 
@@ -43,7 +44,7 @@ export function NavbarHubSelect() {
         >
           {HUBS.map((h) => (
             <option key={h.id} value={h.id}>
-              {h.name}
+              {formatHubLabel(h)}
             </option>
           ))}
         </select>
@@ -58,7 +59,7 @@ export function NavbarHubSelect() {
         >
           {HUBS.map((h) => (
             <option key={h.id} value={h.id}>
-              {h.name}
+              {formatHubLabel(h)}
             </option>
           ))}
         </select>

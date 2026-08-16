@@ -32,13 +32,13 @@ export function ItemBpcContracts({
     <>
       {snapshotAge ? (
         <p className="text-[11px] text-base-content/45 mb-2">
-          Public BPC contracts in {hubName} region from snapshot ({snapshotAge}).
+          Public BPC contracts in {hubName} from snapshot ({snapshotAge}).
         </p>
       ) : null}
 
       {!summary || listings.length === 0 ? (
         <p className="text-sm text-base-content/50">
-          No BPC contracts indexed for this blueprint in the {hubName} region.
+          No BPC contracts indexed for this blueprint in {hubName}.
         </p>
       ) : (
         <>

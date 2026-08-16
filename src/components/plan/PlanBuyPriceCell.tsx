@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatIsk } from '@/lib/profit'
+import { hubDisplayName } from '@/lib/hubDisplay'
 import {
   PLAN_DEFAULT_BUY_HUB,
   type PlanBuyPriceSource,
@@ -30,16 +31,16 @@ export function PlanBuyPriceCell({
   const unitPrice = node.unitPrice ?? 0
   const isCustom = nodeOverride?.buyPrice != null && nodeOverride.buyPrice > 0
   const activeHub = isCustom ? null : (nodeOverride?.buyHub ?? defaultBuyHub)
-  const defaultHubName = HUBS.find((h) => h.id === defaultBuyHub)?.name ?? defaultBuyHub
+  const defaultHubName = hubDisplayName(defaultBuyHub)
   const sourceLabel = isCustom
     ? 'custom'
-    : (HUBS.find((h) => h.id === activeHub)?.name ?? defaultHubName)
+    : (activeHub ? hubDisplayName(activeHub) : defaultHubName)
 
   const hubRows = useMemo(
     () =>
       HUBS.map((hub) => ({
         id: hub.id,
-        name: hub.name,
+        name: hubDisplayName(hub.id),
         price: hubPricesByHub.get(hub.id)?.get(node.productTypeId) ?? 0,
       })),
     [hubPricesByHub, node.productTypeId],

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { HUBS, type HubId } from '@/types'
+import { hubDisplayName } from '@/lib/hubDisplay'
+import type { HubId } from '@/types'
 import { computeRouteDanger, type RouteDangerResult } from '@/lib/routeDanger'
 import { buildHaulerTypeIds, enrichRouteJumps, shouldCheckCamp } from '@/lib/routeCamp'
 import type { SystemGateIntel } from '@/lib/gateIntel'
@@ -59,8 +60,8 @@ export function useHaulRouteRisk({
   const buildSystemName = buildSystem?.name ?? `System ${manufacturingSystemId}`
   const buyHubName = sde ? hubSystemName(sde, primaryHub, hubName) : hubName
   const sellHubName = sde
-    ? hubSystemName(sde, sellHub, HUBS.find((h) => h.id === sellHub)?.name ?? sellHub)
-    : (HUBS.find((h) => h.id === sellHub)?.name ?? sellHub)
+    ? hubSystemName(sde, sellHub, hubDisplayName(sellHub))
+    : hubDisplayName(sellHub)
   const labels: HaulRouteLabels = {
     haulInLabel: `${buyHubName} → ${buildSystemName}`,
     haulOutLabel: `${buildSystemName} → ${sellHubName}`,

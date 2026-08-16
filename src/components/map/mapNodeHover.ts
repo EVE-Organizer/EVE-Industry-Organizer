@@ -1,3 +1,4 @@
+import { hubDisplayName } from '@/lib/hubDisplay'
 import type { HubId } from '@/types'
 import { HUBS } from '@/types'
 import type { MapGraph, MapLayers, WarActivityResult } from '@/types/map'
@@ -45,7 +46,7 @@ export function buildMapNodeHoverDetail(input: {
 
   const hub = HUBS.find((h) => h.marketSystemId === system.systemId)
   if (hub && layers.tradeHubs) {
-    badges.push({ label: hub.name, tone: 'default' })
+    badges.push({ label: hubDisplayName(hub.id), tone: 'default' })
     if (layers.volumeSpike && spikeHubIds.has(hub.id)) {
       badges.push({ label: 'Volume spike', tone: 'warning' })
     }
