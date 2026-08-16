@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { loadSdeData } from '@/services/data/sdeLoader'
+import { loadSdeData, SDE_DATA_VERSION } from '@/services/data/sdeLoader'
 
-const SDE_QUERY_KEY = ['sde'] as const
+const SDE_QUERY_KEY = ['sde', SDE_DATA_VERSION] as const
 
 export function useSdeData() {
   return useQuery({

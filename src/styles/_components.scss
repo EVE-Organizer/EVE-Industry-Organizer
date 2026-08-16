@@ -2394,7 +2394,8 @@
   }
 
   &__queue-item {
-    @apply flex items-center gap-2 rounded-md px-1.5 py-1 text-left;
+    @apply grid items-center gap-x-2 rounded-md px-1.5 py-1 text-left;
+    grid-template-columns: 1rem 1.5rem minmax(0, 1fr) auto auto;
   }
 
   &__queue-attrs {

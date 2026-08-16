@@ -26,23 +26,39 @@ export interface SdeData {
   systems: SystemInfo[]
 }
 
-let cache: SdeData | null = null
+/** Bump when public/data shape changes so React Query refetches cached SDE bundles. */
+export const SDE_DATA_VERSION = 2
+
+async function fetchJson<T>(file: string): Promise<T> {
+  const response = await fetch(publicDataUrl(file), { cache: 'no-store' })
+  if (!response.ok) throw new Error(`Failed to fetch ${file}: ${response.status}`)
+  return response.json() as Promise<T>
+}
+
+async function loadSkills(): Promise<SkillInfo[]> {
+  let skills = await fetchJson<SkillInfo[]>('skills.json')
+  const missingAttributes = skills.some(
+    (skill) => !skill.primaryAttribute || !skill.secondaryAttribute,
+  )
+  if (missingAttributes) {
+    // Browser or dev HMR may still serve an older skills.json without dogma attributes.
+    skills = await fetchJson<SkillInfo[]>(`skills.json?trainingAttributes=${SDE_DATA_VERSION}`)
+  }
+  return skills
+}
 
 export async function loadSdeData(): Promise<SdeData> {
-  if (cache) return cache
   const [typesRaw, registry, market, contracts, regions, skills, systems] = await Promise.all([
-    fetch(publicDataUrl('types.json')).then((r) => r.json()),
-    fetch(publicDataUrl('blueprints.json')).then((r) => r.json()),
-    fetch(publicDataUrl('market.json')).then((r) => r.json()),
-    fetch(publicDataUrl('contracts.json'))
-      .then((r) => (r.ok ? r.json() : null))
-      .catch(() => null),
-    fetch(publicDataUrl('regions.json')).then((r) => r.json()),
-    fetch(publicDataUrl('skills.json')).then((r) => r.json()),
-    fetch(publicDataUrl('systems.json')).then((r) => r.json()),
+    fetchJson<TypeInfo[] | { types: TypeInfo[] }>('types.json'),
+    fetchJson<BlueprintRegistry>('blueprints.json'),
+    fetchJson<MarketData>('market.json'),
+    fetchJson<ContractsData>('contracts.json').catch(() => null),
+    fetchJson<RegionsData>('regions.json'),
+    loadSkills(),
+    fetchJson<SystemInfo[]>('systems.json'),
   ])
   const types: TypeInfo[] = Array.isArray(typesRaw) ? typesRaw : typesRaw.types
-  cache = {
+  return {
     types,
     registry,
     market,
@@ -51,7 +67,6 @@ export async function loadSdeData(): Promise<SdeData> {
     skills,
     systems,
   }
-  return cache
 }
 
 export function buildTypeMap(types: TypeInfo[]): Map<number, TypeInfo> {

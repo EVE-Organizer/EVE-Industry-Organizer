@@ -11,7 +11,7 @@ import {
 } from '@/hooks/useCharacterSkillsData'
 import { useSdeData } from '@/hooks/useSdeData'
 import { formatSyncedAt } from '@/lib/authDisplay'
-import { buildTypeMap } from '@/services/data/sdeLoader'
+import { buildSkillMap, buildTypeMap } from '@/services/data/sdeLoader'
 import { computeSkillImpact } from '@/lib/skillImpact'
 import {
   basesFromEsiTotals,
@@ -85,10 +85,7 @@ export function SkillsPage() {
     isError: implantsError,
   } = useCharacterImplants(characterId)
 
-  const skillNameById = useMemo(
-    () => new Map((sde?.skills ?? []).map((s) => [s.skillId, s])),
-    [sde?.skills],
-  )
+  const skillNameById = useMemo(() => buildSkillMap(sde?.skills ?? []), [sde?.skills])
   const typeMap = useMemo(() => (sde ? buildTypeMap(sde.types) : new Map()), [sde])
 
   const [seedBases, setSeedBases] = useState<AttributeMap>(() => defaultAttributes())
@@ -137,16 +134,13 @@ export function SkillsPage() {
     [queue],
   )
 
-  const trainingSkillKey = useMemo(() => {
-    if (!activeQueueEntry) return 'industry' as const
-    const field = SKILL_FIELDS.find((f) => f.skillId === activeQueueEntry.skill_id)
-    return field?.key ?? 'industry'
-  }, [activeQueueEntry])
-
   const trainingAttrs = useMemo(() => {
-    const field = SKILL_FIELDS.find((f) => f.key === trainingSkillKey)!
-    return skillAttrsFromSde(skillNameById, field.skillId, field.key)
-  }, [skillNameById, trainingSkillKey])
+    if (activeQueueEntry) {
+      const attrs = trainingAttributesForSkill(activeQueueEntry.skill_id, skillNameById)
+      if (attrs) return attrs
+    }
+    return skillAttrsFromSde(skillNameById, SKILL_FIELDS[0].skillId, 'industry')
+  }, [activeQueueEntry, skillNameById])
 
   const spPerMinute = useMemo(
     () => spPerMinuteForSkill(effective, trainingAttrs),
