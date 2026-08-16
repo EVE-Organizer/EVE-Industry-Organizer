@@ -79,7 +79,7 @@ export function characterBlueprintsQueryOptions(characterId: number, forceRefres
     staleTime: CHARACTER_DATA_STALE_MS,
     gcTime: CHARACTER_DATA_GC_MS,
     refetchOnMount: false as const,
-    retry: (failureCount: number, error: Error) => {
+    retry: (failureCount: number, error: unknown) => {
       if (error instanceof EsiAuthError && error.status === 403) return false
       return failureCount < 2
     },
