@@ -1747,6 +1747,27 @@
     @apply border-b border-eve-border/60;
   }
 
+  &.menu li#{&}__header > div:hover {
+    background-color: transparent;
+  }
+
+  &__skills-link {
+    @apply flex min-w-0 flex-1 cursor-pointer select-none items-start gap-3 rounded-md px-1 py-0.5 no-underline outline-none;
+    @apply focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-inset;
+
+    &:hover {
+      background-color: transparent;
+    }
+
+    &:hover .eve-nav-auth-menu__skills-name {
+      @apply text-primary;
+    }
+  }
+
+  &__skills-name {
+    @apply transition-colors;
+  }
+
   &__section-label {
     @apply px-3 pt-2 pb-1 text-[10px] uppercase tracking-wide opacity-50;
 
@@ -2311,5 +2332,260 @@
       content: '';
       @apply ml-1.5 hidden h-3 w-px bg-eve-border/70 sm:inline-block;
     }
+  }
+}
+
+.skills-page {
+  &__split {
+    @apply grid grid-cols-1 gap-4;
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: stretch;
+    }
+  }
+
+  &__queue-slot {
+    @apply relative min-h-[28rem];
+    @media (min-width: 1024px) {
+      min-height: 0;
+    }
+
+    > * {
+      @apply h-full min-h-0;
+      @media (min-width: 1024px) {
+        position: absolute;
+        inset: 0;
+      }
+    }
+  }
+
+  &__card {
+    @apply rounded-xl border border-eve-border/80 bg-gradient-to-br from-base-300/80 to-base-200/40 p-4;
+  }
+
+  &__section-title {
+    @apply text-[10px] font-semibold uppercase tracking-wide text-base-content/45;
+  }
+
+  &__inner-section {
+    @apply rounded-lg border border-eve-border/60 bg-base-300/35 p-2.5;
+  }
+
+  &__inner-title {
+    @apply mb-2 text-[10px] font-semibold uppercase tracking-wide text-base-content/45;
+  }
+
+  &__search {
+    .plan-search-wrap__input {
+      @apply h-9 min-h-9 text-sm;
+    }
+  }
+
+  &__queue-bar {
+    @apply h-1.5 w-full overflow-hidden rounded-full bg-base-300/80;
+  }
+
+  &__queue-bar-fill {
+    @apply h-full rounded-full bg-primary transition-[width] duration-300;
+  }
+
+  &__queue-list {
+    @apply m-0 flex min-h-0 flex-1 list-none flex-col gap-1 overflow-y-auto p-0;
+  }
+
+  &__queue-item {
+    @apply flex items-center gap-2 rounded-md px-1.5 py-1 text-left;
+  }
+
+  &__queue-attrs {
+    @apply flex items-center gap-1 shrink-0;
+  }
+
+  &__queue-attr {
+    @apply inline-flex items-center gap-0.5 text-[9px] font-semibold uppercase leading-none tracking-wide;
+    color: var(--attr-color);
+  }
+
+  &__queue-attr-icon {
+    @apply rounded-sm;
+  }
+
+  &__queue-time {
+    @apply w-14 shrink-0 text-right text-[10px] tabular-nums opacity-60;
+  }
+
+  &__focus-list {
+    @apply mt-1 flex flex-col gap-0.5;
+  }
+
+  &__focus-hint {
+    @apply flex items-center gap-1.5 text-[11px] text-base-content/70;
+  }
+}
+
+.skills-attr {
+  &__header {
+    @apply mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  &__header-meta {
+    @apply flex flex-col items-start gap-1.5 sm:items-end shrink-0;
+  }
+
+  &__grid {
+    @apply grid gap-2;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    @media (max-width: 1023px) {
+      @apply flex overflow-x-auto pb-1;
+      grid-template-columns: unset;
+    }
+  }
+
+  &__col {
+    @apply flex min-w-0 flex-col items-center rounded-lg border border-eve-border/55 bg-base-300/40 p-2 text-center;
+
+    @media (max-width: 1023px) {
+      min-width: 6.5rem;
+      flex: 0 0 auto;
+    }
+  }
+
+  &__attr-icon {
+    @apply mb-1;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--attr-color) 40%, transparent);
+  }
+
+  &__meta {
+    @apply mt-1 text-[10px] leading-none opacity-60;
+  }
+
+  &__total {
+    @apply font-semibold text-base-content opacity-100;
+  }
+
+  &__remap {
+    @apply mt-1 flex w-full items-center justify-center gap-0.5;
+  }
+
+  &__base-input {
+    @apply h-8 min-h-8 w-11 min-w-11 px-0 text-center text-lg font-bold leading-none text-base-content;
+
+    &:focus {
+      @apply outline-none ring-1 ring-base-content/20 bg-base-200/30;
+    }
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+  &__step {
+    @apply btn btn-xs min-h-7 h-7 w-7 min-w-7 shrink-0 rounded-md border border-eve-border/55 bg-base-200/40 p-0 text-sm font-semibold leading-none text-base-content tabular-nums;
+
+    &:not(:disabled):hover {
+      border-color: color-mix(in srgb, var(--attr-color) 45%, transparent);
+      background-color: color-mix(in srgb, var(--attr-color) 12%, transparent);
+      color: var(--attr-color);
+    }
+
+    &:disabled {
+      @apply cursor-not-allowed opacity-40;
+    }
+  }
+
+  &__bar-track {
+    @apply mt-1.5 h-1 w-full overflow-hidden rounded-full bg-base-content/10;
+  }
+
+  &__bar-fill {
+    @apply h-full rounded-full transition-[width] duration-150 ease-out;
+    background-color: var(--attr-color);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--attr-color) 45%, transparent);
+  }
+
+  &__implant-field {
+    @apply mt-2 flex w-full items-center justify-center gap-1 rounded-md border border-eve-border/45 bg-base-200/25 px-1.5 py-1;
+
+    &--dirty {
+      border-color: color-mix(in srgb, var(--attr-color) 45%, transparent);
+      background-color: color-mix(in srgb, var(--attr-color) 8%, transparent);
+    }
+  }
+
+  &__implant-cat-icon {
+    @apply shrink-0 rounded-sm;
+  }
+
+  &__implant-prefix {
+    @apply text-xs font-semibold tabular-nums;
+    color: var(--attr-color);
+  }
+
+  &__implant-input {
+    @apply h-7 min-h-7 w-10 px-1 text-center text-sm font-semibold;
+  }
+}
+
+.skills-impact {
+  &__grid {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  &__group {
+    @apply rounded-lg border border-eve-border/60 bg-base-300/35 p-3;
+  }
+
+  &__group-head {
+    @apply mb-2.5 flex items-center gap-2;
+  }
+
+  &__group-icon {
+    @apply inline-flex size-7 shrink-0 items-center justify-center rounded-md bg-base-200/80 text-base-content/70;
+  }
+
+  &__group-title {
+    @apply text-[11px] font-semibold uppercase tracking-wide text-base-content/55;
+  }
+
+  &__metrics {
+    @apply flex flex-col gap-2;
+  }
+
+  &__metric {
+    @apply flex items-start gap-2.5 rounded-md border border-eve-border/50 bg-base-300/55 px-2.5 py-2;
+  }
+
+  &__metric-icon {
+    @apply mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded text-base-content/60;
+  }
+
+  &__metric-label {
+    @apply text-[10px] uppercase tracking-wide text-base-content/65;
+  }
+
+  &__metric-value {
+    @apply text-base font-bold leading-tight tabular-nums;
+  }
+
+  &__metric-value--neutral {
+    @apply text-base-content;
+  }
+
+  &__metric-value--positive {
+    @apply text-success;
+  }
+
+  &__metric-value--cost {
+    @apply text-warning;
+  }
+
+  &__metric-hint {
+    @apply mt-0.5 text-[10px] text-base-content/55;
   }
 }

@@ -12,6 +12,9 @@ export interface EveCharacterSession {
   characterId: number
   characterName: string
   lastSyncedAt?: string
+  /** Last ESI snapshot for tracked industry skills. */
+  trainedSkills?: SkillLevels
+  /** Assumed what-if levels used in profit and plans. */
   skills?: SkillLevels
   scopes?: string[]
 }
@@ -23,7 +26,7 @@ export interface StoredCharacter extends EveCharacterSession {
 }
 
 /** Untrained skills are stored as 0 (not default 3). Bump when tracked skill keys change. */
-export const CHARACTER_SKILLS_SNAPSHOT_VERSION = 3
+export const CHARACTER_SKILLS_SNAPSHOT_VERSION = 4
 
 export interface AuthAccountState {
   version: 1
@@ -54,8 +57,9 @@ function migrateCharacterSkillSnapshots(characters: StoredCharacter[]): {
       return character
     }
     changed = true
-    const { skills: _skills, ...rest } = character
-    return { ...rest, skills: undefined }
+    const { skills: legacySkills, trainedSkills: _trained, ...rest } = character
+    // v4 split: old `skills` was ESI snapshot; drop and re-sync both fields.
+    return { ...rest, skills: undefined, trainedSkills: undefined }
   })
   return { characters: migrated, changed }
 }
@@ -77,6 +81,7 @@ export function toPublicCharacter(char: StoredCharacter): EveCharacterSession {
     characterId: char.characterId,
     characterName: char.characterName,
     lastSyncedAt: char.lastSyncedAt,
+    trainedSkills: char.trainedSkills,
     skills: char.skills,
     scopes: char.scopes,
   }

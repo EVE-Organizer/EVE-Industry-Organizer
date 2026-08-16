@@ -13,7 +13,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/60381/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/60381/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3452,
@@ -25,7 +27,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3452/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3452/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 16622,
@@ -37,7 +41,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/16622/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/16622/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 89689,
@@ -57,7 +63,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/89689/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/89689/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 16597,
@@ -73,7 +81,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/16597/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/16597/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 77725,
@@ -93,7 +103,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/77725/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/77725/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 73912,
@@ -105,7 +117,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/73912/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/73912/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 88377,
@@ -117,7 +131,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/88377/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/88377/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 23566,
@@ -133,7 +149,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/23566/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/23566/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 81373,
@@ -145,7 +163,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81373/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81373/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3396,
@@ -161,7 +181,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3396/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3396/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3388,
@@ -173,7 +195,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3388/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3388/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 33407,
@@ -185,7 +209,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33407/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33407/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 24624,
@@ -197,7 +223,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24624/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24624/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3398,
@@ -209,7 +237,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3398/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3398/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 24625,
@@ -221,7 +251,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24625/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24625/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 45749,
@@ -233,7 +265,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/45749/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/45749/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3397,
@@ -249,7 +283,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3397/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3397/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 2403,
@@ -261,7 +297,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/2403/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/2403/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3395,
@@ -277,7 +315,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3395/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3395/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 20342,
@@ -289,7 +329,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20342/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20342/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 81371,
@@ -301,7 +343,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81371/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81371/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3430,
@@ -313,7 +357,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3430/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3430/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 11207,
@@ -325,7 +371,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11207/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11207/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3450,
@@ -337,7 +385,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3450/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3450/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 33095,
@@ -353,7 +403,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33095/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33095/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3339,
@@ -369,7 +421,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3339/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3339/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 24311,
@@ -389,7 +443,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24311/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24311/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30539,
@@ -401,7 +457,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30539/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30539/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3335,
@@ -417,7 +475,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3335/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3335/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30532,
@@ -433,7 +493,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30532/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30532/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 33091,
@@ -445,7 +507,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33091/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33091/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 20525,
@@ -465,7 +529,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20525/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20525/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12484,
@@ -477,7 +543,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12484/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12484/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 23087,
@@ -489,7 +557,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/23087/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/23087/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 92397,
@@ -501,7 +571,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/92397/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/92397/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 20524,
@@ -517,7 +589,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20524/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20524/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3331,
@@ -529,7 +603,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3331/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3331/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3343,
@@ -541,7 +617,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3343/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3343/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30537,
@@ -557,7 +635,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30537/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30537/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30538,
@@ -569,7 +649,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30538/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30538/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11444,
@@ -585,7 +667,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11444/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11444/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 30650,
@@ -597,7 +681,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30650/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30650/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 34390,
@@ -609,7 +695,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/34390/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/34390/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3347,
@@ -629,14 +717,18 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3347/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3347/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11584,
     "name": "Anchoring",
     "rank": 3,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/11584/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11584/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 13278,
@@ -652,7 +744,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/13278/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/13278/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 33078,
@@ -664,7 +758,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33078/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33078/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 26253,
@@ -676,7 +772,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/26253/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26253/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 20494,
@@ -688,7 +786,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20494/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20494/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11569,
@@ -704,7 +804,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11569/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11569/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12095,
@@ -724,7 +826,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12095/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12095/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3410,
@@ -740,7 +844,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3410/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3410/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 25811,
@@ -752,7 +858,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25811/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25811/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 25810,
@@ -764,7 +872,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25810/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25810/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 25739,
@@ -776,7 +886,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25739/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25739/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3412,
@@ -788,7 +900,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3412/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3412/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 11487,
@@ -804,7 +918,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11487/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11487/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 26254,
@@ -816,7 +932,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/26254/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26254/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3322,
@@ -828,21 +946,27 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3322/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3322/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 81377,
     "name": "Basic Induction",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/81377/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81377/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 81375,
     "name": "Batch Sequencing",
     "rank": 3,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/81375/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81375/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3405,
@@ -854,7 +978,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3405/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3405/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 28656,
@@ -874,7 +1000,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/28656/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/28656/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 28073,
@@ -886,7 +1014,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/28073/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/28073/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 86261,
@@ -898,7 +1028,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/86261/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/86261/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 86262,
@@ -910,7 +1042,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/86262/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/86262/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 86260,
@@ -926,7 +1060,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/86260/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/86260/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 86263,
@@ -938,7 +1074,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/86263/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/86263/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 86264,
@@ -950,7 +1088,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/86264/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/86264/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 3446,
@@ -962,7 +1102,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3446/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3446/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 27911,
@@ -974,7 +1116,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/27911/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/27911/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 33096,
@@ -990,7 +1134,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33096/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33096/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3338,
@@ -1006,7 +1152,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3338/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3338/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 24312,
@@ -1026,7 +1174,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24312/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24312/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30548,
@@ -1038,7 +1188,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30548/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30548/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3334,
@@ -1054,7 +1206,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3334/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3334/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30544,
@@ -1070,7 +1224,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30544/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30544/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 33092,
@@ -1082,7 +1238,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33092/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33092/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 20530,
@@ -1102,7 +1260,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20530/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20530/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12487,
@@ -1114,7 +1274,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12487/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12487/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 21790,
@@ -1126,7 +1288,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21790/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21790/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 92400,
@@ -1138,7 +1302,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/92400/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/92400/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 20526,
@@ -1154,7 +1320,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20526/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20526/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3330,
@@ -1166,7 +1334,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3330/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3330/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3342,
@@ -1178,7 +1348,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3342/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3342/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30549,
@@ -1194,7 +1366,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30549/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30549/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30552,
@@ -1206,7 +1380,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30552/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30552/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11454,
@@ -1222,7 +1398,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11454/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11454/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 30651,
@@ -1234,7 +1412,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30651/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30651/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 35680,
@@ -1246,7 +1426,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/35680/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/35680/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3346,
@@ -1266,7 +1448,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3346/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3346/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3423,
@@ -1282,7 +1466,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3423/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3423/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3418,
@@ -1294,7 +1480,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3418/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3418/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3417,
@@ -1306,7 +1494,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3417/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3417/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 41404,
@@ -1322,7 +1512,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/41404/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/41404/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 41403,
@@ -1338,7 +1530,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/41403/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/41403/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 41408,
@@ -1354,7 +1548,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/41408/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/41408/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 41405,
@@ -1370,7 +1566,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/41405/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/41405/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 24572,
@@ -1386,7 +1584,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24572/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24572/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 92541,
@@ -1402,7 +1602,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/92541/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/92541/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 20327,
@@ -1418,7 +1620,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20327/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20327/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 21666,
@@ -1434,7 +1638,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21666/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21666/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 28585,
@@ -1446,7 +1652,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/28585/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/28585/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 28374,
@@ -1466,7 +1674,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/28374/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/28374/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 83094,
@@ -1478,7 +1688,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/83094/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/83094/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 83464,
@@ -1494,7 +1706,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/83464/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/83464/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 52998,
@@ -1510,7 +1724,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/52998/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/52998/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 21667,
@@ -1526,7 +1742,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21667/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21667/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 41407,
@@ -1542,7 +1760,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/41407/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/41407/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 41406,
@@ -1558,7 +1778,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/41406/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/41406/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 24568,
@@ -1570,7 +1792,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24568/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24568/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 27936,
@@ -1582,7 +1806,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/27936/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/27936/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 21803,
@@ -1602,7 +1828,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21803/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21803/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 24571,
@@ -1618,7 +1846,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24571/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24571/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 21802,
@@ -1638,7 +1868,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21802/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21802/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 22242,
@@ -1658,7 +1890,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22242/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22242/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 62451,
@@ -1674,7 +1908,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/62451/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/62451/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 20533,
@@ -1686,7 +1922,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20533/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20533/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11579,
@@ -1698,7 +1936,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11579/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11579/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 24606,
@@ -1714,7 +1954,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24606/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24606/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 60378,
@@ -1730,7 +1972,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/60378/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/60378/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3354,
@@ -1742,7 +1986,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3354/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3354/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 93983,
@@ -1762,14 +2008,18 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/93983/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/93983/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 2505,
     "name": "Command Center Upgrades",
     "rank": 4,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/2505/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/2505/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 37615,
@@ -1785,7 +2035,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/37615/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/37615/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 23950,
@@ -1805,7 +2057,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/23950/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/23950/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 46153,
@@ -1821,7 +2075,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/46153/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/46153/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 60380,
@@ -1837,7 +2093,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/60380/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/60380/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3359,
@@ -1849,7 +2107,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3359/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3359/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 25235,
@@ -1861,7 +2121,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25235/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25235/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3316,
@@ -1873,7 +2135,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3316/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3316/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30325,
@@ -1889,7 +2153,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30325/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30325/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 25233,
@@ -1901,14 +2167,18 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25233/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25233/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3363,
     "name": "Corporation Management",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3363/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3363/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 12093,
@@ -1924,14 +2194,18 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12093/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12093/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3426,
     "name": "CPU Management",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3426/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3426/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3361,
@@ -1943,7 +2217,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3361/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3361/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 20212,
@@ -1959,7 +2235,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20212/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20212/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3326,
@@ -1975,7 +2253,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3326/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3326/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 33467,
@@ -1987,7 +2267,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33467/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33467/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3411,
@@ -1999,7 +2281,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3411/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3411/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 21603,
@@ -2011,7 +2295,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21603/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21603/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 16595,
@@ -2023,7 +2309,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/16595/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/16595/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 11395,
@@ -2039,14 +2327,18 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11395/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11395/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3323,
     "name": "Defender Missiles",
     "rank": 2,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3323/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3323/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30324,
@@ -2062,7 +2354,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30324/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30324/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3357,
@@ -2074,7 +2368,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3357/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3357/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3368,
@@ -2090,7 +2386,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3368/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3368/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 77739,
@@ -2110,7 +2408,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/77739/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/77739/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3894,
@@ -2126,7 +2426,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3894/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3894/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 24563,
@@ -2146,7 +2448,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24563/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24563/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 41537,
@@ -2158,7 +2462,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/41537/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/41537/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3437,
@@ -2170,7 +2476,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3437/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3437/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 23618,
@@ -2182,7 +2490,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/23618/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/23618/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3442,
@@ -2194,7 +2504,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3442/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3442/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 12305,
@@ -2206,7 +2518,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12305/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12305/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 23606,
@@ -2218,14 +2532,18 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/23606/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/23606/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3436,
     "name": "Drones",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3436/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3436/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 26255,
@@ -2237,14 +2555,18 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/26255/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26255/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 26224,
     "name": "Drug Manufacturing",
     "rank": 2,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/26224/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26224/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 54794,
@@ -2260,7 +2582,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/54794/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/54794/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 55032,
@@ -2276,7 +2600,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/55032/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/55032/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 55031,
@@ -2288,7 +2614,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/55031/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/55031/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11448,
@@ -2304,7 +2632,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11448/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11448/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 28615,
@@ -2320,7 +2650,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/28615/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/28615/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 11453,
@@ -2336,7 +2668,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11453/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11453/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 26256,
@@ -2348,7 +2682,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/26256/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26256/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3427,
@@ -2360,7 +2696,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3427/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3427/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3432,
@@ -2376,7 +2714,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3432/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3432/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 73910,
@@ -2388,7 +2728,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/73910/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/73910/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 22806,
@@ -2400,7 +2742,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22806/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22806/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 12365,
@@ -2412,7 +2756,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12365/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12365/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3732,
@@ -2424,7 +2770,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3732/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3732/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 3424,
@@ -2440,7 +2788,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3424/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3424/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3421,
@@ -2456,7 +2806,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3421/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3421/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 26258,
@@ -2468,7 +2820,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/26258/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26258/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 90040,
@@ -2484,7 +2838,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/90040/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/90040/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3453,
@@ -2496,7 +2852,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3453/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3453/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 46156,
@@ -2512,7 +2870,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/46156/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/46156/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 84220,
@@ -2524,7 +2884,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/84220/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/84220/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 22551,
@@ -2544,7 +2906,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22551/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22551/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 89611,
@@ -2556,7 +2920,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/89611/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/89611/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 89609,
@@ -2576,7 +2942,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/89609/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/89609/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 89610,
@@ -2592,7 +2960,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/89610/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/89610/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 33856,
@@ -2612,7 +2982,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33856/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33856/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 22807,
@@ -2624,7 +2996,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22807/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22807/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 12367,
@@ -2636,7 +3010,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12367/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12367/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3358,
@@ -2648,7 +3024,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3358/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3358/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 24613,
@@ -2660,7 +3038,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24613/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24613/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 23069,
@@ -2676,7 +3056,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/23069/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/23069/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 47445,
@@ -2696,7 +3078,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/47445/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/47445/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 24764,
@@ -2708,7 +3092,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24764/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24764/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 62453,
@@ -2720,7 +3106,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/62453/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/62453/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 57318,
@@ -2736,7 +3124,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/57318/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/57318/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 57317,
@@ -2748,14 +3138,18 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/57317/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/57317/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 91017,
     "name": "Freelancing",
     "rank": 2,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/91017/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/91017/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 19760,
@@ -2771,7 +3165,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/19760/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/19760/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3451,
@@ -2787,7 +3183,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3451/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3451/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 33097,
@@ -2803,7 +3201,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33097/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33097/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3336,
@@ -2819,7 +3219,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3336/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3336/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 24313,
@@ -2839,7 +3241,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24313/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24313/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30546,
@@ -2851,7 +3255,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30546/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30546/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3332,
@@ -2867,7 +3273,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3332/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3332/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30540,
@@ -2883,7 +3291,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30540/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30540/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 33093,
@@ -2895,7 +3305,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33093/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33093/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 20531,
@@ -2915,7 +3327,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20531/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20531/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12486,
@@ -2927,7 +3341,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12486/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12486/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 23121,
@@ -2939,7 +3355,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/23121/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/23121/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 92398,
@@ -2951,7 +3369,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/92398/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/92398/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 20527,
@@ -2967,7 +3387,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20527/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20527/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3328,
@@ -2979,7 +3401,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3328/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3328/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3340,
@@ -2991,7 +3415,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3340/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3340/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30550,
@@ -3007,7 +3433,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30550/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30550/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30553,
@@ -3019,7 +3447,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30553/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30553/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11450,
@@ -3035,7 +3465,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11450/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11450/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 30652,
@@ -3047,7 +3479,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30652/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30652/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 35685,
@@ -3059,7 +3493,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/35685/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/35685/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3344,
@@ -3079,7 +3515,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3344/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3344/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 25544,
@@ -3091,7 +3529,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25544/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25544/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 62452,
@@ -3103,7 +3543,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/62452/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/62452/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 33000,
@@ -3115,7 +3557,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33000/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33000/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 11446,
@@ -3131,7 +3575,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11446/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11446/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 20312,
@@ -3143,14 +3589,18 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20312/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20312/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3300,
     "name": "Gunnery",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3300/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3300/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 21718,
@@ -3166,7 +3616,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21718/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21718/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 16591,
@@ -3186,7 +3638,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/16591/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/16591/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 25718,
@@ -3202,7 +3656,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25718/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25718/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 25719,
@@ -3218,7 +3674,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25719/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25719/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3441,
@@ -3230,7 +3688,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3441/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3441/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 32339,
@@ -3242,7 +3702,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/32339/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/32339/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 28609,
@@ -3262,7 +3724,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/28609/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/28609/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 20211,
@@ -3278,7 +3742,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20211/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20211/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3324,
@@ -3294,7 +3760,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3324/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3324/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11433,
@@ -3310,7 +3778,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11433/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11433/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3454,
@@ -3326,7 +3796,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3454/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3454/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 81369,
@@ -3338,14 +3810,18 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81369/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81369/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 81368,
     "name": "Hub Promotion",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/81368/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81368/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3394,
@@ -3357,7 +3833,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3394/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3394/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 26259,
@@ -3369,7 +3847,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/26259/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26259/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 11443,
@@ -3385,7 +3865,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11443/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11443/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 16281,
@@ -3397,7 +3879,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/16281/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/16281/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 43702,
@@ -3413,7 +3897,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/43702/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/43702/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 43703,
@@ -3429,7 +3915,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/43703/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/43703/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 18025,
@@ -3445,7 +3933,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/18025/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/18025/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 81372,
@@ -3457,7 +3947,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81372/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81372/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 29637,
@@ -3477,7 +3969,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/29637/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/29637/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 58956,
@@ -3489,7 +3983,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/58956/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/58956/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 81365,
@@ -3501,21 +3997,27 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81365/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81365/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3380,
     "name": "Industry",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3380/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3380/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 24242,
     "name": "Infomorph Psychology",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/24242/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24242/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 33399,
@@ -3527,7 +4029,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33399/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33399/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 20495,
@@ -3539,7 +4043,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20495/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20495/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3352,
@@ -3555,7 +4061,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3352/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3352/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12092,
@@ -3571,7 +4079,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12092/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12092/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 12098,
@@ -3591,14 +4101,18 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12098/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12098/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 2495,
     "name": "Interplanetary Consolidation",
     "rank": 4,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/2495/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/2495/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 44067,
@@ -3614,7 +4128,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/44067/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/44067/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 21611,
@@ -3626,7 +4142,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21611/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21611/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3456,
@@ -3646,7 +4164,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3456/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3456/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 29029,
@@ -3662,7 +4182,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/29029/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/29029/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 21610,
@@ -3674,7 +4196,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21610/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21610/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 24562,
@@ -3694,7 +4218,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24562/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24562/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 26252,
@@ -3706,7 +4232,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/26252/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26252/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 22808,
@@ -3718,7 +4246,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22808/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22808/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 12366,
@@ -3730,7 +4260,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12366/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12366/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3406,
@@ -3742,7 +4274,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3406/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3406/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 33001,
@@ -3754,7 +4288,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33001/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33001/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 77738,
@@ -3774,7 +4310,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/77738/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/77738/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12203,
@@ -3790,7 +4328,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12203/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12203/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12209,
@@ -3806,7 +4346,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12209/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12209/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12205,
@@ -3822,7 +4364,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12205/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12205/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12212,
@@ -3838,7 +4382,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12212/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12212/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 47875,
@@ -3854,7 +4400,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/47875/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/47875/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3309,
@@ -3870,7 +4418,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3309/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3309/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3307,
@@ -3886,7 +4436,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3307/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3307/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 47872,
@@ -3902,7 +4454,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/47872/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/47872/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3308,
@@ -3918,7 +4472,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3308/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3308/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12215,
@@ -3934,7 +4490,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12215/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12215/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12207,
@@ -3950,7 +4508,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12207/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12207/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 54826,
@@ -3966,7 +4526,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/54826/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/54826/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 54829,
@@ -3982,7 +4544,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/54829/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/54829/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11447,
@@ -3998,7 +4562,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11447/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11447/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 26260,
@@ -4010,14 +4576,18 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/26260/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26260/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3348,
     "name": "Leadership",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3348/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3348/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 24241,
@@ -4029,7 +4599,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24241/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24241/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 40572,
@@ -4041,7 +4613,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/40572/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/40572/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 20210,
@@ -4057,7 +4631,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20210/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20210/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3321,
@@ -4069,7 +4645,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3321/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3321/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12096,
@@ -4089,7 +4667,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12096/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12096/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 40328,
@@ -4109,7 +4689,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/40328/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/40328/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 19759,
@@ -4125,7 +4707,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/19759/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/19759/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3428,
@@ -4137,7 +4721,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3428/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3428/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 32999,
@@ -4149,7 +4735,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/32999/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/32999/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 28667,
@@ -4169,7 +4757,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/28667/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/28667/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 16598,
@@ -4181,7 +4771,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/16598/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/16598/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3387,
@@ -4193,7 +4785,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3387/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3387/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 45748,
@@ -4205,7 +4799,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/45748/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/45748/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 81364,
@@ -4217,7 +4813,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81364/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81364/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 11452,
@@ -4233,14 +4831,18 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11452/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11452/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3392,
     "name": "Mechanics",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3392/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3392/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 12202,
@@ -4256,7 +4858,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12202/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12202/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12208,
@@ -4272,7 +4876,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12208/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12208/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12204,
@@ -4288,7 +4894,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12204/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12204/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12211,
@@ -4304,7 +4912,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12211/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12211/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 47874,
@@ -4320,7 +4930,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/47874/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/47874/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 33699,
@@ -4332,7 +4944,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33699/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33699/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3306,
@@ -4348,7 +4962,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3306/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3306/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3304,
@@ -4364,7 +4980,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3304/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3304/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 47871,
@@ -4380,7 +4998,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/47871/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/47871/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3305,
@@ -4396,7 +5016,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3305/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3305/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12214,
@@ -4412,7 +5034,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12214/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12214/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12206,
@@ -4428,7 +5052,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12206/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12206/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 55035,
@@ -4444,7 +5070,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/55035/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/55035/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 54828,
@@ -4460,7 +5088,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/54828/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/54828/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3731,
@@ -4472,7 +5102,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3731/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3731/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 85233,
@@ -4488,7 +5120,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/85233/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/85233/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 12189,
@@ -4504,7 +5138,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12189/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12189/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3409,
@@ -4516,7 +5152,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3409/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3409/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 4385,
@@ -4532,14 +5170,18 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/4385/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/4385/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3386,
     "name": "Mining",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3386/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3386/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 17940,
@@ -4559,7 +5201,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/17940/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/17940/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3893,
@@ -4575,7 +5219,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3893/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3893/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 89241,
@@ -4595,7 +5241,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/89241/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/89241/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 22552,
@@ -4611,7 +5259,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22552/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22552/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3438,
@@ -4627,7 +5277,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3438/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3438/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 22541,
@@ -4643,7 +5295,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22541/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22541/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 90728,
@@ -4663,7 +5317,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/90728/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/90728/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 22536,
@@ -4675,7 +5331,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22536/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22536/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 32918,
@@ -4687,7 +5345,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/32918/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/32918/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 90727,
@@ -4699,7 +5359,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/90727/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/90727/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 22578,
@@ -4711,7 +5373,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22578/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22578/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 33098,
@@ -4727,7 +5391,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33098/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33098/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3337,
@@ -4743,7 +5409,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3337/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3337/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 24314,
@@ -4763,7 +5431,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24314/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24314/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30547,
@@ -4775,7 +5445,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30547/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30547/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3333,
@@ -4791,7 +5463,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3333/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3333/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30545,
@@ -4807,7 +5481,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30545/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30545/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 33094,
@@ -4819,7 +5495,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33094/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33094/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 20532,
@@ -4839,7 +5517,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20532/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20532/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12485,
@@ -4851,7 +5531,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12485/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12485/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 21791,
@@ -4863,7 +5545,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21791/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21791/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 92399,
@@ -4875,7 +5559,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/92399/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/92399/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 20528,
@@ -4891,7 +5577,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20528/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20528/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3329,
@@ -4903,7 +5591,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3329/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3329/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3341,
@@ -4915,7 +5605,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3341/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3341/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30551,
@@ -4931,7 +5623,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30551/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30551/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 30554,
@@ -4943,7 +5637,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30554/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30554/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11445,
@@ -4959,7 +5655,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11445/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11445/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 30653,
@@ -4971,7 +5669,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30653/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30653/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 34533,
@@ -4983,7 +5683,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/34533/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/34533/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3345,
@@ -5003,7 +5705,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3345/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3345/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12441,
@@ -5015,14 +5719,18 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12441/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12441/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3319,
     "name": "Missile Launcher Operation",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3319/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3319/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12442,
@@ -5034,7 +5742,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12442/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12442/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11529,
@@ -5050,7 +5760,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11529/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11529/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3312,
@@ -5062,7 +5774,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3312/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3312/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 81367,
@@ -5074,7 +5788,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81367/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81367/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 81896,
@@ -5090,7 +5806,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81896/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81896/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 60515,
@@ -5110,7 +5828,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/60515/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/60515/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 11442,
@@ -5126,7 +5846,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11442/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11442/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 28880,
@@ -5138,7 +5860,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/28880/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/28880/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 28879,
@@ -5150,14 +5874,18 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/28879/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/28879/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3449,
     "name": "Navigation",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3449/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3449/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3356,
@@ -5169,7 +5897,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3356/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3356/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 25538,
@@ -5185,7 +5915,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25538/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25538/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 25530,
@@ -5197,7 +5929,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25530/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25530/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 11451,
@@ -5213,7 +5947,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11451/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11451/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 30327,
@@ -5229,7 +5965,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30327/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30327/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 34327,
@@ -5245,7 +5983,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/34327/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/34327/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3184,
@@ -5257,7 +5997,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3184/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3184/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3400,
@@ -5277,7 +6019,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3400/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3400/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 84218,
@@ -5289,21 +6033,27 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/84218/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/84218/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 84217,
     "name": "Paragon Relations",
     "rank": 3,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/84217/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/84217/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 81366,
     "name": "Parallel Sequencing",
     "rank": 2,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/81366/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81366/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 81374,
@@ -5315,7 +6065,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81374/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81374/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 2406,
@@ -5331,7 +6083,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/2406/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/2406/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 11441,
@@ -5347,14 +6101,18 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11441/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11441/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3413,
     "name": "Power Grid Management",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3413/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3413/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 49743,
@@ -5370,7 +6128,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/49743/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/49743/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 47869,
@@ -5386,7 +6146,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/47869/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/47869/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 47868,
@@ -5402,7 +6164,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/47868/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/47868/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 49742,
@@ -5414,7 +6178,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/49742/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/49742/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 52997,
@@ -5434,7 +6200,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/52997/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/52997/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 47867,
@@ -5446,7 +6214,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/47867/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/47867/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 16594,
@@ -5458,7 +6228,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/16594/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/16594/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 26257,
@@ -5470,7 +6242,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/26257/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26257/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3435,
@@ -5486,7 +6260,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3435/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3435/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 30788,
@@ -5502,7 +6278,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/30788/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/30788/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 11455,
@@ -5518,7 +6296,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11455/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11455/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 33002,
@@ -5530,7 +6310,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/33002/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/33002/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3310,
@@ -5542,7 +6324,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3310/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3310/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 21071,
@@ -5554,7 +6338,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21071/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21071/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 46155,
@@ -5570,14 +6356,18 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/46155/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/46155/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 45746,
     "name": "Reactions",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/45746/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/45746/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 22761,
@@ -5597,7 +6387,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22761/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22761/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 16069,
@@ -5613,7 +6405,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/16069/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/16069/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 27902,
@@ -5625,7 +6419,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/27902/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/27902/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 45750,
@@ -5637,7 +6433,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/45750/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/45750/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 13279,
@@ -5649,7 +6447,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/13279/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/13279/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3439,
@@ -5665,7 +6465,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3439/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3439/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3393,
@@ -5677,7 +6479,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3393/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3393/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3385,
@@ -5689,7 +6493,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3385/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3385/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3389,
@@ -5701,7 +6507,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3389/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3389/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3403,
@@ -5713,7 +6521,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3403/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3403/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 12179,
@@ -5729,7 +6539,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12179/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12179/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 32797,
@@ -5741,7 +6553,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/32797/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/32797/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3444,
@@ -5753,7 +6567,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3444/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3444/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 11449,
@@ -5769,7 +6585,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11449/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11449/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 20209,
@@ -5785,7 +6603,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20209/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20209/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3320,
@@ -5797,7 +6617,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3320/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3320/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3440,
@@ -5813,7 +6635,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3440/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3440/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 57164,
@@ -5829,7 +6653,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/57164/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/57164/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 25863,
@@ -5845,14 +6671,18 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/25863/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/25863/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3402,
     "name": "Science",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3402/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3402/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 24270,
@@ -5864,7 +6694,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24270/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24270/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 12196,
@@ -5880,7 +6712,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12196/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12196/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3895,
@@ -5896,7 +6730,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3895/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3895/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3433,
@@ -5908,7 +6744,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3433/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3433/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 23594,
@@ -5924,7 +6762,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/23594/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/23594/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3311,
@@ -5936,7 +6776,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3311/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3311/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3350,
@@ -5948,7 +6790,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3350/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3350/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3351,
@@ -5964,7 +6808,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3351/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3351/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 21059,
@@ -5976,7 +6822,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21059/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21059/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3422,
@@ -5992,7 +6840,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3422/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3422/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3419,
@@ -6004,7 +6854,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3419/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3419/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3416,
@@ -6016,7 +6868,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3416/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3416/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 26261,
@@ -6028,7 +6882,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/26261/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/26261/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3425,
@@ -6044,7 +6900,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3425/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3425/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 62450,
@@ -6056,7 +6914,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/62450/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/62450/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 19761,
@@ -6072,7 +6932,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/19761/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/19761/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 19766,
@@ -6088,7 +6950,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/19766/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/19766/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3431,
@@ -6100,7 +6964,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3431/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3431/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 19922,
@@ -6116,7 +6982,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/19922/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/19922/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 4411,
@@ -6128,7 +6996,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/4411/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/4411/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 60377,
@@ -6144,7 +7014,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/60377/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/60377/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3349,
@@ -6156,7 +7028,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3349/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3349/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11572,
@@ -6172,7 +7046,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11572/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11572/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3408,
@@ -6192,7 +7068,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3408/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3408/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 21789,
@@ -6204,7 +7082,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21789/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21789/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 12201,
@@ -6220,7 +7100,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12201/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12201/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11084,
@@ -6236,7 +7118,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11084/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11084/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11083,
@@ -6252,7 +7136,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11083/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11083/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12210,
@@ -6268,7 +7154,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12210/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12210/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 47873,
@@ -6284,7 +7172,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/47873/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/47873/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3303,
@@ -6296,7 +7186,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3303/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3303/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3301,
@@ -6308,7 +7200,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3301/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3301/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 47870,
@@ -6320,7 +7214,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/47870/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/47870/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3302,
@@ -6332,7 +7228,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3302/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3302/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 12213,
@@ -6348,7 +7246,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12213/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12213/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 11082,
@@ -6364,7 +7264,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11082/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11082/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 55034,
@@ -6376,7 +7278,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/55034/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/55034/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 54827,
@@ -6392,14 +7296,18 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/54827/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/54827/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3355,
     "name": "Social",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3355/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3355/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 12241,
@@ -6411,14 +7319,18 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/12241/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/12241/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 3327,
     "name": "Spaceship Command",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3327/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3327/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 43728,
@@ -6434,7 +7346,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/43728/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/43728/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3373,
@@ -6446,7 +7360,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3373/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3373/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 37797,
@@ -6462,7 +7378,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/37797/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/37797/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 37798,
@@ -6478,7 +7396,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/37798/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/37798/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 37799,
@@ -6494,7 +7414,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/37799/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/37799/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 37796,
@@ -6510,14 +7432,18 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/37796/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/37796/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 81370,
     "name": "Studio Management",
     "rank": 2,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/81370/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81370/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 24268,
@@ -6529,7 +7455,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/24268/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/24268/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 40573,
@@ -6541,7 +7469,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/40573/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/40573/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 3315,
@@ -6553,7 +7483,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3315/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3315/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3551,
@@ -6565,7 +7497,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3551/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3551/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 27906,
@@ -6577,7 +7511,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/27906/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/27906/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3420,
@@ -6589,7 +7525,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3420/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3420/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 22043,
@@ -6601,7 +7539,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22043/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22043/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 23123,
@@ -6613,7 +7553,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/23123/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/23123/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 20433,
@@ -6625,7 +7567,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20433/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20433/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3429,
@@ -6637,7 +7581,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3429/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3429/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 20314,
@@ -6649,7 +7595,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20314/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20314/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 19921,
@@ -6661,7 +7609,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/19921/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/19921/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 22809,
@@ -6673,7 +7623,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/22809/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/22809/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 11566,
@@ -6685,7 +7637,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11566/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11566/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 28164,
@@ -6705,7 +7659,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/28164/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/28164/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 20213,
@@ -6721,7 +7677,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20213/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20213/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3325,
@@ -6737,14 +7695,18 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3325/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3325/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3443,
     "name": "Trade",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/3443/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3443/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "charisma"
   },
   {
     "skillId": 3317,
@@ -6756,7 +7718,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3317/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3317/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 19719,
@@ -6772,7 +7736,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/19719/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/19719/icon?size=32",
+    "primaryAttribute": "willpower",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 52308,
@@ -6792,7 +7758,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/52308/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/52308/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 52307,
@@ -6808,7 +7776,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/52307/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/52307/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 18580,
@@ -6824,7 +7794,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/18580/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/18580/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 46152,
@@ -6840,7 +7812,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/46152/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/46152/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 46154,
@@ -6856,7 +7830,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/46154/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/46154/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 90398,
@@ -6872,7 +7848,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/90398/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/90398/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 55025,
@@ -6884,7 +7862,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/55025/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/55025/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 81044,
@@ -6900,7 +7880,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81044/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81044/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 81032,
@@ -6912,7 +7894,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81032/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81032/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 81050,
@@ -6928,7 +7912,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/81050/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/81050/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 60379,
@@ -6944,7 +7930,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/60379/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/60379/icon?size=32",
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence"
   },
   {
     "skillId": 3447,
@@ -6956,7 +7944,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3447/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3447/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 55511,
@@ -6968,7 +7958,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/55511/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/55511/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 54841,
@@ -6980,7 +7972,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/54841/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/54841/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 54840,
@@ -6992,14 +7986,18 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/54840/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/54840/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 55033,
     "name": "Vorton Projector Operation",
     "rank": 1,
     "prerequisites": [],
-    "iconUrl": "https://images.evetech.net/types/55033/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/55033/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 20315,
@@ -7011,7 +8009,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/20315/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/20315/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 3455,
@@ -7023,7 +8023,9 @@
         "level": 1
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3455/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3455/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "perception"
   },
   {
     "skillId": 19767,
@@ -7039,7 +8041,9 @@
         "level": 4
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/19767/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/19767/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3434,
@@ -7051,7 +8055,9 @@
         "level": 3
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3434/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3434/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 3318,
@@ -7063,7 +8069,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/3318/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/3318/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 16596,
@@ -7079,7 +8087,9 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/16596/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/16596/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "memory"
   },
   {
     "skillId": 11574,
@@ -7091,7 +8101,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/11574/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/11574/icon?size=32",
+    "primaryAttribute": "charisma",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 41410,
@@ -7107,7 +8119,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/41410/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/41410/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 32435,
@@ -7123,7 +8137,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/32435/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/32435/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 41409,
@@ -7139,7 +8155,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/41409/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/41409/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 21668,
@@ -7155,7 +8173,9 @@
         "level": 5
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/21668/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/21668/icon?size=32",
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower"
   },
   {
     "skillId": 23124,
@@ -7167,6 +8187,8 @@
         "level": 2
       }
     ],
-    "iconUrl": "https://images.evetech.net/types/23124/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/23124/icon?size=32",
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory"
   }
 ]

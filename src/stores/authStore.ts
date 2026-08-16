@@ -22,7 +22,7 @@ import { queryClient } from '@/lib/queryClient'
 import { refreshCharacterApiCaches } from '@/lib/refreshCharacterData'
 import { ZERO_SKILLS, type SkillLevels } from '@/types'
 
-function applySkillLevels(skills: SkillLevels): void {
+function applyAssumedSkills(skills: SkillLevels): void {
   useAppStore.getState().updateSettings({
     skills: normalizeImportedSkillLevels(skills),
   })
@@ -35,17 +35,43 @@ function applyZeroSkills(): void {
   })
 }
 
+function assumedLevelsForCharacter(character: EveCharacterSession | null): SkillLevels | null {
+  if (!character) return null
+  if (character.skills) return normalizeImportedSkillLevels(character.skills)
+  if (character.trainedSkills) return normalizeImportedSkillLevels(character.trainedSkills)
+  return null
+}
+
 function activateCharacterSkills(
   character: EveCharacterSession | null,
   sync: (characterId: number) => void,
 ): void {
   if (!character) return
-  if (character.skills) {
-    applySkillLevels(character.skills)
+  const assumed = assumedLevelsForCharacter(character)
+  if (assumed) {
+    applyAssumedSkills(assumed)
     return
   }
   applyZeroSkills()
   sync(character.characterId)
+}
+
+function persistEsiSkillSync(
+  characterId: number,
+  trainedSkills: SkillLevels,
+  syncedAt: string,
+): EveCharacterSession | null {
+  const snapshot = getStoredCharacter()
+  const existing = snapshot?.characterId === characterId ? snapshot : null
+  const hasAssumed = Boolean(existing?.skills)
+
+  touchCharacterSync(characterId, {
+    lastSyncedAt: syncedAt,
+    trainedSkills,
+    ...(hasAssumed ? {} : { skills: { ...trainedSkills } }),
+  })
+
+  return getStoredCharacter()
 }
 
 interface AuthStore {
@@ -62,6 +88,7 @@ interface AuthStore {
   completeCallback: (code: string, state: string) => Promise<void>
   switchCharacter: (characterId: number) => void
   persistActiveSkillsFromSettings: () => void
+  resetAssumedToTrained: () => void
   syncSkills: (characterId?: number) => Promise<void>
   refreshCharacter: (characterId?: number) => Promise<void>
   logoutCharacter: (characterId?: number) => void
@@ -168,6 +195,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ ...readAuthSnapshot(), error: null })
   },
 
+  resetAssumedToTrained: () => {
+    const characterId = get().activeCharacterId
+    const character = get().character
+    if (characterId == null || !character?.trainedSkills) return
+
+    const trained = normalizeImportedSkillLevels(character.trainedSkills)
+    touchCharacterSync(characterId, { skills: { ...trained } })
+    applyAssumedSkills(trained)
+    set({ ...readAuthSnapshot(), error: null })
+  },
+
   syncSkills: async (characterId) => {
     const targetId = characterId ?? get().activeCharacterId ?? get().character?.characterId
     if (!targetId) {
@@ -189,15 +227,16 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       }
 
       const esi = await fetchCharacterSkills(targetId, accessToken, { forceRefresh: true })
-      const skills = mapEsiSkillsToSkillLevels(esi.skills)
+      const trainedSkills = mapEsiSkillsToSkillLevels(esi.skills)
       const syncedAt = new Date().toISOString()
-      touchCharacterSync(targetId, { lastSyncedAt: syncedAt, skills })
+      const updated = persistEsiSkillSync(targetId, trainedSkills, syncedAt)
 
       const snapshot = readAuthSnapshot()
       set({ ...snapshot, isBusy: false })
 
-      if (snapshot.activeCharacterId === targetId) {
-        applySkillLevels(skills)
+      if (snapshot.activeCharacterId === targetId && updated) {
+        const assumed = assumedLevelsForCharacter(updated)
+        if (assumed) applyAssumedSkills(assumed)
       }
     } catch (err) {
       set({
@@ -229,17 +268,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       }
 
       const esi = await fetchCharacterSkills(targetId, accessToken, { forceRefresh: true })
-      const skills = mapEsiSkillsToSkillLevels(esi.skills)
+      const trainedSkills = mapEsiSkillsToSkillLevels(esi.skills)
       const syncedAt = new Date().toISOString()
-      touchCharacterSync(targetId, { lastSyncedAt: syncedAt, skills })
+      const updated = persistEsiSkillSync(targetId, trainedSkills, syncedAt)
 
       await refreshCharacterApiCaches(queryClient, targetId)
 
       const snapshot = readAuthSnapshot()
       set({ ...snapshot, isBusy: false })
 
-      if (snapshot.activeCharacterId === targetId) {
-        applySkillLevels(skills)
+      if (snapshot.activeCharacterId === targetId && updated) {
+        const assumed = assumedLevelsForCharacter(updated)
+        if (assumed) applyAssumedSkills(assumed)
       }
     } catch (err) {
       set({

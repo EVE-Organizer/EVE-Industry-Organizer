@@ -584,29 +584,11 @@ export function BpoCostSettingsSection({ settings, onChange, size = 'md' }: Sett
       </label>
 
       {settings.includeBlueprintCost ? (
-        <>
-          <p className="text-xs opacity-60">
-            T1 BPOs are treated as reusable (upfront capital only). When no BPO is listed, BPC
-            contract prices are used. Charges (ammo, scripts) are excluded.
-          </p>
-          <div className="max-w-sm">
-            <SettingField
-              label="Invention skill level"
-              tooltip={GLOBAL_SETTING_TOOLTIPS.inventionSkillLevel}
-              size={size}
-              valueLabel={settings.inventionSkillLevel}
-            >
-              <RangeInput
-                value={settings.inventionSkillLevel}
-                min={0}
-                max={5}
-                onChange={(inventionSkillLevel) => onChange({ inventionSkillLevel })}
-                size={size}
-                ariaLabel="Invention skill level"
-              />
-            </SettingField>
-          </div>
-        </>
+        <p className="text-xs opacity-60">
+          T1 BPOs are treated as reusable (upfront capital only). When no BPO is listed, BPC
+          contract prices are used. Charges (ammo, scripts) are excluded. Set invention skill level
+          on the Skills page (avatar).
+        </p>
       ) : (
         <p className="text-xs opacity-60">
           Profit and budget ignore BPO purchase, BPC copies, and invention costs.

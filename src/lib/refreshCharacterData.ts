@@ -5,6 +5,11 @@ import {
   locationInventoryQueryOptions,
   productionLocationsQueryOptions,
 } from '@/hooks/useCharacterIndustryData'
+import {
+  characterSkillQueueQueryOptions,
+  characterAttributesQueryOptions,
+  characterImplantsQueryOptions,
+} from '@/hooks/useCharacterSkillsData'
 
 /** Force-refresh every ESI-backed query for a character (jobs, skills cache, locations, assets). */
 export async function refreshCharacterApiCaches(
@@ -29,6 +34,18 @@ export async function refreshCharacterApiCaches(
     queryKey: ['location-inventory', characterId],
     ...invalidateOnly,
   })
+  await queryClient.invalidateQueries({
+    queryKey: ['character-skillqueue', characterId],
+    ...invalidateOnly,
+  })
+  await queryClient.invalidateQueries({
+    queryKey: ['character-attributes', characterId],
+    ...invalidateOnly,
+  })
+  await queryClient.invalidateQueries({
+    queryKey: ['character-implants', characterId],
+    ...invalidateOnly,
+  })
 
   const safeFetch = async (options: Parameters<QueryClient['fetchQuery']>[0]) => {
     try {
@@ -42,6 +59,9 @@ export async function refreshCharacterApiCaches(
     safeFetch(characterIndustryJobsQueryOptions(characterId, true)),
     safeFetch(productionLocationsQueryOptions(characterId, true)),
     safeFetch(characterBlueprintsQueryOptions(characterId, true)),
+    safeFetch(characterSkillQueueQueryOptions(characterId, true)),
+    safeFetch(characterAttributesQueryOptions(characterId, true)),
+    safeFetch(characterImplantsQueryOptions(characterId, true)),
   ])
 
   const inventoryQueries = queryClient

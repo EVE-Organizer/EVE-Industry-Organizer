@@ -251,7 +251,11 @@ export function logoutAll(): void {
 
 export function touchCharacterSync(
   characterId: number,
-  patch?: { lastSyncedAt?: string; skills?: SkillLevels },
+  patch?: {
+    lastSyncedAt?: string
+    skills?: SkillLevels
+    trainedSkills?: SkillLevels
+  },
 ): void {
   const accounts = loadAuthAccounts()
   const index = accounts.characters.findIndex((c) => c.characterId === characterId)
@@ -261,8 +265,11 @@ export function touchCharacterSync(
   const characters = [...accounts.characters]
   characters[index] = {
     ...existing,
-    lastSyncedAt: patch?.lastSyncedAt ?? new Date().toISOString(),
+    lastSyncedAt: patch?.lastSyncedAt ?? existing.lastSyncedAt,
     skills: patch?.skills ? { ...patch.skills } : existing.skills,
+    trainedSkills: patch?.trainedSkills
+      ? { ...patch.trainedSkills }
+      : existing.trainedSkills,
     skillsSnapshotVersion: CHARACTER_SKILLS_SNAPSHOT_VERSION,
   }
   saveAuthAccounts({ ...accounts, characters })

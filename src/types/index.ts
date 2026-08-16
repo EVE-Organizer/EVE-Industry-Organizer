@@ -89,6 +89,20 @@ export interface SkillInfo {
   rank: number
   prerequisites: { skillId: number; level: number }[]
   iconUrl: string
+  primaryAttribute?: EveAttributeId
+  secondaryAttribute?: EveAttributeId
+}
+
+export type EveAttributeId =
+  | 'intelligence'
+  | 'memory'
+  | 'perception'
+  | 'willpower'
+  | 'charisma'
+
+export interface SkillAttributePair {
+  primaryAttribute: EveAttributeId
+  secondaryAttribute: EveAttributeId
 }
 
 export interface SystemInfo {

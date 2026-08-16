@@ -11,6 +11,7 @@ interface SkillLevelSliderProps {
   max?: number
   disabled?: boolean
   disabledReason?: string
+  trainedLevel?: number
 }
 
 export function SkillLevelSlider({
@@ -23,8 +24,13 @@ export function SkillLevelSlider({
   max = 5,
   disabled = false,
   disabledReason,
+  trainedLevel,
 }: SkillLevelSliderProps) {
   const hint = disabled ? disabledReason : undefined
+  const trainedHint =
+    trainedLevel != null && trainedLevel !== value
+      ? `trained ${formatSkillLevel(trainedLevel)} · assumed ${formatSkillLevel(value)}`
+      : undefined
 
   return (
     <div
@@ -50,6 +56,9 @@ export function SkillLevelSlider({
           </span>
         </div>
         {hint ? <p className="text-[10px] opacity-60 mb-1">{hint}</p> : null}
+        {!hint && trainedHint ? (
+          <p className="text-[10px] text-primary/70 mb-1">{trainedHint}</p>
+        ) : null}
         <input
           type="range"
           min={min}

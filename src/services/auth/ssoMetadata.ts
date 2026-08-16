@@ -3,11 +3,13 @@ export const EVE_SSO_TOKEN_URL = 'https://login.eveonline.com/v2/oauth/token'
 export const ESI_BASE = 'https://esi.evetech.net/latest'
 
 /**
- * Scopes for skills, jobs, blueprint ME/TE, assets, and structures.
+ * Scopes for skills (includes attributes), jobs, blueprint ME/TE, assets, and structures.
  * Enable "Read character blueprints" on your app at developers.eveonline.com or SSO returns invalid_scope.
  */
 export const EVE_SCOPES = [
   'esi-skills.read_skills.v1',
+  'esi-skills.read_skillqueue.v1',
+  'esi-clones.read_implants.v1',
   'esi-industry.read_character_jobs.v1',
   'esi-characters.read_blueprints.v1',
   'esi-assets.read_assets.v1',

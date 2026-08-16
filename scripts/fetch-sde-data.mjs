@@ -62,27 +62,45 @@ function num(value) {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
+function dogmaValue(attrs, attributeId) {
+  const row = attrs.get(String(attributeId)) ?? attrs.get(attributeId)
+  return num(row?.valueFloat || row?.valueInt)
+}
+
 function buildSkillRecords(types, groups, typeAttributes) {
   const skillGroupIds = new Set(
     groups.filter((group) => group.categoryID === '16').map((group) => group.groupID),
   )
   const attrsByType = buildAttributesByType(typeAttributes)
+  const attrTypeToKey = {
+    164: 'charisma',
+    165: 'intelligence',
+    166: 'memory',
+    167: 'perception',
+    168: 'willpower',
+  }
 
   return types
     .filter((type) => skillGroupIds.has(type.groupID) && type.published === '1')
     .map((type) => {
       const skillId = num(type.typeID)
-      const attrs = attrsByType.get(type.typeID) ?? new Map()
-      const rank = num(attrs.get('275')?.valueFloat || attrs.get('275')?.valueInt) || 1
+      const attrs =
+        attrsByType.get(type.typeID) ??
+        attrsByType.get(String(skillId)) ??
+        attrsByType.get(skillId) ??
+        new Map()
+      const rank = dogmaValue(attrs, 275) || 1
+      const primaryAttribute = attrTypeToKey[dogmaValue(attrs, 180)]
+      const secondaryAttribute = attrTypeToKey[dogmaValue(attrs, 181)]
       const prerequisites = []
 
       for (const [skillAttr, levelAttr] of [
-        ['182', '277'],
-        ['183', '278'],
-        ['184', '279'],
+        [182, 277],
+        [183, 278],
+        [184, 279],
       ]) {
-        const prereqSkillId = num(attrs.get(skillAttr)?.valueFloat || attrs.get(skillAttr)?.valueInt)
-        const level = num(attrs.get(levelAttr)?.valueFloat || attrs.get(levelAttr)?.valueInt)
+        const prereqSkillId = dogmaValue(attrs, skillAttr)
+        const level = dogmaValue(attrs, levelAttr)
         if (prereqSkillId > 0 && level > 0) prerequisites.push({ skillId: prereqSkillId, level })
       }
 
@@ -91,6 +109,8 @@ function buildSkillRecords(types, groups, typeAttributes) {
         name: type.typeName,
         rank,
         prerequisites,
+        ...(primaryAttribute ? { primaryAttribute } : {}),
+        ...(secondaryAttribute ? { secondaryAttribute } : {}),
         iconUrl: typeIconUrl(skillId),
       }
     })

@@ -5,6 +5,7 @@ import {
   normalizeImportedSkillLevels,
   prerequisitesMet,
   skillLevel,
+  trainingAttributesForSkill,
 } from '@/lib/skillFields'
 import { manufacturingSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
 
@@ -90,5 +91,34 @@ describe('skillFields', () => {
         advancedLaboratoryOperation: 5,
       }),
     ).toBe(1)
+  })
+
+  it('resolves training attributes from SDE or industry fallbacks', () => {
+    expect(trainingAttributesForSkill(3380)).toEqual({
+      primaryAttribute: 'intelligence',
+      secondaryAttribute: 'memory',
+    })
+    expect(
+      trainingAttributesForSkill(
+        99,
+        new Map([
+          [
+            99,
+            {
+              skillId: 99,
+              name: 'Test',
+              rank: 1,
+              prerequisites: [],
+              iconUrl: '',
+              primaryAttribute: 'perception',
+              secondaryAttribute: 'willpower',
+            },
+          ],
+        ]),
+      ),
+    ).toEqual({
+      primaryAttribute: 'perception',
+      secondaryAttribute: 'willpower',
+    })
   })
 })

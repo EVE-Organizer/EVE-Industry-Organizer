@@ -12,6 +12,8 @@ describe('ssoMetadata scopes', () => {
   it('reports complete scope set', () => {
     const granted = [
       'esi-skills.read_skills.v1',
+      'esi-skills.read_skillqueue.v1',
+      'esi-clones.read_implants.v1',
       'esi-industry.read_character_jobs.v1',
       'esi-characters.read_blueprints.v1',
       'esi-assets.read_assets.v1',

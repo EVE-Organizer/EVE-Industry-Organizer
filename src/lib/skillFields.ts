@@ -1,4 +1,4 @@
-import type { SkillLevels } from '@/types'
+import type { SkillAttributePair, SkillInfo, SkillLevels } from '@/types'
 import { ZERO_SKILLS } from '@/types'
 
 export interface SkillPrerequisite {
@@ -99,8 +99,41 @@ export const SKILL_KEY_TO_ID: Record<SkillFieldDef['key'], number> = Object.from
   SKILL_FIELDS.map((f) => [f.key, f.skillId]),
 ) as Record<SkillFieldDef['key'], number>
 
+/** Fallback training attributes when SDE row is missing primary/secondary. */
+export const SKILL_ATTRIBUTE_FALLBACKS: Record<
+  SkillFieldDef['key'],
+  { primaryAttribute: import('@/types').EveAttributeId; secondaryAttribute: import('@/types').EveAttributeId }
+> = {
+  industry: { primaryAttribute: 'intelligence', secondaryAttribute: 'memory' },
+  advancedIndustry: { primaryAttribute: 'intelligence', secondaryAttribute: 'memory' },
+  massProduction: { primaryAttribute: 'memory', secondaryAttribute: 'charisma' },
+  advancedMassProduction: { primaryAttribute: 'memory', secondaryAttribute: 'charisma' },
+  laboratoryOperation: { primaryAttribute: 'memory', secondaryAttribute: 'perception' },
+  advancedLaboratoryOperation: { primaryAttribute: 'memory', secondaryAttribute: 'perception' },
+  reactions: { primaryAttribute: 'memory', secondaryAttribute: 'perception' },
+  science: { primaryAttribute: 'intelligence', secondaryAttribute: 'memory' },
+  accounting: { primaryAttribute: 'charisma', secondaryAttribute: 'willpower' },
+  brokerRelations: { primaryAttribute: 'charisma', secondaryAttribute: 'willpower' },
+}
+
 export function skillIdForKey(key: string): number | undefined {
   return SKILL_KEY_TO_ID[key as SkillFieldDef['key']]
+}
+
+/** Primary / secondary attributes that set this skill's SP/min. */
+export function trainingAttributesForSkill(
+  skillId: number,
+  skillMap?: Map<number, SkillInfo>,
+): SkillAttributePair | null {
+  const info = skillMap?.get(skillId)
+  if (info?.primaryAttribute && info?.secondaryAttribute) {
+    return {
+      primaryAttribute: info.primaryAttribute,
+      secondaryAttribute: info.secondaryAttribute,
+    }
+  }
+  const field = SKILL_FIELDS.find((f) => f.skillId === skillId)
+  return field ? SKILL_ATTRIBUTE_FALLBACKS[field.key] : null
 }
 
 export const SKILL_LEVEL_ROMAN = ['-', 'I', 'II', 'III', 'IV', 'V'] as const

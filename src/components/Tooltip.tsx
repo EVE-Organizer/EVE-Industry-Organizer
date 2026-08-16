@@ -14,7 +14,7 @@ export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left'
 
 const GAP = 8
 const TOOLTIP_CLASS =
-  'pointer-events-none fixed z-[9999] max-w-xs rounded-md border border-eve-border bg-base-200 px-3 py-2 text-left text-xs leading-snug text-base-content shadow-lg'
+  'pointer-events-none fixed z-[9999] w-max min-w-[10rem] max-w-xs rounded-md border border-eve-border bg-base-200 px-3 py-2 text-left text-xs leading-snug text-base-content shadow-lg whitespace-normal'
 
 function placementStyle(
   placement: TooltipPlacement,
@@ -98,7 +98,7 @@ export function useAnchorTooltip(placement: TooltipPlacement = 'top') {
         id={tooltipId}
         role="tooltip"
         className={`${TOOLTIP_CLASS} ${className}`.trim()}
-        style={style}
+        style={{ ...style, width: 'max-content', maxWidth: '16rem' }}
       >
         {content}
       </div>,
@@ -172,7 +172,7 @@ export function Tooltip({
             id={tooltipId}
             role="tooltip"
             className={TOOLTIP_CLASS}
-            style={style}
+            style={{ ...style, width: 'max-content', maxWidth: '16rem' }}
           >
             {text}
           </div>,
