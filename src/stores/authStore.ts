@@ -18,6 +18,8 @@ import {
 } from '@/services/character/characterSkillsService'
 import { useAppStore } from '@/stores/appStore'
 import { normalizeImportedSkillLevels } from '@/lib/skillFields'
+import { queryClient } from '@/lib/queryClient'
+import { refreshCharacterApiCaches } from '@/lib/refreshCharacterData'
 import { ZERO_SKILLS, type SkillLevels } from '@/types'
 
 function applySkillLevels(skills: SkillLevels): void {
@@ -61,6 +63,7 @@ interface AuthStore {
   switchCharacter: (characterId: number) => void
   persistActiveSkillsFromSettings: () => void
   syncSkills: (characterId?: number) => Promise<void>
+  refreshCharacter: (characterId?: number) => Promise<void>
   logoutCharacter: (characterId?: number) => void
   logoutAll: () => void
   clearError: () => void
@@ -200,6 +203,48 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({
         isBusy: false,
         error: err instanceof Error ? err.message : 'Failed to sync skills',
+      })
+      throw err
+    }
+  },
+
+  refreshCharacter: async (characterId) => {
+    const targetId = characterId ?? get().activeCharacterId ?? get().character?.characterId
+    if (!targetId) {
+      set({ error: 'Sign in with EVE first' })
+      return
+    }
+
+    set({ error: null, isBusy: true })
+    try {
+      const accessToken = await getValidAccessToken(targetId)
+      if (!accessToken) {
+        const snapshot = readAuthSnapshot()
+        set({
+          ...snapshot,
+          isBusy: false,
+          error: 'Session expired. Sign in again.',
+        })
+        return
+      }
+
+      const esi = await fetchCharacterSkills(targetId, accessToken, { forceRefresh: true })
+      const skills = mapEsiSkillsToSkillLevels(esi.skills)
+      const syncedAt = new Date().toISOString()
+      touchCharacterSync(targetId, { lastSyncedAt: syncedAt, skills })
+
+      await refreshCharacterApiCaches(queryClient, targetId)
+
+      const snapshot = readAuthSnapshot()
+      set({ ...snapshot, isBusy: false })
+
+      if (snapshot.activeCharacterId === targetId) {
+        applySkillLevels(skills)
+      }
+    } catch (err) {
+      set({
+        isBusy: false,
+        error: err instanceof Error ? err.message : 'Failed to refresh character data',
       })
       throw err
     }

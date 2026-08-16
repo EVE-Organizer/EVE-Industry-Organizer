@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { Panel } from '@/components/Panel'
@@ -397,12 +396,10 @@ export function PlanPage() {
   )
 
   const slots = manufacturingSlotsFromSkills(activeSettings.skills)
-
-  const queryClient = useQueryClient()
   const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
-  const syncSkills = useAuthStore((s) => s.syncSkills)
+  const refreshCharacter = useAuthStore((s) => s.refreshCharacter)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const { data: locationInventory, refetch: refetchLocationInventory } = useLocationInventory(
+  const { data: locationInventory } = useLocationInventory(
     activeCharacterId,
     activeSettings.productionLocationId,
   )
@@ -411,25 +408,11 @@ export function PlanPage() {
     if (activeCharacterId == null) return
     setIsRefreshing(true)
     try {
-      await Promise.all([
-        syncSkills(activeCharacterId),
-        activeSettings.productionLocationId != null
-          ? refetchLocationInventory()
-          : Promise.resolve(),
-      ])
-      await queryClient.invalidateQueries({
-        queryKey: ['production-locations', activeCharacterId],
-      })
+      await refreshCharacter(activeCharacterId)
     } finally {
       setIsRefreshing(false)
     }
-  }, [
-    activeCharacterId,
-    activeSettings.productionLocationId,
-    syncSkills,
-    refetchLocationInventory,
-    queryClient,
-  ])
+  }, [activeCharacterId, refreshCharacter])
 
   const rootRunsTotal = useMemo(
     () => (activeTemplate ? activeTemplate.roots.reduce((sum, r) => sum + r.runs, 0) : 0),

@@ -72,80 +72,98 @@ export function useCharactersIndustryJobs(characterIds: readonly number[]) {
   })
 }
 
+export function characterBlueprintsQueryOptions(characterId: number, forceRefresh = false) {
+  const fetchOpts = forceRefresh ? { forceRefresh: true } : undefined
+  return {
+    queryKey: ['character-blueprints', characterId] as const,
+    staleTime: CHARACTER_DATA_STALE_MS,
+    gcTime: CHARACTER_DATA_GC_MS,
+    refetchOnMount: false as const,
+    retry: (failureCount: number, error: Error) => {
+      if (error instanceof EsiAuthError && error.status === 403) return false
+      return failureCount < 2
+    },
+    queryFn: async (): Promise<Map<number, BlueprintItemState>> => {
+      const accessToken = await getValidAccessToken(characterId)
+      if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
+      const blueprints = await fetchCharacterBlueprints(characterId, accessToken, fetchOpts)
+      return new Map(blueprints.map((bp) => [bp.item_id, mapEsiBlueprint(bp)]))
+    },
+  }
+}
+
 export function useCharacterBlueprints(
   characterId: number | null | undefined,
   grantedScopes: readonly string[] = [],
 ) {
   const hasScope = grantedScopes.includes(EVE_BLUEPRINT_SCOPE)
   return useQuery({
-    queryKey: ['character-blueprints', characterId],
+    ...characterBlueprintsQueryOptions(characterId!),
     enabled: characterId != null && hasScope,
+  })
+}
+
+function fetchProductionLocations(characterId: number, forceRefresh = false) {
+  const fetchOpts = forceRefresh ? { forceRefresh: true } : undefined
+  return async (): Promise<ProductionLocation[]> => {
+    const accessToken = await getValidAccessToken(characterId)
+    if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
+
+    const characterAssets = await fetchCharacterAssets(characterId, accessToken, fetchOpts)
+    const esiJobs = await fetchCharacterIndustryJobs(characterId, accessToken, fetchOpts)
+
+    let blueprints: Awaited<ReturnType<typeof fetchCharacterBlueprints>> = []
+    try {
+      blueprints = await fetchCharacterBlueprints(characterId, accessToken, fetchOpts)
+    } catch {
+      blueprints = []
+    }
+
+    let corpStructures: Awaited<ReturnType<typeof fetchCorporationStructures>> = []
+    let corpAssets: Awaited<ReturnType<typeof fetchCorporationAssets>> = []
+    const corporationId = await fetchCharacterCorporationId(characterId)
+    if (corporationId) {
+      try {
+        corpStructures = await fetchCorporationStructures(corporationId, accessToken, fetchOpts)
+      } catch {
+        corpStructures = []
+      }
+      try {
+        corpAssets = await fetchCorporationAssets(corporationId, accessToken, fetchOpts)
+      } catch {
+        corpAssets = []
+      }
+    }
+
+    const jobs = esiJobs.map((job) =>
+      mapEsiIndustryJob(job, characterId, `Type ${job.product_type_id ?? job.blueprint_type_id}`),
+    )
+
+    return buildProductionLocations({
+      accessToken,
+      characterAssets,
+      corpAssets,
+      blueprints,
+      corpStructures,
+      industryJobs: jobs,
+    })
+  }
+}
+
+export function productionLocationsQueryOptions(characterId: number, forceRefresh = false) {
+  return {
+    queryKey: ['production-locations', characterId] as const,
     staleTime: CHARACTER_DATA_STALE_MS,
     gcTime: CHARACTER_DATA_GC_MS,
-    refetchOnMount: false,
-    retry: (failureCount, error) => {
-      if (error instanceof EsiAuthError && error.status === 403) return false
-      return failureCount < 2
-    },
-    queryFn: async (): Promise<Map<number, BlueprintItemState>> => {
-      const accessToken = await getValidAccessToken(characterId!)
-      if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
-      const blueprints = await fetchCharacterBlueprints(characterId!, accessToken)
-      return new Map(blueprints.map((bp) => [bp.item_id, mapEsiBlueprint(bp)]))
-    },
-  })
+    refetchOnMount: true as const,
+    queryFn: fetchProductionLocations(characterId, forceRefresh),
+  }
 }
 
 export function useProductionLocations(characterId: number | null | undefined) {
   return useQuery({
-    queryKey: ['production-locations', characterId],
+    ...productionLocationsQueryOptions(characterId!),
     enabled: characterId != null,
-    staleTime: CHARACTER_DATA_STALE_MS,
-    gcTime: CHARACTER_DATA_GC_MS,
-    refetchOnMount: true,
-    queryFn: async (): Promise<ProductionLocation[]> => {
-      const accessToken = await getValidAccessToken(characterId!)
-      if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
-
-      const characterAssets = await fetchCharacterAssets(characterId!, accessToken)
-      const esiJobs = await fetchCharacterIndustryJobs(characterId!, accessToken)
-
-      let blueprints: Awaited<ReturnType<typeof fetchCharacterBlueprints>> = []
-      try {
-        blueprints = await fetchCharacterBlueprints(characterId!, accessToken)
-      } catch {
-        blueprints = []
-      }
-
-      let corpStructures: Awaited<ReturnType<typeof fetchCorporationStructures>> = []
-      let corpAssets: Awaited<ReturnType<typeof fetchCorporationAssets>> = []
-      const corporationId = await fetchCharacterCorporationId(characterId!)
-      if (corporationId) {
-        try {
-          corpStructures = await fetchCorporationStructures(corporationId, accessToken)
-        } catch {
-          corpStructures = []
-        }
-        try {
-          corpAssets = await fetchCorporationAssets(corporationId, accessToken)
-        } catch {
-          corpAssets = []
-        }
-      }
-
-      const jobs = esiJobs.map((job) =>
-        mapEsiIndustryJob(job, characterId!, `Type ${job.product_type_id ?? job.blueprint_type_id}`),
-      )
-
-      return buildProductionLocations({
-        accessToken,
-        characterAssets,
-        corpAssets,
-        blueprints,
-        corpStructures,
-        industryJobs: jobs,
-      })
-    },
   })
 }
 

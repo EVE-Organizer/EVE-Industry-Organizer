@@ -1740,6 +1740,109 @@
   }
 }
 
+.eve-nav-auth-menu {
+  @apply overflow-hidden;
+
+  &__header {
+    @apply border-b border-eve-border/60;
+  }
+
+  &__section-label {
+    @apply px-3 pt-2 pb-1 text-[10px] uppercase tracking-wide opacity-50;
+
+    &--danger {
+      @apply opacity-40 text-error;
+    }
+  }
+
+  &__character {
+    @apply flex items-center gap-2 px-3 py-2 text-sm;
+
+    &--active {
+      @apply bg-primary/10 font-medium text-primary pointer-events-none;
+    }
+  }
+
+  &__check {
+    @apply text-xs text-primary;
+  }
+
+  &__add {
+    @apply flex items-center gap-2 px-3 py-2 text-xs opacity-60;
+  }
+
+  &__refresh {
+    @apply mt-0.5 border border-eve-border/50 bg-base-300/30;
+  }
+
+  &__danger {
+    @apply text-error/80;
+  }
+
+  li > button:not(.eve-nav-auth-menu__character):not(.eve-nav-auth-menu__add):not(.eve-nav-auth-menu__refresh) {
+    @apply flex items-center gap-2 px-3 py-2 text-sm;
+  }
+}
+
+.eve-character-panel {
+  @apply overflow-hidden rounded-lg border border-eve-border bg-base-300/20;
+
+  &__header {
+    @apply flex items-start gap-3 border-b border-eve-border/60 p-4;
+  }
+
+  &__refresh {
+    @apply border border-eve-border/50 bg-base-300/30;
+  }
+
+  &__section {
+    @apply px-2 py-2;
+
+    &--actions {
+      @apply border-t border-eve-border/60;
+    }
+  }
+
+  &__label {
+    @apply px-2 pb-1 pt-1 text-[10px] font-medium uppercase tracking-wide opacity-50;
+  }
+
+  &__list {
+    @apply flex flex-col;
+  }
+
+  &__character {
+    @apply flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors;
+    @apply hover:bg-base-300/50;
+
+    &--active {
+      @apply bg-primary/10 font-medium text-primary pointer-events-none;
+    }
+  }
+
+  &__check {
+    @apply text-xs text-primary;
+  }
+
+  &__add {
+    @apply flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-xs opacity-60 transition-colors;
+    @apply hover:bg-base-300/50 hover:opacity-80;
+  }
+
+  &__list button:not(.eve-character-panel__character):not(.eve-character-panel__add) {
+    @apply flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm transition-colors;
+    @apply hover:bg-base-300/50;
+  }
+
+  &__warning {
+    @apply text-warning;
+  }
+
+  &__danger {
+    @apply text-error/80;
+  }
+}
+
 .plan-view-tabs {
   @apply overflow-hidden rounded-xl border border-eve-border bg-base-200 shadow-sm;
 

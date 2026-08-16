@@ -1,12 +1,8 @@
 import type { EveCharacterSession } from '@/services/auth/authStorage'
 import { CharacterAvatar } from '@/components/EveImage'
-
-function formatSyncedAt(iso?: string): string | null {
-  if (!iso) return null
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return null
-  return date.toLocaleString()
-}
+import { KeyIcon, LogOutIcon, PlusIcon, RefreshIcon } from '@/components/EveAuthIcons'
+import { useAuthScopes } from '@/hooks/useAuthScopes'
+import { formatSyncedAt } from '@/lib/authDisplay'
 
 export function EveCharacterPanel({
   configured,
@@ -20,7 +16,6 @@ export function EveCharacterPanel({
   onSwitch,
   onSync,
   onLogoutCharacter,
-  onLogoutAll,
   onClearError,
 }: {
   configured: boolean
@@ -34,9 +29,10 @@ export function EveCharacterPanel({
   onSwitch: (characterId: number) => void
   onSync: () => void
   onLogoutCharacter: (characterId?: number) => void
-  onLogoutAll: () => void
   onClearError: () => void
 }) {
+  const { missing, hasAll } = useAuthScopes()
+
   if (!configured) {
     return (
       <div className="text-xs opacity-70 space-y-2">
@@ -53,109 +49,132 @@ export function EveCharacterPanel({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {error && (
+    <div className="flex flex-col gap-3">
+      {error ? (
         <div className="alert alert-error text-xs py-2">
           <span>{error}</span>
           <button type="button" className="btn btn-ghost btn-xs" onClick={onClearError}>
             Dismiss
           </button>
         </div>
-      )}
+      ) : null}
 
-      {isAuthenticated && characters.length > 0 ? (
-        <>
-          {characters.length > 1 && (
-            <div className="flex flex-col gap-2">
-              <p className="text-[10px] font-medium uppercase tracking-wide opacity-50">
-                Switch character
-              </p>
-              <div className="flex flex-col gap-1">
-                {characters.map((c) => (
-                  <button
-                    key={c.characterId}
-                    type="button"
-                    disabled={isBusy || c.characterId === activeCharacterId}
-                    className={`btn btn-sm justify-start gap-3 h-auto py-2 ${
-                      c.characterId === activeCharacterId ? 'btn-primary' : 'btn-ghost'
-                    }`}
-                    onClick={() => onSwitch(c.characterId)}
-                  >
-                    <CharacterAvatar
-                      characterId={c.characterId}
-                      name={c.characterName}
-                      size={32}
-                    />
-                    <span className="flex-1 text-left truncate">{c.characterName}</span>
-                    {c.characterId === activeCharacterId && (
-                      <span className="text-[10px] opacity-80 shrink-0">Active</span>
-                    )}
-                  </button>
-                ))}
-              </div>
+      {isAuthenticated && characters.length > 0 && character ? (
+        <div className="eve-character-panel">
+          <div className="eve-character-panel__header">
+            <CharacterAvatar
+              characterId={character.characterId}
+              name={character.characterName}
+              size={48}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium">{character.characterName}</p>
+              {formatSyncedAt(character.lastSyncedAt) ? (
+                <p className="text-xs opacity-50">Synced {formatSyncedAt(character.lastSyncedAt)}</p>
+              ) : (
+                <p className="text-xs opacity-50">Not synced yet</p>
+              )}
+              {characters.length > 1 ? (
+                <p className="mt-1 text-xs opacity-50">
+                  {characters.length} characters signed in. Switching applies that character&apos;s
+                  skills to profit calculations.
+                </p>
+              ) : null}
             </div>
-          )}
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm btn-square eve-character-panel__refresh shrink-0"
+              disabled={isBusy}
+              aria-label="Refresh character data"
+              onClick={onSync}
+            >
+              {isBusy ? (
+                <span className="loading loading-spinner loading-xs" />
+              ) : (
+                <RefreshIcon className="size-4" />
+              )}
+            </button>
+          </div>
 
-          {character && (
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <CharacterAvatar
-                characterId={character.characterId}
-                name={character.characterName}
-                size={56}
-              />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{character.characterName}</p>
-                {formatSyncedAt(character.lastSyncedAt) && (
-                  <p className="text-xs opacity-60">
-                    Skills synced {formatSyncedAt(character.lastSyncedAt)}
-                  </p>
-                )}
-                {characters.length > 1 && (
-                  <p className="text-xs opacity-50 mt-1">
-                    {characters.length} characters signed in. Switching applies that character&apos;s
-                    skills to profit calculations.
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2">
+          {characters.length > 1 ? (
+            <div className="eve-character-panel__section">
+              <p className="eve-character-panel__label">Switch character</p>
+              <ul className="eve-character-panel__list">
+                {characters.map((c) => {
+                  const active = c.characterId === activeCharacterId
+                  return (
+                    <li key={c.characterId}>
+                      <button
+                        type="button"
+                        disabled={isBusy || active}
+                        className={`eve-character-panel__character${active ? ' eve-character-panel__character--active' : ''}`}
+                        aria-current={active ? 'true' : undefined}
+                        onClick={() => onSwitch(c.characterId)}
+                      >
+                        <CharacterAvatar
+                          characterId={c.characterId}
+                          name={c.characterName}
+                          size={32}
+                        />
+                        <span className="truncate flex-1">{c.characterName}</span>
+                        {active ? (
+                          <span className="eve-character-panel__check shrink-0" aria-hidden>✓</span>
+                        ) : null}
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+              <button
+                type="button"
+                className="eve-character-panel__add"
+                disabled={isBusy}
+                onClick={onLogin}
+              >
+                <PlusIcon className="size-3.5 shrink-0 opacity-60" />
+                Add character
+              </button>
+            </div>
+          ) : null}
+
+          <div className="eve-character-panel__section eve-character-panel__section--actions">
+            <p className="eve-character-panel__label">Account</p>
+            <ul className="eve-character-panel__list">
+              {characters.length === 1 ? (
+                <li>
+                  <button type="button" disabled={isBusy} onClick={onLogin}>
+                    <PlusIcon className="size-3.5 shrink-0 opacity-60" />
+                    Add character
+                  </button>
+                </li>
+              ) : null}
+              {!hasAll ? (
+                <li>
+                  <button
+                    type="button"
+                    className="eve-character-panel__warning"
+                    disabled={isBusy}
+                    onClick={onLogin}
+                  >
+                    <KeyIcon className="size-3.5 shrink-0" />
+                    Re-authorize ({missing.length} scopes)
+                  </button>
+                </li>
+              ) : null}
+              <li>
                 <button
                   type="button"
-                  className="btn btn-outline btn-sm"
-                  disabled={isBusy}
-                  onClick={onLogin}
-                >
-                  Add character
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  disabled={isBusy}
-                  onClick={onSync}
-                >
-                  {isBusy ? <span className="loading loading-spinner loading-xs" /> : 'Sync skills'}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline btn-sm"
+                  className="eve-character-panel__danger"
                   disabled={isBusy}
                   onClick={() => onLogoutCharacter()}
                 >
-                  Sign out
+                  <LogOutIcon className="size-3.5 shrink-0" />
+                  {characters.length > 1 ? `Sign out ${character.characterName}` : 'Sign out'}
                 </button>
-                {characters.length > 1 && (
-                  <button
-                    type="button"
-                    className="btn btn-outline btn-sm btn-error"
-                    disabled={isBusy}
-                    onClick={onLogoutAll}
-                  >
-                    Sign out all
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </>
+              </li>
+            </ul>
+          </div>
+        </div>
       ) : (
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <p className="text-xs opacity-70 flex-1">

@@ -86,9 +86,8 @@ export function SettingsPage() {
   const login = useAuthStore((s) => s.login)
   const switchCharacter = useAuthStore((s) => s.switchCharacter)
   const persistActiveSkillsFromSettings = useAuthStore((s) => s.persistActiveSkillsFromSettings)
-  const syncSkills = useAuthStore((s) => s.syncSkills)
+  const refreshCharacter = useAuthStore((s) => s.refreshCharacter)
   const logoutCharacter = useAuthStore((s) => s.logoutCharacter)
-  const logoutAll = useAuthStore((s) => s.logoutAll)
   const clearAuthError = useAuthStore((s) => s.clearError)
   const cacheStats = getCacheStats()
   const settings = userData.settings
@@ -176,9 +175,8 @@ export function SettingsPage() {
           error={authError}
           onLogin={() => void login()}
           onSwitch={switchCharacter}
-          onSync={() => void syncSkills()}
+          onSync={() => void refreshCharacter()}
           onLogoutCharacter={logoutCharacter}
-          onLogoutAll={logoutAll}
           onClearError={clearAuthError}
         />
       </Panel>

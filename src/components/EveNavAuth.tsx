@@ -1,6 +1,8 @@
 import { CharacterAvatar } from '@/components/EveImage'
+import { KeyIcon, LogOutIcon, PlusIcon, RefreshIcon } from '@/components/EveAuthIcons'
 import type { EveCharacterSession } from '@/services/auth/authStorage'
 import { useAuthScopes } from '@/hooks/useAuthScopes'
+import { formatSyncedAt } from '@/lib/authDisplay'
 import { useAuthStore } from '@/stores/authStore'
 
 export function EveNavAuth() {
@@ -12,14 +14,15 @@ export function EveNavAuth() {
   const isBusy = useAuthStore((s) => s.isBusy)
   const login = useAuthStore((s) => s.login)
   const switchCharacter = useAuthStore((s) => s.switchCharacter)
-  const syncSkills = useAuthStore((s) => s.syncSkills)
+  const refreshCharacter = useAuthStore((s) => s.refreshCharacter)
   const logoutCharacter = useAuthStore((s) => s.logoutCharacter)
-  const logoutAll = useAuthStore((s) => s.logoutAll)
   const { missing, hasAll } = useAuthScopes()
 
   if (!configured) return null
 
   if (isAuthenticated && character) {
+    const syncedAtLabel = formatSyncedAt(character.lastSyncedAt)
+
     return (
       <div className="dropdown dropdown-end">
         <button
@@ -42,13 +45,42 @@ export function EveNavAuth() {
         </button>
         <ul
           tabIndex={0}
-          className="dropdown-content menu bg-base-200 border border-eve-border rounded-box z-50 mt-2 w-52 p-1 shadow-lg"
+          className="dropdown-content menu eve-nav-auth-menu bg-base-200 border border-eve-border rounded-lg z-50 mt-2 w-64 p-0 shadow-lg"
         >
-          {characters.length > 1 && (
+          <li className="eve-nav-auth-menu__header">
+            <div className="flex items-start gap-3 px-3 py-3">
+              <CharacterAvatar
+                characterId={character.characterId}
+                name={character.characterName}
+                size={40}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{character.characterName}</p>
+                {syncedAtLabel ? (
+                  <p className="text-xs opacity-50">Synced {syncedAtLabel}</p>
+                ) : (
+                  <p className="text-xs opacity-50">Not synced yet</p>
+                )}
+              </div>
+              <button
+                type="button"
+                className="btn btn-ghost btn-xs btn-square shrink-0 eve-nav-auth-menu__refresh"
+                disabled={isBusy}
+                aria-label="Refresh character data"
+                onClick={() => void refreshCharacter()}
+              >
+                {isBusy ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : (
+                  <RefreshIcon className="size-3.5" />
+                )}
+              </button>
+            </div>
+          </li>
+
+          {characters.length > 1 ? (
             <>
-              <li className="menu-title px-2 py-1 text-[10px] uppercase tracking-wide">
-                Characters
-              </li>
+              <li className="menu-title eve-nav-auth-menu__section-label">Switch character</li>
               {characters.map((c) => (
                 <CharacterMenuItem
                   key={c.characterId}
@@ -58,38 +90,53 @@ export function EveNavAuth() {
                   onSelect={() => switchCharacter(c.characterId)}
                 />
               ))}
-              <div className="divider my-0 h-px" />
+              <li>
+                <button
+                  type="button"
+                  className="eve-nav-auth-menu__add"
+                  disabled={isBusy}
+                  onClick={() => void login()}
+                >
+                  <PlusIcon className="size-3.5 shrink-0 opacity-60" />
+                  Add character
+                </button>
+              </li>
             </>
-          )}
-          <li>
-            <button type="button" disabled={isBusy} onClick={() => void login()}>
-              Add character
-            </button>
-          </li>
-          <li>
-            <button type="button" disabled={isBusy} onClick={() => void syncSkills()}>
-              {isBusy ? 'Syncing…' : 'Sync skills'}
-            </button>
-          </li>
-          {!hasAll ? (
+          ) : null}
+
+          <li className="menu-title eve-nav-auth-menu__section-label">Account</li>
+          {characters.length === 1 ? (
             <li>
               <button type="button" disabled={isBusy} onClick={() => void login()}>
+                <PlusIcon className="size-3.5 shrink-0 opacity-60" />
+                Add character
+              </button>
+            </li>
+          ) : null}
+          {!hasAll ? (
+            <li>
+              <button
+                type="button"
+                className="text-warning"
+                disabled={isBusy}
+                onClick={() => void login()}
+              >
+                <KeyIcon className="size-3.5 shrink-0" />
                 Re-authorize ({missing.length} scopes)
               </button>
             </li>
           ) : null}
           <li>
-            <button type="button" disabled={isBusy} onClick={() => logoutCharacter()}>
-              Sign out {characters.length > 1 ? character.characterName : ''}
+            <button
+              type="button"
+              className="eve-nav-auth-menu__danger"
+              disabled={isBusy}
+              onClick={() => logoutCharacter()}
+            >
+              <LogOutIcon className="size-3.5 shrink-0" />
+              {characters.length > 1 ? `Sign out ${character.characterName}` : 'Sign out'}
             </button>
           </li>
-          {characters.length > 1 && (
-            <li>
-              <button type="button" disabled={isBusy} onClick={logoutAll}>
-                Sign out all
-              </button>
-            </li>
-          )}
         </ul>
       </div>
     )
@@ -123,16 +170,19 @@ function CharacterMenuItem({
       <button
         type="button"
         disabled={disabled || active}
-        className={`flex items-center gap-2 ${active ? 'active font-medium' : ''}`}
+        className={`eve-nav-auth-menu__character ${active ? 'eve-nav-auth-menu__character--active' : ''}`}
+        aria-current={active ? 'true' : undefined}
         onClick={onSelect}
       >
         <CharacterAvatar
           characterId={character.characterId}
           name={character.characterName}
-          size={24}
+          size={28}
         />
         <span className="truncate flex-1">{character.characterName}</span>
-        {active && <span className="text-[10px] opacity-60 shrink-0">active</span>}
+        {active ? (
+          <span className="eve-nav-auth-menu__check shrink-0" aria-hidden>✓</span>
+        ) : null}
       </button>
     </li>
   )
