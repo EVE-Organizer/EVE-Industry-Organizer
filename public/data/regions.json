@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-16T04:26:07.471Z",
+  "generatedAt": "2026-08-17T04:32:44.672Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0242,
+      "reactionCostIndex": 0.0245,
       "marketSystemId": 30000621
     },
     {
@@ -1039,12 +1039,12 @@
       "regionId": 10000020,
       "name": "Tash-Murkon",
       "securityClass": "highsec",
-      "buildSystemId": 30001727,
-      "buildSystemName": "Rand",
-      "buildSystemSecurity": 0.866089,
+      "buildSystemId": 30001725,
+      "buildSystemName": "Nosodnis",
+      "buildSystemSecurity": 0.929034,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30001727
+      "marketSystemId": 30001725
     },
     {
       "regionId": 10000045,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0354,
+      "costIndex": 0.0358,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
