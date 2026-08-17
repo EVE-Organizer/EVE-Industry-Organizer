@@ -128,6 +128,25 @@ export const SKILL_FIELDS: SkillFieldDef[] = [
     tooltip: 'Cuts gas harvester cycle time by 5% per level. Hull rates assume IV.',
   },
   {
+    key: 'miningBarge',
+    skillId: 17940,
+    label: 'Mining Barge',
+    tooltip:
+      'Applies each barge or exhumer hull bonus to Strip Miner yield and Ice Harvester cycle time.',
+    prerequisites: [
+      { key: 'industry', level: 5 },
+      { key: 'astrogeology', level: 3 },
+    ],
+  },
+  {
+    key: 'exhumers',
+    skillId: 22551,
+    label: 'Exhumers',
+    tooltip:
+      'Applies each exhumer hull bonus to Strip Miner yield and cycle time. Requires Mining Barge V.',
+    prerequisites: [{ key: 'miningBarge', level: 5 }],
+  },
+  {
     key: 'industrialCommandShips',
     skillId: 29637,
     label: 'Industrial Command Ships',
@@ -168,6 +187,8 @@ export const SKILL_ATTRIBUTE_FALLBACKS: Record<
   astrogeology: { primaryAttribute: 'memory', secondaryAttribute: 'intelligence' },
   iceHarvesting: { primaryAttribute: 'memory', secondaryAttribute: 'perception' },
   gasCloudHarvesting: { primaryAttribute: 'memory', secondaryAttribute: 'perception' },
+  miningBarge: { primaryAttribute: 'perception', secondaryAttribute: 'willpower' },
+  exhumers: { primaryAttribute: 'perception', secondaryAttribute: 'willpower' },
   industrialCommandShips: { primaryAttribute: 'memory', secondaryAttribute: 'willpower' },
   capitalIndustrialShips: { primaryAttribute: 'memory', secondaryAttribute: 'willpower' },
 }
@@ -201,6 +222,28 @@ export function formatSkillLevel(level: number): string {
 /** Merge an ESI or character snapshot onto zero defaults for every tracked skill. */
 export function normalizeImportedSkillLevels(skills: Partial<SkillLevels> | undefined): SkillLevels {
   return enforceSkillPrerequisites({ ...ZERO_SKILLS, ...(skills ?? {}) } as SkillLevels)
+}
+
+/**
+ * Preserve explicitly assumed levels while filling fields absent from an older
+ * character snapshot with the latest trained levels.
+ */
+export function mergeAssumedWithTrainedSkillLevels(
+  assumed: Partial<SkillLevels> | undefined,
+  trained: Partial<SkillLevels> | undefined,
+): SkillLevels {
+  const merged: SkillLevels = { ...ZERO_SKILLS }
+  for (const field of SKILL_FIELDS) {
+    const assumedLevel = assumed?.[field.key]
+    const trainedLevel = trained?.[field.key]
+    merged[field.key] =
+      typeof assumedLevel === 'number'
+        ? assumedLevel
+        : typeof trainedLevel === 'number'
+          ? trainedLevel
+          : 0
+  }
+  return enforceSkillPrerequisites(merged)
 }
 
 export function skillLevel(

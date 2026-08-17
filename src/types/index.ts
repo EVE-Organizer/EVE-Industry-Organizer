@@ -414,6 +414,10 @@ export interface SkillLevels {
   iceHarvesting: number
   /** Gas Cloud Harvesting: −5% gas harvester cycle time per level. */
   gasCloudHarvesting: number
+  /** Mining Barge: hull-specific Strip Miner yield and Ice Harvester cycle bonuses. */
+  miningBarge: number
+  /** Exhumers: additional hull-specific Strip Miner yield and cycle bonuses. */
+  exhumers: number
   /** Industrial Command Ships: Porpoise/Orca foreman burst strength. */
   industrialCommandShips: number
   /** Capital Industrial Ships: Rorqual foreman burst strength. */
@@ -818,6 +822,8 @@ export const DEFAULT_SKILLS: SkillLevels = {
   astrogeology: 4,
   iceHarvesting: 4,
   gasCloudHarvesting: 4,
+  miningBarge: 4,
+  exhumers: 4,
   industrialCommandShips: 4,
   capitalIndustrialShips: 4,
 }
@@ -839,6 +845,8 @@ export const ZERO_SKILLS: SkillLevels = {
   astrogeology: 0,
   iceHarvesting: 0,
   gasCloudHarvesting: 0,
+  miningBarge: 0,
+  exhumers: 0,
   industrialCommandShips: 0,
   capitalIndustrialShips: 0,
 }

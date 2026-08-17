@@ -39,6 +39,8 @@ describe('skillFields', () => {
       astrogeology: 0,
       iceHarvesting: 0,
       gasCloudHarvesting: 0,
+      miningBarge: 0,
+      exhumers: 0,
       industrialCommandShips: 0,
       capitalIndustrialShips: 0,
     })

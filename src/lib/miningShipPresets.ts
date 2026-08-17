@@ -40,6 +40,14 @@ export interface MiningShipPreset {
   tech: MiningShipTech
   subtypes: MiningSubtype[]
   m3PerHrBySubtype: Partial<Record<MiningSubtype, number>>
+  roleOreYieldPct?: number
+  miningBargeOreYieldPct?: number
+  exhumersOreYieldPct?: number
+  roleOreDurationReductionPct?: number
+  exhumersOreDurationReductionPct?: number
+  roleIceDurationReductionPct?: number
+  miningBargeIceDurationReductionPct?: number
+  exhumersIceDurationReductionPct?: number
 }
 
 export type MiningBuffCategory = 'fit' | 'fleet'
@@ -146,7 +154,11 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'barge',
     tech: 't1',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: bakedOreM3(1.22), moon: bakedOreM3(1.22), ice: bakedIceM3(0.875) },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.22), moon: bakedOreM3(1.22), ice: bakedIceM3(0.875 * 0.92) },
+    roleOreYieldPct: 10,
+    miningBargeOreYieldPct: 3,
+    roleIceDurationReductionPct: 12.5,
+    miningBargeIceDurationReductionPct: 2,
   },
   {
     id: 'covetor',
@@ -155,7 +167,11 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'barge',
     tech: 't1',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: bakedOreM3(1.12, 0.75), moon: bakedOreM3(1.12, 0.75), ice: bakedIceM3() },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.12, 0.75), moon: bakedOreM3(1.12, 0.75), ice: bakedIceM3(0.7 * 0.88) },
+    miningBargeOreYieldPct: 3,
+    roleOreDurationReductionPct: 25,
+    roleIceDurationReductionPct: 30,
+    miningBargeIceDurationReductionPct: 3,
   },
   {
     id: 'procurer',
@@ -164,7 +180,9 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'barge',
     tech: 't1',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: bakedOreM3(1.08), moon: bakedOreM3(1.08), ice: bakedIceM3() },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.08), moon: bakedOreM3(1.08), ice: bakedIceM3(0.92) },
+    miningBargeOreYieldPct: 2,
+    miningBargeIceDurationReductionPct: 2,
   },
   {
     id: 'hulk',
@@ -173,7 +191,14 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'exhumer',
     tech: 't2',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: bakedOreM3(1.24, 0.85), moon: bakedOreM3(1.24, 0.85), ice: bakedIceM3(0.88) },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.36, 0.85 * 0.88), moon: bakedOreM3(1.36, 0.85 * 0.88), ice: bakedIceM3(0.7 * 0.88 * 0.84) },
+    miningBargeOreYieldPct: 3,
+    exhumersOreYieldPct: 6,
+    roleOreDurationReductionPct: 15,
+    exhumersOreDurationReductionPct: 3,
+    roleIceDurationReductionPct: 30,
+    miningBargeIceDurationReductionPct: 3,
+    exhumersIceDurationReductionPct: 4,
   },
   {
     id: 'mackinaw',
@@ -182,7 +207,13 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'exhumer',
     tech: 't2',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: bakedOreM3(1.28, 0.9), moon: bakedOreM3(1.28, 0.9), ice: bakedIceM3(0.84 * 0.875) },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.28, 0.9), moon: bakedOreM3(1.28, 0.9), ice: bakedIceM3(0.875 * 0.84 * 0.84) },
+    miningBargeOreYieldPct: 3,
+    exhumersOreYieldPct: 4,
+    roleOreDurationReductionPct: 10,
+    roleIceDurationReductionPct: 12.5,
+    miningBargeIceDurationReductionPct: 4,
+    exhumersIceDurationReductionPct: 4,
   },
   {
     id: 'skiff',
@@ -191,7 +222,10 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'exhumer',
     tech: 't2',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: bakedOreM3(1.16), moon: bakedOreM3(1.16), ice: bakedIceM3() },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.16), moon: bakedOreM3(1.16), ice: bakedIceM3(0.84) },
+    miningBargeOreYieldPct: 2,
+    exhumersOreYieldPct: 2,
+    miningBargeIceDurationReductionPct: 4,
   },
   {
     id: 'venture',
@@ -798,6 +832,56 @@ export function miningSkillYieldMultiplier(
   return atLevel / atBaked
 }
 
+function hullSkillRateAtLevels(
+  subtype: MiningSubtype,
+  ship: MiningShipPreset,
+  miningBargeLevel: number,
+  exhumersLevel: number,
+): number {
+  if (subtype === 'ore' || subtype === 'moon') {
+    const yieldMultiplier =
+      1 +
+      ((ship.roleOreYieldPct ?? 0) +
+        (ship.miningBargeOreYieldPct ?? 0) * miningBargeLevel +
+        (ship.exhumersOreYieldPct ?? 0) * exhumersLevel) /
+        100
+    const durationMultiplier =
+      (1 - (ship.roleOreDurationReductionPct ?? 0) / 100) *
+      (1 - ((ship.exhumersOreDurationReductionPct ?? 0) * exhumersLevel) / 100)
+    return yieldMultiplier / Math.max(0.01, durationMultiplier)
+  }
+  if (subtype === 'ice') {
+    const durationMultiplier =
+      (1 - (ship.roleIceDurationReductionPct ?? 0) / 100) *
+      (1 - ((ship.miningBargeIceDurationReductionPct ?? 0) * miningBargeLevel) / 100) *
+      (1 - ((ship.exhumersIceDurationReductionPct ?? 0) * exhumersLevel) / 100)
+    return 1 / Math.max(0.01, durationMultiplier)
+  }
+  return 1
+}
+
+/** Mining Barge and Exhumers hull bonuses relative to the skill-IV rates in the hull table. */
+export function miningHullSkillYieldMultiplier(
+  subtype: MiningSubtype,
+  ship: MiningShipPreset,
+  skills: Partial<SkillLevels> | undefined,
+): number {
+  if (ship.tier !== 'barge' && ship.tier !== 'exhumer') return 1
+  const atSelectedLevels = hullSkillRateAtLevels(
+    subtype,
+    ship,
+    skillOrBaked(skills, 'miningBarge'),
+    ship.tier === 'exhumer' ? skillOrBaked(skills, 'exhumers') : 0,
+  )
+  const atBakedLevels = hullSkillRateAtLevels(
+    subtype,
+    ship,
+    BAKED_MINING_SKILL_LEVEL,
+    ship.tier === 'exhumer' ? BAKED_MINING_SKILL_LEVEL : 0,
+  )
+  return atSelectedLevels / atBakedLevels
+}
+
 /**
  * Typical mining buffs by space.
  * Fleet yield uses miningBoosterHull + miningForemanBurst (not legacy boost chips).
@@ -1292,6 +1376,7 @@ export function miningFitYieldMultiplier(
     miningUpgradeMultiplier(subtype, ship, upgrade, count) *
     miningCrystalMultiplier(subtype, ship, crystal, miner) *
     miningSkillYieldMultiplier(subtype, ctx.skills) *
+    miningHullSkillYieldMultiplier(subtype, ship, ctx.skills) *
     miningCritYieldMultiplier(subtype, ship, ctx, buffIds)
   )
 }

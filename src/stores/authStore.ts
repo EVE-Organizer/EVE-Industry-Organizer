@@ -17,7 +17,10 @@ import {
   mapEsiSkillsToSkillLevels,
 } from '@/services/character/characterSkillsService'
 import { useAppStore } from '@/stores/appStore'
-import { normalizeImportedSkillLevels } from '@/lib/skillFields'
+import {
+  mergeAssumedWithTrainedSkillLevels,
+  normalizeImportedSkillLevels,
+} from '@/lib/skillFields'
 import { queryClient } from '@/lib/queryClient'
 import { refreshCharacterApiCaches } from '@/lib/refreshCharacterData'
 import { ZERO_SKILLS, type SkillLevels } from '@/types'
@@ -63,12 +66,14 @@ function persistEsiSkillSync(
 ): EveCharacterSession | null {
   const snapshot = getStoredCharacter()
   const existing = snapshot?.characterId === characterId ? snapshot : null
-  const hasAssumed = Boolean(existing?.skills)
+  const assumedSkills = existing?.skills
 
   touchCharacterSync(characterId, {
     lastSyncedAt: syncedAt,
     trainedSkills,
-    ...(hasAssumed ? {} : { skills: { ...trainedSkills } }),
+    skills: assumedSkills
+      ? mergeAssumedWithTrainedSkillLevels(assumedSkills, trainedSkills)
+      : { ...trainedSkills },
   })
 
   return getStoredCharacter()

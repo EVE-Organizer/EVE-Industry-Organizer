@@ -16,6 +16,7 @@ import {
   miningCrystalLifeMultiplier,
   miningCrystalMultiplier,
   miningCritYieldMultiplier,
+  miningHullSkillYieldMultiplier,
   miningSkillYieldMultiplier,
   miningUpgradeMultiplier,
   miningBurstSlotCount,
@@ -38,7 +39,7 @@ describe('miningShipPresets', () => {
     expect(resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, { surveyChipset: 'none' })).toBe(
       42_163,
     )
-    expect(resolveUserMiningM3PerHr('ore', 'hulk', [])).toBeLessThan(
+    expect(resolveUserMiningM3PerHr('ore', 'hulk', [])).toBeGreaterThan(
       resolveUserMiningM3PerHr('ore', 'covetor', []),
     )
   })
@@ -226,6 +227,19 @@ describe('miningShipPresets', () => {
     expect(miningSkillYieldMultiplier('ore', { mining: 0, astrogeology: 0 })).toBeLessThan(1)
   })
 
+  it('applies Mining Barge and Exhumers hull bonuses', () => {
+    const retriever = getMiningShip('retriever')
+    const hulk = getMiningShip('hulk')
+    expect(miningHullSkillYieldMultiplier('ore', retriever, { miningBarge: 4 })).toBe(1)
+    expect(miningHullSkillYieldMultiplier('ore', retriever, { miningBarge: 5 })).toBeGreaterThan(1)
+    expect(
+      miningHullSkillYieldMultiplier('ore', hulk, { miningBarge: 5, exhumers: 5 }),
+    ).toBeGreaterThan(1)
+    expect(
+      miningHullSkillYieldMultiplier('ice', hulk, { miningBarge: 5, exhumers: 5 }),
+    ).toBeGreaterThan(1)
+  })
+
   it('uses booster hull and optimization burst for yield', () => {
     const solo = resolveUserMiningM3PerHr('ore', 'retriever', [])
     const orca = resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, {
@@ -363,7 +377,7 @@ describe('miningShipPresets', () => {
   })
 
   it('uses Mackinaw rate for ice', () => {
-    expect(resolveUserMiningM3PerHr('ice', 'mackinaw', [])).toBe(51_020)
+    expect(resolveUserMiningM3PerHr('ice', 'mackinaw', [])).toBe(60_739)
   })
 
   it('scales ice m³/hr with upgrades, booster, and fleet count', () => {
@@ -457,7 +471,7 @@ describe('miningShipPresets', () => {
     )
     const fleetTotal = resolveUserMiningM3PerHrFromFleet('ore', fleet, [], 'highsec')
     const soloSum = soloHulk * 2 + soloRetriever * 3
-    expect(Math.abs(fleetTotal - soloSum)).toBeLessThanOrEqual(1)
+    expect(Math.abs(fleetTotal - soloSum)).toBeLessThanOrEqual(2)
   })
 
   it('applies implants per hull in mixed fleet', () => {

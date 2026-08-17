@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import type { MiningBuffId, MiningShipId, MiningYieldContext } from '@/lib/miningShipPresets'
+import type {
+  MiningBuffId,
+  MiningShipId,
+  MiningShipPreset,
+  MiningYieldContext,
+} from '@/lib/miningShipPresets'
 import {
   MINING_BOOSTER_HULLS,
   MINING_CRYSTAL_OPTIONS,
@@ -257,10 +262,19 @@ function CountInput({
   )
 }
 
-function minerSkillKeys(subtype: MiningSubtype): SkillFieldDef['key'][] {
-  if (subtype === 'ice') return ['iceHarvesting']
+function minerSkillKeys(
+  subtype: MiningSubtype,
+  ship: MiningShipPreset,
+): SkillFieldDef['key'][] {
+  const hullSkills: SkillFieldDef['key'][] =
+    ship.tier === 'exhumer'
+      ? ['miningBarge', 'exhumers']
+      : ship.tier === 'barge'
+        ? ['miningBarge']
+        : []
+  if (subtype === 'ice') return ['iceHarvesting', ...hullSkills]
   if (subtype === 'gas') return ['gasCloudHarvesting']
-  return ['mining', 'astrogeology']
+  return ['mining', 'astrogeology', ...hullSkills]
 }
 
 function boosterSkillKeys(hull: MiningBoosterHullId | null): SkillFieldDef['key'][] {
@@ -475,7 +489,7 @@ function FleetLineCard({
       if (typeof value === 'number') lineSkills[key] = value
     }
   }
-  const skillKeys = minerSkillKeys(subtype)
+  const skillKeys = minerSkillKeys(subtype, ship)
   const implantBuffs = miningBuffsForSetup(line.shipId, subtype, globalBuffIds, null).filter(
     (b) => b.category === 'fit',
   )
@@ -502,6 +516,8 @@ function FleetLineCard({
         astrogeology: merged.astrogeology,
         iceHarvesting: merged.iceHarvesting,
         gasCloudHarvesting: merged.gasCloudHarvesting,
+        miningBarge: merged.miningBarge,
+        exhumers: merged.exhumers,
       },
     })
   }

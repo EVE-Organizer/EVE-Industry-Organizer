@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, startTransition, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAppStore } from '@/stores/appStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useSdeData } from '@/hooks/useSdeData'
 import { useMiningData } from '@/hooks/useMiningData'
 import {
@@ -50,7 +51,7 @@ import { appRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 import { hubDisplayName } from '@/lib/hubDisplay'
-import { HUBS, DEFAULT_SETTINGS, type MiningBuffId, type MiningFleetLine, type MiningIphSortKey, type MiningRankedRow, type MiningSpaceClass, type MiningSubtype, type TimeRange, type TypeInfo } from '@/types'
+import { HUBS, DEFAULT_SETTINGS, type MiningBuffId, type MiningFleetLine, type MiningIphSortKey, type MiningRankedRow, type MiningSpaceClass, type MiningSubtype, type SkillLevels, type TimeRange, type TypeInfo } from '@/types'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { EveImage } from '@/components/EveImage'
 import { InfoTooltip } from '@/components/InfoTooltip'
@@ -299,6 +300,7 @@ function MiningItemName({
 export function MiningIskHrPage() {
   const settings = useAppStore((s) => s.userData.settings)
   const updateSettings = useAppStore((s) => s.updateSettings)
+  const persistActiveSkillsFromSettings = useAuthStore((s) => s.persistActiveSkillsFromSettings)
   const { data: sde, isLoading: sdeLoading } = useSdeData()
   const { data: mining, isLoading: miningLoading, error: miningError } = useMiningData()
 
@@ -574,6 +576,13 @@ export function MiningIskHrPage() {
     })
   }
 
+  function onMiningSkillsChange(skills: SkillLevels) {
+    startTransition(() => {
+      updateSettings({ skills })
+      persistActiveSkillsFromSettings()
+    })
+  }
+
   function onMiningBuffToggle(id: MiningBuffId) {
     startTransition(() => {
       const prev = settings.miningBuffIds ?? []
@@ -799,7 +808,7 @@ export function MiningIskHrPage() {
             onFleetChange={onMiningFleetChange}
             onBuffToggle={onMiningBuffToggle}
             onYieldChange={onMiningYieldChange}
-            onSkillsChange={(skills) => startTransition(() => updateSettings({ skills }))}
+            onSkillsChange={onMiningSkillsChange}
           />
         </div>
       </section>
