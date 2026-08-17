@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { brokerFeePercent, salesTaxPercent, tradingFeeRates } from '@/lib/tradingFees'
+import { brokerFeePercent, relistDiscountPercent, salesTaxPercent, tradingFeeRates } from '@/lib/tradingFees'
 
 describe('tradingFeeRates', () => {
   it('uses NPC base rates at skill 0', () => {
@@ -15,6 +15,11 @@ describe('tradingFeeRates', () => {
 
   it('reduces sales tax multiplicatively per Accounting level', () => {
     expect(salesTaxPercent(5)).toBeCloseTo(3.375, 3)
+  })
+
+  it('increases relist discount by 5 percentage points per Advanced Broker Relations level', () => {
+    expect(relistDiscountPercent(0)).toBe(50)
+    expect(relistDiscountPercent(5)).toBe(75)
   })
 
   it('clamps skill levels to 0–5', () => {

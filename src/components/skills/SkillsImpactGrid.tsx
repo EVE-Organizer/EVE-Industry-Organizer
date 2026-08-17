@@ -14,6 +14,7 @@ import {
   TrainingGroupIcon,
 } from '@/components/skills/SkillsImpactIcons'
 import type { SkillImpactSummary } from '@/lib/skillImpact'
+import { NPC_BASE_RELIST_DISCOUNT_PERCENT } from '@/lib/tradingFees'
 import { formatTrainingDuration } from '@/lib/skillTraining'
 
 interface SkillsImpactGridProps {
@@ -128,6 +129,12 @@ export function SkillsImpactGrid({
             label="Broker fee"
             value={`${impact.brokerFeePercent.toFixed(2)}%`}
             tone="cost"
+          />
+          <ImpactMetric
+            icon={<TaxIcon />}
+            label="Modify order"
+            value={`${impact.relistDiscountPercent.toFixed(0)}% off`}
+            tone={impact.relistDiscountPercent > NPC_BASE_RELIST_DISCOUNT_PERCENT ? 'positive' : 'neutral'}
           />
         </ImpactGroup>
 

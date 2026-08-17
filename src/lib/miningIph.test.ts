@@ -4,8 +4,10 @@ import { buildWindowPriceMap } from '@/lib/ranking'
 import {
   miningDisplayVolume,
   miningPathHasPriceData,
+  isExcludedMiningItem,
   rankMiningIph,
   resolveMiningBreakdownPath,
+  RETRIEVER_ORE_M3_PER_HR,
   sortMiningRows,
 } from '@/lib/miningIph'
 import { buildPriceMap, buildTypeMap, getHubMarket } from '@/services/data/sdeLoader'
@@ -410,7 +412,7 @@ describe('rankMiningIph', () => {
       priceMethod: 'sell_orders',
     })
     expect(rows.every((r) => r.item.typeId !== 9991)).toBe(true)
-    expect(rows.every((r) => r.rawIph > 0 && (r.volDayRaw ?? 0) > 0)).toBe(true)
+    expect(rows.every((r) => r.rawIph > 0 && (r.volDayRaw ?? 0) >= 100)).toBe(true)
   })
 
   it('shows compressed hub volume for ore when raw volume is tiny (Mercoxit-style)', () => {
@@ -585,7 +587,7 @@ describe('rankMiningIph', () => {
     expect(rows.every((r) => r.item.typeId === 18)).toBe(true)
   })
 
-  it('hides gas with spot price but no volume history (non-Jita hubs)', () => {
+  it('hides gas without mined-type hub volume (not mineral proxy)', () => {
     const gasMining: MiningData = {
       generatedAt: '',
       defaults: { m3PerHr: 40_000, reprocessYield: 0.5 },
@@ -643,8 +645,99 @@ describe('rankMiningIph', () => {
       window: '1m',
       priceMethod: 'sell_orders',
     })
-    expect(rows).toHaveLength(1)
-    expect(rows[0].item.name).toBe('Hiemal Tricarboxyl Vapor')
+    expect(rows).toHaveLength(0)
+  })
+
+  it('excludes event grades and crystallites from rankings', () => {
+    const junkMining: MiningData = {
+      generatedAt: '',
+      defaults: { m3PerHr: 50_400, reprocessYield: 0.5 },
+      focusOutputs: { ore: [], moon: [], ice: [], gas: [] },
+      items: [
+        {
+          typeId: 92568,
+          name: 'Kangite X-Grade',
+          group: 'Kangite',
+          volume: 1,
+          portionSize: 100,
+          subtype: 'ore',
+          foundIn: ['highsec'],
+          compressedTypeId: 92821,
+          reprocess: [{ typeId: 34, quantityPerBatch: 1000 }],
+          iconUrl: '',
+        },
+        {
+          typeId: 1230,
+          name: 'Veldspar',
+          group: 'Veldspar',
+          volume: 0.1,
+          portionSize: 100,
+          subtype: 'ore',
+          foundIn: ['highsec'],
+          compressedTypeId: 62516,
+          reprocess: [{ typeId: 34, quantityPerBatch: 400 }],
+          iconUrl: '',
+        },
+      ],
+    }
+    const hub: HubMarketData = {
+      regionId: 10000002,
+      marketSystemId: 30000142,
+      buildSystemId: 30000142,
+      costIndex: 0.01,
+      prices: { '92568': 5000, '1230': 10, '62516': 11, '34': 4 },
+      products: {
+        '92568': { '1m': { avgPrice: 5000, avgVolume: 10_000, high: 6000, low: 4000 } },
+        '1230': { '1m': { avgPrice: 10, avgVolume: 20_000, high: 11, low: 9 } },
+        '62516': { '1m': { avgPrice: 11, avgVolume: 50_000, high: 12, low: 10 } },
+      },
+    }
+    const spot = new Map([
+      [92568, 5000],
+      [1230, 10],
+      [62516, 11],
+      [34, 4],
+    ])
+    const rows = rankMiningIph(junkMining, hub, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1m',
+      priceMethod: 'sell_orders',
+    })
+    expect(rows.every((r) => r.item.typeId !== 92568)).toBe(true)
+    expect(rows.some((r) => r.item.typeId === 1230)).toBe(true)
+  })
+
+  it('isExcludedMiningItem flags grades and gem groups', () => {
+    expect(
+      isExcludedMiningItem({
+        typeId: 92568,
+        name: 'Kangite X-Grade',
+        group: 'Kangite',
+        volume: 1,
+        portionSize: 100,
+        subtype: 'ore',
+        foundIn: ['highsec'],
+        compressedTypeId: null,
+        reprocess: [],
+        iconUrl: '',
+      }),
+    ).toBe(true)
+    expect(
+      isExcludedMiningItem({
+        typeId: 1230,
+        name: 'Veldspar',
+        group: 'Veldspar',
+        volume: 0.1,
+        portionSize: 100,
+        subtype: 'ore',
+        foundIn: ['highsec'],
+        compressedTypeId: 62516,
+        reprocess: [],
+        iconUrl: '',
+      }),
+    ).toBe(false)
   })
 
   it('uses real hub window averages that differ by window (Jita Plagioclase)', () => {
@@ -687,5 +780,45 @@ describe('rankMiningIph', () => {
     expect(plagi1m?.rawPrice).toBe(hubMarket.products['18']?.['1m']?.avgPrice)
     expect(plagi1w?.rawPrice).not.toBe(plagi1m?.rawPrice)
     expect(plagi1w?.rawIph).not.toBe(plagi1m?.rawIph)
+  })
+
+  it('matches Jita Veldspar ISK/hr from hub window price and Retriever m³/hr', () => {
+    const market = JSON.parse(
+      readFileSync('public/data/market.json', 'utf8'),
+    ) as MarketData
+    const miningData = JSON.parse(
+      readFileSync('public/data/mining.json', 'utf8'),
+    ) as MiningData
+    const typesRaw = JSON.parse(readFileSync('public/data/types.json', 'utf8')) as
+      | { types: Parameters<typeof buildTypeMap>[0] }
+      | Parameters<typeof buildTypeMap>[0]
+    const types = Array.isArray(typesRaw) ? typesRaw : typesRaw.types
+    const hubMarket = getHubMarket(market, 'jita')!
+    const spot = buildPriceMap(hubMarket)
+    const typeMap = buildTypeMap(types)
+    const sell1m = buildWindowPriceMap(hubMarket, '1m', spot)
+
+    const rows = rankMiningIph(miningData, hubMarket, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1m',
+      priceMethod: 'sell_orders',
+      sellPrices: sell1m,
+      m3PerHr: RETRIEVER_ORE_M3_PER_HR,
+    })
+
+    const veld = rows.find((r) => r.item.name === 'Veldspar')
+    expect(veld).toBeDefined()
+    const rawPrice = hubMarket.products['1230']?.['1m']?.avgPrice
+    expect(rawPrice).toBeGreaterThan(0)
+    expect(veld!.rawIph).toBe(Math.round((rawPrice! / 0.1) * RETRIEVER_ORE_M3_PER_HR))
+
+    const compressedPrice = hubMarket.products['62516']?.['1m']?.avgPrice
+    expect(compressedPrice).toBeGreaterThan(0)
+    expect(veld!.compressedIph).toBe(
+      Math.round((compressedPrice! / 0.1) * RETRIEVER_ORE_M3_PER_HR),
+    )
+    expect(veld!.compressedIph).not.toBe(veld!.rawIph * 100)
   })
 })

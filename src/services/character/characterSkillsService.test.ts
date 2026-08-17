@@ -13,6 +13,7 @@ describe('mapEsiSkillsToSkillLevels', () => {
       { skill_id: 24624, trained_skill_level: 2, active_skill_level: 2 },
       { skill_id: 16622, trained_skill_level: 2, active_skill_level: 2 },
       { skill_id: 3443, trained_skill_level: 1, active_skill_level: 1 },
+      { skill_id: 16597, trained_skill_level: 3, active_skill_level: 3 },
     ])
 
     expect(skills).toMatchObject({
@@ -25,6 +26,7 @@ describe('mapEsiSkillsToSkillLevels', () => {
       advancedLaboratoryOperation: 0, // locked: Laboratory Operation must be V
       accounting: 2,
       brokerRelations: 1,
+      advancedBrokerRelations: 0, // locked: Accounting IV and Broker Relations IV
     })
   })
 

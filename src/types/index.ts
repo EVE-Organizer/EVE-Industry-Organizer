@@ -365,6 +365,24 @@ export interface GlobalSettings {
   miningBoostSpace?: MiningBoostSpace
   /** Identical mining ships in your fleet (scales m³/hr and ISK/hr). */
   miningFleetSize?: number
+  /** Mixed mining fleet: hull types and counts (sum m³/hr for ISK/hr rankings). */
+  miningFleet?: MiningFleetLine[]
+  /** Foreman booster hull on grid (Porpoise, Orca, Rorqual). Null = solo mining. */
+  miningBoosterHull?: MiningBoosterHullId | null
+  /** Active Mining Foreman burst charge when a booster hull is set. */
+  miningForemanBurst?: MiningForemanBurstId
+  /** Loaded Foreman charges (one per burst module). Porpoise 2, Orca/Rorqual 3. */
+  miningForemanBursts?: MiningForemanBurstId[]
+  /** Mining Foreman burst module tech (T2 is +25% strength). */
+  miningBurstTech?: MiningBurstTech
+  /** Orca/Rorqual industrial core (typical +30% burst strength). */
+  miningIndustrialCore?: boolean
+  /** Mining Laser / Ice Harvester Upgrade module. */
+  miningUpgrade?: MiningUpgradeId
+  /** How many upgrade modules (1–3). Ignored when upgrade is none. */
+  miningUpgradeCount?: number
+  /** Strip miner / ice harvester crystals. */
+  miningCrystal?: MiningCrystalId
 }
 
 /** Global settings plus per-job run count for manufacturing cost and profit math. */
@@ -376,6 +394,8 @@ export interface SkillLevels {
   science: number
   accounting: number
   brokerRelations: number
+  /** Advanced Broker Relations: +5% relist discount per level on modify-order fees. */
+  advancedBrokerRelations: number
   massProduction: number
   advancedMassProduction: number
   /** Reactions skill: −4% reaction time per level. */
@@ -384,6 +404,18 @@ export interface SkillLevels {
   laboratoryOperation: number
   /** Advanced Laboratory Operation: +1 more concurrent science job per level. */
   advancedLaboratoryOperation: number
+  /** Mining: +5% ore/moon yield per level. */
+  mining: number
+  /** Astrogeology: +5% ore/moon yield per level. */
+  astrogeology: number
+  /** Ice Harvesting: −5% ice harvester cycle time per level. */
+  iceHarvesting: number
+  /** Gas Cloud Harvesting: −5% gas harvester cycle time per level. */
+  gasCloudHarvesting: number
+  /** Industrial Command Ships: Porpoise/Orca foreman burst strength. */
+  industrialCommandShips: number
+  /** Capital Industrial Ships: Rorqual foreman burst strength. */
+  capitalIndustrialShips: number
   [key: string]: number
 }
 
@@ -774,11 +806,18 @@ export const DEFAULT_SKILLS: SkillLevels = {
   science: DEFAULT_SKILL_LEVEL,
   accounting: DEFAULT_SKILL_LEVEL,
   brokerRelations: 0,
+  advancedBrokerRelations: 0,
   massProduction: DEFAULT_SKILL_LEVEL,
   advancedMassProduction: DEFAULT_SKILL_LEVEL,
   reactions: DEFAULT_SKILL_LEVEL,
   laboratoryOperation: DEFAULT_SKILL_LEVEL,
   advancedLaboratoryOperation: DEFAULT_SKILL_LEVEL,
+  mining: 4,
+  astrogeology: 4,
+  iceHarvesting: 4,
+  gasCloudHarvesting: 4,
+  industrialCommandShips: 4,
+  capitalIndustrialShips: 4,
 }
 
 /** Untrained skill levels used when importing from ESI or before sync completes. */
@@ -788,11 +827,18 @@ export const ZERO_SKILLS: SkillLevels = {
   science: 0,
   accounting: 0,
   brokerRelations: 0,
+  advancedBrokerRelations: 0,
   massProduction: 0,
   advancedMassProduction: 0,
   reactions: 0,
   laboratoryOperation: 0,
   advancedLaboratoryOperation: 0,
+  mining: 0,
+  astrogeology: 0,
+  iceHarvesting: 0,
+  gasCloudHarvesting: 0,
+  industrialCommandShips: 0,
+  capitalIndustrialShips: 0,
 }
 
 export const DEFAULT_SETTINGS: GlobalSettings = {
@@ -823,6 +869,14 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   miningBuffIds: [],
   miningBoostSpace: 'highsec',
   miningFleetSize: 1,
+  miningBoosterHull: null,
+  miningForemanBurst: 'miningLaserOptimization',
+  miningForemanBursts: ['miningLaserOptimization'],
+  miningBurstTech: 't2',
+  miningIndustrialCore: true,
+  miningUpgrade: 'none',
+  miningUpgradeCount: 3,
+  miningCrystal: 'none',
 }
 
 /** T2 invented blueprint copy base efficiency without a decryptor. */
@@ -943,6 +997,21 @@ export type MiningShipId =
   | 'prospect'
   | 'endurance'
 
+/** Strip Miner I / Ice Harvester I vs modulated guns that load crystals. */
+export type MiningMinerModuleId = 'strip' | 'modulated'
+
+/** One hull type and how many identical ships in a mixed mining fleet. */
+export interface MiningFleetLine {
+  shipId: MiningShipId
+  count: number
+  miner?: MiningMinerModuleId
+  crystal?: MiningCrystalId
+  upgrade?: MiningUpgradeId
+  upgradeCount?: number
+  buffIds?: MiningBuffId[]
+  skills?: Partial<SkillLevels>
+}
+
 export type MiningBuffId =
   | 'mlu3'
   | 'highwall'
@@ -955,6 +1024,18 @@ export type MiningBuffId =
 
 /** Fleet boost context: solo = no foreman ship. */
 export type MiningBoostSpace = 'solo' | MiningSpaceClass
+
+export type MiningBoosterHullId = 'porpoise' | 'orca' | 'rorqual'
+export type MiningBurstTech = 't1' | 't2'
+export type MiningUpgradeId = 'none' | 'mlu1' | 'mlu2'
+export type MiningCrystalId = 'none' | 't1' | 't2'
+
+/** Mining Foreman Command Burst charges (yield-related and common alternatives). */
+export type MiningForemanBurstId =
+  | 'miningLaserOptimization'
+  | 'miningLaserEfficiency'
+  | 'miningLaserFieldEnhancement'
+  | 'miningEquipmentPreservation'
 
 export interface MiningReprocessMat {
   typeId: number

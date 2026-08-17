@@ -34,6 +34,13 @@ describe('skillFields', () => {
       science: 0,
       accounting: 0,
       brokerRelations: 0,
+      advancedBrokerRelations: 0,
+      mining: 0,
+      astrogeology: 0,
+      iceHarvesting: 0,
+      gasCloudHarvesting: 0,
+      industrialCommandShips: 0,
+      capitalIndustrialShips: 0,
     })
   })
 
@@ -52,6 +59,7 @@ describe('skillFields', () => {
         science: 0,
         accounting: 0,
         brokerRelations: 0,
+        advancedBrokerRelations: 0,
       }).advancedMassProduction,
     ).toBe(0)
     expect(

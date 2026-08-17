@@ -24,12 +24,18 @@ import {
   type MiningIphFocusPath,
 } from '@/lib/miningIph'
 import {
-  normalizeMiningShipId,
-  normalizeMiningBoostSpace,
-  normalizeMiningFleetSize,
   inferMiningBoostSpace,
+  normalizeMiningBoostSpace,
+  normalizeMiningBurstTech,
+  normalizeMiningCrystal,
+  normalizeMiningFleet,
+  normalizeMiningForemanBurst,
+  normalizeMiningForemanBursts,
+  normalizeMiningMiner,
+  normalizeMiningUpgrade,
+  resolveUserMiningM3PerHrFromFleet,
   toggleMiningBuffId,
-  resolveUserMiningM3PerHr,
+  type MiningYieldContext,
 } from '@/lib/miningShipPresets'
 import { formatIsk, formatQuantity } from '@/lib/profit'
 import { buildWindowPriceMap } from '@/lib/ranking'
@@ -37,7 +43,7 @@ import { appRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 import { hubDisplayName } from '@/lib/hubDisplay'
-import { HUBS, DEFAULT_SETTINGS, type MiningBuffId, type MiningIphSortKey, type MiningRankedRow, type MiningShipId, type MiningSpaceClass, type MiningSubtype, type TimeRange } from '@/types'
+import { HUBS, DEFAULT_SETTINGS, type MiningBuffId, type MiningFleetLine, type MiningIphSortKey, type MiningRankedRow, type MiningSpaceClass, type MiningSubtype, type TimeRange } from '@/types'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { EveImage } from '@/components/EveImage'
 import { InfoTooltip } from '@/components/InfoTooltip'
@@ -284,6 +290,7 @@ export function MiningIskHrPage() {
   const [foundIn, setFoundIn] = useState<MiningSpaceClass[]>([])
   const [focusTypeId, setFocusTypeId] = useState<number | null>(null)
   const [sortKey, setSortKey] = useState<MiningIphSortKey>(DEFAULT_MINING_IPH_SORT_KEY)
+  const [nameQuery, setNameQuery] = useState('')
   const [breakdown, setBreakdown] = useState<{
     row: MiningRankedRow
     focusPath: MiningIphFocusPath
@@ -395,27 +402,38 @@ export function MiningIskHrPage() {
     return changed ? { ...hubMarket, products } : hubMarket
   }, [hubMarket, liveVolumes, priceWindow])
 
-  useEffect(() => {
-    const current = settings.miningShipId ?? 'retriever'
-    const normalized = normalizeMiningShipId(current, subtype)
-    if (normalized !== current) {
-      updateSettings({ miningShipId: normalized })
-    }
-  }, [subtype, settings.miningShipId, updateSettings])
-
-  const miningShipId = normalizeMiningShipId(settings.miningShipId, subtype)
   const miningBuffIds = settings.miningBuffIds ?? []
-  const miningFleetSize = normalizeMiningFleetSize(settings.miningFleetSize)
+  const miningFleet = normalizeMiningFleet(
+    settings.miningFleet,
+    subtype,
+    settings.miningShipId,
+    settings.miningFleetSize,
+    {
+      miner: normalizeMiningMiner(undefined, normalizeMiningCrystal(settings.miningCrystal)),
+      crystal: normalizeMiningCrystal(settings.miningCrystal),
+      upgrade: normalizeMiningUpgrade(settings.miningUpgrade),
+      upgradeCount: settings.miningUpgradeCount,
+    },
+  )
+  const yieldCtx: MiningYieldContext = {
+    boosterHull: settings.miningBoosterHull ?? null,
+    foremanBurst: normalizeMiningForemanBurst(settings.miningForemanBurst),
+    foremanBursts: settings.miningForemanBursts,
+    burstTech: normalizeMiningBurstTech(settings.miningBurstTech),
+    industrialCore: settings.miningIndustrialCore !== false,
+    skills: settings.skills,
+  }
   const miningBoostSpace = inferMiningBoostSpace(
     miningBuffIds,
     normalizeMiningBoostSpace(settings.miningBoostSpace),
+    yieldCtx.boosterHull,
   )
-  const m3PerHr = resolveUserMiningM3PerHr(
+  const m3PerHr = resolveUserMiningM3PerHrFromFleet(
     subtype,
-    miningShipId,
+    miningFleet,
     miningBuffIds,
     miningBoostSpace,
-    miningFleetSize,
+    yieldCtx,
   )
 
   const rankedRows = useMemo(() => {
@@ -450,10 +468,16 @@ export function MiningIskHrPage() {
     [rankedRows, sortKey],
   )
 
+  const displayRows = useMemo(() => {
+    const q = nameQuery.trim().toLowerCase()
+    if (!q) return rows
+    return rows.filter((row) => row.item.name.toLowerCase().includes(q))
+  }, [rows, nameQuery])
+
   const breakdownRow = useMemo(() => {
     if (!breakdown) return null
-    return rows.find((r) => r.item.typeId === breakdown.row.item.typeId) ?? breakdown.row
-  }, [breakdown, rows])
+    return displayRows.find((r) => r.item.typeId === breakdown.row.item.typeId) ?? breakdown.row
+  }, [breakdown, displayRows])
 
   const focusName =
     focusTypeId != null ? focusOptions.find((o) => o.typeId === focusTypeId)?.name ?? null : null
@@ -488,7 +512,10 @@ export function MiningIskHrPage() {
   }
 
   function onSubtypeChange(next: MiningSubtype) {
-    startTransition(() => setSubtype(next))
+    startTransition(() => {
+      setSubtype(next)
+      setNameQuery('')
+    })
   }
 
   function onSort(key: MiningIphSortKey) {
@@ -506,12 +533,17 @@ export function MiningIskHrPage() {
     setBreakdown({ row, focusPath })
   }
 
-  function onMiningFleetSizeChange(next: number) {
-    startTransition(() => updateSettings({ miningFleetSize: normalizeMiningFleetSize(next) }))
-  }
-
-  function onMiningShipChange(next: MiningShipId) {
-    startTransition(() => updateSettings({ miningShipId: next }))
+  function onMiningFleetChange(next: MiningFleetLine[]) {
+    startTransition(() =>
+      updateSettings({
+        miningFleet: normalizeMiningFleet(
+          next,
+          subtype,
+          settings.miningShipId,
+          settings.miningFleetSize,
+        ),
+      }),
+    )
   }
 
   function onMiningBuffToggle(id: MiningBuffId) {
@@ -523,6 +555,34 @@ export function MiningIskHrPage() {
         miningBoostSpace: inferMiningBoostSpace(
           next,
           normalizeMiningBoostSpace(settings.miningBoostSpace),
+          settings.miningBoosterHull,
+        ),
+      })
+    })
+  }
+
+  function onMiningYieldChange(patch: MiningYieldContext) {
+    startTransition(() => {
+      const boosterHull =
+        patch.boosterHull !== undefined ? patch.boosterHull : settings.miningBoosterHull
+      const bursts = normalizeMiningForemanBursts(
+        boosterHull ?? null,
+        patch.foremanBursts ?? settings.miningForemanBursts,
+        patch.foremanBurst ?? settings.miningForemanBurst,
+      )
+      updateSettings({
+        miningBoosterHull: boosterHull ?? null,
+        miningForemanBursts: bursts,
+        miningForemanBurst: bursts[0] ?? settings.miningForemanBurst,
+        miningBurstTech: patch.burstTech ?? settings.miningBurstTech,
+        miningIndustrialCore:
+          patch.industrialCore !== undefined
+            ? patch.industrialCore
+            : settings.miningIndustrialCore,
+        miningBoostSpace: inferMiningBoostSpace(
+          settings.miningBuffIds ?? [],
+          normalizeMiningBoostSpace(settings.miningBoostSpace),
+          boosterHull,
         ),
       })
     })
@@ -573,7 +633,7 @@ export function MiningIskHrPage() {
             </div>
           </div>
           <span className="badge badge-primary badge-sm badge-outline border-primary/30 tabular-nums font-normal shrink-0">
-            {rows.length} shown · {sortLabel}
+            {displayRows.length} shown · {sortLabel}
           </span>
         </header>
 
@@ -705,16 +765,29 @@ export function MiningIskHrPage() {
 
           <MiningSetupFilterSection
             subtype={subtype}
-            shipId={miningShipId}
+            fleet={miningFleet}
             buffIds={miningBuffIds}
             boostSpace={miningBoostSpace}
-            fleetSize={miningFleetSize}
-            onShipChange={onMiningShipChange}
+            yieldCtx={yieldCtx}
+            skills={settings.skills}
+            onFleetChange={onMiningFleetChange}
             onBuffToggle={onMiningBuffToggle}
-            onFleetSizeChange={onMiningFleetSizeChange}
+            onYieldChange={onMiningYieldChange}
+            onSkillsChange={(skills) => startTransition(() => updateSettings({ skills }))}
           />
         </div>
       </section>
+
+      <div className="mb-4 flex min-w-0 items-center gap-3">
+        <input
+          type="search"
+          className="input input-bordered input-sm w-full max-w-md min-w-0"
+          placeholder={`Search ${MINING_SUBTYPES.find((s) => s.id === subtype)?.label.toLowerCase() ?? 'items'}…`}
+          aria-label={`Search ${MINING_SUBTYPES.find((s) => s.id === subtype)?.label ?? 'items'}`}
+          value={nameQuery}
+          onChange={(e) => setNameQuery(e.target.value)}
+        />
+      </div>
 
       {/* Desktop table */}
       <div className="hidden lg:block overflow-x-auto rounded-xl border border-eve-border/90 bg-base-200/70 shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04),0_8px_24px_-12px_rgb(0_0_0_/_0.55)]">
@@ -753,7 +826,7 @@ export function MiningIskHrPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, index) => (
+            {displayRows.map((row, index) => (
               <tr key={row.item.typeId} className="hover:bg-base-200/80">
                 <td className="tabular-nums opacity-60">{index + 1}</td>
                 <td>
@@ -783,7 +856,7 @@ export function MiningIskHrPage() {
                 </td>
               </tr>
             ))}
-            {rows.length === 0 ? (
+            {displayRows.length === 0 ? (
               <tr>
                 <td colSpan={focusTypeId != null ? 8 : 7} className="text-center opacity-60 py-8">
                   No items match these filters.
@@ -796,7 +869,7 @@ export function MiningIskHrPage() {
 
       {/* Mobile cards */}
       <div className="lg:hidden flex flex-col gap-2">
-        {rows.map((row, index) => (
+        {displayRows.map((row, index) => (
           <article
             key={row.item.typeId}
             className="rounded-xl border border-eve-border/90 bg-gradient-to-br from-base-200/90 to-base-300/20 p-3 shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04),0_4px_14px_-8px_rgb(0_0_0_/_0.5)]"
@@ -835,7 +908,7 @@ export function MiningIskHrPage() {
             </div>
           </article>
         ))}
-        {rows.length === 0 ? (
+        {displayRows.length === 0 ? (
           <p className="text-sm opacity-60 text-center py-8">No items match these filters.</p>
         ) : null}
       </div>

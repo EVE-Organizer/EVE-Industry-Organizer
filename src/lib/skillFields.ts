@@ -91,6 +91,55 @@ export const SKILL_FIELDS: SkillFieldDef[] = [
     tooltip:
       'Lowers broker fee when listing sell orders. NPC base is 3%; each level removes 0.3 percentage points (1.5% at level V). Not charged on instant buy-order sales.',
   },
+  {
+    key: 'advancedBrokerRelations',
+    skillId: 16597,
+    label: 'Advanced Broker Relations',
+    tooltip:
+      'Lowers the relist charge when modifying a sell order price. NPC base discount is 50%; each level adds 5 percentage points (75% at level V). Does not change broker fee on new orders.',
+    prerequisites: [
+      { key: 'accounting', level: 4 },
+      { key: 'brokerRelations', level: 4 },
+    ],
+  },
+  {
+    key: 'mining',
+    skillId: 3386,
+    label: 'Mining',
+    tooltip: 'Adds 5% ore and moon mining yield per level. Hull rates assume IV.',
+  },
+  {
+    key: 'astrogeology',
+    skillId: 3410,
+    label: 'Astrogeology',
+    tooltip: 'Adds 5% ore and moon mining yield per level. Requires Mining IV.',
+    prerequisites: [{ key: 'mining', level: 4 }],
+  },
+  {
+    key: 'iceHarvesting',
+    skillId: 16281,
+    label: 'Ice Harvesting',
+    tooltip: 'Cuts ice harvester cycle time by 5% per level. Hull rates assume IV.',
+  },
+  {
+    key: 'gasCloudHarvesting',
+    skillId: 25544,
+    label: 'Gas Cloud Harvesting',
+    tooltip: 'Cuts gas harvester cycle time by 5% per level. Hull rates assume IV.',
+  },
+  {
+    key: 'industrialCommandShips',
+    skillId: 29637,
+    label: 'Industrial Command Ships',
+    tooltip:
+      'Porpoise +2% and Orca +3% Mining Foreman burst strength per level. Used when a booster hull is on grid.',
+  },
+  {
+    key: 'capitalIndustrialShips',
+    skillId: 28374,
+    label: 'Capital Industrial Ships',
+    tooltip: 'Rorqual +5% Mining Foreman burst strength per level.',
+  },
 ]
 
 export { typeIconUrl as skillIconUrl } from '@/lib/eveImages'
@@ -114,6 +163,13 @@ export const SKILL_ATTRIBUTE_FALLBACKS: Record<
   science: { primaryAttribute: 'intelligence', secondaryAttribute: 'memory' },
   accounting: { primaryAttribute: 'charisma', secondaryAttribute: 'willpower' },
   brokerRelations: { primaryAttribute: 'charisma', secondaryAttribute: 'willpower' },
+  advancedBrokerRelations: { primaryAttribute: 'charisma', secondaryAttribute: 'memory' },
+  mining: { primaryAttribute: 'memory', secondaryAttribute: 'perception' },
+  astrogeology: { primaryAttribute: 'memory', secondaryAttribute: 'intelligence' },
+  iceHarvesting: { primaryAttribute: 'memory', secondaryAttribute: 'perception' },
+  gasCloudHarvesting: { primaryAttribute: 'memory', secondaryAttribute: 'perception' },
+  industrialCommandShips: { primaryAttribute: 'memory', secondaryAttribute: 'willpower' },
+  capitalIndustrialShips: { primaryAttribute: 'memory', secondaryAttribute: 'willpower' },
 }
 
 export function skillIdForKey(key: string): number | undefined {

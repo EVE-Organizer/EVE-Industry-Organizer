@@ -10,6 +10,12 @@ export const BROKER_RELATIONS_REDUCTION_PER_LEVEL = 0.3
 /** Accounting: multiplicative −11% of base tax per level. */
 export const ACCOUNTING_REDUCTION_FACTOR_PER_LEVEL = 0.11
 
+/** NPC base relist discount before Advanced Broker Relations. */
+export const NPC_BASE_RELIST_DISCOUNT_PERCENT = 50
+
+/** Advanced Broker Relations: +5 percentage points to relist discount per level. */
+export const ADVANCED_BROKER_RELIST_DISCOUNT_PER_LEVEL = 5
+
 export interface TradingFeeRates {
   brokerFeePercent: number
   salesTaxPercent: number
@@ -27,6 +33,11 @@ export function brokerFeePercent(brokerRelations: number): number {
 export function salesTaxPercent(accounting: number): number {
   const level = clampSkillLevel(accounting)
   return NPC_BASE_SALES_TAX_PERCENT * (1 - ACCOUNTING_REDUCTION_FACTOR_PER_LEVEL * level)
+}
+
+export function relistDiscountPercent(advancedBrokerRelations: number): number {
+  const level = clampSkillLevel(advancedBrokerRelations)
+  return NPC_BASE_RELIST_DISCOUNT_PERCENT + ADVANCED_BROKER_RELIST_DISCOUNT_PER_LEVEL * level
 }
 
 export function tradingFeeRates(accounting: number, brokerRelations: number): TradingFeeRates {

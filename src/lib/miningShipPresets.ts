@@ -1,8 +1,31 @@
-import type { MiningSubtype, MiningBuffId, MiningShipId, MiningBoostSpace } from '@/types'
+import type {
+  MiningBoosterHullId,
+  MiningBurstTech,
+  MiningCrystalId,
+  MiningFleetLine,
+  MiningForemanBurstId,
+  MiningMinerModuleId,
+  MiningSubtype,
+  MiningBuffId,
+  MiningShipId,
+  MiningBoostSpace,
+  MiningUpgradeId,
+  SkillLevels,
+} from '@/types'
 import { DEFAULT_MINING_M3_PER_HR_BY_SUBTYPE } from '@/lib/miningIph'
 import { MINING_SPACES } from '@/lib/miningIph'
 
-export type { MiningShipId, MiningBuffId, MiningBoostSpace } from '@/types'
+export type {
+  MiningShipId,
+  MiningBuffId,
+  MiningBoostSpace,
+  MiningBoosterHullId,
+  MiningForemanBurstId,
+  MiningMinerModuleId,
+  MiningBurstTech,
+  MiningUpgradeId,
+  MiningCrystalId,
+} from '@/types'
 
 export type MiningShipTier = 'barge' | 'exhumer' | 'frigate' | 'expedition'
 export type MiningShipTech = 't1' | 't2'
@@ -26,6 +49,7 @@ export interface MiningBuffPreset {
   multiplier: number
   category: MiningBuffCategory
   hint: string
+  typeId?: number
   /** Which boost-space contexts show this buff (fleet buffs only). */
   boostSpaces?: readonly MiningBoostSpace[]
   applies: (
@@ -33,7 +57,29 @@ export interface MiningBuffPreset {
     subtype: MiningSubtype,
     boostSpace: MiningBoostSpace,
     activeBuffIds: readonly MiningBuffId[],
+    boosterHull?: MiningBoosterHullId | null,
   ) => boolean
+}
+
+export interface MiningBoosterHullPreset {
+  id: MiningBoosterHullId
+  label: string
+  typeId: number
+  boostSpaces: readonly MiningBoostSpace[]
+  /** Typical yield multiplier with Mining Laser Optimization (no mindlink). */
+  mluMultiplier: number
+  hint: string
+}
+
+export type MiningForemanYieldKind = 'cycle' | 'crit' | 'none'
+
+export interface MiningForemanBurstPreset {
+  id: MiningForemanBurstId
+  label: string
+  shortLabel: string
+  hint: string
+  yieldKind: MiningForemanYieldKind
+  typeId: number
 }
 
 export interface MiningShipGroup {
@@ -61,7 +107,32 @@ export const MINING_BOOST_SPACES: { id: MiningBoostSpace; label: string; hint: s
   })),
 ]
 
-/** Reference m³/hr — @see https://wiki.eveuniversity.org/Mining_yield */
+/** Strip Miner I / Ice Harvester I / Miner II at skill IV. See miningIph Retriever constants. */
+const BAKED = 4
+const ORE_SKILL = (1 + 0.05 * BAKED) ** 2
+const STRIP_I_M3_HR = (150 / 45) * 2 * 3600
+const ICE_I_M3_HR = (1000 / 240) * 2 * 3600
+const ICE_SKILL_DUR = 1 - 0.05 * BAKED
+const MINER_II_M3_HR = (15 / 15) * 2 * 3600
+const SCOOP_II_M3_HR = (20 / 40) * 2 * 3600
+const FRIG_GAS_DUR = 1 - 0.05 * BAKED
+
+function bakedOreM3(yieldMult: number, durationMult = 1) {
+  return Math.round((STRIP_I_M3_HR * yieldMult * ORE_SKILL) / durationMult)
+}
+
+function bakedIceM3(durationMult = 1) {
+  return Math.round(ICE_I_M3_HR / (ICE_SKILL_DUR * durationMult))
+}
+
+function bakedMinerOreM3(guns: number, yieldMult: number) {
+  return Math.round(MINER_II_M3_HR * (guns / 2) * yieldMult * ORE_SKILL)
+}
+
+function bakedGasM3(guns: number, yieldMult = 1, durationMult = 1) {
+  return Math.round((SCOOP_II_M3_HR * (guns / 2) * yieldMult) / durationMult)
+}
+
 export const MINING_SHIPS: MiningShipPreset[] = [
   {
     id: 'retriever',
@@ -70,7 +141,7 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'barge',
     tech: 't1',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: 50_400, moon: 50_400, ice: 37_500 },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.22), moon: bakedOreM3(1.22), ice: bakedIceM3(0.875) },
   },
   {
     id: 'covetor',
@@ -79,7 +150,7 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'barge',
     tech: 't1',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: 58_000, moon: 58_000, ice: 37_500 },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.12, 0.75), moon: bakedOreM3(1.12, 0.75), ice: bakedIceM3() },
   },
   {
     id: 'procurer',
@@ -88,7 +159,7 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'barge',
     tech: 't1',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: 50_400, moon: 50_400, ice: 37_500 },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.08), moon: bakedOreM3(1.08), ice: bakedIceM3() },
   },
   {
     id: 'hulk',
@@ -97,7 +168,7 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'exhumer',
     tech: 't2',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: 87_000, moon: 87_000, ice: 42_000 },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.24, 0.85), moon: bakedOreM3(1.24, 0.85), ice: bakedIceM3(0.88) },
   },
   {
     id: 'mackinaw',
@@ -106,7 +177,7 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'exhumer',
     tech: 't2',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: 82_000, moon: 82_000, ice: 50_000 },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.28, 0.9), moon: bakedOreM3(1.28, 0.9), ice: bakedIceM3(0.84 * 0.875) },
   },
   {
     id: 'skiff',
@@ -115,7 +186,7 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'exhumer',
     tech: 't2',
     subtypes: ['ore', 'moon', 'ice'],
-    m3PerHrBySubtype: { ore: 75_000, moon: 75_000, ice: 45_000 },
+    m3PerHrBySubtype: { ore: bakedOreM3(1.16), moon: bakedOreM3(1.16), ice: bakedIceM3() },
   },
   {
     id: 'venture',
@@ -124,7 +195,7 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'frigate',
     tech: 't1',
     subtypes: ['ore', 'moon', 'gas'],
-    m3PerHrBySubtype: { ore: 15_000, moon: 15_000, gas: 2_400 },
+    m3PerHrBySubtype: { ore: bakedMinerOreM3(2, 2 * 1.2), moon: bakedMinerOreM3(2, 2 * 1.2), gas: bakedGasM3(2, 2, FRIG_GAS_DUR) },
   },
   {
     id: 'prospect',
@@ -133,7 +204,7 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'expedition',
     tech: 't2',
     subtypes: ['ore', 'moon', 'gas'],
-    m3PerHrBySubtype: { ore: 18_000, moon: 18_000, gas: 3_000 },
+    m3PerHrBySubtype: { ore: bakedMinerOreM3(2, 2 * 1.2 * 1.2), moon: bakedMinerOreM3(2, 2 * 1.2 * 1.2), gas: bakedGasM3(2, 2, FRIG_GAS_DUR) },
   },
   {
     id: 'endurance',
@@ -142,28 +213,275 @@ export const MINING_SHIPS: MiningShipPreset[] = [
     tier: 'expedition',
     tech: 't2',
     subtypes: ['ore', 'moon', 'ice', 'gas'],
-    m3PerHrBySubtype: { ore: 12_000, moon: 12_000, ice: 22_000, gas: 2_800 },
+    m3PerHrBySubtype: { ore: bakedMinerOreM3(1, 4 * 1.2), moon: bakedMinerOreM3(1, 4 * 1.2), ice: 22_000, gas: bakedGasM3(1) },
   },
 ]
 
+/** Industrial command ships that run Mining Foreman bursts. */
+export const MINING_BOOSTER_HULLS: MiningBoosterHullPreset[] = [
+  {
+    id: 'porpoise',
+    label: 'Porpoise',
+    typeId: 42244,
+    boostSpaces: ['highsec', 'lowsec', 'nullsec', 'wormhole'],
+    mluMultiplier: 1.3,
+    hint: 'Small command ship. Works in all spaces including wormholes.',
+  },
+  {
+    id: 'orca',
+    label: 'Orca',
+    typeId: 28606,
+    boostSpaces: ['highsec'],
+    mluMultiplier: 1.38,
+    hint: 'Highsec industrial command ship (~38% more yield with MLU burst).',
+  },
+  {
+    id: 'rorqual',
+    label: 'Rorqual',
+    typeId: 28352,
+    boostSpaces: ['lowsec', 'nullsec', 'wormhole'],
+    mluMultiplier: 1.58,
+    hint: 'Capital booster for lowsec, nullsec, and wormhole ops (~58% with MLU burst).',
+  },
+]
+
+/** Mining Foreman burst charges loaded into Command Burst modules. */
+export const MINING_FOREMAN_BURSTS: MiningForemanBurstPreset[] = [
+  {
+    id: 'miningLaserOptimization',
+    label: 'Mining Laser Optimization Charge',
+    shortLabel: 'Optimization',
+    hint: 'Cuts mining module cycle time (~15% base). Biggest m³/hr boost.',
+    yieldKind: 'cycle',
+    typeId: 42830,
+  },
+  {
+    id: 'miningLaserEfficiency',
+    label: 'Mining Laser Efficiency Charge',
+    shortLabel: 'Efficiency',
+    hint: 'Raises mining crit chance (+50% base) and cuts residue. Crits add extra m³ without draining the rock.',
+    yieldKind: 'crit',
+    typeId: 90733,
+  },
+  {
+    id: 'miningLaserFieldEnhancement',
+    label: 'Mining Laser Field Enhancement Charge',
+    shortLabel: 'Field Enhancement',
+    hint: 'Increases mining laser range. Does not change m³/hr at the rock.',
+    yieldKind: 'none',
+    typeId: 42829,
+  },
+  {
+    id: 'miningEquipmentPreservation',
+    label: 'Mining Equipment Preservation Charge',
+    shortLabel: 'Preservation',
+    hint: 'Reduces crystal wear. Does not change m³/hr.',
+    yieldKind: 'none',
+    typeId: 42831,
+  },
+]
+
+export const DEFAULT_MINING_FOREMAN_BURST: MiningForemanBurstId = 'miningLaserOptimization'
+export const DEFAULT_MINING_BURST_TECH: MiningBurstTech = 't2'
+export const DEFAULT_MINING_UPGRADE: MiningUpgradeId = 'none'
+export const DEFAULT_MINING_CRYSTAL: MiningCrystalId = 'none'
+export const DEFAULT_MINING_MINER: MiningMinerModuleId = 'strip'
+export const MAX_MINING_UPGRADE_COUNT = 3
+
+/** SDE type IDs for fleet fit icons. */
+export const MINING_FIT_TYPE_IDS = {
+  stripMinerI: 17482,
+  modulatedStripMinerII: 17912,
+  iceHarvesterI: 16278,
+  iceHarvesterII: 22229,
+  oreCrystalT1: 60276,
+  oreCrystalT2: 60281,
+  moonCrystalT1: 46355,
+  moonCrystalT2: 46356,
+  mlu1: 22542,
+  mlu2: 28576,
+  ihu1: 22576,
+  ihu2: 28578,
+  burstI: 42528,
+  burstII: 43551,
+  largeIndustrialCore: 58945,
+  capitalIndustrialCore: 28583,
+  mindlink: 22559,
+} as const
+/** Hull m³/hr tables assume these skill levels. */
+export const BAKED_MINING_SKILL_LEVEL = 4
+/** Strip Miner I 150 m³ / 45s. MSM II specialty 450 m³ × Type A crystal (1.5 / 1.8). */
+const STRIP_CYCLE_M3 = 150
+const MODULATED_CYCLE_M3 = 120
+const MODULATED_T1_CYCLE_M3 = 450 * 1.5
+const MODULATED_T2_CYCLE_M3 = 450 * 1.8
+const ICE_HARVESTER_I_CYCLE_S = 240
+const ICE_HARVESTER_II_CYCLE_S = 200
+
+export type MiningYieldContext = {
+  boosterHull?: MiningBoosterHullId | null
+  foremanBurst?: MiningForemanBurstId
+  foremanBursts?: MiningForemanBurstId[]
+  burstTech?: MiningBurstTech
+  industrialCore?: boolean
+  miner?: MiningMinerModuleId
+  upgrade?: MiningUpgradeId
+  upgradeCount?: number
+  crystal?: MiningCrystalId
+  skills?: Partial<SkillLevels>
+}
+
+export type MiningFleetLineDefaults = {
+  miner?: MiningMinerModuleId
+  crystal?: MiningCrystalId
+  upgrade?: MiningUpgradeId
+  upgradeCount?: number
+}
+
+export function normalizeMiningUpgrade(id: MiningUpgradeId | undefined): MiningUpgradeId {
+  return id === 'mlu1' || id === 'mlu2' ? id : 'none'
+}
+
+export function normalizeMiningUpgradeCount(count: number | undefined, upgrade: MiningUpgradeId): number {
+  if (upgrade === 'none') return 0
+  const n = Math.floor(Number(count))
+  if (!Number.isFinite(n) || n < 1) return 1
+  return Math.min(n, MAX_MINING_UPGRADE_COUNT)
+}
+
+export function normalizeMiningCrystal(id: MiningCrystalId | undefined): MiningCrystalId {
+  return id === 't1' || id === 't2' ? id : 'none'
+}
+
+export function normalizeMiningMiner(
+  miner: MiningMinerModuleId | undefined,
+  crystal: MiningCrystalId = 'none',
+): MiningMinerModuleId {
+  if (miner === 'strip' || miner === 'modulated') return miner
+  return crystal === 'none' ? DEFAULT_MINING_MINER : 'modulated'
+}
+
+export function miningBurstSlotCount(hull: MiningBoosterHullId | null | undefined): number {
+  if (hull === 'porpoise') return 2
+  if (hull === 'orca' || hull === 'rorqual') return 3
+  return 0
+}
+
+export function normalizeMiningForemanBursts(
+  hull: MiningBoosterHullId | null | undefined,
+  bursts: readonly MiningForemanBurstId[] | undefined,
+  legacySingle?: MiningForemanBurstId,
+): MiningForemanBurstId[] {
+  const max = miningBurstSlotCount(hull)
+  if (!hull || max < 1) return []
+  const raw =
+    bursts && bursts.length > 0
+      ? bursts
+      : [normalizeMiningForemanBurst(legacySingle)]
+  const seen = new Set<MiningForemanBurstId>()
+  const out: MiningForemanBurstId[] = []
+  for (const burst of raw) {
+    const id = normalizeMiningForemanBurst(burst)
+    if (seen.has(id)) continue
+    seen.add(id)
+    out.push(id)
+    if (out.length >= max) break
+  }
+  return out
+}
+
+export function toggleForemanBurst(
+  hull: MiningBoosterHullId | null | undefined,
+  current: readonly MiningForemanBurstId[],
+  id: MiningForemanBurstId,
+): MiningForemanBurstId[] {
+  const max = miningBurstSlotCount(hull)
+  const next = normalizeMiningForemanBursts(hull, current)
+  if (next.includes(id)) return next.filter((b) => b !== id)
+  if (next.length >= max) return next
+  return [...next, id]
+}
+
+export function normalizeMiningBurstTech(tech: MiningBurstTech | undefined): MiningBurstTech {
+  return tech === 't1' ? 't1' : DEFAULT_MINING_BURST_TECH
+}
+
+/** EVE stacking penalty on module bonuses. */
+function stackingProduct(bonus: number, count: number): number {
+  let m = 1
+  for (let i = 0; i < count; i++) {
+    m *= 1 + bonus * Math.exp(-(i * i) / 7.1289)
+  }
+  return m
+}
+
+export function miningUpgradeMultiplier(
+  subtype: MiningSubtype,
+  ship: MiningShipPreset,
+  upgrade: MiningUpgradeId,
+  count: number,
+): number {
+  if (upgrade === 'none' || count < 1) return 1
+  if (subtype === 'gas') return 1
+  if (ship.tier !== 'barge' && ship.tier !== 'exhumer') return 1
+  if (subtype === 'ice') {
+    const cut = upgrade === 'mlu2' ? 0.09 : 0.05
+    let duration = 1
+    for (let i = 0; i < count; i++) {
+      duration *= 1 - cut * Math.exp(-(i * i) / 7.1289)
+    }
+    return 1 / duration
+  }
+  const bonus = upgrade === 'mlu2' ? 0.09 : 0.05
+  return stackingProduct(bonus, count)
+}
+
+export function miningCrystalMultiplier(
+  subtype: MiningSubtype,
+  ship: MiningShipPreset,
+  crystal: MiningCrystalId,
+  miner: MiningMinerModuleId = crystal === 'none' ? 'strip' : 'modulated',
+): number {
+  if (subtype === 'gas') return 1
+  if (ship.tier !== 'barge' && ship.tier !== 'exhumer') return 1
+  const gun = normalizeMiningMiner(miner, crystal)
+  if (gun !== 'modulated') return 1
+  if (subtype === 'ice') return ICE_HARVESTER_I_CYCLE_S / ICE_HARVESTER_II_CYCLE_S
+  const xtal = normalizeMiningCrystal(crystal)
+  if (xtal === 't2') return MODULATED_T2_CYCLE_M3 / STRIP_CYCLE_M3
+  if (xtal === 't1') return MODULATED_T1_CYCLE_M3 / STRIP_CYCLE_M3
+  return MODULATED_CYCLE_M3 / STRIP_CYCLE_M3
+}
+
+function skillOrBaked(skills: Partial<SkillLevels> | undefined, key: keyof SkillLevels): number {
+  const n = skills?.[key]
+  return typeof n === 'number' && Number.isFinite(n) ? Math.max(0, Math.min(5, Math.floor(n))) : BAKED_MINING_SKILL_LEVEL
+}
+
+/** Relative to hull tables baked at skill IV. */
+export function miningSkillYieldMultiplier(
+  subtype: MiningSubtype,
+  skills: Partial<SkillLevels> | undefined,
+): number {
+  const baked = 1 + 0.05 * BAKED_MINING_SKILL_LEVEL
+  if (subtype === 'ore' || subtype === 'moon') {
+    const mining = 1 + 0.05 * skillOrBaked(skills, 'mining')
+    const astro = 1 + 0.05 * skillOrBaked(skills, 'astrogeology')
+    return (mining * astro) / (baked * baked)
+  }
+  if (subtype === 'gas') return 1
+  const level = skillOrBaked(skills, 'iceHarvesting')
+  const atLevel = 1 / (1 - 0.05 * level)
+  const atBaked = 1 / (1 - 0.05 * BAKED_MINING_SKILL_LEVEL)
+  return atLevel / atBaked
+}
+
 /**
  * Typical mining buffs by space.
- * Fleet values: EVE Uni "normal" Orca/Rorqual with Mining Laser Optimization burst
- * (not perfect mindlink + T2 core max).
+ * Fleet yield uses miningBoosterHull + miningForemanBurst (not legacy boost chips).
  * @see https://wiki.eveuniversity.org/Perfect_mining
  */
 export const MINING_BUFFS: MiningBuffPreset[] = [
-  {
-    id: 'mlu3',
-    label: '3× Mining Laser Upgrade I',
-    shortLabel: '3× MLU I',
-    multiplier: 1.167,
-    category: 'fit',
-    hint: 'Common T1 barge fit (EVE Uni Retriever: ~840 → ~980 m³/min). Exhumers usually fit MLU II instead.',
-    applies: (ship, subtype) =>
-      (ship.tier === 'barge' || ship.tier === 'exhumer') &&
-      (subtype === 'ore' || subtype === 'moon'),
-  },
   {
     id: 'highwall',
     label: 'Highwall Mining implant G5',
@@ -171,6 +489,7 @@ export const MINING_BUFFS: MiningBuffPreset[] = [
     multiplier: 1.05,
     category: 'fit',
     hint: 'Inherent Implants "Highwall" Mining (+5% ore yield). Standard on ore/mining alts.',
+    typeId: 22535,
     applies: (_ship, subtype) => subtype === 'ore' || subtype === 'moon',
   },
   {
@@ -180,6 +499,7 @@ export const MINING_BUFFS: MiningBuffPreset[] = [
     multiplier: 1.05,
     category: 'fit',
     hint: 'Inherent Implants "Yeti" Ice Harvesting (−5% ice harvester cycle time).',
+    typeId: 22571,
     applies: (_ship, subtype) => subtype === 'ice',
   },
   {
@@ -189,55 +509,24 @@ export const MINING_BUFFS: MiningBuffPreset[] = [
     multiplier: 1.05,
     category: 'fit',
     hint: 'Eifyr and Co. "Alchemist" Gas Harvesting (−5% gas harvester cycle time).',
+    typeId: 27239,
     applies: (_ship, subtype) => subtype === 'gas',
-  },
-  {
-    id: 'porpoiseBoost',
-    label: 'Porpoise · Mining Laser Optimization',
-    shortLabel: 'Porpoise boost',
-    multiplier: 1.3,
-    category: 'fleet',
-    boostSpaces: ['highsec', 'lowsec', 'nullsec', 'wormhole'],
-    hint: 'Weaker than Orca/Rorqual (~30% more yield). Common for small gangs, WH, and mobile ops.',
-    applies: (_ship, _subtype, boostSpace) => boostSpace !== 'solo',
-  },
-  {
-    id: 'orcaBoost',
-    label: 'Orca · Mining Laser Optimization',
-    shortLabel: 'Orca boost',
-    multiplier: 1.38,
-    category: 'fleet',
-    boostSpaces: ['highsec'],
-    hint: 'Mining Foreman burst from an Orca in highsec (~38% more ore yield; typical skills, no mindlink).',
-    applies: (_ship, _subtype, boostSpace) => boostSpace === 'highsec',
-  },
-  {
-    id: 'rorqualBoost',
-    label: 'Rorqual · Mining Laser Optimization',
-    shortLabel: 'Rorqual boost',
-    multiplier: 1.58,
-    category: 'fleet',
-    boostSpaces: ['lowsec', 'nullsec', 'wormhole'],
-    hint: 'Mining Foreman burst from a Rorqual (~58% more yield). Standard for moon, null, and WH mining.',
-    applies: (_ship, _subtype, boostSpace) =>
-      boostSpace === 'lowsec' || boostSpace === 'nullsec' || boostSpace === 'wormhole',
   },
   {
     id: 'mindlink',
     label: 'Mining Foreman Mindlink',
     shortLabel: 'Mindlink',
-    multiplier: 1.1,
+    multiplier: 1.25,
     category: 'fleet',
-    hint: '+25% burst strength on the booster pilot. ~10% more yield on top of Orca/Rorqual burst.',
-    applies: (_ship, _subtype, boostSpace, activeBuffIds) =>
-      boostSpace !== 'solo' &&
-      (activeBuffIds.includes('orcaBoost') ||
-        activeBuffIds.includes('rorqualBoost') ||
-        activeBuffIds.includes('porpoiseBoost')),
+    hint: '+25% Mining Foreman burst strength on the booster pilot.',
+    typeId: 22559,
+    applies: (_ship, _subtype, boostSpace, _activeBuffIds, boosterHull) =>
+      boostSpace !== 'solo' && boosterHull != null,
   },
 ]
 
-export const FLEET_BURST_BUFF_IDS: readonly MiningBuffId[] = [
+/** Legacy buff ids migrated to miningBoosterHull + miningForemanBurst. */
+export const LEGACY_FLEET_BURST_BUFF_IDS: readonly MiningBuffId[] = [
   'orcaBoost',
   'rorqualBoost',
   'porpoiseBoost',
@@ -248,39 +537,142 @@ export const DEFAULT_MINING_BOOST_SPACE: MiningBoostSpace = 'highsec'
 
 const SHIP_BY_ID = new Map(MINING_SHIPS.map((s) => [s.id, s]))
 const BUFF_BY_ID = new Map(MINING_BUFFS.map((b) => [b.id, b]))
+const BOOSTER_HULL_BY_ID = new Map(MINING_BOOSTER_HULLS.map((h) => [h.id, h]))
+const FOREMAN_BURST_BY_ID = new Map(MINING_FOREMAN_BURSTS.map((b) => [b.id, b]))
 
 const VALID_BUFF_IDS = new Set<MiningBuffId>(MINING_BUFFS.map((b) => b.id))
 const VALID_BOOST_SPACES = new Set<MiningBoostSpace>(MINING_BOOST_SPACES.map((s) => s.id))
-const FLEET_BURST_SET = new Set<MiningBuffId>(FLEET_BURST_BUFF_IDS)
+const LEGACY_BURST_SET = new Set<MiningBuffId>(LEGACY_FLEET_BURST_BUFF_IDS)
 
-function pickFleetBurst(ids: readonly MiningBuffId[]): MiningBuffId | undefined {
-  const bursts = ids.filter((id) => FLEET_BURST_SET.has(id))
-  if (bursts.length === 0) return undefined
-  if (bursts.length === 1) return bursts[0]
-  return bursts.reduce((best, id) => {
-    const bestMult = BUFF_BY_ID.get(best)?.multiplier ?? 1
-    const idMult = BUFF_BY_ID.get(id)?.multiplier ?? 1
-    return idMult > bestMult ? id : best
-  })
+export function getMiningBoosterHull(id: MiningBoosterHullId | undefined | null): MiningBoosterHullPreset | null {
+  if (!id) return null
+  return BOOSTER_HULL_BY_ID.get(id) ?? null
 }
 
-function dedupeFleetBursts(ids: MiningBuffId[]): MiningBuffId[] {
-  const keep = pickFleetBurst(ids)
-  if (!keep) return ids
-  return ids.filter((id) => !FLEET_BURST_SET.has(id) || id === keep)
+export function normalizeMiningBoosterHull(
+  hull: MiningBoosterHullId | null | undefined,
+): MiningBoosterHullId | null {
+  if (!hull) return null
+  return BOOSTER_HULL_BY_ID.has(hull) ? hull : null
 }
 
-/** Toggle a buff; fleet burst boosters are mutually exclusive. */
+export function normalizeMiningForemanBurst(
+  burst: MiningForemanBurstId | undefined,
+): MiningForemanBurstId {
+  if (burst && FOREMAN_BURST_BY_ID.has(burst)) return burst
+  return DEFAULT_MINING_FOREMAN_BURST
+}
+
+export function miningBoosterHullsForSpace(_boostSpace?: MiningBoostSpace): MiningBoosterHullPreset[] {
+  return MINING_BOOSTER_HULLS
+}
+
+function foremanBurstStrength(
+  hull: MiningBoosterHullId,
+  skills?: Partial<SkillLevels>,
+  burstTech: MiningBurstTech = DEFAULT_MINING_BURST_TECH,
+  industrialCore = true,
+  mindlink = false,
+): number {
+  const ics = skillOrBaked(skills, 'industrialCommandShips')
+  const cis = skillOrBaked(skills, 'capitalIndustrialShips')
+  const hullBonus =
+    hull === 'porpoise' ? 0.02 * ics : hull === 'orca' ? 0.03 * ics : hull === 'rorqual' ? 0.05 * cis : 0
+  let strength = 1 + hullBonus
+  if (normalizeMiningBurstTech(burstTech) === 't2') strength *= 1.25
+  if (mindlink) strength *= 1.25
+  if (industrialCore && (hull === 'orca' || hull === 'rorqual')) strength *= 1.3
+  return strength
+}
+
+function burstChargeYieldMultiplier(yieldKind: MiningForemanYieldKind, strength: number): number {
+  if (yieldKind === 'cycle') {
+    const cycleCut = Math.min(0.85, 0.15 * strength)
+    return 1 / (1 - cycleCut)
+  }
+  if (yieldKind === 'crit') {
+    // Base crit 1%, burst +50% crit chance, crit bonus yield +200% of the cycle.
+    const critChance = Math.min(0.25, 0.01 * (1 + 0.5 * strength))
+    return 1 + critChance * 2
+  }
+  return 1
+}
+
+/** Yield from loaded Foreman charges. Optimization and Efficiency stack. */
+export function fleetBurstsYieldMultiplier(
+  hull: MiningBoosterHullId | null | undefined,
+  bursts: readonly MiningForemanBurstId[] | undefined,
+  skills?: Partial<SkillLevels>,
+  burstTech: MiningBurstTech = DEFAULT_MINING_BURST_TECH,
+  industrialCore = true,
+  mindlink = false,
+  legacyBurst?: MiningForemanBurstId,
+): number {
+  if (!hull) return 1
+  const loaded = normalizeMiningForemanBursts(hull, bursts, legacyBurst)
+  if (loaded.length === 0) return 1
+  const strength = foremanBurstStrength(hull, skills, burstTech, industrialCore, mindlink)
+  let m = 1
+  for (const id of loaded) {
+    const kind = FOREMAN_BURST_BY_ID.get(id)?.yieldKind ?? 'none'
+    m *= burstChargeYieldMultiplier(kind, strength)
+  }
+  return m
+}
+
+/** Yield from a single Foreman charge (tests and legacy single-burst settings). */
+export function fleetBurstYieldMultiplier(
+  hull: MiningBoosterHullId | null | undefined,
+  burst: MiningForemanBurstId | undefined,
+  skills?: Partial<SkillLevels>,
+  burstTech: MiningBurstTech = DEFAULT_MINING_BURST_TECH,
+  industrialCore = true,
+  mindlink = false,
+): number {
+  return fleetBurstsYieldMultiplier(hull, burst ? [burst] : [], skills, burstTech, industrialCore, mindlink)
+}
+
+export function migrateBoosterFromLegacyBuffIds(buffIds: readonly MiningBuffId[]): {
+  hull: MiningBoosterHullId | null
+  burst: MiningForemanBurstId
+  buffIds: MiningBuffId[]
+  upgrade: MiningUpgradeId
+  upgradeCount: number
+} {
+  let hull: MiningBoosterHullId | null = null
+  let upgrade: MiningUpgradeId = 'none'
+  let upgradeCount = 0
+  const remaining: MiningBuffId[] = []
+  for (const id of buffIds) {
+    if (id === 'porpoiseBoost') hull = 'porpoise'
+    else if (id === 'orcaBoost') hull = 'orca'
+    else if (id === 'rorqualBoost') hull = 'rorqual'
+    else if (id === 'mlu3') {
+      upgrade = 'mlu1'
+      upgradeCount = 3
+    } else if (LEGACY_BURST_SET.has(id)) continue
+    else if (VALID_BUFF_IDS.has(id)) remaining.push(id)
+  }
+  return {
+    hull,
+    burst: DEFAULT_MINING_FOREMAN_BURST,
+    buffIds: remaining,
+    upgrade,
+    upgradeCount,
+  }
+}
+
+function stripLegacyBurstBuffIds(ids: MiningBuffId[]): MiningBuffId[] {
+  return ids.filter((id) => !LEGACY_BURST_SET.has(id))
+}
+
+/** Toggle a fit or mindlink buff. */
 export function toggleMiningBuffId(
   buffIds: readonly MiningBuffId[],
   id: MiningBuffId,
 ): MiningBuffId[] {
   if (buffIds.includes(id)) return buffIds.filter((b) => b !== id)
-  let next = [...buffIds, id]
-  if (FLEET_BURST_SET.has(id)) {
-    next = next.filter((b) => b === id || !FLEET_BURST_SET.has(b))
-  }
-  return next
+  return [...buffIds, id]
 }
 
 export function getMiningShip(id: MiningShipId | undefined): MiningShipPreset {
@@ -298,18 +690,27 @@ export function miningBoostSpaceLabel(space: MiningBoostSpace): string {
   return MINING_BOOST_SPACES.find((s) => s.id === space)?.label ?? space
 }
 
-/** Derive boost context from selected fleet buffs (no separate space picker needed). */
+/** Derive boost context from booster hull or legacy buff ids. */
 export function inferMiningBoostSpace(
   buffIds: readonly MiningBuffId[],
   fallback: MiningBoostSpace = DEFAULT_MINING_BOOST_SPACE,
+  boosterHull?: MiningBoosterHullId | null,
 ): MiningBoostSpace {
-  const ids = normalizeMiningBuffIds([...buffIds])
-  if (ids.includes('orcaBoost')) return 'highsec'
-  if (ids.includes('rorqualBoost')) {
+  if (boosterHull === 'orca') return 'highsec'
+  if (boosterHull === 'rorqual') {
     return fallback === 'solo' || fallback === 'highsec' ? 'nullsec' : fallback
   }
-  if (ids.includes('porpoiseBoost')) {
+  if (boosterHull === 'porpoise') {
     return fallback === 'solo' ? 'wormhole' : fallback
+  }
+  for (const id of buffIds) {
+    if (id === 'orcaBoost') return 'highsec'
+    if (id === 'rorqualBoost') {
+      return fallback === 'solo' || fallback === 'highsec' ? 'nullsec' : fallback
+    }
+    if (id === 'porpoiseBoost') {
+      return fallback === 'solo' ? 'wormhole' : fallback
+    }
   }
   return 'solo'
 }
@@ -380,9 +781,10 @@ export function normalizeMiningBuffIds(
     if (id === ('fleetBoost' as MiningBuffId)) {
       return space === 'highsec' ? ['orcaBoost'] : space === 'solo' ? [] : ['rorqualBoost']
     }
+    if (LEGACY_BURST_SET.has(id)) return []
     return VALID_BUFF_IDS.has(id) ? [id] : []
   })
-  return [...new Set(expanded)]
+  return stripLegacyBurstBuffIds([...new Set(expanded)])
 }
 
 export function miningBuffApplies(
@@ -391,10 +793,11 @@ export function miningBuffApplies(
   subtype: MiningSubtype,
   boostSpace: MiningBoostSpace,
   activeBuffIds: readonly MiningBuffId[],
+  boosterHull?: MiningBoosterHullId | null,
 ): boolean {
   const buff = BUFF_BY_ID.get(buffId)
   if (!buff) return false
-  return buff.applies(ship, subtype, boostSpace, activeBuffIds)
+  return buff.applies(ship, subtype, boostSpace, activeBuffIds, boosterHull)
 }
 
 export function applicableMiningBuffIds(
@@ -402,11 +805,14 @@ export function applicableMiningBuffIds(
   subtype: MiningSubtype,
   buffIds: readonly MiningBuffId[],
   boostSpace: MiningBoostSpace,
+  boosterHull?: MiningBoosterHullId | null,
 ): MiningBuffId[] {
   const ship = getMiningShip(normalizeMiningShipId(shipId, subtype))
   const space = normalizeMiningBoostSpace(boostSpace)
-  const normalized = dedupeFleetBursts(normalizeMiningBuffIds([...buffIds], space))
-  return normalized.filter((id) => miningBuffApplies(id, ship, subtype, space, normalized))
+  const normalized = normalizeMiningBuffIds([...buffIds], space)
+  return normalized.filter((id) =>
+    miningBuffApplies(id, ship, subtype, space, normalized, boosterHull),
+  )
 }
 
 export function miningBuffsForContext(
@@ -414,48 +820,83 @@ export function miningBuffsForContext(
   subtype: MiningSubtype,
   boostSpace: MiningBoostSpace,
   activeBuffIds: readonly MiningBuffId[],
+  boosterHull?: MiningBoosterHullId | null,
 ): { fit: MiningBuffPreset[]; fleet: MiningBuffPreset[] } {
   const ship = getMiningShip(normalizeMiningShipId(shipId, subtype))
   const space = normalizeMiningBoostSpace(boostSpace)
   const fit: MiningBuffPreset[] = []
   const fleet: MiningBuffPreset[] = []
   for (const buff of MINING_BUFFS) {
-    if (!buff.applies(ship, subtype, space, activeBuffIds)) continue
+    if (!buff.applies(ship, subtype, space, activeBuffIds, boosterHull)) continue
     if (buff.category === 'fit') fit.push(buff)
     else if (space !== 'solo') fleet.push(buff)
   }
   return { fit, fleet }
 }
 
-/** All buffs to show in the setup UI (fit + fleet, no space grouping). */
+/** All fit buffs to show in the setup UI (mindlink when booster is set). */
 export function miningBuffsForSetup(
   shipId: MiningShipId | undefined,
   subtype: MiningSubtype,
   activeBuffIds: readonly MiningBuffId[],
+  boosterHull?: MiningBoosterHullId | null,
 ): MiningBuffPreset[] {
   const ship = getMiningShip(normalizeMiningShipId(shipId, subtype))
   const result: MiningBuffPreset[] = []
   for (const buff of MINING_BUFFS) {
     if (buff.category === 'fit') {
-      if (buff.applies(ship, subtype, 'solo', activeBuffIds)) result.push(buff)
+      if (buff.applies(ship, subtype, 'solo', activeBuffIds, boosterHull)) result.push(buff)
       continue
     }
-    if (buff.id === 'mindlink') {
-      if (FLEET_BURST_BUFF_IDS.some((id) => activeBuffIds.includes(id))) result.push(buff)
-      continue
+    if (buff.id === 'mindlink' && boosterHull) {
+      result.push(buff)
     }
-    result.push(buff)
   }
   return result
 }
 
-export function miningBuffMultiplier(buffIds: readonly MiningBuffId[]): number {
+export function miningFitBuffMultiplier(buffIds: readonly MiningBuffId[]): number {
   let mult = 1
   for (const id of buffIds) {
     const buff = BUFF_BY_ID.get(id)
-    if (buff) mult *= buff.multiplier
+    if (buff && buff.category === 'fit') mult *= buff.multiplier
   }
   return mult
+}
+
+export function miningBuffMultiplier(
+  buffIds: readonly MiningBuffId[],
+  ctx: MiningYieldContext = {},
+): number {
+  const mindlink = buffIds.includes('mindlink')
+  return (
+    miningFitBuffMultiplier(buffIds) *
+    fleetBurstsYieldMultiplier(
+      ctx.boosterHull,
+      ctx.foremanBursts,
+      ctx.skills,
+      ctx.burstTech,
+      ctx.industrialCore !== false,
+      mindlink,
+      ctx.foremanBurst,
+    )
+  )
+}
+
+export function miningFitYieldMultiplier(
+  subtype: MiningSubtype,
+  ship: MiningShipPreset,
+  ctx: MiningYieldContext = {},
+): number {
+  const upgrade = normalizeMiningUpgrade(ctx.upgrade)
+  const count = normalizeMiningUpgradeCount(ctx.upgradeCount, upgrade)
+  const crystal = normalizeMiningCrystal(ctx.crystal)
+  const miner = normalizeMiningMiner(ctx.miner, crystal)
+  return (
+    miningUpgradeMultiplier(subtype, ship, upgrade, count) *
+    miningCrystalMultiplier(subtype, ship, crystal, miner) *
+    miningSkillYieldMultiplier(subtype, ctx.skills)
+  )
 }
 
 export function formatBuffPercent(multiplier: number): string {
@@ -472,17 +913,252 @@ export function normalizeMiningFleetSize(size: number | undefined): number {
   return Math.min(n, MAX_MINING_FLEET_SIZE)
 }
 
+function capFleetTotal(lines: MiningFleetLine[]): MiningFleetLine[] {
+  const result = lines.map((l) => ({
+    ...l,
+    count: normalizeMiningFleetSize(l.count),
+  }))
+  let total = result.reduce((sum, l) => sum + l.count, 0)
+  while (total > MAX_MINING_FLEET_SIZE && result.length > 0) {
+    const last = result[result.length - 1]
+    if (last.count > 1) {
+      last.count--
+      total--
+    } else {
+      result.pop()
+      total--
+    }
+  }
+  return result
+}
+
+function fleetLineKey(line: MiningFleetLine): string {
+  const crystal = normalizeMiningCrystal(line.crystal)
+  const miner = normalizeMiningMiner(line.miner, crystal)
+  const upgrade = normalizeMiningUpgrade(line.upgrade)
+  const upgradeCount = normalizeMiningUpgradeCount(line.upgradeCount, upgrade)
+  const buffs = (line.buffIds ?? []).slice().sort().join(',')
+  const skills = line.skills
+    ? Object.keys(line.skills)
+        .sort()
+        .map((k) => `${k}:${line.skills?.[k] ?? ''}`)
+        .join(',')
+    : ''
+  return `${line.shipId}|${miner}|${crystal}|${upgrade}|${upgradeCount}|${buffs}|${skills}`
+}
+
+function hydrateFleetLine(
+  line: MiningFleetLine,
+  defaults?: MiningFleetLineDefaults,
+): MiningFleetLine {
+  const crystal = normalizeMiningCrystal(line.crystal ?? defaults?.crystal)
+  const miner = normalizeMiningMiner(line.miner ?? defaults?.miner, crystal)
+  const upgrade = normalizeMiningUpgrade(line.upgrade ?? defaults?.upgrade)
+  return {
+    ...line,
+    miner,
+    crystal,
+    upgrade,
+    upgradeCount: normalizeMiningUpgradeCount(
+      line.upgradeCount ?? defaults?.upgradeCount,
+      upgrade,
+    ),
+  }
+}
+
+export function yieldCtxForLine(
+  line: MiningFleetLine,
+  ctx: MiningYieldContext,
+): MiningYieldContext {
+  return {
+    ...ctx,
+    miner: line.miner ?? ctx.miner,
+    crystal: line.crystal ?? ctx.crystal,
+    upgrade: line.upgrade ?? ctx.upgrade,
+    upgradeCount: line.upgradeCount ?? ctx.upgradeCount,
+    skills: { ...ctx.skills, ...line.skills },
+  }
+}
+
+export function buffIdsForLine(
+  line: MiningFleetLine,
+  fleetBuffIds: readonly MiningBuffId[],
+): MiningBuffId[] {
+  if (line.buffIds) return [...line.buffIds, ...fleetBuffIds.filter((id) => id === 'mindlink')]
+  return [...fleetBuffIds]
+}
+
+/** Merge identical fits, drop invalid ships, migrate legacy single-ship settings. */
+export function normalizeMiningFleet(
+  fleet: readonly MiningFleetLine[] | undefined,
+  subtype: MiningSubtype,
+  legacyShip?: MiningShipId,
+  legacySize?: number,
+  defaults?: MiningFleetLineDefaults,
+): MiningFleetLine[] {
+  const merged = new Map<string, MiningFleetLine>()
+
+  function addLine(line: MiningFleetLine) {
+    let ship = getMiningShip(line.shipId)
+    if (!miningShipSupportsSubtype(ship, subtype)) {
+      ship = getMiningShip(defaultMiningShipForSubtype(subtype))
+    }
+    const hydrated = hydrateFleetLine({ ...line, shipId: ship.id }, defaults)
+    hydrated.count = normalizeMiningFleetSize(hydrated.count)
+    const key = fleetLineKey(hydrated)
+    const prev = merged.get(key)
+    if (prev) {
+      prev.count = normalizeMiningFleetSize(prev.count + hydrated.count)
+      return
+    }
+    merged.set(key, hydrated)
+  }
+
+  if (fleet?.length) {
+    for (const line of fleet) addLine(line)
+  } else if (legacyShip) {
+    addLine({
+      shipId: normalizeMiningShipId(legacyShip, subtype),
+      count: normalizeMiningFleetSize(legacySize),
+    })
+  }
+
+  let lines = [...merged.values()]
+  if (lines.length === 0) {
+    lines = [
+      hydrateFleetLine(
+        { shipId: defaultMiningShipForSubtype(subtype), count: DEFAULT_MINING_FLEET_SIZE },
+        defaults,
+      ),
+    ]
+  }
+
+  return capFleetTotal(lines)
+}
+
+export function resolveUserMiningM3PerHrFromFleet(
+  subtype: MiningSubtype,
+  fleet: readonly MiningFleetLine[],
+  buffIds: readonly MiningBuffId[],
+  boostSpace: MiningBoostSpace = DEFAULT_MINING_BOOST_SPACE,
+  ctx: MiningYieldContext = {},
+): number {
+  const normalized = normalizeMiningFleet(fleet, subtype)
+  let sum = 0
+  for (const line of normalized) {
+    sum += resolveUserMiningM3PerHr(
+      subtype,
+      line.shipId,
+      buffIdsForLine(line, buffIds),
+      boostSpace,
+      line.count,
+      yieldCtxForLine(line, ctx),
+    )
+  }
+  return sum
+}
+
+export function formatBoosterBurstLabel(
+  boosterHull: MiningBoosterHullId | null | undefined,
+  foremanBurst: MiningForemanBurstId | undefined,
+  foremanBursts?: readonly MiningForemanBurstId[],
+): string | null {
+  if (!boosterHull) return null
+  const hull = getMiningBoosterHull(boosterHull)
+  if (!hull) return null
+  const loaded = normalizeMiningForemanBursts(boosterHull, foremanBursts, foremanBurst)
+  if (loaded.length === 0) return hull.label
+  const names = loaded
+    .map((id) => FOREMAN_BURST_BY_ID.get(id)?.label)
+    .filter((s): s is string => Boolean(s))
+  return names.length ? `${hull.label} · ${names.join(', ')}` : hull.label
+}
+
+export function formatMiningFleetSummary(
+  subtype: MiningSubtype,
+  fleet: readonly MiningFleetLine[],
+  buffIds: readonly MiningBuffId[],
+  m3PerHr: number,
+  boostSpace: MiningBoostSpace = DEFAULT_MINING_BOOST_SPACE,
+  ctx: MiningYieldContext = {},
+): string {
+  const normalized = normalizeMiningFleet(fleet, subtype)
+  const space = normalizeMiningBoostSpace(boostSpace)
+  const fleetPart = normalized
+    .map((line) => {
+      const ship = getMiningShip(line.shipId)
+      return line.count > 1 ? `${line.count}× ${ship.label}` : ship.label
+    })
+    .join(' + ')
+  const labels: string[] = []
+  const boosterLabel = formatBoosterBurstLabel(ctx.boosterHull, ctx.foremanBurst, ctx.foremanBursts)
+  if (boosterLabel) labels.push(boosterLabel)
+  const upgrade = normalizeMiningUpgrade(ctx.upgrade)
+  const upgradeCount = normalizeMiningUpgradeCount(ctx.upgradeCount, upgrade)
+  if (upgrade !== 'none' && upgradeCount > 0) {
+    labels.push(
+      `${upgradeCount}× ${upgrade === 'mlu2' ? 'Mining Laser Upgrade II' : 'Mining Laser Upgrade I'}`,
+    )
+  }
+  const crystal = normalizeMiningCrystal(ctx.crystal)
+  if (crystal !== 'none') {
+    labels.push(crystal === 't2' ? 'Tech II mining crystal' : 'Tech I mining crystal')
+  }
+  const activeIds = new Set<MiningBuffId>()
+  for (const line of normalized) {
+    for (const id of applicableMiningBuffIds(
+      line.shipId,
+      subtype,
+      buffIds,
+      space,
+      ctx.boosterHull,
+    )) {
+      activeIds.add(id)
+    }
+  }
+  for (const id of activeIds) {
+    const name = BUFF_BY_ID.get(id)?.label
+    if (name) labels.push(name)
+  }
+  const buffPart = labels.length > 0 ? labels.join(' + ') : 'Hull only'
+  return `${fleetPart} · ${buffPart} · ${m3PerHr.toLocaleString()} m³/hr`
+}
+
+/** Buff chips for a mixed fleet: union of fit buffs across all hulls. */
+export function miningBuffsForFleetSetup(
+  fleet: readonly MiningFleetLine[],
+  subtype: MiningSubtype,
+  activeBuffIds: readonly MiningBuffId[],
+  boosterHull?: MiningBoosterHullId | null,
+): MiningBuffPreset[] {
+  const normalized = normalizeMiningFleet(fleet, subtype)
+  const seen = new Set<MiningBuffId>()
+  const result: MiningBuffPreset[] = []
+  for (const line of normalized) {
+    for (const buff of miningBuffsForSetup(line.shipId, subtype, activeBuffIds, boosterHull)) {
+      if (!seen.has(buff.id)) {
+        seen.add(buff.id)
+        result.push(buff)
+      }
+    }
+  }
+  const order = new Map(MINING_BUFFS.map((b, i) => [b.id, i]))
+  result.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
+  return result
+}
+
 export function resolveUserMiningM3PerHr(
   subtype: MiningSubtype,
   shipId: MiningShipId | undefined,
   buffIds: readonly MiningBuffId[],
   boostSpace: MiningBoostSpace = DEFAULT_MINING_BOOST_SPACE,
   fleetSize: number = DEFAULT_MINING_FLEET_SIZE,
+  ctx: MiningYieldContext = {},
 ): number {
   const ship = getMiningShip(normalizeMiningShipId(shipId, subtype))
   const base = ship.m3PerHrBySubtype[subtype] ?? DEFAULT_MINING_M3_PER_HR_BY_SUBTYPE[subtype]
-  const active = applicableMiningBuffIds(shipId, subtype, buffIds, boostSpace)
-  const perShip = base * miningBuffMultiplier(active)
+  const active = applicableMiningBuffIds(shipId, subtype, buffIds, boostSpace, ctx.boosterHull)
+  const perShip = base * miningFitYieldMultiplier(subtype, ship, ctx) * miningBuffMultiplier(active, ctx)
   return Math.round(perShip * normalizeMiningFleetSize(fleetSize))
 }
 
@@ -506,7 +1182,7 @@ export function formatMiningSetupSummary(
   const space = normalizeMiningBoostSpace(boostSpace)
   const active = applicableMiningBuffIds(shipId, subtype, buffIds, space)
   const buffLabels = active
-    .map((id) => BUFF_BY_ID.get(id)?.shortLabel)
+    .map((id) => BUFF_BY_ID.get(id)?.label)
     .filter(Boolean) as string[]
   const buffPart = buffLabels.length > 0 ? buffLabels.join(' + ') : 'Hull only'
   const fleet = normalizeMiningFleetSize(fleetSize)
@@ -514,26 +1190,20 @@ export function formatMiningSetupSummary(
   return `${fleetPart}${ship.label} · ${buffPart} · ${m3PerHr.toLocaleString()} m³/hr`
 }
 
-/** Clear fleet buffs that do not apply after a boost-space change. */
 export function miningBuffIdsForBoostSpace(
   buffIds: readonly MiningBuffId[],
   boostSpace: MiningBoostSpace,
+  boosterHull?: MiningBoosterHullId | null,
 ): MiningBuffId[] {
   const space = normalizeMiningBoostSpace(boostSpace)
   let normalized = normalizeMiningBuffIds([...buffIds], space)
-  if (space === 'solo') {
-    return normalized.filter((id) => BUFF_BY_ID.get(id)?.category === 'fit')
-  }
-  normalized = normalized.filter((id) => {
-    const buff = BUFF_BY_ID.get(id)
-    if (!buff) return false
-    if (buff.category === 'fit') return true
-    if (buff.id === 'mindlink') return false
-    return buff.boostSpaces?.includes(space) ?? false
-  })
-  const hasFleetBurst = FLEET_BURST_BUFF_IDS.some((id) => normalized.includes(id))
-  if (!hasFleetBurst) {
+  if (space === 'solo' || !boosterHull) {
+    normalized = normalized.filter((id) => BUFF_BY_ID.get(id)?.category === 'fit')
     return normalized.filter((id) => id !== 'mindlink')
+  }
+  const hull = getMiningBoosterHull(boosterHull)
+  if (!hull?.boostSpaces.includes(space)) {
+    return normalized.filter((id) => BUFF_BY_ID.get(id)?.category === 'fit')
   }
   return normalized
 }

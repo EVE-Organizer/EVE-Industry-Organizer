@@ -31,6 +31,12 @@ describe('normalizeSkillLevels', () => {
       ...ZERO_SKILLS,
       industry: 5,
       advancedIndustry: 4,
+      mining: 4,
+      astrogeology: 4,
+      iceHarvesting: 4,
+      gasCloudHarvesting: 4,
+      industrialCommandShips: 4,
+      capitalIndustrialShips: 4,
     })
   })
 

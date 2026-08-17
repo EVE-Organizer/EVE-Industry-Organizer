@@ -13,16 +13,16 @@ import type {
 import { buildWindowPriceMap, pickHistoryWindow } from '@/lib/ranking'
 
 /**
- * Retriever + 2× Strip Miner I, average Mining/Astrogeology (~840 m³/min).
- * @see https://wiki.eveuniversity.org/Mining_yield
+ * Retriever + 2× Strip Miner I (150 m³ / 45s), Mining/Astrogeology/Mining Barge IV, +10% role.
+ * @see https://everef.net/types/17482
  */
-export const RETRIEVER_ORE_M3_PER_HR = 50_400
+export const RETRIEVER_ORE_M3_PER_HR = 42_163
 
-/** Retriever + 2× Ice Harvester I, Ice Harvesting IV (SDE cycle times, no boosts). */
-export const RETRIEVER_ICE_M3_PER_HR = 37_500
+/** Retriever + 2× Ice Harvester I (1000 m³ / 240s), Ice Harvesting IV, −12.5% role duration. */
+export const RETRIEVER_ICE_M3_PER_HR = 42_857
 
 /** Venture + Gas Cloud Scoop II, reference gas skills (Retriever cannot harvest gas). */
-export const VENTURE_GAS_M3_PER_HR = 2_400
+export const VENTURE_GAS_M3_PER_HR = 9_000
 
 export const DEFAULT_MINING_M3_PER_HR = RETRIEVER_ORE_M3_PER_HR
 
@@ -166,24 +166,46 @@ export function miningDisplayVolume(
   }
 }
 
+/** Minimum hub avg daily volume to list an ore (matches Blueprints default minVolume). */
+export const MIN_MINING_LIQUIDITY_VOLUME = 100
+
+const EXCLUDED_MINING_GROUPS = new Set([
+  'Fluorite',
+  'Kangite',
+  'Moissanite',
+  'Raspite',
+  'Polycrase',
+])
+
+/** Event gems, Exordium grades, crystallites — not belt ore rankings. */
+export function isExcludedMiningItem(item: MiningItem): boolean {
+  if (/Crystallite/i.test(item.name)) return true
+  if (/\s(?:0|II|III|IV|X)-Grade$/.test(item.name)) return true
+  if (EXCLUDED_MINING_GROUPS.has(item.group)) return true
+  return false
+}
+
 export function shouldIncludeMiningRow(
   row: MiningRankedRow,
   subtype: MiningSubtype,
 ): boolean {
+  const minVol = MIN_MINING_LIQUIDITY_VOLUME
+  const minedLiq = miningLiquidityVolume(row)
+
   switch (subtype) {
     case 'ore':
     case 'ice': {
       const hasRaw =
-        (row.volDayRaw ?? 0) > 0 && miningPathHasPriceData('raw', row)
+        (row.volDayRaw ?? 0) >= minVol && miningPathHasPriceData('raw', row)
       const hasComp =
-        (row.volDayCompressed ?? 0) > 0 && miningPathHasPriceData('compressed', row)
+        (row.volDayCompressed ?? 0) >= minVol && miningPathHasPriceData('compressed', row)
       return hasRaw || hasComp
     }
     case 'gas':
-      if ((row.volDayRaw ?? 0) > 0 && miningPathHasPriceData('raw', row)) return true
-      return miningPathHasPriceData('minerals', row) && (row.volDayMinerals ?? 0) > 0
+      if ((row.volDayRaw ?? 0) >= minVol && miningPathHasPriceData('raw', row)) return true
+      return minedLiq >= minVol && miningPathHasPriceData('minerals', row)
     case 'moon':
-      return miningPathHasPriceData('minerals', row) && (row.volDayMinerals ?? 0) > 0
+      return minedLiq >= minVol && miningPathHasPriceData('minerals', row)
     default:
       return true
   }
@@ -293,7 +315,7 @@ export function rankMiningItem(
 
   const rawPrice = productPrice(item.typeId, windowSell, buyPrices, priceMethod)
   const rawValuePerM3 = rawPrice > 0 ? rawPrice / item.volume : 0
-  const rawIph = rawValuePerM3 * opts.m3PerHr
+  const rawIph = Math.round(rawValuePerM3 * opts.m3PerHr)
 
   let compressedPrice: number | null = null
   let compressedValuePerM3: number | null = null
@@ -303,7 +325,7 @@ export function rankMiningItem(
     if (cPrice > 0) {
       compressedPrice = cPrice
       compressedValuePerM3 = cPrice / item.volume
-      compressedIph = compressedValuePerM3 * opts.m3PerHr
+      compressedIph = Math.round(compressedValuePerM3 * opts.m3PerHr)
     }
   }
 
@@ -314,7 +336,7 @@ export function rankMiningItem(
     opts.m3PerHr,
     opts.reprocessYield,
   )
-  const mineralsIph = reprocessLines.reduce((sum, line) => sum + line.iskPerHr, 0)
+  const mineralsIph = Math.round(reprocessLines.reduce((sum, line) => sum + line.iskPerHr, 0))
   const mineralsValuePerM3 = opts.m3PerHr > 0 ? mineralsIph / opts.m3PerHr : 0
 
   let focusIph: number | null = null
@@ -435,6 +457,7 @@ export function rankMiningIph(
   const rows: MiningRankedRow[] = []
   for (const item of mining.items) {
     if (isCompressedMiningName(item.name)) continue
+    if (isExcludedMiningItem(item)) continue
     if (item.subtype !== options.subtype) continue
     if (foundFilter.length > 0 && !foundFilter.every((s) => item.foundIn.includes(s))) continue
 

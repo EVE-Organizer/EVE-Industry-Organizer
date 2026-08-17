@@ -139,6 +139,22 @@ function isLowTradeVariant(type, subtype) {
   return / IV-Grade$/.test(type.name)
 }
 
+const EXCLUDED_MINING_GROUPS = new Set([
+  'Fluorite',
+  'Kangite',
+  'Moissanite',
+  'Raspite',
+  'Polycrase',
+])
+
+/** Event gems, Exordium grades, crystallites — not belt ore. */
+function isExcludedMiningType(type) {
+  if (/Crystallite/i.test(type.name)) return true
+  if (/\s(?:0|II|III|IV|X)-Grade$/.test(type.name)) return true
+  if (EXCLUDED_MINING_GROUPS.has(type.group)) return true
+  return false
+}
+
 async function main() {
   mkdirSync(outDir, { recursive: true })
 
@@ -180,6 +196,7 @@ async function main() {
     const subtype = classifySubtype(type)
     if (!subtype) continue
     if (isLowTradeVariant(type, subtype)) continue
+    if (isExcludedMiningType(type)) continue
     candidates.push({ type, subtype })
   }
 
@@ -224,12 +241,12 @@ async function main() {
     generatedAt: new Date().toISOString(),
     defaults: {
       // Keep in sync with src/lib/miningIph.ts (Retriever / Venture reference fits).
-      m3PerHr: 50400,
+      m3PerHr: 42163,
       m3PerHrBySubtype: {
-        ore: 50400, // Retriever, 2× Strip Miner I (~840 m³/min, EVE Uni)
-        moon: 50400,
-        ice: 37500, // Retriever, 2× Ice Harvester I, Ice Harvesting IV
-        gas: 2400, // Venture + Gas Cloud Scoop II
+        ore: 42163, // Retriever, 2× Strip Miner I, skills IV
+        moon: 42163,
+        ice: 42857, // Retriever, 2× Ice Harvester I, Ice Harvesting IV
+        gas: 9000, // Venture, 2× Gas Cloud Scoop II, Mining Frigate IV
       },
       reprocessYield: 0.5,
     },

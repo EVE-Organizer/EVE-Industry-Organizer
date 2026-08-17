@@ -26,12 +26,25 @@ const SCIENCE_KEYS: SkillFieldDef['key'][] = [
   'laboratoryOperation',
   'advancedLaboratoryOperation',
 ]
-const MARKET_KEYS: SkillFieldDef['key'][] = ['accounting', 'brokerRelations']
+const MARKET_KEYS: SkillFieldDef['key'][] = [
+  'accounting',
+  'brokerRelations',
+  'advancedBrokerRelations',
+]
+const MINING_KEYS: SkillFieldDef['key'][] = [
+  'mining',
+  'astrogeology',
+  'iceHarvesting',
+  'gasCloudHarvesting',
+  'industrialCommandShips',
+  'capitalIndustrialShips',
+]
 
 const GROUPS: { title: string; keys: SkillFieldDef['key'][] }[] = [
   { title: 'Industry', keys: INDUSTRY_KEYS },
   { title: 'Science', keys: SCIENCE_KEYS },
   { title: 'Trade', keys: MARKET_KEYS },
+  { title: 'Mining', keys: MINING_KEYS },
 ]
 
 interface SkillsEditorPanelProps {

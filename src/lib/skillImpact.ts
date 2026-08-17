@@ -12,7 +12,7 @@ import {
   DEFAULT_INVENTION_BASE_CHANCE,
   inventionSuccessChance,
 } from '@/lib/skillTraining'
-import { brokerFeePercent, salesTaxPercent } from '@/lib/tradingFees'
+import { brokerFeePercent, relistDiscountPercent, salesTaxPercent } from '@/lib/tradingFees'
 import type { SkillLevels } from '@/types'
 
 export interface SkillImpactSummary {
@@ -22,6 +22,7 @@ export interface SkillImpactSummary {
   reactionTimeCutPercent: number
   salesTaxPercent: number
   brokerFeePercent: number
+  relistDiscountPercent: number
   inventionChancePercent: number
 }
 
@@ -38,6 +39,7 @@ export function computeSkillImpact(
   const reactions = skillLevel(skills, 'reactions')
   const accounting = skillLevel(skills, 'accounting')
   const broker = skillLevel(skills, 'brokerRelations')
+  const advancedBroker = skillLevel(skills, 'advancedBrokerRelations')
 
   const mfgFactor = industryTimeFactor(industry) * advancedIndustryTimeFactor(advancedIndustry)
 
@@ -48,6 +50,7 @@ export function computeSkillImpact(
     reactionTimeCutPercent: timeCutPercent(reactionsTimeFactor(reactions)),
     salesTaxPercent: salesTaxPercent(accounting),
     brokerFeePercent: brokerFeePercent(broker),
+    relistDiscountPercent: relistDiscountPercent(advancedBroker),
     inventionChancePercent:
       inventionSuccessChance(DEFAULT_INVENTION_BASE_CHANCE, inventionSkillLevel) * 100,
   }

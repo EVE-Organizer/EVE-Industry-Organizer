@@ -1,6 +1,21 @@
-import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry, StructureType } from '@/types'
+import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry, StructureType, MiningBoosterHullId, MiningBurstTech, MiningCrystalId, MiningForemanBurstId, MiningUpgradeId } from '@/types'
 import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS, STRUCTURE_HULL_PRESETS, type MiningBuffId, type MiningBoostSpace, type MiningShipId } from '@/types'
-import { DEFAULT_MINING_SHIP_ID, normalizeMiningBoostSpace, normalizeMiningBuffIds, normalizeMiningFleetSize, normalizeMiningShipId } from '@/lib/miningShipPresets'
+import {
+  DEFAULT_MINING_SHIP_ID,
+  migrateBoosterFromLegacyBuffIds,
+  normalizeMiningBoostSpace,
+  normalizeMiningBuffIds,
+  normalizeMiningBoosterHull,
+  normalizeMiningBurstTech,
+  normalizeMiningCrystal,
+  normalizeMiningFleet,
+  normalizeMiningFleetSize,
+  normalizeMiningForemanBurst,
+  normalizeMiningForemanBursts,
+  normalizeMiningShipId,
+  normalizeMiningUpgrade,
+  normalizeMiningUpgradeCount,
+} from '@/lib/miningShipPresets'
 import { SKILL_FIELDS, enforceSkillPrerequisites } from '@/lib/skillFields'
 import {
   migrateManufacturingRigs,
@@ -41,7 +56,19 @@ export function normalizeSkillLevels(
   ) {
     return { ...DEFAULT_SKILLS }
   }
-  return enforceSkillPrerequisites({ ...ZERO_SKILLS, ...(skills ?? {}) } as SkillLevels)
+  const merged = { ...ZERO_SKILLS, ...(skills ?? {}) } as SkillLevels
+  // New mining keys: absent on old saves → default IV, not untrained.
+  for (const key of [
+    'mining',
+    'astrogeology',
+    'iceHarvesting',
+    'gasCloudHarvesting',
+    'industrialCommandShips',
+    'capitalIndustrialShips',
+  ] as const) {
+    if (skills?.[key] == null) merged[key] = DEFAULT_SKILLS[key]
+  }
+  return enforceSkillPrerequisites(merged)
 }
 
 /** Migrate region-level buildSystemId to hub default manufacturingSystemId. */
@@ -161,12 +188,59 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
       (rest.miningShipId as MiningShipId | undefined) ?? DEFAULT_MINING_SHIP_ID,
       'ore',
     ),
-    miningBuffIds: normalizeMiningBuffIds(
-      rest.miningBuffIds as MiningBuffId[] | undefined,
-      normalizeMiningBoostSpace(rest.miningBoostSpace as MiningBoostSpace | undefined),
-    ),
     miningBoostSpace: normalizeMiningBoostSpace(rest.miningBoostSpace as MiningBoostSpace | undefined),
     miningFleetSize: normalizeMiningFleetSize(rest.miningFleetSize as number | undefined),
+    miningFleet: normalizeMiningFleet(
+      rest.miningFleet as GlobalSettings['miningFleet'],
+      'ore',
+      (rest.miningShipId as MiningShipId | undefined) ?? DEFAULT_MINING_SHIP_ID,
+      rest.miningFleetSize as number | undefined,
+      {
+        miner: undefined,
+        crystal: rest.miningCrystal as MiningCrystalId | undefined,
+        upgrade: rest.miningUpgrade as MiningUpgradeId | undefined,
+        upgradeCount: rest.miningUpgradeCount as number | undefined,
+      },
+    ),
+    ...(() => {
+      const rawBuffIds = rest.miningBuffIds as MiningBuffId[] | undefined
+      const migrated = migrateBoosterFromLegacyBuffIds(rawBuffIds ?? [])
+      const boostSpace = normalizeMiningBoostSpace(rest.miningBoostSpace as MiningBoostSpace | undefined)
+      const explicitHull = rest.miningBoosterHull as MiningBoosterHullId | null | undefined
+      const hull =
+        explicitHull !== undefined
+          ? normalizeMiningBoosterHull(explicitHull)
+          : migrated.hull
+            ? normalizeMiningBoosterHull(migrated.hull)
+            : null
+      const upgrade =
+        rest.miningUpgrade != null
+          ? normalizeMiningUpgrade(rest.miningUpgrade as MiningUpgradeId)
+          : migrated.upgrade
+      return {
+        miningBoosterHull: hull,
+        miningForemanBurst: normalizeMiningForemanBurst(
+          (rest.miningForemanBurst as MiningForemanBurstId | undefined) ?? migrated.burst,
+        ),
+        miningForemanBursts: normalizeMiningForemanBursts(
+          hull,
+          rest.miningForemanBursts as MiningForemanBurstId[] | undefined,
+          (rest.miningForemanBurst as MiningForemanBurstId | undefined) ?? migrated.burst,
+        ),
+        miningBurstTech: normalizeMiningBurstTech(rest.miningBurstTech as MiningBurstTech | undefined),
+        miningIndustrialCore: rest.miningIndustrialCore !== false,
+        miningUpgrade: upgrade,
+        miningUpgradeCount: normalizeMiningUpgradeCount(
+          (rest.miningUpgradeCount as number | undefined) ?? migrated.upgradeCount,
+          upgrade,
+        ),
+        miningCrystal: normalizeMiningCrystal(rest.miningCrystal as MiningCrystalId | undefined),
+        miningBuffIds: normalizeMiningBuffIds(
+          explicitHull !== undefined ? (rawBuffIds ?? []) : migrated.buffIds,
+          boostSpace,
+        ),
+      }
+    })(),
   }
 }
 

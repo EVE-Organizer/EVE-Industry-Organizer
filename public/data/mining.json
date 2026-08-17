@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-07-26T09:19:25.958Z",
+  "generatedAt": "2026-08-17T03:20:40.970Z",
   "defaults": {
-    "m3PerHr": 50400,
+    "m3PerHr": 42163,
     "m3PerHrBySubtype": {
-      "ore": 50400,
-      "moon": 50400,
-      "ice": 37500,
-      "gas": 2400
+      "ore": 42163,
+      "moon": 42163,
+      "ice": 42857,
+      "gas": 9000
     },
     "reprocessYield": 0.5
   },
@@ -197,28 +197,6 @@
       "iconUrl": "https://images.evetech.net/types/28694/icon?size=32"
     },
     {
-      "typeId": 50015,
-      "name": "Amethystic Crystallite",
-      "group": "Fluorite",
-      "volume": 3,
-      "portionSize": 1000,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": null,
-      "reprocess": [
-        {
-          "typeId": 48927,
-          "quantityPerBatch": 2
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/50015/icon?size=32"
-    },
-    {
       "typeId": 22,
       "name": "Arkonor",
       "group": "Arkonor",
@@ -245,62 +223,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/22/icon?size=32"
-    },
-    {
-      "typeId": 17425,
-      "name": "Arkonor II-Grade",
-      "group": "Arkonor",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62569,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 3360
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 1260
-        },
-        {
-          "typeId": 40,
-          "quantityPerBatch": 126
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17425/icon?size=32"
-    },
-    {
-      "typeId": 17426,
-      "name": "Arkonor III-Grade",
-      "group": "Arkonor",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62570,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 3520
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 1320
-        },
-        {
-          "typeId": 40,
-          "quantityPerBatch": 132
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17426/icon?size=32"
     },
     {
       "typeId": 25279,
@@ -362,60 +284,6 @@
       "iconUrl": "https://images.evetech.net/types/52316/icon?size=32"
     },
     {
-      "typeId": 56627,
-      "name": "Bezdnacine II-Grade",
-      "group": "Bezdnacine",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 62577,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 42000
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 5040
-        },
-        {
-          "typeId": 40,
-          "quantityPerBatch": 134
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/56627/icon?size=32"
-    },
-    {
-      "typeId": 56628,
-      "name": "Bezdnacine III-Grade",
-      "group": "Bezdnacine",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 62578,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 44000
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 5280
-        },
-        {
-          "typeId": 40,
-          "quantityPerBatch": 141
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/56628/icon?size=32"
-    },
-    {
       "typeId": 1223,
       "name": "Bistot",
       "group": "Bistot",
@@ -442,62 +310,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/1223/icon?size=32"
-    },
-    {
-      "typeId": 17428,
-      "name": "Bistot II-Grade",
-      "group": "Bistot",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62565,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 3360
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 1260
-        },
-        {
-          "typeId": 39,
-          "quantityPerBatch": 168
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17428/icon?size=32"
-    },
-    {
-      "typeId": 17429,
-      "name": "Bistot III-Grade",
-      "group": "Bistot",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62566,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 3520
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 1320
-        },
-        {
-          "typeId": 39,
-          "quantityPerBatch": 176
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17429/icon?size=32"
     },
     {
       "typeId": 45492,
@@ -1096,62 +908,6 @@
       "iconUrl": "https://images.evetech.net/types/1225/icon?size=32"
     },
     {
-      "typeId": 17432,
-      "name": "Crokite II-Grade",
-      "group": "Crokite",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62561,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 840
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 2100
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 840
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17432/icon?size=32"
-    },
-    {
-      "typeId": 17433,
-      "name": "Crokite III-Grade",
-      "group": "Crokite",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62562,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 880
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 2200
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 880
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17433/icon?size=32"
-    },
-    {
       "typeId": 16267,
       "name": "Dark Glitter",
       "group": "Ice",
@@ -1207,62 +963,6 @@
       "iconUrl": "https://images.evetech.net/types/1232/icon?size=32"
     },
     {
-      "typeId": 17436,
-      "name": "Dark Ochre II-Grade",
-      "group": "Dark Ochre",
-      "volume": 8,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62557,
-      "reprocess": [
-        {
-          "typeId": 36,
-          "quantityPerBatch": 1428
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 1260
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 336
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17436/icon?size=32"
-    },
-    {
-      "typeId": 17437,
-      "name": "Dark Ochre III-Grade",
-      "group": "Dark Ochre",
-      "volume": 8,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62558,
-      "reprocess": [
-        {
-          "typeId": 36,
-          "quantityPerBatch": 1496
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 1320
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 352
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17437/icon?size=32"
-    },
-    {
       "typeId": 74533,
       "name": "Ducinium",
       "group": "Ducinium",
@@ -1283,46 +983,6 @@
       "iconUrl": "https://images.evetech.net/types/74533/icon?size=32"
     },
     {
-      "typeId": 74534,
-      "name": "Ducinium II-Grade",
-      "group": "Ducinium",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 75288,
-      "reprocess": [
-        {
-          "typeId": 40,
-          "quantityPerBatch": 179
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/74534/icon?size=32"
-    },
-    {
-      "typeId": 74535,
-      "name": "Ducinium III-Grade",
-      "group": "Ducinium",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 75289,
-      "reprocess": [
-        {
-          "typeId": 40,
-          "quantityPerBatch": 187
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/74535/icon?size=32"
-    },
-    {
       "typeId": 74529,
       "name": "Eifyrium",
       "group": "Eifyrium",
@@ -1341,46 +1001,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/74529/icon?size=32"
-    },
-    {
-      "typeId": 74530,
-      "name": "Eifyrium II-Grade",
-      "group": "Eifyrium",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 75284,
-      "reprocess": [
-        {
-          "typeId": 39,
-          "quantityPerBatch": 279
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/74530/icon?size=32"
-    },
-    {
-      "typeId": 74531,
-      "name": "Eifyrium III-Grade",
-      "group": "Eifyrium",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 75285,
-      "reprocess": [
-        {
-          "typeId": 39,
-          "quantityPerBatch": 293
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/74531/icon?size=32"
     },
     {
       "typeId": 45495,
@@ -1891,62 +1511,6 @@
       "iconUrl": "https://images.evetech.net/types/1229/icon?size=32"
     },
     {
-      "typeId": 17865,
-      "name": "Gneiss II-Grade",
-      "group": "Gneiss",
-      "volume": 5,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62553,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 2100
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 1575
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 840
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17865/icon?size=32"
-    },
-    {
-      "typeId": 17866,
-      "name": "Gneiss III-Grade",
-      "group": "Gneiss",
-      "volume": 5,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62554,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 2200
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 1650
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 880
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17866/icon?size=32"
-    },
-    {
       "typeId": 25273,
       "name": "Golden Cytoserocin",
       "group": "Harvestable Cloud",
@@ -2002,52 +1566,6 @@
       "iconUrl": "https://images.evetech.net/types/81975/icon?size=32"
     },
     {
-      "typeId": 81976,
-      "name": "Griemeer II-Grade",
-      "group": "Griemeer",
-      "volume": 0.8,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 82317,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 263
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 84
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/81976/icon?size=32"
-    },
-    {
-      "typeId": 81977,
-      "name": "Griemeer III-Grade",
-      "group": "Griemeer",
-      "volume": 0.8,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 82318,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 275
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 88
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/81977/icon?size=32"
-    },
-    {
       "typeId": 21,
       "name": "Hedbergite",
       "group": "Hedbergite",
@@ -2071,56 +1589,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/21/icon?size=32"
-    },
-    {
-      "typeId": 17440,
-      "name": "Hedbergite II-Grade",
-      "group": "Hedbergite",
-      "volume": 3,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62549,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 473
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 126
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17440/icon?size=32"
-    },
-    {
-      "typeId": 17441,
-      "name": "Hedbergite III-Grade",
-      "group": "Hedbergite",
-      "volume": 3,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62550,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 495
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 132
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17441/icon?size=32"
     },
     {
       "typeId": 1231,
@@ -2148,56 +1616,6 @@
       "iconUrl": "https://images.evetech.net/types/1231/icon?size=32"
     },
     {
-      "typeId": 17444,
-      "name": "Hemorphite II-Grade",
-      "group": "Hemorphite",
-      "volume": 3,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62545,
-      "reprocess": [
-        {
-          "typeId": 37,
-          "quantityPerBatch": 252
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 95
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17444/icon?size=32"
-    },
-    {
-      "typeId": 17445,
-      "name": "Hemorphite III-Grade",
-      "group": "Hemorphite",
-      "volume": 3,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62546,
-      "reprocess": [
-        {
-          "typeId": 37,
-          "quantityPerBatch": 264
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 99
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17445/icon?size=32"
-    },
-    {
       "typeId": 82163,
       "name": "Hezorime",
       "group": "Hezorime",
@@ -2223,60 +1641,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/82163/icon?size=32"
-    },
-    {
-      "typeId": 82164,
-      "name": "Hezorime II-Grade",
-      "group": "Hezorime",
-      "volume": 5,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 82313,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 2100
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 126
-        },
-        {
-          "typeId": 39,
-          "quantityPerBatch": 63
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/82164/icon?size=32"
-    },
-    {
-      "typeId": 82165,
-      "name": "Hezorime III-Grade",
-      "group": "Hezorime",
-      "volume": 5,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 82314,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 2200
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 132
-        },
-        {
-          "typeId": 39,
-          "quantityPerBatch": 66
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/82165/icon?size=32"
     },
     {
       "typeId": 49787,
@@ -2325,86 +1689,6 @@
       "iconUrl": "https://images.evetech.net/types/1226/icon?size=32"
     },
     {
-      "typeId": 17448,
-      "name": "Jaspet II-Grade",
-      "group": "Jaspet",
-      "volume": 2,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62541,
-      "reprocess": [
-        {
-          "typeId": 36,
-          "quantityPerBatch": 158
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 53
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17448/icon?size=32"
-    },
-    {
-      "typeId": 17449,
-      "name": "Jaspet III-Grade",
-      "group": "Jaspet",
-      "volume": 2,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62542,
-      "reprocess": [
-        {
-          "typeId": 36,
-          "quantityPerBatch": 165
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 55
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17449/icon?size=32"
-    },
-    {
-      "typeId": 92568,
-      "name": "Kangite X-Grade",
-      "group": "Kangite",
-      "volume": 1,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 92821,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 1000
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 750
-        },
-        {
-          "typeId": 92572,
-          "quantityPerBatch": 10
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/92568/icon?size=32"
-    },
-    {
       "typeId": 20,
       "name": "Kernite",
       "group": "Kernite",
@@ -2429,58 +1713,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/20/icon?size=32"
-    },
-    {
-      "typeId": 17452,
-      "name": "Kernite II-Grade",
-      "group": "Kernite",
-      "volume": 1.2,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62537,
-      "reprocess": [
-        {
-          "typeId": 36,
-          "quantityPerBatch": 63
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 126
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17452/icon?size=32"
-    },
-    {
-      "typeId": 17453,
-      "name": "Kernite III-Grade",
-      "group": "Kernite",
-      "volume": 1.2,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62538,
-      "reprocess": [
-        {
-          "typeId": 36,
-          "quantityPerBatch": 66
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 132
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17453/icon?size=32"
     },
     {
       "typeId": 16269,
@@ -2535,60 +1767,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/81900/icon?size=32"
-    },
-    {
-      "typeId": 81901,
-      "name": "Kylixium II-Grade",
-      "group": "Kylixium",
-      "volume": 1.2,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 82301,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 315
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 210
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 578
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/81901/icon?size=32"
-    },
-    {
-      "typeId": 81902,
-      "name": "Kylixium III-Grade",
-      "group": "Kylixium",
-      "volume": 1.2,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 82302,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 330
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 220
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 605
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/81902/icon?size=32"
     },
     {
       "typeId": 46302,
@@ -2797,74 +1975,6 @@
       "iconUrl": "https://images.evetech.net/types/11396/icon?size=32"
     },
     {
-      "typeId": 17869,
-      "name": "Mercoxit II-Grade",
-      "group": "Mercoxit",
-      "volume": 40,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 62587,
-      "reprocess": [
-        {
-          "typeId": 11399,
-          "quantityPerBatch": 147
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17869/icon?size=32"
-    },
-    {
-      "typeId": 17870,
-      "name": "Mercoxit III-Grade",
-      "group": "Mercoxit",
-      "volume": 40,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 62588,
-      "reprocess": [
-        {
-          "typeId": 11399,
-          "quantityPerBatch": 154
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17870/icon?size=32"
-    },
-    {
-      "typeId": 92567,
-      "name": "Moissanite X-Grade",
-      "group": "Moissanite",
-      "volume": 1,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 92820,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 1000
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 750
-        },
-        {
-          "typeId": 92571,
-          "quantityPerBatch": 10
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/92567/icon?size=32"
-    },
-    {
       "typeId": 45511,
       "name": "Monazite",
       "group": "Exceptional Moon Asteroids",
@@ -2914,46 +2024,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/74521/icon?size=32"
-    },
-    {
-      "typeId": 74522,
-      "name": "Mordunium II-Grade",
-      "group": "Mordunium",
-      "volume": 0.1,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 75276,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 101
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/74522/icon?size=32"
-    },
-    {
-      "typeId": 74523,
-      "name": "Mordunium III-Grade",
-      "group": "Mordunium",
-      "volume": 0.1,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 75277,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 107
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/74523/icon?size=32"
     },
     {
       "typeId": 76373,
@@ -3014,60 +2084,6 @@
       "iconUrl": "https://images.evetech.net/types/82016/icon?size=32"
     },
     {
-      "typeId": 82017,
-      "name": "Nocxite II-Grade",
-      "group": "Nocxite",
-      "volume": 4,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 82305,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 945
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 158
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 111
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/82017/icon?size=32"
-    },
-    {
-      "typeId": 82018,
-      "name": "Nocxite III-Grade",
-      "group": "Nocxite",
-      "volume": 4,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 82306,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 990
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 165
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 116
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/82018/icon?size=32"
-    },
-    {
       "typeId": 1227,
       "name": "Omber",
       "group": "Omber",
@@ -3092,58 +2108,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/1227/icon?size=32"
-    },
-    {
-      "typeId": 17867,
-      "name": "Omber II-Grade",
-      "group": "Omber",
-      "volume": 0.6,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62533,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 95
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 79
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17867/icon?size=32"
-    },
-    {
-      "typeId": 17868,
-      "name": "Omber III-Grade",
-      "group": "Omber",
-      "volume": 0.6,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62534,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 99
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 83
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17868/icon?size=32"
     },
     {
       "typeId": 45498,
@@ -3195,58 +2159,6 @@
       "iconUrl": "https://images.evetech.net/types/18/icon?size=32"
     },
     {
-      "typeId": 17455,
-      "name": "Plagioclase II-Grade",
-      "group": "Plagioclase",
-      "volume": 0.35,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62529,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 184
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 74
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17455/icon?size=32"
-    },
-    {
-      "typeId": 17456,
-      "name": "Plagioclase III-Grade",
-      "group": "Plagioclase",
-      "volume": 0.35,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62530,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 193
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 77
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17456/icon?size=32"
-    },
-    {
       "typeId": 45504,
       "name": "Pollucite",
       "group": "Rare Moon Asteroids",
@@ -3272,36 +2184,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/45504/icon?size=32"
-    },
-    {
-      "typeId": 92566,
-      "name": "Polycrase X-Grade",
-      "group": "Polycrase",
-      "volume": 1,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 92819,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 1000
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 750
-        },
-        {
-          "typeId": 92570,
-          "quantityPerBatch": 10
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/92566/icon?size=32"
     },
     {
       "typeId": 1224,
@@ -3330,84 +2212,6 @@
       "iconUrl": "https://images.evetech.net/types/1224/icon?size=32"
     },
     {
-      "typeId": 95395,
-      "name": "Pyroxeres 0-Grade",
-      "group": "Pyroxeres",
-      "volume": 0.3,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": null,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 45
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 15
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/95395/icon?size=32"
-    },
-    {
-      "typeId": 17459,
-      "name": "Pyroxeres II-Grade",
-      "group": "Pyroxeres",
-      "volume": 0.3,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62525,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 95
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 32
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17459/icon?size=32"
-    },
-    {
-      "typeId": 17460,
-      "name": "Pyroxeres III-Grade",
-      "group": "Pyroxeres",
-      "volume": 0.3,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62526,
-      "reprocess": [
-        {
-          "typeId": 35,
-          "quantityPerBatch": 99
-        },
-        {
-          "typeId": 36,
-          "quantityPerBatch": 33
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17460/icon?size=32"
-    },
-    {
       "typeId": 52315,
       "name": "Rakovene",
       "group": "Rakovene",
@@ -3433,90 +2237,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/52315/icon?size=32"
-    },
-    {
-      "typeId": 56629,
-      "name": "Rakovene II-Grade",
-      "group": "Rakovene",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 62580,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 42000
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 3360
-        },
-        {
-          "typeId": 39,
-          "quantityPerBatch": 210
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/56629/icon?size=32"
-    },
-    {
-      "typeId": 56630,
-      "name": "Rakovene III-Grade",
-      "group": "Rakovene",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 62581,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 44000
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 3520
-        },
-        {
-          "typeId": 39,
-          "quantityPerBatch": 220
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/56630/icon?size=32"
-    },
-    {
-      "typeId": 92565,
-      "name": "Raspite X-Grade",
-      "group": "Raspite",
-      "volume": 1,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 92818,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 1000
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 750
-        },
-        {
-          "typeId": 92569,
-          "quantityPerBatch": 10
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/92565/icon?size=32"
     },
     {
       "typeId": 46304,
@@ -3670,84 +2390,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/1228/icon?size=32"
-    },
-    {
-      "typeId": 92373,
-      "name": "Scordite 0-Grade",
-      "group": "Scordite",
-      "volume": 0.15,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 92374,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 75
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 55
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/92373/icon?size=32"
-    },
-    {
-      "typeId": 17463,
-      "name": "Scordite II-Grade",
-      "group": "Scordite",
-      "volume": 0.15,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62521,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 158
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 114
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17463/icon?size=32"
-    },
-    {
-      "typeId": 17464,
-      "name": "Scordite III-Grade",
-      "group": "Scordite",
-      "volume": 0.15,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62522,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 165
-        },
-        {
-          "typeId": 35,
-          "quantityPerBatch": 119
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17464/icon?size=32"
     },
     {
       "typeId": 46303,
@@ -4025,78 +2667,6 @@
       "iconUrl": "https://images.evetech.net/types/19/icon?size=32"
     },
     {
-      "typeId": 17466,
-      "name": "Spodumain II-Grade",
-      "group": "Spodumain",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62573,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 50400
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 1050
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 168
-        },
-        {
-          "typeId": 39,
-          "quantityPerBatch": 84
-        },
-        {
-          "typeId": 40,
-          "quantityPerBatch": 42
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17466/icon?size=32"
-    },
-    {
-      "typeId": 17467,
-      "name": "Spodumain III-Grade",
-      "group": "Spodumain",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62574,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 52800
-        },
-        {
-          "typeId": 37,
-          "quantityPerBatch": 1100
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 176
-        },
-        {
-          "typeId": 39,
-          "quantityPerBatch": 88
-        },
-        {
-          "typeId": 40,
-          "quantityPerBatch": 44
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17467/icon?size=32"
-    },
-    {
       "typeId": 45491,
       "name": "Sylvite",
       "group": "Ubiquitous Moon Asteroids",
@@ -4149,60 +2719,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/52306/icon?size=32"
-    },
-    {
-      "typeId": 56625,
-      "name": "Talassonite II-Grade",
-      "group": "Talassonite",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 62583,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 42000
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 1008
-        },
-        {
-          "typeId": 40,
-          "quantityPerBatch": 34
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/56625/icon?size=32"
-    },
-    {
-      "typeId": 56626,
-      "name": "Talassonite III-Grade",
-      "group": "Talassonite",
-      "volume": 16,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 62584,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 44000
-        },
-        {
-          "typeId": 38,
-          "quantityPerBatch": 1056
-        },
-        {
-          "typeId": 40,
-          "quantityPerBatch": 35
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/56626/icon?size=32"
     },
     {
       "typeId": 45496,
@@ -4345,52 +2861,6 @@
       "iconUrl": "https://images.evetech.net/types/82205/icon?size=32"
     },
     {
-      "typeId": 82206,
-      "name": "Ueganite II-Grade",
-      "group": "Ueganite",
-      "volume": 5,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 82309,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 840
-        },
-        {
-          "typeId": 40,
-          "quantityPerBatch": 42
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/82206/icon?size=32"
-    },
-    {
-      "typeId": 82207,
-      "name": "Ueganite III-Grade",
-      "group": "Ueganite",
-      "volume": 5,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec"
-      ],
-      "compressedTypeId": 82310,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 880
-        },
-        {
-          "typeId": 40,
-          "quantityPerBatch": 44
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/82207/icon?size=32"
-    },
-    {
       "typeId": 45500,
       "name": "Vanadinite",
       "group": "Uncommon Moon Asteroids",
@@ -4434,72 +2904,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/1230/icon?size=32"
-    },
-    {
-      "typeId": 92371,
-      "name": "Veldspar 0-Grade",
-      "group": "Veldspar",
-      "volume": 0.1,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 92372,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 200
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/92371/icon?size=32"
-    },
-    {
-      "typeId": 17470,
-      "name": "Veldspar II-Grade",
-      "group": "Veldspar",
-      "volume": 0.1,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62517,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 420
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17470/icon?size=32"
-    },
-    {
-      "typeId": 17471,
-      "name": "Veldspar III-Grade",
-      "group": "Veldspar",
-      "volume": 0.1,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "highsec",
-        "lowsec",
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 62518,
-      "reprocess": [
-        {
-          "typeId": 34,
-          "quantityPerBatch": 440
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/17471/icon?size=32"
     },
     {
       "typeId": 25278,
@@ -4646,46 +3050,6 @@
         }
       ],
       "iconUrl": "https://images.evetech.net/types/74525/icon?size=32"
-    },
-    {
-      "typeId": 74526,
-      "name": "Ytirium II-Grade",
-      "group": "Ytirium",
-      "volume": 0.6,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 75280,
-      "reprocess": [
-        {
-          "typeId": 37,
-          "quantityPerBatch": 252
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/74526/icon?size=32"
-    },
-    {
-      "typeId": 74527,
-      "name": "Ytirium III-Grade",
-      "group": "Ytirium",
-      "volume": 0.6,
-      "portionSize": 100,
-      "subtype": "ore",
-      "foundIn": [
-        "nullsec",
-        "wormhole"
-      ],
-      "compressedTypeId": 75281,
-      "reprocess": [
-        {
-          "typeId": 37,
-          "quantityPerBatch": 264
-        }
-      ],
-      "iconUrl": "https://images.evetech.net/types/74527/icon?size=32"
     },
     {
       "typeId": 45513,
