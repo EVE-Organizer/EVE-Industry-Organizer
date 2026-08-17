@@ -70,5 +70,15 @@
     "security": -0.094393,
     "hubId": "ympwl",
     "isBuildHub": true
+  },
+  {
+    "stationId": 0,
+    "name": "4-HWWF",
+    "systemId": 30000240,
+    "systemName": "4-HWWF",
+    "regionId": 10000003,
+    "regionName": "Vale of the Silent",
+    "security": -0.473026,
+    "hubId": "vale"
   }
 ]
