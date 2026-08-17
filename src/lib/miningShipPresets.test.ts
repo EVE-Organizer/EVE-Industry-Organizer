@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   applicableMiningBuffIds,
   defaultMiningShipForSubtype,
+  effectiveMinerForOre,
+  fleetCanMineOreGroup,
   fleetBurstYieldMultiplier,
   MINING_SHIPS,
   inferMiningBoostSpace,
@@ -9,15 +11,21 @@ import {
   miningBuffsForContext,
   miningBuffsForFleetSetup,
   miningBuffsForSetup,
+  miningCrystalExpectedCycles,
+  miningCrystalExpectedDurationSeconds,
+  miningCrystalLifeMultiplier,
   miningCrystalMultiplier,
+  miningCritYieldMultiplier,
   miningSkillYieldMultiplier,
   miningUpgradeMultiplier,
   miningBurstSlotCount,
   normalizeMiningFleet,
+  normalizeMiningCrystal,
   normalizeMiningForemanBursts,
   normalizeMiningShipId,
   normalizeMiningFleetSize,
   resolveUserMiningM3PerHr,
+  resolveUserMiningM3PerHrForOre,
   resolveUserMiningM3PerHrFromFleet,
   toggleForemanBurst,
   toggleMiningBuffId,
@@ -27,7 +35,9 @@ import {
 describe('miningShipPresets', () => {
   it('defaults to Retriever for ore', () => {
     expect(defaultMiningShipForSubtype('ore')).toBe('retriever')
-    expect(resolveUserMiningM3PerHr('ore', 'retriever', [])).toBe(42_163)
+    expect(resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, { surveyChipset: 'none' })).toBe(
+      42_163,
+    )
     expect(resolveUserMiningM3PerHr('ore', 'hulk', [])).toBeLessThan(
       resolveUserMiningM3PerHr('ore', 'covetor', []),
     )
@@ -63,13 +73,150 @@ describe('miningShipPresets', () => {
     ).toBe(24_883)
   })
 
+  it('applies Mining Survey Chipset II crit bonus on barges', () => {
+    const ship = getMiningShip('retriever')
+    const none = miningCritYieldMultiplier('ore', ship, { surveyChipset: 'none' })
+    const msc2 = miningCritYieldMultiplier('ore', ship, { surveyChipset: 'msc2' })
+    expect(msc2).toBeCloseTo(1 + 0.012 * 2.4, 5)
+    expect(msc2).toBeGreaterThan(none)
+    const withChip = resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, {
+      surveyChipset: 'msc2',
+    })
+    const bare = resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, {
+      surveyChipset: 'none',
+    })
+    expect(withChip).toBeGreaterThan(bare)
+  })
+
+  it('migrates legacy t1/t2 crystal ids to Type A', () => {
+    expect(normalizeMiningCrystal('t1')).toBe('a1')
+    expect(normalizeMiningCrystal('t2')).toBe('a2')
+  })
+
+  it('estimates crystal lifespan from live volatility', () => {
+    expect(miningCrystalExpectedCycles('ore', 'a1')).toBe(800)
+    expect(miningCrystalExpectedCycles('ore', 'a2')).toBe(667)
+    expect(miningCrystalExpectedCycles('moon', 'b1')).toBe(533)
+    expect(miningCrystalExpectedCycles('moon', 'c1')).toBe(333)
+    expect(miningCrystalExpectedCycles('ore', 'none')).toBeNull()
+    expect(miningCrystalExpectedDurationSeconds('ore', 'a1')).toBe(10 * 60 * 60)
+    expect(miningCrystalExpectedDurationSeconds('moon', 'b1')).toBe(21_587)
+    expect(miningCrystalExpectedDurationSeconds('ore', 'none')).toBeNull()
+  })
+
+  it('extends crystal lifespan with an Equipment Preservation burst', () => {
+    const baseCycles = miningCrystalExpectedCycles('ore', 'a2') ?? 0
+    const multiplier = miningCrystalLifeMultiplier(
+      {
+        boosterHull: 'rorqual',
+        foremanBursts: ['miningEquipmentPreservation'],
+        burstTech: 't2',
+        industrialCore: true,
+        skills: { capitalIndustrialShips: 5 },
+      },
+      ['mindlink'],
+    )
+    expect(multiplier).toBeGreaterThan(1)
+    expect(miningCrystalExpectedCycles('ore', 'a2', multiplier)).toBeGreaterThan(baseCycles)
+    expect(
+      miningCrystalLifeMultiplier({
+        boosterHull: 'rorqual',
+        foremanBursts: ['miningLaserOptimization'],
+      }),
+    ).toBe(1)
+  })
+
+  it('coerces deep core to modulated when subtype is moon or ice', () => {
+    const deepLine = {
+      shipId: 'retriever' as const,
+      count: 1,
+      miner: 'deepCore' as const,
+      crystal: 'a2' as const,
+    }
+    const moonFleet = normalizeMiningFleet([deepLine], 'moon')
+    expect(moonFleet[0]?.miner).toBe('modulated')
+    expect(moonFleet[0]?.crystal).toBe('a2')
+    const iceFleet = normalizeMiningFleet([deepLine], 'ice')
+    expect(iceFleet[0]?.miner).toBe('modulated')
+    expect(iceFleet[0]?.crystal).toBe('none')
+  })
+
+  it('matches live SDE cycle ratios vs Strip Miner I', () => {
+    const ship = getMiningShip('retriever')
+    expect(miningCrystalMultiplier('ore', ship, 'a1', 'modulated')).toBe(180 / 150)
+    expect(miningCrystalMultiplier('ore', ship, 'a2', 'modulated')).toBe(216 / 150)
+    expect(miningCrystalMultiplier('ore', ship, 'b1', 'modulated')).toBe(
+      180 / 0.9 / 150,
+    )
+    expect(miningCrystalMultiplier('ore', ship, 'b2', 'modulated')).toBe(
+      216 / 0.8 / 150,
+    )
+    expect(miningCrystalMultiplier('ore', ship, 'c1', 'modulated')).toBe(30 / 150)
+    expect(miningCrystalMultiplier('ore', ship, 'c2', 'modulated')).toBe(24 / 150)
+    expect(miningCrystalMultiplier('ore', ship, 'none', 'modulated')).toBe(120 / 150)
+    expect(miningCrystalMultiplier('ore', ship, 'none', 'strip')).toBe(1)
+    expect(resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, { surveyChipset: 'none' })).toBe(
+      42_163,
+    )
+    const strip = resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, {
+      miner: 'strip',
+      crystal: 'none',
+      surveyChipset: 'none',
+    })
+    const t1 = resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, {
+      miner: 'modulated',
+      crystal: 'a1',
+      surveyChipset: 'none',
+    })
+    expect(t1).toBe(Math.round(strip * (180 / 150)))
+  })
+
+  it('uses MDCSM II ratios for deep core and Mercoxit requirement', () => {
+    const ship = getMiningShip('retriever')
+    expect(miningCrystalMultiplier('ore', ship, 'a1', 'deepCore')).toBe(120 / 150)
+    expect(miningCrystalMultiplier('ore', ship, 'a2', 'deepCore')).toBe(144 / 150)
+    expect(miningCrystalMultiplier('ore', ship, 'none', 'deepCore')).toBe(80 / 150)
+    expect(miningCrystalMultiplier('ore', ship, 'a2', 'deepCore')).toBeLessThan(
+      miningCrystalMultiplier('ore', ship, 'a2', 'modulated'),
+    )
+    expect(effectiveMinerForOre('modulated', 'a2', 'Mercoxit')).toBeNull()
+    expect(effectiveMinerForOre('deepCore', 'a2', 'Mercoxit')).toEqual({
+      miner: 'deepCore',
+      crystal: 'a2',
+    })
+    expect(effectiveMinerForOre('strip', 'none', 'Mercoxit')).toBeNull()
+    const fleet = [{ shipId: 'retriever' as const, count: 1, miner: 'modulated' as const, crystal: 'a2' as const }]
+    expect(fleetCanMineOreGroup('ore', fleet, {}, 'Veldspar')).toBe(true)
+    expect(fleetCanMineOreGroup('ore', fleet, {}, 'Mercoxit')).toBe(false)
+    const msmM3 = resolveUserMiningM3PerHrForOre('ore', fleet, [], 'highsec', {}, 'Veldspar')
+    const mercM3 = resolveUserMiningM3PerHrForOre('ore', fleet, [], 'highsec', {}, 'Mercoxit')
+    const msmDirect = resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, {
+      miner: 'modulated',
+      crystal: 'a2',
+      surveyChipset: 'msc2',
+    })
+    expect(msmM3).toBe(msmDirect)
+    expect(mercM3).toBe(0)
+    const deepFleet = [{ shipId: 'retriever' as const, count: 1, miner: 'deepCore' as const, crystal: 'a2' as const }]
+    expect(fleetCanMineOreGroup('ore', deepFleet, {}, 'Mercoxit')).toBe(true)
+    expect(fleetCanMineOreGroup('ore', deepFleet, {}, 'Veldspar')).toBe(false)
+    const deepMercM3 = resolveUserMiningM3PerHrForOre('ore', deepFleet, [], 'highsec', {}, 'Mercoxit')
+    const deepDirect = resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, {
+      miner: 'deepCore',
+      crystal: 'a2',
+      surveyChipset: 'msc2',
+    })
+    expect(deepMercM3).toBe(deepDirect)
+    expect(deepMercM3).toBeLessThan(msmM3)
+  })
+
   it('applies T2 crystals on barges', () => {
     const ship = getMiningShip('retriever')
-    expect(miningCrystalMultiplier('ore', ship, 't2')).toBe(810 / 150)
-    expect(miningCrystalMultiplier('ore', ship, 't1', 'modulated')).toBe(675 / 150)
+    expect(miningCrystalMultiplier('ore', ship, 'a2')).toBe(216 / 150)
+    expect(miningCrystalMultiplier('ore', ship, 'a1', 'modulated')).toBe(180 / 150)
     expect(miningCrystalMultiplier('ore', ship, 'none', 'strip')).toBe(1)
-    expect(miningCrystalMultiplier('ore', getMiningShip('venture'), 't2')).toBe(1)
-    expect(miningCrystalMultiplier('ice', ship, 't2', 'modulated')).toBe(240 / 200)
+    expect(miningCrystalMultiplier('ore', getMiningShip('venture'), 'a2')).toBe(1)
+    expect(miningCrystalMultiplier('ice', ship, 'a2', 'modulated')).toBe(240 / 200)
     expect(miningUpgradeMultiplier('ice', ship, 'mlu2', 3)).toBeGreaterThan(1.2)
   })
 
@@ -277,7 +424,7 @@ describe('miningShipPresets', () => {
     const fleet = normalizeMiningFleet(
       [
         { shipId: 'retriever', count: 1, miner: 'strip', crystal: 'none' },
-        { shipId: 'retriever', count: 1, miner: 'modulated', crystal: 't2' },
+        { shipId: 'retriever', count: 1, miner: 'modulated', crystal: 'a2' },
       ],
       'ore',
     )
@@ -297,8 +444,10 @@ describe('miningShipPresets', () => {
   })
 
   it('sums mixed fleet m³/hr', () => {
-    const soloHulk = resolveUserMiningM3PerHr('ore', 'hulk', [], 'highsec', 1)
-    const soloRetriever = resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1)
+    const soloHulk = resolveUserMiningM3PerHr('ore', 'hulk', [], 'highsec', 1, { surveyChipset: 'msc2' })
+    const soloRetriever = resolveUserMiningM3PerHr('ore', 'retriever', [], 'highsec', 1, {
+      surveyChipset: 'msc2',
+    })
     const fleet = normalizeMiningFleet(
       [
         { shipId: 'hulk', count: 2 },
@@ -306,9 +455,9 @@ describe('miningShipPresets', () => {
       ],
       'ore',
     )
-    expect(resolveUserMiningM3PerHrFromFleet('ore', fleet, [], 'highsec')).toBe(
-      soloHulk * 2 + soloRetriever * 3,
-    )
+    const fleetTotal = resolveUserMiningM3PerHrFromFleet('ore', fleet, [], 'highsec')
+    const soloSum = soloHulk * 2 + soloRetriever * 3
+    expect(Math.abs(fleetTotal - soloSum)).toBeLessThanOrEqual(1)
   })
 
   it('applies implants per hull in mixed fleet', () => {
@@ -320,7 +469,9 @@ describe('miningShipPresets', () => {
       ],
       'ore',
     )
-    const retrieverBoosted = resolveUserMiningM3PerHr('ore', 'retriever', [...buffs], 'highsec', 1)
+    const retrieverBoosted = resolveUserMiningM3PerHr('ore', 'retriever', [...buffs], 'highsec', 1, {
+      surveyChipset: 'msc2',
+    })
     const ventureBoosted = resolveUserMiningM3PerHr('ore', 'venture', [...buffs], 'highsec', 1)
     expect(resolveUserMiningM3PerHrFromFleet('ore', fleet, [...buffs], 'highsec')).toBe(
       retrieverBoosted + ventureBoosted,

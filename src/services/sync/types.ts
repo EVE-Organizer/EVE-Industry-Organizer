@@ -1,4 +1,4 @@
-import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry, StructureType, MiningBoosterHullId, MiningBurstTech, MiningCrystalId, MiningForemanBurstId, MiningUpgradeId } from '@/types'
+import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry, StructureType, MiningBoosterHullId, MiningBurstTech, MiningCrystalId, MiningForemanBurstId, MiningSurveyChipsetId, MiningUpgradeId } from '@/types'
 import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS, STRUCTURE_HULL_PRESETS, type MiningBuffId, type MiningBoostSpace, type MiningShipId } from '@/types'
 import {
   DEFAULT_MINING_SHIP_ID,
@@ -15,6 +15,7 @@ import {
   normalizeMiningShipId,
   normalizeMiningUpgrade,
   normalizeMiningUpgradeCount,
+  normalizeMiningSurveyChipset,
 } from '@/lib/miningShipPresets'
 import { SKILL_FIELDS, enforceSkillPrerequisites } from '@/lib/skillFields'
 import {
@@ -200,6 +201,7 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
         crystal: rest.miningCrystal as MiningCrystalId | undefined,
         upgrade: rest.miningUpgrade as MiningUpgradeId | undefined,
         upgradeCount: rest.miningUpgradeCount as number | undefined,
+        surveyChipset: rest.miningSurveyChipset as MiningSurveyChipsetId | undefined,
       },
     ),
     ...(() => {
@@ -233,6 +235,10 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
         miningUpgradeCount: normalizeMiningUpgradeCount(
           (rest.miningUpgradeCount as number | undefined) ?? migrated.upgradeCount,
           upgrade,
+        ),
+        miningSurveyChipset: normalizeMiningSurveyChipset(
+          (rest.miningSurveyChipset as MiningSurveyChipsetId | undefined) ??
+            DEFAULT_SETTINGS.miningSurveyChipset,
         ),
         miningCrystal: normalizeMiningCrystal(rest.miningCrystal as MiningCrystalId | undefined),
         miningBuffIds: normalizeMiningBuffIds(

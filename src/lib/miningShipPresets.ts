@@ -9,6 +9,7 @@ import type {
   MiningBuffId,
   MiningShipId,
   MiningBoostSpace,
+  MiningSurveyChipsetId,
   MiningUpgradeId,
   SkillLevels,
 } from '@/types'
@@ -24,6 +25,7 @@ export type {
   MiningMinerModuleId,
   MiningBurstTech,
   MiningUpgradeId,
+  MiningSurveyChipsetId,
   MiningCrystalId,
 } from '@/types'
 
@@ -110,9 +112,12 @@ export const MINING_BOOST_SPACES: { id: MiningBoostSpace; label: string; hint: s
 /** Strip Miner I / Ice Harvester I / Miner II at skill IV. See miningIph Retriever constants. */
 const BAKED = 4
 const ORE_SKILL = (1 + 0.05 * BAKED) ** 2
+/** Strip Miner I (17482): attr 77 miningAmount 150, attr 73 duration 45s. */
 const STRIP_I_M3_HR = (150 / 45) * 2 * 3600
+/** Ice Harvester I (16278): 1000 m³ / 240s. */
 const ICE_I_M3_HR = (1000 / 240) * 2 * 3600
 const ICE_SKILL_DUR = 1 - 0.05 * BAKED
+/** Miner II (482): 15 m³ / 15s. */
 const MINER_II_M3_HR = (15 / 15) * 2 * 3600
 const SCOOP_II_M3_HR = (20 / 40) * 2 * 3600
 const FRIG_GAS_DUR = 1 - 0.05 * BAKED
@@ -284,6 +289,7 @@ export const MINING_FOREMAN_BURSTS: MiningForemanBurstPreset[] = [
 export const DEFAULT_MINING_FOREMAN_BURST: MiningForemanBurstId = 'miningLaserOptimization'
 export const DEFAULT_MINING_BURST_TECH: MiningBurstTech = 't2'
 export const DEFAULT_MINING_UPGRADE: MiningUpgradeId = 'none'
+export const DEFAULT_MINING_SURVEY_CHIPSET: MiningSurveyChipsetId = 'msc2'
 export const DEFAULT_MINING_CRYSTAL: MiningCrystalId = 'none'
 export const DEFAULT_MINING_MINER: MiningMinerModuleId = 'strip'
 export const MAX_MINING_UPGRADE_COUNT = 3
@@ -292,14 +298,29 @@ export const MAX_MINING_UPGRADE_COUNT = 3
 export const MINING_FIT_TYPE_IDS = {
   stripMinerI: 17482,
   modulatedStripMinerII: 17912,
+  modulatedDeepCoreStripMinerII: 24305,
   iceHarvesterI: 16278,
   iceHarvesterII: 22229,
-  oreCrystalT1: 60276,
-  oreCrystalT2: 60281,
-  moonCrystalT1: 46355,
-  moonCrystalT2: 46356,
+  /** Simple asteroid crystals (matching ore tier assumed in rankings). */
+  oreCrystalA1: 60276,
+  oreCrystalA2: 60281,
+  oreCrystalB1: 60279,
+  oreCrystalB2: 60283,
+  oreCrystalC1: 60280,
+  oreCrystalC2: 60284,
+  mercoxitCrystalA1: 18054,
+  mercoxitCrystalA2: 18608,
+  /** Ubiquitous moon tier (matching moon ore tier assumed in rankings). */
+  moonCrystalA1: 46355,
+  moonCrystalA2: 46356,
+  moonCrystalB1: 61197,
+  moonCrystalB2: 61199,
+  moonCrystalC1: 61198,
+  moonCrystalC2: 61200,
   mlu1: 22542,
   mlu2: 28576,
+  msc1: 444,
+  msc2: 2333,
   ihu1: 22576,
   ihu2: 28578,
   burstI: 42528,
@@ -308,15 +329,218 @@ export const MINING_FIT_TYPE_IDS = {
   capitalIndustrialCore: 28583,
   mindlink: 22559,
 } as const
+
+/** ESI attr 782 specializationAsteroidYieldMultiplier (same across ore/moon tiers for A/B/C). */
+const CRYSTAL_YIELD_MULT: Record<Exclude<MiningCrystalId, 'none'>, number> = {
+  a1: 1.5,
+  a2: 1.8,
+  b1: 1.5,
+  b2: 1.8,
+  c1: 0.25,
+  c2: 0.2,
+}
+
+const CRYSTAL_DURATION_MULT: Record<Exclude<MiningCrystalId, 'none'>, number> = {
+  a1: 1,
+  a2: 1,
+  b1: 0.9,
+  b2: 0.8,
+  c1: 1,
+  c2: 1,
+}
+
+const MINING_CRYSTAL_BASE_CYCLE_SECONDS = 45
+
+export const MINING_CRYSTAL_OPTIONS: readonly {
+  id: Exclude<MiningCrystalId, 'none'>
+  label: string
+  yieldMultiplier: number
+  durationMultiplier: number
+  residueProbabilityBonus: number
+  residueVolumeBonus: number
+  asteroidVolatilityPct: number
+  moonVolatilityPct: number
+  hint: string
+}[] = [
+  {
+    id: 'a1',
+    label: 'Type A I',
+    yieldMultiplier: 1.5,
+    durationMultiplier: 1,
+    residueProbabilityBonus: 0,
+    residueVolumeBonus: 0,
+    asteroidVolatilityPct: 2.5,
+    moonVolatilityPct: 2.5,
+    hint:
+      'Use for everyday mining when preserving the asteroid or moon field matters. It adds yield without adding residue chance.',
+  },
+  {
+    id: 'a2',
+    label: 'Type A II',
+    yieldMultiplier: 1.8,
+    durationMultiplier: 1,
+    residueProbabilityBonus: 3.6,
+    residueVolumeBonus: 0,
+    asteroidVolatilityPct: 3,
+    moonVolatilityPct: 3,
+    hint:
+      'Use for efficient everyday mining with Tech II skills. It gives more yield than Type A I with only a small residue increase.',
+  },
+  {
+    id: 'b1',
+    label: 'Type B I',
+    yieldMultiplier: 1.5,
+    durationMultiplier: 0.9,
+    residueProbabilityBonus: 20,
+    residueVolumeBonus: 0,
+    asteroidVolatilityPct: 2.5,
+    moonVolatilityPct: 3.75,
+    hint:
+      'Use when finishing a rock or site quickly matters more than recovering every unit. Faster cycles create more residue.',
+  },
+  {
+    id: 'b2',
+    label: 'Type B II',
+    yieldMultiplier: 1.8,
+    durationMultiplier: 0.8,
+    residueProbabilityBonus: 30,
+    residueVolumeBonus: 0,
+    asteroidVolatilityPct: 5,
+    moonVolatilityPct: 5,
+    hint:
+      'Use for maximum extraction speed. It clears valuable rocks quickly but leaves more of the deposit as residue.',
+  },
+  {
+    id: 'c1',
+    label: 'Type C I',
+    yieldMultiplier: 0.25,
+    durationMultiplier: 1,
+    residueProbabilityBonus: 40,
+    residueVolumeBonus: 18,
+    asteroidVolatilityPct: 2.5,
+    moonVolatilityPct: 6,
+    hint:
+      'Use to remove unwanted or hostile rocks, not to maximize ore collected. It recovers little ore and destroys more of the deposit.',
+  },
+  {
+    id: 'c2',
+    label: 'Type C II',
+    yieldMultiplier: 0.2,
+    durationMultiplier: 1,
+    residueProbabilityBonus: 59,
+    residueVolumeBonus: 28,
+    asteroidVolatilityPct: 7.5,
+    moonVolatilityPct: 7.5,
+    hint:
+      'Use for aggressive field clearance. It removes deposits while recovering very little ore, so it is unsuitable for normal mining.',
+  },
+]
+
+export function miningCrystalLabel(crystal: MiningCrystalId): string {
+  if (crystal === 'none') return 'No crystal'
+  const opt = MINING_CRYSTAL_OPTIONS.find((o) => o.id === crystal)
+  return opt?.label ?? crystal
+}
+
+/**
+ * Average base lifespan before volatility modifiers such as Equipment Preservation.
+ * Uses the displayed Simple Asteroid or Ubiquitous Moon crystal's live ESI volatility.
+ * Crystal HP is 1 and volatility damage is 0.05 HP per damage event.
+ */
+export function miningCrystalExpectedCycles(
+  subtype: MiningSubtype,
+  crystal: MiningCrystalId,
+  lifespanMultiplier = 1,
+): number | null {
+  const xtal = normalizeMiningCrystal(crystal)
+  if (xtal === 'none') return null
+  const option = MINING_CRYSTAL_OPTIONS.find((entry) => entry.id === xtal)
+  if (!option) return null
+  const volatilityPct =
+    subtype === 'moon' ? option.moonVolatilityPct : option.asteroidVolatilityPct
+  return Math.round((1 / ((volatilityPct / 100) * 0.05)) * Math.max(1, lifespanMultiplier))
+}
+
+/** Base elapsed lifetime before hull, skill, and fleet cycle-time reductions. */
+export function miningCrystalExpectedDurationSeconds(
+  subtype: MiningSubtype,
+  crystal: MiningCrystalId,
+  lifespanMultiplier = 1,
+): number | null {
+  const xtal = normalizeMiningCrystal(crystal)
+  if (xtal === 'none') return null
+  const cycles = miningCrystalExpectedCycles(subtype, xtal, lifespanMultiplier)
+  if (cycles == null) return null
+  return Math.round(cycles * MINING_CRYSTAL_BASE_CYCLE_SECONDS * CRYSTAL_DURATION_MULT[xtal])
+}
+
+export function miningCrystalTypeId(
+  subtype: MiningSubtype,
+  crystal: MiningCrystalId,
+): number | null {
+  const xtal = normalizeMiningCrystal(crystal)
+  if (xtal === 'none') return null
+  const letter = xtal[0] as 'a' | 'b' | 'c'
+  const tier = xtal[1] === '2' ? 2 : 1
+  const key = `${letter}${tier}` as 'a1' | 'a2' | 'b1' | 'b2' | 'c1' | 'c2'
+  if (subtype === 'moon') {
+    const map = {
+      a1: MINING_FIT_TYPE_IDS.moonCrystalA1,
+      a2: MINING_FIT_TYPE_IDS.moonCrystalA2,
+      b1: MINING_FIT_TYPE_IDS.moonCrystalB1,
+      b2: MINING_FIT_TYPE_IDS.moonCrystalB2,
+      c1: MINING_FIT_TYPE_IDS.moonCrystalC1,
+      c2: MINING_FIT_TYPE_IDS.moonCrystalC2,
+    } as const
+    return map[key]
+  }
+  if (subtype === 'ore' || subtype === 'ice') {
+    const map = {
+      a1: MINING_FIT_TYPE_IDS.oreCrystalA1,
+      a2: MINING_FIT_TYPE_IDS.oreCrystalA2,
+      b1: MINING_FIT_TYPE_IDS.oreCrystalB1,
+      b2: MINING_FIT_TYPE_IDS.oreCrystalB2,
+      c1: MINING_FIT_TYPE_IDS.oreCrystalC1,
+      c2: MINING_FIT_TYPE_IDS.oreCrystalC2,
+    } as const
+    return map[key]
+  }
+  return null
+}
+
+export function miningCrystalMercoxitTypeId(crystal: MiningCrystalId): number | null {
+  const xtal = normalizeMiningCrystal(crystal)
+  if (xtal === 'none' || xtal[0] !== 'a') return null
+  return xtal[1] === '2'
+    ? MINING_FIT_TYPE_IDS.mercoxitCrystalA2
+    : MINING_FIT_TYPE_IDS.mercoxitCrystalA1
+}
 /** Hull m³/hr tables assume these skill levels. */
 export const BAKED_MINING_SKILL_LEVEL = 4
-/** Strip Miner I 150 m³ / 45s. MSM II specialty 450 m³ × Type A crystal (1.5 / 1.8). */
+/**
+ * Live SDE cycle amounts (Tranquility ESI).
+ * Strip Miner I 17482: attr 77 = 150 m³.
+ * Modulated Strip Miner II 17912: attr 77 = 120 m³.
+ * Modulated Deep Core Strip Miner II 24305: attr 77 = 80 m³.
+ * Crystal attr 782 modifies the module mining amount; attr 3161 modifies cycle duration.
+ * Do not use hidden attr 789 as another per-cycle base after Catalyst's 4× cycle-speed change.
+ * Mercoxit Type A I 18054 / II 18608: same 1.5 / 1.8 on MDCSM only (MSM II cannot load Mercoxit crystals).
+ * MLU I 22542 / MLU II 28576: attr 434 miningAmountBonus = 5 / 9 (stacking).
+ * Mining Survey Chipset I 444 / II 2333: attr 6049/6050 = +12% / +20% crit chance and crit yield.
+ */
 const STRIP_CYCLE_M3 = 150
 const MODULATED_CYCLE_M3 = 120
-const MODULATED_T1_CYCLE_M3 = 450 * 1.5
-const MODULATED_T2_CYCLE_M3 = 450 * 1.8
+const DEEP_CORE_CYCLE_M3 = 80
+/** Ice Harvester I 16278 / II 22229: attr 73 = 240s / 200s. */
 const ICE_HARVESTER_I_CYCLE_S = 240
 const ICE_HARVESTER_II_CYCLE_S = 200
+/** MLU attr 434 per module (stacking in miningUpgradeMultiplier). */
+const MLU1_YIELD_BONUS = 0.05
+const MLU2_YIELD_BONUS = 0.09
+const BASE_MINING_CRIT_CHANCE = 0.01
+const BASE_MINING_CRIT_BONUS_YIELD = 2
+const MSC1_CRIT_BONUS = 0.12
+const MSC2_CRIT_BONUS = 0.2
 
 export type MiningYieldContext = {
   boosterHull?: MiningBoosterHullId | null
@@ -327,6 +551,7 @@ export type MiningYieldContext = {
   miner?: MiningMinerModuleId
   upgrade?: MiningUpgradeId
   upgradeCount?: number
+  surveyChipset?: MiningSurveyChipsetId
   crystal?: MiningCrystalId
   skills?: Partial<SkillLevels>
 }
@@ -336,6 +561,7 @@ export type MiningFleetLineDefaults = {
   crystal?: MiningCrystalId
   upgrade?: MiningUpgradeId
   upgradeCount?: number
+  surveyChipset?: MiningSurveyChipsetId
 }
 
 export function normalizeMiningUpgrade(id: MiningUpgradeId | undefined): MiningUpgradeId {
@@ -349,16 +575,97 @@ export function normalizeMiningUpgradeCount(count: number | undefined, upgrade: 
   return Math.min(n, MAX_MINING_UPGRADE_COUNT)
 }
 
-export function normalizeMiningCrystal(id: MiningCrystalId | undefined): MiningCrystalId {
-  return id === 't1' || id === 't2' ? id : 'none'
+export function normalizeMiningSurveyChipset(
+  id: MiningSurveyChipsetId | undefined,
+): MiningSurveyChipsetId {
+  return id === 'msc1' || id === 'msc2' ? id : 'none'
+}
+
+export function normalizeMiningCrystal(id: MiningCrystalId | string | undefined): MiningCrystalId {
+  if (id === 't1') return 'a1'
+  if (id === 't2') return 'a2'
+  if (
+    id === 'a1' ||
+    id === 'a2' ||
+    id === 'b1' ||
+    id === 'b2' ||
+    id === 'c1' ||
+    id === 'c2'
+  ) {
+    return id
+  }
+  return 'none'
 }
 
 export function normalizeMiningMiner(
   miner: MiningMinerModuleId | undefined,
   crystal: MiningCrystalId = 'none',
 ): MiningMinerModuleId {
-  if (miner === 'strip' || miner === 'modulated') return miner
+  if (miner === 'strip' || miner === 'modulated' || miner === 'deepCore') return miner
   return crystal === 'none' ? DEFAULT_MINING_MINER : 'modulated'
+}
+
+/** Mercoxit is the only standard belt ore that requires Modulated Deep Core Strip Miner II. */
+export const MERCOXIT_ORE_GROUP = 'Mercoxit'
+
+export function oreRequiresDeepCoreMiner(oreGroup: string): boolean {
+  return oreGroup === MERCOXIT_ORE_GROUP
+}
+
+/** Effective gun + crystal for a specific ore group (rankings assume matching Type A tier). */
+export function effectiveMinerForOre(
+  miner: MiningMinerModuleId | undefined,
+  crystal: MiningCrystalId | undefined,
+  oreGroup: string,
+): { miner: MiningMinerModuleId; crystal: MiningCrystalId } | null {
+  const gun = normalizeMiningMiner(miner, crystal)
+  const xtal = normalizeMiningCrystal(crystal)
+  if (oreRequiresDeepCoreMiner(oreGroup)) {
+    if (gun !== 'deepCore') return null
+    return { miner: 'deepCore', crystal: xtal === 'none' ? 'a1' : xtal }
+  }
+  if (gun === 'deepCore') {
+    return { miner: 'deepCore', crystal: xtal === 'none' ? 'a1' : xtal }
+  }
+  return { miner: gun, crystal: xtal }
+}
+
+/** True when at least one fleet line can mine this ore with its selected module. */
+export function fleetCanMineOreGroup(
+  subtype: MiningSubtype,
+  fleet: readonly MiningFleetLine[],
+  ctx: MiningYieldContext,
+  oreGroup: string,
+): boolean {
+  const normalized = normalizeMiningFleet(fleet, subtype)
+  if (normalized.length === 0) return false
+
+  const miners = normalized.map((line) =>
+    normalizeMiningMiner(line.miner ?? ctx.miner, line.crystal ?? ctx.crystal),
+  )
+  const hasDeepCore = miners.some((m) => m === 'deepCore')
+  const hasStandard = miners.some((m) => m === 'strip' || m === 'modulated')
+  const needsDeep = oreRequiresDeepCoreMiner(oreGroup)
+
+  if (hasDeepCore && !hasStandard) {
+    return needsDeep
+  }
+  if (hasStandard && !hasDeepCore) {
+    return !needsDeep
+  }
+
+  for (const line of normalized) {
+    if (
+      effectiveMinerForOre(
+        line.miner ?? ctx.miner,
+        line.crystal ?? ctx.crystal,
+        oreGroup,
+      )
+    ) {
+      return true
+    }
+  }
+  return false
 }
 
 export function miningBurstSlotCount(hull: MiningBoosterHullId | null | undefined): number {
@@ -425,14 +732,14 @@ export function miningUpgradeMultiplier(
   if (subtype === 'gas') return 1
   if (ship.tier !== 'barge' && ship.tier !== 'exhumer') return 1
   if (subtype === 'ice') {
-    const cut = upgrade === 'mlu2' ? 0.09 : 0.05
+    const cut = upgrade === 'mlu2' ? MLU2_YIELD_BONUS : MLU1_YIELD_BONUS
     let duration = 1
     for (let i = 0; i < count; i++) {
       duration *= 1 - cut * Math.exp(-(i * i) / 7.1289)
     }
     return 1 / duration
   }
-  const bonus = upgrade === 'mlu2' ? 0.09 : 0.05
+  const bonus = upgrade === 'mlu2' ? MLU2_YIELD_BONUS : MLU1_YIELD_BONUS
   return stackingProduct(bonus, count)
 }
 
@@ -445,11 +752,26 @@ export function miningCrystalMultiplier(
   if (subtype === 'gas') return 1
   if (ship.tier !== 'barge' && ship.tier !== 'exhumer') return 1
   const gun = normalizeMiningMiner(miner, crystal)
-  if (gun !== 'modulated') return 1
+  if (gun === 'strip') return 1
   if (subtype === 'ice') return ICE_HARVESTER_I_CYCLE_S / ICE_HARVESTER_II_CYCLE_S
   const xtal = normalizeMiningCrystal(crystal)
-  if (xtal === 't2') return MODULATED_T2_CYCLE_M3 / STRIP_CYCLE_M3
-  if (xtal === 't1') return MODULATED_T1_CYCLE_M3 / STRIP_CYCLE_M3
+  if (gun === 'deepCore') {
+    if (xtal !== 'none') {
+      return (
+        (DEEP_CORE_CYCLE_M3 * CRYSTAL_YIELD_MULT[xtal]) /
+        CRYSTAL_DURATION_MULT[xtal] /
+        STRIP_CYCLE_M3
+      )
+    }
+    return DEEP_CORE_CYCLE_M3 / STRIP_CYCLE_M3
+  }
+  if (xtal !== 'none') {
+    return (
+      (MODULATED_CYCLE_M3 * CRYSTAL_YIELD_MULT[xtal]) /
+      CRYSTAL_DURATION_MULT[xtal] /
+      STRIP_CYCLE_M3
+    )
+  }
   return MODULATED_CYCLE_M3 / STRIP_CYCLE_M3
 }
 
@@ -585,17 +907,90 @@ function foremanBurstStrength(
   return strength
 }
 
+/** Expected crystal-life multiplier from a loaded Equipment Preservation burst. */
+export function miningCrystalLifeMultiplier(
+  ctx: MiningYieldContext,
+  buffIds: readonly MiningBuffId[] = [],
+): number {
+  const hull = normalizeMiningBoosterHull(ctx.boosterHull)
+  if (!hull) return 1
+  const loaded = normalizeMiningForemanBursts(hull, ctx.foremanBursts, ctx.foremanBurst)
+  if (!loaded.includes('miningEquipmentPreservation')) return 1
+  const strength = foremanBurstStrength(
+    hull,
+    ctx.skills,
+    ctx.burstTech,
+    ctx.industrialCore !== false,
+    buffIds.includes('mindlink'),
+  )
+  const volatilityReduction = Math.min(0.95, 0.15 * strength)
+  return 1 / (1 - volatilityReduction)
+}
+
 function burstChargeYieldMultiplier(yieldKind: MiningForemanYieldKind, strength: number): number {
   if (yieldKind === 'cycle') {
     const cycleCut = Math.min(0.85, 0.15 * strength)
     return 1 / (1 - cycleCut)
   }
   if (yieldKind === 'crit') {
-    // Base crit 1%, burst +50% crit chance, crit bonus yield +200% of the cycle.
-    const critChance = Math.min(0.25, 0.01 * (1 + 0.5 * strength))
-    return 1 + critChance * 2
+    // Crit yield is computed per fit (survey chipset + efficiency burst) in miningCritYieldMultiplier.
+    return 1
   }
   return 1
+}
+
+function surveyChipsetCritBonuses(chipset: MiningSurveyChipsetId): { chanceMult: number; bonusMult: number } {
+  switch (normalizeMiningSurveyChipset(chipset)) {
+    case 'msc1':
+      return { chanceMult: 1 + MSC1_CRIT_BONUS, bonusMult: 1 + MSC1_CRIT_BONUS }
+    case 'msc2':
+      return { chanceMult: 1 + MSC2_CRIT_BONUS, bonusMult: 1 + MSC2_CRIT_BONUS }
+    default:
+      return { chanceMult: 1, bonusMult: 1 }
+  }
+}
+
+/** Expected m³/hr from mining crits (chipset + optional Efficiency burst). */
+export function miningCritYieldMultiplier(
+  subtype: MiningSubtype,
+  ship: MiningShipPreset,
+  ctx: MiningYieldContext,
+  buffIds: readonly MiningBuffId[] = [],
+): number {
+  if (subtype === 'gas') return 1
+  if (ship.tier !== 'barge' && ship.tier !== 'exhumer') return 1
+
+  const chipset = normalizeMiningSurveyChipset(ctx.surveyChipset)
+  let hasEffBurst = false
+  if (ctx.boosterHull) {
+    const loaded = normalizeMiningForemanBursts(ctx.boosterHull, ctx.foremanBursts, ctx.foremanBurst)
+    hasEffBurst = loaded.includes('miningLaserEfficiency')
+  }
+  if (chipset === 'none' && !hasEffBurst) return 1
+
+  const { chanceMult, bonusMult } = surveyChipsetCritBonuses(chipset)
+  let critChance = BASE_MINING_CRIT_CHANCE * chanceMult
+
+  if (hasEffBurst && ctx.boosterHull) {
+    const strength = foremanBurstStrength(
+      ctx.boosterHull,
+      ctx.skills,
+      ctx.burstTech,
+      ctx.industrialCore !== false,
+      buffIds.includes('mindlink'),
+    )
+    critChance = Math.min(0.25, critChance * (1 + 0.5 * strength))
+  }
+
+  const critBonus = BASE_MINING_CRIT_BONUS_YIELD * bonusMult
+  return 1 + critChance * critBonus
+}
+
+/** @deprecated Use miningCritYieldMultiplier; kept for burst tests comparing strength only. */
+export function burstEfficiencyCritMultiplier(strength: number, chipset: MiningSurveyChipsetId = 'none'): number {
+  const { chanceMult, bonusMult } = surveyChipsetCritBonuses(chipset)
+  const critChance = Math.min(0.25, BASE_MINING_CRIT_CHANCE * chanceMult * (1 + 0.5 * strength))
+  return 1 + critChance * (BASE_MINING_CRIT_BONUS_YIELD * bonusMult)
 }
 
 /** Yield from loaded Foreman charges. Optimization and Efficiency stack. */
@@ -887,6 +1282,7 @@ export function miningFitYieldMultiplier(
   subtype: MiningSubtype,
   ship: MiningShipPreset,
   ctx: MiningYieldContext = {},
+  buffIds: readonly MiningBuffId[] = [],
 ): number {
   const upgrade = normalizeMiningUpgrade(ctx.upgrade)
   const count = normalizeMiningUpgradeCount(ctx.upgradeCount, upgrade)
@@ -895,7 +1291,8 @@ export function miningFitYieldMultiplier(
   return (
     miningUpgradeMultiplier(subtype, ship, upgrade, count) *
     miningCrystalMultiplier(subtype, ship, crystal, miner) *
-    miningSkillYieldMultiplier(subtype, ctx.skills)
+    miningSkillYieldMultiplier(subtype, ctx.skills) *
+    miningCritYieldMultiplier(subtype, ship, ctx, buffIds)
   )
 }
 
@@ -937,6 +1334,7 @@ function fleetLineKey(line: MiningFleetLine): string {
   const miner = normalizeMiningMiner(line.miner, crystal)
   const upgrade = normalizeMiningUpgrade(line.upgrade)
   const upgradeCount = normalizeMiningUpgradeCount(line.upgradeCount, upgrade)
+  const surveyChipset = normalizeMiningSurveyChipset(line.surveyChipset)
   const buffs = (line.buffIds ?? []).slice().sort().join(',')
   const skills = line.skills
     ? Object.keys(line.skills)
@@ -944,26 +1342,49 @@ function fleetLineKey(line: MiningFleetLine): string {
         .map((k) => `${k}:${line.skills?.[k] ?? ''}`)
         .join(',')
     : ''
-  return `${line.shipId}|${miner}|${crystal}|${upgrade}|${upgradeCount}|${buffs}|${skills}`
+  return `${line.shipId}|${miner}|${crystal}|${upgrade}|${upgradeCount}|${surveyChipset}|${buffs}|${skills}`
+}
+
+function coerceFleetLineForSubtype(
+  line: MiningFleetLine,
+  subtype: MiningSubtype,
+): MiningFleetLine {
+  let crystal = normalizeMiningCrystal(line.crystal)
+  let miner = normalizeMiningMiner(line.miner, crystal)
+  if (subtype === 'ice') {
+    crystal = 'none'
+  }
+  if (subtype !== 'ore' && miner === 'deepCore') {
+    miner = 'modulated'
+  }
+  return { ...line, miner, crystal }
 }
 
 function hydrateFleetLine(
   line: MiningFleetLine,
+  subtype: MiningSubtype,
   defaults?: MiningFleetLineDefaults,
 ): MiningFleetLine {
   const crystal = normalizeMiningCrystal(line.crystal ?? defaults?.crystal)
   const miner = normalizeMiningMiner(line.miner ?? defaults?.miner, crystal)
   const upgrade = normalizeMiningUpgrade(line.upgrade ?? defaults?.upgrade)
-  return {
-    ...line,
-    miner,
-    crystal,
-    upgrade,
-    upgradeCount: normalizeMiningUpgradeCount(
-      line.upgradeCount ?? defaults?.upgradeCount,
+  const surveyChipset = normalizeMiningSurveyChipset(
+    line.surveyChipset ?? defaults?.surveyChipset ?? DEFAULT_MINING_SURVEY_CHIPSET,
+  )
+  return coerceFleetLineForSubtype(
+    {
+      ...line,
+      miner,
+      crystal,
       upgrade,
-    ),
-  }
+      surveyChipset,
+      upgradeCount: normalizeMiningUpgradeCount(
+        line.upgradeCount ?? defaults?.upgradeCount,
+        upgrade,
+      ),
+    },
+    subtype,
+  )
 }
 
 export function yieldCtxForLine(
@@ -976,6 +1397,7 @@ export function yieldCtxForLine(
     crystal: line.crystal ?? ctx.crystal,
     upgrade: line.upgrade ?? ctx.upgrade,
     upgradeCount: line.upgradeCount ?? ctx.upgradeCount,
+    surveyChipset: line.surveyChipset ?? ctx.surveyChipset,
     skills: { ...ctx.skills, ...line.skills },
   }
 }
@@ -1003,7 +1425,7 @@ export function normalizeMiningFleet(
     if (!miningShipSupportsSubtype(ship, subtype)) {
       ship = getMiningShip(defaultMiningShipForSubtype(subtype))
     }
-    const hydrated = hydrateFleetLine({ ...line, shipId: ship.id }, defaults)
+    const hydrated = hydrateFleetLine({ ...line, shipId: ship.id }, subtype, defaults)
     hydrated.count = normalizeMiningFleetSize(hydrated.count)
     const key = fleetLineKey(hydrated)
     const prev = merged.get(key)
@@ -1028,6 +1450,7 @@ export function normalizeMiningFleet(
     lines = [
       hydrateFleetLine(
         { shipId: defaultMiningShipForSubtype(subtype), count: DEFAULT_MINING_FLEET_SIZE },
+        subtype,
         defaults,
       ),
     ]
@@ -1053,6 +1476,37 @@ export function resolveUserMiningM3PerHrFromFleet(
       boostSpace,
       line.count,
       yieldCtxForLine(line, ctx),
+    )
+  }
+  return sum
+}
+
+/** Fleet m³/hr for one ore row, using the module + crystal that ore actually needs. */
+export function resolveUserMiningM3PerHrForOre(
+  subtype: MiningSubtype,
+  fleet: readonly MiningFleetLine[],
+  buffIds: readonly MiningBuffId[],
+  boostSpace: MiningBoostSpace,
+  ctx: MiningYieldContext,
+  oreGroup: string,
+): number {
+  const normalized = normalizeMiningFleet(fleet, subtype)
+  let sum = 0
+  for (const line of normalized) {
+    const lineCrystal = normalizeMiningCrystal(line.crystal ?? ctx.crystal)
+    const effective = effectiveMinerForOre(line.miner ?? ctx.miner, lineCrystal, oreGroup)
+    if (!effective) continue
+    sum += resolveUserMiningM3PerHr(
+      subtype,
+      line.shipId,
+      buffIdsForLine(line, buffIds),
+      boostSpace,
+      line.count,
+      {
+        ...yieldCtxForLine(line, ctx),
+        miner: effective.miner,
+        crystal: effective.crystal,
+      },
     )
   }
   return sum
@@ -1100,9 +1554,18 @@ export function formatMiningFleetSummary(
       `${upgradeCount}× ${upgrade === 'mlu2' ? 'Mining Laser Upgrade II' : 'Mining Laser Upgrade I'}`,
     )
   }
+  const surveyChipset = normalizeMiningSurveyChipset(ctx.surveyChipset)
+  if (surveyChipset === 'msc2') labels.push('Mining Survey Chipset II')
+  else if (surveyChipset === 'msc1') labels.push('Mining Survey Chipset I')
   const crystal = normalizeMiningCrystal(ctx.crystal)
+  const miner = normalizeMiningMiner(ctx.miner, crystal)
   if (crystal !== 'none') {
-    labels.push(crystal === 't2' ? 'Tech II mining crystal' : 'Tech I mining crystal')
+    const crystalLabel = miningCrystalLabel(crystal)
+    if (miner === 'deepCore') {
+      labels.push(`MDCSM II + ${crystalLabel} crystal`)
+    } else {
+      labels.push(`MSM II + ${crystalLabel} crystal`)
+    }
   }
   const activeIds = new Set<MiningBuffId>()
   for (const line of normalized) {
@@ -1158,7 +1621,7 @@ export function resolveUserMiningM3PerHr(
   const ship = getMiningShip(normalizeMiningShipId(shipId, subtype))
   const base = ship.m3PerHrBySubtype[subtype] ?? DEFAULT_MINING_M3_PER_HR_BY_SUBTYPE[subtype]
   const active = applicableMiningBuffIds(shipId, subtype, buffIds, boostSpace, ctx.boosterHull)
-  const perShip = base * miningFitYieldMultiplier(subtype, ship, ctx) * miningBuffMultiplier(active, ctx)
+  const perShip = base * miningFitYieldMultiplier(subtype, ship, ctx, active) * miningBuffMultiplier(active, ctx)
   return Math.round(perShip * normalizeMiningFleetSize(fleetSize))
 }
 

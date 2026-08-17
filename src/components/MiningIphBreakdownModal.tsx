@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
 import type { MiningIphFocusPath } from '@/lib/miningIph'
 import type { MiningRankedRow, TimeRange, TypeInfo } from '@/types'
+import { MiningCompressedIcon } from '@/components/MiningCompressedIcon'
 import {
   MINING_IPH_PATHS,
   MINING_IPH_PATH_ORDER,
+  miningPathDisplayIph,
   miningPathHasPriceData,
+  miningRowDisplayName,
+  miningRowMarketTypeId,
   miningVolumeLabel,
   resolveMiningBreakdownPath,
 } from '@/lib/miningIph'
@@ -28,7 +32,7 @@ interface MiningIphBreakdownModalProps {
 
 export function MiningIphBreakdownModal({
   row,
-  initialFocusPath = 'raw',
+  initialFocusPath = 'compressed',
   m3PerHr,
   reprocessYield,
   focusTypeId,
@@ -46,7 +50,9 @@ export function MiningIphBreakdownModal({
   if (!row) return null
 
   const { item } = row
-  const itemHref = appRoute(`item/${item.typeId}`)
+  const displayName = miningRowDisplayName(item, typeMap)
+  const marketTypeId = miningRowMarketTypeId(item)
+  const itemHref = appRoute(`item/${marketTypeId}`)
   const priceLabel = priceMethod === 'buy_orders' ? 'buy orders' : 'sell orders'
   const volLabel = miningVolumeLabel(window)
   const pathsWithPrice = MINING_IPH_PATH_ORDER.filter((path) => miningPathHasPriceData(path, row))
@@ -57,9 +63,14 @@ export function MiningIphBreakdownModal({
       <div className="modal-box max-w-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
         <div className="px-5 py-4 border-b border-eve-border bg-base-200/60 flex items-start justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <EveImage id={item.typeId} size={40} alt="" className="rounded shrink-0" />
+            <MiningCompressedIcon
+              rawTypeId={item.typeId}
+              compressedTypeId={item.compressedTypeId}
+              size={52}
+              alt={displayName}
+            />
             <div className="min-w-0">
-              <h3 className="font-bold text-lg truncate">{item.name}</h3>
+              <h3 className="font-bold text-lg truncate">{displayName}</h3>
               <p className="text-xs opacity-60 mt-0.5 inline-flex flex-wrap items-center gap-x-1.5 gap-y-1">
                 <MiningSpaceBadges spaces={item.foundIn} />
                 <span>
@@ -128,19 +139,7 @@ export function MiningIphBreakdownModal({
             </section>
           ) : null}
 
-          {activePath === 'raw' ? (
-            miningPathHasPriceData('raw', row) ? (
-              <RawPathDetail
-                row={row}
-                m3PerHr={m3PerHr}
-                window={window}
-                volLabel={volLabel}
-                priceLabel={priceLabel}
-              />
-            ) : (
-              <NoPriceDataDetail path="raw" window={window} priceLabel={priceLabel} />
-            )
-          ) : activePath === 'compressed' ? (
+          {activePath === 'compressed' ? (
             miningPathHasPriceData('compressed', row) ? (
               <CompressedPathDetail
                 row={row}
@@ -195,51 +194,6 @@ export function MiningIphBreakdownModal({
   )
 }
 
-function RawPathDetail({
-  row,
-  m3PerHr,
-  window,
-  volLabel,
-  priceLabel,
-}: {
-  row: MiningRankedRow
-  m3PerHr: number
-  window: TimeRange
-  volLabel: string
-  priceLabel: string
-}) {
-  const { item } = row
-
-  return (
-    <section className="rounded-lg border border-primary/25 bg-primary/5 px-4 py-3 space-y-3">
-      <div>
-        <h4 className="text-sm font-semibold">{MINING_IPH_PATHS.raw.label}</h4>
-        <p className="text-xs opacity-60 mt-0.5">
-          Sell uncompressed at the hub ({priceLabel}, {window} window).
-        </p>
-      </div>
-
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-        <DetailRow label="Raw unit price" value={formatIsk(row.rawPrice)} />
-        <DetailRow label="Unit volume" value={`${formatDecimal(item.volume, 2)} m³`} />
-        <DetailRow
-          label="Value per m³ mined"
-          value={`${formatIsk(row.rawValuePerM3)}/m³`}
-          mono={`${formatIsk(row.rawPrice)} ÷ ${formatDecimal(item.volume, 2)} m³`}
-        />
-        <DetailRow label="Mining rate" value={`${formatDecimal(m3PerHr, 0)} m³/hr`} />
-        <DetailRow
-          label="ISK/hr"
-          value={formatIsk(row.rawIph)}
-          mono={`${formatIsk(row.rawValuePerM3)}/m³ × ${formatDecimal(m3PerHr, 0)} m³/hr`}
-          highlight
-        />
-        <DetailRow label={`${volLabel} (raw)`} value={formatQuantity(row.volDayRaw ?? 0)} />
-      </dl>
-    </section>
-  )
-}
-
 function CompressedPathDetail({
   row,
   m3PerHr,
@@ -283,7 +237,7 @@ function CompressedPathDetail({
       <div>
         <h4 className="text-sm font-semibold">{MINING_IPH_PATHS.compressed.label}</h4>
         <p className="text-xs opacity-60 mt-0.5">
-          Same m³/hr as raw, priced as the compressed form ({priceLabel}, {window} window).
+          Mined volume priced as the compressed form ({priceLabel}, {window} window).
         </p>
       </div>
 
@@ -490,16 +444,13 @@ function PathStat({
   unavailable?: boolean
 }) {
   const label = MINING_IPH_PATHS[path].label
-  const value =
-    path === 'raw' ? row.rawIph : path === 'compressed' ? row.compressedIph : row.mineralsIph
+  const value = miningPathDisplayIph(path, row)
   const detail =
-    path === 'raw'
-      ? `${formatIsk(row.rawValuePerM3)}/m³`
-      : path === 'compressed'
-        ? row.compressedValuePerM3 != null
-          ? `${formatIsk(row.compressedValuePerM3)}/m³`
-          : 'No compressed type'
-        : `${formatIsk(row.mineralsValuePerM3)}/m³`
+    path === 'compressed'
+      ? row.compressedValuePerM3 != null
+        ? `${formatIsk(row.compressedValuePerM3)}/m³`
+        : 'No compressed type'
+      : `${formatIsk(row.mineralsValuePerM3)}/m³`
 
   return (
     <button

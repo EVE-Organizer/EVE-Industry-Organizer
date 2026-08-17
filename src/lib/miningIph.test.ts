@@ -4,9 +4,14 @@ import { buildWindowPriceMap } from '@/lib/ranking'
 import {
   miningDisplayVolume,
   miningPathHasPriceData,
+  miningPathDisplayIph,
   isExcludedMiningItem,
   rankMiningIph,
+  rankMiningItem,
   resolveMiningBreakdownPath,
+  miningRowDisplayName,
+  miningRowMarketTypeId,
+  miningRowMatchesNameQuery,
   RETRIEVER_ORE_M3_PER_HR,
   sortMiningRows,
 } from '@/lib/miningIph'
@@ -84,6 +89,8 @@ const hubMarket: HubMarketData = {
   products: {
     '18': { all: { avgPrice: 10, avgVolume: 5000, high: 10, low: 10 } },
     '1230': { all: { avgPrice: 5, avgVolume: 8000, high: 5, low: 5 } },
+    '62528': { all: { avgPrice: 12, avgVolume: 5000, high: 12, low: 12 } },
+    '62516': { all: { avgPrice: 6, avgVolume: 8000, high: 6, low: 6 } },
   },
 }
 
@@ -105,6 +112,7 @@ describe('rankMiningIph', () => {
     })
     expect(rows.length).toBe(2)
     expect(rows[0].mineralsIph).toBeGreaterThan(0)
+    expect(rows.every((r) => r.compressedIph != null && r.compressedIph > 0)).toBe(true)
   })
 
   it('hides ores with zero focused material', () => {
@@ -136,6 +144,14 @@ describe('rankMiningIph', () => {
         },
         '34': { '1w': { avgPrice: 4, avgVolume: 1e9, high: 4, low: 4 } },
         '36': { '1w': { avgPrice: 50, avgVolume: 1e6, high: 50, low: 50 } },
+        '62528': {
+          '1w': { avgPrice: 12, avgVolume: 1000, high: 12, low: 12 },
+          '1m': { avgPrice: 15, avgVolume: 1000, high: 15, low: 15 },
+        },
+        '62516': {
+          '1w': { avgPrice: 6, avgVolume: 1000, high: 6, low: 6 },
+          '1m': { avgPrice: 7, avgVolume: 1000, high: 7, low: 7 },
+        },
       },
     }
     const spot = new Map<number, number>([
@@ -164,12 +180,12 @@ describe('rankMiningIph', () => {
     })
     const plagi1w = rows1w.find((r) => r.item.typeId === 18)
     const plagi1m = rows1m.find((r) => r.item.typeId === 18)
-    expect(plagi1w?.rawPrice).toBe(10)
-    expect(plagi1m?.rawPrice).toBe(20)
-    expect(plagi1w?.rawIph).not.toBe(plagi1m?.rawIph)
+    expect(plagi1w?.compressedPrice).toBe(12)
+    expect(plagi1m?.compressedPrice).toBe(15)
+    expect(plagi1w?.compressedIph).not.toBe(plagi1m?.compressedIph)
   })
 
-  it('treats dust raw quotes as missing price data', () => {
+  it('treats dust compressed quotes as missing when hub volume is thin', () => {
     const dustRow = {
       ...mining.items[0],
       typeId: 999,
@@ -189,22 +205,26 @@ describe('rankMiningIph', () => {
       focusQtyPerHr: null,
       focusTypeId: null,
       volDayRaw: 12,
-      volDayCompressed: 100,
+      volDayCompressed: 5_000,
       volDayMinerals: 0,
       volDayFocus: null,
       volDay: 100,
       reprocessLines: [],
     }
-    expect(miningPathHasPriceData('raw', row)).toBe(false)
     expect(miningPathHasPriceData('compressed', row)).toBe(true)
-    expect(resolveMiningBreakdownPath(row, 'raw')).toBe('compressed')
+    expect(miningPathDisplayIph('compressed', {
+      ...row,
+      compressedPrice: 50_000,
+      volDayCompressed: 50,
+    })).toBeNull()
+    expect(resolveMiningBreakdownPath(row, 'compressed')).toBe('compressed')
   })
 
   it('reprocess minerals always use window sell averages (like blueprint material buys)', () => {
     const windowedHub: HubMarketData = {
       ...hubMarket,
-      prices: { '18': 99, '34': 99 },
-      buyPrices: { '18': 5, '34': 2 },
+      prices: { '18': 99, '34': 99, '62528': 99 },
+      buyPrices: { '18': 5, '34': 2, '62528': 12 },
       products: {
         '18': {
           '1w': { avgPrice: 10, avgVolume: 1000, high: 10, low: 10 },
@@ -213,6 +233,10 @@ describe('rankMiningIph', () => {
         '34': {
           '1w': { avgPrice: 4, avgVolume: 1e9, high: 4, low: 4 },
           '1m': { avgPrice: 8, avgVolume: 1e9, high: 8, low: 8 },
+        },
+        '62528': {
+          '1w': { avgPrice: 12, avgVolume: 1000, high: 12, low: 12 },
+          '1m': { avgPrice: 12, avgVolume: 1000, high: 12, low: 12 },
         },
       },
     }
@@ -223,10 +247,12 @@ describe('rankMiningIph', () => {
     const spot = new Map<number, number>([
       [18, 99],
       [34, 99],
+      [62528, 99],
     ])
     const buy = new Map<number, number>([
       [18, 5],
       [34, 2],
+      [62528, 12],
     ])
     const sell1w = buildWindowPriceMap(windowedHub, '1w', spot)
     const sell1m = buildWindowPriceMap(windowedHub, '1m', spot)
@@ -248,8 +274,8 @@ describe('rankMiningIph', () => {
       sellPrices: sell1m,
       sortKey: 'minerals',
     })
-    expect(rows1w[0]?.rawPrice).toBe(5)
-    expect(rows1m[0]?.rawPrice).toBe(5)
+    expect(rows1w[0]?.compressedPrice).toBe(12)
+    expect(rows1m[0]?.compressedPrice).toBe(12)
     expect(rows1w[0]?.mineralsIph).not.toBe(rows1m[0]?.mineralsIph)
   })
 
@@ -358,7 +384,8 @@ describe('rankMiningIph', () => {
       ...hubMarket,
       products: {
         '18': { all: { avgPrice: 10, avgVolume: 1000, high: 10, low: 10 } },
-        // 1230 Veldspar: no product history
+        '62528': { all: { avgPrice: 12, avgVolume: 1000, high: 12, low: 12 } },
+        // 1230 Veldspar / 62516: no product history
       },
     }
     const spot = new Map(Object.entries(hubMarket.prices).map(([k, v]) => [Number(k), Number(v)]))
@@ -371,7 +398,7 @@ describe('rankMiningIph', () => {
       sortKey: 'minerals',
     })
     expect(rows.every((r) => r.item.typeId === 18)).toBe(true)
-    expect(rows[0]?.volDayRaw).toBeGreaterThan(0)
+    expect(rows[0]?.volDayCompressed).toBeGreaterThan(0)
   })
 
   it('hides ores with only mineral volume (no raw hub trades)', () => {
@@ -412,7 +439,7 @@ describe('rankMiningIph', () => {
       priceMethod: 'sell_orders',
     })
     expect(rows.every((r) => r.item.typeId !== 9991)).toBe(true)
-    expect(rows.every((r) => r.rawIph > 0 && (r.volDayRaw ?? 0) >= 100)).toBe(true)
+    expect(rows.every((r) => r.compressedIph != null && (r.volDayCompressed ?? 0) >= 100)).toBe(true)
   })
 
   it('shows compressed hub volume for ore when raw volume is tiny (Mercoxit-style)', () => {
@@ -461,17 +488,90 @@ describe('rankMiningIph', () => {
       focusTypeId: null,
       window: '1y',
       priceMethod: 'sell_orders',
-      sortKey: 'raw',
+      sortKey: 'compressed',
     })
     expect(rows).toHaveLength(1)
     expect(rows[0].volDayRaw).toBe(279)
     expect(rows[0].volDayCompressed).toBe(3057)
     expect(rows[0].volDay).toBe(3057)
-    expect(miningDisplayVolume(rows[0], 'raw')).toBe(3057)
     expect(miningDisplayVolume(rows[0], 'compressed')).toBe(3057)
   })
 
-  it('prefers raw hub volume when compressed volume is thin (secondary hub)', () => {
+  it('hides Mercoxit when canMineItem rejects non-deep-core fleets', () => {
+    const mercoxitMining: MiningData = {
+      generatedAt: '',
+      defaults: { m3PerHr: 40_000, reprocessYield: 0.5 },
+      focusOutputs: { ore: [], moon: [], ice: [], gas: [] },
+      items: [
+        {
+          typeId: 1230,
+          name: 'Veldspar',
+          group: 'Veldspar',
+          volume: 0.1,
+          portionSize: 100,
+          subtype: 'ore',
+          foundIn: ['highsec'],
+          compressedTypeId: 62516,
+          reprocess: [{ typeId: 34, quantityPerBatch: 400 }],
+          iconUrl: '',
+        },
+        {
+          typeId: 11396,
+          name: 'Mercoxit',
+          group: 'Mercoxit',
+          volume: 40,
+          portionSize: 100,
+          subtype: 'ore',
+          foundIn: ['nullsec'],
+          compressedTypeId: 62586,
+          reprocess: [{ typeId: 11399, quantityPerBatch: 140 }],
+          iconUrl: '',
+        },
+      ],
+    }
+    const hub: HubMarketData = {
+      regionId: 10000043,
+      marketSystemId: 30002187,
+      buildSystemId: 30002187,
+      costIndex: 0.01,
+      prices: { '1230': 10, '11396': 24480, '62586': 20000, '11399': 20000, '34': 5 },
+      products: {
+        '1230': { '1y': { avgPrice: 10, avgVolume: 5000, high: 12, low: 8 } },
+        '62516': { '1y': { avgPrice: 6, avgVolume: 5000, high: 7, low: 5 } },
+        '11396': { '1y': { avgPrice: 16500, avgVolume: 279, high: 125000, low: 42 } },
+        '62586': { '1y': { avgPrice: 20000, avgVolume: 3057, high: 25000, low: 10000 } },
+      },
+    }
+    const spot = new Map([
+      [1230, 10],
+      [62516, 6],
+      [11396, 24480],
+      [62586, 20000],
+      [11399, 20000],
+      [34, 5],
+    ])
+    const opts = {
+      subtype: 'ore' as const,
+      foundIn: [] as const,
+      focusTypeId: null,
+      window: '1y' as const,
+      priceMethod: 'sell_orders' as const,
+    }
+    const all = rankMiningIph(mercoxitMining, hub, spot, null, typeMap, opts)
+    expect(all.map((r) => r.item.name).sort()).toEqual(['Mercoxit', 'Veldspar'])
+    const msmOnly = rankMiningIph(mercoxitMining, hub, spot, null, typeMap, {
+      ...opts,
+      canMineItem: (item) => item.group !== 'Mercoxit',
+    })
+    expect(msmOnly.map((r) => r.item.name)).toEqual(['Veldspar'])
+    const mercOnly = rankMiningIph(mercoxitMining, hub, spot, null, typeMap, {
+      ...opts,
+      canMineItem: (item) => item.group === 'Mercoxit',
+    })
+    expect(mercOnly.map((r) => r.item.name)).toEqual(['Mercoxit'])
+  })
+
+  it('excludes ore when compressed hub volume is below listing threshold', () => {
     const rakoveneMining: MiningData = {
       generatedAt: '',
       defaults: { m3PerHr: 50_400, reprocessYield: 0.5 },
@@ -520,10 +620,63 @@ describe('rankMiningIph', () => {
       window: '1m',
       priceMethod: 'sell_orders',
     })
+    expect(rows).toHaveLength(0)
+  })
+
+  it('uses compressed hub volume for liquidity when listed', () => {
+    const rakoveneMining: MiningData = {
+      generatedAt: '',
+      defaults: { m3PerHr: 42_163, reprocessYield: 0.5 },
+      focusOutputs: { ore: [], moon: [], ice: [], gas: [] },
+      items: [
+        {
+          typeId: 52315,
+          name: 'Rakovene',
+          group: 'Rakovene',
+          volume: 16,
+          portionSize: 100,
+          subtype: 'ore',
+          foundIn: ['nullsec'],
+          compressedTypeId: 62579,
+          reprocess: [
+            { typeId: 34, quantityPerBatch: 40000 },
+            { typeId: 37, quantityPerBatch: 3200 },
+            { typeId: 39, quantityPerBatch: 200 },
+          ],
+          iconUrl: '',
+        },
+      ],
+    }
+    const hub: HubMarketData = {
+      regionId: 10000042,
+      marketSystemId: 30002053,
+      buildSystemId: 30002053,
+      costIndex: 0.01,
+      prices: { '52315': 3261, '62579': 12650, '34': 4, '37': 50, '39': 1200 },
+      products: {
+        '52315': { '1y': { avgPrice: 3261, avgVolume: 209.4, high: 19000, low: 0.01 } },
+        '62579': { '1m': { avgPrice: 12650, avgVolume: 500, high: 12650, low: 12650 } },
+      },
+    }
+    const spot = new Map([
+      [52315, 3261],
+      [62579, 12650],
+      [34, 4],
+      [37, 50],
+      [39, 1200],
+    ])
+    const rows = rankMiningIph(rakoveneMining, hub, spot, null, typeMap, {
+      subtype: 'ore',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1m',
+      priceMethod: 'sell_orders',
+    })
     expect(rows).toHaveLength(1)
     expect(rows[0].volDayRaw).toBe(209.4)
-    expect(rows[0].volDayCompressed).toBe(1)
-    expect(miningDisplayVolume(rows[0], 'compressed')).toBe(209.4)
+    expect(rows[0].volDayCompressed).toBe(500)
+    expect(rows[0].volDay).toBe(500)
+    expect(miningDisplayVolume(rows[0], 'compressed')).toBe(500)
   })
 
   it('sortMiningRows does not rewrite volDay', () => {
@@ -820,5 +973,204 @@ describe('rankMiningIph', () => {
       Math.round((compressedPrice! / 0.1) * RETRIEVER_ORE_M3_PER_HR),
     )
     expect(veld!.compressedIph).not.toBe(veld!.rawIph * 100)
+  })
+
+  it('excludes ice without a compressed market type', () => {
+    const iceLike: MiningData = {
+      generatedAt: '',
+      defaults: { m3PerHr: 40_000, reprocessYield: 0.5 },
+      focusOutputs: { ore: [], moon: [], ice: [], gas: [] },
+      items: [
+        {
+          typeId: 16262,
+          name: 'Water Ice',
+          group: 'Ice',
+          volume: 1000,
+          portionSize: 1,
+          subtype: 'ice',
+          foundIn: ['highsec'],
+          compressedTypeId: null,
+          reprocess: [{ typeId: 16272, quantityPerBatch: 69 }],
+          iconUrl: '',
+        },
+      ],
+    }
+    const hub: HubMarketData = {
+      regionId: 10000002,
+      marketSystemId: 30000142,
+      buildSystemId: 30000142,
+      costIndex: 0.01,
+      prices: { '16262': 100_000, '16272': 500 },
+      products: {
+        '16262': { '1y': { avgPrice: 100_000, avgVolume: 5_000, high: 110_000, low: 90_000 } },
+      },
+    }
+    const spot = new Map([
+      [16262, 100_000],
+      [16272, 500],
+    ])
+    const rows = rankMiningIph(iceLike, hub, spot, null, typeMap, {
+      subtype: 'ice',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1y',
+      priceMethod: 'sell_orders',
+    })
+    expect(rows).toHaveLength(0)
+  })
+
+  it('does not copy raw hub volume into compressed volume when there is no compressed type', () => {
+    const iceLike: MiningData = {
+      generatedAt: '',
+      defaults: { m3PerHr: 40_000, reprocessYield: 0.5 },
+      focusOutputs: { ore: [], moon: [], ice: [], gas: [] },
+      items: [
+        {
+          typeId: 16262,
+          name: 'Water Ice',
+          group: 'Ice',
+          volume: 1000,
+          portionSize: 1,
+          subtype: 'ice',
+          foundIn: ['highsec'],
+          compressedTypeId: 28433,
+          reprocess: [{ typeId: 16272, quantityPerBatch: 69 }],
+          iconUrl: '',
+        },
+      ],
+    }
+    const hub: HubMarketData = {
+      regionId: 10000002,
+      marketSystemId: 30000142,
+      buildSystemId: 30000142,
+      costIndex: 0.01,
+      prices: { '16262': 100_000, '28433': 120_000, '16272': 500 },
+      products: {
+        '16262': { '1y': { avgPrice: 100_000, avgVolume: 5_000, high: 110_000, low: 90_000 } },
+        // compressed type: no hub history (live fetch would fill this)
+      },
+    }
+    const spot = new Map([
+      [16262, 100_000],
+      [28433, 120_000],
+      [16272, 500],
+    ])
+    const sell = buildWindowPriceMap(hub, '1y', spot)
+    const rows = rankMiningIph(iceLike, hub, spot, null, typeMap, {
+      subtype: 'ice',
+      foundIn: [],
+      focusTypeId: null,
+      window: '1y',
+      priceMethod: 'sell_orders',
+    })
+    expect(rows).toHaveLength(0)
+    const row = rankMiningItem(
+      iceLike.items[0],
+      hub,
+      '1y',
+      sell,
+      null,
+      'sell_orders',
+      (id) => `Type ${id}`,
+      { m3PerHr: 40_000, reprocessYield: 0.5, focusTypeId: null },
+    )
+    expect(row?.volDayCompressed).toBe(0)
+    expect(row?.compressedIph).toBeGreaterThan(0)
+    expect(miningPathDisplayIph('compressed', row!)).toBeNull()
+    expect(miningDisplayVolume(row!, 'compressed')).toBe(0)
+  })
+
+  it('leaves thin-traded reprocess outputs out of Reprocess ISK/hr', () => {
+    const pochvenItem = {
+      typeId: 76373,
+      name: 'Nesosilicate Rakovene',
+      group: 'Rakovene',
+      volume: 0.5,
+      portionSize: 100,
+      subtype: 'ore' as const,
+      foundIn: ['nullsec' as const],
+      compressedTypeId: null,
+      reprocess: [
+        { typeId: 34, quantityPerBatch: 1500 },
+        { typeId: 76374, quantityPerBatch: 65 },
+      ],
+      iconUrl: '',
+    }
+    const hub: HubMarketData = {
+      regionId: 10000002,
+      marketSystemId: 30000142,
+      buildSystemId: 30000142,
+      costIndex: 0.01,
+      prices: { '76373': 10_000, '34': 5, '76374': 2_000_000 },
+      products: {
+        '76373': { '1m': { avgPrice: 10_000, avgVolume: 2_000, high: 12_000, low: 8_000 } },
+        '34': { '1m': { avgPrice: 5, avgVolume: 50_000_000, high: 6, low: 4 } },
+        '76374': { '1m': { avgPrice: 2_000_000, avgVolume: 40, high: 3_000_000, low: 1_000_000 } },
+      },
+    }
+    const spot = new Map([
+      [76373, 10_000],
+      [34, 5],
+      [76374, 2_000_000],
+    ])
+    const sell = buildWindowPriceMap(hub, '1m', spot)
+    const listed = rankMiningIph(
+      { generatedAt: '', defaults: { m3PerHr: 42_163, reprocessYield: 0.5 }, focusOutputs: { ore: [], moon: [], ice: [], gas: [] }, items: [pochvenItem] },
+      hub,
+      spot,
+      null,
+      typeMap,
+      {
+        subtype: 'ore',
+        foundIn: [],
+        focusTypeId: null,
+        window: '1m',
+        priceMethod: 'sell_orders',
+        m3PerHr: 42_163,
+      },
+    )
+    expect(listed).toHaveLength(0)
+
+    const row = rankMiningItem(
+      pochvenItem,
+      hub,
+      '1m',
+      sell,
+      null,
+      'sell_orders',
+      (id) => (id === 34 ? 'Tritanium' : `Type ${id}`),
+      { m3PerHr: 42_163, reprocessYield: 0.5, focusTypeId: null },
+    )
+    expect(row).not.toBeNull()
+    const tritIph = (1500 / (0.5 * 100)) * 0.5 * 5 * 42_163
+    expect(row!.mineralsIph).toBe(Math.round(tritIph))
+    expect(row!.mineralsIph).toBeLessThan(10_000_000)
+    expect(row!.reprocessLines.some((l) => l.typeId === 76374 && l.iskPerHr > 1_000_000_000)).toBe(
+      true,
+    )
+  })
+
+  it('uses compressed type for row display name and search', () => {
+    const types = new Map<number, TypeInfo>([
+      ...typeMap,
+      [62516, { typeId: 62516, name: 'Compressed Veldspar', group: '', category: '', volume: 0.1, iconUrl: '', renderUrl: '', bpIconUrl: '' }],
+    ])
+    const veld = mining.items[2]
+    expect(miningRowDisplayName(veld, types)).toBe('Compressed Veldspar')
+    expect(miningRowMarketTypeId(veld)).toBe(62516)
+    expect(
+      miningRowMatchesNameQuery(
+        { item: veld } as import('@/types').MiningRankedRow,
+        'compressed veld',
+        types,
+      ),
+    ).toBe(true)
+    expect(
+      miningRowMatchesNameQuery(
+        { item: veld } as import('@/types').MiningRankedRow,
+        'plain veld',
+        types,
+      ),
+    ).toBe(false)
   })
 })

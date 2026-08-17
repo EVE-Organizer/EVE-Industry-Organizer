@@ -685,20 +685,99 @@
   }
 
   &__fleet-grid {
-    @apply grid grid-cols-1 gap-4 xl:grid-cols-2 xl:items-start;
+    @apply grid grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.85fr)];
+  }
+
+  &__workspace-panel {
+    @apply min-w-0 overflow-hidden rounded-xl border border-eve-border/80;
+    background-image: linear-gradient(
+      155deg,
+      rgb(31 38 47 / 0.82) 0%,
+      rgb(13 17 23 / 0.72) 55%,
+      rgb(9 13 18 / 0.88) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.04),
+      0 8px 24px -16px rgb(0 0 0 / 0.75);
+  }
+
+  &__workspace-head {
+    @apply relative flex min-w-0 items-center justify-between gap-4 border-b border-eve-border/60 px-4 py-3;
+    background-image: linear-gradient(90deg, rgb(245 166 35 / 0.08), transparent 42%);
+
+    &::before {
+      @apply absolute bottom-2 left-0 top-2 w-0.5 rounded-r bg-primary/80;
+      content: '';
+      box-shadow: 0 0 10px rgb(245 166 35 / 0.45);
+    }
+  }
+
+  &__workspace-kicker {
+    @apply block text-[9px] font-semibold uppercase tracking-[0.16em] text-primary/70;
+  }
+
+  &__workspace-title {
+    @apply mt-0.5 text-sm font-semibold leading-tight text-base-content/95;
+  }
+
+  &__workspace-subtitle {
+    @apply mt-0.5 truncate text-[11px] text-base-content/45;
+  }
+
+  &__workspace-body {
+    @apply flex min-w-0 flex-col gap-3 p-3;
+  }
+
+  &__fleet-lines {
+    @apply flex min-w-0 flex-col gap-2;
+  }
+
+  &__output {
+    @apply grid shrink-0 grid-cols-[auto_auto] items-baseline gap-x-1 rounded-lg border border-primary/25 bg-primary/10 px-3 py-1.5 text-right;
+
+    span {
+      @apply col-span-2 text-[8px] font-semibold uppercase tracking-[0.14em] text-primary/65;
+    }
+
+    strong {
+      @apply text-lg font-semibold leading-none text-primary tabular-nums;
+    }
+
+    small {
+      @apply text-[9px] font-medium text-primary/60;
+    }
+  }
+
+  &__status-pill {
+    @apply shrink-0 rounded-full border border-eve-border/70 bg-base-300/50 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-base-content/40;
+
+    &--active {
+      @apply border-success/35 bg-success/10 text-success;
+      box-shadow: 0 0 10px -4px rgb(74 222 128 / 0.45);
+    }
+  }
+
+  &__add-hull {
+    @apply flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-eve-border/70 py-2 text-[11px] font-medium text-base-content/50 transition-colors hover:border-primary/45 hover:bg-primary/5 hover:text-primary;
+
+    span {
+      @apply text-base font-light leading-none;
+    }
   }
 
   &__bay {
-    @apply flex min-w-0 flex-col gap-2.5 rounded-lg border border-eve-border/60 bg-base-300/20 p-3;
-    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+    @apply flex min-w-0 flex-col gap-2 rounded-lg border border-eve-border/60 bg-base-300/15 p-3;
+    box-shadow:
+      inset 3px 0 0 rgb(245 166 35 / 0.28),
+      inset 0 1px 0 rgb(255 255 255 / 0.025);
   }
 
   &__bay-head {
-    @apply flex min-w-0 flex-wrap items-start gap-3;
+    @apply flex min-w-0 flex-wrap items-center gap-2.5 border-b border-eve-border/45 pb-2.5;
   }
 
   &__bay-art {
-    @apply flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-eve-border/70 bg-base-300/80 shadow-sm;
+    @apply flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-eve-border/70 bg-base-300/80 shadow-sm;
   }
 
   &__bay-identity {
@@ -706,11 +785,11 @@
   }
 
   &__bay-select {
-    @apply select select-bordered select-sm h-9 min-h-9 w-full min-w-0 bg-base-300/50 font-medium;
+    @apply select select-bordered select-sm h-8 min-h-8 w-full min-w-0 border-eve-border/70 bg-base-300/40 text-xs font-medium;
   }
 
   &__bay-count {
-    @apply input input-bordered input-sm h-9 min-h-9 w-16 bg-base-300/50 tabular-nums;
+    @apply input input-bordered input-sm h-8 min-h-8 w-14 border-eve-border/70 bg-base-300/40 text-center text-xs tabular-nums;
   }
 
   &__bay-hint {
@@ -734,23 +813,82 @@
   }
 
   &__fit-row {
-    @apply flex min-w-0 items-center gap-3;
+    @apply flex min-w-0 items-center gap-2;
+
+    &--wide {
+      @apply items-start;
+
+      .mining-filters__slots {
+        @apply min-w-0 flex-1;
+      }
+
+      .mining-filters__fit-label {
+        @apply pt-2;
+      }
+    }
   }
 
   &__fit-label {
-    @apply w-20 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-base-content/45;
+    @apply w-[4.75rem] shrink-0 pl-1 text-[9px] font-semibold uppercase tracking-[0.09em] text-base-content/40;
   }
 
   &__slots {
-    @apply inline-flex flex-wrap items-center gap-1 rounded-lg border border-eve-border/60 bg-base-200/35 p-1;
+    @apply inline-flex flex-wrap items-center gap-1;
+  }
+
+  &__crystal-grid {
+    @apply flex min-w-0 flex-wrap gap-1;
+  }
+
+  &__crystal-card {
+    @apply flex h-[3.4rem] w-[3.4rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-md border border-eve-border/60 bg-base-300/35 p-1 text-center transition-[border-color,background-color,box-shadow] duration-150;
+
+    &:hover {
+      @apply border-primary/40 bg-base-300/70;
+    }
+
+    &--active {
+      @apply border-primary/70 bg-primary/10;
+      box-shadow:
+        0 0 12px -4px rgb(245 166 35 / 0.45),
+        inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+    }
+  }
+
+  &__crystal-empty {
+    @apply flex size-[30px] shrink-0 items-center justify-center rounded border border-dashed border-base-content/25 text-sm text-base-content/35;
+  }
+
+  &__crystal-name {
+    @apply text-[9px] font-semibold leading-none text-base-content/75;
+  }
+
+  &__crystal-summary {
+    @apply flex min-w-0 basis-full flex-col justify-center gap-1 rounded-md border border-eve-border/50 bg-base-300/25 px-2.5 py-1.5;
+  }
+
+  &__crystal-summary-name {
+    @apply text-[10px] font-semibold uppercase tracking-wide text-primary;
+  }
+
+  &__crystal-summary-note {
+    @apply text-[10px] leading-tight text-base-content/55;
+  }
+
+  &__crystal-stats {
+    @apply flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] leading-tight text-base-content/55;
+
+    strong {
+      @apply font-semibold text-base-content/90;
+    }
   }
 
   &__hull-tiles {
-    @apply grid grid-cols-2 gap-1.5 sm:grid-cols-4;
+    @apply grid grid-cols-4 gap-1.5;
   }
 
   &__hull-tile {
-    @apply flex min-w-0 flex-col items-center gap-1 rounded-lg border border-eve-border/70 px-1.5 py-2 text-center transition-[border-color,background-color,box-shadow] duration-150;
+    @apply relative flex min-w-0 flex-col items-center gap-1 rounded-lg border border-eve-border/60 px-1 py-2 text-center transition-[border-color,background-color,box-shadow,transform] duration-150;
     background-image: linear-gradient(
       180deg,
       rgb(22 27 34 / 0.9) 0%,
@@ -758,7 +896,7 @@
     );
 
     &:hover:not(&--active) {
-      @apply border-eve-border bg-base-300/50;
+      @apply -translate-y-px border-primary/30 bg-base-300/55;
     }
 
     &--active {
@@ -771,6 +909,26 @@
 
   &__hull-tile-name {
     @apply w-full truncate text-[10px] font-medium leading-tight text-base-content/75;
+  }
+
+  &__booster-fit {
+    @apply flex min-w-0 flex-col gap-2 rounded-lg border border-eve-border/50 bg-base-300/15 p-2.5;
+  }
+
+  &__booster-empty {
+    @apply flex items-center gap-3 rounded-lg border border-dashed border-eve-border/55 bg-base-300/10 px-3 py-3 text-base-content/50;
+
+    strong {
+      @apply text-[11px] font-semibold text-base-content/70;
+    }
+
+    p {
+      @apply m-0 mt-0.5 text-[10px] leading-snug text-base-content/40;
+    }
+  }
+
+  &__booster-empty-mark {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-full border border-eve-border/60 bg-base-300/40 text-lg font-light text-base-content/35;
   }
 
   &__icon-row {

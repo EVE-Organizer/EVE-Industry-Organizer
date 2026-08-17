@@ -381,6 +381,8 @@ export interface GlobalSettings {
   miningUpgrade?: MiningUpgradeId
   /** How many upgrade modules (1–3). Ignored when upgrade is none. */
   miningUpgradeCount?: number
+  /** Mid-slot Mining Survey Chipset (crit chance and crit yield). */
+  miningSurveyChipset?: MiningSurveyChipsetId
   /** Strip miner / ice harvester crystals. */
   miningCrystal?: MiningCrystalId
 }
@@ -876,6 +878,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   miningIndustrialCore: true,
   miningUpgrade: 'none',
   miningUpgradeCount: 3,
+  miningSurveyChipset: 'msc2',
   miningCrystal: 'none',
 }
 
@@ -997,8 +1000,8 @@ export type MiningShipId =
   | 'prospect'
   | 'endurance'
 
-/** Strip Miner I / Ice Harvester I vs modulated guns that load crystals. */
-export type MiningMinerModuleId = 'strip' | 'modulated'
+/** Strip Miner I / Ice Harvester I / modulated guns / MDCSM II. */
+export type MiningMinerModuleId = 'strip' | 'modulated' | 'deepCore'
 
 /** One hull type and how many identical ships in a mixed mining fleet. */
 export interface MiningFleetLine {
@@ -1008,6 +1011,7 @@ export interface MiningFleetLine {
   crystal?: MiningCrystalId
   upgrade?: MiningUpgradeId
   upgradeCount?: number
+  surveyChipset?: MiningSurveyChipsetId
   buffIds?: MiningBuffId[]
   skills?: Partial<SkillLevels>
 }
@@ -1028,7 +1032,10 @@ export type MiningBoostSpace = 'solo' | MiningSpaceClass
 export type MiningBoosterHullId = 'porpoise' | 'orca' | 'rorqual'
 export type MiningBurstTech = 't1' | 't2'
 export type MiningUpgradeId = 'none' | 'mlu1' | 'mlu2'
-export type MiningCrystalId = 'none' | 't1' | 't2'
+/** Mid-slot survey chipset on mining barges and exhumers. */
+export type MiningSurveyChipsetId = 'none' | 'msc1' | 'msc2'
+/** Mining crystal letter (A/B/C) and tech tier (I/II). Legacy saves may still use t1/t2 (= Type A). */
+export type MiningCrystalId = 'none' | 'a1' | 'a2' | 'b1' | 'b2' | 'c1' | 'c2'
 
 /** Mining Foreman Command Burst charges (yield-related and common alternatives). */
 export type MiningForemanBurstId =
@@ -1071,7 +1078,7 @@ export interface MiningData {
   items: MiningItem[]
 }
 
-export type MiningIphSortKey = 'raw' | 'compressed' | 'minerals' | 'focus' | 'vol'
+export type MiningIphSortKey = 'compressed' | 'minerals' | 'focus' | 'vol'
 
 export interface MiningReprocessLine {
   typeId: number

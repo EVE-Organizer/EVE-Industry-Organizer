@@ -77,41 +77,58 @@ export function miningVolumeLabel(window: TimeRange): string {
 
 /** Table/modal labels and tooltips for the three ISK/hr valuation paths. */
 /** Which valuation path is shown in the breakdown modal. */
-export type MiningIphFocusPath = 'raw' | 'compressed' | 'minerals'
+export type MiningIphFocusPath = 'compressed' | 'minerals'
 
 export const MINING_IPH_PATHS = {
-  raw: {
-    label: 'Raw ISK/hr',
-    shortLabel: 'Raw',
-    tooltip:
-      'Sell uncompressed ore, ice, or gas at the hub. Uses your price window and sell/buy setting.',
-  },
   compressed: {
     label: 'Compressed ISK/hr',
     shortLabel: 'Compressed',
     tooltip:
-      'Same m³/hr, valued as the compressed form when this item has a compressed type on the market.',
+      'Same m³/hr, priced as the compressed type. Shows — when compressed hub volume is under 1,000/day.',
   },
   minerals: {
     label: 'Reprocess ISK/hr',
     shortLabel: 'Reprocess',
     tooltip:
-      'Reprocess at your yield setting and sell every output mineral at hub prices.',
+      'Reprocess at your yield setting and sell outputs at hub prices. Thin-traded outputs (under 1,000/day) are left out of the total.',
   },
 } as const
 
-export const MINING_IPH_PATH_ORDER: MiningIphFocusPath[] = ['raw', 'compressed', 'minerals']
+export const MINING_IPH_PATH_ORDER: MiningIphFocusPath[] = ['compressed', 'minerals']
 
-export function miningPathHasPriceData(path: MiningIphFocusPath, row: MiningRankedRow): boolean {
+/** Minimum hub avg daily volume to list an ore (matches Blueprints default minVolume). */
+export const MIN_MINING_LIQUIDITY_VOLUME = 100
+
+/** A path needs this much hub volume before we treat its price as real (ISK/hr). */
+export const MIN_MINING_PATH_VOLUME = 1_000
+
+export function miningPathVolume(
+  path: MiningIphFocusPath | MiningIphSortKey,
+  row: MiningRankedRow,
+): number {
   switch (path) {
-    case 'raw':
-      // Below 1 ISK the unit price rounds to "0 ISK" in the UI (thin or missing hub quotes).
-      return row.rawPrice >= 1
+    case 'compressed':
+      return row.volDayCompressed ?? 0
+    case 'minerals':
+      return row.volDayMinerals ?? 0
+    default:
+      return miningLiquidityVolume(row)
+  }
+}
+
+export function miningPathHasQuote(path: MiningIphFocusPath, row: MiningRankedRow): boolean {
+  switch (path) {
     case 'compressed':
       return row.compressedPrice != null && row.compressedPrice >= 1
     case 'minerals':
       return row.mineralsIph > 0 && row.reprocessLines.some((line) => line.price >= 1)
   }
+}
+
+export function miningPathHasPriceData(path: MiningIphFocusPath, row: MiningRankedRow): boolean {
+  if (!miningPathHasQuote(path, row)) return false
+  if (path === 'minerals') return true
+  return miningPathVolume(path, row) >= MIN_MINING_PATH_VOLUME
 }
 
 /** Prefer a path that has hub prices; fall back to the requested path. */
@@ -130,8 +147,6 @@ export function miningPathDisplayIph(
 ): number | null {
   if (!miningPathHasPriceData(path, row)) return null
   switch (path) {
-    case 'raw':
-      return row.rawIph
     case 'compressed':
       return row.compressedIph
     case 'minerals':
@@ -139,12 +154,10 @@ export function miningPathDisplayIph(
   }
 }
 
-/** Prefer compressed hub volume when the raw market is thin. */
+/** Hub liquidity for listing: compressed market when a compressed type exists. */
 export function miningLiquidityVolume(row: MiningRankedRow): number {
-  const raw = row.volDayRaw ?? 0
-  const compressed = row.volDayCompressed ?? 0
-  if (row.item.compressedTypeId != null) return Math.max(raw, compressed)
-  return raw
+  if (row.item.compressedTypeId != null) return row.volDayCompressed ?? 0
+  return row.volDayRaw ?? 0
 }
 
 /** Volume column for the active sort key (does not mutate row.volDay). */
@@ -153,21 +166,17 @@ export function miningDisplayVolume(
   sortKey: MiningIphSortKey,
 ): number {
   switch (sortKey) {
-    case 'raw':
     case 'compressed':
-    case 'vol':
-      // Same liquidity proxy for every direct-sale path (raw or compressed).
-      return miningLiquidityVolume(row)
+      return row.volDayCompressed ?? 0
     case 'focus':
-      return row.volDayFocus ?? row.volDay
+      return row.volDayFocus ?? 0
     case 'minerals':
+      return row.volDayMinerals ?? 0
+    case 'vol':
     default:
-      return row.volDayMinerals ?? row.volDay
+      return miningLiquidityVolume(row)
   }
 }
-
-/** Minimum hub avg daily volume to list an ore (matches Blueprints default minVolume). */
-export const MIN_MINING_LIQUIDITY_VOLUME = 100
 
 const EXCLUDED_MINING_GROUPS = new Set([
   'Fluorite',
@@ -194,18 +203,16 @@ export function shouldIncludeMiningRow(
 
   switch (subtype) {
     case 'ore':
-    case 'ice': {
-      const hasRaw =
-        (row.volDayRaw ?? 0) >= minVol && miningPathHasPriceData('raw', row)
-      const hasComp =
-        (row.volDayCompressed ?? 0) >= minVol && miningPathHasPriceData('compressed', row)
-      return hasRaw || hasComp
-    }
+    case 'ice':
+      if (row.item.compressedTypeId == null) return false
+      return (
+        (row.volDayCompressed ?? 0) >= minVol && miningPathHasQuote('compressed', row)
+      )
     case 'gas':
-      if ((row.volDayRaw ?? 0) >= minVol && miningPathHasPriceData('raw', row)) return true
-      return minedLiq >= minVol && miningPathHasPriceData('minerals', row)
+      if ((row.volDayRaw ?? 0) >= minVol && row.rawPrice >= 1) return true
+      return minedLiq >= minVol && miningPathHasQuote('minerals', row)
     case 'moon':
-      return minedLiq >= minVol && miningPathHasPriceData('minerals', row)
+      return minedLiq >= minVol && miningPathHasQuote('minerals', row)
     default:
       return true
   }
@@ -213,6 +220,34 @@ export function shouldIncludeMiningRow(
 
 export function isCompressedMiningName(name: string): boolean {
   return /compress/i.test(name)
+}
+
+/** Hub item page type: compressed when the row has a compressed market type. */
+export function miningRowMarketTypeId(item: MiningItem): number {
+  return item.compressedTypeId ?? item.typeId
+}
+
+export function miningRowDisplayName(
+  item: MiningItem,
+  typeMap: Map<number, TypeInfo>,
+): string {
+  const compressedId = item.compressedTypeId
+  if (compressedId == null) return item.name
+  return typeMap.get(compressedId)?.name ?? item.name
+}
+
+export function miningRowMatchesNameQuery(
+  row: MiningRankedRow,
+  query: string,
+  typeMap: Map<number, TypeInfo>,
+): boolean {
+  const q = query.trim().toLowerCase()
+  if (!q) return true
+  if (row.item.name.toLowerCase().includes(q)) return true
+  const compressedId = row.item.compressedTypeId
+  if (compressedId == null) return false
+  const compressedName = typeMap.get(compressedId)?.name ?? ''
+  return compressedName.toLowerCase().includes(q)
 }
 
 export function collectMiningPriceTypeIds(
@@ -255,6 +290,12 @@ function avgVolumeOf(hubMarket: HubMarketData, typeId: number, window: TimeRange
   if (!byWindow) return 0
   const summary = pickHistoryWindow(byWindow, window, 'avgVolume')
   return summary?.avgVolume ?? 0
+}
+
+/** Hub history exists and average daily volume is below the ISK/hr floor. */
+function hasThinHubVolume(hubMarket: HubMarketData, typeId: number, window: TimeRange): boolean {
+  if (!hubMarket.products[String(typeId)]) return false
+  return avgVolumeOf(hubMarket, typeId, window) < MIN_MINING_PATH_VOLUME
 }
 
 function topMineralTypeId(lines: MiningReprocessLine[]): number | null {
@@ -336,7 +377,12 @@ export function rankMiningItem(
     opts.m3PerHr,
     opts.reprocessYield,
   )
-  const mineralsIph = Math.round(reprocessLines.reduce((sum, line) => sum + line.iskPerHr, 0))
+  const liquidReprocessIph = reprocessLines.reduce((sum, line) => {
+    if (line.price < 1) return sum
+    if (hasThinHubVolume(hubMarket, line.typeId, window)) return sum
+    return sum + line.iskPerHr
+  }, 0)
+  const mineralsIph = Math.round(liquidReprocessIph)
   const mineralsValuePerM3 = opts.m3PerHr > 0 ? mineralsIph / opts.m3PerHr : 0
 
   let focusIph: number | null = null
@@ -353,9 +399,18 @@ export function rankMiningItem(
   const volCompressed =
     item.compressedTypeId != null
       ? avgVolumeOf(hubMarket, item.compressedTypeId, window)
-      : volRaw
+      : 0
+  const liquidTopId = topMineralTypeId(
+    reprocessLines.filter(
+      (line) => line.price >= 1 && !hasThinHubVolume(hubMarket, line.typeId, window),
+    ),
+  )
   const volMinerals =
-    topMineralId != null ? avgVolumeOf(hubMarket, topMineralId, window) : volRaw
+    liquidTopId != null
+      ? avgVolumeOf(hubMarket, liquidTopId, window)
+      : topMineralId != null
+        ? avgVolumeOf(hubMarket, topMineralId, window)
+        : 0
   const volFocus =
     opts.focusTypeId != null ? avgVolumeOf(hubMarket, opts.focusTypeId, window) : volMinerals
 
@@ -396,8 +451,6 @@ export function sortMiningRows(
 ): MiningRankedRow[] {
   const value = (row: MiningRankedRow): number => {
     switch (sortKey) {
-      case 'raw':
-        return miningPathDisplayIph('raw', row) ?? -1
       case 'compressed':
         return miningPathDisplayIph('compressed', row) ?? -1
       case 'minerals':
@@ -431,6 +484,10 @@ export interface RankMiningOptions {
   /** Hub sell-side window averages (same as Blueprints buildWindowPriceMap). */
   sellPrices?: Map<number, number>
   m3PerHr?: number
+  /** Per-ore m³/hr when fleet module choice varies by rock (e.g. Mercoxit needs MDCSM II). */
+  m3PerHrForItem?: (item: MiningItem) => number
+  /** Hide ores the fleet cannot mine with its selected modules. */
+  canMineItem?: (item: MiningItem) => boolean
   reprocessYield?: number
   sortKey?: MiningIphSortKey
   sortDesc?: boolean
@@ -460,6 +517,7 @@ export function rankMiningIph(
     if (isExcludedMiningItem(item)) continue
     if (item.subtype !== options.subtype) continue
     if (foundFilter.length > 0 && !foundFilter.every((s) => item.foundIn.includes(s))) continue
+    if (options.canMineItem && !options.canMineItem(item)) continue
 
     const row = rankMiningItem(
       item,
@@ -470,7 +528,7 @@ export function rankMiningIph(
       options.priceMethod,
       typeName,
       {
-        m3PerHr,
+        m3PerHr: options.m3PerHrForItem?.(item) ?? m3PerHr,
         reprocessYield,
         focusTypeId: options.focusTypeId,
       },

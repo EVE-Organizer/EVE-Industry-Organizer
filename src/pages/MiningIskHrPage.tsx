@@ -10,6 +10,7 @@ import {
   getHubMarket,
 } from '@/services/data/sdeLoader'
 import { getBuyPricesForTypes, getAvgVolumesForTypes } from '@/services/market/marketService'
+import { MiningCompressedIcon, MINING_ROW_ICON_SIZE } from '@/components/MiningCompressedIcon'
 import {
   MINING_SPACES,
   MINING_SUBTYPES,
@@ -18,6 +19,9 @@ import {
   MINING_IPH_PATHS,
   miningDisplayVolume,
   miningPathDisplayIph,
+  miningRowDisplayName,
+  miningRowMarketTypeId,
+  miningRowMatchesNameQuery,
   miningVolumeLabel,
   rankMiningIph,
   sortMiningRows,
@@ -33,7 +37,10 @@ import {
   normalizeMiningForemanBursts,
   normalizeMiningMiner,
   normalizeMiningUpgrade,
+  normalizeMiningSurveyChipset,
   resolveUserMiningM3PerHrFromFleet,
+  resolveUserMiningM3PerHrForOre,
+  fleetCanMineOreGroup,
   toggleMiningBuffId,
   type MiningYieldContext,
 } from '@/lib/miningShipPresets'
@@ -43,7 +50,7 @@ import { appRoute } from '@/lib/paths'
 import { textLinkClass } from '@/lib/textLink'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 import { hubDisplayName } from '@/lib/hubDisplay'
-import { HUBS, DEFAULT_SETTINGS, type MiningBuffId, type MiningFleetLine, type MiningIphSortKey, type MiningRankedRow, type MiningSpaceClass, type MiningSubtype, type TimeRange } from '@/types'
+import { HUBS, DEFAULT_SETTINGS, type MiningBuffId, type MiningFleetLine, type MiningIphSortKey, type MiningRankedRow, type MiningSpaceClass, type MiningSubtype, type TimeRange, type TypeInfo } from '@/types'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import { EveImage } from '@/components/EveImage'
 import { InfoTooltip } from '@/components/InfoTooltip'
@@ -247,30 +254,39 @@ function QtyPerHrCell({ value }: { value: number | null | undefined }) {
 
 function MiningItemName({
   row,
+  typeMap,
   onOpenBreakdown,
 }: {
   row: MiningRankedRow
+  typeMap: Map<number, TypeInfo>
   onOpenBreakdown: () => void
 }) {
-  const itemHref = appRoute(`item/${row.item.typeId}`)
+  const displayName = miningRowDisplayName(row.item, typeMap)
+  const marketTypeId = miningRowMarketTypeId(row.item)
+  const itemHref = appRoute(`item/${marketTypeId}`)
   return (
     <div className="flex items-center gap-1.5 min-w-0">
-      <EveImage id={row.item.typeId} size={28} framed alt="" className="shrink-0" />
-      <CopyNameButton text={row.item.name} />
+      <MiningCompressedIcon
+        rawTypeId={row.item.typeId}
+        compressedTypeId={row.item.compressedTypeId}
+        size={MINING_ROW_ICON_SIZE}
+        alt={displayName}
+      />
+      <CopyNameButton text={displayName} />
       <a
         href={itemHref}
         target="_blank"
         rel="noopener noreferrer"
         className={textLinkClass('text-sm truncate leading-snug min-w-0')}
-        title={`${row.item.name} (market)`}
+        title={`${displayName} (market)`}
       >
-        {row.item.name}
+        {displayName}
       </a>
       <Tooltip text="Open ISK/hr breakdown" placement="top">
         <button
           type="button"
           className="btn btn-ghost btn-xs btn-square shrink-0 min-h-0 h-6 w-6 opacity-70 hover:opacity-100"
-          aria-label={`Open ISK/hr breakdown for ${row.item.name}`}
+          aria-label={`Open ISK/hr breakdown for ${displayName}`}
           onClick={onOpenBreakdown}
         >
           <BreakdownIcon className="size-3.5" />
@@ -413,6 +429,7 @@ export function MiningIskHrPage() {
       crystal: normalizeMiningCrystal(settings.miningCrystal),
       upgrade: normalizeMiningUpgrade(settings.miningUpgrade),
       upgradeCount: settings.miningUpgradeCount,
+      surveyChipset: normalizeMiningSurveyChipset(settings.miningSurveyChipset),
     },
   )
   const yieldCtx: MiningYieldContext = {
@@ -447,6 +464,17 @@ export function MiningIskHrPage() {
       sellPrices: windowSell,
       reprocessYield: mining.defaults.reprocessYield,
       m3PerHr,
+      m3PerHrForItem: (item) =>
+        resolveUserMiningM3PerHrForOre(
+          subtype,
+          miningFleet,
+          miningBuffIds,
+          miningBoostSpace,
+          yieldCtx,
+          item.group,
+        ),
+      canMineItem: (item) =>
+        fleetCanMineOreGroup(subtype, miningFleet, yieldCtx, item.group),
     })
   }, [
     mining,
@@ -461,6 +489,10 @@ export function MiningIskHrPage() {
     priceWindow,
     settings.priceMethod,
     m3PerHr,
+    miningFleet,
+    miningBuffIds,
+    miningBoostSpace,
+    yieldCtx,
   ])
 
   const rows = useMemo(
@@ -469,10 +501,10 @@ export function MiningIskHrPage() {
   )
 
   const displayRows = useMemo(() => {
-    const q = nameQuery.trim().toLowerCase()
+    const q = nameQuery.trim()
     if (!q) return rows
-    return rows.filter((row) => row.item.name.toLowerCase().includes(q))
-  }, [rows, nameQuery])
+    return rows.filter((row) => miningRowMatchesNameQuery(row, q, typeMap))
+  }, [rows, nameQuery, typeMap])
 
   const breakdownRow = useMemo(() => {
     if (!breakdown) return null
@@ -515,6 +547,9 @@ export function MiningIskHrPage() {
     startTransition(() => {
       setSubtype(next)
       setNameQuery('')
+      updateSettings({
+        miningFleet: normalizeMiningFleet(settings.miningFleet, next),
+      })
     })
   }
 
@@ -529,21 +564,14 @@ export function MiningIskHrPage() {
     })
   }
 
-  function openBreakdown(row: MiningRankedRow, focusPath: MiningIphFocusPath = 'raw') {
+  function openBreakdown(row: MiningRankedRow, focusPath: MiningIphFocusPath = 'compressed') {
     setBreakdown({ row, focusPath })
   }
 
   function onMiningFleetChange(next: MiningFleetLine[]) {
-    startTransition(() =>
-      updateSettings({
-        miningFleet: normalizeMiningFleet(
-          next,
-          subtype,
-          settings.miningShipId,
-          settings.miningFleetSize,
-        ),
-      }),
-    )
+    updateSettings({
+      miningFleet: normalizeMiningFleet(next, subtype),
+    })
   }
 
   function onMiningBuffToggle(id: MiningBuffId) {
@@ -605,15 +633,13 @@ export function MiningIskHrPage() {
   const sortLabel =
     sortKey === 'focus' && focusName
       ? `${focusName}/hr`
-      : sortKey === 'raw'
-        ? MINING_IPH_PATHS.raw.label
-        : sortKey === 'compressed'
-          ? MINING_IPH_PATHS.compressed.label
-          : sortKey === 'vol'
-            ? volLabel
-            : sortKey === 'minerals'
-              ? MINING_IPH_PATHS.minerals.label
-              : MINING_IPH_PATHS.raw.label
+      : sortKey === 'compressed'
+        ? MINING_IPH_PATHS.compressed.label
+        : sortKey === 'vol'
+          ? volLabel
+          : sortKey === 'minerals'
+            ? MINING_IPH_PATHS.minerals.label
+            : MINING_IPH_PATHS.compressed.label
 
   return (
     <div>
@@ -798,12 +824,6 @@ export function MiningIskHrPage() {
               <th>Name</th>
               <th>Found</th>
               <SortHeader
-                label={MINING_IPH_PATHS.raw.label}
-                tooltip={MINING_IPH_PATHS.raw.tooltip}
-                active={sortKey === 'raw'}
-                onClick={() => onSort('raw')}
-              />
-              <SortHeader
                 label={MINING_IPH_PATHS.compressed.label}
                 tooltip={MINING_IPH_PATHS.compressed.tooltip}
                 active={sortKey === 'compressed'}
@@ -830,16 +850,11 @@ export function MiningIskHrPage() {
               <tr key={row.item.typeId} className="hover:bg-base-200/80">
                 <td className="tabular-nums opacity-60">{index + 1}</td>
                 <td>
-                  <MiningItemName row={row} onOpenBreakdown={() => openBreakdown(row)} />
+                  <MiningItemName row={row} typeMap={typeMap} onOpenBreakdown={() => openBreakdown(row)} />
                 </td>
                 <td>
                   <MiningSpaceBadges spaces={row.item.foundIn} />
                 </td>
-                <IphCell
-                  value={miningPathDisplayIph('raw', row)}
-                  onClick={() => openBreakdown(row, 'raw')}
-                  ariaLabel={`Raw ISK per hour breakdown for ${row.item.name}`}
-                />
                 <IphCell
                   value={miningPathDisplayIph('compressed', row)}
                   onClick={() => openBreakdown(row, 'compressed')}
@@ -858,7 +873,7 @@ export function MiningIskHrPage() {
             ))}
             {displayRows.length === 0 ? (
               <tr>
-                <td colSpan={focusTypeId != null ? 8 : 7} className="text-center opacity-60 py-8">
+                <td colSpan={focusTypeId != null ? 7 : 6} className="text-center opacity-60 py-8">
                   No items match these filters.
                 </td>
               </tr>
@@ -876,7 +891,7 @@ export function MiningIskHrPage() {
           >
             <div className="flex items-center gap-2 min-w-0 mb-2">
               <span className="text-xs opacity-50 tabular-nums">#{index + 1}</span>
-              <MiningItemName row={row} onOpenBreakdown={() => openBreakdown(row)} />
+              <MiningItemName row={row} typeMap={typeMap} onOpenBreakdown={() => openBreakdown(row)} />
             </div>
             <p className="text-[11px] opacity-60 mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="inline-flex items-center gap-1">
@@ -887,11 +902,6 @@ export function MiningIskHrPage() {
               </span>
             </p>
             <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
-              <MobileIph
-                label={MINING_IPH_PATHS.raw.label}
-                value={miningPathDisplayIph('raw', row)}
-                onClick={() => openBreakdown(row, 'raw')}
-              />
               <MobileIph
                 label={MINING_IPH_PATHS.compressed.label}
                 value={miningPathDisplayIph('compressed', row)}
@@ -915,7 +925,7 @@ export function MiningIskHrPage() {
 
       <MiningIphBreakdownModal
         row={breakdownRow}
-        initialFocusPath={breakdown?.focusPath ?? 'raw'}
+        initialFocusPath={breakdown?.focusPath ?? 'compressed'}
         m3PerHr={m3PerHr}
         reprocessYield={reprocessYield}
         focusTypeId={focusTypeId}
