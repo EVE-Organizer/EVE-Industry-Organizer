@@ -12,7 +12,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const outDir = join(__dirname, '../public/data')
 const SDE_BASE = 'https://www.fuzzwork.co.uk/dump/latest/csv'
 
-const REQUIRED_CSVS = ['invTypes', 'invGroups', 'invCategories', 'dgmTypeAttributes']
+const REQUIRED_CSVS = ['invTypes', 'invGroups', 'invCategories', 'dgmTypeAttributes', 'invTraits']
 
 async function main() {
   mkdirSync(outDir, { recursive: true })
@@ -27,6 +27,7 @@ async function main() {
     csvData.invGroups,
     csvData.invCategories,
     csvData.dgmTypeAttributes,
+    csvData.invTraits,
   )
   const payload = { generatedAt: new Date().toISOString(), types }
   writeFileSync(join(outDir, 'fitting.json'), JSON.stringify(payload))

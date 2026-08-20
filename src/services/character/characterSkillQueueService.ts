@@ -69,3 +69,20 @@ export function queueTotalRemainingSeconds(
   }
   return latest
 }
+
+/** Highest level each skill in the queue will reach (finished_level per entry). */
+export function queuedTargetLevelBySkill(
+  entries: readonly EsiSkillQueueEntry[],
+): Map<number, number> {
+  const map = new Map<number, number>()
+  for (const entry of entries) {
+    map.set(entry.skill_id, Math.max(map.get(entry.skill_id) ?? 0, entry.finished_level))
+  }
+  return map
+}
+
+/** Skill id currently training (queue position 0 with active dates). */
+export function activeTrainingSkillId(entries: readonly EsiSkillQueueEntry[]): number | null {
+  const active = entries.find((entry) => entry.queue_position === 0 && isActiveQueueEntry(entry))
+  return active?.skill_id ?? null
+}

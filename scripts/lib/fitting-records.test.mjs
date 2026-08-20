@@ -29,7 +29,7 @@ describe('buildFittingRecords', () => {
       { typeID: '3033', attributeID: '277', valueFloat: '5' },
     ]
 
-    const records = buildFittingRecords(types, groups, categories, typeAttributes)
+    const records = buildFittingRecords(types, groups, categories, typeAttributes, [])
     expect(records.map((row) => row.name)).toEqual(['Small Focused Beam Laser II', 'Retribution'])
     expect(records[1].cpuOutput).toBe(140)
     expect(records[1].powerOutput).toBe(62)

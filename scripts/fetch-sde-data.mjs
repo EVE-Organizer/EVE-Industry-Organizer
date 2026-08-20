@@ -50,6 +50,7 @@ const REQUIRED_CSVS = [
   'invCategories',
   'invMetaTypes',
   'dgmTypeAttributes',
+  'invTraits',
   'mapSolarSystems',
   'mapSolarSystemJumps',
   'mapRegions',
@@ -360,6 +361,7 @@ async function main() {
             groups,
             categories,
             ctx.csvData.dgmTypeAttributes,
+            ctx.csvData.invTraits,
           )
           ctx.typeRecords = buildAllTypeRecords(
             types,

@@ -186,8 +186,8 @@ describe('skillDisplay', () => {
     ]
     expect(skillGroupName(rows[0])).toBe('Fitting')
     expect(skillGroupName(rows[1])).toBe('Ship')
-    expect(skillGroupName(rows[2])).toBe('Gunnery')
-    expect(groupFitSkills(rows).map((group) => group.title)).toEqual(['Fitting', 'Ship', 'Gunnery'])
+    expect(skillGroupName(rows[2])).toBe('DPS')
+    expect(groupFitSkills(rows).map((group) => group.title)).toEqual(['Fitting', 'Ship', 'DPS'])
   })
 
   it('formats a fitting combo without empty rigging', () => {
