@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-19T04:28:07.404Z",
+  "generatedAt": "2026-08-20T04:27:32.532Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0253,
+      "reactionCostIndex": 0.0255,
       "marketSystemId": 30000621
     },
     {
@@ -830,9 +830,9 @@
       "regionId": 10000042,
       "name": "Metropolis",
       "securityClass": "highsec",
-      "buildSystemId": 30022505,
-      "buildSystemName": "Orgron",
-      "buildSystemSecurity": 0.949,
+      "buildSystemId": 30003403,
+      "buildSystemName": "Meimungen",
+      "buildSystemSecurity": 0.907195,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30002053
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0358,
+      "costIndex": 0.0361,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
