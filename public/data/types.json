@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-20T04:28:32.150Z",
+  "generatedAt": "2026-08-21T04:29:35.826Z",
   "types": [
     {
       "typeId": 18,
@@ -300427,116 +300427,6 @@
       "iconUrl": "https://images.evetech.net/types/95530/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95530/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95530/bp?size=32"
-    },
-    {
-      "typeId": 95532,
-      "name": "Cavalry Clash Booster",
-      "group": "Booster",
-      "category": "Implant",
-      "volume": 1,
-      "description": "+20% Warp Speed, -12% Ship Inertia, Base duration: 10 minutes.\n\nThis booster has been manufactured using volatile compounds and will expire on July 27th, YC128.",
-      "iconUrl": "https://images.evetech.net/types/95532/icon?size=32",
-      "renderUrl": "https://images.evetech.net/types/95532/render?size=128",
-      "bpIconUrl": "https://images.evetech.net/types/95532/bp?size=32"
-    },
-    {
-      "typeId": 95533,
-      "name": "Astrograph Clash Booster",
-      "group": "Booster",
-      "category": "Implant",
-      "volume": 1,
-      "description": "+20% Scan Probe Strength, +20% Scan Resolution. Base duration: 10 minutes.\n\nThis booster has been manufactured using volatile compounds and will expire on July 27th, YC128.",
-      "iconUrl": "https://images.evetech.net/types/95533/icon?size=32",
-      "renderUrl": "https://images.evetech.net/types/95533/render?size=128",
-      "bpIconUrl": "https://images.evetech.net/types/95533/bp?size=32"
-    },
-    {
-      "typeId": 95534,
-      "name": "SITREP Clash Booster",
-      "group": "Booster",
-      "category": "Implant",
-      "volume": 1,
-      "description": "+20% D-Scan Range. Base duration: 10 minutes.\n\nThis booster has been manufactured using volatile compounds and will expire on July 27th, YC128.",
-      "iconUrl": "https://images.evetech.net/types/95534/icon?size=32",
-      "renderUrl": "https://images.evetech.net/types/95534/render?size=128",
-      "bpIconUrl": "https://images.evetech.net/types/95534/bp?size=32"
-    },
-    {
-      "typeId": 95537,
-      "name": "Coherence Volatile Booster",
-      "group": "Booster",
-      "category": "Implant",
-      "volume": 1,
-      "description": "+20 Analyzer Coherence, +20 Analyzer Strength. Base duration: 3.5 minutes.\n\nThis booster has been manufactured using volatile compounds and will expire on July 27th, YC128.",
-      "iconUrl": "https://images.evetech.net/types/95537/icon?size=32",
-      "renderUrl": "https://images.evetech.net/types/95537/render?size=128",
-      "bpIconUrl": "https://images.evetech.net/types/95537/bp?size=32"
-    },
-    {
-      "typeId": 95538,
-      "name": "Upcycle Volatile Booster",
-      "group": "Booster",
-      "category": "Implant",
-      "volume": 1,
-      "description": "-20% Salvage Duration. Base duration: 3.5 minutes.\n\nThis booster has been manufactured using volatile compounds and will expire on July 27th, YC128.",
-      "iconUrl": "https://images.evetech.net/types/95538/icon?size=32",
-      "renderUrl": "https://images.evetech.net/types/95538/render?size=128",
-      "bpIconUrl": "https://images.evetech.net/types/95538/bp?size=32"
-    },
-    {
-      "typeId": 95539,
-      "name": "Requisition Volatile Booster",
-      "group": "Booster",
-      "category": "Implant",
-      "volume": 1,
-      "description": "+20% Warp Disruptor and Scrambler Range. Base duration: 3.5 minutes.\n\nThis booster has been manufactured using volatile compounds and will expire on July 27th, YC128.",
-      "iconUrl": "https://images.evetech.net/types/95539/icon?size=32",
-      "renderUrl": "https://images.evetech.net/types/95539/render?size=128",
-      "bpIconUrl": "https://images.evetech.net/types/95539/bp?size=32"
-    },
-    {
-      "typeId": 95540,
-      "name": "Zero-In Volatile Booster",
-      "group": "Booster",
-      "category": "Implant",
-      "volume": 1,
-      "description": "+16% Turret Tracking Speed. Base duration: 3.5 minutes.\n\nThis booster has been manufactured using volatile compounds and will expire on July 27th, YC128.",
-      "iconUrl": "https://images.evetech.net/types/95540/icon?size=32",
-      "renderUrl": "https://images.evetech.net/types/95540/render?size=128",
-      "bpIconUrl": "https://images.evetech.net/types/95540/bp?size=32"
-    },
-    {
-      "typeId": 95541,
-      "name": "Soaring Volatile Booster",
-      "group": "Booster",
-      "category": "Implant",
-      "volume": 1,
-      "description": "+16% Missile Flight Time. Base duration: 3.5 minutes.\n\nThis booster has been manufactured using volatile compounds and will expire on July 27th, YC128.",
-      "iconUrl": "https://images.evetech.net/types/95541/icon?size=32",
-      "renderUrl": "https://images.evetech.net/types/95541/render?size=128",
-      "bpIconUrl": "https://images.evetech.net/types/95541/bp?size=32"
-    },
-    {
-      "typeId": 95542,
-      "name": "Hallowed Volatile Booster",
-      "group": "Booster",
-      "category": "Implant",
-      "volume": 1,
-      "description": "+16% Shield Boost. Base duration: 3.5 minutes.\n\nThis booster has been manufactured using volatile compounds and will expire on July 27th, YC128.",
-      "iconUrl": "https://images.evetech.net/types/95542/icon?size=32",
-      "renderUrl": "https://images.evetech.net/types/95542/render?size=128",
-      "bpIconUrl": "https://images.evetech.net/types/95542/bp?size=32"
-    },
-    {
-      "typeId": 95543,
-      "name": "Tenacious Volatile Booster",
-      "group": "Booster",
-      "category": "Implant",
-      "volume": 1,
-      "description": "+16% Armor Repair. Base duration: 3.5 minutes.\n\nThis booster has been manufactured using volatile compounds and will expire on July 27th, YC128.",
-      "iconUrl": "https://images.evetech.net/types/95543/icon?size=32",
-      "renderUrl": "https://images.evetech.net/types/95543/render?size=128",
-      "bpIconUrl": "https://images.evetech.net/types/95543/bp?size=32"
     },
     {
       "typeId": 95556,

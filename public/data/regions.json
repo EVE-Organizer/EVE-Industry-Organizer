@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-20T04:27:32.532Z",
+  "generatedAt": "2026-08-21T04:28:52.816Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0255,
+      "reactionCostIndex": 0.0257,
       "marketSystemId": 30000621
     },
     {
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0361,
+      "costIndex": 0.0362,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
