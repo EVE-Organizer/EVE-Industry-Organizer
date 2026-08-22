@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-21T04:28:52.816Z",
+  "generatedAt": "2026-08-22T04:22:49.235Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0257,
+      "reactionCostIndex": 0.0258,
       "marketSystemId": 30000621
     },
     {
@@ -720,12 +720,12 @@
       "regionId": 10000025,
       "name": "Immensea",
       "securityClass": "nullsec",
-      "buildSystemId": 30002106,
-      "buildSystemName": "PPFB-U",
-      "buildSystemSecurity": -0.074166,
+      "buildSystemId": 30002152,
+      "buildSystemName": "F76-8Q",
+      "buildSystemSecurity": -0.060216,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30002106
+      "marketSystemId": 30002152
     },
     {
       "regionId": 10000031,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0362,
+      "costIndex": 0.0364,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
