@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-19T04:29:05.352Z",
+  "generatedAt": "2026-08-26T04:31:55.336Z",
   "blueprints": [
     {
       "blueprintTypeId": 879,
@@ -17722,6 +17722,29 @@
       "productIconUrl": "https://images.evetech.net/types/2838/icon?size=32",
       "productRenderUrl": "https://images.evetech.net/types/2838/render?size=128",
       "copyTime": 240
+    },
+    {
+      "blueprintTypeId": 2864,
+      "productTypeId": 2863,
+      "productQuantity": 1,
+      "manufacturingTime": 15000,
+      "materials": [
+        {
+          "typeId": 34,
+          "quantity": 50000
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Polaris": 5
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Hauler",
+      "bpIconUrl": "https://images.evetech.net/types/2864/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/2863/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/2863/render?size=128",
+      "copyTime": 9600
     },
     {
       "blueprintTypeId": 2866,
