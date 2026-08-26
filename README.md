@@ -23,7 +23,7 @@ pnpm run dev
 
 ## Build & deploy (GitHub Pages)
 
-Pushes to `main` deploy automatically via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+Pushes to `main` deploy automatically via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). To redeploy without a push: **Actions → Deploy to GitHub Pages → Run workflow** (always builds from `main`).
 
 One-time setup in the repo on GitHub:
 
