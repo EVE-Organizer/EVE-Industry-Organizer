@@ -13,6 +13,7 @@ import { buildMapOpportunities } from '@/lib/mapOpportunities'
 import { getHubMarket } from '@/services/data/sdeLoader'
 import { useAppStore } from '@/stores/appStore'
 import { hubDisplayName } from '@/lib/hubDisplay'
+import { buildManufacturingSettings } from '@/lib/structureSettings'
 import { DEFAULT_BATCH_SIZE, HUBS } from '@/types'
 import type { HubId } from '@/types'
 import { DEFAULT_MAP_LAYERS, type MapLayers, type WarIntelAnchor, type WarIntelRadius, type WarIntelWindow, type WarTheater } from '@/types/map'
@@ -99,7 +100,7 @@ export function MapPage() {
     return buildMapOpportunities({
       sde,
       graph,
-      settings: { ...settings, batchSize: DEFAULT_BATCH_SIZE },
+      settings: buildManufacturingSettings(settings, sde.systems, { batchSize: DEFAULT_BATCH_SIZE }),
       primaryHub,
       sellHubId,
       warResults: overlays.warResults,

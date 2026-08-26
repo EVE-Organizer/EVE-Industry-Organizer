@@ -454,7 +454,7 @@ function graphStructureTe(
 ): number {
   const structure = isReactionRecipe(blueprint)
     ? resolveReactionModifiers(settings, blueprint)
-    : resolveManufacturingModifiers(settings)
+    : resolveManufacturingModifiers(settings, blueprint)
   return structure.teBonusPercent
 }
 

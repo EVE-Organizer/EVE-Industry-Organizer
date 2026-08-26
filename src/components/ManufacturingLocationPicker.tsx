@@ -7,15 +7,17 @@ import { findProductionLocation } from '@/lib/productionLocations'
 import { structureTypeFromTypeId } from '@/lib/structureTypeFromTypeId'
 import {
   patchStructureType,
+  patchManufacturingSystemFromList,
   STRUCTURE_TYPE_IDS,
   STRUCTURE_TYPES,
   structureTypeLabel,
 } from '@/lib/structureSettings'
-import type { GlobalSettings, ProductionLocation, StructureType } from '@/types'
+import type { GlobalSettings, ProductionLocation, StructureType, SystemInfo } from '@/types'
 
 interface ManufacturingLocationPickerProps {
   settings: GlobalSettings
   onChange: (patch: Partial<GlobalSettings>) => void
+  systems?: SystemInfo[]
   size?: 'sm' | 'md'
   /** Show buy-list inventory hint when a character station is selected (Plan page). */
   showInventoryHint?: boolean
@@ -58,6 +60,7 @@ function matchesQuery(text: string, query: string): boolean {
 export function ManufacturingLocationPicker({
   settings,
   onChange,
+  systems,
   size = 'md',
   showInventoryHint = false,
 }: ManufacturingLocationPickerProps) {
@@ -153,13 +156,21 @@ export function ManufacturingLocationPicker({
     if (settings.productionLocationId == null || isLoading || !selectedLocation) return
     const systemId = selectedLocation.solarSystemId
     if (systemId <= 0 || settings.manufacturingSystemId === systemId) return
-    onChange({ manufacturingSystemId: systemId })
+    onChange({
+      ...patchManufacturingSystemFromList(
+        systems,
+        systemId,
+        settings.buildSystemSecurity ?? 1,
+      ),
+    })
   }, [
     isLoading,
     onChange,
     selectedLocation,
+    settings.buildSystemSecurity,
     settings.manufacturingSystemId,
     settings.productionLocationId,
+    systems,
   ])
 
   function selectPreset(type: StructureType) {
@@ -172,10 +183,15 @@ export function ManufacturingLocationPicker({
   }
 
   function selectLocation(location: ProductionLocation) {
+    const systemId = location.solarSystemId || settings.manufacturingSystemId
     onChange({
       productionLocationId: location.locationId,
       productionLocationKind: location.kind,
-      manufacturingSystemId: location.solarSystemId || settings.manufacturingSystemId,
+      ...patchManufacturingSystemFromList(
+        systems,
+        systemId,
+        settings.buildSystemSecurity ?? 1,
+      ),
       ...patchStructureType(locationStructureType(location)),
     })
     setOpen(false)

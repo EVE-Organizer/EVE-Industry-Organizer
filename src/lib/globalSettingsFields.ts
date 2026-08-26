@@ -18,7 +18,7 @@ export const GLOBAL_SETTING_TOOLTIPS = {
   inventionSkillLevel:
     'Assumed level (0-5) for your invention encryption and datacore skills. Higher levels raise the T2 success chance, which lowers the invention cost charged per run.',
   structureType:
-    'Where you run manufacturing jobs. NPC stations use only the system cost index. Engineering complexes add hull role bonuses; fitted M-Set rigs are entered separately below.',
+    'Where you run manufacturing jobs. NPC stations use only the system cost index. Raitaru, Azbel, and Sotiyo add hull bonuses and fit M-Set, L-Set, or XL-Set rigs.',
   structureHullMeBonusPercent:
     'Hull role bonus for material reduction (Raitaru 1%, Azbel 2%, Sotiyo 3%). Presets are fixed; custom structures can override.',
   structureHullTeBonusPercent:

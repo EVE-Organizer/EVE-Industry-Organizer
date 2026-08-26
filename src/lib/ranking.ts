@@ -333,7 +333,10 @@ function computeRow(
   if (runs === null) return null
 
   const { me, te } = blueprintMeTe(blueprint.tier, settings, blueprint)
-  const structure = resolveRecipeModifiers(settings, blueprint)
+  const structure = resolveRecipeModifiers(settings, {
+    ...blueprint,
+    category: product.category,
+  })
   const industry = skillLevel(settings.skills, 'industry')
 
   const priceCtx: PriceContext = {

@@ -58,11 +58,16 @@ export function SettingsPage() {
             Engineering complex for manufacturing jobs. Hull role bonuses come from the structure
             type; enter fitted M-Set rig values separately.
           </p>
-          <ManufacturingSettingsSection
-            size="sm"
-            settings={settings}
-            onChange={updateSettings}
-          />
+          {sde ? (
+            <ManufacturingSettingsSection
+              size="sm"
+              settings={settings}
+              onChange={updateSettings}
+              systems={sde.systems}
+            />
+          ) : (
+            <p className="text-sm opacity-60">Loading systems…</p>
+          )}
         </Panel>
 
         <Panel title="Reaction facility">

@@ -30,7 +30,13 @@ describe('facilityModifiers', () => {
       structureMeBonusPercent: 3,
       structureTeBonusPercent: 25,
       structureJobCostBonusPercent: 5,
-      manufacturingRigs: { rigMeBonusPercent: 0, rigTeBonusPercent: 0, rigJobCostBonusPercent: 0 },
+      manufacturingRigs: {
+        meRig: 'none' as const,
+        teRig: 'none' as const,
+        rigMeBonusPercent: 0,
+        rigTeBonusPercent: 0,
+        rigJobCostBonusPercent: 0,
+      },
     }
     const mods = resolveManufacturingModifiers(settings)
     expect(mods.meBonusPercent).toBeCloseTo(3, 5)
@@ -42,9 +48,21 @@ describe('facilityModifiers', () => {
     const settings = {
       ...DEFAULT_SETTINGS,
       structureType: 'sotiyo' as const,
-      manufacturingRigs: { rigMeBonusPercent: 2, rigTeBonusPercent: 20, rigJobCostBonusPercent: 0 },
+      manufacturingRigs: {
+        meRig: 'none' as const,
+        teRig: 'none' as const,
+        rigMeBonusPercent: 0,
+        rigTeBonusPercent: 0,
+        rigJobCostBonusPercent: 0,
+        familyRigs: {
+          equipment: { meRig: 't1' as const, teRig: 't1' as const },
+        },
+      },
     }
-    const detail = manufacturingFacilityDetail(settings)
+    const detail = manufacturingFacilityDetail(settings, {
+      productGroup: 'Armor Plate',
+      category: 'Module',
+    })
     expect(detail.effectiveMeBonusPercent).toBeCloseTo(4.94, 2)
     expect(detail.effectiveTeBonusPercent).toBeCloseTo(40, 5)
   })
@@ -55,6 +73,19 @@ describe('facilityModifiers', () => {
     expect(migrated.rigs.rigMeBonusPercent).toBe(5)
     expect(migrated.rigs.rigTeBonusPercent).toBe(30)
     expect(migrated.rigs.rigJobCostBonusPercent).toBe(4)
+  })
+
+  it('keeps per-category familyRigs when settings are normalized', () => {
+    const familyRigs = { ammo: { meRig: 't2' as const, teRig: 't1' as const } }
+    const settings = normalizeGlobalSettings({
+      ...DEFAULT_SETTINGS,
+      structureType: 'sotiyo',
+      manufacturingRigs: {
+        ...DEFAULT_SETTINGS.manufacturingRigs,
+        familyRigs,
+      },
+    })
+    expect(settings.manufacturingRigs.familyRigs).toEqual(familyRigs)
   })
 
   it('applies Tatara hull and composite rig for reactions', () => {
@@ -129,7 +160,8 @@ describe('facilityModifiers', () => {
     expect(settings.structureTeBonusPercent).toBe(25)
     expect(settings.manufacturingRigs.rigTeBonusPercent).toBeCloseTo(20, 5)
     const detail = manufacturingFacilityDetail(settings)
-    expect(detail.effectiveTeBonusPercent).toBeCloseTo(40, 5)
+    expect(detail.hullTeBonusPercent).toBe(25)
+    expect(detail.rigTeBonusPercent).toBe(0)
   })
 
   it('does not double-stack reaction rig TE when migrating legacy manufacturing bonuses', () => {

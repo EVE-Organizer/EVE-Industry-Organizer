@@ -1,7 +1,9 @@
 import type {
   BlueprintInfo,
+  BlueprintTier,
   FacilityBonusDetail,
   GlobalSettings,
+  ManufacturingRigModifiers,
   ReactionFamily,
   ReactionFamilyGroup,
   ReactionFacilitySettings,
@@ -15,6 +17,10 @@ import {
   STRUCTURE_HULL_PRESETS,
   defaultReactionFamilyModifiers,
 } from '@/types'
+import {
+  normalizeManufacturingRigs,
+  resolveRigBonuses,
+} from '@/lib/manufacturingRigs'
 /** Multiplicative bonus combine: hull 25% + rig 20% -> 40% effective reduction. */
 export function combineBonusPercent(hullPercent: number, rigPercent: number): number {
   if (hullPercent <= 0 && rigPercent <= 0) return 0
@@ -68,25 +74,39 @@ function manufacturingHullBonuses(settings: GlobalSettings): {
   }
 }
 
-export function manufacturingFacilityDetail(settings: GlobalSettings): FacilityBonusDetail {
+export type ManufacturingProductHint = {
+  productGroup: string
+  tier?: BlueprintTier
+  category?: string
+}
+
+export function manufacturingFacilityDetail(
+  settings: GlobalSettings,
+  product?: ManufacturingProductHint,
+): FacilityBonusDetail {
   const hull = manufacturingHullBonuses(settings)
-  const rig = settings.manufacturingRigs ?? DEFAULT_MANUFACTURING_RIGS
+  const rigs = normalizeManufacturingRigs(settings.manufacturingRigs)
+  const security = settings.buildSystemSecurity ?? 1
+  const rig = resolveRigBonuses(rigs, security, product)
   return {
     hullMeBonusPercent: hull.me,
     hullTeBonusPercent: hull.te,
     hullJobCostBonusPercent: hull.jobCost,
-    rigMeBonusPercent: rig.rigMeBonusPercent,
-    rigTeBonusPercent: rig.rigTeBonusPercent,
-    rigJobCostBonusPercent: rig.rigJobCostBonusPercent,
-    effectiveMeBonusPercent: combineBonusPercent(hull.me, rig.rigMeBonusPercent),
-    effectiveTeBonusPercent: combineBonusPercent(hull.te, rig.rigTeBonusPercent),
-    effectiveJobCostBonusPercent: combineBonusPercent(hull.jobCost, rig.rigJobCostBonusPercent),
+    rigMeBonusPercent: rig.me,
+    rigTeBonusPercent: rig.te,
+    rigJobCostBonusPercent: rig.jobCost,
+    effectiveMeBonusPercent: combineBonusPercent(hull.me, rig.me),
+    effectiveTeBonusPercent: combineBonusPercent(hull.te, rig.te),
+    effectiveJobCostBonusPercent: combineBonusPercent(hull.jobCost, rig.jobCost),
     taxPercent: settings.structureTaxPercent,
   }
 }
 
-export function resolveManufacturingModifiers(settings: GlobalSettings): StructureModifiers {
-  const detail = manufacturingFacilityDetail(settings)
+export function resolveManufacturingModifiers(
+  settings: GlobalSettings,
+  product?: ManufacturingProductHint,
+): StructureModifiers {
+  const detail = manufacturingFacilityDetail(settings, product)
   if (settings.structureType === 'npc') {
     return {
       meBonusPercent: 0,
@@ -157,12 +177,14 @@ export function resolveReactionModifiers(
 
 export function resolveRecipeModifiers(
   settings: GlobalSettings,
-  blueprint: Pick<BlueprintInfo, 'kind' | 'reactionFamily'>,
+  blueprint: Pick<BlueprintInfo, 'kind' | 'reactionFamily' | 'productGroup' | 'tier'> & {
+    category?: string
+  },
 ): StructureModifiers {
   if (blueprint.kind === 'reaction') {
     return resolveReactionModifiers(settings, blueprint)
   }
-  return resolveManufacturingModifiers(settings)
+  return resolveManufacturingModifiers(settings, blueprint)
 }
 
 export function normalizeReactionFacility(
@@ -235,25 +257,33 @@ export function migrateManufacturingRigs(
   structureMeBonusPercent: number,
   structureTeBonusPercent: number,
   structureJobCostBonusPercent: number,
-  existingRigs: Partial<typeof DEFAULT_MANUFACTURING_RIGS> | undefined,
+  existingRigs: Partial<ManufacturingRigModifiers> | undefined,
 ): {
   hullMe: number
   hullTe: number
   hullJobCost: number
-  rigs: typeof DEFAULT_MANUFACTURING_RIGS
+  rigs: ManufacturingRigModifiers
 } {
+  const kept = {
+    fitted: existingRigs?.fitted,
+    familyRigs: existingRigs?.familyRigs,
+  }
   if (structureType === 'custom') {
     return {
       hullMe: 0,
       hullTe: 0,
       hullJobCost: 0,
       rigs: {
+        ...DEFAULT_MANUFACTURING_RIGS,
+        ...kept,
         rigMeBonusPercent:
           existingRigs?.rigMeBonusPercent ?? structureMeBonusPercent,
         rigTeBonusPercent:
           existingRigs?.rigTeBonusPercent ?? structureTeBonusPercent,
         rigJobCostBonusPercent:
           existingRigs?.rigJobCostBonusPercent ?? structureJobCostBonusPercent,
+        meRig: existingRigs?.meRig ?? (structureMeBonusPercent > 0 ? 'custom' : 'none'),
+        teRig: existingRigs?.teRig ?? (structureTeBonusPercent > 0 ? 'custom' : 'none'),
       },
     }
   }
@@ -263,9 +293,13 @@ export function migrateManufacturingRigs(
     hullTe: structureType === 'npc' ? 0 : structureTeBonusPercent,
     hullJobCost: structureType === 'npc' ? 0 : structureJobCostBonusPercent,
     rigs: {
+      ...DEFAULT_MANUFACTURING_RIGS,
+      ...kept,
       rigMeBonusPercent: existingRigs?.rigMeBonusPercent ?? 0,
       rigTeBonusPercent: existingRigs?.rigTeBonusPercent ?? 0,
       rigJobCostBonusPercent: existingRigs?.rigJobCostBonusPercent ?? 0,
+      meRig: existingRigs?.meRig ?? (existingRigs?.rigMeBonusPercent ? 'custom' : 'none'),
+      teRig: existingRigs?.teRig ?? (existingRigs?.rigTeBonusPercent ? 'custom' : 'none'),
     },
   }
 }

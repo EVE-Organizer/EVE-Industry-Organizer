@@ -22,6 +22,7 @@ import {
   setupBudgetFromSlider,
   type BlueprintSortKey,
 } from '@/lib/ranking'
+import { buildManufacturingSettings } from '@/lib/structureSettings'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import type { RouteDangerResult } from '@/lib/routeDanger'
 import { HaulRiskModal } from '@/components/HaulRiskModal'
@@ -97,13 +98,13 @@ export function BlueprintsPage() {
   }, [])
 
   const manufacturingSettings = useMemo(
-    (): ManufacturingSettings => ({
-      ...settings,
-      batchSize: rankingQuery.batchSize,
-      priceMethod: rankingQuery.priceMethod,
-      manufacturingSystemId: rankingQuery.mfgSystem,
-    }),
-    [settings, rankingQuery.batchSize, rankingQuery.priceMethod, rankingQuery.mfgSystem],
+    (): ManufacturingSettings =>
+      buildManufacturingSettings(settings, sde?.systems, {
+        manufacturingSystemId: rankingQuery.mfgSystem,
+        batchSize: rankingQuery.batchSize,
+        priceMethod: rankingQuery.priceMethod,
+      }),
+    [settings, rankingQuery.batchSize, rankingQuery.priceMethod, rankingQuery.mfgSystem, sde?.systems],
   )
 
   const [haulRiskOpen, setHaulRiskOpen] = useState(false)

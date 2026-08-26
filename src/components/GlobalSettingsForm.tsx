@@ -22,6 +22,7 @@ import {
   REACTION_FAMILY_LABELS,
 } from '@/lib/refinerySettings'
 import { ManufacturingLocationPicker } from '@/components/ManufacturingLocationPicker'
+import { ManufacturingRigFields } from '@/components/ManufacturingRigFields'
 import { RefineryLocationPicker } from '@/components/RefineryLocationPicker'
 import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
 
@@ -121,62 +122,6 @@ function StructurePresetBonuses({
         <StructureBonusTile label="Hull ME" value={hull.hullMeBonusPercent} />
         <StructureBonusTile label="Hull TE" value={hull.hullTeBonusPercent} />
         <StructureBonusTile label="Hull job cost" value={hull.hullJobCostBonusPercent} />
-      </div>
-    </div>
-  )
-}
-
-function ManufacturingRigFields({
-  settings,
-  onChange,
-  size = 'md',
-}: SettingsSectionProps) {
-  const gap = sectionGap(size)
-  const rigs = settings.manufacturingRigs
-
-  return (
-    <div className="rounded-lg border border-eve-border bg-base-300/20 px-3 py-3">
-      <div className="flex items-center gap-1.5 text-xs font-medium opacity-70 mb-2">
-        <span>Structure rigs</span>
-        <InfoTooltip text="M-Set rig bonuses from your in-game Manufacturing tooltip. Hull and rig stack multiplicatively." />
-      </div>
-      <div className={`grid grid-cols-3 ${gap}`}>
-        <NumberField
-          label="Rig ME %"
-          tooltip={GLOBAL_SETTING_TOOLTIPS.manufacturingRigMeBonusPercent}
-          size={size}
-          value={rigs.rigMeBonusPercent}
-          min={0}
-          max={10}
-          step={0.1}
-          onChange={(rigMeBonusPercent) =>
-            onChange({ manufacturingRigs: { ...rigs, rigMeBonusPercent } })
-          }
-        />
-        <NumberField
-          label="Rig TE %"
-          tooltip={GLOBAL_SETTING_TOOLTIPS.manufacturingRigTeBonusPercent}
-          size={size}
-          value={rigs.rigTeBonusPercent}
-          min={0}
-          max={50}
-          step={0.1}
-          onChange={(rigTeBonusPercent) =>
-            onChange({ manufacturingRigs: { ...rigs, rigTeBonusPercent } })
-          }
-        />
-        <NumberField
-          label="Rig job cost %"
-          tooltip={GLOBAL_SETTING_TOOLTIPS.manufacturingRigJobCostBonusPercent}
-          size={size}
-          value={rigs.rigJobCostBonusPercent}
-          min={0}
-          max={10}
-          step={0.1}
-          onChange={(rigJobCostBonusPercent) =>
-            onChange({ manufacturingRigs: { ...rigs, rigJobCostBonusPercent } })
-          }
-        />
       </div>
     </div>
   )
@@ -332,8 +277,9 @@ export function CommonSettingsSection({ settings, onChange, size = 'md' }: Setti
 export function ManufacturingSettingsSection({
   settings,
   onChange,
+  systems,
   size = 'md',
-}: SettingsSectionProps) {
+}: SettingsSectionProps & { systems?: SystemInfo[] }) {
   const gap = sectionGap(size)
 
   return (
@@ -343,7 +289,12 @@ export function ManufacturingSettingsSection({
         tooltip={GLOBAL_SETTING_TOOLTIPS.structureType}
         size={size}
       >
-        <ManufacturingLocationPicker settings={settings} onChange={onChange} size={size} />
+        <ManufacturingLocationPicker
+          settings={settings}
+          onChange={onChange}
+          systems={systems}
+          size={size}
+        />
       </SettingField>
 
       {isPlayerStructure(settings.structureType) ? (

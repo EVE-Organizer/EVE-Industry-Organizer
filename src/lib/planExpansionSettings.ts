@@ -12,6 +12,7 @@ export function planExpansionSettingsKey(settings: GlobalSettings): string {
     structureTeBonusPercent: settings.structureTeBonusPercent,
     structureJobCostBonusPercent: settings.structureJobCostBonusPercent,
     manufacturingRigs: settings.manufacturingRigs,
+    buildSystemSecurity: settings.buildSystemSecurity,
     structureTaxPercent: settings.structureTaxPercent,
     reactionFacility: settings.reactionFacility,
     includeBlueprintCost: settings.includeBlueprintCost,

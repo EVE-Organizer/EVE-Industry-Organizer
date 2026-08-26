@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { MAX_BATCH_SIZE, MIN_BATCH_SIZE } from '@/types'
 import type { SdeData, ProductGroupCategoryNode } from '@/services/data/sdeLoader'
 import { findProductGroupEntry } from '@/services/data/sdeLoader'
@@ -14,6 +14,7 @@ import { useAppStore } from '@/stores/appStore'
 import { CompactSliderField } from '@/components/CompactSliderField'
 import { SetupBudgetRange } from '@/components/SetupBudgetRange'
 import { PlanFacilityControls } from '@/components/plan/PlanFacilityControls'
+import { buildManufacturingSettings } from '@/lib/structureSettings'
 import {
   EconomicsFilterSection,
   FilterSection,
@@ -79,6 +80,14 @@ export function BlueprintFilterBar({
   const settings = useAppStore((s) => s.userData.settings)
   const updateSettings = useAppStore((s) => s.updateSettings)
 
+  const facilitySettings = useMemo(
+    () =>
+      buildManufacturingSettings(settings, sde?.systems, {
+        manufacturingSystemId: query.mfgSystem,
+      }),
+    [settings, sde?.systems, query.mfgSystem],
+  )
+
   function handleReset() {
     onChange(defaultQuery(settings))
   }
@@ -135,14 +144,11 @@ export function BlueprintFilterBar({
       <div className="blueprint-filters__body">
         {sde ? (
           <PlanFacilityControls
-            settings={{
-              ...settings,
-              manufacturingSystemId: query.mfgSystem,
-            }}
+            settings={facilitySettings}
             onChange={onFacilityChange}
             systems={sde.systems}
             regions={sde.regions}
-            hint="Rig bonuses and owner tax are in Settings. Station and system changes apply to ranking cost estimates."
+            hint="Structure, rigs, and build system apply to ranking cost and ISK/hr estimates."
           />
         ) : null}
 

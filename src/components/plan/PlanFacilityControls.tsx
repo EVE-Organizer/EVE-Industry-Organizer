@@ -1,9 +1,11 @@
 import type { GlobalSettings, RegionsData, SystemInfo } from '@/types'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { ManufacturingLocationPicker } from '@/components/ManufacturingLocationPicker'
+import { ManufacturingRigFields } from '@/components/ManufacturingRigFields'
 import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
 import { RefineryLocationPicker } from '@/components/RefineryLocationPicker'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
+import { patchManufacturingSystemFromList } from '@/lib/structureSettings'
 
 interface PlanFacilityControlsProps {
   settings: GlobalSettings
@@ -21,7 +23,7 @@ export function PlanFacilityControls({
   onChange,
   systems,
   regions,
-  hint = "Rig bonuses and owner tax are in Settings. Changes here apply to this plan's cost estimates.",
+  hint,
   className = '',
   onRefresh,
   isRefreshing = false,
@@ -29,6 +31,16 @@ export function PlanFacilityControls({
   const facility = settings.reactionFacility
   const buildSystemLocked = settings.productionLocationId != null
   const reactionSystemLocked = settings.reactionLocationId != null
+
+  function onManufacturingSystemChange(manufacturingSystemId: number) {
+    onChange(
+      patchManufacturingSystemFromList(
+        systems,
+        manufacturingSystemId,
+        settings.buildSystemSecurity ?? 1,
+      ),
+    )
+  }
 
   return (
     <div className={`plan-facility-controls ${className}`.trim()}>
@@ -44,6 +56,7 @@ export function PlanFacilityControls({
               <ManufacturingLocationPicker
                 settings={settings}
                 onChange={onChange}
+                systems={systems}
                 size="sm"
                 showInventoryHint
               />
@@ -81,11 +94,19 @@ export function PlanFacilityControls({
           <ManufacturingSystemPicker
             size="sm"
             value={settings.manufacturingSystemId}
-            onChange={(manufacturingSystemId) => onChange({ manufacturingSystemId })}
+            onChange={onManufacturingSystemChange}
             systems={systems}
             regions={regions}
             costIndexKind="manufacturing"
             disabled={buildSystemLocked}
+          />
+        </div>
+
+        <div className="plan-facility-controls__field plan-facility-controls__field--wide">
+          <ManufacturingRigFields
+            settings={settings}
+            onChange={onChange}
+            size="sm"
           />
         </div>
 

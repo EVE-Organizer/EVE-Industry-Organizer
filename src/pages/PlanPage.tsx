@@ -56,6 +56,7 @@ import {
 } from '@/lib/planShare'
 import { hubDisplayName } from '@/lib/hubDisplay'
 import { formatDecimal } from '@/lib/profit'
+import { buildManufacturingSettings } from '@/lib/structureSettings'
 import { DEFAULT_BATCH_SIZE, DEFAULT_SETTINGS, HUBS, type HubId } from '@/types'
 import type {
   GlobalSettings,
@@ -352,11 +353,9 @@ export function PlanPage() {
   )
 
   const manufacturingSettings = useMemo(
-    (): ManufacturingSettings => ({
-      ...activeSettings,
-      batchSize: DEFAULT_BATCH_SIZE,
-    }),
-    [activeSettings],
+    (): ManufacturingSettings =>
+      buildManufacturingSettings(activeSettings, data?.systems, { batchSize: DEFAULT_BATCH_SIZE }),
+    [activeSettings, data?.systems],
   )
 
   const plan = useManufacturingPlan(

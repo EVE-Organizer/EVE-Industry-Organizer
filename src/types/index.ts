@@ -227,13 +227,42 @@ export const STRUCTURE_PRESETS: Record<
   sotiyo: { structureMeBonusPercent: 3, structureTeBonusPercent: 25, structureJobCostBonusPercent: 5 },
 }
 
+export type ManufacturingRigTier = 'none' | 't1' | 't2' | 'custom'
+
+/** One fitted M/L/XL manufacturing rig from ESI assets + type dogma. */
+export interface FittedManufacturingRig {
+  typeId: number
+  name: string
+  meBase: number
+  teBase: number
+  jobCostBase: number
+}
+
+export interface ManufacturingFamilyRigTiers {
+  meRig: ManufacturingRigTier
+  teRig: ManufacturingRigTier
+}
+
 export interface ManufacturingRigModifiers {
+  /** Fitted ME rig tier; custom uses rigMeBonusPercent as pasted from in-game tooltip. */
+  meRig: ManufacturingRigTier
+  /** Fitted TE rig tier; custom uses rigTeBonusPercent as pasted from in-game tooltip. */
+  teRig: ManufacturingRigTier
   rigMeBonusPercent: number
   rigTeBonusPercent: number
   rigJobCostBonusPercent: number
+  /**
+   * ESI-imported rigs. When present, ME/TE apply only to matching product groups
+   * (e.g. Ammunition Manufacturing does not buff ships).
+   */
+  fitted?: FittedManufacturingRig[]
+  /** Per-category ME/TE. */
+  familyRigs?: Partial<Record<string, ManufacturingFamilyRigTiers>>
 }
 
 export const DEFAULT_MANUFACTURING_RIGS: ManufacturingRigModifiers = {
+  meRig: 'none',
+  teRig: 'none',
   rigMeBonusPercent: 0,
   rigTeBonusPercent: 0,
   rigJobCostBonusPercent: 0,
@@ -322,6 +351,8 @@ export interface GlobalSettings {
   primaryHub: HubId
   /** Solar system ID where manufacturing jobs are run. Drives cost index and haul routes. */
   manufacturingSystemId: number
+  /** Cached security of manufacturingSystemId; scales rig bonuses (HS 1x, LS 1.9x, null/WH 2.1x). */
+  buildSystemSecurity: number
   sellHubId: HubId
   meDefault: number
   teDefault: number
@@ -854,6 +885,7 @@ export const ZERO_SKILLS: SkillLevels = {
 export const DEFAULT_SETTINGS: GlobalSettings = {
   primaryHub: 'jita',
   manufacturingSystemId: 30000144,
+  buildSystemSecurity: 1,
   sellHubId: 'jita',
   meDefault: MAX_ME,
   teDefault: MAX_TE,

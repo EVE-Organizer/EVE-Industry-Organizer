@@ -23,6 +23,7 @@ import {
   normalizeReactionFacility,
   rigPercentFromCombined,
 } from '@/lib/facilityModifiers'
+import { normalizeManufacturingRigs } from '@/lib/manufacturingRigs'
 import { isPresetPlayerStructure } from '@/lib/structureSettings'
 
 type LegacySettings = Partial<Omit<GlobalSettings, 'skills'>> & {
@@ -139,7 +140,11 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     if (rigJobCost > manufacturingRigs.rigJobCostBonusPercent) {
       manufacturingRigs.rigJobCostBonusPercent = rigJobCost
     }
+    if (rigMe > 0) manufacturingRigs.meRig = 'custom'
+    if (rigTe > 0) manufacturingRigs.teRig = 'custom'
   }
+
+  manufacturingRigs = normalizeManufacturingRigs(manufacturingRigs)
 
   const reactionFacility = normalizeReactionFacility(parsedReactionFacility, manufacturingSystemId)
 
@@ -170,6 +175,10 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     primaryHub,
     sellHubId,
     manufacturingSystemId,
+    buildSystemSecurity:
+      typeof rest.buildSystemSecurity === 'number'
+        ? rest.buildSystemSecurity
+        : DEFAULT_SETTINGS.buildSystemSecurity,
     structureType,
     structureMeBonusPercent,
     structureTeBonusPercent,

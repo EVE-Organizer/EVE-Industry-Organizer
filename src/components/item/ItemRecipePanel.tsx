@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useMemo } from 'react'
 import type { BlueprintInfo, GlobalSettings, ManufacturingSettings, SkillInfo } from '@/types'
 import { DEFAULT_BATCH_SIZE } from '@/types'
+import { buildManufacturingSettings } from '@/lib/structureSettings'
 import { isReactionRecipe } from '@/lib/recipes'
 import { formatDuration, formatGraphQuantity } from '@/lib/profit'
 import { formatSkillLevel, skillIconUrl } from '@/lib/skillFields'
@@ -25,11 +26,15 @@ export function ItemRecipePanel({
   productName,
   settings,
   className,
-}: ItemRecipePanelProps) {
+  systems,
+}: ItemRecipePanelProps & {
+  systems?: { systemId: number; security: number }[]
+}) {
   const isReaction = isReactionRecipe(blueprint)
   const graphSettings = useMemo(
-    (): ManufacturingSettings => ({ ...settings, batchSize: DEFAULT_BATCH_SIZE }),
-    [settings],
+    (): ManufacturingSettings =>
+      buildManufacturingSettings(settings, systems, { batchSize: DEFAULT_BATCH_SIZE }),
+    [settings, systems],
   )
 
   return (

@@ -289,6 +289,7 @@ export function ItemDetailPage() {
           skillNameMap={skillNameMap}
           productName={manufacturedProduct.name}
           settings={settings}
+          systems={sde?.systems}
           className="mb-6"
         />
       ) : (

@@ -42,6 +42,7 @@ import { formatDecimal } from '@/lib/profit'
 import { typeIconUrl } from '@/lib/eveImages'
 import { getAllBlueprints, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { DEFAULT_BATCH_SIZE } from '@/types'
+import { buildManufacturingSettings } from '@/lib/structureSettings'
 import type { LiveIndustryJob } from '@/types'
 import type { GanttBar } from '@/components/gantt/ganttTypes'
 
@@ -140,12 +141,11 @@ export function JobsPage() {
   const isBusy = useAuthStore((s) => s.isBusy)
   const settings = useAppStore((s) => s.userData.settings)
 
+  const { data: sdeData, isLoading: sdeLoading } = useSdeData()
+
   const manufacturingSettings = useMemo(
-    () => ({
-      ...settings,
-      batchSize: DEFAULT_BATCH_SIZE,
-    }),
-    [settings],
+    () => buildManufacturingSettings(settings, sdeData?.systems, { batchSize: DEFAULT_BATCH_SIZE }),
+    [settings, sdeData?.systems],
   )
 
   const viewCharacterId = activeCharacterId
@@ -153,7 +153,6 @@ export function JobsPage() {
   const [graphProductTypeId, setGraphProductTypeId] = useState<number | null>(null)
   const timelineRef = useRef<HTMLElement>(null)
 
-  const { data: sdeData, isLoading: sdeLoading } = useSdeData()
   const typeNameMap = useMemo(() => {
     if (!sdeData) return new Map<number, string>()
     return new Map(sdeData.types.map((type) => [type.typeId, type.name]))

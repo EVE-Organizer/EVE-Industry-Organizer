@@ -9,6 +9,7 @@ import {
   getBlueprintForProduct,
 } from '@/services/data/sdeLoader'
 import { searchParamsToQuery } from '@/lib/blueprintQuery'
+import { buildManufacturingSettings } from '@/lib/structureSettings'
 import { BlueprintGraphModal } from '@/components/BlueprintGraphModal'
 import { LoadingState, PageHeader } from '@/components/Layout'
 
@@ -31,12 +32,13 @@ export function ProductionGraphPage() {
   )
 
   const manufacturingSettings = useMemo(
-    (): ManufacturingSettings => ({
-      ...settings,
-      batchSize: query.batchSize,
-      priceMethod: query.priceMethod,
-    }),
-    [settings, query.batchSize, query.priceMethod],
+    (): ManufacturingSettings =>
+      buildManufacturingSettings(settings, sde?.systems, {
+        manufacturingSystemId: query.mfgSystem,
+        batchSize: query.batchSize,
+        priceMethod: query.priceMethod,
+      }),
+    [settings, sde?.systems, query.batchSize, query.mfgSystem, query.priceMethod],
   )
 
   const blueprint = useMemo(() => {

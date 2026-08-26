@@ -342,8 +342,15 @@ export function computeFlatSetup(input: FlatSetupInput): FlatSetupResult {
   } = input
 
   const { me } = resolveBlueprintMeTe(blueprint.tier, settings, undefined, blueprint)
-  const structure = resolveRecipeModifiers(settings, blueprint)
-  const facilityBonus = manufacturingFacilityDetail(settings)
+  const structure = resolveRecipeModifiers(settings, {
+    ...blueprint,
+    category: product.category,
+  })
+  const facilityBonus = manufacturingFacilityDetail(settings, {
+    productGroup: blueprint.productGroup,
+    tier: blueprint.tier,
+    category: product.category,
+  })
   const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
   const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
   const matCost = materialCost(mats, prices)
