@@ -1,14 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import { aggregateHistoryWindows, robustVolumeWeightedAvgPrice } from './market-data.mjs'
 
+function daysAgo(n) {
+  const d = new Date()
+  d.setDate(d.getDate() - n)
+  return d.toISOString().slice(0, 10)
+}
+
 /** Ducinium II-Grade-style history: one spike day vs normal trading days. */
 const DUCINIUM_DAYS = [
-  { date: '2026-07-01', average: 1_005_000, volume: 2, highest: 1_005_000, lowest: 1_005_000 },
-  { date: '2026-07-05', average: 2_000, volume: 310, highest: 2_000, lowest: 2_000 },
-  { date: '2026-07-10', average: 2_000, volume: 2, highest: 2_000, lowest: 2_000 },
-  { date: '2026-07-15', average: 4_001, volume: 18, highest: 4_001, lowest: 4_001 },
-  { date: '2026-07-20', average: 4_004, volume: 348, highest: 4_004, lowest: 4_004 },
-  { date: '2026-07-24', average: 2_807, volume: 1_522, highest: 2_807, lowest: 2_807 },
+  { date: daysAgo(25), average: 1_005_000, volume: 2, highest: 1_005_000, lowest: 1_005_000 },
+  { date: daysAgo(21), average: 2_000, volume: 310, highest: 2_000, lowest: 2_000 },
+  { date: daysAgo(16), average: 2_000, volume: 2, highest: 2_000, lowest: 2_000 },
+  { date: daysAgo(11), average: 4_001, volume: 18, highest: 4_001, lowest: 4_001 },
+  { date: daysAgo(6), average: 4_004, volume: 348, highest: 4_004, lowest: 4_004 },
+  { date: daysAgo(2), average: 2_807, volume: 1_522, highest: 2_807, lowest: 2_807 },
 ]
 
 describe('robustVolumeWeightedAvgPrice', () => {
