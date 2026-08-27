@@ -117,6 +117,12 @@ export function formatAvgVolume(avgVolume: number): string {
   return formatNumber(avgVolume, 1)
 }
 
+/** Hub quote volume next to a price, e.g. `4,200.0/d`. */
+export function formatHubDailyVolume(volume: number): string {
+  if (!(volume > 0)) return '—'
+  return `${formatAvgVolume(volume)}/d`
+}
+
 export function formatQuantity(value: number): string {
   return formatNumber(value, 0)
 }

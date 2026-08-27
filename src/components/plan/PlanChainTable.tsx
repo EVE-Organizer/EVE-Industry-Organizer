@@ -181,6 +181,7 @@ interface PlanChainTableProps {
   planRoots?: PlanRootEntry[]
   skillSlots: number
   hubPricesByHub: Map<HubId, Map<number, number>>
+  hubVolumesByHub: Map<HubId, Map<number, number>>
   defaultBuyHub: HubId
   nodeOverrides: Record<number, PlanNodeOverride>
   onToggleMode?: (productTypeId: number) => void
@@ -631,12 +632,14 @@ function HaveQtyCell({
 function PriceCell({
   node,
   hubPricesByHub,
+  hubVolumesByHub,
   defaultBuyHub,
   nodeOverride,
   onSetBuyPriceSource,
 }: {
   node: PlanNode
   hubPricesByHub: Map<HubId, Map<number, number>>
+  hubVolumesByHub: Map<HubId, Map<number, number>>
   defaultBuyHub: HubId
   nodeOverride?: PlanNodeOverride
   onSetBuyPriceSource?: (productTypeId: number, source: PlanBuyPriceSource | null) => void
@@ -645,6 +648,7 @@ function PriceCell({
     <PlanBuyPriceCell
       node={node}
       hubPricesByHub={hubPricesByHub}
+      hubVolumesByHub={hubVolumesByHub}
       defaultBuyHub={defaultBuyHub}
       nodeOverride={nodeOverride}
       onSetBuyPriceSource={onSetBuyPriceSource}
@@ -666,6 +670,7 @@ function BuyTableRow({
   typeVolumes,
   groupHaulVolumeM3,
   hubPricesByHub,
+  hubVolumesByHub,
   defaultBuyHub,
   nodeOverrides,
 }: {
@@ -683,6 +688,7 @@ function BuyTableRow({
   typeVolumes: Map<number, number>
   groupHaulVolumeM3: Map<string, number>
   hubPricesByHub: Map<HubId, Map<number, number>>
+  hubVolumesByHub: Map<HubId, Map<number, number>>
   defaultBuyHub: HubId
   nodeOverrides: Record<number, PlanNodeOverride>
 }) {
@@ -787,6 +793,7 @@ function BuyTableRow({
           <PriceCell
             node={row.node}
             hubPricesByHub={hubPricesByHub}
+            hubVolumesByHub={hubVolumesByHub}
             defaultBuyHub={defaultBuyHub}
             nodeOverride={nodeOverrides[row.node.productTypeId]}
             onSetBuyPriceSource={onSetBuyPriceSource}
@@ -832,6 +839,7 @@ function BuyTableRow({
         <PriceCell
           node={row.node}
           hubPricesByHub={hubPricesByHub}
+          hubVolumesByHub={hubVolumesByHub}
           defaultBuyHub={defaultBuyHub}
           nodeOverride={nodeOverrides[row.node.productTypeId]}
           onSetBuyPriceSource={onSetBuyPriceSource}
@@ -858,6 +866,7 @@ function BuySection({
   showInventory,
   typeVolumes,
   hubPricesByHub,
+  hubVolumesByHub,
   defaultBuyHub,
   nodeOverrides,
 }: {
@@ -871,6 +880,7 @@ function BuySection({
   showInventory: boolean
   typeVolumes: Map<number, number>
   hubPricesByHub: Map<HubId, Map<number, number>>
+  hubVolumesByHub: Map<HubId, Map<number, number>>
   defaultBuyHub: HubId
   nodeOverrides: Record<number, PlanNodeOverride>
 }) {
@@ -1008,6 +1018,7 @@ function BuySection({
               typeVolumes={typeVolumes}
               groupHaulVolumeM3={groupHaulVolumeM3}
               hubPricesByHub={hubPricesByHub}
+              hubVolumesByHub={hubVolumesByHub}
               defaultBuyHub={defaultBuyHub}
               nodeOverrides={nodeOverrides}
             />
@@ -1039,6 +1050,7 @@ export function PlanChainTable({
   planRoots,
   skillSlots,
   hubPricesByHub,
+  hubVolumesByHub,
   defaultBuyHub,
   nodeOverrides,
   onToggleMode,
@@ -1096,6 +1108,7 @@ export function PlanChainTable({
           showInventory={showInventory}
           typeVolumes={typeVolumes}
           hubPricesByHub={hubPricesByHub}
+          hubVolumesByHub={hubVolumesByHub}
           defaultBuyHub={defaultBuyHub}
           nodeOverrides={nodeOverrides}
         />

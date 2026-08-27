@@ -31,8 +31,9 @@ import {
   buildBuyPriceMap,
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
-import { buildWindowPriceMap, resolveHubHaulRates } from '@/lib/ranking'
+import { buildHubWindowMaps, buildWindowPriceMap, resolveHubHaulRates } from '@/lib/ranking'
 import { mergePlanBuyPrices } from '@/lib/planBuyPrices'
+import { pickHubMaps, sanitizeBuyPriceMap } from '@/lib/hubPriceSanity'
 import type { PlanBuyPriceSource } from '@/lib/planBuyPrices'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/lib/planTreeLines'
@@ -264,25 +265,37 @@ export function PlanPage() {
   }, [typeMap])
   const buyHubId = activeSettings.primaryHub
   const sellHubId = activeSettings.sellHubId ?? buyHubId
-  const hubPricesByHub = useMemo(() => {
-    if (!data) return new Map<HubId, Map<number, number>>()
-    const window = activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow
-    const maps = new Map<HubId, Map<number, number>>()
-    for (const hub of HUBS) {
-      const hubMarket = getHubMarket(data.market, hub.id)
-      if (!hubMarket) continue
-      maps.set(
-        hub.id,
-        buildWindowPriceMap(hubMarket, window, buildPriceMap(hubMarket)),
-      )
+  const hubWindowMaps = useMemo(() => {
+    if (!data) {
+      return {
+        prices: new Map<HubId, Map<number, number>>(),
+        volumes: new Map<HubId, Map<number, number>>(),
+      }
     }
-    return maps
+    const window = activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow
+    return buildHubWindowMaps(
+      data.market,
+      window,
+      HUBS.map((hub) => hub.id),
+    )
   }, [data, activeSettings.priceWindow])
+  const hubPricesByHub = hubWindowMaps.prices
+  const hubVolumesByHub = hubWindowMaps.volumes
 
   const prices = useMemo(() => {
-    if (!activeTemplate) return hubPricesByHub.get(buyHubId) ?? new Map<number, number>()
-    return mergePlanBuyPrices(hubPricesByHub, activeTemplate.nodeOverrides, buyHubId)
-  }, [hubPricesByHub, activeTemplate, buyHubId])
+    const rawDefault = hubPricesByHub.get(buyHubId) ?? new Map<number, number>()
+    const buyVolumes = hubVolumesByHub.get(buyHubId) ?? new Map<number, number>()
+    const sanitizedDefault = sanitizeBuyPriceMap(
+      rawDefault,
+      buyVolumes,
+      pickHubMaps(hubPricesByHub),
+      pickHubMaps(hubVolumesByHub),
+    )
+    if (!activeTemplate) return sanitizedDefault
+    const mapsForMerge = new Map(hubPricesByHub)
+    mapsForMerge.set(buyHubId, sanitizedDefault)
+    return mergePlanBuyPrices(mapsForMerge, activeTemplate.nodeOverrides, buyHubId)
+  }, [hubPricesByHub, hubVolumesByHub, activeTemplate, buyHubId])
 
   const sellPrices = useMemo(() => {
     if (!data) return new Map<number, number>()
@@ -1177,6 +1190,7 @@ export function PlanPage() {
                 planRoots={activeTemplate.roots}
                 skillSlots={slots}
                 hubPricesByHub={hubPricesByHub}
+                hubVolumesByHub={hubVolumesByHub}
                 defaultBuyHub={buyHubId}
                 nodeOverrides={activeTemplate.nodeOverrides}
                 onToggleMode={isSharedView ? undefined : toggleMode}

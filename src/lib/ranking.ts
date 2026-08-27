@@ -38,6 +38,12 @@ import { skillLevel } from '@/lib/skillFields'
 import { tradingFeeRates } from '@/lib/tradingFees'
 import { WIDER_TIME_RANGES } from '@/lib/profit'
 import {
+  NPC_REFERENCE_HUBS,
+  referenceMedianFromMaps,
+  sanitizeBuyPriceMap,
+  sanitizeSellPrice,
+} from '@/lib/hubPriceSanity'
+import {
   buildPriceMap,
   buildBuyPriceMap,
   filterBlueprints,
@@ -267,6 +273,37 @@ function hasValidPrices(
     if ((materialWindowPrices.get(mat.typeId) ?? 0) <= 0) return false
   }
   return true
+}
+
+export function buildWindowVolumeMap(
+  hubMarket: HubMarketData,
+  window: TimeRange,
+): Map<number, number> {
+  const map = new Map<number, number>()
+  for (const [key, byWindow] of Object.entries(hubMarket.products)) {
+    const summary = pickHistoryWindow(byWindow, window, 'avgVolume')
+    if (summary?.avgVolume && summary.avgVolume > 0) map.set(Number(key), summary.avgVolume)
+  }
+  return map
+}
+
+export function buildHubWindowMaps(
+  market: MarketData,
+  window: TimeRange,
+  hubIds: readonly HubId[],
+): {
+  prices: Map<HubId, Map<number, number>>
+  volumes: Map<HubId, Map<number, number>>
+} {
+  const prices = new Map<HubId, Map<number, number>>()
+  const volumes = new Map<HubId, Map<number, number>>()
+  for (const hubId of hubIds) {
+    const hubMarket = getHubMarket(market, hubId)
+    if (!hubMarket) continue
+    prices.set(hubId, buildWindowPriceMap(hubMarket, window, buildPriceMap(hubMarket)))
+    volumes.set(hubId, buildWindowVolumeMap(hubMarket, window))
+  }
+  return { prices, volumes }
 }
 
 export function buildWindowPriceMap(
@@ -661,8 +698,23 @@ export function rankBlueprintsFromMarket(
   const reactionCostIndex =
     typeof resolvedReactionIndex === 'number' ? resolvedReactionIndex : resolvedCostIndex
 
-  const buySpotPrices = buildPriceMap(buyHubMarket)
-  const materialWindowPrices = buildWindowPriceMap(buyHubMarket, window, buySpotPrices)
+  const npcWindowMaps = buildHubWindowMaps(market, window, NPC_REFERENCE_HUBS)
+  const npcPrices = npcWindowMaps.prices
+  const npcVolumes = npcWindowMaps.volumes
+  const buyVolumes = buildWindowVolumeMap(buyHubMarket, window)
+  const rawBuySpotPrices = buildPriceMap(buyHubMarket)
+  const buySpotPrices = sanitizeBuyPriceMap(
+    rawBuySpotPrices,
+    buyVolumes,
+    npcPrices,
+    npcVolumes,
+  )
+  const materialWindowPrices = sanitizeBuyPriceMap(
+    buildWindowPriceMap(buyHubMarket, window, rawBuySpotPrices),
+    buyVolumes,
+    npcPrices,
+    npcVolumes,
+  )
   const productBuyPrices = buildBuyPriceMap(sellHubMarket)
   const sellSpotPrices = buildPriceMap(sellHubMarket)
   const buyMarketSystemId = buyHubMarket.marketSystemId
@@ -714,6 +766,12 @@ export function rankBlueprintsFromMarket(
       summary = { avgPrice: 0, avgVolume: 0, high: 0, low: 0 }
     }
     if (!summary) continue
+
+    const medianSell = referenceMedianFromMaps(bp.productTypeId, npcPrices)
+    summary = {
+      ...summary,
+      avgPrice: sanitizeSellPrice(summary.avgPrice, medianSell),
+    }
 
     const row = computeRow(
       bp,

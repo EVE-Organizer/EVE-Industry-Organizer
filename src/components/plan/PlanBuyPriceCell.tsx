@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { formatIsk } from '@/lib/profit'
+import { formatHubDailyVolume, formatIsk } from '@/lib/profit'
 import { hubDisplayName } from '@/lib/hubDisplay'
 import {
   PLAN_DEFAULT_BUY_HUB,
@@ -8,15 +8,30 @@ import {
 import type { HubId, PlanNode, PlanNodeOverride } from '@/types'
 import { HUBS } from '@/types'
 
+export function planHubQuoteRows(
+  typeId: number,
+  hubPricesByHub: Map<HubId, Map<number, number>>,
+  hubVolumesByHub: Map<HubId, Map<number, number>>,
+): { id: HubId; name: string; price: number; volume: number }[] {
+  return HUBS.map((hub) => ({
+    id: hub.id,
+    name: hubDisplayName(hub.id),
+    price: hubPricesByHub.get(hub.id)?.get(typeId) ?? 0,
+    volume: hubVolumesByHub.get(hub.id)?.get(typeId) ?? 0,
+  }))
+}
+
 export function PlanBuyPriceCell({
   node,
   hubPricesByHub,
+  hubVolumesByHub,
   defaultBuyHub = PLAN_DEFAULT_BUY_HUB,
   nodeOverride,
   onSetBuyPriceSource,
 }: {
   node: PlanNode
   hubPricesByHub: Map<HubId, Map<number, number>>
+  hubVolumesByHub?: Map<HubId, Map<number, number>>
   defaultBuyHub?: HubId
   nodeOverride?: PlanNodeOverride
   onSetBuyPriceSource?: (productTypeId: number, source: PlanBuyPriceSource | null) => void
@@ -38,12 +53,12 @@ export function PlanBuyPriceCell({
 
   const hubRows = useMemo(
     () =>
-      HUBS.map((hub) => ({
-        id: hub.id,
-        name: hubDisplayName(hub.id),
-        price: hubPricesByHub.get(hub.id)?.get(node.productTypeId) ?? 0,
-      })),
-    [hubPricesByHub, node.productTypeId],
+      planHubQuoteRows(
+        node.productTypeId,
+        hubPricesByHub,
+        hubVolumesByHub ?? new Map(),
+      ),
+    [hubPricesByHub, hubVolumesByHub, node.productTypeId],
   )
 
   useEffect(() => {
@@ -156,7 +171,7 @@ export function PlanBuyPriceCell({
           </span>
         </div>
         <ul
-          className="absolute right-0 top-full z-30 mt-1 w-44 overflow-hidden rounded-lg border border-eve-border bg-base-200 shadow-lg"
+          className="absolute right-0 top-full z-30 mt-1 min-w-56 w-max overflow-hidden rounded-lg border border-eve-border bg-base-200 shadow-lg"
           role="listbox"
         >
           {hubRows.map((row) => {
@@ -165,15 +180,18 @@ export function PlanBuyPriceCell({
               <li key={row.id} role="option" aria-selected={selected}>
                 <button
                   type="button"
-                  className={`flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-xs hover:bg-base-300/80 ${
+                  className={`flex w-full items-center justify-between gap-3 px-2.5 py-1.5 text-left text-xs hover:bg-base-300/80 ${
                     selected ? 'bg-primary/10 text-primary' : ''
                   }`}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => selectHub(row.id)}
                 >
-                  <span className="truncate">{row.name}</span>
-                  <span className="tabular-nums shrink-0 opacity-70">
-                    {row.price > 0 ? formatIsk(row.price) : '—'}
+                  <span className="truncate min-w-0">{row.name}</span>
+                  <span className="flex items-baseline gap-1.5 shrink-0 tabular-nums">
+                    <span className="opacity-70">
+                      {row.price > 0 ? formatIsk(row.price) : '—'}
+                    </span>
+                    <span className="opacity-40">{formatHubDailyVolume(row.volume)}</span>
                   </span>
                 </button>
               </li>
