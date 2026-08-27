@@ -85,6 +85,22 @@ export function patchManufacturingSystemFromList(
   )
 }
 
+/** Update cached build-system security when SDE loads or id already matches. */
+export function patchManufacturingSystemIfStale(
+  systems: { systemId: number; security: number }[] | undefined,
+  systemId: number,
+  current: Pick<GlobalSettings, 'manufacturingSystemId' | 'buildSystemSecurity'>,
+): Partial<GlobalSettings> | null {
+  if (systemId <= 0) return null
+  const expectedSecurity = securityForSystem(systems, systemId, Number.NaN)
+  if (!Number.isFinite(expectedSecurity)) return null
+  const currentSecurity = current.buildSystemSecurity ?? 1
+  const idMatches = current.manufacturingSystemId === systemId
+  const securityMatches = Math.abs(currentSecurity - expectedSecurity) < 1e-9
+  if (idMatches && securityMatches) return null
+  return patchManufacturingSystemFromList(systems, systemId, expectedSecurity)
+}
+
 /** Global settings scoped to a build system with correct rig security scaling. */
 export function settingsForManufacturingSystem(
   settings: GlobalSettings,

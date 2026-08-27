@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { buildManufacturingSettings, securityForSystem } from '@/lib/structureSettings'
+import {
+  buildManufacturingSettings,
+  patchManufacturingSystemIfStale,
+  securityForSystem,
+} from '@/lib/structureSettings'
 import { DEFAULT_SETTINGS } from '@/types'
 
 describe('structureSettings manufacturing scope', () => {
@@ -21,5 +25,34 @@ describe('structureSettings manufacturing scope', () => {
     expect(scoped.manufacturingSystemId).toBe(30002780)
     expect(scoped.buildSystemSecurity).toBe(-0.5)
     expect(scoped.batchSize).toBe(100)
+  })
+
+  it('patches security when build system id matches but security is stale highsec default', () => {
+    const patch = patchManufacturingSystemIfStale(systems, 30002780, {
+      manufacturingSystemId: 30002780,
+      buildSystemSecurity: 1,
+    })
+    expect(patch).toEqual({
+      manufacturingSystemId: 30002780,
+      buildSystemSecurity: -0.5,
+    })
+  })
+
+  it('skips patch when id and security already match SDE', () => {
+    expect(
+      patchManufacturingSystemIfStale(systems, 30002780, {
+        manufacturingSystemId: 30002780,
+        buildSystemSecurity: -0.5,
+      }),
+    ).toBeNull()
+  })
+
+  it('waits for SDE before patching security', () => {
+    expect(
+      patchManufacturingSystemIfStale(undefined, 30002780, {
+        manufacturingSystemId: 30002780,
+        buildSystemSecurity: 1,
+      }),
+    ).toBeNull()
   })
 })

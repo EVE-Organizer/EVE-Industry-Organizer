@@ -8,6 +8,7 @@ import { structureTypeFromTypeId } from '@/lib/structureTypeFromTypeId'
 import {
   patchStructureType,
   patchManufacturingSystemFromList,
+  patchManufacturingSystemIfStale,
   STRUCTURE_TYPE_IDS,
   STRUCTURE_TYPES,
   structureTypeLabel,
@@ -151,18 +152,18 @@ export function ManufacturingLocationPicker({
     settings.productionLocationId,
   ])
 
-  // Keep build system aligned when a saved character location loads asynchronously.
+  // Keep build system + security aligned when location or SDE loads asynchronously.
   useEffect(() => {
     if (settings.productionLocationId == null || isLoading || !selectedLocation) return
-    const systemId = selectedLocation.solarSystemId
-    if (systemId <= 0 || settings.manufacturingSystemId === systemId) return
-    onChange({
-      ...patchManufacturingSystemFromList(
-        systems,
-        systemId,
-        settings.buildSystemSecurity ?? 1,
-      ),
-    })
+    const patch = patchManufacturingSystemIfStale(
+      systems,
+      selectedLocation.solarSystemId,
+      {
+        manufacturingSystemId: settings.manufacturingSystemId,
+        buildSystemSecurity: settings.buildSystemSecurity,
+      },
+    )
+    if (patch) onChange(patch)
   }, [
     isLoading,
     onChange,
@@ -183,15 +184,13 @@ export function ManufacturingLocationPicker({
   }
 
   function selectLocation(location: ProductionLocation) {
-    const systemId = location.solarSystemId || settings.manufacturingSystemId
+    const systemId = location.solarSystemId
     onChange({
       productionLocationId: location.locationId,
       productionLocationKind: location.kind,
-      ...patchManufacturingSystemFromList(
-        systems,
-        systemId,
-        settings.buildSystemSecurity ?? 1,
-      ),
+      ...(systemId > 0
+        ? patchManufacturingSystemFromList(systems, systemId, settings.buildSystemSecurity ?? 1)
+        : {}),
       ...patchStructureType(locationStructureType(location)),
     })
     setOpen(false)
