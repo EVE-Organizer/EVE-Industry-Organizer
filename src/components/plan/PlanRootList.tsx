@@ -41,7 +41,9 @@ interface PlanRootListProps {
     productTypeId: number,
     patch: { runs?: number; productionDurationHours?: number },
   ) => void
+  onDuplicate?: (rootId: string) => void
   onRemove?: (rootId: string) => void
+  onReorder?: (fromRootId: string, toRootId: string) => void
 }
 
 function ChevronIcon({ open }: { open: boolean }) {
@@ -62,6 +64,25 @@ function RemoveIcon() {
     </svg>
   )
 }
+
+function DuplicateIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+      <path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" />
+      <path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" />
+    </svg>
+  )
+}
+
+function GripIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+      <path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm8-12a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0z" />
+    </svg>
+  )
+}
+
+const ROOT_DRAG_TYPE = 'text/plain'
 
 function RunsInput({
   runs,
@@ -238,9 +259,13 @@ export function PlanRootList({
   onOpenMeTe,
   readOnly = false,
   onChange,
+  onDuplicate,
   onRemove,
+  onReorder,
 }: PlanRootListProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
 
   const visibleRows = useMemo(
     () => rows.filter((row) => isExpandableRowVisible(row, collapsed)),
@@ -249,6 +274,7 @@ export function PlanRootList({
 
   const rootRows = useMemo(() => rows.filter((row) => row.isRoot), [rows])
   const rootCount = rootRows.length
+  const canReorder = !readOnly && !!onReorder && rootCount > 1
   const summary = useMemo(() => {
     const totalRuns = rootRows.reduce((sum, row) => sum + row.runs, 0)
     const totalHours = rootRows.reduce((sum, row) => sum + row.jobTimeHours, 0)
@@ -313,7 +339,7 @@ export function PlanRootList({
               </th>
               <th className="plan-jobs-table__money-col">Profit</th>
               <th className="plan-jobs-table__money-col plan-jobs-table__money-col--narrow">Margin</th>
-              <th className="w-8" aria-label="Actions" />
+              <th className="w-16" aria-label="Actions" />
             </tr>
           </thead>
           <tbody>
@@ -326,19 +352,78 @@ export function PlanRootList({
                   : null
               const rowKey = row.rootId ?? `job-${row.productTypeId}-${row.depth}-${rowIndex}`
               const profit = row.rootId ? profitByRootId?.get(row.rootId) : undefined
+              const isDropTarget = !!row.rootId && dragOverId === row.rootId && draggingId !== row.rootId
               return (
                 <tr
                   key={rowKey}
-                  className={`${planTableRowClass(isParentRow)}${row.kind === 'parent' ? ' cursor-pointer' : ''}`}
+                  className={`${planTableRowClass(isParentRow)}${row.kind === 'parent' ? ' cursor-pointer' : ''}${
+                    draggingId && row.rootId === draggingId ? ' opacity-50' : ''
+                  }${isDropTarget ? ' plan-jobs-table__drop-target' : ''}`}
                   {...rowToggle}
+                  onDragOver={
+                    canReorder && row.isRoot && row.rootId
+                      ? (e) => {
+                          e.preventDefault()
+                          e.dataTransfer.dropEffect = 'move'
+                          if (dragOverId !== row.rootId) setDragOverId(row.rootId!)
+                        }
+                      : undefined
+                  }
+                  onDragLeave={
+                    canReorder && row.isRoot && row.rootId
+                      ? (e) => {
+                          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                            setDragOverId((id) => (id === row.rootId ? null : id))
+                          }
+                        }
+                      : undefined
+                  }
+                  onDrop={
+                    canReorder && row.isRoot && row.rootId
+                      ? (e) => {
+                          e.preventDefault()
+                          const fromId = e.dataTransfer.getData(ROOT_DRAG_TYPE)
+                          setDraggingId(null)
+                          setDragOverId(null)
+                          if (fromId && fromId !== row.rootId) onReorder?.(fromId, row.rootId!)
+                        }
+                      : undefined
+                  }
                 >
                   <td className="align-top py-2 min-w-0">
-                    <ProductCell
-                      row={row}
-                      expanded={expanded}
-                      onOpenGraph={onOpenGraph}
-                      onOpenMeTe={onOpenMeTe}
-                    />
+                    <div className="flex items-start gap-0.5 min-w-0">
+                      {canReorder && row.isRoot && row.rootId ? (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          className="inline-flex items-center justify-center w-6 h-6 mt-1 shrink-0 cursor-grab active:cursor-grabbing opacity-40 hover:opacity-80"
+                          aria-label={`Reorder ${row.name}`}
+                          draggable
+                          onClick={stopRowToggle}
+                          onDragStart={(e) => {
+                            e.dataTransfer.effectAllowed = 'move'
+                            e.dataTransfer.setData(ROOT_DRAG_TYPE, row.rootId!)
+                            const tr = e.currentTarget.closest('tr')
+                            if (tr) e.dataTransfer.setDragImage(tr, 24, 16)
+                            setDraggingId(row.rootId!)
+                          }}
+                          onDragEnd={() => {
+                            setDraggingId(null)
+                            setDragOverId(null)
+                          }}
+                        >
+                          <GripIcon />
+                        </span>
+                      ) : null}
+                      <div className="min-w-0 flex-1">
+                        <ProductCell
+                          row={row}
+                          expanded={expanded}
+                          onOpenGraph={onOpenGraph}
+                          onOpenMeTe={onOpenMeTe}
+                        />
+                      </div>
+                    </div>
                   </td>
                   <td onClick={stopRowToggle}>
                     {readOnly || !onChange ? (
@@ -434,17 +519,33 @@ export function PlanRootList({
                     )}
                   </td>
                   <td onClick={stopRowToggle}>
-                    {row.isRoot && row.rootId && onRemove && !readOnly ? (
-                      <Tooltip text="Remove root" placement="left">
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-xs btn-square text-error"
-                          aria-label={`Remove ${row.name}`}
-                          onClick={() => onRemove(row.rootId!)}
-                        >
-                          <RemoveIcon />
-                        </button>
-                      </Tooltip>
+                    {row.isRoot && row.rootId && !readOnly ? (
+                      <div className="flex items-center justify-end gap-0.5">
+                        {onDuplicate ? (
+                          <Tooltip text="Duplicate job" placement="left">
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-xs btn-square"
+                              aria-label={`Duplicate ${row.name}`}
+                              onClick={() => onDuplicate(row.rootId!)}
+                            >
+                              <DuplicateIcon />
+                            </button>
+                          </Tooltip>
+                        ) : null}
+                        {onRemove ? (
+                          <Tooltip text="Remove root" placement="left">
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-xs btn-square text-error"
+                              aria-label={`Remove ${row.name}`}
+                              onClick={() => onRemove(row.rootId!)}
+                            >
+                              <RemoveIcon />
+                            </button>
+                          </Tooltip>
+                        ) : null}
+                      </div>
                     ) : null}
                   </td>
                 </tr>

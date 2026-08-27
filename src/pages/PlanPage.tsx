@@ -46,6 +46,7 @@ import {
   syncRootEntry,
 } from '@/lib/rootRunsDuration'
 import { createPlanRootId } from '@/services/sync/types'
+import { duplicatePlanRootAfter, movePlanRootById } from '@/lib/planRootOrder'
 import { computePlanProfitSummary, computeRootProfitBreakdown, computeRootSetupBreakdown } from '@/lib/planProfit'
 import { productionGraphRoute } from '@/lib/paths'
 import {
@@ -1123,10 +1124,32 @@ export function PlanPage() {
                         })
                       }
                 }
+                onDuplicate={
+                  isSharedView
+                    ? undefined
+                    : (rootId) => {
+                        const template = selectedPlanTemplateFromStore()
+                        if (!template) return
+                        updatePlanTemplate(template.id, {
+                          roots: duplicatePlanRootAfter(template.roots, rootId, createPlanRootId()),
+                        })
+                      }
+                }
                 onRemove={
                   isSharedView
                     ? undefined
                     : (rootId) => storeTemplate && removeRootFromPlanTemplate(storeTemplate.id, rootId)
+                }
+                onReorder={
+                  isSharedView
+                    ? undefined
+                    : (fromId, toId) => {
+                        const template = selectedPlanTemplateFromStore()
+                        if (!template) return
+                        updatePlanTemplate(template.id, {
+                          roots: movePlanRootById(template.roots, fromId, toId),
+                        })
+                      }
                 }
               />
             </div>

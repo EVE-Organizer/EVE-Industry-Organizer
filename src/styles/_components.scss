@@ -2604,6 +2604,10 @@
     @apply bg-base-300/25;
   }
 
+  tbody tr.plan-jobs-table__drop-target {
+    @apply bg-info/15;
+  }
+
   &__money-col {
     @apply min-w-[6.75rem] w-[6.75rem] max-w-none text-right whitespace-nowrap;
 
