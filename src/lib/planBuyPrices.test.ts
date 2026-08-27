@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  applyPlanBuyPriceSource,
   mergePlanBuyPrices,
   PLAN_DEFAULT_BUY_HUB,
+  planBuyPriceSourceForHub,
   resolvePlanBuyUnitPrice,
 } from '@/lib/planBuyPrices'
 import type { HubId } from '@/types'
@@ -95,5 +97,37 @@ describe('mergePlanBuyPrices', () => {
       35: { me: 10 },
     })
     expect(merged.get(35)).toBe(10)
+  })
+})
+
+describe('planBuyPriceSourceForHub', () => {
+  it('selects Jita as an override when the default hub is Vale', () => {
+    expect(planBuyPriceSourceForHub('jita', 'vale')).toEqual({ hub: 'jita' })
+  })
+
+  it('clears the override when picking the default hub', () => {
+    expect(planBuyPriceSourceForHub('vale', 'vale')).toBeNull()
+    expect(planBuyPriceSourceForHub('jita', 'jita')).toBeNull()
+  })
+})
+
+describe('applyPlanBuyPriceSource', () => {
+  it('stores Jita when Buy default is Vale', () => {
+    expect(applyPlanBuyPriceSource({ me: 10 }, { hub: 'jita' }, 'vale')).toEqual({
+      me: 10,
+      buyHub: 'jita',
+    })
+  })
+
+  it('does not treat Jita as "no hub" when default is another region', () => {
+    const afterVale = applyPlanBuyPriceSource({}, { hub: 'vale' }, 'jita')
+    expect(afterVale).toEqual({ buyHub: 'vale' })
+    expect(applyPlanBuyPriceSource(afterVale, { hub: 'jita' }, 'vale')).toEqual({ buyHub: 'jita' })
+  })
+
+  it('clears hub and custom price when source is null', () => {
+    expect(applyPlanBuyPriceSource({ buyHub: 'vale', buyPrice: 1000, me: 8 }, null, 'vale')).toEqual({
+      me: 8,
+    })
   })
 })

@@ -32,7 +32,7 @@ import {
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
 import { buildHubWindowMaps, buildWindowPriceMap, resolveHubHaulRates } from '@/lib/ranking'
-import { mergePlanBuyPrices } from '@/lib/planBuyPrices'
+import { mergePlanBuyPrices, applyPlanBuyPriceSource } from '@/lib/planBuyPrices'
 import { pickHubMaps, sanitizeBuyPriceMap } from '@/lib/hubPriceSanity'
 import type { PlanBuyPriceSource } from '@/lib/planBuyPrices'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
@@ -284,18 +284,12 @@ export function PlanPage() {
 
   const prices = useMemo(() => {
     const rawDefault = hubPricesByHub.get(buyHubId) ?? new Map<number, number>()
-    const buyVolumes = hubVolumesByHub.get(buyHubId) ?? new Map<number, number>()
-    const sanitizedDefault = sanitizeBuyPriceMap(
-      rawDefault,
-      buyVolumes,
-      pickHubMaps(hubPricesByHub),
-      pickHubMaps(hubVolumesByHub),
-    )
+    const sanitizedDefault = sanitizeBuyPriceMap(rawDefault, pickHubMaps(hubPricesByHub))
     if (!activeTemplate) return sanitizedDefault
     const mapsForMerge = new Map(hubPricesByHub)
     mapsForMerge.set(buyHubId, sanitizedDefault)
     return mergePlanBuyPrices(mapsForMerge, activeTemplate.nodeOverrides, buyHubId)
-  }, [hubPricesByHub, hubVolumesByHub, activeTemplate, buyHubId])
+  }, [hubPricesByHub, activeTemplate, buyHubId])
 
   const sellPrices = useMemo(() => {
     if (!data) return new Map<number, number>()
@@ -838,23 +832,7 @@ export function PlanPage() {
       if (!template) return
 
       const current = template.nodeOverrides[productTypeId] ?? {}
-      let nextEntry: PlanNodeOverride
-
-      if (source == null) {
-        const { buyHub: _buyHub, buyPrice: _buyPrice, ...rest } = current
-        nextEntry = rest
-      } else if ('hub' in source) {
-        const { buyPrice: _buyPrice, ...rest } = current
-        if (source.hub === 'jita') {
-          const { buyHub: _buyHub, ...withoutHub } = rest
-          nextEntry = withoutHub
-        } else {
-          nextEntry = { ...rest, buyHub: source.hub }
-        }
-      } else {
-        const { buyHub: _buyHub, ...rest } = current
-        nextEntry = { ...rest, buyPrice: source.price }
-      }
+      const nextEntry = applyPlanBuyPriceSource(current, source, buyHubId)
 
       const nextOverrides = { ...template.nodeOverrides }
       if (Object.keys(nextEntry).length === 0) {
@@ -867,7 +845,7 @@ export function PlanPage() {
         nodeOverrides: nextOverrides,
       })
     },
-    [isSharedView, updatePlanTemplate],
+    [isSharedView, updatePlanTemplate, buyHubId],
   )
 
   const graphBlueprint = useMemo(() => {

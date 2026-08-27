@@ -4,6 +4,36 @@ export const PLAN_DEFAULT_BUY_HUB: HubId = 'jita'
 
 export type PlanBuyPriceSource = { hub: HubId } | { price: number }
 
+export function planBuyPriceSourceForHub(
+  hubId: HubId,
+  defaultHub: HubId = PLAN_DEFAULT_BUY_HUB,
+): PlanBuyPriceSource | null {
+  return hubId === defaultHub ? null : { hub: hubId }
+}
+
+export function applyPlanBuyPriceSource(
+  current: PlanNodeOverride,
+  source: PlanBuyPriceSource | null,
+  defaultHub: HubId = PLAN_DEFAULT_BUY_HUB,
+): PlanNodeOverride {
+  if (source == null) {
+    const { buyHub: _buyHub, buyPrice: _buyPrice, ...rest } = current
+    return rest
+  }
+
+  if ('hub' in source) {
+    const { buyPrice: _buyPrice, ...rest } = current
+    if (source.hub === defaultHub) {
+      const { buyHub: _buyHub, ...withoutHub } = rest
+      return withoutHub
+    }
+    return { ...rest, buyHub: source.hub }
+  }
+
+  const { buyHub: _buyHub, ...rest } = current
+  return { ...rest, buyPrice: source.price }
+}
+
 export function resolvePlanBuyUnitPrice(
   typeId: number,
   hubPriceMaps: Map<HubId, Map<number, number>>,

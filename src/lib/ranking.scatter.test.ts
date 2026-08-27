@@ -1,7 +1,6 @@
 import { readFileSync } from 'fs'
 import { describe, expect, it } from 'vitest'
 import { rankBlueprintsFromMarket } from '@/lib/ranking'
-import { referenceMedianFromMaps } from '@/lib/hubPriceSanity'
 import { buildBlueprintRankingSettings } from '@/lib/structureSettings'
 import { buildTypeMap } from '@/services/data/sdeLoader'
 import { DEFAULT_SETTINGS, type BlueprintRegistry, type HubId, type MarketData, type RegionsData, type TimeRange, type TypeInfo } from '@/types'
@@ -79,20 +78,18 @@ describe('rankBlueprintsFromMarket scatter-cheap buy quotes', () => {
     )
   }
 
-  it('does not cost Tritanium at a 1 ISK Vale thin quote', () => {
-    const npcPrices = new Map<HubId, Map<number, number>>()
-    for (const hub of ['jita', 'amarr', 'dodixie', 'rens', 'hek'] as const) {
-      const avg = baseMarket.hubs[hub].products[String(TRITANIUM)]?.['1m']?.avgPrice ?? 0
-      npcPrices.set(hub, new Map([[TRITANIUM, avg]]))
-    }
-    const median = referenceMedianFromMaps(TRITANIUM, npcPrices)
-    expect(median).toBeGreaterThan(1)
+  it('does not cost Tritanium at a 1 ISK Vale quote', () => {
+    const jita =
+      baseMarket.hubs.jita.products[String(TRITANIUM)]?.['1m']?.avgPrice ??
+      baseMarket.hubs.jita.prices[String(TRITANIUM)] ??
+      0
+    expect(jita).toBeGreaterThan(1)
 
     const poisoned = cloneMarket(baseMarket)
-    setHubQuote(poisoned, 'vale', TRITANIUM, 0.01, 1)
+    setHubQuote(poisoned, 'vale', TRITANIUM, 0.01, 50_000)
 
     const floored = cloneMarket(baseMarket)
-    setHubQuote(floored, 'vale', TRITANIUM, median!, 50_000)
+    setHubQuote(floored, 'vale', TRITANIUM, jita, 50_000)
 
     const cheapRows = rank(poisoned)
     const fairRows = rank(floored)

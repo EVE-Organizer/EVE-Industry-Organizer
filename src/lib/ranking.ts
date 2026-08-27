@@ -39,7 +39,7 @@ import { tradingFeeRates } from '@/lib/tradingFees'
 import { WIDER_TIME_RANGES } from '@/lib/profit'
 import {
   NPC_REFERENCE_HUBS,
-  referenceMedianFromMaps,
+  referenceFallbackPrice,
   sanitizeBuyPriceMap,
   sanitizeSellPrice,
 } from '@/lib/hubPriceSanity'
@@ -698,22 +698,12 @@ export function rankBlueprintsFromMarket(
   const reactionCostIndex =
     typeof resolvedReactionIndex === 'number' ? resolvedReactionIndex : resolvedCostIndex
 
-  const npcWindowMaps = buildHubWindowMaps(market, window, NPC_REFERENCE_HUBS)
-  const npcPrices = npcWindowMaps.prices
-  const npcVolumes = npcWindowMaps.volumes
-  const buyVolumes = buildWindowVolumeMap(buyHubMarket, window)
+  const npcPrices = buildHubWindowMaps(market, window, NPC_REFERENCE_HUBS).prices
   const rawBuySpotPrices = buildPriceMap(buyHubMarket)
-  const buySpotPrices = sanitizeBuyPriceMap(
-    rawBuySpotPrices,
-    buyVolumes,
-    npcPrices,
-    npcVolumes,
-  )
+  const buySpotPrices = sanitizeBuyPriceMap(rawBuySpotPrices, npcPrices)
   const materialWindowPrices = sanitizeBuyPriceMap(
     buildWindowPriceMap(buyHubMarket, window, rawBuySpotPrices),
-    buyVolumes,
     npcPrices,
-    npcVolumes,
   )
   const productBuyPrices = buildBuyPriceMap(sellHubMarket)
   const sellSpotPrices = buildPriceMap(sellHubMarket)
@@ -767,10 +757,12 @@ export function rankBlueprintsFromMarket(
     }
     if (!summary) continue
 
-    const medianSell = referenceMedianFromMaps(bp.productTypeId, npcPrices)
     summary = {
       ...summary,
-      avgPrice: sanitizeSellPrice(summary.avgPrice, medianSell),
+      avgPrice: sanitizeSellPrice(
+        summary.avgPrice,
+        referenceFallbackPrice(bp.productTypeId, npcPrices),
+      ),
     }
 
     const row = computeRow(

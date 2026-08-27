@@ -29,25 +29,21 @@ describe('referenceMedian', () => {
 })
 
 describe('sanitizeBuyPrice', () => {
-  it('floors scatter-cheap thin quotes to the NPC median', () => {
-    expect(sanitizeBuyPrice(1000, 15900, 2, 4000)).toBe(15900)
+  it('falls back to Jita when the hub quote is scatter-cheap', () => {
+    expect(sanitizeBuyPrice(1000, 13300)).toBe(13300)
   })
 
-  it('keeps a modest discount when volume is comparable', () => {
-    expect(sanitizeBuyPrice(12000, 13300, 3500, 4000)).toBe(12000)
+  it('keeps a modest discount vs Jita', () => {
+    expect(sanitizeBuyPrice(12000, 13300)).toBe(12000)
   })
 
-  it('keeps a cheap quote when volume is not thin', () => {
-    expect(sanitizeBuyPrice(1000, 15900, 3000, 4000)).toBe(1000)
-  })
-
-  it('does not invent a floor without a reference median', () => {
-    expect(sanitizeBuyPrice(1000, null, 1, null)).toBe(1000)
+  it('does not invent a floor without a Jita price', () => {
+    expect(sanitizeBuyPrice(1000, 0)).toBe(1000)
   })
 })
 
 describe('sanitizeSellPrice', () => {
-  it('caps scatter-expensive sell quotes', () => {
+  it('caps scatter-expensive sell quotes to Jita', () => {
     expect(sanitizeSellPrice(200_000, 15000)).toBe(15000)
   })
 
@@ -64,19 +60,11 @@ describe('sanitizeBuyPriceMap', () => {
     rens: { 34: 18000 },
     hek: { 34: 23000 },
   })
-  const npcVolumes = hubMap({
-    jita: { 34: 5000 },
-    amarr: { 34: 4000 },
-    dodixie: { 34: 4200 },
-    rens: { 34: 3800 },
-    hek: { 34: 3500 },
-  })
 
-  it('replaces Vale 1K thin quotes with the NPC median', () => {
+  it('replaces Vale 1K quotes with Jita', () => {
     const valePrices = new Map([[34, 1000]])
-    const valeVolumes = new Map([[34, 2]])
-    const sanitized = sanitizeBuyPriceMap(valePrices, valeVolumes, npcPrices, npcVolumes)
-    expect(sanitized.get(34)).toBe(15900)
+    const sanitized = sanitizeBuyPriceMap(valePrices, npcPrices)
+    expect(sanitized.get(34)).toBe(13300)
   })
 })
 

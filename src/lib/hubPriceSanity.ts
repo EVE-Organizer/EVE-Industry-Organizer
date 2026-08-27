@@ -9,7 +9,7 @@ export const NPC_REFERENCE_HUBS: readonly HubId[] = [
   'hek',
 ]
 
-/** Hub quote is scatter-cheap when it is below reference median / this ratio. */
+/** Hub quote is scatter-cheap when it is below Jita / this ratio. */
 export const SCATTER_PRICE_RATIO = 4
 
 /** Hub volume is thin when it is below reference median / this ratio. */
@@ -37,43 +37,53 @@ export function referenceMedianFromMaps(
   return referenceMedian(NPC_REFERENCE_HUBS.map((hubId) => mapsByHub.get(hubId)?.get(typeId) ?? 0))
 }
 
+export function jitaPriceFromMaps(
+  typeId: number,
+  npcPrices: Map<HubId, Map<number, number>>,
+): number {
+  return npcPrices.get('jita')?.get(typeId) ?? 0
+}
+
+/** Prefer Jita; NPC median only when Jita has no quote. */
+export function referenceFallbackPrice(
+  typeId: number,
+  npcPrices: Map<HubId, Map<number, number>>,
+): number {
+  const jita = jitaPriceFromMaps(typeId, npcPrices)
+  if (jita > 0) return jita
+  return referenceMedianFromMaps(typeId, npcPrices) ?? 0
+}
+
 export function isThinVolume(hubVolume: number, medianVolume: number | null): boolean {
   if (!(hubVolume > 0)) return true
   if (medianVolume == null || medianVolume <= 0) return false
   return hubVolume < medianVolume / SCATTER_VOLUME_RATIO
 }
 
-/** Floor scatter-cheap buy quotes with thin volume to the NPC median. */
-export function sanitizeBuyPrice(
-  hubPrice: number,
-  medianPrice: number | null,
-  hubVolume: number,
-  medianVolume: number | null,
-): number {
-  if (!(hubPrice > 0) || medianPrice == null || medianPrice <= 0) return hubPrice
-  const tooCheap = hubPrice < medianPrice / SCATTER_PRICE_RATIO
-  if (tooCheap && isThinVolume(hubVolume, medianVolume)) return medianPrice
+function isScatterCheap(hubPrice: number, fallback: number): boolean {
+  return fallback > 0 && hubPrice > 0 && hubPrice < fallback / SCATTER_PRICE_RATIO
+}
+
+/** Replace scatter-cheap buy quotes with Jita (or NPC median if Jita is missing). */
+export function sanitizeBuyPrice(hubPrice: number, fallbackPrice: number): number {
+  if (isScatterCheap(hubPrice, fallbackPrice)) return fallbackPrice
   return hubPrice
 }
 
-/** Cap scatter-expensive sell quotes to the NPC median. */
-export function sanitizeSellPrice(hubPrice: number, medianPrice: number | null): number {
-  if (!(hubPrice > 0) || medianPrice == null || medianPrice <= 0) return hubPrice
-  if (hubPrice > medianPrice * SCATTER_PRICE_RATIO) return medianPrice
+/** Cap scatter-expensive sell quotes to Jita. */
+export function sanitizeSellPrice(hubPrice: number, fallbackPrice: number): number {
+  if (!(hubPrice > 0) || !(fallbackPrice > 0)) return hubPrice
+  if (hubPrice > fallbackPrice * SCATTER_PRICE_RATIO) return fallbackPrice
   return hubPrice
 }
 
 export function sanitizeBuyPriceMap(
   hubPrices: Map<number, number>,
-  hubVolumes: Map<number, number>,
   npcPrices: Map<HubId, Map<number, number>>,
-  npcVolumes: Map<HubId, Map<number, number>>,
 ): Map<number, number> {
   const out = new Map(hubPrices)
   for (const [typeId, price] of hubPrices) {
-    const medianPrice = referenceMedianFromMaps(typeId, npcPrices)
-    const medianVolume = referenceMedianFromMaps(typeId, npcVolumes)
-    const next = sanitizeBuyPrice(price, medianPrice, hubVolumes.get(typeId) ?? 0, medianVolume)
+    const next = sanitizeBuyPrice(price, referenceFallbackPrice(typeId, npcPrices))
     if (next !== price) out.set(typeId, next)
   }
   return out

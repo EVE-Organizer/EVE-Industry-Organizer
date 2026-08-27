@@ -3,6 +3,7 @@ import { formatHubDailyVolume, formatIsk } from '@/lib/profit'
 import { hubDisplayName } from '@/lib/hubDisplay'
 import {
   PLAN_DEFAULT_BUY_HUB,
+  planBuyPriceSourceForHub,
   type PlanBuyPriceSource,
 } from '@/lib/planBuyPrices'
 import type { HubId, PlanNode, PlanNodeOverride } from '@/types'
@@ -81,7 +82,6 @@ export function PlanBuyPriceCell({
 
   function closeEditor() {
     setOpen(false)
-    committedRef.current = false
   }
 
   function commitCustom(fromBlur = false) {
@@ -117,11 +117,7 @@ export function PlanBuyPriceCell({
   function selectHub(hubId: HubId) {
     if (!onSetBuyPriceSource) return
     committedRef.current = true
-    if (hubId === defaultBuyHub) {
-      onSetBuyPriceSource(node.productTypeId, null)
-    } else {
-      onSetBuyPriceSource(node.productTypeId, { hub: hubId })
-    }
+    onSetBuyPriceSource(node.productTypeId, planBuyPriceSourceForHub(hubId, defaultBuyHub))
     closeEditor()
   }
 
