@@ -1,4 +1,4 @@
-import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry, StructureType, MiningBoosterHullId, MiningBurstTech, MiningCrystalId, MiningForemanBurstId, MiningSurveyChipsetId, MiningUpgradeId } from '@/types'
+import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry, StructureType, MiningBoosterHullId, MiningBurstTech, MiningCrystalId, MiningForemanBurstId, MiningReprocessFacility, MiningSurveyChipsetId, MiningUpgradeId, ProductionLocationKind } from '@/types'
 import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS, STRUCTURE_HULL_PRESETS, type MiningBuffId, type MiningBoostSpace, type MiningShipId } from '@/types'
 import {
   DEFAULT_MINING_SHIP_ID,
@@ -17,7 +17,8 @@ import {
   normalizeMiningUpgradeCount,
   normalizeMiningSurveyChipset,
 } from '@/lib/miningShipPresets'
-import { SKILL_FIELDS, enforceSkillPrerequisites } from '@/lib/skillFields'
+import { normalizeMiningReprocessFacility } from '@/lib/miningReprocess'
+import { SKILL_FIELDS } from '@/lib/skillFields'
 import {
   migrateManufacturingRigs,
   normalizeReactionFacility,
@@ -65,12 +66,17 @@ export function normalizeSkillLevels(
     'astrogeology',
     'iceHarvesting',
     'gasCloudHarvesting',
+    'miningBarge',
+    'exhumers',
     'industrialCommandShips',
     'capitalIndustrialShips',
+    'miningFrigate',
+    'expeditionFrigates',
+    'miningDirector',
   ] as const) {
     if (skills?.[key] == null) merged[key] = DEFAULT_SKILLS[key]
   }
-  return enforceSkillPrerequisites(merged)
+  return merged
 }
 
 /** Migrate region-level buildSystemId to hub default manufacturingSystemId. */
@@ -250,6 +256,12 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
             DEFAULT_SETTINGS.miningSurveyChipset,
         ),
         miningCrystal: normalizeMiningCrystal(rest.miningCrystal as MiningCrystalId | undefined),
+        miningReprocessFacility: normalizeMiningReprocessFacility(
+          rest.miningReprocessFacility as MiningReprocessFacility | undefined,
+        ),
+        miningReprocessLocationId: rest.miningReprocessLocationId ?? null,
+        miningReprocessLocationKind:
+          (rest.miningReprocessLocationKind as ProductionLocationKind | undefined) ?? null,
         miningBuffIds: normalizeMiningBuffIds(
           explicitHull !== undefined ? (rawBuffIds ?? []) : migrated.buffIds,
           boostSpace,

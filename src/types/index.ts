@@ -421,6 +421,11 @@ export interface GlobalSettings {
   miningSurveyChipset?: MiningSurveyChipsetId
   /** Strip miner / ice harvester crystals. */
   miningCrystal?: MiningCrystalId
+  /** Mining ISK/hr: Upwell / NPC refine facility, rig, and security. */
+  miningReprocessFacility?: MiningReprocessFacility
+  /** Selected station or structure used for mining reprocess yield. */
+  miningReprocessLocationId?: number | null
+  miningReprocessLocationKind?: ProductionLocationKind | null
 }
 
 /** Global settings plus per-job run count for manufacturing cost and profit math. */
@@ -462,6 +467,29 @@ export interface SkillLevels {
   industrialCommandShips: number
   /** Capital Industrial Ships: Rorqual foreman burst strength. */
   capitalIndustrialShips: number
+  /** Mining Frigate: Venture and Prospect hull bonuses. */
+  miningFrigate: number
+  /** Expedition Frigates: Prospect and Endurance hull bonuses. */
+  expeditionFrigates: number
+  /** Mining Director: foreman burst strength. */
+  miningDirector: number
+  /** Reprocessing: +3% NPC station yield per level. */
+  reprocessing: number
+  /** Reprocessing Efficiency: +2% yield per level. */
+  reprocessingEfficiency: number
+  simpleOreProcessing: number
+  coherentOreProcessing: number
+  variegatedOreProcessing: number
+  complexOreProcessing: number
+  mercoxitOreProcessing: number
+  abyssalOreProcessing: number
+  erraticOreProcessing: number
+  iceProcessing: number
+  ubiquitousMoonOreProcessing: number
+  commonMoonOreProcessing: number
+  uncommonMoonOreProcessing: number
+  rareMoonOreProcessing: number
+  exceptionalMoonOreProcessing: number
   [key: string]: number
 }
 
@@ -866,6 +894,24 @@ export const DEFAULT_SKILLS: SkillLevels = {
   exhumers: 4,
   industrialCommandShips: 4,
   capitalIndustrialShips: 4,
+  miningFrigate: 4,
+  expeditionFrigates: 4,
+  miningDirector: 4,
+  reprocessing: 0,
+  reprocessingEfficiency: 0,
+  simpleOreProcessing: 0,
+  coherentOreProcessing: 0,
+  variegatedOreProcessing: 0,
+  complexOreProcessing: 0,
+  mercoxitOreProcessing: 0,
+  abyssalOreProcessing: 0,
+  erraticOreProcessing: 0,
+  iceProcessing: 0,
+  ubiquitousMoonOreProcessing: 0,
+  commonMoonOreProcessing: 0,
+  uncommonMoonOreProcessing: 0,
+  rareMoonOreProcessing: 0,
+  exceptionalMoonOreProcessing: 0,
 }
 
 /** Untrained skill levels used when importing from ESI or before sync completes. */
@@ -889,6 +935,24 @@ export const ZERO_SKILLS: SkillLevels = {
   exhumers: 0,
   industrialCommandShips: 0,
   capitalIndustrialShips: 0,
+  miningFrigate: 0,
+  expeditionFrigates: 0,
+  miningDirector: 0,
+  reprocessing: 0,
+  reprocessingEfficiency: 0,
+  simpleOreProcessing: 0,
+  coherentOreProcessing: 0,
+  variegatedOreProcessing: 0,
+  complexOreProcessing: 0,
+  mercoxitOreProcessing: 0,
+  abyssalOreProcessing: 0,
+  erraticOreProcessing: 0,
+  iceProcessing: 0,
+  ubiquitousMoonOreProcessing: 0,
+  commonMoonOreProcessing: 0,
+  uncommonMoonOreProcessing: 0,
+  rareMoonOreProcessing: 0,
+  exceptionalMoonOreProcessing: 0,
 }
 
 export const DEFAULT_SETTINGS: GlobalSettings = {
@@ -929,6 +993,9 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   miningUpgradeCount: 3,
   miningSurveyChipset: 'msc2',
   miningCrystal: 'none',
+  miningReprocessFacility: { hull: 'npc', rig: 'none', space: 'highsec' },
+  miningReprocessLocationId: null,
+  miningReprocessLocationKind: null,
 }
 
 /** T2 invented blueprint copy base efficiency without a decryptor. */
@@ -1038,6 +1105,23 @@ export const MINERAL_TYPE_IDS: Record<keyof MineralStock, number> = {
 export type MiningSubtype = 'ore' | 'moon' | 'ice' | 'gas'
 export type MiningSpaceClass = 'highsec' | 'lowsec' | 'nullsec' | 'wormhole'
 
+/** Where ore/ice/moon is refined for Mining ISK/hr. */
+export type MiningReprocessHull = 'npc' | 'upwell' | 'athanor' | 'tatara'
+export type MiningReprocessRig = 'none' | 't1' | 't2'
+export type MiningReprocessSpace = 'highsec' | 'lowsec' | 'nullsec'
+
+export interface MiningReprocessFacility {
+  hull: MiningReprocessHull
+  rig: MiningReprocessRig
+  space: MiningReprocessSpace
+}
+
+export const DEFAULT_MINING_REPROCESS_FACILITY: MiningReprocessFacility = {
+  hull: 'npc',
+  rig: 'none',
+  space: 'highsec',
+}
+
 export type MiningShipId =
   | 'retriever'
   | 'covetor'
@@ -1062,7 +1146,6 @@ export interface MiningFleetLine {
   upgradeCount?: number
   surveyChipset?: MiningSurveyChipsetId
   buffIds?: MiningBuffId[]
-  skills?: Partial<SkillLevels>
 }
 
 export type MiningBuffId =
@@ -1157,5 +1240,7 @@ export interface MiningRankedRow {
   volDayCompressed?: number
   volDayMinerals?: number
   volDayFocus?: number
+  /** Effective reprocess yield for this ore (NPC base × skills). */
+  reprocessYield: number
   reprocessLines: MiningReprocessLine[]
 }

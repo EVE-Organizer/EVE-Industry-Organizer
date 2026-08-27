@@ -36,8 +36,31 @@ const MINING_KEYS: SkillFieldDef['key'][] = [
   'astrogeology',
   'iceHarvesting',
   'gasCloudHarvesting',
+  'miningBarge',
+  'exhumers',
+  'miningFrigate',
+  'expeditionFrigates',
+  'miningDirector',
   'industrialCommandShips',
   'capitalIndustrialShips',
+]
+
+const REPROCESSING_KEYS: SkillFieldDef['key'][] = [
+  'reprocessing',
+  'reprocessingEfficiency',
+  'simpleOreProcessing',
+  'coherentOreProcessing',
+  'variegatedOreProcessing',
+  'complexOreProcessing',
+  'mercoxitOreProcessing',
+  'abyssalOreProcessing',
+  'erraticOreProcessing',
+  'iceProcessing',
+  'ubiquitousMoonOreProcessing',
+  'commonMoonOreProcessing',
+  'uncommonMoonOreProcessing',
+  'rareMoonOreProcessing',
+  'exceptionalMoonOreProcessing',
 ]
 
 const GROUPS: { title: string; keys: SkillFieldDef['key'][] }[] = [
@@ -45,6 +68,7 @@ const GROUPS: { title: string; keys: SkillFieldDef['key'][] }[] = [
   { title: 'Science', keys: SCIENCE_KEYS },
   { title: 'Trade', keys: MARKET_KEYS },
   { title: 'Mining', keys: MINING_KEYS },
+  { title: 'Reprocessing', keys: REPROCESSING_KEYS },
 ]
 
 interface SkillsEditorPanelProps {

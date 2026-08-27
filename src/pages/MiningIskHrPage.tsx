@@ -29,6 +29,11 @@ import {
   type MiningIphFocusPath,
 } from '@/lib/miningIph'
 import {
+  formatReprocessYieldStatus,
+  reprocessSkillGroupsForSubtype,
+  reprocessStructureBase,
+} from '@/lib/miningReprocess'
+import {
   inferMiningBoostSpace,
   normalizeMiningBoostSpace,
   normalizeMiningBurstTech,
@@ -60,8 +65,10 @@ import { MiningSpaceBadges, MiningSpaceDot } from '@/components/MiningSpaceBadge
 import { CopyNameButton } from '@/components/CopyNameButton'
 import { Tooltip } from '@/components/Tooltip'
 import { MiningSetupFilterSection } from '@/components/MiningSetupFilterSection'
+import { CollapsibleMiningSkills } from '@/components/MiningSkillSliders'
 import { FilterSection } from '@/components/EconomicsFilterSection'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
+import { MiningReprocessFacilityControls } from '@/components/MiningReprocessFacilityControls'
 
 const TIME_WINDOWS: TimeRange[] = ['1d', '1w', '1m', '1y', 'all']
 
@@ -301,6 +308,7 @@ export function MiningIskHrPage() {
   const settings = useAppStore((s) => s.userData.settings)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const persistActiveSkillsFromSettings = useAuthStore((s) => s.persistActiveSkillsFromSettings)
+  const character = useAuthStore((s) => s.character)
   const { data: sde, isLoading: sdeLoading } = useSdeData()
   const { data: mining, isLoading: miningLoading, error: miningError } = useMiningData()
 
@@ -464,7 +472,8 @@ export function MiningIskHrPage() {
       window: priceWindow,
       priceMethod: settings.priceMethod,
       sellPrices: windowSell,
-      reprocessYield: mining.defaults.reprocessYield,
+      skills: settings.skills,
+      reprocessYield: reprocessStructureBase(settings.miningReprocessFacility),
       m3PerHr,
       m3PerHrForItem: (item) =>
         resolveUserMiningM3PerHrForOre(
@@ -490,6 +499,8 @@ export function MiningIskHrPage() {
     focusTypeId,
     priceWindow,
     settings.priceMethod,
+    settings.skills,
+    settings.miningReprocessFacility,
     m3PerHr,
     miningFleet,
     miningBuffIds,
@@ -516,7 +527,11 @@ export function MiningIskHrPage() {
   const focusName =
     focusTypeId != null ? focusOptions.find((o) => o.typeId === focusTypeId)?.name ?? null : null
 
-  const reprocessYield = mining?.defaults.reprocessYield ?? 0.5
+  const reprocessSkillGroups = reprocessSkillGroupsForSubtype(subtype)
+  const reprocessYieldStatus = useMemo(
+    () => formatReprocessYieldStatus(subtype, settings.skills, settings.miningReprocessFacility),
+    [subtype, settings.skills, settings.miningReprocessFacility],
+  )
   const volLabel = miningVolumeLabel(priceWindow)
 
   const subtitleParts = [
@@ -524,7 +539,9 @@ export function MiningIskHrPage() {
     hubName,
     settings.priceMethod === 'buy_orders' ? 'buy orders' : 'sell orders',
     `window ${priceWindow}`,
-    `${Math.round(reprocessYield * 100)}% reprocess · ${m3PerHr.toLocaleString()} m³/hr`,
+    subtype === 'gas'
+      ? `${m3PerHr.toLocaleString()} m³/hr`
+      : `${reprocessYieldStatus ?? '50% refine'} · ${m3PerHr.toLocaleString()} m³/hr`,
   ]
 
   function toggleFound(space: MiningSpaceClass) {
@@ -795,6 +812,27 @@ export function MiningIskHrPage() {
                   ))}
                 </div>
               </div>
+              <MiningReprocessFacilityControls
+                settings={settings}
+                subtype={subtype}
+                systems={sde?.systems}
+                onChange={(patch) => startTransition(() => updateSettings(patch))}
+              />
+              {reprocessSkillGroups.length > 0 ? (
+                <div className="w-full min-w-0">
+                  <CollapsibleMiningSkills
+                    className="mining-filters__skill-fit-details--inline mt-3"
+                    summaryLabel="Reprocess"
+                    summaryStatus={reprocessYieldStatus}
+                    summaryTooltip="NPC station 50% base yield, plus Reprocessing, Efficiency, and group processing skills. Table rows use the matching group skill per ore."
+                    skills={settings.skills}
+                    trainedSkills={character?.trainedSkills}
+                    groups={reprocessSkillGroups}
+                    layout="grid-4"
+                    onSkillsChange={onMiningSkillsChange}
+                  />
+                </div>
+              ) : null}
             </FilterSection>
           ) : null}
 
@@ -805,6 +843,7 @@ export function MiningIskHrPage() {
             boostSpace={miningBoostSpace}
             yieldCtx={yieldCtx}
             skills={settings.skills}
+            trainedSkills={character?.trainedSkills}
             onFleetChange={onMiningFleetChange}
             onBuffToggle={onMiningBuffToggle}
             onYieldChange={onMiningYieldChange}
@@ -936,7 +975,7 @@ export function MiningIskHrPage() {
         row={breakdownRow}
         initialFocusPath={breakdown?.focusPath ?? 'compressed'}
         m3PerHr={m3PerHr}
-        reprocessYield={reprocessYield}
+        reprocessYield={breakdownRow?.reprocessYield ?? mining?.defaults.reprocessYield ?? 0.5}
         focusTypeId={focusTypeId}
         window={priceWindow}
         priceMethod={settings.priceMethod}

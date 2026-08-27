@@ -221,6 +221,26 @@ describe('miningShipPresets', () => {
     expect(miningUpgradeMultiplier('ice', ship, 'mlu2', 3)).toBeGreaterThan(1.2)
   })
 
+  it('scales gas from Gas Cloud Harvesting', () => {
+    expect(miningSkillYieldMultiplier('gas', { gasCloudHarvesting: 4 })).toBe(1)
+    expect(miningSkillYieldMultiplier('gas', { gasCloudHarvesting: 5 })).toBeGreaterThan(1)
+  })
+
+  it('applies frigate hull skill bonuses', () => {
+    const venture = getMiningShip('venture')
+    expect(miningHullSkillYieldMultiplier('ore', venture, { miningFrigate: 4 })).toBe(1)
+    expect(miningHullSkillYieldMultiplier('ore', venture, { miningFrigate: 5 })).toBeGreaterThan(1)
+    const prospect = getMiningShip('prospect')
+    expect(
+      miningHullSkillYieldMultiplier('ore', prospect, { miningFrigate: 5, expeditionFrigates: 5 }),
+    ).toBeGreaterThan(1)
+    const endurance = getMiningShip('endurance')
+    expect(miningHullSkillYieldMultiplier('ice', endurance, { expeditionFrigates: 4 })).toBe(1)
+    expect(
+      miningHullSkillYieldMultiplier('ice', endurance, { expeditionFrigates: 5 }),
+    ).toBeGreaterThan(1)
+  })
+
   it('scales ore yield from baked skill IV', () => {
     expect(miningSkillYieldMultiplier('ore', { mining: 4, astrogeology: 4 })).toBe(1)
     expect(miningSkillYieldMultiplier('ore', { mining: 5, astrogeology: 5 })).toBeGreaterThan(1)

@@ -825,7 +825,12 @@ export function miningSkillYieldMultiplier(
     const astro = 1 + 0.05 * skillOrBaked(skills, 'astrogeology')
     return (mining * astro) / (baked * baked)
   }
-  if (subtype === 'gas') return 1
+  if (subtype === 'gas') {
+    const level = skillOrBaked(skills, 'gasCloudHarvesting')
+    const atLevel = 1 / (1 - 0.05 * level)
+    const atBaked = 1 / (1 - 0.05 * BAKED_MINING_SKILL_LEVEL)
+    return atLevel / atBaked
+  }
   const level = skillOrBaked(skills, 'iceHarvesting')
   const atLevel = 1 / (1 - 0.05 * level)
   const atBaked = 1 / (1 - 0.05 * BAKED_MINING_SKILL_LEVEL)
@@ -860,26 +865,63 @@ function hullSkillRateAtLevels(
   return 1
 }
 
-/** Mining Barge and Exhumers hull bonuses relative to the skill-IV rates in the hull table. */
+/** Mining Barge, Exhumers, and frigate hull bonuses relative to skill-IV hull tables. */
 export function miningHullSkillYieldMultiplier(
   subtype: MiningSubtype,
   ship: MiningShipPreset,
   skills: Partial<SkillLevels> | undefined,
 ): number {
-  if (ship.tier !== 'barge' && ship.tier !== 'exhumer') return 1
-  const atSelectedLevels = hullSkillRateAtLevels(
-    subtype,
-    ship,
-    skillOrBaked(skills, 'miningBarge'),
-    ship.tier === 'exhumer' ? skillOrBaked(skills, 'exhumers') : 0,
-  )
-  const atBakedLevels = hullSkillRateAtLevels(
-    subtype,
-    ship,
-    BAKED_MINING_SKILL_LEVEL,
-    ship.tier === 'exhumer' ? BAKED_MINING_SKILL_LEVEL : 0,
-  )
-  return atSelectedLevels / atBakedLevels
+  if (ship.tier === 'barge' || ship.tier === 'exhumer') {
+    const atSelectedLevels = hullSkillRateAtLevels(
+      subtype,
+      ship,
+      skillOrBaked(skills, 'miningBarge'),
+      ship.tier === 'exhumer' ? skillOrBaked(skills, 'exhumers') : 0,
+    )
+    const atBakedLevels = hullSkillRateAtLevels(
+      subtype,
+      ship,
+      BAKED_MINING_SKILL_LEVEL,
+      ship.tier === 'exhumer' ? BAKED_MINING_SKILL_LEVEL : 0,
+    )
+    return atSelectedLevels / atBakedLevels
+  }
+
+  const miningFrigate = skillOrBaked(skills, 'miningFrigate')
+  const expeditionFrigates = skillOrBaked(skills, 'expeditionFrigates')
+  const bakedFrigate = 1 + 0.05 * BAKED_MINING_SKILL_LEVEL
+
+  if (ship.tier === 'frigate') {
+    if (subtype === 'ore' || subtype === 'moon') {
+      const atSelected = 2 * (1 + 0.05 * miningFrigate)
+      const atBaked = 2 * bakedFrigate
+      return atSelected / atBaked
+    }
+    if (subtype === 'gas') {
+      const atSelected = 2 * (1 + 0.05 * miningFrigate)
+      const atBaked = 2 * bakedFrigate
+      return atSelected / atBaked
+    }
+  }
+
+  if (ship.tier === 'expedition') {
+    if (ship.id === 'prospect') {
+      if (subtype === 'ore' || subtype === 'moon' || subtype === 'gas') {
+        const atSelected = 2 * (1 + 0.05 * miningFrigate) * (1 + 0.05 * expeditionFrigates)
+        const atBaked = 2 * bakedFrigate * bakedFrigate
+        return atSelected / atBaked
+      }
+    }
+    if (ship.id === 'endurance') {
+      if (subtype === 'ore' || subtype === 'moon' || subtype === 'ice') {
+        const atSelected = 4 * (1 + 0.05 * expeditionFrigates)
+        const atBaked = 4 * bakedFrigate
+        return atSelected / atBaked
+      }
+    }
+  }
+
+  return 1
 }
 
 /**
@@ -982,9 +1024,10 @@ function foremanBurstStrength(
 ): number {
   const ics = skillOrBaked(skills, 'industrialCommandShips')
   const cis = skillOrBaked(skills, 'capitalIndustrialShips')
+  const director = skillOrBaked(skills, 'miningDirector')
   const hullBonus =
     hull === 'porpoise' ? 0.02 * ics : hull === 'orca' ? 0.03 * ics : hull === 'rorqual' ? 0.05 * cis : 0
-  let strength = 1 + hullBonus
+  let strength = (1 + hullBonus) * (1 + 0.1 * director) / (1 + 0.1 * BAKED_MINING_SKILL_LEVEL)
   if (normalizeMiningBurstTech(burstTech) === 't2') strength *= 1.25
   if (mindlink) strength *= 1.25
   if (industrialCore && (hull === 'orca' || hull === 'rorqual')) strength *= 1.3
@@ -1421,13 +1464,7 @@ function fleetLineKey(line: MiningFleetLine): string {
   const upgradeCount = normalizeMiningUpgradeCount(line.upgradeCount, upgrade)
   const surveyChipset = normalizeMiningSurveyChipset(line.surveyChipset)
   const buffs = (line.buffIds ?? []).slice().sort().join(',')
-  const skills = line.skills
-    ? Object.keys(line.skills)
-        .sort()
-        .map((k) => `${k}:${line.skills?.[k] ?? ''}`)
-        .join(',')
-    : ''
-  return `${line.shipId}|${miner}|${crystal}|${upgrade}|${upgradeCount}|${surveyChipset}|${buffs}|${skills}`
+  return `${line.shipId}|${miner}|${crystal}|${upgrade}|${upgradeCount}|${surveyChipset}|${buffs}`
 }
 
 function coerceFleetLineForSubtype(
@@ -1450,21 +1487,24 @@ function hydrateFleetLine(
   subtype: MiningSubtype,
   defaults?: MiningFleetLineDefaults,
 ): MiningFleetLine {
-  const crystal = normalizeMiningCrystal(line.crystal ?? defaults?.crystal)
-  const miner = normalizeMiningMiner(line.miner ?? defaults?.miner, crystal)
-  const upgrade = normalizeMiningUpgrade(line.upgrade ?? defaults?.upgrade)
+  const { skills: _legacySkills, ...rest } = line as MiningFleetLine & {
+    skills?: Partial<SkillLevels>
+  }
+  const crystal = normalizeMiningCrystal(rest.crystal ?? defaults?.crystal)
+  const miner = normalizeMiningMiner(rest.miner ?? defaults?.miner, crystal)
+  const upgrade = normalizeMiningUpgrade(rest.upgrade ?? defaults?.upgrade)
   const surveyChipset = normalizeMiningSurveyChipset(
-    line.surveyChipset ?? defaults?.surveyChipset ?? DEFAULT_MINING_SURVEY_CHIPSET,
+    rest.surveyChipset ?? defaults?.surveyChipset ?? DEFAULT_MINING_SURVEY_CHIPSET,
   )
   return coerceFleetLineForSubtype(
     {
-      ...line,
+      ...rest,
       miner,
       crystal,
       upgrade,
       surveyChipset,
       upgradeCount: normalizeMiningUpgradeCount(
-        line.upgradeCount ?? defaults?.upgradeCount,
+        rest.upgradeCount ?? defaults?.upgradeCount,
         upgrade,
       ),
     },
@@ -1483,7 +1523,6 @@ export function yieldCtxForLine(
     upgrade: line.upgrade ?? ctx.upgrade,
     upgradeCount: line.upgradeCount ?? ctx.upgradeCount,
     surveyChipset: line.surveyChipset ?? ctx.surveyChipset,
-    skills: { ...ctx.skills, ...line.skills },
   }
 }
 

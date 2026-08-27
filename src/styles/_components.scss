@@ -1102,6 +1102,110 @@
       content: '▾';
     }
   }
+
+  &__skill-stack {
+    @apply min-w-0 flex-1 rounded-md border border-eve-border/50 bg-base-300/20 px-2;
+
+    .range {
+      @apply w-full;
+    }
+
+    &--single {
+      @apply grid w-full min-w-0 gap-y-0.5 border-0 bg-transparent p-0;
+      grid-template-columns: minmax(0, 1fr);
+
+      > * {
+        @apply min-w-0 rounded-sm border-b border-eve-border/40 bg-base-300/10 px-1 py-0.5 last:border-b-0;
+      }
+
+      .mining-filters__skill-range {
+        @apply h-4 min-h-4;
+      }
+    }
+
+    &--grid-4 {
+      @apply grid w-full min-w-0 gap-x-3 gap-y-1 border-0 bg-transparent p-0;
+      grid-template-columns: minmax(0, 1fr);
+
+      @media (min-width: 640px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      @media (min-width: 1024px) {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      > * {
+        @apply min-w-0 border-b-0;
+      }
+
+      .mining-filters__skill-range {
+        @apply h-4 min-h-4;
+      }
+    }
+  }
+
+  &__fit-row--wide:has(&__skill-stack--single) &__fit-label,
+  &__fit-row--wide:has(&__skill-stack--grid-4) &__fit-label {
+    @apply pt-1;
+  }
+
+  &__skill-fit-details {
+    @apply block w-full min-w-0 border-t border-eve-border/45 pt-2 text-xs text-base-content/55;
+
+    summary {
+      @apply cursor-pointer list-none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+    }
+
+    &--inline {
+      @apply border-t-0 pt-0;
+    }
+  }
+
+  &__skill-fit-summary {
+    @apply box-border flex w-full min-w-0 items-center gap-2 rounded-md border border-eve-border/55 bg-base-300/25 px-2 py-1.5 transition-[border-color,background-color] duration-150 hover:border-primary/35 hover:bg-primary/5;
+
+    &::after {
+      @apply shrink-0 pr-0.5 text-sm text-base-content/45;
+      content: '▸';
+    }
+  }
+
+  &__skill-fit-details[open] &__skill-fit-summary::after {
+    content: '▾';
+  }
+
+  &__skill-fit-reset {
+    @apply ml-auto mr-1 shrink-0;
+  }
+
+  &__skill-fit-heading {
+    @apply flex min-w-0 flex-1 items-center gap-1 text-[11px] font-bold uppercase tracking-[0.12em] text-primary;
+  }
+
+  &__skill-fit-status {
+    @apply shrink-0 rounded border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold tabular-nums tracking-normal text-primary normal-case;
+  }
+
+  &__skill-groups {
+    @apply mt-2 flex w-full min-w-0 flex-col gap-3;
+  }
+
+  &__skill-group {
+    @apply flex w-full min-w-0 flex-col gap-1.5;
+
+    .mining-filters__skill-stack {
+      @apply w-full min-w-0;
+    }
+  }
+
+  &__skill-group-title {
+    @apply pl-0.5 text-[9px] font-semibold uppercase tracking-[0.09em] text-base-content/45;
+  }
 }
 
 .economics-filter-bar {

@@ -209,6 +209,7 @@ describe('rankMiningIph', () => {
       volDayMinerals: 0,
       volDayFocus: null,
       volDay: 100,
+      reprocessYield: 0.5,
       reprocessLines: [],
     }
     expect(miningPathHasPriceData('compressed', row)).toBe(true)

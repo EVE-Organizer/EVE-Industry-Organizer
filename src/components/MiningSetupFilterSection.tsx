@@ -1,8 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type {
   MiningBuffId,
   MiningShipId,
-  MiningShipPreset,
   MiningYieldContext,
 } from '@/lib/miningShipPresets'
 import {
@@ -38,7 +37,6 @@ import {
   type MiningBoostSpace,
 } from '@/lib/miningShipPresets'
 import type {
-  MiningBoosterHullId,
   MiningBurstTech,
   MiningCrystalId,
   MiningFleetLine,
@@ -50,14 +48,15 @@ import type {
   SkillLevels,
 } from '@/types'
 import { EveImage } from '@/components/EveImage'
+import { CollapsibleMiningSkills, type MiningSkillGroup } from '@/components/MiningSkillSliders'
 import { Tooltip, useAnchorTooltip } from '@/components/Tooltip'
 import {
-  SKILL_FIELDS,
-  enforceSkillPrerequisites,
-  formatSkillLevel,
-  skillLevel,
-  type SkillFieldDef,
-} from '@/lib/skillFields'
+  boosterHullSkillKeys,
+  hullSkillKeys,
+  minerSkillKeys,
+  MINING_BURST_SKILL_KEYS,
+} from '@/lib/miningSkillSections'
+import type { SkillFieldDef } from '@/lib/skillFields'
 
 function IconChip({
   active,
@@ -262,28 +261,6 @@ function CountInput({
   )
 }
 
-function minerSkillKeys(
-  subtype: MiningSubtype,
-  ship: MiningShipPreset,
-): SkillFieldDef['key'][] {
-  const hullSkills: SkillFieldDef['key'][] =
-    ship.tier === 'exhumer'
-      ? ['miningBarge', 'exhumers']
-      : ship.tier === 'barge'
-        ? ['miningBarge']
-        : []
-  if (subtype === 'ice') return ['iceHarvesting', ...hullSkills]
-  if (subtype === 'gas') return ['gasCloudHarvesting']
-  return ['mining', 'astrogeology', ...hullSkills]
-}
-
-function boosterSkillKeys(hull: MiningBoosterHullId | null): SkillFieldDef['key'][] {
-  if (hull === 'rorqual') return ['capitalIndustrialShips']
-  if (hull) return ['industrialCommandShips']
-  return []
-}
-
-
 function setMinerModule(
   miner: MiningMinerModuleId,
   crystal: MiningCrystalId,
@@ -442,7 +419,6 @@ function FleetLineCard({
   subtype,
   subtypeShips,
   canRemove,
-  globalSkills,
   globalBuffIds,
   crystalLifespanMultiplier,
   perShipM3,
@@ -455,7 +431,6 @@ function FleetLineCard({
   subtype: MiningSubtype
   subtypeShips: ReturnType<typeof miningShipsForSubtype>
   canRemove: boolean
-  globalSkills: SkillLevels
   globalBuffIds: MiningBuffId[]
   crystalLifespanMultiplier: number
   perShipM3: number
@@ -483,13 +458,6 @@ function FleetLineCard({
     crystalLifespanMultiplier,
   )
   const preservationGainPct = Math.round((crystalLifespanMultiplier - 1) * 100)
-  const lineSkills: SkillLevels = { ...globalSkills }
-  if (line.skills) {
-    for (const [key, value] of Object.entries(line.skills)) {
-      if (typeof value === 'number') lineSkills[key] = value
-    }
-  }
-  const skillKeys = minerSkillKeys(subtype, ship)
   const implantBuffs = miningBuffsForSetup(line.shipId, subtype, globalBuffIds, null).filter(
     (b) => b.category === 'fit',
   )
@@ -507,20 +475,6 @@ function FleetLineCard({
         : ship.tier === 'expedition'
           ? 'Expedition frigate'
           : 'Mining frigate'
-
-  function setSkill(key: SkillFieldDef['key'], level: number) {
-    const merged = enforceSkillPrerequisites({ ...lineSkills, [key]: level })
-    onPatch({
-      skills: {
-        mining: merged.mining,
-        astrogeology: merged.astrogeology,
-        iceHarvesting: merged.iceHarvesting,
-        gasCloudHarvesting: merged.gasCloudHarvesting,
-        miningBarge: merged.miningBarge,
-        exhumers: merged.exhumers,
-      },
-    })
-  }
 
   function setUpgrade(next: MiningUpgradeId) {
     onPatch({
@@ -801,34 +755,6 @@ function FleetLineCard({
         </FitRow>
       ) : null}
 
-      <details className="mining-filters__pilot">
-        <summary>Skills</summary>
-        <div className="mt-2 flex flex-col gap-2">
-          {skillKeys.map((key) => {
-            const field = SKILL_FIELDS.find((f) => f.key === key)
-            if (!field) return null
-            const value = skillLevel(lineSkills, key)
-            return (
-              <label key={key} className="flex min-w-0 flex-col gap-1">
-                <span className="flex justify-between text-xs">
-                  {field.label}
-                  <span className="tabular-nums opacity-60">{formatSkillLevel(value)}</span>
-                </span>
-                <input
-                  type="range"
-                  min={0}
-                  max={5}
-                  step={1}
-                  value={value}
-                  aria-label={`${ship.label} ${field.label}`}
-                  className="range range-primary range-xs"
-                  onChange={(e) => setSkill(key, Number(e.target.value))}
-                />
-              </label>
-            )
-          })}
-        </div>
-      </details>
     </article>
   )
 }
@@ -840,6 +766,7 @@ export interface MiningSetupFilterSectionProps {
   boostSpace: MiningBoostSpace
   yieldCtx: MiningYieldContext
   skills: SkillLevels
+  trainedSkills?: SkillLevels | null
   onFleetChange: (fleet: MiningFleetLine[]) => void
   onBuffToggle: (id: MiningBuffId) => void
   onYieldChange: (patch: MiningYieldContext) => void
@@ -853,6 +780,7 @@ export function MiningSetupFilterSection({
   boostSpace,
   yieldCtx,
   skills,
+  trainedSkills,
   onFleetChange,
   onBuffToggle,
   onYieldChange,
@@ -876,7 +804,7 @@ export function MiningSetupFilterSection({
   )
   const burstSlots = miningBurstSlotCount(boosterHull)
   const burstTech = yieldCtx.burstTech === 't1' ? 't1' : 't2'
-  const boosterSkills = boosterSkillKeys(boosterHull)
+  const boosterHullSkills = boosterHullSkillKeys(boosterHull)
   const selectedBooster = MINING_BOOSTER_HULLS.find((hull) => hull.id === boosterHull)
   const crystalLifespanMultiplier = miningCrystalLifeMultiplier(yieldCtx, buffIds)
 
@@ -887,6 +815,19 @@ export function MiningSetupFilterSection({
     })
     .join(' + ')
   const fleetShipCount = normalizedFleet.reduce((total, line) => total + line.count, 0)
+  const fleetSkillGroups = useMemo(() => {
+    const hullKeys = new Set<SkillFieldDef['key']>()
+    for (const line of normalizedFleet) {
+      for (const key of hullSkillKeys(getMiningShip(line.shipId))) {
+        hullKeys.add(key)
+      }
+    }
+    const minerKeys = minerSkillKeys(subtype)
+    const groups: MiningSkillGroup[] = []
+    if (hullKeys.size > 0) groups.push({ label: 'Hull', keys: [...hullKeys] })
+    if (minerKeys.length > 0) groups.push({ label: 'Miner', keys: minerKeys })
+    return groups
+  }, [normalizedFleet, subtype])
 
   function updateLine(index: number, patch: Partial<MiningFleetLine>) {
     const next = normalizedFleet.map((line, i) =>
@@ -906,10 +847,6 @@ export function MiningSetupFilterSection({
     onFleetChange(
       normalizeMiningFleet([...normalizedFleet, { shipId, count: 1 }], subtype),
     )
-  }
-
-  function setSkill(key: SkillFieldDef['key'], level: number) {
-    onSkillsChange(enforceSkillPrerequisites({ ...skills, [key]: level }))
   }
 
   return (
@@ -938,7 +875,6 @@ export function MiningSetupFilterSection({
               subtype={subtype}
               subtypeShips={subtypeShips}
               canRemove={normalizedFleet.length > 1}
-              globalSkills={skills}
               globalBuffIds={buffIds}
               crystalLifespanMultiplier={crystalLifespanMultiplier}
               perShipM3={resolveUserMiningM3PerHr(
@@ -956,6 +892,15 @@ export function MiningSetupFilterSection({
             />
           ))}
           </div>
+          {fleetSkillGroups.length > 0 ? (
+            <CollapsibleMiningSkills
+              skills={skills}
+              trainedSkills={trainedSkills}
+              layout="single"
+              onSkillsChange={onSkillsChange}
+              groups={fleetSkillGroups}
+            />
+          ) : null}
           <button type="button" className="mining-filters__add-hull" onClick={addHull}>
             <span aria-hidden>+</span>
             Add another hull
@@ -1092,35 +1037,17 @@ export function MiningSetupFilterSection({
                 onClick={() => onBuffToggle('mindlink')}
               />
             </FitRow>
-            {boosterSkills.length > 0 ? (
-              <details className="mining-filters__pilot">
-                <summary>Skills</summary>
-                <div className="mt-2 flex flex-col gap-2">
-                  {boosterSkills.map((key) => {
-                    const field = SKILL_FIELDS.find((f) => f.key === key)
-                    if (!field) return null
-                    const value = skillLevel(skills, key)
-                    return (
-                      <label key={key} className="flex min-w-0 flex-col gap-1">
-                        <span className="flex justify-between text-xs">
-                          {field.label}
-                          <span className="tabular-nums opacity-60">{formatSkillLevel(value)}</span>
-                        </span>
-                        <input
-                          type="range"
-                          min={0}
-                          max={5}
-                          step={1}
-                          value={value}
-                          aria-label={`${field.label} level`}
-                          className="range range-primary range-xs"
-                          onChange={(e) => setSkill(key, Number(e.target.value))}
-                        />
-                      </label>
-                    )
-                  })}
-                </div>
-              </details>
+            {boosterHullSkills.length > 0 || MINING_BURST_SKILL_KEYS.length > 0 ? (
+              <CollapsibleMiningSkills
+                skills={skills}
+                trainedSkills={trainedSkills}
+                layout="single"
+                onSkillsChange={onSkillsChange}
+                groups={[
+                  { label: 'Hull', keys: boosterHullSkills },
+                  { label: 'Burst', keys: MINING_BURST_SKILL_KEYS },
+                ]}
+              />
             ) : null}
             </div>
           ) : (

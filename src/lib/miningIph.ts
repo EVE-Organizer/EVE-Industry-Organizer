@@ -7,10 +7,12 @@ import type {
   MiningReprocessLine,
   MiningSpaceClass,
   MiningSubtype,
+  SkillLevels,
   TimeRange,
   TypeInfo,
 } from '@/types'
 import { buildWindowPriceMap, pickHistoryWindow } from '@/lib/ranking'
+import { reprocessYieldForItem } from '@/lib/miningReprocess'
 
 /**
  * Retriever + 2× Strip Miner I (150 m³ / 45s), Mining/Astrogeology/Mining Barge IV, +10% role.
@@ -435,6 +437,7 @@ export function rankMiningItem(
     volDayCompressed: volCompressed,
     volDayMinerals: volMinerals,
     volDayFocus: volFocus,
+    reprocessYield: opts.reprocessYield,
     reprocessLines,
   }
 
@@ -488,6 +491,9 @@ export interface RankMiningOptions {
   m3PerHrForItem?: (item: MiningItem) => number
   /** Hide ores the fleet cannot mine with its selected modules. */
   canMineItem?: (item: MiningItem) => boolean
+  /** Character skills for per-row reprocess yield. */
+  skills?: Partial<SkillLevels>
+  /** Fallback when skills are omitted (legacy flat yield). */
   reprocessYield?: number
   sortKey?: MiningIphSortKey
   sortDesc?: boolean
@@ -503,7 +509,7 @@ export function rankMiningIph(
 ): MiningRankedRow[] {
   const m3PerHr =
     options.m3PerHr ?? resolveMiningM3PerHr(mining, options.subtype)
-  const reprocessYield =
+  const flatReprocessYield =
     options.reprocessYield ?? mining.defaults.reprocessYield ?? DEFAULT_REPROCESS_YIELD
   const typeName = (typeId: number) => typeMap.get(typeId)?.name ?? `Type ${typeId}`
   const foundFilter = options.foundIn
@@ -519,6 +525,10 @@ export function rankMiningIph(
     if (foundFilter.length > 0 && !foundFilter.every((s) => item.foundIn.includes(s))) continue
     if (options.canMineItem && !options.canMineItem(item)) continue
 
+    const itemReprocessYield = options.skills
+      ? reprocessYieldForItem(item, options.skills, flatReprocessYield)
+      : flatReprocessYield
+
     const row = rankMiningItem(
       item,
       hubMarket,
@@ -529,7 +539,7 @@ export function rankMiningIph(
       typeName,
       {
         m3PerHr: options.m3PerHrForItem?.(item) ?? m3PerHr,
-        reprocessYield,
+        reprocessYield: itemReprocessYield,
         focusTypeId: options.focusTypeId,
       },
     )

@@ -35,8 +35,27 @@ describe('normalizeSkillLevels', () => {
       astrogeology: 4,
       iceHarvesting: 4,
       gasCloudHarvesting: 4,
+      miningBarge: 4,
+      exhumers: 4,
+      miningFrigate: 4,
+      expeditionFrigates: 4,
+      miningDirector: 4,
       industrialCommandShips: 4,
       capitalIndustrialShips: 4,
+    })
+  })
+
+  it('preserves skill levels without prerequisite enforcement', () => {
+    expect(
+      normalizeSkillLevels({
+        industry: 0,
+        miningBarge: 5,
+        astrogeology: 5,
+      }),
+    ).toMatchObject({
+      industry: 0,
+      miningBarge: 5,
+      astrogeology: 5,
     })
   })
 
