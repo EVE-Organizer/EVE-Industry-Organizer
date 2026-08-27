@@ -96,7 +96,7 @@ function computeTank(
   const online = onlineModules(items)
   let shieldHp = (c?.shieldHp ?? 0) * skillPct(lvl(skillLevels, SHIELD_MANAGEMENT), 0.05)
   let armorHp = (c?.armorHp ?? 0) * skillPct(lvl(skillLevels, HULL_UPGRADES), 0.05)
-  let hullHp = (c?.hullHp ?? 0) * skillPct(lvl(skillLevels, MECHANICS), 0.05)
+  const hullHp = (c?.hullHp ?? 0) * skillPct(lvl(skillLevels, MECHANICS), 0.05)
 
   for (const item of online) {
     if (item.type.combat?.shieldBonus) {
@@ -141,7 +141,6 @@ function computeWeapons(
   const turrets = onlineModules(items).filter((item) => item.type.weapon === 'turret')
   if (!turrets.length) return undefined
 
-  let guns = 0
   let cycleMs = 5000
   let optimalM = 0
   let falloffM = 0
@@ -151,7 +150,6 @@ function computeWeapons(
 
   for (const item of turrets) {
     const mc = item.type.combat
-    guns += item.quantity
     cycleMs = mc?.cycleTime ?? cycleMs
     optimalM = mc?.optimal ?? optimalM
     falloffM = mc?.falloff ?? falloffM

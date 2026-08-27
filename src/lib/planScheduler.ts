@@ -21,11 +21,6 @@ interface ScheduleEvent {
   qty: number
 }
 
-interface StageReadyEvent {
-  stageId: string
-  hour: number
-}
-
 function childDemandForJob(child: PlanNode, parent: PlanNode, parentRunsThisJob: number): number {
   const entry = child.demandByParent.find((d) => d.parentProductTypeId === parent.productTypeId)
   if (!entry) return 0

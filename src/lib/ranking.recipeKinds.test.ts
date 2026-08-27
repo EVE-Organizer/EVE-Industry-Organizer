@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { defaultQuery } from '@/lib/blueprintQuery'
 import { rankBlueprintsFromMarket, setupBudgetFromSlider } from '@/lib/ranking'
+import { buildBlueprintRankingSettings } from '@/lib/structureSettings'
 import { buildTypeMap } from '@/services/data/sdeLoader'
-import type { BlueprintRegistry, GlobalSettings, TypeInfo } from '@/types'
+import type { BlueprintRegistry, TypeInfo } from '@/types'
 import { DEFAULT_SETTINGS } from '@/types'
 
 function loadFixture<T>(path: string): T {
@@ -21,12 +22,11 @@ describe('ranking recipe kinds with default page filters', () => {
 
   it('surfaces reaction formulas somewhere in an expanded ranking with default filters', () => {
     const q = defaultQuery(DEFAULT_SETTINGS)
-    const settings: GlobalSettings & { batchSize: number } = {
-      ...DEFAULT_SETTINGS,
-      batchSize: q.batchSize,
+    const settings = buildBlueprintRankingSettings(DEFAULT_SETTINGS, systems, {
+      mfgSystem: q.mfgSystem,
+      rankingTimeHours: q.rankingTimeHours,
       priceMethod: q.priceMethod,
-      manufacturingSystemId: q.mfgSystem,
-    }
+    })
 
     const rows = rankBlueprintsFromMarket(
       registry,
@@ -55,12 +55,11 @@ describe('ranking recipe kinds with default page filters', () => {
 
   it('shows reaction formulas in default top 50 when recipe filter is formulas only', () => {
     const q = defaultQuery(DEFAULT_SETTINGS)
-    const settings: GlobalSettings & { batchSize: number } = {
-      ...DEFAULT_SETTINGS,
-      batchSize: q.batchSize,
+    const settings = buildBlueprintRankingSettings(DEFAULT_SETTINGS, systems, {
+      mfgSystem: q.mfgSystem,
+      rankingTimeHours: q.rankingTimeHours,
       priceMethod: q.priceMethod,
-      manufacturingSystemId: q.mfgSystem,
-    }
+    })
 
     const rows = rankBlueprintsFromMarket(
       registry,

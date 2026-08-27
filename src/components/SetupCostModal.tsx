@@ -1,6 +1,6 @@
 import { PriceSourceBadge } from '@/components/PriceSourceBadge'
 import type { BlueprintCostBreakdown, RankedBlueprintRow, SetupCostBreakdown, TypeInfo } from '@/types'
-import { formatAvgVolume, formatDecimal, formatIsk, formatPercent, formatQuantity } from '@/lib/profit'
+import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
 import { JobCostFormula, jobCostStepTitle } from '@/components/JobCostFormula'
 import { formatFacilityBonusLine } from '@/lib/facilityModifiers'
@@ -19,14 +19,23 @@ function typeName(typeMap: Map<number, TypeInfo>, typeId: number): string {
 }
 
 function RunsExplanation({ breakdown }: { breakdown: SetupCostBreakdown }) {
-  const { batchSizeSetting, productQuantity, avgVolume, volumeCapDays, runs, outputQty } = breakdown
+  const { targetJobTimeSeconds, productQuantity, avgVolume, volumeCapDays, runs, outputQty } =
+    breakdown
+
+  function formatDuration(seconds: number): string {
+    if (seconds >= 86400) return `${formatDecimal(seconds / 86400, 2)} days`
+    if (seconds >= 3600) return `${formatDecimal(seconds / 3600, 2)} hr`
+    if (seconds >= 60) return `${formatDecimal(seconds / 60, 1)} min`
+    return `${formatNumber(seconds, 0)} sec`
+  }
 
   if (avgVolume <= 0) {
     return (
       <p className="text-sm">
-        No volume history for this window, so rankings use your full batch setting:{' '}
+        No volume history for this window. Your job time setting (
+        <strong>{formatDuration(targetJobTimeSeconds)}</strong>) gives{' '}
         <strong>{runs}</strong> run{runs === 1 ? '' : 's'} × {productQuantity} ={' '}
-        <strong>{formatQuantity(outputQty)}</strong> units.
+        <strong>{formatQuantity(outputQty)}</strong> units for this blueprint.
       </p>
     )
   }
@@ -36,14 +45,15 @@ function RunsExplanation({ breakdown }: { breakdown: SetupCostBreakdown }) {
   return (
     <ol className="text-sm space-y-1 list-decimal list-inside">
       <li>
-        Batch size: <strong>{batchSizeSetting}</strong> runs
+        Target job time: <strong>{formatDuration(targetJobTimeSeconds)}</strong> →{' '}
+        <strong>{runs}</strong> runs for this blueprint
       </li>
       <li>
         Hub avg volume/day ({volumeCapDays}-day cap):{' '}
         <strong>{formatAvgVolume(avgVolume)}</strong> units/day
       </li>
       <li>
-        Runs for setup & profit: <strong>{runs}</strong> (your batch setting)
+        Runs for setup & profit: <strong>{runs}</strong> (from job time)
       </li>
       <li>
         Market fits ~<strong>{maxRuns}</strong> runs in {volumeCapDays} days at hub volume (ISK/hr
@@ -224,7 +234,7 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
 
         <div className="px-5 py-4 max-h-[min(70dvh,32rem)] overflow-y-auto space-y-5">
           <section>
-            <h4 className="font-semibold text-sm mb-2">1. Batch size</h4>
+            <h4 className="font-semibold text-sm mb-2">1. Job time → runs</h4>
             <RunsExplanation breakdown={b} />
           </section>
 

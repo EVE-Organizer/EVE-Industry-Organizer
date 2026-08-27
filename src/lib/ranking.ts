@@ -26,6 +26,8 @@ import {
   industryTimeFactor,
   reactionsTimeFactor,
   revenueFromSale,
+  runsForJobTime,
+  runsForReactionJobTime,
   teTimeFactor,
 } from '@/lib/cost'
 import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
@@ -56,7 +58,7 @@ export function isPlaceholderManufacturingBlueprint(blueprint: BlueprintInfo): b
   return mats.length === 1 && mats[0]?.typeId === 34 && mats[0]?.quantity === 1
 }
 
-/** Runs for setup cost and profit from the batch-size filter (clamped to allowed range). */
+/** Runs for setup cost and profit from a fixed batch-size setting (legacy / non-ranking). */
 export function resolveRankingRuns(
   batchSize: number,
   productQuantity: number,
@@ -70,6 +72,73 @@ export function resolveRankingRuns(
   if (maxMarketRuns < 1) return null
 
   return runs
+}
+
+/** Runs that fit a target job duration for one blueprint (ranking filter). */
+export function resolveRankingRunsFromTime(
+  targetJobTimeSeconds: number,
+  blueprint: BlueprintInfo,
+  productCategory: string | undefined,
+  settings: ManufacturingSettings,
+  productQuantity: number,
+  avgVolume: number,
+): number | null {
+  if (!Number.isFinite(targetJobTimeSeconds) || targetJobTimeSeconds <= 0) return null
+
+  const { te } = blueprintMeTe(blueprint.tier, settings, blueprint)
+  const structure = resolveRecipeModifiers(settings, {
+    ...blueprint,
+    category: productCategory,
+  })
+  const industry = skillLevel(settings.skills, 'industry')
+  const advancedIndustry = skillLevel(settings.skills, 'advancedIndustry')
+  const isReaction = isReactionRecipe(blueprint)
+
+  const runs = isReaction
+    ? runsForReactionJobTime(
+        targetJobTimeSeconds,
+        blueprint.manufacturingTime,
+        skillLevel(settings.skills, 'reactions'),
+        structure.teBonusPercent,
+        { step: 1, maxRuns: MAX_BATCH_SIZE },
+      )
+    : runsForJobTime(
+        targetJobTimeSeconds,
+        blueprint.manufacturingTime,
+        te,
+        industry,
+        advancedIndustry,
+        structure.teBonusPercent,
+        { step: 1, maxRuns: MAX_BATCH_SIZE },
+      )
+
+  const clamped = Math.min(MAX_BATCH_SIZE, Math.max(MIN_BATCH_SIZE, runs))
+  if (avgVolume <= 0) return clamped
+
+  const maxMarketRuns = Math.floor((avgVolume * MAX_DAYS_TO_CLEAR) / productQuantity)
+  if (maxMarketRuns < 1) return null
+
+  return clamped
+}
+
+export function resolveRankingRunsForBlueprint(
+  settings: ManufacturingSettings,
+  blueprint: BlueprintInfo,
+  productCategory: string | undefined,
+  productQuantity: number,
+  avgVolume: number,
+): number | null {
+  if (settings.rankingTargetTimeSeconds != null && settings.rankingTargetTimeSeconds > 0) {
+    return resolveRankingRunsFromTime(
+      settings.rankingTargetTimeSeconds,
+      blueprint,
+      productCategory,
+      settings,
+      productQuantity,
+      avgVolume,
+    )
+  }
+  return resolveRankingRuns(settings.batchSize, productQuantity, avgVolume)
 }
 
 export interface RankingFilters {
@@ -329,7 +398,13 @@ function computeRow(
   }
 
   const avgVolume = windowSummary.avgVolume
-  const runs = resolveRankingRuns(settings.batchSize, blueprint.productQuantity, avgVolume)
+  const runs = resolveRankingRunsForBlueprint(
+    settings,
+    blueprint,
+    product.category,
+    blueprint.productQuantity,
+    avgVolume,
+  )
   if (runs === null) return null
 
   const { me, te } = blueprintMeTe(blueprint.tier, settings, blueprint)
@@ -460,7 +535,9 @@ function computeRow(
     ...(isReaction
       ? { reactions: reactionsSkill, reactionsTimeFactor: reactionsFactor }
       : {}),
-    batchSizeSetting: settings.batchSize,
+    targetJobTimeSeconds:
+      settings.rankingTargetTimeSeconds ??
+      settings.batchSize * 3600,
     productQuantity: blueprint.productQuantity,
     avgVolume,
     volumeCapDays: MAX_DAYS_TO_CLEAR,
@@ -685,7 +762,7 @@ export function defaultMinSetupCost(): number {
 }
 
 export function defaultMaxSetupCost(): number {
-  return 100_000_000
+  return 1_000_000_000
 }
 
 /** Setup budget slider: 0 ISK at step 0, log scale from 1 ISK to 500B, then no limit at max step. */

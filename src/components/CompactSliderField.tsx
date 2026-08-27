@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { RangeSlider } from '@/components/RangeSlider'
 import { useNumericSliderInput, type NumericFieldState } from '@/hooks/useNumericSliderInput'
@@ -20,6 +21,7 @@ interface CompactSliderFieldProps {
   inputPlaceholder?: string
   variant?: 'inline' | 'panel'
   className?: string
+  actions?: ReactNode
 }
 
 function NumericUnitField({
@@ -74,6 +76,7 @@ export function CompactSliderField({
   inputPlaceholder,
   variant = 'inline',
   className,
+  actions,
 }: CompactSliderFieldProps) {
   const field = useNumericSliderInput({
     value,
@@ -127,6 +130,7 @@ export function CompactSliderField({
 
       {isPanel ? (
         <>
+          {actions ? <div className="compact-slider__actions-row">{actions}</div> : null}
           <div className="compact-slider__input-row">{input}</div>
           {track}
         </>

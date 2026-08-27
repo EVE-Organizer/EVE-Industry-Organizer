@@ -9,6 +9,12 @@
   }
 }
 
+.blueprint-ranking-table {
+  thead th {
+    @apply sticky top-0 z-10 bg-base-200/95 backdrop-blur-sm;
+  }
+}
+
 // Animated underline on hover; use with text-inherit or text-primary as needed.
 .text-link {
   @apply cursor-pointer pb-px bg-no-repeat transition-[background-size] duration-300 ease-out;
@@ -197,6 +203,14 @@
 
   &__header {
     @apply flex items-center justify-between gap-2 mb-1.5 min-w-0;
+  }
+
+  &__actions {
+    @apply ml-auto shrink-0;
+  }
+
+  &__actions-row {
+    @apply mb-2 min-w-0;
   }
 
   &__title {
@@ -527,6 +541,35 @@
   }
 }
 
+.manufacturing-rig-fields {
+  @apply rounded-lg border border-eve-border bg-base-300/20 px-3 py-2;
+
+  &__summary {
+    @apply flex cursor-pointer list-none items-center justify-between gap-3 text-xs font-medium text-base-content/70;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::before {
+      @apply mr-1 shrink-0 text-[10px] text-base-content/35;
+      content: '▸';
+    }
+  }
+
+  &[open] > &__summary::before {
+    content: '▾';
+  }
+
+  &__summary-meta {
+    @apply text-[11px] font-normal opacity-60;
+  }
+
+  &__body {
+    @apply mt-3 border-t border-eve-border/60 pt-3;
+  }
+}
+
 .filter-section {
   background-image: linear-gradient(
     160deg,
@@ -617,6 +660,79 @@
 
   &__limits-body {
     @apply flex min-h-0 flex-1 flex-col justify-between gap-3;
+  }
+}
+
+.blueprint-volume-picker {
+  @apply relative w-full min-w-0;
+
+  &__trigger {
+    @apply flex w-full items-center gap-2 rounded-lg border border-eve-border/80 bg-base-300/20 px-2 py-1.5 text-left transition-colors;
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+
+    &:hover {
+      @apply border-primary/35 bg-base-300/35;
+    }
+
+    &--open {
+      @apply border-primary/50 ring-1 ring-primary/20;
+    }
+  }
+
+  &__trigger-text {
+    @apply flex min-w-0 flex-1 flex-col leading-tight;
+  }
+
+  &__trigger-label {
+    @apply text-xs font-medium;
+  }
+
+  &__trigger-detail {
+    @apply text-[10px] text-base-content/50 tabular-nums;
+  }
+
+  &__chevron {
+    @apply text-xs opacity-40 shrink-0;
+  }
+
+  &__any-icon {
+    @apply inline-flex size-[22px] shrink-0 items-center justify-center rounded-md border border-eve-border/80 bg-base-300/40 text-xs font-medium opacity-70;
+  }
+
+  &__menu {
+    @apply overflow-hidden rounded-lg border border-eve-border bg-base-200 shadow-lg;
+  }
+
+  &__search {
+    @apply rounded-none border-0 border-b border-eve-border/80 bg-base-200 focus:outline-none;
+  }
+
+  &__list {
+    @apply max-h-64 overflow-y-auto py-1;
+  }
+
+  &__option {
+    @apply flex w-full items-center gap-2.5 px-2.5 py-2 text-left text-sm hover:bg-base-300/70;
+
+    &--active {
+      @apply bg-primary/10 text-primary;
+    }
+  }
+
+  &__option-label {
+    @apply block text-sm font-medium truncate;
+  }
+
+  &__option-meta {
+    @apply block text-[10px] opacity-60 tabular-nums truncate;
+  }
+
+  &__empty {
+    @apply px-3 py-4 text-center text-sm opacity-50;
+  }
+
+  &__hint {
+    @apply border-t border-eve-border/60 px-2.5 py-1.5 text-[10px] opacity-45;
   }
 }
 

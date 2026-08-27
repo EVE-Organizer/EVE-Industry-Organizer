@@ -5,7 +5,6 @@ import {
   formatHourTick,
   layoutLaneBars,
   timelineBarStyle,
-  timelineTickPosition,
   timelineVisualRatio,
   TIMELINE_MIN_BAR_WIDTH_PCT,
 } from '@/lib/planTimelineChartData'

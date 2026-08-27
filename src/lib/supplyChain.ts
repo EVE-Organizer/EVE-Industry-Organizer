@@ -5,7 +5,7 @@ import {
   resolveBlueprintMeTe,
   totalManufacturingCost,
 } from '@/lib/cost'
-import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
+import { resolveRecipeModifiersForBlueprint } from '@/lib/facilityModifiers'
 import { canRunReactionJobs, isReactionRecipe } from '@/lib/recipes'
 import { runsForDemand } from '@/lib/rootRunsDuration'
 import { getBlueprintForProduct } from '@/services/data/sdeLoader'
@@ -104,10 +104,11 @@ export function buildSupplyChain(
   reactionCostIndex = systemCostIndex,
 ): SupplyChainNode {
   const runs = settings.batchSize
-  const structure = resolveRecipeModifiers(settings, blueprint)
+  const product = typeMap.get(blueprint.productTypeId)
+  const category = product?.category
+  const structure = resolveRecipeModifiersForBlueprint(settings, blueprint, category)
   const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
   const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
-  const product = typeMap.get(blueprint.productTypeId)
   const productPrice = prices.get(blueprint.productTypeId) ?? 0
   const buyTotal = materialCost(mats, prices)
   const { capital: buildTotal } = totalManufacturingCost(
@@ -117,6 +118,7 @@ export function buildSupplyChain(
     effectiveMe,
     systemCostIndex,
     reactionCostIndex,
+    category,
   )
 
   const children: SupplyChainNode[] = mats.map((mat) => {

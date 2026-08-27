@@ -39,7 +39,7 @@ describe('expandManufacturingPlan fuzz', () => {
           },
         ]
 
-        const { nodes, slots, windowHours } = expandManufacturingPlan({
+        const { nodes, slots, windowHours: _windowHours } = expandManufacturingPlan({
           template,
           blueprints,
           typeMap,

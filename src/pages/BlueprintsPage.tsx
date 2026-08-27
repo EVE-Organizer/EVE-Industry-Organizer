@@ -22,7 +22,8 @@ import {
   setupBudgetFromSlider,
   type BlueprintSortKey,
 } from '@/lib/ranking'
-import { buildManufacturingSettings } from '@/lib/structureSettings'
+import { buildBlueprintRankingSettings } from '@/lib/structureSettings'
+import { planExpansionSettingsKey } from '@/lib/planExpansionSettings'
 import { PageHeader, LoadingState } from '@/components/Layout'
 import type { RouteDangerResult } from '@/lib/routeDanger'
 import { HaulRiskModal } from '@/components/HaulRiskModal'
@@ -97,14 +98,23 @@ export function BlueprintsPage() {
     setRankingQuery(query)
   }, [])
 
+  const facilitySettingsKey = planExpansionSettingsKey(settings)
+
   const manufacturingSettings = useMemo(
     (): ManufacturingSettings =>
-      buildManufacturingSettings(settings, sde?.systems, {
-        manufacturingSystemId: rankingQuery.mfgSystem,
-        batchSize: rankingQuery.batchSize,
+      buildBlueprintRankingSettings(settings, sde?.systems, {
+        mfgSystem: rankingQuery.mfgSystem,
+        rankingTimeHours: rankingQuery.rankingTimeHours,
         priceMethod: rankingQuery.priceMethod,
       }),
-    [settings, rankingQuery.batchSize, rankingQuery.priceMethod, rankingQuery.mfgSystem, sde?.systems],
+    [
+      settings,
+      facilitySettingsKey,
+      rankingQuery.rankingTimeHours,
+      rankingQuery.priceMethod,
+      rankingQuery.mfgSystem,
+      sde?.systems,
+    ],
   )
 
   const [haulRiskOpen, setHaulRiskOpen] = useState(false)
@@ -205,7 +215,7 @@ export function BlueprintsPage() {
     rankingQuery.hub,
     rankingQuery.window,
     rankingQuery.priceMethod,
-    rankingQuery.batchSize,
+    rankingQuery.rankingTimeHours,
     minSetupCost,
     maxSetupCost,
     rankingQuery.buildableOnly,
@@ -432,79 +442,81 @@ const BlueprintResults = memo(function BlueprintResults({
 }) {
   return (
     <>
-      <div className="hidden lg:block overflow-x-auto border border-eve-border/90 rounded-xl shrink-0 mb-4 bg-base-200/70 shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04),0_8px_24px_-12px_rgb(0_0_0_/_0.55)]">
-        <table className="table table-compact w-full">
-          <thead className="bg-base-200 sticky top-0">
-            <tr>
-              <th className="w-12"></th>
-              <th>Blueprint</th>
-              <SortableTh
-                label="Setup"
-                sortKey="setupCost"
-                activeKey={rankingQuery.sortBy}
-                direction={rankingQuery.sortDir}
-                onSort={onSort}
-              />
-              <SortableTh
-                label="Profit"
-                sortKey="netProfit"
-                activeKey={rankingQuery.sortBy}
-                direction={rankingQuery.sortDir}
-                onSort={onSort}
-              />
-              <SortableTh
-                label="ISK/hr"
-                sortKey="iph"
-                activeKey={rankingQuery.sortBy}
-                direction={rankingQuery.sortDir}
-                onSort={onSort}
-              >
-                <InfoTooltip text={`Setup cost and profit use your batch size. ISK/hr uses min(production/day, market volume/day) × profit per unit, scaled down when your production share exceeds daily hub volume (competition penalty).`} />
-              </SortableTh>
-              <SortableTh
-                label="Margin"
-                sortKey="margin"
-                activeKey={rankingQuery.sortBy}
-                direction={rankingQuery.sortDir}
-                onSort={onSort}
-              />
-              <SortableTh
-                label="Vol/day"
-                sortKey="avgVolume"
-                activeKey={rankingQuery.sortBy}
-                direction={rankingQuery.sortDir}
-                onSort={onSort}
-              >
-                <InfoTooltip text="Average daily traded volume for liquidity (batch cap, IPH, filters). With a 1y price window, volume uses the 1m average. Shows — when only spot price is available." />
-              </SortableTh>
-              <th>Haul risk</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <BlueprintRow
-                key={row.blueprint.blueprintTypeId}
-                row={row}
-                rank={index + 1}
-                skills={settings.skills}
-                watched={watchlistIds.has(row.blueprint.productTypeId)}
-                onWatch={() => toggleWatchlist(row.blueprint.productTypeId)}
-                onOpenGraph={() => onOpenGraph(row)}
-                onOpenSetup={() => onOpenSetup(row)}
-                onOpenIph={() => onOpenIph(row)}
-                onOpenHaulRisk={onOpenHaulRisk}
-                haulIn={haulInDanger}
-                haulOut={haulOutDanger}
-                haulError={haulDangerError}
-                dangerLoading={dangerLoading}
-                gateIntelLoading={gateIntelLoading}
-                haulInLabel={haulInLabel}
-                haulOutLabel={haulOutLabel}
-              />
-            ))}
-          </tbody>
-        </table>
+      <div className="hidden lg:block overflow-hidden border border-eve-border/90 rounded-xl shrink-0 mb-4 bg-base-200/70 shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.04),0_8px_24px_-12px_rgb(0_0_0_/_0.55)]">
+        <div className="overflow-x-auto">
+          <table className="table table-compact blueprint-ranking-table w-full">
+            <thead>
+              <tr>
+                <th className="w-12"></th>
+                <th>Blueprint</th>
+                <SortableTh
+                  label="Setup"
+                  sortKey="setupCost"
+                  activeKey={rankingQuery.sortBy}
+                  direction={rankingQuery.sortDir}
+                  onSort={onSort}
+                />
+                <SortableTh
+                  label="Profit"
+                  sortKey="netProfit"
+                  activeKey={rankingQuery.sortBy}
+                  direction={rankingQuery.sortDir}
+                  onSort={onSort}
+                />
+                <SortableTh
+                  label="ISK/hr"
+                  sortKey="iph"
+                  activeKey={rankingQuery.sortBy}
+                  direction={rankingQuery.sortDir}
+                  onSort={onSort}
+                >
+                  <InfoTooltip text={`Setup cost and profit use runs derived from your job time filter. ISK/hr uses min(production/day, market volume/day) × profit per unit, scaled down when your production share exceeds daily hub volume (competition penalty).`} />
+                </SortableTh>
+                <SortableTh
+                  label="Margin"
+                  sortKey="margin"
+                  activeKey={rankingQuery.sortBy}
+                  direction={rankingQuery.sortDir}
+                  onSort={onSort}
+                />
+                <SortableTh
+                  label="Vol/day"
+                  sortKey="avgVolume"
+                  activeKey={rankingQuery.sortBy}
+                  direction={rankingQuery.sortDir}
+                  onSort={onSort}
+                >
+                  <InfoTooltip text="Average daily traded volume for liquidity (batch cap, IPH, filters). With a 1y price window, volume uses the 1m average. Shows — when only spot price is available." />
+                </SortableTh>
+                <th>Haul risk</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <BlueprintRow
+                  key={row.blueprint.blueprintTypeId}
+                  row={row}
+                  rank={index + 1}
+                  skills={settings.skills}
+                  watched={watchlistIds.has(row.blueprint.productTypeId)}
+                  onWatch={() => toggleWatchlist(row.blueprint.productTypeId)}
+                  onOpenGraph={() => onOpenGraph(row)}
+                  onOpenSetup={() => onOpenSetup(row)}
+                  onOpenIph={() => onOpenIph(row)}
+                  onOpenHaulRisk={onOpenHaulRisk}
+                  haulIn={haulInDanger}
+                  haulOut={haulOutDanger}
+                  haulError={haulDangerError}
+                  dangerLoading={dangerLoading}
+                  gateIntelLoading={gateIntelLoading}
+                  haulInLabel={haulInLabel}
+                  haulOutLabel={haulOutLabel}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="lg:hidden flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 pb-4">

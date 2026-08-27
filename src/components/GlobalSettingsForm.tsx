@@ -440,11 +440,20 @@ export function ReactionFacilitySection({
             />
           )}
 
-          <div className="rounded-lg border border-eve-border bg-base-300/20 px-3 py-3 overflow-x-auto">
-            <div className="flex items-center gap-1.5 text-xs font-medium opacity-70 mb-2">
-              <span>Structure rigs and tax by type</span>
-              <InfoTooltip text="Match the in-game Reaction tooltip: Composite, Biochemical, and Hybrid rows." />
-            </div>
+          <details className="manufacturing-rig-fields">
+            <summary className="manufacturing-rig-fields__summary">
+              <span className="flex min-w-0 flex-1 items-center gap-1.5">
+                <span>Structure rigs and tax by type</span>
+                <span
+                  className="shrink-0"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                >
+                  <InfoTooltip text="Match the in-game Reaction tooltip: Composite, Biochemical, and Hybrid rows." />
+                </span>
+              </span>
+            </summary>
+            <div className="manufacturing-rig-fields__body overflow-x-auto">
             <table className="table table-sm w-full min-w-[20rem]">
               <thead>
                 <tr className="text-xs opacity-60">
@@ -511,7 +520,8 @@ export function ReactionFacilitySection({
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+          </details>
         </>
       ) : null}
     </div>

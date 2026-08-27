@@ -8,7 +8,7 @@ import { expandManufacturingPlan } from '@/lib/manufacturingPlan'
 import { buildSupplyChain } from '@/lib/supplyChain'
 import { rankBlueprintsFromMarket } from '@/lib/ranking'
 import { buildTypeMap, getAllBlueprints, getBlueprintForProduct, isRankableBlueprint } from '@/services/data/sdeLoader'
-import type { BlueprintRegistry, GlobalSettings, TypeInfo } from '@/types'
+import type { BlueprintRegistry, TypeInfo } from '@/types'
 import { DEFAULT_BATCH_SIZE, DEFAULT_SETTINGS } from '@/types'
 
 function loadFixture<T>(path: string): T {

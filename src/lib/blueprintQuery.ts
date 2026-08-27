@@ -1,12 +1,12 @@
 import type { BlueprintTier, GlobalSettings, HubId, RecipeKind, TimeRange } from '@/types'
 import {
   BLUEPRINT_TIERS,
-  DEFAULT_BATCH_SIZE,
+  DEFAULT_RANKING_TIME_HOURS,
   DEFAULT_RECIPE_KINDS,
   DEFAULT_SETTINGS,
   HUBS,
-  MAX_BATCH_SIZE,
-  MIN_BATCH_SIZE,
+  MAX_RANKING_TIME_HOURS,
+  MIN_RANKING_TIME_HOURS,
   RANKING_RECIPE_KINDS,
 } from '@/types'
 import type { BlueprintSortKey, SortDirection } from '@/lib/ranking'
@@ -38,8 +38,8 @@ export interface BlueprintQuery {
   includeHaul: boolean
   /** Minimum average daily hub volume (0 = no filter). Uses the selected price window. */
   minVolume: number
-  /** Manufacturing runs per job for profit and cost calculations on this page. */
-  batchSize: number
+  /** Target total job time (hours) for profit and cost; runs sync per blueprint. */
+  rankingTimeHours: number
   sortBy: BlueprintSortKey
   sortDir: SortDirection
 }
@@ -78,8 +78,8 @@ export function defaultQuery(settings: GlobalSettings): BlueprintQuery {
     requireBlueprintPrice: true,
     recipeKinds: [...DEFAULT_RECIPE_KINDS],
     includeHaul: settings.includeHaulCost ?? true,
-    minVolume: 100,
-    batchSize: DEFAULT_BATCH_SIZE,
+    minVolume: 0,
+    rankingTimeHours: DEFAULT_RANKING_TIME_HOURS,
     sortBy: 'iph',
     sortDir: 'desc',
   }
@@ -107,7 +107,7 @@ export function queryToSearchParams(q: BlueprintQuery, settings: GlobalSettings)
   }
   if (q.includeHaul !== def.includeHaul) p.set('haul', q.includeHaul ? '1' : '0')
   if (q.minVolume !== def.minVolume) p.set('vmin', String(q.minVolume))
-  if (q.batchSize !== def.batchSize) p.set('batch', String(q.batchSize))
+  if (q.rankingTimeHours !== def.rankingTimeHours) p.set('time', String(q.rankingTimeHours))
   if (q.sortBy !== def.sortBy) p.set('sort', q.sortBy)
   if (q.sortDir !== def.sortDir) p.set('dir', q.sortDir)
 
@@ -171,8 +171,10 @@ export function searchParamsToQuery(
   const rawVmin = params.get('vmin')
   const minVolume = rawVmin ? clampMinVolume(parseFloat(rawVmin)) : def.minVolume
 
-  const rawBatch = params.get('batch')
-  const batchSize = rawBatch ? clampBatchSize(parseInt(rawBatch, 10)) : def.batchSize
+  const rawTime = params.get('time')
+  const rankingTimeHours = rawTime
+    ? clampRankingTimeHours(parseFloat(rawTime))
+    : def.rankingTimeHours
 
   const rawSort = params.get('sort')
   const sortBy =
@@ -200,7 +202,7 @@ export function searchParamsToQuery(
     recipeKinds,
     includeHaul,
     minVolume,
-    batchSize,
+    rankingTimeHours,
     sortBy,
     sortDir,
   }
@@ -259,16 +261,16 @@ function tiersEqual(a: BlueprintTier[], b: BlueprintTier[]): boolean {
 }
 
 /** Slider cap for min vol/day; typed values may exceed this. */
-export const MAX_MIN_VOLUME_SLIDER = 5000
+export const MAX_MIN_VOLUME_SLIDER = 100_000
 
 export function clampMinVolume(value: number): number {
   if (!Number.isFinite(value) || value <= 0) return 0
   return value
 }
 
-export function clampBatchSize(value: number): number {
-  if (!Number.isFinite(value)) return DEFAULT_BATCH_SIZE
-  return Math.min(MAX_BATCH_SIZE, Math.max(MIN_BATCH_SIZE, Math.round(value)))
+export function clampRankingTimeHours(value: number): number {
+  if (!Number.isFinite(value)) return DEFAULT_RANKING_TIME_HOURS
+  return Math.min(MAX_RANKING_TIME_HOURS, Math.max(MIN_RANKING_TIME_HOURS, value))
 }
 
 function clampSlider(value: number): number {

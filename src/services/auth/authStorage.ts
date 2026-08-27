@@ -57,7 +57,7 @@ function migrateCharacterSkillSnapshots(characters: StoredCharacter[]): {
       return character
     }
     changed = true
-    const { skills: legacySkills, trainedSkills: _trained, ...rest } = character
+    const { skills: _legacySkills, trainedSkills: _trained, ...rest } = character
     // v4 split: old `skills` was ESI snapshot; drop and re-sync both fields.
     return { ...rest, skills: undefined, trainedSkills: undefined }
   })

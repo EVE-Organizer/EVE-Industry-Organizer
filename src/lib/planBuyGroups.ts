@@ -1,7 +1,6 @@
 import type { PlanNode } from '@/types'
 import {
   computeTreeLineMeta,
-  sortBuyGroupNodesDepthFirst,
 } from '@/lib/planTreeLines'
 
 export interface PlanBuyGroup {

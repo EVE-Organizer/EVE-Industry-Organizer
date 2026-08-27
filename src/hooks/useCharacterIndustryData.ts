@@ -112,7 +112,7 @@ function fetchProductionLocations(characterId: number, forceRefresh = false) {
     const characterAssets = await fetchCharacterAssets(characterId, accessToken, fetchOpts)
     const esiJobs = await fetchCharacterIndustryJobs(characterId, accessToken, fetchOpts)
 
-    let blueprints: Awaited<ReturnType<typeof fetchCharacterBlueprints>> = []
+    let blueprints: Awaited<ReturnType<typeof fetchCharacterBlueprints>>
     try {
       blueprints = await fetchCharacterBlueprints(characterId, accessToken, fetchOpts)
     } catch {

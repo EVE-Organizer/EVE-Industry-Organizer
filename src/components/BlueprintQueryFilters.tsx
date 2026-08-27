@@ -27,15 +27,15 @@ function deferredRankingSnapshot(query: BlueprintQuery): string {
   return JSON.stringify({
     budgetMinSlider: query.budgetMinSlider,
     budgetMaxSlider: query.budgetMaxSlider,
-    batchSize: query.batchSize,
+    rankingTimeHours: query.rankingTimeHours,
     minVolume: query.minVolume,
   })
 }
 
 function immediateRankingQuery(
   query: BlueprintQuery,
-): Omit<BlueprintQuery, 'budgetMinSlider' | 'budgetMaxSlider' | 'batchSize' | 'minVolume'> {
-  const { budgetMinSlider, budgetMaxSlider, batchSize, minVolume, ...rest } = query
+): Omit<BlueprintQuery, 'budgetMinSlider' | 'budgetMaxSlider' | 'rankingTimeHours' | 'minVolume'> {
+  const { budgetMinSlider: _budgetMinSlider, budgetMaxSlider: _budgetMaxSlider, rankingTimeHours: _rankingTimeHours, minVolume: _minVolume, ...rest } = query
   return rest
 }
 
@@ -77,7 +77,7 @@ export const BlueprintQueryFilters = forwardRef<
   useEffect(() => {
     const deferred = JSON.parse(debouncedRankingFields) as Pick<
       BlueprintQuery,
-      'budgetMinSlider' | 'budgetMaxSlider' | 'batchSize' | 'minVolume'
+      'budgetMinSlider' | 'budgetMaxSlider' | 'rankingTimeHours' | 'minVolume'
     >
     onRankingQueryChange({ ...stableImmediateQuery, ...deferred })
   }, [debouncedRankingFields, stableImmediateQuery, onRankingQueryChange])

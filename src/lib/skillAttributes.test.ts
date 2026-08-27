@@ -12,7 +12,6 @@ import {
   implantBonusFromDescription,
   implantsFromTypeIds,
   mergeImplantBonuses,
-  implantTypeIdForBonus,
   fittedImplantsFromTypeIds,
 } from '@/lib/skillImplants'
 import { normalizeImplantTypeIds } from '@/services/character/characterImplantsService'

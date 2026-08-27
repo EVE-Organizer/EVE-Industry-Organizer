@@ -14,6 +14,26 @@ interface StructureTypePickerProps {
   className?: string
 }
 
+function StructureArt({ type, slotSize }: { type: StructureType; slotSize: number }) {
+  return (
+    <span
+      className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-eve-border bg-base-300/80 shadow-sm"
+      style={{ width: slotSize, height: slotSize }}
+      aria-hidden
+    >
+      <EveImage
+        id={STRUCTURE_TYPE_IDS[type]}
+        variant="render"
+        size={slotSize}
+        framed={false}
+        alt=""
+        lazy={false}
+        className="max-w-full max-h-full object-contain"
+      />
+    </span>
+  )
+}
+
 export function StructureTypePicker({
   value,
   onChange,
@@ -28,26 +48,6 @@ export function StructureTypePicker({
     size === 'sm'
       ? 'input input-bordered input-sm !h-12 !min-h-12 py-1'
       : 'input input-bordered !h-14 !min-h-14 py-1.5'
-
-  function StructureArt({ type, slotSize }: { type: StructureType; slotSize: number }) {
-    return (
-      <span
-        className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-eve-border bg-base-300/80 shadow-sm"
-        style={{ width: slotSize, height: slotSize }}
-        aria-hidden
-      >
-        <EveImage
-          id={STRUCTURE_TYPE_IDS[type]}
-          variant="render"
-          size={slotSize}
-          framed={false}
-          alt=""
-          lazy={false}
-          className="max-w-full max-h-full object-contain"
-        />
-      </span>
-    )
-  }
 
   useEffect(() => {
     if (!open) return

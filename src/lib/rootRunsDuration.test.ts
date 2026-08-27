@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import {
   applyRootEntryPatch,
   createSyncedPlanRootEntry,
-  durationHoursFromRuns,
   inGameDurationHoursFromRuns,
   inGameRunsFromDurationHours,
   jobTimeSecondsForRuns,

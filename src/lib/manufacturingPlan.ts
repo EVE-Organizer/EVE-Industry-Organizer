@@ -22,7 +22,7 @@ import {
   jobTimeSecondsForRuns,
   runsForDemand,
 } from '@/lib/rootRunsDuration'
-import { activeConcurrentCopies, duplicateRootCount, totalRootRuns } from '@/lib/supplyChainSlots'
+import { activeConcurrentCopies, totalRootRuns } from '@/lib/supplyChainSlots'
 import { manufacturingSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { getBlueprintForBpo, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { isRawMaterial } from '@/lib/supplyChain'

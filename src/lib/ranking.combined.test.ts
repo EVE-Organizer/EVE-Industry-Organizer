@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { defaultQuery } from '@/lib/blueprintQuery'
 import { finalizeRankedRows, rankBlueprintsFromMarket, setupBudgetFromSlider } from '@/lib/ranking'
+import { buildBlueprintRankingSettings } from '@/lib/structureSettings'
 import { buildTypeMap } from '@/services/data/sdeLoader'
-import type { BlueprintRegistry, GlobalSettings, TypeInfo } from '@/types'
+import type { BlueprintRegistry, TypeInfo } from '@/types'
 import { DEFAULT_SETTINGS } from '@/types'
 
 function loadFixture<T>(path: string): T {
@@ -23,12 +24,11 @@ describe('combined ranking includes high-iph formulas', () => {
   const typeMap = buildTypeMap(types)
 
   const q = defaultQuery(DEFAULT_SETTINGS)
-  const settings: GlobalSettings & { batchSize: number } = {
-    ...DEFAULT_SETTINGS,
-    batchSize: q.batchSize,
+  const settings = buildBlueprintRankingSettings(DEFAULT_SETTINGS, systems, {
+    mfgSystem: q.mfgSystem,
+    rankingTimeHours: q.rankingTimeHours,
     priceMethod: q.priceMethod,
-    manufacturingSystemId: q.mfgSystem,
-  }
+  })
   const baseFilters = {
     minSetupCost: setupBudgetFromSlider(q.budgetMinSlider),
     maxSetupCost: setupBudgetFromSlider(q.budgetMaxSlider),
@@ -64,7 +64,22 @@ describe('combined ranking includes high-iph formulas', () => {
     const goal = relaxed.find((r) => r.blueprint.productTypeId === GOAL_ORIENTING_TYPE_ID)
     expect(goal).toBeDefined()
     expect(goal!.iph).toBeGreaterThan(400_000)
-    expect(goal!.upfrontCapital).toBeGreaterThan(baseFilters.maxSetupCost)
+    expect(goal!.upfrontCapital).toBeGreaterThan(20_000_000)
+
+    const cappedBudget = rankBlueprintsFromMarket(
+      registry,
+      market,
+      regions,
+      typeMap,
+      q.hub,
+      q.window,
+      settings,
+      { ...baseFilters, recipeKinds: ['reaction'], maxSetupCost: 20_000_000 },
+      systems,
+    )
+    expect(
+      cappedBudget.find((r) => r.blueprint.productTypeId === GOAL_ORIENTING_TYPE_ID),
+    ).toBeUndefined()
 
     const defaultFormula = rankBlueprintsFromMarket(
       registry,
@@ -79,7 +94,7 @@ describe('combined ranking includes high-iph formulas', () => {
     )
     expect(
       defaultFormula.find((r) => r.blueprint.productTypeId === GOAL_ORIENTING_TYPE_ID),
-    ).toBeUndefined()
+    ).toBeDefined()
   })
 
   it('keeps top formulas visible when both recipe kinds are selected', () => {

@@ -135,16 +135,25 @@ export function ManufacturingRigFields({
   }
 
   return (
-    <div className="rounded-lg border border-eve-border bg-base-300/20 px-3 py-3">
-      <div className="flex items-center gap-1.5 text-xs font-medium opacity-70 mb-2">
-        <span>Structure rigs ({setLabel})</span>
-        <InfoTooltip text="Raitaru fits M-Set (separate ME and TE per category). Azbel fits L-Set Efficiency (ME and TE in one rig). Sotiyo fits XL-Set bundles: equipment and consumable, all ships, and structure and component. Values scale with system security." />
-      </div>
-      <p className="text-[11px] opacity-60 mb-3">
-        Scaling: {rigSecurityLabel(security)} ({rigSecurityMultiplier(security).toFixed(1)}x)
-      </p>
+    <details className="manufacturing-rig-fields">
+      <summary className="manufacturing-rig-fields__summary">
+        <span className="flex min-w-0 flex-1 items-center gap-1.5">
+          <span className="truncate">Structure rigs ({setLabel})</span>
+          <span
+            className="shrink-0"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <InfoTooltip text="Raitaru fits M-Set (separate ME and TE per category). Azbel fits L-Set Efficiency (ME and TE in one rig). Sotiyo fits XL-Set bundles: equipment and consumable, all ships, and structure and component. Values scale with system security." />
+          </span>
+        </span>
+        <span className="manufacturing-rig-fields__summary-meta shrink-0 tabular-nums">
+          {rigSecurityLabel(security)} ({rigSecurityMultiplier(security).toFixed(1)}x)
+        </span>
+      </summary>
 
-      <div className="mb-3 space-y-3">
+      <div className="manufacturing-rig-fields__body">
+        <div className="mb-3 space-y-3">
         {sections.map((section) => (
           <div key={section.title}>
             <p className="text-[10px] uppercase tracking-wide opacity-50 mb-1">{section.title}</p>
@@ -253,6 +262,7 @@ export function ManufacturingRigFields({
           onChange({ manufacturingRigs: patchRigs(rigs, { rigJobCostBonusPercent }) })
         }
       />
-    </div>
+      </div>
+    </details>
   )
 }

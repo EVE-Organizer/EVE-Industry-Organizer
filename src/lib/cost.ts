@@ -2,7 +2,6 @@ import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings, M
 import { isReactionRecipe, recipeKind } from '@/lib/recipes'
 import {
   resolveManufacturingModifiers,
-  resolveReactionModifiers,
   resolveRecipeModifiers,
 } from '@/lib/facilityModifiers'
 import {
@@ -207,6 +206,45 @@ export function runsForJobTime(
   return best
 }
 
+export function runsForReactionJobTime(
+  jobTimeSeconds: number,
+  baseTimeSeconds: number,
+  reactions: number,
+  structureTeBonusPercent = 0,
+  options?: { step?: number; maxRuns?: number | null },
+): number {
+  const perRun = reactionTimePerRun(baseTimeSeconds, reactions, structureTeBonusPercent)
+  const step = options?.step ?? BATCH_SIZE_STEP
+  const minRuns = minRunsForStep(step)
+  if (!Number.isFinite(perRun) || perRun <= 0) return minRuns
+  if (!Number.isFinite(jobTimeSeconds) || jobTimeSeconds <= 0) return minRuns
+
+  const maxRuns = options && 'maxRuns' in options ? options.maxRuns : MAX_BATCH_SIZE
+  const exactRuns = jobTimeSeconds / perRun
+
+  if (maxRuns != null && exactRuns >= maxRuns) return maxRuns
+  if (exactRuns <= minRuns) return minRuns
+
+  const low = Math.floor(exactRuns / step) * step
+  const high = Math.ceil(exactRuns / step) * step
+  const candidates = new Set<number>([
+    clampRunsToStep(low, step, maxRuns),
+    clampRunsToStep(high, step, maxRuns),
+    clampRunsToStep(exactRuns, step, maxRuns),
+  ])
+
+  let best = minRuns
+  let bestError = Infinity
+  for (const runs of candidates) {
+    const error = Math.abs(perRun * runs - jobTimeSeconds)
+    if (error < bestError) {
+      bestError = error
+      best = runs
+    }
+  }
+  return best
+}
+
 export function materialCost(
   materials: { typeId: number; quantity: number }[],
   prices: Map<number, number>,
@@ -254,12 +292,16 @@ export function totalManufacturingCost(
   me: number,
   systemCostIndex: number,
   reactionCostIndex = systemCostIndex,
+  productCategory?: string,
 ): { materialCost: number; jobCost: number; capital: number; jobTime: number } {
   const runs = settings.batchSize
   const kind = recipeKind(blueprint)
   const costIndex =
     kind === 'reaction' ? reactionCostIndex : systemCostIndex
-  const structure = resolveRecipeModifiers(settings, blueprint)
+  const structure = resolveRecipeModifiers(settings, {
+    ...blueprint,
+    category: productCategory,
+  })
 
   if (isReactionRecipe(blueprint)) {
     const mats = applyME(blueprint.materials, 0, runs, structure.meBonusPercent)

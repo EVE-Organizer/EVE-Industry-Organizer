@@ -9,7 +9,8 @@ import {
   getBlueprintForProduct,
 } from '@/services/data/sdeLoader'
 import { searchParamsToQuery } from '@/lib/blueprintQuery'
-import { buildManufacturingSettings } from '@/lib/structureSettings'
+import { buildBlueprintRankingSettings } from '@/lib/structureSettings'
+import { planExpansionSettingsKey } from '@/lib/planExpansionSettings'
 import { BlueprintGraphModal } from '@/components/BlueprintGraphModal'
 import { LoadingState, PageHeader } from '@/components/Layout'
 
@@ -31,14 +32,16 @@ export function ProductionGraphPage() {
     [searchParams, settings],
   )
 
+  const facilitySettingsKey = planExpansionSettingsKey(settings)
+
   const manufacturingSettings = useMemo(
     (): ManufacturingSettings =>
-      buildManufacturingSettings(settings, sde?.systems, {
-        manufacturingSystemId: query.mfgSystem,
-        batchSize: query.batchSize,
+      buildBlueprintRankingSettings(settings, sde?.systems, {
+        mfgSystem: query.mfgSystem,
+        rankingTimeHours: query.rankingTimeHours,
         priceMethod: query.priceMethod,
       }),
-    [settings, sde?.systems, query.batchSize, query.mfgSystem, query.priceMethod],
+    [settings, facilitySettingsKey, sde?.systems, query.rankingTimeHours, query.mfgSystem, query.priceMethod],
   )
 
   const blueprint = useMemo(() => {

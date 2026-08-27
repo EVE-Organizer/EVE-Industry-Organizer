@@ -37,17 +37,15 @@ import {
   getHubMarket,
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
-import { buildWindowPriceMap } from '@/lib/ranking'
+import { buildWindowPriceMap, resolveRankingRunsFromTime } from '@/lib/ranking'
 import {
   revenueFromSale,
   applyTE,
   applyReactionTime,
-  reactionTimePerRun,
   blueprintMeTe,
-  runsForJobTime,
   clampGraphRuns,
 } from '@/lib/cost'
-import { resolveReactionModifiers, resolveManufacturingModifiers } from '@/lib/facilityModifiers'
+import { resolveReactionModifiers, resolveRecipeModifiersForBlueprint } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
 import { buildSupplyChain, findBuildTargetDetails, type BuildTargetDetail } from '@/lib/supplyChain'
 import { tierLabel } from '@/lib/blueprintGroups'
@@ -451,10 +449,11 @@ interface OutputSummary {
 function graphStructureTe(
   blueprint: BlueprintInfo,
   settings: ManufacturingSettings | GlobalSettings,
+  productCategory?: string,
 ): number {
   const structure = isReactionRecipe(blueprint)
     ? resolveReactionModifiers(settings, blueprint)
-    : resolveManufacturingModifiers(settings, blueprint)
+    : resolveRecipeModifiersForBlueprint(settings, blueprint, productCategory)
   return structure.teBonusPercent
 }
 
@@ -462,8 +461,9 @@ function graphJobTimeSeconds(
   blueprint: BlueprintInfo,
   settings: ManufacturingSettings | GlobalSettings,
   runs: number,
+  productCategory?: string,
 ): number {
-  const structureTe = graphStructureTe(blueprint, settings)
+  const structureTe = graphStructureTe(blueprint, settings, productCategory)
   if (isReactionRecipe(blueprint)) {
     return applyReactionTime(
       blueprint.manufacturingTime,
@@ -483,39 +483,13 @@ function graphJobTimeSeconds(
   )
 }
 
-function graphRunsFromJobTime(
-  blueprint: BlueprintInfo,
-  settings: GlobalSettings,
-  jobTimeSeconds: number,
-): number {
-  const structureTe = graphStructureTe(blueprint, settings)
-  if (isReactionRecipe(blueprint)) {
-    const perRun = reactionTimePerRun(
-      blueprint.manufacturingTime,
-      skillLevel(settings.skills, 'reactions'),
-      structureTe,
-    )
-    if (perRun <= 0) return 1
-    return Math.max(1, Math.floor(jobTimeSeconds / perRun))
-  }
-  const { te } = blueprintMeTe(blueprint.tier, settings, blueprint)
-  return runsForJobTime(
-    jobTimeSeconds,
-    blueprint.manufacturingTime,
-    te,
-    skillLevel(settings.skills, 'industry'),
-    skillLevel(settings.skills, 'advancedIndustry'),
-    structureTe,
-    { step: 1, maxRuns: null },
-  )
-}
-
 function buildOutputSummary(
   root: SupplyChainNode,
   blueprint: BlueprintInfo,
   settings: ManufacturingSettings,
   sellPrices: Map<number, number>,
   buyPrices?: Map<number, number>,
+  productCategory?: string,
 ): OutputSummary {
   const runs = settings.batchSize
   const productQuantity = blueprint.productQuantity
@@ -544,7 +518,7 @@ function buildOutputSummary(
   const netProfit = net - setupCost
   const marginPercent = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
   const buyFinishedCost = root.buyCost ?? 0
-  const jobTimeSeconds = graphJobTimeSeconds(blueprint, settings, runs)
+  const jobTimeSeconds = graphJobTimeSeconds(blueprint, settings, runs, productCategory)
 
   return {
     runs,
@@ -1486,8 +1460,16 @@ function attachOutputSummary(
   settings: ManufacturingSettings,
   sellPrices: Map<number, number>,
   buyPrices?: Map<number, number>,
+  productCategory?: string,
 ): Node[] {
-  const summary = buildOutputSummary(root, blueprint, settings, sellPrices, buyPrices)
+  const summary = buildOutputSummary(
+    root,
+    blueprint,
+    settings,
+    sellPrices,
+    buyPrices,
+    productCategory,
+  )
   return nodes.map((node) => {
     if ((node.data as SupplyNodeData).role !== 'root') return node
     return {
@@ -1615,6 +1597,7 @@ function GraphProductionControls({
   jobTimeSeconds,
   onRunsChange,
   onJobTimeChange,
+  productCategory,
 }: {
   blueprint: BlueprintInfo
   settings: ManufacturingSettings
@@ -1622,8 +1605,9 @@ function GraphProductionControls({
   jobTimeSeconds: number
   onRunsChange: (runs: number) => void
   onJobTimeChange: (jobTimeSeconds: number) => void
+  productCategory?: string
 }) {
-  const perRunSeconds = graphJobTimeSeconds(blueprint, settings, 1)
+  const perRunSeconds = graphJobTimeSeconds(blueprint, settings, 1, productCategory)
   const jobHours = jobTimeSeconds / 3600
   const outputQty = blueprint.productQuantity * runs
 
@@ -1682,7 +1666,7 @@ function GraphProductionControls({
 
 export function BlueprintGraphModal({
   blueprint,
-  rankedRow: _rankedRow,
+  rankedRow,
   buyHub,
   sellHub: sellHubProp,
   priceWindow = DEFAULT_SETTINGS.priceWindow,
@@ -1706,21 +1690,43 @@ export function BlueprintGraphModal({
   }, [blueprint?.productTypeId, blueprint])
 
   const resolveGraphRuns = useCallback(
-    (productTypeId: number | undefined): number => {
-      if (productTypeId != null) {
-        const planRuns = getPlanRuns?.(productTypeId)
+    (bp: BlueprintInfo | null | undefined, productCategory?: string): number => {
+      if (bp?.productTypeId != null) {
+        const planRuns = getPlanRuns?.(bp.productTypeId)
         if (planRuns != null && planRuns > 0) return planRuns
+      }
+      if (rankedRow && bp?.productTypeId === rankedRow.blueprint.productTypeId) {
+        return rankedRow.iphBreakdown.runs
+      }
+      if (bp && settings.rankingTargetTimeSeconds && settings.rankingTargetTimeSeconds > 0) {
+        const fromTime = resolveRankingRunsFromTime(
+          settings.rankingTargetTimeSeconds,
+          bp,
+          productCategory,
+          settings,
+          bp.productQuantity,
+          0,
+        )
+        if (fromTime != null) return fromTime
       }
       return settings.batchSize
     },
-    [getPlanRuns, settings.batchSize],
+    [getPlanRuns, rankedRow, settings],
   )
 
-  const [graphRuns, setGraphRuns] = useState(() => resolveGraphRuns(blueprint?.productTypeId))
+  const activeProductCategory = useMemo(() => {
+    if (!sde || !activeBlueprint) return undefined
+    return buildTypeMap(sde.types).get(activeBlueprint.productTypeId)?.category
+  }, [sde, activeBlueprint])
 
+  const [graphRuns, setGraphRuns] = useState(() => resolveGraphRuns(blueprint, undefined))
+
+  const activeProductTypeId = activeBlueprint?.productTypeId
   useEffect(() => {
-    setGraphRuns(resolveGraphRuns(activeBlueprint?.productTypeId))
-  }, [activeBlueprint?.productTypeId, resolveGraphRuns])
+    setGraphRuns(resolveGraphRuns(activeBlueprint, activeProductCategory))
+    // ponytail: only reset runs when navigating products, not on global settings edits
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resolveGraphRuns intentionally omitted
+  }, [activeProductTypeId, activeProductCategory])
 
   const graphSettings = useMemo(
     (): ManufacturingSettings => ({
@@ -1732,8 +1738,15 @@ export function BlueprintGraphModal({
 
   const graphJobTiming = useMemo(() => {
     if (!activeBlueprint) return { jobTimeSeconds: 0 }
-    return { jobTimeSeconds: graphJobTimeSeconds(activeBlueprint, settings, graphRuns) }
-  }, [activeBlueprint, settings, graphRuns])
+    return {
+      jobTimeSeconds: graphJobTimeSeconds(
+        activeBlueprint,
+        settings,
+        graphRuns,
+        activeProductCategory,
+      ),
+    }
+  }, [activeBlueprint, activeProductCategory, settings, graphRuns])
 
   const handleRunsChange = useCallback((runs: number) => {
     setGraphRuns(clampGraphRuns(runs))
@@ -1742,9 +1755,21 @@ export function BlueprintGraphModal({
   const handleJobTimeChange = useCallback(
     (jobTimeSeconds: number) => {
       if (!activeBlueprint) return
-      setGraphRuns(clampGraphRuns(graphRunsFromJobTime(activeBlueprint, settings, jobTimeSeconds)))
+      const avgVolume =
+        rankedRow?.blueprint.productTypeId === activeBlueprint.productTypeId
+          ? rankedRow.iphBreakdown.avgVolume
+          : 0
+      const fromTime = resolveRankingRunsFromTime(
+        jobTimeSeconds,
+        activeBlueprint,
+        activeProductCategory,
+        settings,
+        activeBlueprint.productQuantity,
+        avgVolume,
+      )
+      if (fromTime != null) setGraphRuns(fromTime)
     },
-    [activeBlueprint, settings],
+    [activeBlueprint, activeProductCategory, rankedRow, settings],
   )
 
   const activeProductName = useMemo(() => {
@@ -1875,6 +1900,7 @@ export function BlueprintGraphModal({
       graphSettings,
       sellPrices,
       buyPrices,
+      typeMap.get(activeBlueprint.productTypeId)?.category,
     )
     const withTargets = attachBuildTargetNodes(withSummary, flow.edges, buildTargets, sourceName)
     const aligned = withAlignedEdgeHandles(withTargets.nodes, withTargets.edges)
@@ -1963,6 +1989,7 @@ export function BlueprintGraphModal({
         jobTimeSeconds={graphJobTiming.jobTimeSeconds}
         onRunsChange={handleRunsChange}
         onJobTimeChange={handleJobTimeChange}
+        productCategory={activeProductCategory}
       />
       <div className={graphCanvasClassName}>
         {flowNodes.length > 0 ? (

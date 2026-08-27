@@ -187,6 +187,15 @@ export function resolveRecipeModifiers(
   return resolveManufacturingModifiers(settings, blueprint)
 }
 
+/** Manufacturing/reaction modifiers with SDE product category for per-family rigs. */
+export function resolveRecipeModifiersForBlueprint(
+  settings: GlobalSettings,
+  blueprint: Pick<BlueprintInfo, 'kind' | 'reactionFamily' | 'productGroup' | 'tier'>,
+  category?: string,
+): StructureModifiers {
+  return resolveRecipeModifiers(settings, { ...blueprint, category })
+}
+
 export function normalizeReactionFacility(
   parsed: Partial<ReactionFacilitySettings> | undefined,
   manufacturingSystemId: number,

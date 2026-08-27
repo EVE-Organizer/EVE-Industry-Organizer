@@ -1,5 +1,5 @@
 import type { GlobalSettings, ManufacturingSettings, StructureType } from '@/types'
-import { DEFAULT_BATCH_SIZE, STRUCTURE_HULL_PRESETS } from '@/types'
+import { DEFAULT_BATCH_SIZE, MAX_RANKING_TIME_HOURS, MIN_RANKING_TIME_HOURS, STRUCTURE_HULL_PRESETS } from '@/types'
 
 /** EVE type icons for manufacturing location options. */
 export const STRUCTURE_TYPE_IDS: Record<StructureType, number> = {
@@ -118,6 +118,37 @@ export function settingsForManufacturingSystem(
   }
 }
 
+/** Build system for ranking when a saved production location owns the system picker. */
+export function effectiveManufacturingSystemId(
+  settings: Pick<GlobalSettings, 'manufacturingSystemId' | 'productionLocationId'>,
+  queryMfgSystem: number,
+): number {
+  return settings.productionLocationId != null
+    ? settings.manufacturingSystemId
+    : queryMfgSystem
+}
+
+/** Blueprint ranking/graph settings: location system wins over URL query override. */
+export function buildBlueprintRankingSettings(
+  settings: GlobalSettings,
+  systems: { systemId: number; security: number }[] | undefined,
+  query: {
+    mfgSystem: number
+    rankingTimeHours: number
+    priceMethod: GlobalSettings['priceMethod']
+  },
+): ManufacturingSettings {
+  const rankingTimeHours = Math.min(
+    MAX_RANKING_TIME_HOURS,
+    Math.max(MIN_RANKING_TIME_HOURS, query.rankingTimeHours),
+  )
+  return buildManufacturingSettings(settings, systems, {
+    manufacturingSystemId: effectiveManufacturingSystemId(settings, query.mfgSystem),
+    rankingTargetTimeSeconds: rankingTimeHours * 3600,
+    priceMethod: query.priceMethod,
+  })
+}
+
 /** ManufacturingSettings for cost/ranking with batch size and build-system security. */
 export function buildManufacturingSettings(
   settings: GlobalSettings,
@@ -125,6 +156,7 @@ export function buildManufacturingSettings(
   overrides: {
     manufacturingSystemId?: number
     batchSize?: number
+    rankingTargetTimeSeconds?: number
     priceMethod?: GlobalSettings['priceMethod']
   } = {},
 ): ManufacturingSettings {

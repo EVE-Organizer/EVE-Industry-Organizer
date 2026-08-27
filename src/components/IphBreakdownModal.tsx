@@ -92,13 +92,21 @@ function SkillTile({ label, value, detail }: { label: string; value: number | st
 }
 
 function BatchSteps({ breakdown }: { breakdown: SetupCostBreakdown }) {
-  const { batchSizeSetting, productQuantity, avgVolume, volumeCapDays, runs, outputQty } = breakdown
+  const { targetJobTimeSeconds, productQuantity, avgVolume, volumeCapDays, runs, outputQty } =
+    breakdown
+
+  function formatDuration(seconds: number): string {
+    if (seconds >= 86400) return `${formatDecimal(seconds / 86400, 2)} days`
+    if (seconds >= 3600) return `${formatDecimal(seconds / 3600, 2)} hr`
+    if (seconds >= 60) return `${formatDecimal(seconds / 60, 1)} min`
+    return `${formatNumber(seconds, 0)} sec`
+  }
 
   if (avgVolume <= 0) {
     return (
       <>
-        <CalcStep label="No hub volume for this window">
-          Use full batch from settings: <strong>{runs}</strong> runs
+        <CalcStep label="Target job time">
+          {formatDuration(targetJobTimeSeconds)} → <strong>{runs}</strong> runs for this blueprint
         </CalcStep>
         <CalcStep label="Output quantity">
           {runs} runs × {productQuantity} units/run ={' '}
@@ -112,12 +120,14 @@ function BatchSteps({ breakdown }: { breakdown: SetupCostBreakdown }) {
 
   return (
     <>
-      <CalcStep label="Your batch setting">{batchSizeSetting} runs</CalcStep>
+      <CalcStep label="Target job time">
+        {formatDuration(targetJobTimeSeconds)} → <strong>{runs}</strong> runs for this blueprint
+      </CalcStep>
       <CalcStep label="Hub average volume">
         {formatAvgVolume(avgVolume)} units/day (capped at {volumeCapDays} days of volume)
       </CalcStep>
       <CalcStep label="Runs for setup and profit">
-        <strong>{runs} runs</strong> (your batch setting)
+        <strong>{runs} runs</strong> (from your job time setting)
       </CalcStep>
       <CalcStep label="Market volume cap (ISK/hr only)">
         floor({formatAvgVolume(avgVolume)} × {volumeCapDays} ÷ {productQuantity}) ={' '}
@@ -183,7 +193,7 @@ export function IphBreakdownModal({
         <div className="px-5 py-4 max-h-[min(75dvh,36rem)] overflow-y-auto space-y-6 scrollbar-thin">
           <PhaseHeader
             title="Part 1 · Inputs"
-            description="Skills, batch size, and job time set how much you make and how long it takes."
+            description="Skills, job time, and derived runs set how much you make and how long it takes."
           />
 
           <div className="space-y-4">
@@ -265,8 +275,8 @@ export function IphBreakdownModal({
 
             <StepCard
               step={2}
-              title="Batch size"
-              note="Runs are capped so output fits within 7 days of average hub volume."
+              title="Job time → runs"
+              note="Runs are derived from your time filter for this blueprint, then capped for hub volume in ISK/hr."
               result={`${formatQuantity(iph.outputQty)} units`}
               resultLabel="Units in this batch"
             >

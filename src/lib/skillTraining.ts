@@ -120,7 +120,7 @@ export function scaleSkillQueueTimes(
     const newSpm = pair ? spPerMinuteForSkill(newAttrs, pair) : 0
     const ratio = oldSpm > 0 && newSpm > 0 ? oldSpm / newSpm : 1
 
-    let thisSeconds: number | null = null
+    let thisSeconds: number | null
     if (isInProgress(entry, nowMs)) {
       const remainingMs = Math.max(0, Date.parse(entry.finish_date!) - nowMs)
       thisSeconds = Math.round((remainingMs / 1000) * ratio)

@@ -30,7 +30,7 @@ export function MapOpportunityPanel({
   buyHubName,
   rows,
   selectedProductTypeId,
-  warLoading = false,
+  warLoading: _warLoading = false,
   noFactory,
   onSelect,
   onSetSellHub,

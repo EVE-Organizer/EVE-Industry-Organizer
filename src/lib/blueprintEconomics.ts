@@ -392,7 +392,9 @@ export function computeFlatSetup(input: FlatSetupInput): FlatSetupResult {
 
   const baseQtyByType = new Map(blueprint.materials.map((m) => [m.typeId, m.quantity]))
   const setup: SetupCostBreakdown = {
-    batchSizeSetting: settings.batchSize,
+    targetJobTimeSeconds:
+      settings.rankingTargetTimeSeconds ??
+      settings.batchSize * 3600,
     productQuantity: blueprint.productQuantity,
     avgVolume,
     volumeCapDays,

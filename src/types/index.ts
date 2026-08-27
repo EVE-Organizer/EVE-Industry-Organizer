@@ -7,6 +7,11 @@ export const MAX_BATCH_SIZE = 10_000
 export const BATCH_SIZE_STEP = 10
 export const DEFAULT_BATCH_SIZE = 100
 
+/** Blueprint ranking filter: target job duration (hours in UI, seconds in settings). */
+export const MIN_RANKING_TIME_HOURS = 1
+export const MAX_RANKING_TIME_HOURS = 720
+export const DEFAULT_RANKING_TIME_HOURS = 720
+
 export type BlueprintTier = 't1' | 't2' | 'faction'
 
 export const BLUEPRINT_TIERS: BlueprintTier[] = ['t1', 't2', 'faction']
@@ -419,7 +424,11 @@ export interface GlobalSettings {
 }
 
 /** Global settings plus per-job run count for manufacturing cost and profit math. */
-export type ManufacturingSettings = GlobalSettings & { batchSize: number }
+export type ManufacturingSettings = GlobalSettings & {
+  batchSize: number
+  /** Blueprint ranking: total job time; runs are derived per blueprint from this. */
+  rankingTargetTimeSeconds?: number
+}
 
 export interface SkillLevels {
   industry: number
@@ -669,7 +678,7 @@ export interface SetupMaterialLine {
 }
 
 export interface SetupCostBreakdown {
-  batchSizeSetting: number
+  targetJobTimeSeconds: number
   productQuantity: number
   avgVolume: number
   volumeCapDays: number
@@ -739,7 +748,7 @@ export interface IphBreakdown {
   reactions?: number
   /** 1 − (reactions × 4%); set for reaction formulas only. */
   reactionsTimeFactor?: number
-  batchSizeSetting: number
+  targetJobTimeSeconds: number
   productQuantity: number
   avgVolume: number
   volumeCapDays: number

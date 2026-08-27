@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildBlueprintRankingSettings,
   buildManufacturingSettings,
+  effectiveManufacturingSystemId,
   patchManufacturingSystemIfStale,
   securityForSystem,
 } from '@/lib/structureSettings'
@@ -54,5 +56,36 @@ describe('structureSettings manufacturing scope', () => {
         buildSystemSecurity: 1,
       }),
     ).toBeNull()
+  })
+
+  it('prefers saved production location system over URL query override', () => {
+    expect(
+      effectiveManufacturingSystemId(
+        { manufacturingSystemId: 30002780, productionLocationId: 'loc-1' },
+        30000144,
+      ),
+    ).toBe(30002780)
+    expect(
+      effectiveManufacturingSystemId(
+        { manufacturingSystemId: 30002780, productionLocationId: null },
+        30000144,
+      ),
+    ).toBe(30000144)
+  })
+
+  it('scopes blueprint ranking to location system security', () => {
+    const scoped = buildBlueprintRankingSettings(
+      {
+        ...DEFAULT_SETTINGS,
+        productionLocationId: 'loc-1',
+        manufacturingSystemId: 30002780,
+        buildSystemSecurity: 1,
+      },
+      systems,
+      { mfgSystem: 30000144, rankingTimeHours: 720, priceMethod: 'sell_orders' },
+    )
+    expect(scoped.manufacturingSystemId).toBe(30002780)
+    expect(scoped.buildSystemSecurity).toBe(-0.5)
+    expect(scoped.rankingTargetTimeSeconds).toBe(720 * 3600)
   })
 })

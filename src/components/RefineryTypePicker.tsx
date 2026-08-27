@@ -14,6 +14,26 @@ interface RefineryTypePickerProps {
   className?: string
 }
 
+function RefineryArt({ type, slotSize }: { type: RefineryType; slotSize: number }) {
+  return (
+    <span
+      className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-eve-border bg-base-300/80 shadow-sm"
+      style={{ width: slotSize, height: slotSize }}
+      aria-hidden
+    >
+      <EveImage
+        id={REFINERY_TYPE_IDS[type]}
+        variant="render"
+        size={slotSize}
+        framed={false}
+        alt=""
+        lazy={false}
+        className="max-w-full max-h-full object-contain"
+      />
+    </span>
+  )
+}
+
 export function RefineryTypePicker({
   value,
   onChange,
@@ -28,26 +48,6 @@ export function RefineryTypePicker({
     size === 'sm'
       ? 'input input-bordered input-sm !h-12 !min-h-12 py-1'
       : 'input input-bordered !h-14 !min-h-14 py-1.5'
-
-  function RefineryArt({ type, slotSize }: { type: RefineryType; slotSize: number }) {
-    return (
-      <span
-        className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-eve-border bg-base-300/80 shadow-sm"
-        style={{ width: slotSize, height: slotSize }}
-        aria-hidden
-      >
-        <EveImage
-          id={REFINERY_TYPE_IDS[type]}
-          variant="render"
-          size={slotSize}
-          framed={false}
-          alt=""
-          lazy={false}
-          className="max-w-full max-h-full object-contain"
-        />
-      </span>
-    )
-  }
 
   useEffect(() => {
     if (!open) return

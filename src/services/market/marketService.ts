@@ -271,9 +271,11 @@ async function fetchRawHistory(
     }
 
     const etag = forceRefresh ? undefined : (allCached?.etag ?? findEtagForHistory(typeId, regionId))
-    let { history, etag: newEtag, notModified } = await fetchEsiHistoryRaw(typeId, regionId, etag)
+    const first = await fetchEsiHistoryRaw(typeId, regionId, etag)
+    let history = first.history
+    let newEtag = first.etag
 
-    if (notModified) {
+    if (first.notModified) {
       if (allCached) {
         setCached(allKey, allCached.data, 'esi', TTL.history.fresh, TTL.history.stale, newEtag)
         return { raw: allCached.data, etag: newEtag, source: 'cache', fetchedAt: Date.now() }
@@ -281,7 +283,6 @@ async function fetchRawHistory(
       const retry = await fetchEsiHistoryRaw(typeId, regionId)
       history = retry.history
       newEtag = retry.etag
-      notModified = retry.notModified
     }
 
     return { raw: history, etag: newEtag, source: 'esi', fetchedAt: Date.now() }

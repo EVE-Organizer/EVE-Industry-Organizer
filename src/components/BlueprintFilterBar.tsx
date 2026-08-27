@@ -1,27 +1,29 @@
 import { useMemo, type ReactNode } from 'react'
-import { MAX_BATCH_SIZE, MIN_BATCH_SIZE } from '@/types'
 import type { SdeData, ProductGroupCategoryNode } from '@/services/data/sdeLoader'
 import { findProductGroupEntry } from '@/services/data/sdeLoader'
 import {
-  clampBatchSize,
   clampMinVolume,
+  clampRankingTimeHours,
   defaultQuery,
   MAX_MIN_VOLUME_SLIDER,
   recipeKindsEqual,
   type BlueprintQuery,
 } from '@/lib/blueprintQuery'
+import { MAX_RANKING_TIME_HOURS, MIN_RANKING_TIME_HOURS } from '@/types'
 import { useAppStore } from '@/stores/appStore'
 import { CompactSliderField } from '@/components/CompactSliderField'
+import { BlueprintVolumeCategoryPicker } from '@/components/BlueprintVolumeCategoryPicker'
 import { SetupBudgetRange } from '@/components/SetupBudgetRange'
 import { PlanFacilityControls } from '@/components/plan/PlanFacilityControls'
-import { buildManufacturingSettings } from '@/lib/structureSettings'
+import { buildBlueprintRankingSettings } from '@/lib/structureSettings'
+import { planExpansionSettingsKey } from '@/lib/planExpansionSettings'
 import {
   EconomicsFilterSection,
   FilterSection,
 } from '@/components/EconomicsFilterSection'
 import { BlueprintPickerFilterSection } from '@/components/BlueprintPickerFilterSection'
 import { InfoTooltip } from '@/components/InfoTooltip'
-import { formatAvgVolume, formatInputDecimal, formatNumber } from '@/lib/profit'
+import { formatAvgVolume, formatDuration, formatInputDecimal } from '@/lib/profit'
 import type { GlobalSettings, RecipeKind } from '@/types'
 import { DEFAULT_RECIPE_KINDS } from '@/types'
 
@@ -80,12 +82,16 @@ export function BlueprintFilterBar({
   const settings = useAppStore((s) => s.userData.settings)
   const updateSettings = useAppStore((s) => s.updateSettings)
 
+  const facilitySettingsKey = planExpansionSettingsKey(settings)
+
   const facilitySettings = useMemo(
     () =>
-      buildManufacturingSettings(settings, sde?.systems, {
-        manufacturingSystemId: query.mfgSystem,
+      buildBlueprintRankingSettings(settings, sde?.systems, {
+        mfgSystem: query.mfgSystem,
+        rankingTimeHours: query.rankingTimeHours,
+        priceMethod: query.priceMethod,
       }),
-    [settings, sde?.systems, query.mfgSystem],
+    [settings, facilitySettingsKey, sde?.systems, query.mfgSystem, query.rankingTimeHours, query.priceMethod],
   )
 
   function handleReset() {
@@ -214,7 +220,7 @@ export function BlueprintFilterBar({
 
           <FilterSection
             title="Ranking limits"
-            hint="Budget, batch size, and volume cutoffs"
+            hint="Budget, job time, and volume cutoffs"
             className="blueprint-filters__card"
           >
             <div className="blueprint-filters__limits-body">
@@ -232,23 +238,23 @@ export function BlueprintFilterBar({
               <div className="grid grid-cols-1 gap-3 min-w-0 items-stretch">
                 <CompactSliderField
                   variant="panel"
-                  label="Batch size"
-                  tooltip="Number of manufacturing runs per job. Setup cost and profit scale with this value. ISK/hr also caps sell rate to hub volume."
-                  value={query.batchSize}
-                  onChange={(batchSize) => onChange({ batchSize })}
-                  min={MIN_BATCH_SIZE}
-                  max={MAX_BATCH_SIZE}
+                  label="Job time"
+                  tooltip="Target total job duration. Runs sync per blueprint from its base time, TE, and your skills. Setup cost, profit, and ISK/hr use those runs."
+                  value={query.rankingTimeHours}
+                  onChange={(rankingTimeHours) => onChange({ rankingTimeHours })}
+                  min={MIN_RANKING_TIME_HOURS}
+                  max={MAX_RANKING_TIME_HOURS}
                   step={1}
-                  unit="runs"
-                  formatSummary={(v) => `${formatNumber(v, 0)} runs`}
-                  formatDisplay={(v) => formatInputDecimal(v, 0)}
+                  unit="hr"
+                  formatSummary={(v) => formatDuration(v * 3600)}
+                  formatDisplay={(v) => formatInputDecimal(v, 1)}
                   parseInput={(raw) => {
                     const parsed = parseFloat(raw.trim())
                     return Number.isFinite(parsed) ? parsed : null
                   }}
-                  clampValue={clampBatchSize}
-                  formatAxis={(v) => formatNumber(v, 0)}
-                  ariaLabel="Batch size (runs)"
+                  clampValue={clampRankingTimeHours}
+                  formatAxis={(v) => formatDuration(v * 3600)}
+                  ariaLabel="Target job time (hours)"
                 />
 
                 <CompactSliderField
@@ -273,6 +279,12 @@ export function BlueprintFilterBar({
                   formatAxis={(v) => (v === 0 ? 'Any' : formatAvgVolume(v))}
                   inputPlaceholder="Any"
                   ariaLabel="Minimum average daily volume"
+                  actions={
+                    <BlueprintVolumeCategoryPicker
+                      minVolume={query.minVolume}
+                      onChange={(minVolume) => onChange({ minVolume })}
+                    />
+                  }
                 />
               </div>
             </div>

@@ -5,7 +5,7 @@ import { EveImage } from '@/components/EveImage'
 import { BuildSkillGapFlag } from '@/components/BuildSkillGapFlag'
 import { HaulRiskTrigger } from '@/components/HaulRiskModal'
 import { PlanBlueprintItemName } from '@/components/plan/PlanBlueprintItemName'
-import { formatAvgVolume, formatDuration, formatIsk, formatPercent } from '@/lib/profit'
+import { formatAvgVolume, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
 import { tierLabel } from '@/lib/blueprintGroups'
 import { getMissingBuildSkills } from '@/lib/buildRequirements'
 import type { RouteDangerResult } from '@/lib/routeDanger'
@@ -34,6 +34,9 @@ export interface BlueprintItemProps {
 }
 
 function BlueprintMetaLine({ row }: { row: RankedBlueprintRow }) {
+  const runs = row.iphBreakdown.runs
+  const outputQty = row.iphBreakdown.outputQty
+
   return (
     <span className="text-[10px] flex items-center gap-1 flex-wrap">
       <span className="opacity-50 flex items-center gap-1">
@@ -43,12 +46,14 @@ function BlueprintMetaLine({ row }: { row: RankedBlueprintRow }) {
         ) : null}
         {row.product.group}
       </span>
-      {row.jobTimeSeconds > 0 ? (
+      {outputQty > 0 ? (
         <span
           className="shrink-0 tabular-nums text-info/70"
-          title="Total job duration for your batch size"
+          title={`${formatQuantity(outputQty)} units from ${runs} run${runs === 1 ? '' : 's'} (your job time filter)`}
         >
-          {formatDuration(row.jobTimeSeconds)}
+          {formatQuantity(outputQty)} units
+          <span className="opacity-60"> · </span>
+          {formatNumber(runs, 0)} run{runs === 1 ? '' : 's'}
         </span>
       ) : null}
     </span>

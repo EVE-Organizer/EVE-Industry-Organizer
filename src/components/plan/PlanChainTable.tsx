@@ -429,6 +429,14 @@ function BuildSection({
   )
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
+  const totalHaulOutM3 = useMemo(
+    () =>
+      tableRows
+        .filter((row) => row.kind === 'leaf' && row.node.isRoot)
+        .reduce((sum, row) => sum + nodeHaulOutVolumeM3(row.node, typeVolumes), 0),
+    [tableRows, typeVolumes],
+  )
+
   if (nodes.length === 0) return null
 
   const rootCount = planRoots?.length ?? nodes.filter((n) => n.isRoot).length
@@ -454,14 +462,6 @@ function BuildSection({
   }
 
   const visibleRows = tableRows.filter((row) => isExpandableRowVisible(row, collapsed))
-
-  const totalHaulOutM3 = useMemo(
-    () =>
-      tableRows
-        .filter((row) => row.kind === 'leaf' && row.node.isRoot)
-        .reduce((sum, row) => sum + nodeHaulOutVolumeM3(row.node, typeVolumes), 0),
-    [tableRows, typeVolumes],
-  )
 
   return (
     <PlanChainSection
@@ -897,6 +897,25 @@ function BuySection({
 
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
+  const buyTotal = useMemo(
+    () => buyNodes.reduce((sum, n) => sum + (n.buyCost ?? 0), 0),
+    [buyNodes],
+  )
+
+  const totalUnits = useMemo(
+    () => buyNodes.reduce((sum, n) => sum + n.totalDemandQty, 0),
+    [buyNodes],
+  )
+
+  const totalHaulInM3 = useMemo(
+    () =>
+      buyNodes.reduce((sum, node) => {
+        const have = inventoryByTypeId?.get(node.productTypeId) ?? 0
+        return sum + nodeHaulInVolumeM3(node, have, showInventory, typeVolumes)
+      }, 0),
+    [buyNodes, inventoryByTypeId, showInventory, typeVolumes],
+  )
+
   if (buyNodes.length === 0) return null
 
   function toggleCollapse(key: string) {
@@ -917,25 +936,6 @@ function BuySection({
   }
 
   const visibleRows = tableRows.filter((row) => isBuyTableRowVisible(row, collapsed))
-
-  const buyTotal = useMemo(
-    () => buyNodes.reduce((sum, n) => sum + (n.buyCost ?? 0), 0),
-    [buyNodes],
-  )
-
-  const totalUnits = useMemo(
-    () => buyNodes.reduce((sum, n) => sum + n.totalDemandQty, 0),
-    [buyNodes],
-  )
-
-  const totalHaulInM3 = useMemo(
-    () =>
-      buyNodes.reduce((sum, node) => {
-        const have = inventoryByTypeId?.get(node.productTypeId) ?? 0
-        return sum + nodeHaulInVolumeM3(node, have, showInventory, typeVolumes)
-      }, 0),
-    [buyNodes, inventoryByTypeId, showInventory, typeVolumes],
-  )
 
   function rowExpanded(row: PlanBuyTableRow): boolean {
     if (row.kind === 'group') return !collapsed.has(row.key)
