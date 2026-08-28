@@ -8,7 +8,7 @@ import {
   skillLevel,
   trainingAttributesForSkill,
 } from '@/lib/skillFields'
-import { manufacturingSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
+import { manufacturingSlotsFromSkills, reactionSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
 
 describe('skillFields', () => {
   it('skillLevel returns 0 for missing keys', () => {
@@ -59,6 +59,13 @@ describe('skillFields', () => {
         advancedMassProduction: 5,
       }),
     ).toBe(11)
+  })
+
+  it('counts reaction slots from Mass Reactions skills', () => {
+    expect(reactionSlotsFromSkills({ reactions: 3, massReactions: 5, advancedMassReactions: 5 })).toBe(
+      11,
+    )
+    expect(reactionSlotsFromSkills({ massReactions: 4, advancedMassReactions: 5 })).toBe(1)
   })
 
   it('locks advanced laboratory until laboratory operation V and science III', () => {

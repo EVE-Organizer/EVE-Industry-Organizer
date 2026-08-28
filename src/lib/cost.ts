@@ -1,12 +1,5 @@
-import type {
-  BlueprintInfo,
-  BlueprintMaterial,
-  BlueprintTier,
-  GlobalSettings,
-  ManufacturingSettings,
-  StructureModifiers,
-  SystemInfo,
-} from '@/types'
+import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings, ManufacturingSettings, SkillLevels, StructureModifiers, SystemInfo } from '@/types'
+import { itemTypeManufacturingTimeFactor, inventionSuccessChanceFromLevels, resolveInventionSkillLevels } from '@/lib/industrySkillBonuses'
 import { scienceCostIndex } from '@/lib/structureSettings'
 import { isReactionRecipe, recipeKind } from '@/lib/recipes'
 import {
@@ -113,15 +106,19 @@ export function applyTE(
   industry: number,
   advancedIndustry: number,
   structureTeBonusPercent = 0,
+  requiredSkills?: Record<string, number>,
+  skills?: Partial<SkillLevels>,
 ): number {
   const structFactor = bonusFactor(structureTeBonusPercent)
+  const itemFactor = itemTypeManufacturingTimeFactor(requiredSkills, skills)
   return (
     baseTimeSeconds *
     runs *
     teTimeFactor(te) *
     industryTimeFactor(industry) *
     structFactor *
-    advancedIndustryTimeFactor(advancedIndustry)
+    advancedIndustryTimeFactor(advancedIndustry) *
+    itemFactor
   )
 }
 
@@ -204,8 +201,19 @@ export function manufacturingTimePerRun(
   industry: number,
   advancedIndustry: number,
   structureTeBonusPercent = 0,
+  requiredSkills?: Record<string, number>,
+  skills?: Partial<SkillLevels>,
 ): number {
-  return applyTE(baseTimeSeconds, te, 1, industry, advancedIndustry, structureTeBonusPercent)
+  return applyTE(
+    baseTimeSeconds,
+    te,
+    1,
+    industry,
+    advancedIndustry,
+    structureTeBonusPercent,
+    requiredSkills,
+    skills,
+  )
 }
 
 export function clampManufacturingRuns(value: number): number {
@@ -406,6 +414,8 @@ export function totalManufacturingCost(
     settings.skills.industry ?? 0,
     settings.skills.advancedIndustry ?? 0,
     structure.teBonusPercent,
+    blueprint.requiredSkills,
+    settings.skills,
   )
   return {
     materialCost: matCost,
@@ -492,6 +502,9 @@ export function inventionBlueprintCostPerRun({
   baseChance,
   runsPerBPC,
   skillLevel,
+  encryptionLevel,
+  datacore1Level,
+  datacore2Level,
   copyFeePerAttempt = 0,
   inventionFeePerAttempt = 0,
 }: {
@@ -499,15 +512,20 @@ export function inventionBlueprintCostPerRun({
   prices: Map<number, number>
   baseChance: number
   runsPerBPC: number
+  /** Fallback when per-skill levels are omitted. */
   skillLevel: number
+  encryptionLevel?: number
+  datacore1Level?: number
+  datacore2Level?: number
   copyFeePerAttempt?: number
   inventionFeePerAttempt?: number
 }): InventionCostResult {
   const datacoreCost = materialCost(datacores, prices)
   const attemptCost = datacoreCost + copyFeePerAttempt + inventionFeePerAttempt
-  // Encryption and both datacore skills add +1% per level (multiplicative).
-  const skillFactor = 1 + skillLevel * 0.01
-  const chance = Math.min(1, baseChance * skillFactor * skillFactor * skillFactor)
+  const enc = encryptionLevel ?? skillLevel
+  const dc1 = datacore1Level ?? skillLevel
+  const dc2 = datacore2Level ?? skillLevel
+  const chance = inventionSuccessChanceFromLevels(baseChance, enc, dc1, dc2)
   const expectedRunsPerAttempt = chance * runsPerBPC
   const costPerRun = expectedRunsPerAttempt > 0 ? attemptCost / expectedRunsPerAttempt : Infinity
   return { datacoreCost, attemptCost, chance, expectedRunsPerAttempt, costPerRun }
@@ -544,12 +562,20 @@ export function inventionBlueprintCostForSettings(args: {
       fallback,
     ),
   })
+  const levels = resolveInventionSkillLevels(
+    inv,
+    args.settings.skills,
+    args.settings.inventionSkillLevel,
+  )
   return inventionBlueprintCostPerRun({
     datacores: inv.datacores,
     prices: args.prices,
     baseChance: inv.baseChance,
     runsPerBPC: inv.runsPerBPC,
     skillLevel: args.settings.inventionSkillLevel,
+    encryptionLevel: levels.encryption,
+    datacore1Level: levels.datacore1,
+    datacore2Level: levels.datacore2,
     copyFeePerAttempt: fees.copyFeePerAttempt,
     inventionFeePerAttempt: fees.inventionFeePerAttempt,
   })

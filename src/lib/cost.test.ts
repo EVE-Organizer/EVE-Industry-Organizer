@@ -96,7 +96,7 @@ describe('inventionBlueprintCostPerRun', () => {
       runsPerBPC: 10,
       skillLevel: 4,
     })
-    expect(skilled.chance).toBeCloseTo(0.3 * 1.04 ** 3, 5)
+    expect(skilled.chance).toBeCloseTo(0.3 * (1 + 4 / 40 + 8 / 30), 5)
     expect(skilled.costPerRun).toBeLessThan(base.costPerRun)
   })
 

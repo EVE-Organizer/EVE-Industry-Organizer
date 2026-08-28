@@ -23,6 +23,17 @@ Sources: [Tailwind: Extracting components](https://tailwindcss.com/docs/reusing-
 
 **Do not** extract too early: a one-off onboarding wizard step can stay inline. Extract when you copy the pattern or expect to reuse it.
 
+### ตัวเลือก inline vs component (ภาษาไทย)
+
+**เก็บ Tailwind inline** — layout ใช้ครั้งเดียว ไม่ซ้ำ class string  
+ตัวอย่าง: wizard step พิเศษที่ไม่มีหน้าอื่นเหมือน
+
+**แยก component** — class combo เดิมปรากฏ 2+ ที่  
+ตัวอย่าง: `card bg-base-200 border border-eve-border` → ใช้ `Panel.tsx` แทน copy ใน settings/plan
+
+**ใช้ primitive ที่มีแล้วก่อนสร้างใหม่**  
+ตัวอย่าง: `StatCard`, `PageHeader`, `LoadingState` ใน `src/components/`
+
 ## Project patterns to centralize
 
 These strings are duplicated today. Use or add primitives in `src/components/` instead of re-declaring them:

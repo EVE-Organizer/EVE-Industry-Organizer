@@ -29,6 +29,20 @@ Sources: [Tailwind responsive design](https://tailwindcss.com/docs/responsive-de
 
 Combine both: grid for the page, flex inside each section/card.
 
+### ตัวเลือก flex vs grid (ภาษาไทย)
+
+**Flex** — จัดเรียง **แถวเดียวหรือคอลัมน์เดียว** สลับทิศได้  
+ตัวอย่าง: แถวหัวข้อ + ปุ่มใน `PlanDetailHeader.tsx` ใช้ `flex items-center justify-between`
+
+**Grid** — จัด **หลายคอลัมน์/หลายแถว** พร้อมกัน  
+ตัวอย่าง: การ์ด stat บน dashboard ใช้ `grid grid-cols-1 md:grid-cols-3 gap-4`
+
+**`min-w-0` บน flex child** — ให้ข้อความ truncate/scroll ได้  
+ตัวอย่าง: ชื่อ blueprint ยาวในแถว plan ต้องมี `min-w-0 truncate` ไม่งั้น flex ดันความกว้างออก
+
+**CSS var + calc สำหรับความสูง** — ใช้เมื่อ flex + `min-h-0` ยัง scroll ไม่ได้  
+ตัวอย่าง: Gantt / timeline ที่ต้องลบความสูง header/footer ออกจาก viewport
+
 ## Critical: `min-w-0` / `min-h-0`
 
 Flex items default to `min-width: auto`, so they refuse to shrink below content width. This breaks truncation, scroll regions, and nested flex layouts.

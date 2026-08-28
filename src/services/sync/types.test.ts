@@ -42,6 +42,8 @@ describe('normalizeSkillLevels', () => {
       miningDirector: 4,
       industrialCommandShips: 4,
       capitalIndustrialShips: 4,
+      massReactions: 3,
+      advancedMassReactions: 3,
     })
   })
 

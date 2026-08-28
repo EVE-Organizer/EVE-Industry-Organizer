@@ -216,12 +216,14 @@ describe('schedulePlanJobs', () => {
       settings: DEFAULT_SETTINGS,
       scienceSlots: 2,
       manufacturingSlots: 3,
+      reactionSlots: 2,
     })
 
     const jobs = schedulePlanJobs({
       nodes,
       slots: 3,
       scienceSlots: 2,
+      reactionSlots: 2,
       windowHours: 500,
       pipeline,
       blueprints,

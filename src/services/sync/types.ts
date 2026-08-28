@@ -74,6 +74,8 @@ export function normalizeSkillLevels(
     'miningFrigate',
     'expeditionFrigates',
     'miningDirector',
+    'massReactions',
+    'advancedMassReactions',
   ] as const) {
     if (skills?.[key] == null) merged[key] = DEFAULT_SKILLS[key]
   }

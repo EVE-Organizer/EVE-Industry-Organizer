@@ -1,0 +1,54 @@
+---
+description: EVE Industry Organizer stack, layout, and data boundaries
+alwaysApply: true
+---
+
+# Project stack
+
+Frontend-only React app for EVE Online manufacturing planning. No backend server in this repo.
+
+## Stack
+
+| Layer | Choice |
+|---|---|
+| Runtime / PM | Node, pnpm |
+| Build | Vite 8, TypeScript 5 |
+| UI | React 19, Tailwind, DaisyUI |
+| State | Zustand (`src/stores/`) |
+| Async data | TanStack Query (`src/services/`) |
+| Routing | React Router (`src/pages/`) |
+| Tests | Vitest |
+
+## Key directories
+
+| Path | Purpose |
+|---|---|
+| `src/lib/` | Pure game/business logic (cost, plan, ranking) |
+| `src/components/` | UI components |
+| `src/hooks/` | React hooks |
+| `src/services/` | ESI/market fetch, auth, sync, cache |
+| `src/types/` | Shared TypeScript types |
+| `public/data/` | Generated SDE JSON (do not hand-edit) |
+| `scripts/` | Data rebuild scripts (`fetch-data`, catalog) |
+
+## Data boundaries
+
+- **Static game data:** `public/data/` from `pnpm run fetch-data`
+- **Live prices:** ESI/Fuzzwork via `src/services/market/`
+- **User data:** localStorage + optional Google Drive sync
+- **Domain rules:** `eve-industry-domain.mdc` and `src/lib/cost.ts`
+
+## UI conventions
+
+- Layout: `css-layout.mdc`
+- Shared shells: `component-primitives.mdc`
+- Components: `react-component-conventions.mdc`
+
+## Agent communication
+
+- เมื่อเสนอตัวเลือกหลายทาง: `choice-explanations-th.mdc` (อธิบายแต่ละทางเป็นภาษาไทย + ตัวอย่าง)
+
+## Out of scope for this repo
+
+- NestJS/backend APIs, SQL migrations, Jira/Notion workflows
+- Server-side rendering (SPA only)

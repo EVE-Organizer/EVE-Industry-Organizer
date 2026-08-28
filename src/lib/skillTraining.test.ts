@@ -26,8 +26,9 @@ describe('skillTraining', () => {
     expect(skillPointsPerMinute(27, 22)).toBe(38)
   })
 
-  it('computes invention chance with assumed skills', () => {
-    expect(inventionSuccessChance(0.34, 4)).toBeCloseTo(0.34 * 1.04 ** 3, 5)
+  it('computes invention chance with assumed skills (enc/40 + 2×datacore/30)', () => {
+    expect(inventionSuccessChance(0.34, 4)).toBeCloseTo(0.34 * (1 + 4 / 40 + 8 / 30), 5)
+    expect(inventionSuccessChance(0.34, 5)).toBeCloseTo(0.34 * (1 + 5 / 40 + 10 / 30), 5)
   })
 })
 

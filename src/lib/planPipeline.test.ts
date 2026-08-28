@@ -76,6 +76,7 @@ describe('buildPlanPipeline', () => {
       settings,
       scienceSlots: 2,
       manufacturingSlots: 5,
+      reactionSlots: 2,
     })
 
     const copy = stages.find((s) => s.id === `copy-${productTypeId}`)
@@ -127,6 +128,7 @@ describe('buildPlanPipeline', () => {
       settings,
       scienceSlots: 1,
       manufacturingSlots: 1,
+      reactionSlots: 1,
     })
 
     expect(stages.filter((s) => s.productTypeId === productTypeId)).toHaveLength(0)
@@ -158,13 +160,14 @@ describe('buildPlanPipeline', () => {
       settings,
       scienceSlots: 1,
       manufacturingSlots: 3,
+      reactionSlots: 2,
     })
 
     expect(stages).toHaveLength(1)
     expect(stages[0]).toMatchObject({
       id: `mfg-${productTypeId}`,
       activity: 'reaction',
-      pool: 'manufacturing',
+      pool: 'reaction',
     })
   })
 
@@ -200,6 +203,7 @@ describe('buildPlanPipeline', () => {
       settings,
       scienceSlots: 2,
       manufacturingSlots: 5,
+      reactionSlots: 2,
     })
     const sotiyo = buildPlanPipeline({
       nodes,
@@ -211,6 +215,7 @@ describe('buildPlanPipeline', () => {
       },
       scienceSlots: 2,
       manufacturingSlots: 5,
+      reactionSlots: 2,
     })
     const npcCopy = npc.stages.find((s) => s.id === `copy-${productTypeId}`)!
     const sotiyoCopy = sotiyo.stages.find((s) => s.id === `copy-${productTypeId}`)!

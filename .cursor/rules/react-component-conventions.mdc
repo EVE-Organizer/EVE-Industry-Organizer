@@ -1,0 +1,106 @@
+---
+description: React component files, props, Tailwind layout, and section comments
+globs: src/**/*.tsx,src/**/*.ts
+alwaysApply: false
+---
+
+# React Component Conventions
+
+Use when creating or editing React UI in this repo.
+
+## Stack
+
+- React 19, Vite, React Router, TanStack Query/Table/Virtual
+- Tailwind CSS + DaisyUI (no styled-components)
+- Layout rules: `css-layout.mdc`, shared shells: `component-primitives.mdc`
+
+## File layout
+
+Flat files under `src/components/` or feature subfolders (`plan/`, `map/`, `skills/`).
+
+```
+src/components/plan/
+  PlanDetailHeader.tsx
+  PlanPipelineChecklist.tsx
+src/components/
+  Panel.tsx
+  StatCard.tsx
+  Layout.tsx
+```
+
+One main component per file. Co-locate small helpers in the same file until reused elsewhere.
+
+## Naming
+
+- Components: `PascalCase` matching the filename
+- Hooks: `useSomething.ts` in `src/hooks/`
+- Prefer descriptive prefixes for feature groups (`Plan*`, `Map*`, `Skills*`)
+
+## Props
+
+Named interface when exported or reused; inline for tiny local components. No `React.FC`.
+
+```typescript
+// ✅ GOOD
+interface PanelProps {
+  title: ReactNode
+  children: ReactNode
+}
+export function Panel({ title, children }: PanelProps) { ... }
+
+// ✅ OK for tiny local components
+export function Tag({ label }: { label: string }) { ... }
+
+// ❌ BAD
+const Panel: React.FC<PanelProps> = ...
+```
+
+### ตัวเลือก props (ภาษาไทย)
+
+**`interface XxxProps` + named export** — component ใช้ซ้ำหรือ export ให้หน้าอื่น  
+ตัวอย่าง: `PanelProps` ใน `Panel.tsx` ใช้ทั้ง settings และ plan
+
+**inline `{ label: string }`** — component เล็ก ใช้ในไฟล์เดียว  
+ตัวอย่าง: badge ย่อยใน modal ที่ไม่ export
+
+**ห้าม `React.FC`** — typing ซ้ำซ้อน, defaultProps legacy  
+ตัวอย่าง: ใช้ `export function Panel(...)` แทน
+
+## Styling
+
+- Tailwind utilities in JSX; no `@apply` for section shells (see `component-primitives.mdc`)
+- Reuse `Panel`, `StatCard`, `PageHeader`, `LoadingState`, `FormFieldLabel` before copying class strings
+- Responsive layout: mobile-first, `min-w-0` on flex children that truncate/scroll
+
+## Section comments (optional)
+
+For large components, use only sections that apply:
+
+```typescript
+/* --------------------------------- State --------------------------------- */
+/* -------------------------------- Handlers ------------------------------- */
+/* --------------------------------- Render -------------------------------- */
+```
+
+Exact dash width (~78 chars). Hooks omit Render.
+
+## Pages
+
+Route pages live in `src/pages/`. Keep pages thin: compose components, wire hooks/stores, minimal logic.
+
+## Data
+
+- Global user/settings state: `useAppStore` (`src/stores/appStore.ts`)
+- Server/async data: TanStack Query in hooks or page-level loaders
+- Do not fetch inside presentational components when a parent already has the data
+
+### ตัวเลือกที่เก็บ state (ภาษาไทย)
+
+**`useAppStore`** — settings, plan templates, watchlist ที่ persist localStorage  
+ตัวอย่าง: `selectedPlanTemplateId`, `updatePlanTemplate`
+
+**TanStack Query** — ราคา ESI, SDE fetch, cache ฝั่ง server  
+ตัวอย่าง: hub prices ใน `src/services/market/`
+
+**useState ใน component** — UI ชั่วคราว (modal เปิด/ปิด, tab)  
+ตัวอย่าง: `PlanMeTeModal` เปิด/ปิด ไม่ต้องใส่ global store

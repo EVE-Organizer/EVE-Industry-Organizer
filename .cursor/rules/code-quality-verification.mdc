@@ -1,0 +1,54 @@
+---
+description: Enforce Prettier, ESLint, TypeScript, and Vitest on generated code
+alwaysApply: true
+---
+
+# Code Quality Verification
+
+Every code change must pass **Prettier**, **ESLint**, and **TypeScript** before done. Read config in the repo; do not guess rules.
+
+## Config locations
+
+| Tool | File |
+|---|---|
+| Prettier | `.prettierrc` |
+| ESLint | `eslint.config.js` |
+| TypeScript (app) | `tsconfig.app.json` |
+| TypeScript (node scripts) | `tsconfig.node.json` |
+| Vitest | `vitest.config.ts` (if present) or `vite.config.ts` |
+
+## After edits
+
+Run on **touched areas** unless the change is broad:
+
+```bash
+pnpm format          # or prettier --write on touched paths
+pnpm lint:fix
+pnpm build           # tsc --noEmit + vite build
+pnpm test            # when logic changed; run affected tests if possible
+```
+
+Then `ReadLints` on changed files. Re-run until clean.
+
+**Broad changes:** full `pnpm lint`, `pnpm build`, `pnpm test`.
+
+Do not mass-reformat unrelated files in feature work. Format/lint only what you touch.
+
+## Unrelated files
+
+Do not reorder imports or apply style-only fixes on files out of scope for the current task, even if the linter flags them.
+
+| Situation | Do |
+|---|---|
+| File out of scope | Leave as-is |
+| Brief touch (re-export) | Change only what the task requires |
+| `lint:fix` touched unrelated paths | Revert those hunks |
+| File in scope and edited | Format/lint that file |
+
+## Do not
+
+- Fix import order in unrelated files
+- Skip reading eslint/prettier/tsconfig before editing unfamiliar areas
+- Use `--no-verify` unless the user explicitly requests it
+- Disable ESLint or `@ts-ignore` without fixing root cause
+- Edit `public/data/` generated JSON by hand (use `pnpm run fetch-data` / rebuild scripts)

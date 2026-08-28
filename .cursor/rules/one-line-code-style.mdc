@@ -1,0 +1,91 @@
+---
+description: One-line code style — implicit arrows, simple guards, single-level ternaries; Prettier for layout
+globs: **/*.ts,**/*.tsx,**/*.js,**/*.jsx
+alwaysApply: false
+---
+
+# One-Line Code Style
+
+Tactical style for compact, readable code. Prefer fewer lines when readable. `code-quality-verification.mdc` is the source of truth for format/lint.
+
+## Arrow functions
+
+Prefer **implicit return** when the body is a single expression:
+
+```typescript
+// ✅
+const double = (n: number) => n * 2
+const active = users.filter((u) => u.isActive)
+
+// ❌ unnecessary block
+const double = (n: number) => {
+  return n * 2
+}
+```
+
+Use a block body when the function has multiple statements, side effects, or needs local variables.
+
+## Guard clauses
+
+**Simple guards** — one line, no braces:
+
+```typescript
+if (!user) return null
+if (items.length === 0) throw new Error('Empty')
+```
+
+**Side effects** — use braces:
+
+```typescript
+if (user) {
+  console.warn('found', user.id)
+  return user
+}
+```
+
+## Null, undefined, and falsy checks
+
+`!x` and `x == null` are **not** interchangeable. Pick the check that matches what "missing" means for that type.
+
+| Type | Use | Avoid |
+|---|---|---|
+| Object / array / optional ref | `if (!x)` | `if (x == null)` when `!x` is enough |
+| Number (`0` is valid) | `if (x == null)` or `x ?? default` | `if (!x)` |
+| String (`''` is valid) | `if (x == null)` or `x ?? default` | `if (!x)` |
+| Boolean (`false` is valid) | `if (x === undefined)` | `if (!x)` |
+| Default when absent | `x ?? default` | `x \|\| default` when `0`/`''`/`false` are valid |
+| Exactly zero | `if (x === 0)` | `if (x == 0)` or `if (!x)` |
+| Null or undefined | `if (x == null)` | `if (x == undefined)` |
+
+### ตัวเลือกการเช็คค่า (ภาษาไทย)
+
+**`if (!x)`** — ใช้เมื่อ `x` เป็น object/array ที่ "ไม่มี" = null/undefined/ว่าง  
+ตัวอย่าง: `if (!blueprint) return null` ใน `PlanBlueprintItemName.tsx` เมื่อหา BPO ไม่เจอ
+
+**`if (x == null)`** — ใช้เมื่อ **0 หรือ `''` เป็นค่าที่ถูกต้อง** แต่ null/undefined ไม่ถูก  
+ตัวอย่าง: `if (me == null) return 0` เพราะ ME 0 ในเกมมีจริง แต่ `if (!me)` จะ treat 0 เป็นค่าว่างผิด
+
+**`x ?? default`** — ใส่ค่า default เฉพาะเมื่อ null/undefined  
+ตัวอย่าง: `const runs = root.runs ?? 100` ใน plan (batch 100 เป็นค่าเริ่ม)
+
+**`x || default`** — หลีกเลี่ยงถ้า 0/false/`''`  valid  
+ตัวอย่าง: `te || 0` ผิดถ้า TE 0 ตั้งใจ; ใช้ `te ?? 0` แทน
+
+```typescript
+// ✅ ME level 0 is valid
+if (me == null) return 0
+
+// ❌ BUG — 0 is valid
+if (!me) return defaultMe
+```
+
+One level is fine; **never nest** ternaries. Rewrite nested cases as `if/else` or early returns.
+
+## Objects, arrays, and method chains
+
+Let **Prettier and ESLint** decide line breaks. Run `pnpm format` on touched files.
+
+## When not to compress
+
+1. **Trust boundaries** — validation, error handling, EVE formulas (`eve-industry-domain.mdc`).
+2. **Readability** — if a teammate cannot understand the line in ~5 seconds, expand it.

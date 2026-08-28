@@ -1,0 +1,61 @@
+---
+description: TypeScript style, immutability, errors, and validation for this frontend app
+globs: **/*.ts,**/*.tsx,**/*.js,**/*.jsx
+alwaysApply: false
+---
+
+# TypeScript Conventions
+
+## Types
+
+- Explicit types on exported functions and public APIs; infer locals when obvious
+- `interface` for extendable object shapes; `type` for unions/intersections
+- Prefer string literal unions over `enum` unless SDE/API IDs require numeric enums
+- Avoid `any`; use `unknown` + narrowing for external input (ESI, localStorage, shared plan imports)
+
+```typescript
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return 'Unexpected error'
+}
+```
+
+## Comments
+
+JSDoc and flow comments: see `code-flow-comments.mdc`.
+
+## React props
+
+Follow `react-component-conventions.mdc`. Named prop interfaces when exported or reused; inline props for small local components.
+
+## Immutability
+
+Return new objects; do not mutate inputs. Zustand actions and plan/user-data updates must spread prior state.
+
+## Errors
+
+- `async/await` + try/catch; narrow `unknown` errors
+- User-facing errors: short, actionable copy in sentence case
+- Avoid `console.log` in app code; remove debug logs before finishing
+
+## Validation
+
+Validate at trust boundaries:
+
+- Imported/shared plan payloads (`planShare.ts`)
+- localStorage user data (`services/sync/types.ts` migrations)
+- ESI/API JSON before use
+
+Prefer type guards and explicit checks. This project does not use Zod; do not add it unless requested.
+
+## Secrets
+
+Frontend-only app: no API secrets in source. OAuth client IDs may be public config; never commit refresh tokens or user tokens. Auth storage lives in `services/auth/`.
+
+## Domain logic
+
+Manufacturing math (ME, TE, job time, profit) must match `src/lib/cost.ts` and `eve-industry-domain.mdc`. Do not invent alternate formulas.
+
+## Testing
+
+See `testing-strategy.mdc`. Test hooks and `src/lib/` logic; not component render output.

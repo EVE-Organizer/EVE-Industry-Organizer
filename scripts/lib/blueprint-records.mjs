@@ -66,6 +66,8 @@ function buildRecipesForActivity(tables, activityId, kind) {
         products: tables.products,
         materials: tables.materials,
         probabilities: tables.probabilities,
+        skills: tables.skills,
+        skillNames,
       })
     : new Map()
 

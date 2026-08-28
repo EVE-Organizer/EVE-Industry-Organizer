@@ -1,0 +1,77 @@
+---
+description: Vitest strategy — test lib logic and hooks, not component render output
+globs: **/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx
+alwaysApply: false
+---
+
+# Testing Strategy
+
+Vitest. Only write tests for **hooks**, **`src/lib/` business logic**, and **store actions**. Do not write tests for component rendering behavior unless the user explicitly asks.
+
+## Placement
+
+This repo colocates tests next to source:
+
+```
+src/lib/cost.ts
+src/lib/cost.test.ts
+src/stores/appStore.ts
+src/stores/appStore.test.ts
+```
+
+Keep colocated `.test.ts` files. Do not introduce `__spec__/` folders unless a directory already uses that pattern.
+
+## Test
+
+- Pure functions: cost, profit, plan scheduling, skill bonuses, supply chain
+- Store actions: plan template CRUD, settings merges, hydration edge cases
+- Custom hooks: param building, derived state, side-effect guards
+- Data loaders/parsers: SDE helpers, sync migrations, ESI response shaping
+
+## Do NOT test (unless asked)
+
+- Whether a button renders, a modal opens, or text is visible
+- Prop wiring between presentational components
+- Snapshot tests of large UI trees
+
+### ตัวเลือกว่าจะ test อะไร (ภาษาไทย)
+
+**Test ฟังก์ชันใน `src/lib/`** — สูตรต้นทุน/กำไร/plan ที่ต้องตรงเกม  
+ตัวอย่าง: `cost.test.ts` ทดสอบ ME rounding หลังแก้ `adjustedMaterialQuantity`
+
+**Test store action** — logic เปลี่ยน userData / plan templates  
+ตัวอย่าง: `appStore.test.ts` ทดสอบ `importSharedPlan` ไม่ทับ template เดิม
+
+**ไม่ test การ render ปุ่ม/ข้อความ** — brittle, mock เยอะ, confidence ต่ำ  
+ตัวอย่าง: ไม่เขียน `PlanDetailHeader` test ว่าแสดงชื่อ BPO (unless user ขอ)
+
+**Colocate `.test.ts`** — วางข้างไฟล์ต้นทาง ไม่สร้าง `__spec__/` ใหม่  
+ตัวอย่าง: `planScheduler.ts` + `planScheduler.test.ts` ใน `src/lib/`
+
+## Examples
+
+```typescript
+// ✅ GOOD — manufacturing math
+describe('adjustedMaterialQuantity', () => {
+  it('applies ME per run with ceiling', () => { ... })
+})
+
+// ✅ GOOD — store action
+describe('importSharedPlan', () => {
+  it('merges settings without dropping local templates', () => { ... })
+})
+
+// ❌ BAD — render test
+describe('PlanDetailHeader', () => {
+  it('shows the blueprint name', () => { ... })
+})
+```
+
+## Running
+
+```bash
+pnpm test                    # all
+pnpm vitest run src/lib/cost.test.ts   # one file
+```
+
+Fix implementation, not tests, unless the test encodes wrong game mechanics. Game formulas must match `eve-industry-domain.mdc` and `cost.ts`.

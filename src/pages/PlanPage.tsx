@@ -1282,6 +1282,7 @@ export function PlanPage() {
             productionJobs={plan.productionJobs}
             slots={slots}
             scienceSlots={plan.scienceSlots}
+            reactionSlots={plan.reactionSlots}
             blueprintTypeIdByProduct={blueprintTypeIdByProduct}
           />
 

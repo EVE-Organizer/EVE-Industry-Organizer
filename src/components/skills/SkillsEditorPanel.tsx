@@ -20,12 +20,20 @@ const INDUSTRY_KEYS: SkillFieldDef['key'][] = [
   'massProduction',
   'advancedMassProduction',
   'reactions',
+  'massReactions',
+  'advancedMassReactions',
 ]
 const SCIENCE_KEYS: SkillFieldDef['key'][] = [
   'science',
   'laboratoryOperation',
   'advancedLaboratoryOperation',
 ]
+const INVENTION_KEYS: SkillFieldDef['key'][] = SKILL_FIELDS.filter((f) => f.group === 'invention').map(
+  (f) => f.key,
+)
+const ADVANCED_MFG_KEYS: SkillFieldDef['key'][] = SKILL_FIELDS.filter(
+  (f) => f.group === 'advancedMfg',
+).map((f) => f.key)
 const MARKET_KEYS: SkillFieldDef['key'][] = [
   'accounting',
   'brokerRelations',
@@ -66,6 +74,8 @@ const REPROCESSING_KEYS: SkillFieldDef['key'][] = [
 const GROUPS: { title: string; keys: SkillFieldDef['key'][] }[] = [
   { title: 'Industry', keys: INDUSTRY_KEYS },
   { title: 'Science', keys: SCIENCE_KEYS },
+  { title: 'Invention', keys: INVENTION_KEYS },
+  { title: 'Advanced manufacturing', keys: ADVANCED_MFG_KEYS },
   { title: 'Trade', keys: MARKET_KEYS },
   { title: 'Mining', keys: MINING_KEYS },
   { title: 'Reprocessing', keys: REPROCESSING_KEYS },

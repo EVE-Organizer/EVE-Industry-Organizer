@@ -2,9 +2,11 @@ import {
   advancedIndustryTimeFactor,
   industryTimeFactor,
   reactionsTimeFactor,
+  scienceCopyTimeFactor,
 } from '@/lib/cost'
 import {
   manufacturingSlotsFromSkills,
+  reactionSlotsFromSkills,
   researchSlotsFromSkills,
 } from '@/lib/manufacturingSlots'
 import { skillLevel } from '@/lib/skillFields'
@@ -18,7 +20,9 @@ import type { SkillLevels } from '@/types'
 export interface SkillImpactSummary {
   manufacturingSlots: number
   scienceSlots: number
+  reactionSlots: number
   manufacturingTimeCutPercent: number
+  copyTimeCutPercent: number
   reactionTimeCutPercent: number
   salesTaxPercent: number
   brokerFeePercent: number
@@ -36,17 +40,21 @@ export function computeSkillImpact(
 ): SkillImpactSummary {
   const industry = skillLevel(skills, 'industry')
   const advancedIndustry = skillLevel(skills, 'advancedIndustry')
+  const science = skillLevel(skills, 'science')
   const reactions = skillLevel(skills, 'reactions')
   const accounting = skillLevel(skills, 'accounting')
   const broker = skillLevel(skills, 'brokerRelations')
   const advancedBroker = skillLevel(skills, 'advancedBrokerRelations')
 
   const mfgFactor = industryTimeFactor(industry) * advancedIndustryTimeFactor(advancedIndustry)
+  const copyFactor = scienceCopyTimeFactor(science) * advancedIndustryTimeFactor(advancedIndustry)
 
   return {
     manufacturingSlots: manufacturingSlotsFromSkills(skills),
     scienceSlots: researchSlotsFromSkills(skills),
+    reactionSlots: reactionSlotsFromSkills(skills),
     manufacturingTimeCutPercent: timeCutPercent(mfgFactor),
+    copyTimeCutPercent: timeCutPercent(copyFactor),
     reactionTimeCutPercent: timeCutPercent(reactionsTimeFactor(reactions)),
     salesTaxPercent: salesTaxPercent(accounting),
     brokerFeePercent: brokerFeePercent(broker),

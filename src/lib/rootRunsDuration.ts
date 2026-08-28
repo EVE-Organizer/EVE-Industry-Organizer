@@ -75,6 +75,8 @@ export function jobTimeSecondsForRuns(
     industry,
     advancedIndustry,
     structureTe,
+    blueprint.requiredSkills,
+    settings.skills,
   )
 }
 
@@ -251,6 +253,8 @@ export function durationHoursFromRuns(
     industry,
     advancedIndustry,
     structureTe,
+    blueprint.requiredSkills,
+    settings.skills,
   )
   if (perRun <= 0 || runs <= 0) return 0
 
@@ -261,6 +265,8 @@ export function durationHoursFromRuns(
     industry,
     advancedIndustry,
     structureTe,
+    blueprint.requiredSkills,
+    settings.skills,
   )
   const waves = Math.ceil(runs / (runsPerJob * effectiveLines))
   return (jobTime * waves) / 3600

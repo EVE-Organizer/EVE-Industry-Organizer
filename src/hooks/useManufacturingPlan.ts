@@ -6,7 +6,7 @@ import { activePlanRoots } from '@/lib/planRootEnabled'
 import { buildPlanPipeline } from '@/lib/planPipeline'
 import { schedulePlanJobs, detectOverUnder, windowHoursFromJobs } from '@/lib/planScheduler'
 import { simulatePlanFlow } from '@/lib/planSimulator'
-import { manufacturingSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
+import { manufacturingSlotsFromSkills, reactionSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
 import type { GlobalSettings, ManufacturingPlanTemplate, SystemInfo } from '@/types'
 
 export interface UseManufacturingPlanOptions {
@@ -30,6 +30,7 @@ export function useManufacturingPlan(
   return useMemo(() => {
     const mfgSlots = manufacturingSlotsFromSkills(settings.skills)
     const scienceSlots = researchSlotsFromSkills(settings.skills)
+    const reactionSlots = reactionSlotsFromSkills(settings.skills)
 
     if (!template || activePlanRoots(template.roots).length === 0) {
       return {
@@ -40,6 +41,7 @@ export function useManufacturingPlan(
         simulations: new Map(),
         slots: mfgSlots,
         scienceSlots,
+        reactionSlots,
         windowHours: 1,
         productionWindowHours: 1,
         warnings: [] as { productTypeId: number; message: string }[],
@@ -64,11 +66,13 @@ export function useManufacturingPlan(
       settings,
       scienceSlots: expanded.scienceSlots,
       manufacturingSlots: expanded.slots,
+      reactionSlots: expanded.reactionSlots,
     })
     const jobs = schedulePlanJobs({
       nodes: expanded.nodes,
       slots: expanded.slots,
       scienceSlots: expanded.scienceSlots,
+      reactionSlots: expanded.reactionSlots,
       windowHours: Number.POSITIVE_INFINITY,
       pipeline,
       blueprints,
@@ -76,6 +80,7 @@ export function useManufacturingPlan(
     const productionJobs = schedulePlanJobs({
       nodes: expanded.nodes,
       slots: expanded.slots,
+      reactionSlots: expanded.reactionSlots,
       windowHours: Number.POSITIVE_INFINITY,
       blueprints,
     })
@@ -97,6 +102,7 @@ export function useManufacturingPlan(
       simulations,
       slots: expanded.slots,
       scienceSlots: expanded.scienceSlots,
+      reactionSlots: expanded.reactionSlots,
       windowHours,
       productionWindowHours,
       warnings: [...expanded.warnings, ...detectOverUnder(expanded.nodes)],

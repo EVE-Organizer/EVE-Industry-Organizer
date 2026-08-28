@@ -33,7 +33,8 @@ export function buildPlanGanttLanes(
     bySlot.set(job.slot, list)
   }
 
-  const labelPrefix = pool === 'science' ? 'Sci' : 'Slot'
+  const labelPrefix =
+    pool === 'science' ? 'Sci' : pool === 'reaction' ? 'Rxn' : 'Slot'
 
   return Array.from({ length: slots }, (_, slotIndex) => {
     const slotJobs = [...(bySlot.get(slotIndex) ?? [])].sort((a, b) => a.startHour - b.startHour)

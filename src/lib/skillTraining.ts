@@ -184,14 +184,10 @@ export function suggestQueueAttributeFocus(
   return ranked.slice(0, Math.max(1, Math.min(3, limit)))
 }
 
-/** T2 invention success chance with assumed encryption + 2 datacore skills. */
-export function inventionSuccessChance(
-  baseChance: number,
-  inventionSkillLevel: number,
-): number {
-  const skillFactor = 1 + inventionSkillLevel * 0.01
-  return Math.min(1, baseChance * skillFactor ** 3)
-}
+export {
+  inventionSuccessChance,
+  inventionSuccessChanceFromLevels,
+} from '@/lib/industrySkillBonuses'
 
 /** Default base chance used when blueprint-specific chance is unknown (display only). */
 export const DEFAULT_INVENTION_BASE_CHANCE = 0.34

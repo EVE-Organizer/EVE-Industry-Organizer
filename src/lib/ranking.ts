@@ -557,6 +557,8 @@ function computeRow(
         industry,
         advancedIndustry,
         structure.teBonusPercent,
+        blueprint.requiredSkills,
+        settings.skills,
       )
   const jobHours = jobTimeSeconds / 3600
   const daysToClear = avgVolume > 0 ? outputQty / avgVolume : Infinity

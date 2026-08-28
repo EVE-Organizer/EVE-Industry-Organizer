@@ -1,0 +1,71 @@
+---
+description: JSDoc and flow comments — 5-second test, section blocks, inline step comments
+alwaysApply: true
+---
+
+# Code Flow Comments
+
+Every non-trivial code path should be understandable step-by-step. **5-second test:** a teammate reads one step for ~5 seconds. If they still don't know why it runs or what it produces, fix that step.
+
+## Two layers
+
+1. **Section blocks** — divide multi-step logic into named phases
+2. **Inline step comments** — one short `//` above each logical step inside a section
+
+Skip both on trivial one-liners. Prefer clear names over comments that restate the code.
+
+## Section blocks
+
+Use when a function has **2+ distinct phases** and the phase is **≥ 10 lines**. Under 10 lines: inline `//` only.
+
+```typescript
+/* ----------------------------- Load blueprint ----------------------------- */
+/* --------------------------- Apply ME / TE ------------------------------- */
+/* ----------------------------- Schedule jobs ------------------------------ */
+```
+
+Centered dash style, same total width (~78 chars) within a file.
+
+## Inline step comments
+
+One line; state what the step does or why when non-obvious.
+
+```typescript
+async function schedulePlanRoots(roots: PlanRootEntry[]) {
+  /* ----------------------------- Load blueprint ----------------------------- */
+
+  // Resolve BPO recipe from SDE — throws if type id missing from static data
+  const bp = getBlueprint(root.blueprintTypeId)
+  if (!bp) throw new Error('Blueprint not found')
+
+  // Job duration uses TE + Industry skills per eve-industry-domain.mdc
+  const seconds = jobDurationSeconds(bp, root.me, root.te, skills, runs)
+
+  /* ----------------------------- Schedule jobs ------------------------------ */
+
+  // Sub-components must finish before parent manufacturing slot opens
+  await scheduleDependencies(root, bp.materials)
+
+  // Assign earliest free slot respecting mass production limits
+  assignSlot(root.id, seconds)
+}
+```
+
+| Step comment should… | Step comment should not… |
+|---|---|
+| Name the step's purpose | Repeat the next line verbatim |
+| Explain hidden game rules | Describe obvious guards |
+| Note ordering or side effects | Replace bad names |
+
+## JSDoc
+
+On **exported** functions/types whose purpose is not obvious from the name. Skip tests, trivial one-liners, and React components (use section comments instead).
+
+Document game-mechanics helpers with assumptions (ME rounding, batch runs, hub prices).
+
+## Anti-patterns
+
+- Section banner over < 10 lines
+- Uneven banner widths in the same file
+- Step comments instead of renames
+- Long orchestrators with neither sections nor step comments

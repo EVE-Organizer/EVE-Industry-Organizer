@@ -58,6 +58,8 @@ export interface InventionInfo {
   copyTime?: number
   /** Invention job time (seconds) on the T1 BPC (SDE activity 8). */
   inventionTime?: number
+  /** Encryption + datacore skills from SDE activity 8 on the T1 BPO. */
+  requiredSkills?: Record<string, number>
 }
 
 export interface BlueprintInfo {
@@ -506,12 +508,50 @@ export interface SkillLevels {
   advancedBrokerRelations: number
   massProduction: number
   advancedMassProduction: number
+  massReactions: number
+  advancedMassReactions: number
   /** Reactions skill: −4% reaction time per level. */
   reactions: number
   /** Laboratory Operation: +1 concurrent science job per level. */
   laboratoryOperation: number
   /** Advanced Laboratory Operation: +1 more concurrent science job per level. */
   advancedLaboratoryOperation: number
+  advancedSmallShipConstruction: number
+  advancedMediumShipConstruction: number
+  advancedLargeShipConstruction: number
+  advancedIndustrialShipConstruction: number
+  advancedCapitalShipConstruction: number
+  outpostConstruction: number
+  capitalShipConstruction: number
+  drugManufacturing: number
+  amarrStarshipEngineering: number
+  caldariStarshipEngineering: number
+  gallenteStarshipEngineering: number
+  minmatarStarshipEngineering: number
+  triglavianQuantumEngineering: number
+  upwellStarshipEngineering: number
+  electromagneticPhysics: number
+  electronicEngineering: number
+  gravitonPhysics: number
+  highEnergyPhysics: number
+  hydromagneticPhysics: number
+  laserPhysics: number
+  mechanicalEngineering: number
+  molecularEngineering: number
+  naniteEngineering: number
+  nuclearPhysics: number
+  plasmaPhysics: number
+  quantumPhysics: number
+  rocketScience: number
+  astronauticEngineering: number
+  mutagenicStabilization: number
+  amarrEncryptionMethods: number
+  caldariEncryptionMethods: number
+  gallenteEncryptionMethods: number
+  minmatarEncryptionMethods: number
+  sleeperEncryptionMethods: number
+  triglavianEncryptionMethods: number
+  upwellEncryptionMethods: number
   /** Mining: +5% ore/moon yield per level. */
   mining: number
   /** Astrogeology: +5% ore/moon yield per level. */
@@ -685,7 +725,7 @@ export interface ScheduledPlanJob {
 }
 
 export type PlanJobActivity = 'copy' | 'invention' | 'manufacture' | 'reaction'
-export type PlanJobPool = 'science' | 'manufacturing'
+export type PlanJobPool = 'science' | 'manufacturing' | 'reaction'
 
 export type IndustryActivityId = 1 | 3 | 4 | 5 | 7 | 8 | 11
 
@@ -952,9 +992,47 @@ export const DEFAULT_SKILLS: SkillLevels = {
   advancedBrokerRelations: 0,
   massProduction: DEFAULT_SKILL_LEVEL,
   advancedMassProduction: DEFAULT_SKILL_LEVEL,
+  massReactions: DEFAULT_SKILL_LEVEL,
+  advancedMassReactions: DEFAULT_SKILL_LEVEL,
   reactions: DEFAULT_SKILL_LEVEL,
   laboratoryOperation: DEFAULT_SKILL_LEVEL,
   advancedLaboratoryOperation: DEFAULT_SKILL_LEVEL,
+  advancedSmallShipConstruction: 0,
+  advancedMediumShipConstruction: 0,
+  advancedLargeShipConstruction: 0,
+  advancedIndustrialShipConstruction: 0,
+  advancedCapitalShipConstruction: 0,
+  outpostConstruction: 0,
+  capitalShipConstruction: 0,
+  drugManufacturing: 0,
+  amarrStarshipEngineering: 0,
+  caldariStarshipEngineering: 0,
+  gallenteStarshipEngineering: 0,
+  minmatarStarshipEngineering: 0,
+  triglavianQuantumEngineering: 0,
+  upwellStarshipEngineering: 0,
+  electromagneticPhysics: 0,
+  electronicEngineering: 0,
+  gravitonPhysics: 0,
+  highEnergyPhysics: 0,
+  hydromagneticPhysics: 0,
+  laserPhysics: 0,
+  mechanicalEngineering: 0,
+  molecularEngineering: 0,
+  naniteEngineering: 0,
+  nuclearPhysics: 0,
+  plasmaPhysics: 0,
+  quantumPhysics: 0,
+  rocketScience: 0,
+  astronauticEngineering: 0,
+  mutagenicStabilization: 0,
+  amarrEncryptionMethods: 0,
+  caldariEncryptionMethods: 0,
+  gallenteEncryptionMethods: 0,
+  minmatarEncryptionMethods: 0,
+  sleeperEncryptionMethods: 0,
+  triglavianEncryptionMethods: 0,
+  upwellEncryptionMethods: 0,
   mining: 4,
   astrogeology: 4,
   iceHarvesting: 4,
@@ -993,9 +1071,47 @@ export const ZERO_SKILLS: SkillLevels = {
   advancedBrokerRelations: 0,
   massProduction: 0,
   advancedMassProduction: 0,
+  massReactions: 0,
+  advancedMassReactions: 0,
   reactions: 0,
   laboratoryOperation: 0,
   advancedLaboratoryOperation: 0,
+  advancedSmallShipConstruction: 0,
+  advancedMediumShipConstruction: 0,
+  advancedLargeShipConstruction: 0,
+  advancedIndustrialShipConstruction: 0,
+  advancedCapitalShipConstruction: 0,
+  outpostConstruction: 0,
+  capitalShipConstruction: 0,
+  drugManufacturing: 0,
+  amarrStarshipEngineering: 0,
+  caldariStarshipEngineering: 0,
+  gallenteStarshipEngineering: 0,
+  minmatarStarshipEngineering: 0,
+  triglavianQuantumEngineering: 0,
+  upwellStarshipEngineering: 0,
+  electromagneticPhysics: 0,
+  electronicEngineering: 0,
+  gravitonPhysics: 0,
+  highEnergyPhysics: 0,
+  hydromagneticPhysics: 0,
+  laserPhysics: 0,
+  mechanicalEngineering: 0,
+  molecularEngineering: 0,
+  naniteEngineering: 0,
+  nuclearPhysics: 0,
+  plasmaPhysics: 0,
+  quantumPhysics: 0,
+  rocketScience: 0,
+  astronauticEngineering: 0,
+  mutagenicStabilization: 0,
+  amarrEncryptionMethods: 0,
+  caldariEncryptionMethods: 0,
+  gallenteEncryptionMethods: 0,
+  minmatarEncryptionMethods: 0,
+  sleeperEncryptionMethods: 0,
+  triglavianEncryptionMethods: 0,
+  upwellEncryptionMethods: 0,
   mining: 0,
   astrogeology: 0,
   iceHarvesting: 0,

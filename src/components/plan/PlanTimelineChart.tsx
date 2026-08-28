@@ -6,7 +6,21 @@ import { buildPlanGanttLanes, formatPlanGanttTick, formatPlanScrubLabel } from '
 import { formatDecimal } from '@/lib/profit'
 import type { PlanNode, ScheduledPlanJob } from '@/types'
 
-type TimelineTab = 'manufacturing' | 'research'
+type TimelineTab = 'manufacturing' | 'reactions' | 'research'
+
+function jobsForPool(jobs: ScheduledPlanJob[], pool: TimelineTab): ScheduledPlanJob[] {
+  if (pool === 'research') {
+    return jobs.filter((j) => j.pool === 'science' || j.activity === 'copy' || j.activity === 'invention')
+  }
+  if (pool === 'reactions') {
+    return jobs.filter((j) => j.pool === 'reaction' || j.activity === 'reaction')
+  }
+  return jobs.filter(
+    (j) =>
+      (j.pool === 'manufacturing' || (!j.pool && j.activity !== 'reaction' && j.activity !== 'copy' && j.activity !== 'invention')) &&
+      j.activity !== 'reaction',
+  )
+}
 
 export function PlanTimelinePanel({
   windowHours,
@@ -16,6 +30,7 @@ export function PlanTimelinePanel({
   productionJobs,
   slots,
   scienceSlots = 1,
+  reactionSlots = 1,
   blueprintTypeIdByProduct,
   embedded = false,
 }: {
@@ -26,26 +41,37 @@ export function PlanTimelinePanel({
   productionJobs?: ScheduledPlanJob[]
   slots: number
   scienceSlots?: number
+  reactionSlots?: number
   blueprintTypeIdByProduct: Map<number, number>
   embedded?: boolean
 }) {
   const [tab, setTab] = useState<TimelineTab>('manufacturing')
   const [focusedSlotIndex, setFocusedSlotIndex] = useState<number | null>(null)
   const scienceWindowHours = researchWindowHours ?? windowHours
-  const mfgJobs = productionJobs ?? jobs
-  const axisHours = tab === 'research' ? scienceWindowHours : windowHours
+  const allProduction = productionJobs ?? jobs
+  const mfgJobs = useMemo(() => jobsForPool(allProduction, 'manufacturing'), [allProduction])
+  const rxnJobs = useMemo(() => jobsForPool(allProduction, 'reactions'), [allProduction])
+  const sciJobs = useMemo(() => jobsForPool(jobs, 'research'), [jobs])
+
+  const axisHours =
+    tab === 'research' ? scienceWindowHours : tab === 'reactions' ? windowHours : windowHours
 
   const mfgLanes = useMemo(
     () => buildPlanGanttLanes(mfgJobs, nodes, slots, windowHours, 'manufacturing'),
     [mfgJobs, nodes, slots, windowHours],
   )
+  const reactionLanes = useMemo(
+    () => buildPlanGanttLanes(rxnJobs, nodes, reactionSlots, windowHours, 'reaction'),
+    [rxnJobs, nodes, reactionSlots, windowHours],
+  )
   const scienceLanes = useMemo(
-    () => buildPlanGanttLanes(jobs, nodes, scienceSlots, scienceWindowHours, 'science'),
-    [jobs, nodes, scienceSlots, scienceWindowHours],
+    () => buildPlanGanttLanes(sciJobs, nodes, scienceSlots, scienceWindowHours, 'science'),
+    [sciJobs, nodes, scienceSlots, scienceWindowHours],
   )
 
-  const activePool = tab === 'research' ? 'science' : 'manufacturing'
-  const activeLanes = tab === 'research' ? scienceLanes : mfgLanes
+  const activePool = tab === 'research' ? 'science' : tab === 'reactions' ? 'reaction' : 'manufacturing'
+  const activeLanes =
+    tab === 'research' ? scienceLanes : tab === 'reactions' ? reactionLanes : mfgLanes
 
   const focusedLaneId =
     focusedSlotIndex != null ? `${activePool}-slot-${focusedSlotIndex}` : null
@@ -60,7 +86,7 @@ export function PlanTimelinePanel({
         setFocusedSlotIndex(null)
         return
       }
-      const match = /^(manufacturing|science)-slot-(\d+)$/.exec(laneId)
+      const match = /^(manufacturing|science|reaction)-slot-(\d+)$/.exec(laneId)
       if (match && match[1] === activePool) {
         setFocusedSlotIndex(Number(match[2]))
       }
@@ -106,9 +132,9 @@ export function PlanTimelinePanel({
     return parts.join(' · ')
   }, [])
 
-  const mfgSlotRingProps = useMemo(
-    () =>
-      mfgLanes.map((lane, index) => ({
+  const slotRingPropsFor = useCallback(
+    (lanes: typeof mfgLanes, idleMessage: string) =>
+      lanes.map((lane, index) => ({
         slotIndex: index,
         active: lane.jobCount > 0,
         utilization: windowHours > 0 ? lane.busyHours / windowHours : 0,
@@ -117,26 +143,30 @@ export function PlanTimelinePanel({
           ? blueprintTypeIdByProduct.get(lane.bars[0].productTypeId)
           : undefined,
         productName: lane.bars[0]?.label,
-        idleMessage: 'Please install blueprint',
+        idleMessage,
       })),
-    [mfgLanes, windowHours, blueprintTypeIdByProduct],
+    [windowHours, blueprintTypeIdByProduct],
   )
 
-  const scienceSlotRingProps = useMemo(
-    () =>
-      scienceLanes.map((lane, index) => ({
-        slotIndex: index,
-        active: lane.jobCount > 0,
-        utilization: windowHours > 0 ? lane.busyHours / windowHours : 0,
-        productTypeId: lane.bars[0]?.productTypeId,
-        blueprintTypeId: lane.bars[0]?.productTypeId
-          ? blueprintTypeIdByProduct.get(lane.bars[0].productTypeId)
-          : undefined,
-        productName: lane.bars[0]?.label,
-        idleMessage: 'Idle research slot',
-      })),
-    [scienceLanes, windowHours, blueprintTypeIdByProduct],
+  const mfgSlotRingProps = useMemo(
+    () => slotRingPropsFor(mfgLanes, 'Please install blueprint'),
+    [mfgLanes, slotRingPropsFor],
   )
+  const reactionSlotRingProps = useMemo(
+    () => slotRingPropsFor(reactionLanes, 'Idle reaction slot'),
+    [reactionLanes, slotRingPropsFor],
+  )
+  const scienceSlotRingProps = useMemo(
+    () => slotRingPropsFor(scienceLanes, 'Idle research slot'),
+    [scienceLanes, slotRingPropsFor],
+  )
+
+  const activeSlotRingProps =
+    tab === 'research'
+      ? scienceSlotRingProps
+      : tab === 'reactions'
+        ? reactionSlotRingProps
+        : mfgSlotRingProps
 
   const tabs = (
     <div className="plan-timeline__tabs" role="tablist" aria-label="Timeline pool">
@@ -151,6 +181,18 @@ export function PlanTimelinePanel({
       >
         Manufacturing
         <span className="plan-timeline__tab-count">{slots}</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        id="plan-timeline-tab-reactions"
+        aria-selected={tab === 'reactions'}
+        aria-controls="plan-timeline-panel-reactions"
+        className={`plan-timeline__tab${tab === 'reactions' ? ' plan-timeline__tab--active' : ''}`}
+        onClick={() => handleTabChange('reactions')}
+      >
+        Reactions
+        <span className="plan-timeline__tab-count">{reactionSlots}</span>
       </button>
       <button
         type="button"
@@ -175,7 +217,9 @@ export function PlanTimelinePanel({
             text={
               tab === 'research'
                 ? 'Hour when the last copy or invention job finishes.'
-                : 'Hour when the last manufacture or reaction job finishes. Copy and invention are on the Research tab.'
+                : tab === 'reactions'
+                  ? 'Hour when the last reaction job finishes.'
+                  : 'Hour when the last manufacture job finishes. Copy, invention, and reactions have their own tabs.'
             }
             placement="bottom"
           >
@@ -191,7 +235,9 @@ export function PlanTimelinePanel({
           text={
             tab === 'research'
               ? `${scienceSlots} research slots from Laboratory Operation skills (copy and invention). Click a slot to highlight its row.`
-              : `${slots} manufacturing slots from Mass Production skills. Click a slot to highlight its row.`
+              : tab === 'reactions'
+                ? `${reactionSlots} reaction slots from Mass Reactions skills. Click a slot to highlight its row.`
+                : `${slots} manufacturing slots from Mass Production skills. Click a slot to highlight its row.`
           }
           placement="bottom"
           className="flex w-full min-w-0 self-stretch"
@@ -203,10 +249,16 @@ export function PlanTimelinePanel({
             aria-labelledby={`plan-timeline-tab-${tab}`}
           >
             <ManufacturingSlotsRow
-              slots={tab === 'research' ? scienceSlotRingProps : mfgSlotRingProps}
+              slots={activeSlotRingProps}
               selectedSlotIndex={focusedSlotIndex}
               onSelectSlot={handleSelectSlot}
-              emptyHint={tab === 'research' ? 'Idle research slot' : 'Please install blueprint'}
+              emptyHint={
+                tab === 'research'
+                  ? 'Idle research slot'
+                  : tab === 'reactions'
+                    ? 'Idle reaction slot'
+                    : 'Please install blueprint'
+              }
             />
           </div>
         </UiTooltip>
@@ -221,11 +273,19 @@ export function PlanTimelinePanel({
         blueprintTypeIdByProduct={blueprintTypeIdByProduct}
         focusedLaneId={focusedLaneId}
         onFocusedLaneChange={handleFocusedLaneChange}
-        title={tab === 'research' ? 'Research schedule' : 'Manufacturing schedule'}
+        title={
+          tab === 'research'
+            ? 'Research schedule'
+            : tab === 'reactions'
+              ? 'Reaction schedule'
+              : 'Manufacturing schedule'
+        }
         emptyMessage={
           tab === 'research'
             ? 'No copy or invention jobs on this plan yet. Build a T2 root to schedule research.'
-            : undefined
+            : tab === 'reactions'
+              ? 'No reaction jobs on this plan yet.'
+              : undefined
         }
       />
     </>

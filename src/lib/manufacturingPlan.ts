@@ -25,7 +25,7 @@ import {
 } from '@/lib/rootRunsDuration'
 import { activeConcurrentCopies, totalRootRuns } from '@/lib/supplyChainSlots'
 import { templateWithActiveRoots } from '@/lib/planRootEnabled'
-import { manufacturingSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
+import { manufacturingSlotsFromSkills, reactionSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { getBlueprintForBpo, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { isRawMaterial } from '@/lib/supplyChain'
 import { canRunReactionJobs, isReactionRecipe } from '@/lib/recipes'
@@ -63,6 +63,7 @@ export interface ExpandPlanResult {
   nodes: PlanNode[]
   slots: number
   scienceSlots: number
+  reactionSlots: number
   windowHours: number
   missingPriceTypeIds: number[]
   warnings: { productTypeId: number; message: string }[]
@@ -702,6 +703,7 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
   const nodeMap = new Map<number, NodeAccum>()
   const slots = manufacturingSlotsFromSkills(settings.skills)
   const scienceSlots = researchSlotsFromSkills(settings.skills)
+  const reactionSlots = reactionSlotsFromSkills(settings.skills)
   const buildCostCache = createBuildCostCache()
 
   for (const root of template.roots) {
@@ -746,6 +748,7 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
     nodes,
     slots,
     scienceSlots,
+    reactionSlots,
     windowHours,
     missingPriceTypeIds,
     warnings,

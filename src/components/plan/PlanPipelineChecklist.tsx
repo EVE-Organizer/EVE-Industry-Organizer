@@ -31,11 +31,13 @@ export function PlanPipelineChecklist({
 
   const science = pipeline.stages.filter((s) => s.pool === 'science')
   const manufacturing = pipeline.stages.filter((s) => s.pool === 'manufacturing')
+  const reactions = pipeline.stages.filter((s) => s.pool === 'reaction')
 
   return (
     <div className="flex flex-col gap-5 min-w-0">
       <p className="text-xs opacity-60">
         Science slots: {pipeline.scienceSlots} · Manufacturing slots: {pipeline.manufacturingSlots}
+        · Reaction slots: {pipeline.reactionSlots}
       </p>
 
       {science.length > 0 ? (
@@ -48,12 +50,22 @@ export function PlanPipelineChecklist({
       ) : null}
 
       <StageGroup
-        title="Manufacturing (includes reactions)"
+        title="Manufacturing"
         stages={manufacturing}
         allStages={pipeline.stages}
         typeMap={typeMap}
         onOpenMeTe={onOpenMeTe}
       />
+
+      {reactions.length > 0 ? (
+        <StageGroup
+          title="Reactions"
+          stages={reactions}
+          allStages={pipeline.stages}
+          typeMap={typeMap}
+          onOpenMeTe={onOpenMeTe}
+        />
+      ) : null}
     </div>
   )
 }

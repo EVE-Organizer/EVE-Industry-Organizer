@@ -431,7 +431,7 @@ export function ReactionFacilityBonusFields({
 
       {showHull ? (
         rigLayout === 'split' ? (
-          <div className={`grid grid-cols-1 ${size === 'sm' ? 'gap-2' : 'gap-3'}`}>
+          <div className="grid grid-cols-1 gap-3">
             {REACTION_FAMILY_GROUPS.map((group) => (
               <NumberField
                 key={group}

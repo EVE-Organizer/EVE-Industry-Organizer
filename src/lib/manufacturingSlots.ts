@@ -15,6 +15,13 @@ export function researchSlotsFromSkills(skills: Partial<SkillLevels> | undefined
   return 1 + lab + advanced
 }
 
+/** EVE: 1 base + Mass Reactions + Advanced Mass Reactions (max 11 at V/V). */
+export function reactionSlotsFromSkills(skills: Partial<SkillLevels> | undefined): number {
+  const mass = effectiveSkillLevel(skills, 'massReactions')
+  const advanced = effectiveSkillLevel(skills, 'advancedMassReactions')
+  return 1 + mass + advanced
+}
+
 /** @deprecated Slots always come from character/settings skills. */
 export function resolveTemplateSlots(
   _template: Pick<ManufacturingPlanTemplate, 'slotSource' | 'manufacturingSlots'>,

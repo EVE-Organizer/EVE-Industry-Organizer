@@ -105,10 +105,17 @@ export function SkillsImpactGrid({
             value={`−${impact.reactionTimeCutPercent}%`}
             tone={impact.reactionTimeCutPercent > 0 ? 'positive' : 'neutral'}
           />
+          <ImpactMetric icon={<SlotIcon />} label="Reaction slots" value={impact.reactionSlots} />
         </ImpactGroup>
 
         <ImpactGroup title="Science" icon={<ScienceGroupIcon />}>
           <ImpactMetric icon={<SlotIcon />} label="Sci slots" value={impact.scienceSlots} />
+          <ImpactMetric
+            icon={<TimeCutIcon />}
+            label="Copy time"
+            value={`−${impact.copyTimeCutPercent}%`}
+            tone={impact.copyTimeCutPercent > 0 ? 'positive' : 'neutral'}
+          />
           <ImpactMetric
             icon={<InventionIcon />}
             label="Invention"

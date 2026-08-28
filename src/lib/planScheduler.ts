@@ -9,6 +9,8 @@ export interface SchedulePlanInput {
   slots: number
   /** Concurrent science slots for copy / invention. */
   scienceSlots?: number
+  /** Concurrent reaction slots (separate from manufacturing). */
+  reactionSlots?: number
   windowHours: number
   /** Optional pre-built pipeline; when present, science stages are scheduled too. */
   pipeline?: PlanPipeline
@@ -175,28 +177,28 @@ function activityForNode(node: PlanNode, blueprints?: BlueprintInfo[]): PlanJobA
   return 'manufacture'
 }
 
-/** Greedy slot packing with build dependencies: parents wait for child supply + science. */
-export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
-  const { nodes, slots, windowHours, pipeline, blueprints } = input
-  const scienceSlots = input.scienceSlots ?? 1
-
-  const scienceResult = pipeline
-    ? scheduleScienceStages(pipeline.stages, scienceSlots)
-    : { jobs: [] as ScheduledPlanJob[], readyByProduct: new Map<number, number>(), stageEnd: new Map() }
-
+function scheduleProductionNodes(
+  nodes: PlanNode[],
+  nodesById: Map<number, PlanNode>,
+  mfgSlotFreeAt: number[],
+  rxnSlotFreeAt: number[],
+  scienceReadyByProduct: Map<number, number>,
+  windowHours: number,
+  blueprints?: BlueprintInfo[],
+): { jobs: ScheduledPlanJob[]; supplies: ScheduleEvent[]; demands: ScheduleEvent[] } {
   const buildNodes = nodes.filter((n) => n.mode === 'build' && n.runs > 0)
   const byDepth = [...buildNodes].sort((a, b) => b.depth - a.depth)
-  const nodesById = new Map(nodes.map((node) => [node.productTypeId, node]))
-
-  const slotFreeAt = Array.from({ length: Math.max(1, slots) }, () => 0)
-  const jobs: ScheduledPlanJob[] = [...scienceResult.jobs]
+  const jobs: ScheduledPlanJob[] = []
   const supplies: ScheduleEvent[] = []
   const demands: ScheduleEvent[] = []
 
   for (const node of byDepth) {
+    const activity = activityForNode(node, blueprints)
+    const pool: PlanJobPool = activity === 'reaction' ? 'reaction' : 'manufacturing'
+    const slotFreeAt = pool === 'reaction' ? rxnSlotFreeAt : mfgSlotFreeAt
+
     let remainingRuns = node.runs
     const runsPerJob = Math.max(1, Math.ceil(node.runs / Math.max(1, node.concurrentCopies)))
-    const activity = activityForNode(node, blueprints)
 
     while (remainingRuns > 0) {
       const slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
@@ -209,7 +211,7 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
         nodesById,
         supplies,
         demands,
-        scienceResult.readyByProduct,
+        scienceReadyByProduct,
       )
       const jobDurationHours =
         runsPerJob > 0 ? (node.jobTimeSeconds * runsThisJob) / runsPerJob / 3600 : 0
@@ -225,7 +227,7 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
         runs: runsThisJob,
         outputQty,
         activity,
-        pool: 'manufacturing' as PlanJobPool,
+        pool,
       })
 
       supplies.push({ productTypeId: node.productTypeId, hour: endHour, qty: outputQty })
@@ -244,7 +246,34 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
     }
   }
 
-  return jobs.filter((j) => j.startHour < windowHours)
+  return { jobs: jobs.filter((j) => j.startHour < windowHours), supplies, demands }
+}
+
+/** Greedy slot packing with build dependencies: parents wait for child supply + science. */
+export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
+  const { nodes, slots, windowHours, pipeline, blueprints } = input
+  const scienceSlots = input.scienceSlots ?? 1
+  const reactionSlots = input.reactionSlots ?? 1
+
+  const scienceResult = pipeline
+    ? scheduleScienceStages(pipeline.stages, scienceSlots)
+    : { jobs: [] as ScheduledPlanJob[], readyByProduct: new Map<number, number>(), stageEnd: new Map() }
+
+  const nodesById = new Map(nodes.map((node) => [node.productTypeId, node]))
+  const mfgSlotFreeAt = Array.from({ length: Math.max(1, slots) }, () => 0)
+  const rxnSlotFreeAt = Array.from({ length: Math.max(1, reactionSlots) }, () => 0)
+
+  const production = scheduleProductionNodes(
+    nodes,
+    nodesById,
+    mfgSlotFreeAt,
+    rxnSlotFreeAt,
+    scienceResult.readyByProduct,
+    windowHours,
+    blueprints,
+  )
+
+  return [...scienceResult.jobs, ...production.jobs]
 }
 
 export function isSciencePlanJob(job: ScheduledPlanJob): boolean {

@@ -1,6 +1,6 @@
 /**
  * Research / manufacturing pipeline stages derived from an expanded plan.
- * Science pool: copy → invention. Manufacturing pool: manufacture + reaction.
+ * Science pool: copy → invention. Manufacturing pool: manufacture. Reaction pool: reaction.
  */
 import { applyCopyTime, applyInventionTime, inventionBlueprintCostForSettings } from '@/lib/cost'
 import { resolveScienceModifiers } from '@/lib/facilityModifiers'
@@ -35,6 +35,7 @@ export interface PlanPipeline {
   stages: PlanPipelineStage[]
   scienceSlots: number
   manufacturingSlots: number
+  reactionSlots: number
 }
 
 export interface BuildPlanPipelineInput {
@@ -43,6 +44,7 @@ export interface BuildPlanPipelineInput {
   settings: GlobalSettings
   scienceSlots: number
   manufacturingSlots: number
+  reactionSlots: number
 }
 
 function inventionAttempts(
@@ -64,7 +66,7 @@ function inventionAttempts(
 
 /** Build ordered pipeline stages for build-mode nodes (skip buy roots / buy leaves). */
 export function buildPlanPipeline(input: BuildPlanPipelineInput): PlanPipeline {
-  const { nodes, blueprints, settings, scienceSlots, manufacturingSlots } = input
+  const { nodes, blueprints, settings, scienceSlots, manufacturingSlots, reactionSlots } = input
   const prices = new Map<number, number>()
   for (const node of nodes) {
     if (node.unitPrice != null) prices.set(node.productTypeId, node.unitPrice)
@@ -145,12 +147,13 @@ export function buildPlanPipeline(input: BuildPlanPipelineInput): PlanPipeline {
     }
 
     const activity: PlanJobActivity = isReactionRecipe(blueprint) ? 'reaction' : 'manufacture'
+    const pool: PlanJobPool = activity === 'reaction' ? 'reaction' : 'manufacturing'
     stages.push({
       id: mfgId,
       productTypeId: node.productTypeId,
       name: node.name,
       activity,
-      pool: 'manufacturing',
+      pool,
       runs: node.runs,
       durationHours: node.jobTimeSeconds / 3600,
       dependsOn,
@@ -158,5 +161,5 @@ export function buildPlanPipeline(input: BuildPlanPipelineInput): PlanPipeline {
     })
   }
 
-  return { stages, scienceSlots, manufacturingSlots }
+  return { stages, scienceSlots, manufacturingSlots, reactionSlots }
 }

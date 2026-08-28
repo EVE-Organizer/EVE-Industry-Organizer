@@ -1,0 +1,71 @@
+---
+description: Zustand store structure for appStore-style create() hooks
+globs: src/**/*store*.ts,src/**/*Store*.ts
+alwaysApply: false
+---
+
+# Zustand Store Pattern
+
+This project uses the simple `create()` hook pattern (not React context providers).
+
+Reference: `src/stores/appStore.ts`, `src/stores/authStore.ts`.
+
+## Structure
+
+```typescript
+interface MyStore {
+  // plain state fields
+  count: number
+  items: Item[]
+
+  // actions (mutate via set/get)
+  addItem: (item: Item) => void
+  reset: () => void
+}
+
+export const useMyStore = create<MyStore>((set, get) => ({
+  count: 0,
+  items: [],
+
+  addItem: (item) => set((s) => ({ items: [...s.items, item] })),
+  reset: () => set({ count: 0, items: [] }),
+}))
+```
+
+## Rules
+
+- **State**: plain values in the store object
+- **Actions**: call `set()`; use functional updates when deriving from prior state
+- **Getters**: use `get()` inside actions for cross-field reads; avoid storing derived functions unless reused heavily
+- **Persistence**: user data goes through `services/sync/types.ts` helpers; update `updatedAt` when mutating `UserData`
+- **Immutability**: spread nested objects (`userData`, plan templates); never mutate arrays in place
+
+### ตัวเลือกรูปแบบ store (ภาษาไทย)
+
+**`create()` + `useAppStore` (ที่โปรเจกต์ใช้)** — store เดียวทั้ง app, import ตรง  
+ตัวอย่าง: `appStore.ts`, `authStore.ts`
+
+**Context + Provider** — ไม่ใช้ใน repo นี้ เว้นแต่ต้องมีหลาย instance แยกกัน  
+ตัวอย่าง: ถ้ามี plan editor 2 หน้าต่างพร้อมกัน (ยังไม่มีในโปรเจกต์)
+
+**Persist ผ่าน `services/sync/types.ts`** — อย่า `localStorage.setItem` ใน component  
+ตัวอย่าง: `setUserData` + `saveUserDataToLocal` หลังแก้ plan template
+
+## Optional file sections
+
+For large stores, divide with full-width blocks:
+
+```
+/* -------------------------------------------------------------------------- */
+/*                                    Types                                   */
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/*                                   Factory                                  */
+/* -------------------------------------------------------------------------- */
+```
+
+## Do not
+
+- Introduce context/provider wrappers unless multiple isolated store instances are required
+- Put React hooks inside the store file (keep hooks in `src/hooks/`)
