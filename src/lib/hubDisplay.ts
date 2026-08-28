@@ -17,3 +17,14 @@ export function hubDisplayName(hubId: HubId): string {
   const hub = HUBS.find((h) => h.id === hubId)
   return hub ? formatHubLabel(hub) : hubId
 }
+
+/** Tailwind class for system security (high / low / null). */
+export function securityColor(security: number): string {
+  if (security >= 0.5) return 'text-success'
+  if (security > 0) return 'text-warning'
+  return 'text-error'
+}
+
+export function formatSecurity(security: number): string {
+  return security.toFixed(1)
+}

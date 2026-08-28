@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
-import type { HubId } from '@/types'
 import {
   characterPortraitUrl,
-  HUB_FACTION_IDS,
   type ImageVariant,
   imageUrlChain,
   normalizeImageSize,
@@ -37,8 +35,7 @@ export function EveImage({
     setUrlIndex(0)
   }, [id, variant, productTypeId, size])
 
-  const frame =
-    'rounded-md border border-eve-border bg-base-300/80 p-0.5 shadow-sm'
+  const frame = 'rounded-md border border-eve-border bg-base-300/80 p-0.5 shadow-sm'
 
   const src = urls[urlIndex]
 
@@ -129,29 +126,6 @@ export function CorpLogo({
   )
 }
 
-export function HubLogo({
-  hubId,
-  size = 48,
-  className = '',
-  alt = '',
-}: {
-  hubId: HubId
-  size?: number
-  className?: string
-  alt?: string
-}) {
-  return (
-    <EveImage
-      id={HUB_FACTION_IDS[hubId]}
-      variant="faction"
-      size={size}
-      alt={alt}
-      className={className}
-      framed
-    />
-  )
-}
-
 export function CharacterAvatar({
   characterId,
   name,
@@ -198,19 +172,6 @@ export function CharacterAvatar({
         </span>
       )}
     </div>
-  )
-}
-
-export function IskBadge({ className = '' }: { className?: string }) {
-  return (
-    <span
-      className={`inline-flex items-center justify-center rounded-full bg-warning/20 text-warning font-bold border border-warning/30 ${className}`}
-      style={{ width: 32, height: 32, fontSize: 14 }}
-      title="ISK"
-      aria-hidden
-    >
-      Ƶ
-    </span>
   )
 }
 

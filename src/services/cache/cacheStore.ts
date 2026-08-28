@@ -12,7 +12,11 @@ const MAX_ENTRIES = 500
 /** Evict these sources first when over the entry cap. */
 const PRUNE_FIRST_SOURCES = new Set(['price', 'history', 'route', 'costIndex'])
 
-export function cacheKey(source: string, endpoint: string, params: Record<string, unknown>): string {
+export function cacheKey(
+  source: string,
+  endpoint: string,
+  params: Record<string, unknown>,
+): string {
   const canonical = JSON.stringify(params, Object.keys(params).sort())
   return `${PREFIX}${source}:${endpoint}:${canonical}`
 }
@@ -77,7 +81,7 @@ export function getCacheStats(): { count: number; sizeKb: number } {
     const key = localStorage.key(i)
     if (key?.startsWith(PREFIX)) {
       count++
-      size += (localStorage.getItem(key)?.length ?? 0)
+      size += localStorage.getItem(key)?.length ?? 0
     }
   }
   return { count, sizeKb: Math.round(size / 1024) }
@@ -130,5 +134,4 @@ export const TTL = {
   failed: { fresh: 5 * 60 * 1000, stale: 5 * 60 * 1000 },
   characterData: { fresh: 10 * 60 * 1000, stale: 24 * 60 * 60 * 1000 },
   universeLocation: { fresh: 24 * 60 * 60 * 1000, stale: 7 * 24 * 60 * 60 * 1000 },
-  warOverlay: { fresh: 10 * 60 * 1000, stale: 4 * 60 * 60 * 1000 },
 } as const

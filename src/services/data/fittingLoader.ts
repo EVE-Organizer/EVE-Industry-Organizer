@@ -1,4 +1,4 @@
-import type { FittingData } from '@/lib/fitting/types'
+import type { FittingData } from '@/pages/FitSkills/types'
 import { publicDataUrl } from '@/lib/paths'
 
 let cache: FittingData | null = null

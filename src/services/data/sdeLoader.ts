@@ -12,9 +12,12 @@ import type {
   SkillInfo,
   SystemInfo,
   TypeInfo,
+  UpwellCatalog,
 } from '@/types'
 import { DEFAULT_RECIPE_KINDS } from '@/types'
 import { publicDataUrl } from '@/lib/paths'
+import { setSkillCalcCatalog } from '@/lib/industrySkillBonuses'
+import { parseUpwellCatalog, setUpwellCatalog } from '@/lib/upwellCatalog'
 
 export interface SdeData {
   types: TypeInfo[]
@@ -24,10 +27,11 @@ export interface SdeData {
   regions: RegionsData
   skills: SkillInfo[]
   systems: SystemInfo[]
+  upwell: UpwellCatalog
 }
 
 /** Bump when public/data shape changes so React Query refetches cached SDE bundles. */
-export const SDE_DATA_VERSION = 2
+export const SDE_DATA_VERSION = 3
 
 async function fetchJson<T>(file: string): Promise<T> {
   const response = await fetch(publicDataUrl(file), { cache: 'no-store' })
@@ -48,16 +52,21 @@ async function loadSkills(): Promise<SkillInfo[]> {
 }
 
 export async function loadSdeData(): Promise<SdeData> {
-  const [typesRaw, registry, market, contracts, regions, skills, systems] = await Promise.all([
-    fetchJson<TypeInfo[] | { types: TypeInfo[] }>('types.json'),
-    fetchJson<BlueprintRegistry>('blueprints.json'),
-    fetchJson<MarketData>('market.json'),
-    fetchJson<ContractsData>('contracts.json').catch(() => null),
-    fetchJson<RegionsData>('regions.json'),
-    loadSkills(),
-    fetchJson<SystemInfo[]>('systems.json'),
-  ])
+  const [typesRaw, registry, market, contracts, regions, skills, systems, upwellRaw] =
+    await Promise.all([
+      fetchJson<TypeInfo[] | { types: TypeInfo[] }>('types.json'),
+      fetchJson<BlueprintRegistry>('blueprints.json'),
+      fetchJson<MarketData>('market.json'),
+      fetchJson<ContractsData>('contracts.json').catch(() => null),
+      fetchJson<RegionsData>('regions.json'),
+      loadSkills(),
+      fetchJson<SystemInfo[]>('systems.json'),
+      fetchJson<unknown>('upwell.json').catch(() => null),
+    ])
   const types: TypeInfo[] = Array.isArray(typesRaw) ? typesRaw : typesRaw.types
+  const upwell = parseUpwellCatalog(upwellRaw)
+  setUpwellCatalog(upwell)
+  setSkillCalcCatalog(skills)
   return {
     types,
     registry,
@@ -66,6 +75,7 @@ export async function loadSdeData(): Promise<SdeData> {
     regions,
     skills,
     systems,
+    upwell,
   }
 }
 
@@ -112,9 +122,7 @@ export function resolveBuildSystem(
   manufacturingSystemId: number,
 ): { buildSystemId: number; costIndex: number; reactionCostIndex: number } {
   const system = systems.find((s) => s.systemId === manufacturingSystemId)
-  const region = system
-    ? regions.regions.find((r) => r.regionId === system.regionId)
-    : undefined
+  const region = system ? regions.regions.find((r) => r.regionId === system.regionId) : undefined
 
   if (system) {
     const costIndex = system.costIndex ?? region?.costIndex ?? hubMarket.costIndex

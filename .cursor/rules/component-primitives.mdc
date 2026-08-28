@@ -21,12 +21,12 @@ Sources: [Tailwind: Extracting components](https://tailwindcss.com/docs/reusing-
 
 **Do not** create `@apply` CSS classes for UI sections. Prefer a component with utilities inside it. Reserve `@apply` for global base styles (see `index.css`).
 
-**Do not** extract too early: a one-off onboarding wizard step can stay inline. Extract when you copy the pattern or expect to reuse it.
+**Do not** extract too early: a one-off settings subsection can stay inline. Extract when you copy the pattern or expect to reuse it.
 
 ### ตัวเลือก inline vs component (ภาษาไทย)
 
 **เก็บ Tailwind inline** — layout ใช้ครั้งเดียว ไม่ซ้ำ class string  
-ตัวอย่าง: wizard step พิเศษที่ไม่มีหน้าอื่นเหมือน
+ตัวอย่าง: subsection ใน Settings ที่ใช้ครั้งเดียวและไม่มีหน้าอื่นเหมือน
 
 **แยก component** — class combo เดิมปรากฏ 2+ ที่  
 ตัวอย่าง: `card bg-base-200 border border-eve-border` → ใช้ `Panel.tsx` แทน copy ใน settings/plan

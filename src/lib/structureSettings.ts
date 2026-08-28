@@ -4,7 +4,13 @@ import type {
   ScienceFacilitySettings,
   StructureType,
 } from '@/types'
-import { DEFAULT_BATCH_SIZE, MAX_RANKING_TIME_HOURS, MIN_RANKING_TIME_HOURS, STRUCTURE_HULL_PRESETS, defaultScienceFacility } from '@/types'
+import {
+  DEFAULT_BATCH_SIZE,
+  MAX_RANKING_TIME_HOURS,
+  MIN_RANKING_TIME_HOURS,
+  defaultScienceFacility,
+} from '@/types'
+import { structureHullPreset } from '@/lib/upwellCatalog'
 
 export type ScienceFacilityKey = 'copyFacility' | 'inventionFacility'
 
@@ -33,7 +39,7 @@ export function patchStructureType(structureType: StructureType): Partial<Global
   if (structureType === 'custom') {
     return { structureType }
   }
-  const hull = STRUCTURE_HULL_PRESETS[structureType]
+  const hull = structureHullPreset(structureType)
   return {
     structureType,
     structureMeBonusPercent: hull.hullMeBonusPercent,
@@ -65,6 +71,22 @@ export function isPresetPlayerStructure(type: StructureType): boolean {
   return type === 'raitaru' || type === 'azbel' || type === 'sotiyo'
 }
 
+export function structureTypeFromTypeId(typeId: number | undefined): StructureType {
+  if (typeId == null) return 'npc'
+  const match = STRUCTURE_TYPES.find(
+    (type) => isPresetPlayerStructure(type) && STRUCTURE_TYPE_IDS[type] === typeId,
+  )
+  return match ?? 'custom'
+}
+
+export function isPlayerStructureTypeId(typeId: number | undefined): boolean {
+  return isPresetPlayerStructure(structureTypeFromTypeId(typeId))
+}
+
+export function isEngineeringStructureTypeId(typeId: number | undefined): boolean {
+  return isPlayerStructureTypeId(typeId)
+}
+
 /** Apply preset hull TE / job-cost when the user picks a copy or invention structure. */
 export function patchScienceStructureType(
   key: ScienceFacilityKey,
@@ -85,7 +107,7 @@ export function patchScienceStructureType(
   if (structureType === 'custom') {
     return { [key]: { ...current, structureType } }
   }
-  const hull = STRUCTURE_HULL_PRESETS[structureType]
+  const hull = structureHullPreset(structureType)
   return {
     [key]: {
       ...current,
@@ -212,9 +234,7 @@ export function effectiveManufacturingSystemId(
   settings: Pick<GlobalSettings, 'manufacturingSystemId' | 'productionLocationId'>,
   queryMfgSystem: number,
 ): number {
-  return settings.productionLocationId != null
-    ? settings.manufacturingSystemId
-    : queryMfgSystem
+  return settings.productionLocationId != null ? settings.manufacturingSystemId : queryMfgSystem
 }
 
 /** Blueprint ranking/graph settings: location system wins over URL query override. */
@@ -249,8 +269,7 @@ export function buildManufacturingSettings(
     priceMethod?: GlobalSettings['priceMethod']
   } = {},
 ): ManufacturingSettings {
-  const manufacturingSystemId =
-    overrides.manufacturingSystemId ?? settings.manufacturingSystemId
+  const manufacturingSystemId = overrides.manufacturingSystemId ?? settings.manufacturingSystemId
   return {
     ...settingsForManufacturingSystem(settings, manufacturingSystemId, systems),
     ...overrides,

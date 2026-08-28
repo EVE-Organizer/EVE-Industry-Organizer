@@ -1,13 +1,7 @@
 import type { HubId } from '@/types'
 
 /** NPC trade hubs used as the liquid-price reference cluster. */
-export const NPC_REFERENCE_HUBS: readonly HubId[] = [
-  'jita',
-  'amarr',
-  'dodixie',
-  'rens',
-  'hek',
-]
+export const NPC_REFERENCE_HUBS: readonly HubId[] = ['jita', 'amarr', 'dodixie', 'rens', 'hek']
 
 /** Hub quote is scatter-cheap when it is below Jita / this ratio. */
 export const SCATTER_PRICE_RATIO = 4
@@ -52,6 +46,18 @@ export function referenceFallbackPrice(
   const jita = jitaPriceFromMaps(typeId, npcPrices)
   if (jita > 0) return jita
   return referenceMedianFromMaps(typeId, npcPrices) ?? 0
+}
+
+/** Fill missing (zero/absent) hub quotes from Jita sell prices. */
+export function fillMissingPricesFromJita(
+  hubPrices: Map<number, number>,
+  jitaPrices: Map<number, number>,
+): Map<number, number> {
+  const out = new Map(hubPrices)
+  for (const [typeId, jitaPrice] of jitaPrices) {
+    if (jitaPrice > 0 && (out.get(typeId) ?? 0) <= 0) out.set(typeId, jitaPrice)
+  }
+  return out
 }
 
 export function isThinVolume(hubVolume: number, medianVolume: number | null): boolean {

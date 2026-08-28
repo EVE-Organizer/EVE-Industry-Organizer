@@ -98,14 +98,55 @@ export interface SkillInfo {
   iconUrl: string
   primaryAttribute?: EveAttributeId
   secondaryAttribute?: EveAttributeId
+  /** Fraction per level (Industry 0.04). Omitted when the skill has no time bonus. */
+  manufacturingTimeBonusPerLevel?: number
+  /** Science copy-time fraction per level (0.05). */
+  copyTimeBonusPerLevel?: number
+  /** Reactions time fraction per level (0.04). */
+  reactionTimeBonusPerLevel?: number
+  extraJobSlotsPerLevel?: number
+  extraScienceJobSlotsPerLevel?: number
+  extraReactionJobSlotsPerLevel?: number
 }
 
-export type EveAttributeId =
-  | 'intelligence'
-  | 'memory'
-  | 'perception'
-  | 'willpower'
-  | 'charisma'
+export type UpwellHullKind = 'engineering' | 'refinery'
+export type UpwellRigSize = 'm' | 'l' | 'xl'
+export type UpwellRigTier = 't1' | 't2'
+export type UpwellRigActivity = 'manufacturing' | 'reaction' | 'copy' | 'invention'
+
+export interface UpwellRoleBonuses {
+  me: number
+  te: number
+  jobCost: number
+}
+
+export interface UpwellHull {
+  typeId: number
+  name: string
+  kind: UpwellHullKind
+  size: UpwellRigSize
+  roleBonuses: UpwellRoleBonuses
+}
+
+export interface UpwellRig {
+  typeId: number
+  name: string
+  size: UpwellRigSize
+  tier: UpwellRigTier
+  activity: UpwellRigActivity
+  families: string[]
+  me: number
+  te: number
+  jobCost: number
+}
+
+export interface UpwellCatalog {
+  generatedAt?: string
+  hulls: UpwellHull[]
+  rigs: UpwellRig[]
+}
+
+export type EveAttributeId = 'intelligence' | 'memory' | 'perception' | 'willpower' | 'charisma'
 
 export interface SkillAttributePair {
   primaryAttribute: EveAttributeId
@@ -228,16 +269,6 @@ export const STRUCTURE_HULL_PRESETS: Record<
   sotiyo: { hullMeBonusPercent: 3, hullTeBonusPercent: 25, hullJobCostBonusPercent: 5 },
 }
 
-/** @deprecated Use STRUCTURE_HULL_PRESETS. Kept for migration reads. */
-export const STRUCTURE_PRESETS: Record<
-  Exclude<StructureType, 'npc' | 'custom'>,
-  { structureMeBonusPercent: number; structureTeBonusPercent: number; structureJobCostBonusPercent: number }
-> = {
-  raitaru: { structureMeBonusPercent: 1, structureTeBonusPercent: 15, structureJobCostBonusPercent: 3 },
-  azbel: { structureMeBonusPercent: 2, structureTeBonusPercent: 20, structureJobCostBonusPercent: 4 },
-  sotiyo: { structureMeBonusPercent: 3, structureTeBonusPercent: 25, structureJobCostBonusPercent: 5 },
-}
-
 export type ManufacturingRigTier = 'none' | 't1' | 't2' | 'custom'
 
 /** One fitted M/L/XL manufacturing rig from ESI assets + type dogma. */
@@ -291,11 +322,7 @@ export interface ReactionFamilyModifiers {
   taxPercent: number
 }
 
-export const REACTION_FAMILY_GROUPS: ReactionFamilyGroup[] = [
-  'composite',
-  'biochemical',
-  'hybrid',
-]
+export const REACTION_FAMILY_GROUPS: ReactionFamilyGroup[] = ['composite', 'biochemical', 'hybrid']
 
 export const DEFAULT_REACTION_FAMILY_MODIFIERS: ReactionFamilyModifiers = {
   meRig: 'none',
@@ -637,6 +664,12 @@ export interface PlanNodeOverride {
   buyPrice?: number
 }
 
+export interface PlanSlotBonuses {
+  manufacturing?: number
+  reactions?: number
+  research?: number
+}
+
 export interface ManufacturingPlanTemplate {
   id: string
   name: string
@@ -645,6 +678,12 @@ export interface ManufacturingPlanTemplate {
   productionWindowHours: number
   slotSource: PlanSlotSource
   manufacturingSlots: number
+  /** Extra manufacturing slots beyond skill-based count. */
+  manufacturingSlotBonus?: number
+  /** Extra reaction slots beyond skill-based count. */
+  reactionSlotBonus?: number
+  /** Extra research slots beyond skill-based count. */
+  researchSlotBonus?: number
   defaultRunsPerBpc: number
   /** How Duration is applied: job timer vs ready-by deadline. Displayed hours stay the stored input. */
   durationMode?: PlanDurationMode
@@ -729,7 +768,13 @@ export type PlanJobPool = 'science' | 'manufacturing' | 'reaction'
 
 export type IndustryActivityId = 1 | 3 | 4 | 5 | 7 | 8 | 11
 
-export type LiveIndustryJobStatus = 'active' | 'paused' | 'ready' | 'delivered' | 'cancelled' | 'reverted'
+export type LiveIndustryJobStatus =
+  | 'active'
+  | 'paused'
+  | 'ready'
+  | 'delivered'
+  | 'cancelled'
+  | 'reverted'
 
 /** In-game industry job from ESI (not a plan simulation). */
 export interface LiveIndustryJob {

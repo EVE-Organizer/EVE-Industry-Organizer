@@ -27,16 +27,22 @@ export function buildTypeLookupMaps(groups, categories) {
   return { groupById, categoryById }
 }
 
-export function buildAllTypeRecords(types, groupById, categoryById, blueprintTypeIds = []) {
-  const includeTypeIds = new Set(
-    types.filter((type) => type.published === '1').map((type) => type.typeID),
-  )
+export function buildAllTypeRecords(
+  types,
+  groupById,
+  categoryById,
+  blueprintTypeIds = [],
+  { onlyIds } = {},
+) {
+  const includeTypeIds = onlyIds
+    ? new Set([...onlyIds].map(String))
+    : new Set(types.filter((type) => type.published === '1').map((type) => type.typeID))
   for (const typeId of blueprintTypeIds) {
     includeTypeIds.add(String(typeId))
   }
 
   return types
-    .filter((type) => includeTypeIds.has(type.typeID))
+    .filter((type) => type.published === '1' && includeTypeIds.has(type.typeID))
     .map((type) => {
       const typeId = num(type.typeID)
       const group = groupById.get(type.groupID)

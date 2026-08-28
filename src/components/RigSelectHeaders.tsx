@@ -17,7 +17,9 @@ function HeaderCell({
   className?: string
 }) {
   return (
-    <span className={`flex min-w-0 items-center justify-end gap-1 text-[10px] opacity-50 ${className ?? ''}`}>
+    <span
+      className={`flex min-w-0 items-center justify-end gap-1 text-[10px] opacity-50 ${className ?? ''}`}
+    >
       <span className="truncate">{label}</span>
       <InfoTooltip text={tooltip} />
     </span>
@@ -73,17 +75,6 @@ export function LabOptimizationHeader() {
       <span aria-hidden />
       <span aria-hidden />
       <HeaderCell label="Optimization rig" tooltip={LAB_OPTIMIZATION_TOOLTIP} />
-    </div>
-  )
-}
-
-/** @deprecated Use RigCostTimeHeaders for laboratory M-Set rows. */
-export function RigTeHeader() {
-  return (
-    <div className="mb-1 grid grid-cols-[1.75rem_minmax(0,1fr)_minmax(9rem,1fr)] items-center gap-2">
-      <span aria-hidden />
-      <span aria-hidden />
-      <HeaderCell label="TE rig" tooltip={TE_TOOLTIP} />
     </div>
   )
 }

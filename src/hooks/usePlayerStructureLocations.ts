@@ -14,8 +14,8 @@ import {
   mergeProductionLocations,
   playerStructuresInRange,
 } from '@/lib/productionLocations'
-import { isEngineeringStructureTypeId } from '@/lib/structureTypeFromTypeId'
-import { isRefineryStructureTypeId } from '@/lib/refineryTypeFromTypeId'
+import { isRefineryStructureTypeId } from '@/lib/refinerySettings'
+import { isEngineeringStructureTypeId } from '@/lib/structureSettings'
 import type { ProductionLocation } from '@/types'
 
 export function usePlayerStructureLocations(
@@ -25,8 +25,7 @@ export function usePlayerStructureLocations(
   const configured = useAuthStore((s) => s.configured)
   const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
   const characters = useAuthStore((s) => s.characters)
-  const granted =
-    characters.find((c) => c.characterId === activeCharacterId)?.scopes ?? []
+  const granted = characters.find((c) => c.characterId === activeCharacterId)?.scopes ?? []
   const characterId = configured && activeCharacterId != null ? activeCharacterId : null
 
   const locationsQuery = useProductionLocations(characterId)

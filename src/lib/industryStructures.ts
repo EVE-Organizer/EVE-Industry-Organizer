@@ -1,6 +1,6 @@
 import { makeProductionLocation } from '@/lib/productionLocations'
-import { isEngineeringStructureTypeId } from '@/lib/structureTypeFromTypeId'
-import { isRefineryStructureTypeId } from '@/lib/refineryTypeFromTypeId'
+import { isRefineryStructureTypeId } from '@/lib/refinerySettings'
+import { isEngineeringStructureTypeId } from '@/lib/structureSettings'
 import type { ProductionLocation } from '@/types'
 
 export interface IndustryStructureRow {

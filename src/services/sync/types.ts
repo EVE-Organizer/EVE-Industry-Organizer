@@ -1,5 +1,30 @@
-import type { HubId, UserData, GlobalSettings, SkillLevels, ManufacturingPlanTemplate, PlanRootEntry, StructureType, MiningBoosterHullId, MiningBurstTech, MiningCrystalId, MiningForemanBurstId, MiningReprocessFacility, MiningSurveyChipsetId, MiningUpgradeId, ProductionLocationKind } from '@/types'
-import { DEFAULT_SETTINGS, DEFAULT_SKILLS, ZERO_SKILLS, HUBS, STRUCTURE_HULL_PRESETS, type MiningBuffId, type MiningBoostSpace, type MiningShipId } from '@/types'
+import type {
+  HubId,
+  UserData,
+  GlobalSettings,
+  SkillLevels,
+  ManufacturingPlanTemplate,
+  PlanRootEntry,
+  StructureType,
+  MiningBoosterHullId,
+  MiningBurstTech,
+  MiningCrystalId,
+  MiningForemanBurstId,
+  MiningReprocessFacility,
+  MiningSurveyChipsetId,
+  MiningUpgradeId,
+  ProductionLocationKind,
+} from '@/types'
+import {
+  DEFAULT_SETTINGS,
+  DEFAULT_SKILLS,
+  ZERO_SKILLS,
+  HUBS,
+  type MiningBuffId,
+  type MiningBoostSpace,
+  type MiningShipId,
+} from '@/types'
+import { structureHullPreset } from '@/lib/upwellCatalog'
 import {
   DEFAULT_MINING_SHIP_ID,
   migrateBoosterFromLegacyBuffIds,
@@ -38,7 +63,6 @@ type LegacySettings = Partial<Omit<GlobalSettings, 'skills'>> & {
 }
 
 type LegacyUserData = Partial<UserData> & {
-  onboardingComplete?: boolean
   accounts?: { skills?: Partial<SkillLevels> }[]
 }
 
@@ -53,11 +77,7 @@ export function normalizeSkillLevels(
   options?: { legacyZeroMeansDefault?: boolean },
 ): SkillLevels {
   const keys = SKILL_FIELDS.map((f) => f.key)
-  if (
-    options?.legacyZeroMeansDefault &&
-    skills &&
-    keys.every((k) => (skills[k] ?? 0) === 0)
-  ) {
+  if (options?.legacyZeroMeansDefault && skills && keys.every((k) => (skills[k] ?? 0) === 0)) {
     return { ...DEFAULT_SKILLS }
   }
   const merged = { ...ZERO_SKILLS, ...(skills ?? {}) } as SkillLevels
@@ -127,7 +147,7 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
   let manufacturingRigs = migratedRigs.rigs
 
   if (isPresetPlayerStructure(structureType)) {
-    const hullPreset = STRUCTURE_HULL_PRESETS[structureType as keyof typeof STRUCTURE_HULL_PRESETS]
+    const hullPreset = structureHullPreset(structureType as 'raitaru' | 'azbel' | 'sotiyo')
     structureMeBonusPercent = hullPreset.hullMeBonusPercent
     structureTeBonusPercent = hullPreset.hullTeBonusPercent
     structureJobCostBonusPercent = hullPreset.hullJobCostBonusPercent
@@ -138,10 +158,7 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     manufacturingRigs = { ...migratedRigs.rigs }
     const rigMe = rigPercentFromCombined(hullPreset.hullMeBonusPercent, legacyMe)
     const rigTe = rigPercentFromCombined(hullPreset.hullTeBonusPercent, legacyTe)
-    const rigJobCost = rigPercentFromCombined(
-      hullPreset.hullJobCostBonusPercent,
-      legacyJobCost,
-    )
+    const rigJobCost = rigPercentFromCombined(hullPreset.hullJobCostBonusPercent, legacyJobCost)
     if (rigMe > manufacturingRigs.rigMeBonusPercent) {
       manufacturingRigs.rigMeBonusPercent = rigMe
     }
@@ -159,10 +176,7 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
 
   const reactionFacility = normalizeReactionFacility(parsedReactionFacility, manufacturingSystemId)
   const copyFacility = normalizeScienceFacility(parsedCopyFacility, manufacturingSystemId)
-  const inventionFacility = normalizeScienceFacility(
-    parsedInventionFacility,
-    manufacturingSystemId,
-  )
+  const inventionFacility = normalizeScienceFacility(parsedInventionFacility, manufacturingSystemId)
 
   const hadPlayerStructure =
     structureType !== 'npc' &&
@@ -220,7 +234,9 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
       (rest.miningShipId as MiningShipId | undefined) ?? DEFAULT_MINING_SHIP_ID,
       'ore',
     ),
-    miningBoostSpace: normalizeMiningBoostSpace(rest.miningBoostSpace as MiningBoostSpace | undefined),
+    miningBoostSpace: normalizeMiningBoostSpace(
+      rest.miningBoostSpace as MiningBoostSpace | undefined,
+    ),
     miningFleetSize: normalizeMiningFleetSize(rest.miningFleetSize as number | undefined),
     miningFleet: normalizeMiningFleet(
       rest.miningFleet as GlobalSettings['miningFleet'],
@@ -238,7 +254,9 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     ...(() => {
       const rawBuffIds = rest.miningBuffIds as MiningBuffId[] | undefined
       const migrated = migrateBoosterFromLegacyBuffIds(rawBuffIds ?? [])
-      const boostSpace = normalizeMiningBoostSpace(rest.miningBoostSpace as MiningBoostSpace | undefined)
+      const boostSpace = normalizeMiningBoostSpace(
+        rest.miningBoostSpace as MiningBoostSpace | undefined,
+      )
       const explicitHull = rest.miningBoosterHull as MiningBoosterHullId | null | undefined
       const hull =
         explicitHull !== undefined
@@ -260,7 +278,9 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
           rest.miningForemanBursts as MiningForemanBurstId[] | undefined,
           (rest.miningForemanBurst as MiningForemanBurstId | undefined) ?? migrated.burst,
         ),
-        miningBurstTech: normalizeMiningBurstTech(rest.miningBurstTech as MiningBurstTech | undefined),
+        miningBurstTech: normalizeMiningBurstTech(
+          rest.miningBurstTech as MiningBurstTech | undefined,
+        ),
         miningIndustrialCore: rest.miningIndustrialCore !== false,
         miningUpgrade: upgrade,
         miningUpgradeCount: normalizeMiningUpgradeCount(
@@ -322,12 +342,17 @@ export function ensurePlanRootIds(roots: PlanRootEntry[] | undefined): PlanRootE
   }))
 }
 
-export function migratePlanTemplates(templates: ManufacturingPlanTemplate[] | undefined): ManufacturingPlanTemplate[] {
+export function migratePlanTemplates(
+  templates: ManufacturingPlanTemplate[] | undefined,
+): ManufacturingPlanTemplate[] {
   return (templates ?? []).map((t) => ({
     ...t,
     roots: ensurePlanRootIds(t.roots),
     modeOverrides: t.modeOverrides ?? {},
     nodeOverrides: t.nodeOverrides ?? {},
+    manufacturingSlotBonus: Math.max(0, t.manufacturingSlotBonus ?? 0) || undefined,
+    reactionSlotBonus: Math.max(0, t.reactionSlotBonus ?? 0) || undefined,
+    researchSlotBonus: Math.max(0, t.researchSlotBonus ?? 0) || undefined,
   }))
 }
 
@@ -354,7 +379,7 @@ export function loadUserDataFromLocal(): UserData {
     if (!raw) return createDefaultUserData()
     const parsed = JSON.parse(raw) as LegacyUserData
     const legacySkills = parsed.accounts?.[0]?.skills
-    const { onboardingComplete: _onboarding, accounts: _accounts, ...rest } = parsed
+    const { accounts: _accounts, ...rest } = parsed
     return {
       ...createDefaultUserData(),
       ...rest,

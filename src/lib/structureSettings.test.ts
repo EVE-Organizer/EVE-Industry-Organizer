@@ -3,9 +3,14 @@ import {
   buildBlueprintRankingSettings,
   buildManufacturingSettings,
   effectiveManufacturingSystemId,
+  isEngineeringStructureTypeId,
+  isPlayerStructureTypeId,
   patchManufacturingSystemIfStale,
   patchScienceFacilityFromLocation,
+  patchStructureType,
   securityForSystem,
+  STRUCTURE_TYPE_IDS,
+  structureTypeFromTypeId,
 } from '@/lib/structureSettings'
 import { DEFAULT_SETTINGS, defaultScienceFacility } from '@/types'
 
@@ -88,6 +93,30 @@ describe('structureSettings manufacturing scope', () => {
     expect(scoped.manufacturingSystemId).toBe(30002780)
     expect(scoped.buildSystemSecurity).toBe(-0.5)
     expect(scoped.rankingTargetTimeSeconds).toBe(720 * 3600)
+  })
+})
+
+describe('structureTypeFromTypeId', () => {
+  it('maps missing ids to npc and unknown hulls to custom', () => {
+    expect(structureTypeFromTypeId(undefined)).toBe('npc')
+    expect(structureTypeFromTypeId(35826)).toBe('azbel')
+    expect(structureTypeFromTypeId(1)).toBe('custom')
+  })
+
+  it('treats engineering complexes as player structure type ids', () => {
+    expect(isPlayerStructureTypeId(STRUCTURE_TYPE_IDS.sotiyo)).toBe(true)
+    expect(isEngineeringStructureTypeId(STRUCTURE_TYPE_IDS.raitaru)).toBe(true)
+    expect(isPlayerStructureTypeId(STRUCTURE_TYPE_IDS.npc)).toBe(false)
+    expect(isEngineeringStructureTypeId(undefined)).toBe(false)
+  })
+
+  it('applies Raitaru hull percents 1/15/3', () => {
+    expect(patchStructureType('raitaru')).toMatchObject({
+      structureType: 'raitaru',
+      structureMeBonusPercent: 1,
+      structureTeBonusPercent: 15,
+      structureJobCostBonusPercent: 3,
+    })
   })
 })
 

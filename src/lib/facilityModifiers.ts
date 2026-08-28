@@ -15,8 +15,6 @@ import type {
 import {
   DEFAULT_MANUFACTURING_RIGS,
   DEFAULT_REACTION_FAMILY_MODIFIERS,
-  REFINERY_HULL_PRESETS,
-  STRUCTURE_HULL_PRESETS,
   defaultReactionFamilyModifiers,
   defaultScienceFacility,
 } from '@/types'
@@ -29,6 +27,7 @@ import {
 } from '@/lib/manufacturingRigs'
 import { reactionRigLayout } from '@/lib/reactionRigFamilies'
 import { scienceRigLayout } from '@/lib/scienceRigFamilies'
+import { refineryHullPreset, structureHullPreset } from '@/lib/upwellCatalog'
 /** Multiplicative bonus combine: hull 25% + rig 20% -> 40% effective reduction. */
 export function combineBonusPercent(hullPercent: number, rigPercent: number): number {
   if (hullPercent <= 0 && rigPercent <= 0) return 0
@@ -68,7 +67,7 @@ function manufacturingHullBonuses(settings: GlobalSettings): {
     settings.structureType === 'azbel' ||
     settings.structureType === 'sotiyo'
   ) {
-    const hull = STRUCTURE_HULL_PRESETS[settings.structureType]
+    const hull = structureHullPreset(settings.structureType)
     return {
       me: hull.hullMeBonusPercent,
       te: hull.hullTeBonusPercent,
@@ -133,8 +132,8 @@ export function resolveManufacturingModifiers(
 
 function refineryHullTe(facility: ReactionFacilitySettings): number {
   if (facility.refineryType === 'none') return 0
-  if (facility.refineryType === 'athanor') return REFINERY_HULL_PRESETS.athanor.hullTeBonusPercent
-  if (facility.refineryType === 'tatara') return REFINERY_HULL_PRESETS.tatara.hullTeBonusPercent
+  if (facility.refineryType === 'athanor') return refineryHullPreset('athanor').hullTeBonusPercent
+  if (facility.refineryType === 'tatara') return refineryHullPreset('tatara').hullTeBonusPercent
   return facility.hullTeBonusPercent
 }
 
@@ -187,7 +186,9 @@ export function reactionFacilityDetail(
   if (layout === 'optimization') {
     const storedTier = facility.reactorEfficiencyRig ?? 'none'
     const tier =
-      storedTier !== 'none' ? storedTier : inferReactorEfficiencyRig(facility.familyModifiers, security)
+      storedTier !== 'none'
+        ? storedTier
+        : inferReactorEfficiencyRig(facility.familyModifiers, security)
     if (tier !== 'none' && tier !== 'custom') {
       rigMe = scaledRigBonus(tier, 0, 'me', security, 'reaction')
       rigTe = scaledRigBonus(tier, 0, 'te', security, 'reaction')
@@ -268,7 +269,7 @@ function scienceHullBonuses(facility: ScienceFacilitySettings): {
     facility.structureType === 'azbel' ||
     facility.structureType === 'sotiyo'
   ) {
-    const hull = STRUCTURE_HULL_PRESETS[facility.structureType]
+    const hull = structureHullPreset(facility.structureType)
     return { te: hull.hullTeBonusPercent, jobCost: hull.hullJobCostBonusPercent }
   }
   return {
@@ -285,12 +286,7 @@ export function scienceFacilityDetail(facility: ScienceFacilitySettings): Facili
   let rigJobCost = 0
   if (layout === 'split') {
     rigTe = scaledRigBonus(facility.teRig, facility.rigTeBonusPercent, 'te', security)
-    rigJobCost = scaledRigBonus(
-      facility.costRig,
-      facility.rigJobCostBonusPercent,
-      'cost',
-      security,
-    )
+    rigJobCost = scaledRigBonus(facility.costRig, facility.rigJobCostBonusPercent, 'cost', security)
   } else if (layout === 'optimization' || layout === 'xl-laboratory') {
     const opt = scaledLabOptimizationBonuses(facility.optimizationRig, security)
     rigTe = opt.time
@@ -337,12 +333,8 @@ export function normalizeScienceFacility(
   const structureType = parsed.structureType ?? 'npc'
   let hullTeBonusPercent = parsed.hullTeBonusPercent ?? 0
   let hullJobCostBonusPercent = parsed.hullJobCostBonusPercent ?? 0
-  if (
-    structureType === 'raitaru' ||
-    structureType === 'azbel' ||
-    structureType === 'sotiyo'
-  ) {
-    const hull = STRUCTURE_HULL_PRESETS[structureType]
+  if (structureType === 'raitaru' || structureType === 'azbel' || structureType === 'sotiyo') {
+    const hull = structureHullPreset(structureType)
     hullTeBonusPercent = hull.hullTeBonusPercent
     hullJobCostBonusPercent = hull.hullJobCostBonusPercent
   }
@@ -404,9 +396,7 @@ export function normalizeReactionFacility(
 
   return {
     reactionSystemId:
-      typeof parsed.reactionSystemId === 'number'
-        ? parsed.reactionSystemId
-        : manufacturingSystemId,
+      typeof parsed.reactionSystemId === 'number' ? parsed.reactionSystemId : manufacturingSystemId,
     reactionSystemSecurity,
     refineryType,
     hullTeBonusPercent: parsed.hullTeBonusPercent ?? 0,
@@ -470,10 +460,8 @@ export function migrateManufacturingRigs(
       rigs: {
         ...DEFAULT_MANUFACTURING_RIGS,
         ...kept,
-        rigMeBonusPercent:
-          existingRigs?.rigMeBonusPercent ?? structureMeBonusPercent,
-        rigTeBonusPercent:
-          existingRigs?.rigTeBonusPercent ?? structureTeBonusPercent,
+        rigMeBonusPercent: existingRigs?.rigMeBonusPercent ?? structureMeBonusPercent,
+        rigTeBonusPercent: existingRigs?.rigTeBonusPercent ?? structureTeBonusPercent,
         rigJobCostBonusPercent:
           existingRigs?.rigJobCostBonusPercent ?? structureJobCostBonusPercent,
         meRig: existingRigs?.meRig ?? (structureMeBonusPercent > 0 ? 'custom' : 'none'),

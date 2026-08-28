@@ -1,4 +1,4 @@
-import type { BlueprintTier, HubId, MineralStock, RecipeKind } from '@/types'
+import type { BlueprintTier, MineralStock, RecipeKind } from '@/types'
 import { MINERAL_TYPE_IDS } from '@/types'
 
 /** EVE Image Service only accepts these sizes (see ESI image server docs). */
@@ -127,15 +127,4 @@ export const MINERAL_KEYS = Object.keys(MINERAL_TYPE_IDS) as (keyof MineralStock
 
 export function mineralIconUrl(key: keyof MineralStock, size = 32): string {
   return typeIconUrl(MINERAL_TYPE_IDS[key], size)
-}
-
-/** Primary empire faction corp IDs for trade hub branding. */
-export const HUB_FACTION_IDS: Record<HubId, number> = {
-  jita: 500001,
-  amarr: 500002,
-  dodixie: 500004,
-  rens: 500003,
-  hek: 500003,
-  ympwl: 500002,
-  vale: 500010,
 }

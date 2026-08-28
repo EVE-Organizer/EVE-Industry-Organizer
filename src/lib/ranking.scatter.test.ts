@@ -3,7 +3,15 @@ import { describe, expect, it } from 'vitest'
 import { rankBlueprintsFromMarket } from '@/lib/ranking'
 import { buildBlueprintRankingSettings } from '@/lib/structureSettings'
 import { buildTypeMap } from '@/services/data/sdeLoader'
-import { DEFAULT_SETTINGS, type BlueprintRegistry, type HubId, type MarketData, type RegionsData, type TimeRange, type TypeInfo } from '@/types'
+import {
+  DEFAULT_SETTINGS,
+  type BlueprintRegistry,
+  type HubId,
+  type MarketData,
+  type RegionsData,
+  type TimeRange,
+  type TypeInfo,
+} from '@/types'
 
 function loadFixture<T>(path: string): T {
   return JSON.parse(readFileSync(path, 'utf8')) as T
@@ -43,14 +51,18 @@ describe('rankBlueprintsFromMarket scatter-cheap buy quotes', () => {
   const baseMarket = loadFixture<MarketData>('public/data/market.json')
   const regions = loadFixture<RegionsData>('public/data/regions.json')
   const typesRaw = loadFixture<{ types?: TypeInfo[] } | TypeInfo[]>('public/data/types.json')
-  const types = Array.isArray(typesRaw) ? typesRaw : typesRaw.types ?? []
+  const types = Array.isArray(typesRaw) ? typesRaw : (typesRaw.types ?? [])
   const typeMap = buildTypeMap(types)
   const systems = loadFixture<import('@/types').SystemInfo[]>('public/data/systems.json')
 
   const settings = buildBlueprintRankingSettings(
     { ...DEFAULT_SETTINGS, sellHubId: 'jita', primaryHub: 'vale' },
     systems,
-    { mfgSystem: DEFAULT_SETTINGS.manufacturingSystemId, rankingTimeHours: 24, priceMethod: 'sell_orders' },
+    {
+      mfgSystem: DEFAULT_SETTINGS.manufacturingSystemId,
+      rankingTimeHours: 24,
+      priceMethod: 'sell_orders',
+    },
   )
   const filters = {
     minSetupCost: 0,
@@ -99,10 +111,27 @@ describe('rankBlueprintsFromMarket scatter-cheap buy quotes', () => {
     const cheap = cheapRows.find((row) =>
       row.blueprint.materials.some((mat) => mat.typeId === TRITANIUM),
     )
-    const fair = fairRows.find((row) => row.blueprint.productTypeId === cheap?.blueprint.productTypeId)
+    const fair = fairRows.find(
+      (row) => row.blueprint.productTypeId === cheap?.blueprint.productTypeId,
+    )
     expect(cheap).toBeDefined()
     expect(fair).toBeDefined()
     expect(cheap!.setupBreakdown.materialCost).toBeCloseTo(fair!.setupBreakdown.materialCost, 0)
     expect(cheap!.setupBreakdown.materialCost).toBeGreaterThan(1)
+  })
+
+  it('falls back to Jita when the buy hub has no material quote', () => {
+    const market = cloneMarket(baseMarket)
+    delete market.hubs.vale.prices[String(TRITANIUM)]
+    delete market.hubs.vale.products[String(TRITANIUM)]
+
+    const rows = rank(market)
+    expect(rows.length).toBeGreaterThan(0)
+
+    const row = rows.find((candidate) =>
+      candidate.blueprint.materials.some((mat) => mat.typeId === TRITANIUM),
+    )
+    expect(row).toBeDefined()
+    expect(row!.setupBreakdown.materialCost).toBeGreaterThan(0)
   })
 })

@@ -1,0 +1,24 @@
+---
+description: Source folder layout for pages, components, stores, and imports
+alwaysApply: true
+---
+
+# Source layout
+
+Pages live in `src/pages/<Name>/`. Colocate UI used by that route only.
+
+```
+src/pages/Plan/PlanPage.tsx
+src/pages/Settings/...
+src/components/layout/Layout.tsx
+src/hooks/useSdeData.ts
+src/lib/cost.ts
+src/stores/appStore.ts
+```
+
+- Shared chrome: `src/components/layout/`
+- Shared widgets: `src/components/`
+- No `src/features/`. No `index.ts` barrels.
+- Import files directly, e.g. `@/pages/Plan/PlanPage`.
+- Zustand for client state (`appStore`, `authStore`). TanStack Query for fetches.
+- Do not add Immer, extra providers, or nested `components/hooks/lib` inside a page folder.

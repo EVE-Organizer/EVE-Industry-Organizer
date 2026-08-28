@@ -25,7 +25,10 @@ import {
 } from '@/lib/rootRunsDuration'
 import { activeConcurrentCopies, totalRootRuns } from '@/lib/supplyChainSlots'
 import { templateWithActiveRoots } from '@/lib/planRootEnabled'
-import { manufacturingSlotsFromSkills, reactionSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
+import {
+  effectivePlanSlots,
+  planSlotBonusesFromManufacturingTemplate,
+} from '@/lib/manufacturingSlots'
 import { getBlueprintForBpo, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { isRawMaterial } from '@/lib/supplyChain'
 import { canRunReactionJobs, isReactionRecipe } from '@/lib/recipes'
@@ -66,7 +69,6 @@ export interface ExpandPlanResult {
   reactionSlots: number
   windowHours: number
   missingPriceTypeIds: number[]
-  warnings: { productTypeId: number; message: string }[]
 }
 
 function modeOverridesMap(template: ManufacturingPlanTemplate): Map<number, PlanBuildMode> {
@@ -172,10 +174,7 @@ function computeInventionPrereqCost(
     systems,
   })
   if (!invCost) return 0
-  const attempts = Math.max(
-    1,
-    Math.ceil(runs / Math.max(1, invCost.expectedRunsPerAttempt)),
-  )
+  const attempts = Math.max(1, Math.ceil(runs / Math.max(1, invCost.expectedRunsPerAttempt)))
 
   let cost = invCost.attemptCost * attempts
   if (!t1Bp || depth >= maxDepth) return cost
@@ -341,12 +340,7 @@ function ensureNode(
   return node
 }
 
-function addDemand(
-  node: NodeAccum,
-  parentProductTypeId: number,
-  qty: number,
-  depth: number,
-): void {
+function addDemand(node: NodeAccum, parentProductTypeId: number, qty: number, depth: number): void {
   const existing = node.demandByParent.find((d) => d.parentProductTypeId === parentProductTypeId)
   if (existing) existing.qty += qty
   else node.demandByParent.push({ parentProductTypeId, qty })
@@ -367,7 +361,8 @@ function expandInventionPrereqs(
   const inv = blueprint.invention
   if (!inv || blueprint.tier !== 't2') return
 
-  const { settings, blueprints, typeMap, prices, systemCostIndex, reactionCostIndex, systems } = input
+  const { settings, blueprints, typeMap, prices, systemCostIndex, reactionCostIndex, systems } =
+    input
   const t1ForFees = getBlueprintForBpo(blueprints, inv.t1BlueprintTypeId)
   const invCost = inventionBlueprintCostForSettings({
     blueprint,
@@ -377,10 +372,7 @@ function expandInventionPrereqs(
     systems,
   })
   if (!invCost) return
-  const attempts = Math.max(
-    1,
-    Math.ceil(runs / Math.max(1, invCost.expectedRunsPerAttempt)),
-  )
+  const attempts = Math.max(1, Math.ceil(runs / Math.max(1, invCost.expectedRunsPerAttempt)))
 
   const parentNode = ensureNode(nodeMap, blueprint.productTypeId, typeMap, blueprint)
   for (const dc of inv.datacores) {
@@ -433,7 +425,17 @@ function expandInventionPrereqs(
   parentNode.childProductTypeIds.add(t1Bp.productTypeId)
 
   if (mode === 'build') {
-    expandMaterials(t1Bp, t1Runs, blueprint.productTypeId, parentNode.depth + 1, input, nodeMap, modeOverrides, maxDepth, cache)
+    expandMaterials(
+      t1Bp,
+      t1Runs,
+      blueprint.productTypeId,
+      parentNode.depth + 1,
+      input,
+      nodeMap,
+      modeOverrides,
+      maxDepth,
+      cache,
+    )
   } else {
     child.isLeaf = true
   }
@@ -450,7 +452,8 @@ function expandMaterials(
   maxDepth: number,
   cache: BuildCostCache,
 ): void {
-  const { settings, blueprints, typeMap, prices, systemCostIndex, reactionCostIndex, template } = input
+  const { settings, blueprints, typeMap, prices, systemCostIndex, reactionCostIndex, template } =
+    input
   const { me } = resolveBlueprintMeTe(
     blueprint.tier,
     settings,
@@ -523,7 +526,17 @@ function expandMaterials(
     parentNode.childProductTypeIds.add(mat.typeId)
 
     if (mode === 'build') {
-      expandMaterials(subBp!, subRuns, blueprint.productTypeId, depth + 1, input, nodeMap, modeOverrides, maxDepth, cache)
+      expandMaterials(
+        subBp!,
+        subRuns,
+        blueprint.productTypeId,
+        depth + 1,
+        input,
+        nodeMap,
+        modeOverrides,
+        maxDepth,
+        cache,
+      )
     } else {
       child.isLeaf = true
     }
@@ -555,18 +568,19 @@ function finalizeNodes(
     const blueprint = accum.blueprint
     const override = template.nodeOverrides[accum.productTypeId]
 
-    let runs = accum.isRoot && blueprint
-      ? template.roots
-          .filter((r) => r.productTypeId === accum.productTypeId)
-          .reduce((s, r) => s + r.runs, 0) || MIN_BATCH_SIZE
-      : blueprint
-        ? runsForDemand(blueprint.productQuantity, totalDemandQty)
-        : 0
+    let runs =
+      accum.isRoot && blueprint
+        ? template.roots
+            .filter((r) => r.productTypeId === accum.productTypeId)
+            .reduce((s, r) => s + r.runs, 0) || MIN_BATCH_SIZE
+        : blueprint
+          ? runsForDemand(blueprint.productQuantity, totalDemandQty)
+          : 0
 
     if (override?.runs != null) runs = override.runs
 
     const runsPerBpc = blueprint
-      ? override?.runsPerBpc ?? defaultRunsPerBpc(blueprint, template.defaultRunsPerBpc)
+      ? (override?.runsPerBpc ?? defaultRunsPerBpc(blueprint, template.defaultRunsPerBpc))
       : template.defaultRunsPerBpc
 
     const bpcCount = blueprint && accum.mode === 'build' ? bpcCountForRuns(runs, runsPerBpc) : 0
@@ -587,13 +601,7 @@ function finalizeNodes(
       : { me: settings.meDefault, te: settings.teDefault, locked: false }
     const jobTimeSeconds =
       blueprint && accum.mode === 'build'
-        ? jobTimeSecondsForRuns(
-            blueprint,
-            settings,
-            runs,
-            concurrent,
-            override,
-          )
+        ? jobTimeSecondsForRuns(blueprint, settings, runs, concurrent, override)
         : 0
 
     const outputQty = blueprint ? runs * blueprint.productQuantity : totalDemandQty
@@ -628,8 +636,7 @@ function finalizeNodes(
         input.systems,
       )
       savings = buyCost - buildCost
-      recommendedMode =
-        unitPrice <= 0 ? 'build' : buildCost <= buyCost ? 'build' : 'buy'
+      recommendedMode = unitPrice <= 0 ? 'build' : buildCost <= buyCost ? 'build' : 'buy'
     } else if (accum.mode === 'buy' && unitPrice > 0) {
       buyCost = unitPrice * totalDemandQty
     }
@@ -701,9 +708,12 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
   const { settings } = input
   const modeOverrides = modeOverridesMap(template)
   const nodeMap = new Map<number, NodeAccum>()
-  const slots = manufacturingSlotsFromSkills(settings.skills)
-  const scienceSlots = researchSlotsFromSkills(settings.skills)
-  const reactionSlots = reactionSlotsFromSkills(settings.skills)
+  const slotBonuses = planSlotBonusesFromManufacturingTemplate(template)
+  const {
+    manufacturing: slots,
+    research: scienceSlots,
+    reactions: reactionSlots,
+  } = effectivePlanSlots(settings.skills, slotBonuses)
   const buildCostCache = createBuildCostCache()
 
   for (const root of template.roots) {
@@ -715,7 +725,17 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
     node.depth = 0
     node.mode = 'build'
     node.isLeaf = false
-    expandMaterials(blueprint, root.runs, root.productTypeId, 0, input, nodeMap, modeOverrides, 10, buildCostCache)
+    expandMaterials(
+      blueprint,
+      root.runs,
+      root.productTypeId,
+      0,
+      input,
+      nodeMap,
+      modeOverrides,
+      10,
+      buildCostCache,
+    )
   }
 
   const windowFromRoots = template.roots.reduce((m, r) => {
@@ -732,16 +752,19 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
   }, 0)
   const windowHours = Math.max(windowFromRoots, 1)
 
-  const nodes = finalizeNodes(nodeMap, template, settings, slots, input, modeOverrides, buildCostCache)
+  const nodes = finalizeNodes(
+    nodeMap,
+    template,
+    settings,
+    slots,
+    input,
+    modeOverrides,
+    buildCostCache,
+  )
   const missingPriceTypeIds: number[] = []
-  const warnings: { productTypeId: number; message: string }[] = []
   for (const accum of nodeMap.values()) {
     if (!accum.missingPrice) continue
     missingPriceTypeIds.push(accum.productTypeId)
-    warnings.push({
-      productTypeId: accum.productTypeId,
-      message: `${accum.name}: no hub sell price (cannot buy; ${accum.blueprint ? 'forced build or blocked' : 'must buy'})`,
-    })
   }
 
   return {
@@ -751,6 +774,5 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
     reactionSlots,
     windowHours,
     missingPriceTypeIds,
-    warnings,
   }
 }

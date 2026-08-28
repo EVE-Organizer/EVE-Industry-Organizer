@@ -1,5 +1,22 @@
-import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings, ManufacturingSettings, SkillLevels, StructureModifiers, SystemInfo } from '@/types'
-import { itemTypeManufacturingTimeFactor, inventionSuccessChanceFromLevels, resolveInventionSkillLevels } from '@/lib/industrySkillBonuses'
+import type {
+  BlueprintInfo,
+  BlueprintMaterial,
+  BlueprintTier,
+  GlobalSettings,
+  ManufacturingSettings,
+  SkillLevels,
+  StructureModifiers,
+  SystemInfo,
+} from '@/types'
+import {
+  advancedIndustryTimeBonusPerLevel,
+  industryTimeBonusPerLevel,
+  inventionSuccessChanceFromLevels,
+  itemTypeManufacturingTimeFactor,
+  reactionsTimeBonusPerLevel,
+  resolveInventionSkillLevels,
+  scienceCopyBonusPerLevel,
+} from '@/lib/industrySkillBonuses'
 import { scienceCostIndex } from '@/lib/structureSettings'
 import { isReactionRecipe, recipeKind } from '@/lib/recipes'
 import {
@@ -23,21 +40,6 @@ const ME_BONUS = 0.01
  * Each point is 1% reduction; research steps are 2% each across 10 levels.
  */
 const TE_BONUS = 0.01
-/** Industry skill: 4% manufacturing time reduction per level (EVE SDE). */
-const INDUSTRY_BONUS = 0.04
-/** Advanced Industry: 3% manufacturing time reduction per level. */
-const ADVANCED_INDUSTRY_BONUS = 0.03
-/** Reactions skill: 4% reaction time reduction per level. */
-const REACTIONS_BONUS = 0.04
-/** Science skill: 5% copy time reduction per level. */
-const SCIENCE_COPY_BONUS = 0.05
-
-/**
- * Rough EIV fraction for full ME10 + TE20 research, charged once per BPO.
- * Research job fees are small next to a BPO's price, so this stays a proxy
- * (one build-job equivalent) rather than the exact per-level EVE formula.
- */
-const RESEARCH_FEE_FACTOR = 1
 
 /** Multiplicative bonus as a factor in [0, 1] (40% bonus → 0.6). */
 function bonusFactor(percent: number): number {
@@ -59,19 +61,19 @@ export function teTimeFactor(te: number): number {
 }
 
 export function industryTimeFactor(industry: number): number {
-  return 1 - industry * INDUSTRY_BONUS
+  return 1 - industry * industryTimeBonusPerLevel()
 }
 
 export function advancedIndustryTimeFactor(advancedIndustry: number): number {
-  return 1 - advancedIndustry * ADVANCED_INDUSTRY_BONUS
+  return 1 - advancedIndustry * advancedIndustryTimeBonusPerLevel()
 }
 
 export function reactionsTimeFactor(reactions: number): number {
-  return 1 - reactions * REACTIONS_BONUS
+  return 1 - reactions * reactionsTimeBonusPerLevel()
 }
 
 export function scienceCopyTimeFactor(science: number): number {
-  return 1 - science * SCIENCE_COPY_BONUS
+  return 1 - science * scienceCopyBonusPerLevel()
 }
 
 /**
@@ -185,9 +187,7 @@ export function inventionScienceFees(args: {
     args.settings.inventionFacility ?? defaultScienceFacility(args.settings.manufacturingSystemId)
   const copyMods = resolveScienceModifiers(copyFacility)
   const inventMods = resolveScienceModifiers(inventionFacility)
-  const copyEiv = args.t1Materials
-    ? estimatedItemValue(args.t1Materials, 1, args.prices)
-    : 0
+  const copyEiv = args.t1Materials ? estimatedItemValue(args.t1Materials, 1, args.prices) : 0
   const inventEiv = estimatedItemValue(args.t2Materials, 1, args.prices)
   return {
     copyFeePerAttempt: estimateJobCost(copyEiv, args.copyingCostIndex, copyMods),
@@ -341,10 +341,7 @@ export function estimatedItemValue(
   prices: Map<number, number>,
 ): number {
   if (runs <= 0) return 0
-  return materials.reduce(
-    (sum, m) => sum + (prices.get(m.typeId) ?? 0) * m.quantity * runs,
-    0,
-  )
+  return materials.reduce((sum, m) => sum + (prices.get(m.typeId) ?? 0) * m.quantity * runs, 0)
 }
 
 /** Job installation fee from EIV (base materials), system cost index, and structure modifiers. */
@@ -375,8 +372,7 @@ export function totalManufacturingCost(
 ): { materialCost: number; jobCost: number; capital: number; jobTime: number } {
   const runs = settings.batchSize
   const kind = recipeKind(blueprint)
-  const costIndex =
-    kind === 'reaction' ? reactionCostIndex : systemCostIndex
+  const costIndex = kind === 'reaction' ? reactionCostIndex : systemCostIndex
   const structure = resolveRecipeModifiers(settings, {
     ...blueprint,
     category: productCategory,
@@ -432,8 +428,7 @@ export function revenueFromSale(
   options: { includeBrokerFee?: boolean } = {},
 ): { gross: number; net: number; brokerFee: number; salesTax: number } {
   const gross = productPrice * productQty
-  const brokerFee =
-    options.includeBrokerFee === false ? 0 : gross * (fees.brokerFeePercent / 100)
+  const brokerFee = options.includeBrokerFee === false ? 0 : gross * (fees.brokerFeePercent / 100)
   const salesTax = gross * (fees.salesTaxPercent / 100)
   return { gross, net: gross - brokerFee - salesTax, brokerFee, salesTax }
 }
@@ -480,11 +475,6 @@ export function resolveBlueprintMeTe(
     te: override?.te ?? base.te,
     locked: false,
   }
-}
-
-/** Approximate one-time research job fee (ME10 + TE20) from one base run's material value. */
-export function estimateResearchFee(baseRunMaterialValue: number, systemCostIndex: number): number {
-  return baseRunMaterialValue * systemCostIndex * RESEARCH_FEE_FACTOR
 }
 
 export interface InventionCostResult {
@@ -556,8 +546,10 @@ export function inventionBlueprintCostForSettings(args: {
     ),
     inventionCostIndex: scienceCostIndex(
       args.systems,
-      (args.settings.inventionFacility ??
-        defaultScienceFacility(args.settings.manufacturingSystemId)).systemId,
+      (
+        args.settings.inventionFacility ??
+        defaultScienceFacility(args.settings.manufacturingSystemId)
+      ).systemId,
       'invention',
       fallback,
     ),

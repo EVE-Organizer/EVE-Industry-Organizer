@@ -1,4 +1,5 @@
 import type { BlueprintTier, StructureType } from '@/types'
+import { catalogRigIconTypeId } from '@/lib/upwellCatalog'
 
 /**
  * Product families for Upwell manufacturing rigs.
@@ -95,21 +96,21 @@ export function hullManufacturingRigSections(
           {
             id: 'xl_consumable',
             label: 'Equipment and consumable',
-            iconTypeId: 37178,
+            iconTypeId: catalogRigIconTypeId('manufacturing', 'ammo', 'xl') ?? 37178,
             families: XL_CONSUMABLE_FAMILIES,
             combinedMeTe: true,
           },
           {
             id: 'xl_ships',
             label: 'Ship manufacturing',
-            iconTypeId: 37180,
+            iconTypeId: catalogRigIconTypeId('manufacturing', 'ships_capital', 'xl') ?? 37180,
             families: XL_SHIP_FAMILIES,
             combinedMeTe: true,
           },
           {
             id: 'xl_structures',
             label: 'Structure and component',
-            iconTypeId: 43704,
+            iconTypeId: catalogRigIconTypeId('manufacturing', 'structures', 'xl') ?? 43704,
             families: XL_STRUCTURE_FAMILIES,
             combinedMeTe: true,
           },
@@ -124,7 +125,7 @@ export function hullManufacturingRigSections(
     rows: section.families.map((family) => ({
       id: family,
       label: manufacturingRigFamilyLabel(family),
-      iconTypeId: MANUFACTURING_RIG_FAMILY_ICON_TYPE_ID[family],
+      iconTypeId: manufacturingRigFamilyIconTypeId(family),
       families: [family],
       combinedMeTe,
     })),
@@ -179,6 +180,12 @@ export const MANUFACTURING_RIG_FAMILY_ICON_TYPE_ID: Record<ManufacturingRigFamil
   structures: 43875,
 }
 
+export function manufacturingRigFamilyIconTypeId(family: ManufacturingRigFamily): number {
+  return (
+    catalogRigIconTypeId('manufacturing', family) ?? MANUFACTURING_RIG_FAMILY_ICON_TYPE_ID[family]
+  )
+}
+
 const ALL_SHIPS: ManufacturingRigFamily[] = [
   'ships_t1_small',
   'ships_t1_medium',
@@ -202,7 +209,10 @@ const RIG_NAME_FAMILIES: { match: RegExp; families: ManufacturingRigFamily[] }[]
   { match: /basic capital component manufacturing/i, families: ['components_capital'] },
   { match: /structure manufacturing/i, families: ['structures'] },
   { match: /equipment manufacturing/i, families: ['equipment'] },
-  { match: /ammunition manufacturing|ammunition efficiency|ammunition me|ammunition te/i, families: ['ammo'] },
+  {
+    match: /ammunition manufacturing|ammunition efficiency|ammunition me|ammunition te/i,
+    families: ['ammo'],
+  },
   { match: /drone and fighter/i, families: ['drones'] },
   { match: /advanced small ship/i, families: ['ships_t2_small'] },
   { match: /advanced medium ship/i, families: ['ships_t2_medium'] },
@@ -365,7 +375,10 @@ export function manufacturingRigFamilyForProduct(input: {
   }
 
   if (group === 'Fuel Block' || group === 'Structure Components') return 'structures'
-  if (group === 'Capital Construction Components' || group === 'Advanced Capital Construction Components') {
+  if (
+    group === 'Capital Construction Components' ||
+    group === 'Advanced Capital Construction Components'
+  ) {
     return 'components_capital'
   }
   if (
@@ -380,9 +393,7 @@ export function manufacturingRigFamilyForProduct(input: {
   if (ships) return ships
 
   if (
-    /ammo|charge|missile|rocket|torpedo|bomb|crystal|probe|script|condenser|nanite/i.test(
-      group,
-    )
+    /ammo|charge|missile|rocket|torpedo|bomb|crystal|probe|script|condenser|nanite/i.test(group)
   ) {
     return 'ammo'
   }

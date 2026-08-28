@@ -40,6 +40,7 @@ import { tradingFeeRates } from '@/lib/tradingFees'
 import { WIDER_TIME_RANGES } from '@/lib/profit'
 import {
   NPC_REFERENCE_HUBS,
+  fillMissingPricesFromJita,
   referenceFallbackPrice,
   sanitizeBuyPriceMap,
   sanitizeSellPrice,
@@ -544,12 +545,7 @@ function computeRow(
   const advancedIndustryFactor = isReaction ? 1 : advancedIndustryTimeFactor(advancedIndustry)
   const reactionsFactor = reactionsTimeFactor(reactionsSkill)
   const jobTimeSeconds = isReaction
-    ? applyReactionTime(
-        baseTimePerRunSeconds,
-        runs,
-        reactionsSkill,
-        structure.teBonusPercent,
-      )
+    ? applyReactionTime(baseTimePerRunSeconds, runs, reactionsSkill, structure.teBonusPercent)
     : applyTE(
         baseTimePerRunSeconds,
         te,
@@ -570,20 +566,15 @@ function computeRow(
   )
   const profitPerUnit = outputQty > 0 ? netProfit / outputQty : 0
   const productionPerDay = jobHours > 0 ? (outputQty * 24) / jobHours : 0
-  const sellablePerDay =
-    avgVolume > 0 ? Math.min(productionPerDay, avgVolume) : productionPerDay
+  const sellablePerDay = avgVolume > 0 ? Math.min(productionPerDay, avgVolume) : productionPerDay
   const realizedDailyProfit = sellablePerDay * profitPerUnit * competitionFactor
   const iphBreakdown: IphBreakdown = {
     me,
     te: isReaction ? 0 : te,
     industry: isReaction ? 0 : industry,
     advancedIndustry: isReaction ? 0 : advancedIndustry,
-    ...(isReaction
-      ? { reactions: reactionsSkill, reactionsTimeFactor: reactionsFactor }
-      : {}),
-    targetJobTimeSeconds:
-      settings.rankingTargetTimeSeconds ??
-      settings.batchSize * 3600,
+    ...(isReaction ? { reactions: reactionsSkill, reactionsTimeFactor: reactionsFactor } : {}),
+    targetJobTimeSeconds: settings.rankingTargetTimeSeconds ?? settings.batchSize * 3600,
     productQuantity: blueprint.productQuantity,
     avgVolume,
     volumeCapDays: MAX_DAYS_TO_CLEAR,
@@ -671,10 +662,8 @@ export function marketAwareIph(
 ): { iph: number; marketShare: number; competitionFactor: number } {
   const profitPerUnit = outputQty > 0 ? netProfit / outputQty : 0
   const productionPerDay = jobHours > 0 ? (outputQty * 24) / jobHours : 0
-  const sellablePerDay =
-    avgVolume > 0 ? Math.min(productionPerDay, avgVolume) : productionPerDay
-  const marketShare =
-    avgVolume > 0 && productionPerDay > 0 ? productionPerDay / avgVolume : 0
+  const sellablePerDay = avgVolume > 0 ? Math.min(productionPerDay, avgVolume) : productionPerDay
+  const marketShare = avgVolume > 0 && productionPerDay > 0 ? productionPerDay / avgVolume : 0
   const competitionFactor = 1 / (1 + marketShare)
   const realizedDailyProfit = sellablePerDay * profitPerUnit * competitionFactor
   const iph = realizedDailyProfit / 24
@@ -697,22 +686,32 @@ export function rankBlueprintsFromMarket(
   if (!buyHubMarket) return []
 
   const jitaHubMarket = hub === 'jita' ? buyHubMarket : getHubMarket(market, 'jita')
+  const npcPrices = buildHubWindowMaps(market, window, NPC_REFERENCE_HUBS).prices
   const jitaSpotPrices = jitaHubMarket ? buildPriceMap(jitaHubMarket) : new Map<number, number>()
+  const jitaMaterialWindowPrices =
+    jitaHubMarket != null
+      ? sanitizeBuyPriceMap(buildWindowPriceMap(jitaHubMarket, window, jitaSpotPrices), npcPrices)
+      : new Map<number, number>()
 
   const sellHubId = settings.sellHubId ?? hub
   const sellHubMarket = getHubMarket(market, sellHubId) ?? buyHubMarket
 
-  const { buildSystemId, costIndex: resolvedCostIndex, reactionCostIndex: resolvedReactionIndex } =
-    resolveBuildSystem(systems, regions, buyHubMarket, settings.manufacturingSystemId)
+  const {
+    buildSystemId,
+    costIndex: resolvedCostIndex,
+    reactionCostIndex: resolvedReactionIndex,
+  } = resolveBuildSystem(systems, regions, buyHubMarket, settings.manufacturingSystemId)
   const reactionCostIndex =
     typeof resolvedReactionIndex === 'number' ? resolvedReactionIndex : resolvedCostIndex
 
-  const npcPrices = buildHubWindowMaps(market, window, NPC_REFERENCE_HUBS).prices
   const rawBuySpotPrices = buildPriceMap(buyHubMarket)
-  const buySpotPrices = sanitizeBuyPriceMap(rawBuySpotPrices, npcPrices)
-  const materialWindowPrices = sanitizeBuyPriceMap(
-    buildWindowPriceMap(buyHubMarket, window, rawBuySpotPrices),
-    npcPrices,
+  const buySpotPrices = fillMissingPricesFromJita(
+    sanitizeBuyPriceMap(rawBuySpotPrices, npcPrices),
+    jitaSpotPrices,
+  )
+  const materialWindowPrices = fillMissingPricesFromJita(
+    sanitizeBuyPriceMap(buildWindowPriceMap(buyHubMarket, window, rawBuySpotPrices), npcPrices),
+    jitaMaterialWindowPrices,
   )
   const productBuyPrices = buildBuyPriceMap(sellHubMarket)
   const sellSpotPrices = buildPriceMap(sellHubMarket)
@@ -801,10 +800,7 @@ export function rankBlueprintsFromMarket(
     )
     if (!row) continue
     if (row.upfrontCapital < filters.minSetupCost) continue
-    if (
-      Number.isFinite(filters.maxSetupCost) &&
-      row.upfrontCapital > filters.maxSetupCost
-    ) {
+    if (Number.isFinite(filters.maxSetupCost) && row.upfrontCapital > filters.maxSetupCost) {
       continue
     }
     if ((filters.minVolume ?? 0) > 0 && row.avgVolume < filters.minVolume!) continue
@@ -838,10 +834,7 @@ const SETUP_BUDGET_FINITE_STEPS = SETUP_BUDGET_SLIDER_STEPS - 1
 export function setupBudgetFromSlider(slider: number): number {
   if (slider <= 0) return 0
   if (slider >= SETUP_BUDGET_SLIDER_STEPS) return SETUP_BUDGET_MAX
-  const t = Math.min(
-    1,
-    Math.max(0, (slider - 1) / (SETUP_BUDGET_FINITE_STEPS - 1)),
-  )
+  const t = Math.min(1, Math.max(0, (slider - 1) / (SETUP_BUDGET_FINITE_STEPS - 1)))
   const logMin = Math.log(SETUP_BUDGET_LOG_MIN)
   const logMax = Math.log(SETUP_BUDGET_SLIDER_CAP)
   return Math.round(Math.exp(logMin + t * (logMax - logMin)))
@@ -854,8 +847,7 @@ export function setupBudgetToSlider(value: number): number {
   if (clamped >= SETUP_BUDGET_SLIDER_CAP) return SETUP_BUDGET_SLIDER_STEPS
   const logMin = Math.log(SETUP_BUDGET_LOG_MIN)
   const logMax = Math.log(SETUP_BUDGET_SLIDER_CAP)
-  const t =
-    (Math.log(Math.max(clamped, SETUP_BUDGET_LOG_MIN)) - logMin) / (logMax - logMin)
+  const t = (Math.log(Math.max(clamped, SETUP_BUDGET_LOG_MIN)) - logMin) / (logMax - logMin)
   return Math.round(1 + t * (SETUP_BUDGET_FINITE_STEPS - 1))
 }
 

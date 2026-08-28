@@ -5,7 +5,12 @@ import {
   inGameDurationHoursFromRuns,
   inGameRunsFromDurationHours,
   descendantProductIds,
+  fitPlanForOverallDeadlines,
   fitPlanToRootReadyDeadlines,
+  overallDeadlineTargets,
+  overallPlanFitChanged,
+  planRootsKey,
+  resetPlanRootsFromDuration,
   scaleRunsToSlotDeadline,
   jobTimeSecondsForRuns,
   resolveRunsFromPatch,
@@ -96,12 +101,7 @@ describe('applyRootEntryPatch', () => {
   })
 
   it('does not overwrite stored duration when runs change', () => {
-    const next = applyRootEntryPatch(
-      root,
-      { runs: 200 },
-      blueprint,
-      DEFAULT_SETTINGS,
-    )
+    const next = applyRootEntryPatch(root, { runs: 200 }, blueprint, DEFAULT_SETTINGS)
 
     expect(next.runs).toBe(200)
     expect(next.productionDurationHours).toBe(24)
@@ -130,6 +130,81 @@ describe('descendantProductIds', () => {
   })
 })
 
+describe('fitPlanForOverallDeadlines', () => {
+  it('shrinks a new root when the expanded schedule exceeds its stored deadline', () => {
+    const late: PlanRootEntry = {
+      id: 'late',
+      productTypeId: 100,
+      runs: 1000,
+      productionDurationHours: 168,
+    }
+    const { roots } = fitPlanForOverallDeadlines({
+      roots: [late],
+      nodeOverrides: {},
+      targets: overallDeadlineTargets([late]),
+      readyHoursByProductId: new Map([[100, 2063]]),
+      nodes: [{ productTypeId: 100, childProductTypeIds: [], isRoot: true, mode: 'build' }],
+      settings: DEFAULT_SETTINGS,
+      getBlueprint: () => blueprint,
+    })
+    expect(roots[0]!.runs).toBe(Math.floor(1000 * (168 / 2063)))
+    expect(roots[0]!.productionDurationHours).toBe(168)
+  })
+})
+
+describe('overallPlanFitChanged', () => {
+  it('detects root run changes only', () => {
+    const before = {
+      roots: [root],
+      nodeOverrides: {} as Record<number, import('@/types').PlanNodeOverride>,
+    }
+    const after = {
+      roots: [{ ...root, runs: root.runs - 1 }],
+      nodeOverrides: {},
+    }
+    expect(overallPlanFitChanged(before, after)).toBe(true)
+    expect(overallPlanFitChanged(before, before)).toBe(false)
+  })
+
+  it('detects when a root was removed from the fitted set', () => {
+    const other: PlanRootEntry = {
+      id: 'root-2',
+      productTypeId: 200,
+      runs: 50,
+      productionDurationHours: 12,
+    }
+    const before = { roots: [root, other], nodeOverrides: {} }
+    const after = { roots: [root], nodeOverrides: {} }
+    expect(overallPlanFitChanged(before, after)).toBe(true)
+  })
+})
+
+describe('planRootsKey', () => {
+  it('changes when a root is removed', () => {
+    const other: PlanRootEntry = {
+      id: 'root-2',
+      productTypeId: 200,
+      runs: 50,
+      productionDurationHours: 12,
+    }
+    const withTwo = planRootsKey([root, other])
+    const withOne = planRootsKey([root])
+    expect(withTwo).not.toBe(withOne)
+  })
+})
+
+describe('resetPlanRootsFromDuration', () => {
+  it('restores runs from stored duration after an Overall shrink', () => {
+    const shrunk: PlanRootEntry = {
+      ...root,
+      runs: Math.floor(1000 * (168 / 2063)),
+    }
+    const reset = resetPlanRootsFromDuration([shrunk], DEFAULT_SETTINGS, {}, () => blueprint)
+    expect(reset[0]!.runs).toBe(inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24))
+    expect(reset[0]!.productionDurationHours).toBe(24)
+  })
+})
+
 describe('fitPlanToRootReadyDeadlines', () => {
   const childBp: BlueprintInfo = { ...blueprint, blueprintTypeId: 10002, productTypeId: 200 }
   const otherBp: BlueprintInfo = { ...blueprint, blueprintTypeId: 10003, productTypeId: 300 }
@@ -145,8 +220,18 @@ describe('fitPlanToRootReadyDeadlines', () => {
   ]
 
   it('scales only the overrunning root to its own ready-by deadline', () => {
-    const late: PlanRootEntry = { id: 'late', productTypeId: 100, runs: 1000, productionDurationHours: 168 }
-    const onTime: PlanRootEntry = { id: 'ok', productTypeId: 300, runs: 80, productionDurationHours: 20 }
+    const late: PlanRootEntry = {
+      id: 'late',
+      productTypeId: 100,
+      runs: 1000,
+      productionDurationHours: 168,
+    }
+    const onTime: PlanRootEntry = {
+      id: 'ok',
+      productTypeId: 300,
+      runs: 80,
+      productionDurationHours: 20,
+    }
     const { roots } = fitPlanToRootReadyDeadlines({
       roots: [late, onTime],
       targets: [
@@ -181,8 +266,18 @@ describe('fitPlanToRootReadyDeadlines', () => {
   })
 
   it('keeps a shared sub-build pin when another root still needs it', () => {
-    const late: PlanRootEntry = { id: 'late', productTypeId: 100, runs: 1000, productionDurationHours: 168 }
-    const onTime: PlanRootEntry = { id: 'ok', productTypeId: 300, runs: 80, productionDurationHours: 20 }
+    const late: PlanRootEntry = {
+      id: 'late',
+      productTypeId: 100,
+      runs: 1000,
+      productionDurationHours: 168,
+    }
+    const onTime: PlanRootEntry = {
+      id: 'ok',
+      productTypeId: 300,
+      runs: 80,
+      productionDurationHours: 20,
+    }
     const { nodeOverrides } = fitPlanToRootReadyDeadlines({
       roots: [late, onTime],
       targets: [
@@ -202,7 +297,12 @@ describe('fitPlanToRootReadyDeadlines', () => {
   })
 
   it('shrinks an unshared sub-build pin with the overrunning root', () => {
-    const late: PlanRootEntry = { id: 'late', productTypeId: 100, runs: 1000, productionDurationHours: 168 }
+    const late: PlanRootEntry = {
+      id: 'late',
+      productTypeId: 100,
+      runs: 1000,
+      productionDurationHours: 168,
+    }
     const { nodeOverrides } = fitPlanToRootReadyDeadlines({
       roots: [late],
       targets: [{ rootId: 'late', deadlineHours: 168 }],

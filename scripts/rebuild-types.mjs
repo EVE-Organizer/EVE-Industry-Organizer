@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 /**
  * Rebuild public/data/types.json from SDE CSVs (includes item descriptions).
+ * Materials + products from published manufacturing/reaction blueprints only.
  * Does not touch market.json. Run rebuild-market for prices.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { fetchCsv } from './lib/sde-csv.mjs'
-import { buildAllTypeRecords, buildTypeLookupMaps } from './lib/type-records.mjs'
+import { buildCalcTypeRecords } from './lib/calc-catalogs.mjs'
+import { buildTypeLookupMaps } from './lib/type-records.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outDir = join(__dirname, '../public/data')
@@ -15,14 +17,14 @@ const SDE_BASE = 'https://www.fuzzwork.co.uk/dump/latest/csv/'
 
 const REQUIRED_CSVS = ['invTypes', 'invGroups', 'invCategories']
 
-function loadBlueprintTypeIds() {
+function loadBlueprints() {
   const path = join(outDir, 'blueprints.json')
   const raw = JSON.parse(readFileSync(path, 'utf8'))
   const blueprints = Array.isArray(raw) ? raw : raw.blueprints
   if (!Array.isArray(blueprints)) {
     throw new Error('blueprints.json must contain a blueprints array')
   }
-  return blueprints.map((bp) => bp.blueprintTypeId)
+  return blueprints
 }
 
 async function main() {
@@ -33,17 +35,8 @@ async function main() {
     csvData[name] = await fetchCsv(SDE_BASE, name)
   }
 
-  const blueprintTypeIds = loadBlueprintTypeIds()
-  const { groupById, categoryById } = buildTypeLookupMaps(
-    csvData.invGroups,
-    csvData.invCategories,
-  )
-  const types = buildAllTypeRecords(
-    csvData.invTypes,
-    groupById,
-    categoryById,
-    blueprintTypeIds,
-  )
+  const { groupById, categoryById } = buildTypeLookupMaps(csvData.invGroups, csvData.invCategories)
+  const types = buildCalcTypeRecords(csvData.invTypes, groupById, categoryById, loadBlueprints())
   const withDescription = types.filter((type) => type.description).length
 
   const payload = { generatedAt: new Date().toISOString(), types }

@@ -2,15 +2,18 @@ import { describe, expect, it } from 'vitest'
 import type { HubId } from '@/types'
 import {
   NPC_REFERENCE_HUBS,
+  fillMissingPricesFromJita,
   referenceMedian,
   sanitizeBuyPrice,
   sanitizeBuyPriceMap,
   sanitizeSellPrice,
 } from '@/lib/hubPriceSanity'
 import { formatHubDailyVolume } from '@/lib/profit'
-import { planHubQuoteRows } from '@/components/plan/PlanBuyPriceCell'
+import { planHubQuoteRows } from '@/pages/Plan/PlanBuyPriceCell'
 
-function hubMap(entries: Partial<Record<HubId, Record<number, number>>>): Map<HubId, Map<number, number>> {
+function hubMap(
+  entries: Partial<Record<HubId, Record<number, number>>>,
+): Map<HubId, Map<number, number>> {
   const maps = new Map<HubId, Map<number, number>>()
   for (const [hubId, values] of Object.entries(entries)) {
     maps.set(hubId as HubId, new Map(Object.entries(values).map(([k, v]) => [Number(k), v])))
@@ -49,6 +52,24 @@ describe('sanitizeSellPrice', () => {
 
   it('leaves cheap sell quotes alone', () => {
     expect(sanitizeSellPrice(1000, 15000)).toBe(1000)
+  })
+})
+
+describe('fillMissingPricesFromJita', () => {
+  it('fills zero/absent hub quotes from Jita without overwriting hub prices', () => {
+    const hub = new Map([
+      [34, 12000],
+      [35, 0],
+    ])
+    const jita = new Map([
+      [34, 13300],
+      [35, 500],
+      [36, 800],
+    ])
+    const filled = fillMissingPricesFromJita(hub, jita)
+    expect(filled.get(34)).toBe(12000)
+    expect(filled.get(35)).toBe(500)
+    expect(filled.get(36)).toBe(800)
   })
 })
 

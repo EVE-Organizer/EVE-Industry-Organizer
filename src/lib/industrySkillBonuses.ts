@@ -1,13 +1,98 @@
-import { effectiveSkillLevel, skillLevel, SKILL_FIELDS, type SkillFieldDef } from '@/lib/skillFields'
-import type { InventionInfo, SkillLevels } from '@/types'
+import {
+  effectiveSkillLevel,
+  skillLevel,
+  SKILL_FIELDS,
+  type SkillFieldDef,
+} from '@/lib/skillFields'
+import type { InventionInfo, SkillInfo, SkillLevels } from '@/types'
+
+/** Bonuses that live on dogma effects, not attributes. Used when SkillInfo calc fields are absent. */
+export const EFFECT_TIME_BONUS_PER_LEVEL: Record<number, number> = {
+  3380: 0.04,
+  3388: 0.03,
+}
+
+const MASS_PRODUCTION_ID = 3387
+const ADVANCED_MASS_PRODUCTION_ID = 24625
+const LABORATORY_OPERATION_ID = 3406
+const ADVANCED_LABORATORY_OPERATION_ID = 24624
+const MASS_REACTIONS_ID = 45748
+const ADVANCED_MASS_REACTIONS_ID = 45749
+const INDUSTRY_ID = 3380
+const ADVANCED_INDUSTRY_ID = 3388
+const SCIENCE_ID = 3402
+const REACTIONS_ID = 45746
+
+let skillsById = new Map<number, SkillInfo>()
+let skillsByName = new Map<string, SkillInfo>()
+
+export function setSkillCalcCatalog(skills: SkillInfo[] | undefined): void {
+  skillsById = new Map((skills ?? []).map((skill) => [skill.skillId, skill]))
+  skillsByName = new Map((skills ?? []).map((skill) => [skill.name, skill]))
+}
+
+function fractionField(
+  skillId: number,
+  field: 'manufacturingTimeBonusPerLevel' | 'copyTimeBonusPerLevel' | 'reactionTimeBonusPerLevel',
+  fallback: number,
+): number {
+  return skillsById.get(skillId)?.[field] ?? fallback
+}
+
+function slotField(
+  skillId: number,
+  field: 'extraJobSlotsPerLevel' | 'extraScienceJobSlotsPerLevel' | 'extraReactionJobSlotsPerLevel',
+): number {
+  return skillsById.get(skillId)?.[field] ?? 1
+}
+
+export function industryTimeBonusPerLevel(): number {
+  return fractionField(
+    INDUSTRY_ID,
+    'manufacturingTimeBonusPerLevel',
+    EFFECT_TIME_BONUS_PER_LEVEL[3380] ?? 0.04,
+  )
+}
+
+export function advancedIndustryTimeBonusPerLevel(): number {
+  return fractionField(
+    ADVANCED_INDUSTRY_ID,
+    'manufacturingTimeBonusPerLevel',
+    EFFECT_TIME_BONUS_PER_LEVEL[3388] ?? 0.03,
+  )
+}
+
+export function scienceCopyBonusPerLevel(): number {
+  return fractionField(SCIENCE_ID, 'copyTimeBonusPerLevel', 0.05)
+}
+
+export function reactionsTimeBonusPerLevel(): number {
+  return fractionField(REACTIONS_ID, 'reactionTimeBonusPerLevel', 0.04)
+}
+
+export function extraManufacturingSlotsPerLevel(advanced = false): number {
+  return slotField(
+    advanced ? ADVANCED_MASS_PRODUCTION_ID : MASS_PRODUCTION_ID,
+    'extraJobSlotsPerLevel',
+  )
+}
+
+export function extraScienceSlotsPerLevel(advanced = false): number {
+  return slotField(
+    advanced ? ADVANCED_LABORATORY_OPERATION_ID : LABORATORY_OPERATION_ID,
+    'extraScienceJobSlotsPerLevel',
+  )
+}
+
+export function extraReactionSlotsPerLevel(advanced = false): number {
+  return slotField(
+    advanced ? ADVANCED_MASS_REACTIONS_ID : MASS_REACTIONS_ID,
+    'extraReactionJobSlotsPerLevel',
+  )
+}
 
 /** Skills whose time bonus is applied globally, not per-blueprint. */
-const GLOBAL_TIME_SKILL_LABELS = new Set([
-  'Industry',
-  'Advanced Industry',
-  'Science',
-  'Reactions',
-])
+const GLOBAL_TIME_SKILL_LABELS = new Set(['Industry', 'Advanced Industry', 'Science', 'Reactions'])
 
 /** Gate-only skills: required to start jobs but no manufacturing time bonus. */
 const GATE_ONLY_SKILL_LABELS = new Set([
@@ -21,8 +106,10 @@ const labelToField = new Map(SKILL_FIELDS.map((f) => [f.label, f]))
 
 /** Per-level manufacturing time reduction when the BPO lists this skill. */
 export function itemTypeTimeBonusPerLevel(label: string): number {
-  if (label === 'Mutagenic Stabilization') return 0.02
   if (GATE_ONLY_SKILL_LABELS.has(label)) return 0
+  const fromCatalog = skillsByName.get(label)?.manufacturingTimeBonusPerLevel
+  if (fromCatalog != null) return fromCatalog
+  if (label === 'Mutagenic Stabilization') return 0.02
   const field = labelToField.get(label)
   if (!field?.manufacturingTimeBonus) return 0
   return field.manufacturingTimeBonus
@@ -55,8 +142,7 @@ export function inventionSuccessChanceFromLevels(
   datacore2Level: number,
   decryptorModifier = 1,
 ): number {
-  const skillBonus =
-    1 + encryptionLevel / 40 + (datacore1Level + datacore2Level) / 30
+  const skillBonus = 1 + encryptionLevel / 40 + (datacore1Level + datacore2Level) / 30
   return Math.min(1, baseChance * skillBonus * decryptorModifier)
 }
 
@@ -64,10 +150,7 @@ export function inventionSuccessChanceFromLevels(
  * Fallback when per-skill levels are unknown: treat encryption + both datacores
  * as the same assumed level.
  */
-export function inventionSuccessChance(
-  baseChance: number,
-  inventionSkillLevel: number,
-): number {
+export function inventionSuccessChance(baseChance: number, inventionSkillLevel: number): number {
   return inventionSuccessChanceFromLevels(
     baseChance,
     inventionSkillLevel,

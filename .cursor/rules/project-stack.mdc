@@ -16,15 +16,17 @@ Frontend-only React app for EVE Online manufacturing planning. No backend server
 | UI | React 19, Tailwind, DaisyUI |
 | State | Zustand (`src/stores/`) |
 | Async data | TanStack Query (`src/services/`) |
-| Routing | React Router (`src/pages/`) |
+| Routing | React Router (`src/pages/<Name>/`) |
 | Tests | Vitest |
 
 ## Key directories
 
 | Path | Purpose |
 |---|---|
+| `src/pages/<Name>/` | Route pages; colocate UI used by that route only |
 | `src/lib/` | Pure game/business logic (cost, plan, ranking) |
-| `src/components/` | UI components |
+| `src/components/layout/` | Shared chrome (`Layout`, `PageHeader`) |
+| `src/components/` | Shared widgets |
 | `src/hooks/` | React hooks |
 | `src/services/` | ESI/market fetch, auth, sync, cache |
 | `src/types/` | Shared TypeScript types |
@@ -40,6 +42,7 @@ Frontend-only React app for EVE Online manufacturing planning. No backend server
 
 ## UI conventions
 
+- Folders: `src-layout.mdc` (no `src/features/`, no barrels)
 - Layout: `css-layout.mdc`
 - Shared shells: `component-primitives.mdc`
 - Components: `react-component-conventions.mdc`

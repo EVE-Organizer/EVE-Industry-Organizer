@@ -69,10 +69,7 @@ describe('manufacturingRigs', () => {
       category: 'Charge',
     })
     expect(detail.rigTeBonusPercent).toBeCloseTo(50.4, 5)
-    expect(detail.effectiveTeBonusPercent).toBeCloseTo(
-      combineBonusPercent(25, 50.4),
-      1,
-    )
+    expect(detail.effectiveTeBonusPercent).toBeCloseTo(combineBonusPercent(25, 50.4), 1)
     expect(detail.effectiveTeBonusPercent).toBeCloseTo(62.8, 1)
     expect(
       manufacturingFacilityDetail(settings, {
@@ -93,5 +90,31 @@ describe('manufacturingRigs', () => {
       },
     ])
     expect(familyRigs.ammo).toEqual({ meRig: 'none', teRig: 't2' })
+  })
+
+  it('resolves T1 ME from catalog typeId when ESI bases are empty', async () => {
+    const { setUpwellCatalog } = await import('@/lib/upwellCatalog')
+    setUpwellCatalog({
+      hulls: [],
+      rigs: [
+        {
+          typeId: 37158,
+          name: 'Standup M-Set Ammunition Manufacturing Material Efficiency I',
+          size: 'm',
+          tier: 't1',
+          activity: 'manufacturing',
+          families: ['ammo'],
+          me: 2,
+          te: 0,
+          jobCost: 0,
+        },
+      ],
+    })
+    expect(
+      familyRigsFromFitted([
+        { typeId: 37158, name: 'ignored', meBase: 0, teBase: 0, jobCostBase: 0 },
+      ]).ammo,
+    ).toEqual({ meRig: 't1', teRig: 'none' })
+    setUpwellCatalog(null)
   })
 })

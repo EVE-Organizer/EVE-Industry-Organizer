@@ -1,5 +1,10 @@
-import type { GlobalSettings, RefineryType, ReactionFacilitySettings } from '@/types'
-import { REFINERY_HULL_PRESETS } from '@/types'
+import type {
+  GlobalSettings,
+  ProductionLocationKind,
+  ReactionFacilitySettings,
+  RefineryType,
+} from '@/types'
+import { refineryHullPreset } from '@/lib/upwellCatalog'
 
 /** EVE type icons for refinery options. */
 export const REFINERY_TYPE_IDS: Record<RefineryType, number> = {
@@ -32,9 +37,24 @@ export function isPresetRefinery(type: RefineryType): boolean {
   return type === 'athanor' || type === 'tatara'
 }
 
+export function isRefineryStructureTypeId(typeId: number | undefined): boolean {
+  return typeId === REFINERY_TYPE_IDS.athanor || typeId === REFINERY_TYPE_IDS.tatara
+}
+
+export function refineryTypeFromTypeId(
+  typeId: number | undefined,
+  kind: ProductionLocationKind,
+): RefineryType {
+  if (kind === 'station') return 'none'
+  if (typeId == null) return 'custom'
+  if (typeId === REFINERY_TYPE_IDS.athanor) return 'athanor'
+  if (typeId === REFINERY_TYPE_IDS.tatara) return 'tatara'
+  return 'custom'
+}
+
 export function refineryHullTePercent(type: RefineryType, customTe: number): number {
-  if (type === 'athanor') return REFINERY_HULL_PRESETS.athanor.hullTeBonusPercent
-  if (type === 'tatara') return REFINERY_HULL_PRESETS.tatara.hullTeBonusPercent
+  if (type === 'athanor') return refineryHullPreset('athanor').hullTeBonusPercent
+  if (type === 'tatara') return refineryHullPreset('tatara').hullTeBonusPercent
   if (type === 'custom') return customTe
   return 0
 }
@@ -65,15 +85,12 @@ export function patchRefineryType(
     reactionFacility: {
       ...current,
       refineryType,
-      hullTeBonusPercent: REFINERY_HULL_PRESETS[refineryType].hullTeBonusPercent,
+      hullTeBonusPercent: refineryHullPreset(refineryType).hullTeBonusPercent,
     },
   }
 }
 
-export const REACTION_FAMILY_LABELS: Record<
-  'composite' | 'biochemical' | 'hybrid',
-  string
-> = {
+export const REACTION_FAMILY_LABELS: Record<'composite' | 'biochemical' | 'hybrid', string> = {
   composite: 'Composite',
   biochemical: 'Biochemical',
   hybrid: 'Hybrid',

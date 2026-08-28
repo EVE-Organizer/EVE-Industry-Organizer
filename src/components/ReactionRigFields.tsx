@@ -15,8 +15,8 @@ import {
   rigSecurityLabel,
 } from '@/lib/manufacturingRigs'
 import {
-  REACTION_FAMILY_RIG_ICONS,
-  REACTOR_EFFICIENCY_RIG_ICON,
+  reactionFamilyRigIcon,
+  reactorEfficiencyRigIcon,
   reactionRigLayout,
   reactionRigSetLabel,
 } from '@/lib/reactionRigFamilies'
@@ -98,7 +98,7 @@ export function ReactionRigFields({
                 <LabOptimizationHeader />
                 <div className="grid grid-cols-[1.75rem_minmax(0,1fr)_minmax(9rem,1fr)] items-center gap-2">
                   <EveImage
-                    id={REACTOR_EFFICIENCY_RIG_ICON}
+                    id={reactorEfficiencyRigIcon()}
                     variant="icon"
                     size={24}
                     framed
@@ -110,9 +110,7 @@ export function ReactionRigFields({
                     className={`${selectClass} w-full`}
                     aria-label="Reactor efficiency rig"
                     value={reactorTier}
-                    onChange={(e) =>
-                      patchReactorEfficiency(e.target.value as ManufacturingRigTier)
-                    }
+                    onChange={(e) => patchReactorEfficiency(e.target.value as ManufacturingRigTier)}
                   >
                     {FAMILY_TIERS.map((option) => (
                       <option key={option} value={option}>
@@ -137,7 +135,7 @@ export function ReactionRigFields({
                         className="grid grid-cols-[1.75rem_minmax(0,1fr)_7.25rem_7.25rem] items-center gap-2"
                       >
                         <EveImage
-                          id={REACTION_FAMILY_RIG_ICONS[group]}
+                          id={reactionFamilyRigIcon(group)}
                           variant="icon"
                           size={24}
                           framed

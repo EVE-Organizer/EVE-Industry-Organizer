@@ -16,16 +16,16 @@ Use when creating or editing React UI in this repo.
 
 ## File layout
 
-Flat files under `src/components/` or feature subfolders (`plan/`, `map/`, `skills/`).
+Follow `src-layout.mdc`. Shared widgets under `src/components/` (feature subfolders like `plan/` when reused). Shared chrome in `src/components/layout/`. Route-only UI colocates under `src/pages/<Name>/`.
 
 ```
+src/pages/Plan/PlanPage.tsx
+src/components/layout/Layout.tsx
 src/components/plan/
   PlanDetailHeader.tsx
-  PlanPipelineChecklist.tsx
 src/components/
   Panel.tsx
   StatCard.tsx
-  Layout.tsx
 ```
 
 One main component per file. Co-locate small helpers in the same file until reused elsewhere.
@@ -86,11 +86,11 @@ Exact dash width (~78 chars). Hooks omit Render.
 
 ## Pages
 
-Route pages live in `src/pages/`. Keep pages thin: compose components, wire hooks/stores, minimal logic.
+Route pages live in `src/pages/<Name>/`. Keep pages thin: compose components, wire hooks/stores, minimal logic. Import the page file directly (`@/pages/Plan/PlanPage`). Do not nest `components/hooks/lib` inside a page folder.
 
 ## Data
 
-- Global user/settings state: `useAppStore` (`src/stores/appStore.ts`)
+- Global user/settings state: `useAppStore` (`src/stores/appStore.ts`); auth: `useAuthStore` (`src/stores/authStore.ts`)
 - Server/async data: TanStack Query in hooks or page-level loaders
 - Do not fetch inside presentational components when a parent already has the data
 

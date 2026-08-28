@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { expandManufacturingPlan } from '@/lib/manufacturingPlan'
-import { schedulePlanJobs } from '@/lib/planScheduler'
+import { schedulePlanJobs } from '@/pages/Plan/planScheduler'
 import { durationHoursFromRuns } from '@/lib/rootRunsDuration'
 import { createDefaultPlanTemplate } from '@/services/sync/types'
 import { DEFAULT_SETTINGS } from '@/types'

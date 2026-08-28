@@ -9,11 +9,26 @@ import { DEFAULT_MANUFACTURING_RIGS } from '@/types'
 import {
   manufacturingFamiliesFromRigName,
   manufacturingRigFamilyForProduct,
+  type ManufacturingRigFamily,
 } from '@/lib/manufacturingRigFamilies'
+import { catalogRigBase, upwellRigByTypeId } from '@/lib/upwellCatalog'
 
-/** T1/T2 M-Set/L-Set/XL-Set base bonuses before security scaling. */
+/** T1/T2 M-Set/L-Set/XL-Set base bonuses before security scaling. Fallback when upwell.json is missing. */
 export const RIG_ME_BASE: Record<'t1' | 't2', number> = { t1: 2, t2: 2.4 }
 export const RIG_TE_BASE: Record<'t1' | 't2', number> = { t1: 20, t2: 24 }
+export const RIG_COST_BASE: Record<'t1' | 't2', number> = { t1: 10, t2: 12 }
+
+function rigMeBase(tier: 't1' | 't2'): number {
+  return catalogRigBase('me', tier) ?? RIG_ME_BASE[tier]
+}
+
+function rigTeBase(tier: 't1' | 't2'): number {
+  return catalogRigBase('te', tier) ?? RIG_TE_BASE[tier]
+}
+
+function rigCostBase(tier: 't1' | 't2'): number {
+  return catalogRigBase('cost', tier) ?? RIG_COST_BASE[tier]
+}
 
 /**
  * In-game security is true SDE security rounded to one decimal.
@@ -45,8 +60,8 @@ function scaledRigPercent(basePercent: number, security: number): number {
 
 function tierFromBase(base: number, kind: 'me' | 'te'): ManufacturingRigTier {
   if (base <= 0) return 'none'
-  const t1 = kind === 'me' ? RIG_ME_BASE.t1 : RIG_TE_BASE.t1
-  const t2 = kind === 'me' ? RIG_ME_BASE.t2 : RIG_TE_BASE.t2
+  const t1 = kind === 'me' ? rigMeBase('t1') : rigTeBase('t1')
+  const t2 = kind === 'me' ? rigMeBase('t2') : rigTeBase('t2')
   if (Math.abs(base - t2) < 0.2) return 't2'
   if (Math.abs(base - t1) < 0.2) return 't1'
   return 'custom'
@@ -57,10 +72,16 @@ export function familyRigsFromFitted(
 ): NonNullable<ManufacturingRigModifiers['familyRigs']> {
   const familyRigs: NonNullable<ManufacturingRigModifiers['familyRigs']> = {}
   for (const rig of fitted) {
-    for (const family of manufacturingFamiliesFromRigName(rig.name)) {
+    const catalog = upwellRigByTypeId(rig.typeId)
+    const families = (
+      catalog?.families.length ? catalog.families : manufacturingFamiliesFromRigName(rig.name)
+    ) as ManufacturingRigFamily[]
+    const meBase = catalog?.me ?? rig.meBase
+    const teBase = catalog?.te ?? rig.teBase
+    for (const family of families) {
       const current = familyRigs[family] ?? { meRig: 'none', teRig: 'none' }
-      const meRig = tierFromBase(rig.meBase, 'me')
-      const teRig = tierFromBase(rig.teBase, 'te')
+      const meRig = tierFromBase(meBase, 'me')
+      const teRig = tierFromBase(teBase, 'te')
       familyRigs[family] = {
         meRig: meRig !== 'none' ? meRig : current.meRig,
         teRig: teRig !== 'none' ? teRig : current.teRig,
@@ -83,7 +104,7 @@ function resolveFamilyTier(
       ? Math.max(0, global.rigMeBonusPercent)
       : Math.max(0, global.rigTeBonusPercent)
   }
-  return scaledRigPercent(kind === 'me' ? RIG_ME_BASE[tier] : RIG_TE_BASE[tier], security)
+  return scaledRigPercent(kind === 'me' ? rigMeBase(tier) : rigTeBase(tier), security)
 }
 
 export function resolveRigBonuses(
@@ -109,25 +130,19 @@ export function resolveRigBonuses(
 }
 
 /** Resolve stored ME rig tier (or custom paste) to an effective percent bonus. */
-export function resolveRigMePercent(
-  rigs: ManufacturingRigModifiers,
-  security: number,
-): number {
+export function resolveRigMePercent(rigs: ManufacturingRigModifiers, security: number): number {
   const tier = rigs.meRig ?? (rigs.rigMeBonusPercent > 0 ? 'custom' : 'none')
   if (tier === 'none') return 0
   if (tier === 'custom') return Math.max(0, rigs.rigMeBonusPercent)
-  return scaledRigPercent(RIG_ME_BASE[tier], security)
+  return scaledRigPercent(rigMeBase(tier), security)
 }
 
 /** Resolve stored TE rig tier (or custom paste) to an effective percent bonus. */
-export function resolveRigTePercent(
-  rigs: ManufacturingRigModifiers,
-  security: number,
-): number {
+export function resolveRigTePercent(rigs: ManufacturingRigModifiers, security: number): number {
   const tier = rigs.teRig ?? (rigs.rigTeBonusPercent > 0 ? 'custom' : 'none')
   if (tier === 'none') return 0
   if (tier === 'custom') return Math.max(0, rigs.rigTeBonusPercent)
-  return scaledRigPercent(RIG_TE_BASE[tier], security)
+  return scaledRigPercent(rigTeBase(tier), security)
 }
 
 /** Migrate legacy saves that only stored percent fields. */
@@ -139,8 +154,7 @@ export function normalizeManufacturingRigs(
     ? rigs.fitted.filter((row) => row && typeof row.name === 'string')
     : undefined
   const familyRigs =
-    rigs?.familyRigs ??
-    (fitted && fitted.length > 0 ? familyRigsFromFitted(fitted) : undefined)
+    rigs?.familyRigs ?? (fitted && fitted.length > 0 ? familyRigsFromFitted(fitted) : undefined)
   return {
     ...base,
     meRig: rigs?.meRig ?? (base.rigMeBonusPercent > 0 ? 'custom' : 'none'),
@@ -150,8 +164,14 @@ export function normalizeManufacturingRigs(
   }
 }
 
-/** Laboratory and manufacturing cost rigs (M-Set cost / L-Set optimization cost). */
-export const RIG_COST_BASE: Record<'t1' | 't2', number> = { t1: 10, t2: 12 }
+/** Resolve ESI-fitted standup rig bonuses from the upwell catalog when present. */
+export function fittedRigBonusesFromCatalog(
+  typeId: number,
+): { meBase: number; teBase: number; jobCostBase: number } | undefined {
+  const rig = upwellRigByTypeId(typeId)
+  if (!rig) return undefined
+  return { meBase: rig.me, teBase: rig.te, jobCostBase: rig.jobCost }
+}
 
 export type RigBonusKind = 'me' | 'te' | 'cost'
 
@@ -176,9 +196,9 @@ function scaledReactionPercent(basePercent: number, security: number): number {
 }
 
 function rigBase(kind: RigBonusKind, tier: 't1' | 't2'): number {
-  if (kind === 'cost') return RIG_COST_BASE[tier]
-  if (kind === 'me') return RIG_ME_BASE[tier]
-  return RIG_TE_BASE[tier]
+  if (kind === 'cost') return rigCostBase(tier)
+  if (kind === 'me') return rigMeBase(tier)
+  return rigTeBase(tier)
 }
 
 /** Infer T1/T2 from a stored bonus, matching both raw and security-scaled values. */
@@ -192,7 +212,9 @@ export function inferRigTier(
   const t1 = rigBase(kind, 't1')
   const t2 = rigBase(kind, 't2')
   const scale =
-    domain === 'reaction' ? reactionRigSecurityMultiplier(security) : engineeringRigSecurityMultiplier(security)
+    domain === 'reaction'
+      ? reactionRigSecurityMultiplier(security)
+      : engineeringRigSecurityMultiplier(security)
   const scaledT1 = t1 * scale
   const scaledT2 = t2 * scale
   if (Math.abs(percent - t2) < 0.05 || Math.abs(percent - scaledT2) < 0.05) return 't2'
@@ -226,8 +248,8 @@ export function scaledLabOptimizationBonuses(
 ): { cost: number; time: number } {
   if (tier === 'none' || tier === 'custom') return { cost: 0, time: 0 }
   return {
-    cost: scaledEngineeringPercent(RIG_COST_BASE[tier], security),
-    time: scaledEngineeringPercent(RIG_TE_BASE[tier], security),
+    cost: scaledEngineeringPercent(rigCostBase(tier), security),
+    time: scaledEngineeringPercent(rigTeBase(tier), security),
   }
 }
 
@@ -247,10 +269,7 @@ export function labRigPreview(
   return `${label} ${tier.toUpperCase()} ${scaled.toFixed(1)}%`
 }
 
-export function reactionCombinedPreview(
-  tier: ManufacturingRigTier,
-  security: number,
-): string {
+export function reactionCombinedPreview(tier: ManufacturingRigTier, security: number): string {
   if (tier === 'none' || tier === 'custom') return manufacturingRigTierLabel(tier)
   const me = scaledRigBonus(tier, 0, 'me', security, 'reaction')
   const te = scaledRigBonus(tier, 0, 'te', security, 'reaction')
@@ -277,10 +296,7 @@ export function reactionRigPreview(
   return `${kind.toUpperCase()} ${tier.toUpperCase()} ${scaled.toFixed(1)}%`
 }
 
-export function manufacturingCombinedPreview(
-  tier: ManufacturingRigTier,
-  security: number,
-): string {
+export function manufacturingCombinedPreview(tier: ManufacturingRigTier, security: number): string {
   if (tier === 'none' || tier === 'custom') return manufacturingRigTierLabel(tier)
   const me = scaledRigBonus(tier, 0, 'me', security)
   const te = scaledRigBonus(tier, 0, 'te', security)

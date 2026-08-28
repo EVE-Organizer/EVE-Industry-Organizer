@@ -10,12 +10,13 @@
 import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-import {
-  typeIconUrl,
-} from './lib/eve-image-urls.mjs'
 import { fetchCsv } from './lib/sde-csv.mjs'
-import { buildAttributesByType } from './lib/blueprint-groups.mjs'
 import { buildBlueprintRecords } from './lib/blueprint-records.mjs'
+import {
+  buildCalcTypeRecords,
+  buildSkillRecords,
+  buildUpwellCatalog,
+} from './lib/calc-catalogs.mjs'
 import { fetchCostIndices } from './lib/market-prices.mjs'
 import { buildRegionsFile } from './lib/regions.mjs'
 import { buildMarketData, loadExistingMarket, writeMarketJson } from './lib/market-data.mjs'
@@ -28,7 +29,6 @@ import {
   isInteractive,
 } from './lib/run-progress.mjs'
 import { HUBS, resolveSellSystemId } from './lib/hubs.mjs'
-import { buildAllTypeRecords } from './lib/type-records.mjs'
 import { buildFittingRecords } from './lib/fitting-records.mjs'
 import { buildMapData, systemsFromSdeJsonl } from './lib/map-data.mjs'
 import { buildGateIntelData } from './lib/gate-intel-data.mjs'
@@ -61,61 +61,6 @@ const REQUIRED_CSVS = [
 function num(value) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : 0
-}
-
-function dogmaValue(attrs, attributeId) {
-  const row = attrs.get(String(attributeId)) ?? attrs.get(attributeId)
-  return num(row?.valueFloat || row?.valueInt)
-}
-
-function buildSkillRecords(types, groups, typeAttributes) {
-  const skillGroupIds = new Set(
-    groups.filter((group) => group.categoryID === '16').map((group) => group.groupID),
-  )
-  const attrsByType = buildAttributesByType(typeAttributes)
-  const attrTypeToKey = {
-    164: 'charisma',
-    165: 'intelligence',
-    166: 'memory',
-    167: 'perception',
-    168: 'willpower',
-  }
-
-  return types
-    .filter((type) => skillGroupIds.has(type.groupID) && type.published === '1')
-    .map((type) => {
-      const skillId = num(type.typeID)
-      const attrs =
-        attrsByType.get(type.typeID) ??
-        attrsByType.get(String(skillId)) ??
-        attrsByType.get(skillId) ??
-        new Map()
-      const rank = dogmaValue(attrs, 275) || 1
-      const primaryAttribute = attrTypeToKey[dogmaValue(attrs, 180)]
-      const secondaryAttribute = attrTypeToKey[dogmaValue(attrs, 181)]
-      const prerequisites = []
-
-      for (const [skillAttr, levelAttr] of [
-        [182, 277],
-        [183, 278],
-        [184, 279],
-      ]) {
-        const prereqSkillId = dogmaValue(attrs, skillAttr)
-        const level = dogmaValue(attrs, levelAttr)
-        if (prereqSkillId > 0 && level > 0) prerequisites.push({ skillId: prereqSkillId, level })
-      }
-
-      return {
-        skillId,
-        name: type.typeName,
-        rank,
-        prerequisites,
-        ...(primaryAttribute ? { primaryAttribute } : {}),
-        ...(secondaryAttribute ? { secondaryAttribute } : {}),
-        iconUrl: typeIconUrl(skillId),
-      }
-    })
-    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 function buildHubSystems(hubs, stations, systems) {
@@ -219,9 +164,7 @@ async function runPool(items, concurrency, worker) {
       await worker(items[index], index)
     }
   }
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker()),
-  )
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker()))
 }
 
 function buildHubStations(hubs, stations, systems, regions) {
@@ -231,9 +174,7 @@ function buildHubStations(hubs, stations, systems, regions) {
 
   return hubs
     .flatMap((hub) => {
-      const sellStation = hub.sellStationId
-        ? stationById.get(String(hub.sellStationId))
-        : null
+      const sellStation = hub.sellStationId ? stationById.get(String(hub.sellStationId)) : null
       const sellSystemId = resolveSellSystemId(hub, stationById)
       const buildSystem = systemById.get(String(hub.buildSystemId))
       const buildStation =
@@ -262,7 +203,11 @@ function buildHubStations(hubs, stations, systems, regions) {
       }
       if (buildStation && buildStation.stationID !== sellStation?.stationID) {
         entries.push({ station: buildStation, hub, isBuildHub: hub.isBuildHubSystem ?? false })
-      } else if (buildSystem && hub.isBuildHubSystem && sellStation?.solarSystemID !== buildSystem.solarSystemID) {
+      } else if (
+        buildSystem &&
+        hub.isBuildHubSystem &&
+        sellStation?.solarSystemID !== buildSystem.solarSystemID
+      ) {
         entries.push({
           station: {
             stationID: sellStation?.stationID ?? hub.sellStationId,
@@ -335,53 +280,51 @@ async function main() {
         task: async (_, task) => {
           const stopElapsed = startElapsedTicker(task, 'Build blueprint registry')
           try {
-          const types = ctx.csvData.invTypes
-          const groups = ctx.csvData.invGroups
-          const categories = ctx.csvData.invCategories
-          const skillNames = new Map(
-            types
-              .filter(
-                (type) =>
-                  groups.find((group) => group.groupID === type.groupID)?.categoryID === '16',
-              )
-              .map((type) => [num(type.typeID), type.typeName]),
-          )
+            const types = ctx.csvData.invTypes
+            const groups = ctx.csvData.invGroups
+            const categories = ctx.csvData.invCategories
+            const skillNames = new Map(
+              types
+                .filter(
+                  (type) =>
+                    groups.find((group) => group.groupID === type.groupID)?.categoryID === '16',
+                )
+                .map((type) => [num(type.typeID), type.typeName]),
+            )
 
-          ctx.skills = buildSkillRecords(types, groups, ctx.csvData.dgmTypeAttributes)
-          const { blueprints, typeById, groupById, categoryById } = buildBlueprintRecords({
-            activity: ctx.csvData.industryActivity,
-            products: ctx.csvData.industryActivityProducts,
-            materials: ctx.csvData.industryActivityMaterials,
-            skills: ctx.csvData.industryActivitySkills,
-            probabilities: ctx.csvData.industryActivityProbabilities,
-            types,
-            groups,
-            categories,
-            metaTypes: ctx.csvData.invMetaTypes,
-            skillNames,
-          })
+            ctx.skills = buildSkillRecords(types, groups, ctx.csvData.dgmTypeAttributes, {
+              activitySkills: ctx.csvData.industryActivitySkills,
+            })
+            const { blueprints, typeById, groupById, categoryById } = buildBlueprintRecords({
+              activity: ctx.csvData.industryActivity,
+              products: ctx.csvData.industryActivityProducts,
+              materials: ctx.csvData.industryActivityMaterials,
+              skills: ctx.csvData.industryActivitySkills,
+              probabilities: ctx.csvData.industryActivityProbabilities,
+              types,
+              groups,
+              categories,
+              metaTypes: ctx.csvData.invMetaTypes,
+              skillNames,
+            })
 
-          ctx.blueprints = blueprints
-          ctx.fittingTypes = buildFittingRecords(
-            types,
-            groups,
-            categories,
-            ctx.csvData.dgmTypeAttributes,
-            ctx.csvData.invTraits,
-          )
-          ctx.typeRecords = buildAllTypeRecords(
-            types,
-            groupById,
-            categoryById,
-            blueprints.map((bp) => bp.blueprintTypeId),
-          )
-          ctx.stations = buildHubStations(
-            HUBS,
-            ctx.csvData.staStations,
-            ctx.csvData.mapSolarSystems,
-            ctx.csvData.mapRegions,
-          )
-          task.title = `Build blueprint registry · ${blueprints.length.toLocaleString()} blueprints`
+            ctx.blueprints = blueprints
+            ctx.fittingTypes = buildFittingRecords(
+              types,
+              groups,
+              categories,
+              ctx.csvData.dgmTypeAttributes,
+              ctx.csvData.invTraits,
+            )
+            ctx.typeRecords = buildCalcTypeRecords(types, groupById, categoryById, blueprints)
+            ctx.upwell = buildUpwellCatalog(types, groups, ctx.csvData.dgmTypeAttributes)
+            ctx.stations = buildHubStations(
+              HUBS,
+              ctx.csvData.staStations,
+              ctx.csvData.mapSolarSystems,
+              ctx.csvData.mapRegions,
+            )
+            task.title = `Build blueprint registry · ${blueprints.length.toLocaleString()} blueprints`
           } finally {
             stopElapsed()
           }
@@ -392,29 +335,29 @@ async function main() {
         task: async (_, task) => {
           const stopElapsed = startElapsedTicker(task, 'Cost indices and regions')
           try {
-          const costIndices = await fetchCostIndices()
-          ctx.regions = buildRegionsFile(
-            ctx.csvData.mapSolarSystems,
-            ctx.csvData.mapRegions,
-            costIndices,
-          )
-          ctx.systems = buildIndustrySystems(
-            HUBS,
-            ctx.csvData.staStations,
-            ctx.csvData.mapSolarSystems,
-            costIndices,
-          )
-          ctx.mapSolarSystemsJsonl = await loadMapSolarSystemsJsonl({
-            zipPath: existsSync(localSdeZip) ? localSdeZip : undefined,
-            cacheZipPath: localSdeZip,
-          })
-          ctx.mapSystems = systemsFromSdeJsonl(ctx.mapSolarSystemsJsonl)
-          ctx.mapData = buildMapData(ctx.mapSystems, ctx.csvData.mapSolarSystemJumps)
-          ctx.gateIntel = buildGateIntelData({
-            invTypes: ctx.csvData.invTypes,
-            mapDenormalize: ctx.csvData.mapDenormalize,
-          })
-          task.title = `Cost indices and regions · ${ctx.regions.regions.length} regions, ${ctx.systems.length} industry systems`
+            const costIndices = await fetchCostIndices()
+            ctx.regions = buildRegionsFile(
+              ctx.csvData.mapSolarSystems,
+              ctx.csvData.mapRegions,
+              costIndices,
+            )
+            ctx.systems = buildIndustrySystems(
+              HUBS,
+              ctx.csvData.staStations,
+              ctx.csvData.mapSolarSystems,
+              costIndices,
+            )
+            ctx.mapSolarSystemsJsonl = await loadMapSolarSystemsJsonl({
+              zipPath: existsSync(localSdeZip) ? localSdeZip : undefined,
+              cacheZipPath: localSdeZip,
+            })
+            ctx.mapSystems = systemsFromSdeJsonl(ctx.mapSolarSystemsJsonl)
+            ctx.mapData = buildMapData(ctx.mapSystems, ctx.csvData.mapSolarSystemJumps)
+            ctx.gateIntel = buildGateIntelData({
+              invTypes: ctx.csvData.invTypes,
+              mapDenormalize: ctx.csvData.mapDenormalize,
+            })
+            task.title = `Cost indices and regions · ${ctx.regions.regions.length} regions, ${ctx.systems.length} industry systems`
           } finally {
             stopElapsed()
           }
@@ -449,6 +392,7 @@ async function main() {
             ['regions.json', ctx.regions],
             ['market.json', ctx.market],
             ['skills.json', ctx.skills],
+            ['upwell.json', { generatedAt: new Date().toISOString(), ...ctx.upwell }],
             ['fitting.json', { generatedAt: new Date().toISOString(), types: ctx.fittingTypes }],
             ['systems.json', ctx.systems],
             ['stations.json', ctx.stations],

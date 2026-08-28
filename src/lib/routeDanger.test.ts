@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { computeRouteDanger, routeGateJumps } from '@/lib/routeDanger'
+import {
+  computeRouteDanger,
+  filterNotableJumps,
+  isNotableJump,
+  routeGateJumps,
+} from '@/lib/routeDanger'
 import { normalizeGlobalSettings } from '@/services/sync/types'
 import { DEFAULT_SETTINGS } from '@/types'
 
@@ -36,6 +41,30 @@ describe('computeRouteDanger', () => {
     )
     expect(result.gateJumps).toBe(1)
     expect(result.jumps).toHaveLength(2)
+  })
+
+  it('flags lowsec high-kill systems as notable jumps', () => {
+    const result = computeRouteDanger(
+      [30000142, 30002768, 30000144],
+      new Map([
+        [30000142, 'Jita'],
+        [30002768, 'Uedama'],
+        [30000144, 'Perimeter'],
+      ]),
+      new Map([
+        [30000142, 0.9],
+        [30002768, 0.4],
+        [30000144, 0.9],
+      ]),
+      new Map([
+        [30000142, { systemId: 30000142, shipKills: 0, podKills: 0 }],
+        [30002768, { systemId: 30002768, shipKills: 12, podKills: 1 }],
+        [30000144, { systemId: 30000144, shipKills: 0, podKills: 0 }],
+      ]),
+    )
+    expect(isNotableJump(result.jumps[1]!)).toBe(true)
+    expect(isNotableJump(result.jumps[0]!)).toBe(false)
+    expect(filterNotableJumps(result.jumps)).toHaveLength(1)
   })
 })
 

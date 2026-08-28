@@ -1113,13 +1113,6 @@ export function miningCritYieldMultiplier(
   return 1 + critChance * critBonus
 }
 
-/** @deprecated Use miningCritYieldMultiplier; kept for burst tests comparing strength only. */
-export function burstEfficiencyCritMultiplier(strength: number, chipset: MiningSurveyChipsetId = 'none'): number {
-  const { chanceMult, bonusMult } = surveyChipsetCritBonuses(chipset)
-  const critChance = Math.min(0.25, BASE_MINING_CRIT_CHANCE * chanceMult * (1 + 0.5 * strength))
-  return 1 + critChance * (BASE_MINING_CRIT_BONUS_YIELD * bonusMult)
-}
-
 /** Yield from loaded Foreman charges. Optimization and Efficiency stack. */
 export function fleetBurstsYieldMultiplier(
   hull: MiningBoosterHullId | null | undefined,

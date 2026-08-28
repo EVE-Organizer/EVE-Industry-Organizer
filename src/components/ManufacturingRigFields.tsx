@@ -11,11 +11,10 @@ import { InfoTooltip } from '@/components/InfoTooltip'
 import { RigEfficiencyHeader, RigMeTeHeaders } from '@/components/RigSelectHeaders'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 import {
-  manufacturingRigTierLabel,
+  manufacturingCombinedPreview,
+  manufacturingRigPreview,
   rigSecurityLabel,
   rigSecurityMultiplier,
-  RIG_ME_BASE,
-  RIG_TE_BASE,
 } from '@/lib/manufacturingRigs'
 import { isPlayerStructure } from '@/lib/structureSettings'
 import {
@@ -70,20 +69,6 @@ function NumberField({
   )
 }
 
-function scaledPreview(kind: 'me' | 'te', tier: ManufacturingRigTier, security: number): string {
-  if (tier === 'none' || tier === 'custom') return manufacturingRigTierLabel(tier)
-  const base = kind === 'me' ? RIG_ME_BASE[tier] : RIG_TE_BASE[tier]
-  const scaled = base * rigSecurityMultiplier(security)
-  return `${kind.toUpperCase()} ${tier.toUpperCase()} ${scaled.toFixed(1)}%`
-}
-
-function combinedPreview(tier: ManufacturingRigTier, security: number): string {
-  if (tier === 'none' || tier === 'custom') return manufacturingRigTierLabel(tier)
-  const me = RIG_ME_BASE[tier] * rigSecurityMultiplier(security)
-  const te = RIG_TE_BASE[tier] * rigSecurityMultiplier(security)
-  return `${tier.toUpperCase()} ME ${me.toFixed(1)}% / TE ${te.toFixed(1)}%`
-}
-
 function patchRigs(
   rigs: ManufacturingRigModifiers,
   patch: Partial<ManufacturingRigModifiers>,
@@ -110,8 +95,7 @@ export function ManufacturingRigFields({
   const security = settings.buildSystemSecurity ?? 1
   const fitSize = manufacturingRigFitSize(settings.structureType)
   const sections = hullManufacturingRigSections(settings.structureType)
-  const setLabel =
-    fitSize === 'l' ? 'L-Set' : fitSize === 'xl' ? 'XL-Set' : 'M-Set'
+  const setLabel = fitSize === 'l' ? 'L-Set' : fitSize === 'xl' ? 'XL-Set' : 'M-Set'
 
   function setFamilies(
     families: ManufacturingRigFamily[],
@@ -155,18 +139,53 @@ export function ManufacturingRigFields({
 
       <div className="manufacturing-rig-fields__body">
         <div className="mb-3 space-y-3">
-        {sections.map((section) => (
-          <div key={section.title}>
-            <p className="text-[10px] uppercase tracking-wide opacity-50 mb-1">{section.title}</p>
-            {section.rows[0]?.combinedMeTe ? <RigEfficiencyHeader /> : <RigMeTeHeaders />}
-            <div className="space-y-1">
-              {section.rows.map((row) => {
-                if (row.combinedMeTe) {
-                  const tier = combinedTier(row)
+          {sections.map((section) => (
+            <div key={section.title}>
+              <p className="text-[10px] uppercase tracking-wide opacity-50 mb-1">{section.title}</p>
+              {section.rows[0]?.combinedMeTe ? <RigEfficiencyHeader /> : <RigMeTeHeaders />}
+              <div className="space-y-1">
+                {section.rows.map((row) => {
+                  if (row.combinedMeTe) {
+                    const tier = combinedTier(row)
+                    return (
+                      <div
+                        key={row.id}
+                        className="grid grid-cols-[1.75rem_minmax(0,1fr)_minmax(9rem,1fr)] items-center gap-2"
+                      >
+                        <EveImage
+                          id={row.iconTypeId}
+                          variant="icon"
+                          size={24}
+                          framed
+                          lazy={false}
+                          alt=""
+                        />
+                        <span className="text-xs truncate">{row.label}</span>
+                        <select
+                          className={`${selectClass} w-full`}
+                          aria-label={`${row.label} efficiency`}
+                          value={tier}
+                          onChange={(e) => {
+                            const next = e.target.value as ManufacturingRigTier
+                            setFamilies(row.families, { meRig: next, teRig: next })
+                          }}
+                        >
+                          {FAMILY_TIERS.map((option) => (
+                            <option key={option} value={option}>
+                              {manufacturingCombinedPreview(option, security)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )
+                  }
+
+                  const family = row.families[0]
+                  const familyRow = familyTiers(rigs, family)
                   return (
                     <div
                       key={row.id}
-                      className="grid grid-cols-[1.75rem_minmax(0,1fr)_minmax(9rem,1fr)] items-center gap-2"
+                      className="grid grid-cols-[1.75rem_minmax(0,1fr)_7.25rem_7.25rem] items-center gap-2"
                     >
                       <EveImage
                         id={row.iconTypeId}
@@ -179,91 +198,56 @@ export function ManufacturingRigFields({
                       <span className="text-xs truncate">{row.label}</span>
                       <select
                         className={`${selectClass} w-full`}
-                        aria-label={`${row.label} efficiency`}
-                        value={tier}
-                        onChange={(e) => {
-                          const next = e.target.value as ManufacturingRigTier
-                          setFamilies(row.families, { meRig: next, teRig: next })
-                        }}
+                        aria-label={`${manufacturingRigFamilyLabel(family)} ME`}
+                        value={familyRow.meRig}
+                        onChange={(e) =>
+                          setFamilies([family], {
+                            meRig: e.target.value as ManufacturingRigTier,
+                          })
+                        }
                       >
                         {FAMILY_TIERS.map((option) => (
                           <option key={option} value={option}>
-                            {combinedPreview(option, security)}
+                            {manufacturingRigPreview('me', option, security)}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        className={`${selectClass} w-full`}
+                        aria-label={`${manufacturingRigFamilyLabel(family)} TE`}
+                        value={familyRow.teRig}
+                        onChange={(e) =>
+                          setFamilies([family], {
+                            teRig: e.target.value as ManufacturingRigTier,
+                          })
+                        }
+                      >
+                        {FAMILY_TIERS.map((option) => (
+                          <option key={option} value={option}>
+                            {manufacturingRigPreview('te', option, security)}
                           </option>
                         ))}
                       </select>
                     </div>
                   )
-                }
-
-                const family = row.families[0]
-                const familyRow = familyTiers(rigs, family)
-                return (
-                  <div
-                    key={row.id}
-                    className="grid grid-cols-[1.75rem_minmax(0,1fr)_7.25rem_7.25rem] items-center gap-2"
-                  >
-                    <EveImage
-                      id={row.iconTypeId}
-                      variant="icon"
-                      size={24}
-                      framed
-                      lazy={false}
-                      alt=""
-                    />
-                    <span className="text-xs truncate">{row.label}</span>
-                    <select
-                      className={`${selectClass} w-full`}
-                      aria-label={`${manufacturingRigFamilyLabel(family)} ME`}
-                      value={familyRow.meRig}
-                      onChange={(e) =>
-                        setFamilies([family], {
-                          meRig: e.target.value as ManufacturingRigTier,
-                        })
-                      }
-                    >
-                      {FAMILY_TIERS.map((option) => (
-                        <option key={option} value={option}>
-                          {scaledPreview('me', option, security)}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      className={`${selectClass} w-full`}
-                      aria-label={`${manufacturingRigFamilyLabel(family)} TE`}
-                      value={familyRow.teRig}
-                      onChange={(e) =>
-                        setFamilies([family], {
-                          teRig: e.target.value as ManufacturingRigTier,
-                        })
-                      }
-                    >
-                      {FAMILY_TIERS.map((option) => (
-                        <option key={option} value={option}>
-                          {scaledPreview('te', option, security)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )
-              })}
+                })}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      <NumberField
-        label="Rig job cost %"
-        tooltip={GLOBAL_SETTING_TOOLTIPS.manufacturingRigJobCostBonusPercent}
-        size={size}
-        value={rigs.rigJobCostBonusPercent}
-        min={0}
-        max={10}
-        step={0.1}
-        onChange={(rigJobCostBonusPercent) =>
-          onChange({ manufacturingRigs: patchRigs(rigs, { rigJobCostBonusPercent }) })
-        }
-      />
+        <NumberField
+          label="Rig job cost %"
+          tooltip={GLOBAL_SETTING_TOOLTIPS.manufacturingRigJobCostBonusPercent}
+          size={size}
+          value={rigs.rigJobCostBonusPercent}
+          min={0}
+          max={10}
+          step={0.1}
+          onChange={(rigJobCostBonusPercent) =>
+            onChange({ manufacturingRigs: patchRigs(rigs, { rigJobCostBonusPercent }) })
+          }
+        />
       </div>
     </details>
   )

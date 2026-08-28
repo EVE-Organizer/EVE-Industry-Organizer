@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { formatSecurity, securityColor } from '@/lib/hubDisplay'
 import type { RegionsData, SystemInfo } from '@/types'
 
 const MAX_RESULTS = 20
@@ -15,27 +16,17 @@ interface ManufacturingSystemPickerProps {
   disabled?: boolean
 }
 
-function securityColor(security: number): string {
-  if (security >= 0.5) return 'text-success'
-  if (security > 0) return 'text-warning'
-  return 'text-error'
-}
-
-function formatSecurity(security: number): string {
-  return security.toFixed(1)
-}
-
 function formatCostIndex(
   system: SystemInfo,
   kind: 'manufacturing' | 'reaction' | 'copying' | 'invention',
 ): string {
   const index =
     kind === 'reaction'
-      ? system.reactionCostIndex ?? system.costIndex
+      ? (system.reactionCostIndex ?? system.costIndex)
       : kind === 'copying'
-        ? system.copyingCostIndex ?? system.costIndex
+        ? (system.copyingCostIndex ?? system.costIndex)
         : kind === 'invention'
-          ? system.inventionCostIndex ?? system.costIndex
+          ? (system.inventionCostIndex ?? system.costIndex)
           : system.costIndex
   if (index === undefined) return ''
   return `${(index * 100).toFixed(2)}%`
@@ -196,7 +187,9 @@ export function ManufacturingSystemPicker({
                     </span>
                   </button>
                   {regionName && (
-                    <div className="px-3 pb-1.5 -mt-1 text-xs opacity-40 truncate">{regionName}</div>
+                    <div className="px-3 pb-1.5 -mt-1 text-xs opacity-40 truncate">
+                      {regionName}
+                    </div>
                   )}
                 </li>
               )

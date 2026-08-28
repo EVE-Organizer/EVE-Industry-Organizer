@@ -5,11 +5,7 @@ const BRACKET_PATH =
 
 function EmptyBlueprintIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className="manufacturing-slot__empty-icon"
-      aria-hidden
-    >
+    <svg viewBox="0 0 24 24" className="manufacturing-slot__empty-icon" aria-hidden>
       <rect x="6" y="6" width="12" height="12" rx="1" />
       <path d="M8 8l8 8M16 8l-8 8" />
     </svg>
@@ -70,14 +66,7 @@ export function ManufacturingSlotRing({
             const x2 = 100 + Math.cos(angle) * 78
             const y2 = 100 + Math.sin(angle) * 78
             return (
-              <line
-                key={i}
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                className="manufacturing-slot__spoke"
-              />
+              <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} className="manufacturing-slot__spoke" />
             )
           })}
           {active && clampedUtil > 0.01 ? (
@@ -92,16 +81,28 @@ export function ManufacturingSlotRing({
           ) : null}
           <g className="manufacturing-slot__brackets">
             <g transform="translate(100 34)">
-              <path d={BRACKET_PATH} className="manufacturing-slot__bracket manufacturing-slot__bracket--top" />
+              <path
+                d={BRACKET_PATH}
+                className="manufacturing-slot__bracket manufacturing-slot__bracket--top"
+              />
             </g>
             <g transform="translate(166 100) rotate(90)">
-              <path d={BRACKET_PATH} className="manufacturing-slot__bracket manufacturing-slot__bracket--right" />
+              <path
+                d={BRACKET_PATH}
+                className="manufacturing-slot__bracket manufacturing-slot__bracket--right"
+              />
             </g>
             <g transform="translate(100 166) rotate(180)">
-              <path d={BRACKET_PATH} className="manufacturing-slot__bracket manufacturing-slot__bracket--bottom" />
+              <path
+                d={BRACKET_PATH}
+                className="manufacturing-slot__bracket manufacturing-slot__bracket--bottom"
+              />
             </g>
             <g transform="translate(34 100) rotate(-90)">
-              <path d={BRACKET_PATH} className="manufacturing-slot__bracket manufacturing-slot__bracket--left" />
+              <path
+                d={BRACKET_PATH}
+                className="manufacturing-slot__bracket manufacturing-slot__bracket--left"
+              />
             </g>
           </g>
         </svg>
@@ -125,7 +126,7 @@ export function ManufacturingSlotRing({
         <span className="manufacturing-slot__slot-label">Slot {slotIndex + 1}</span>
         {size === 'md' ? (
           <span className="manufacturing-slot__status">
-            {hasProduct ? productName ?? 'Building' : idleMessage}
+            {hasProduct ? (productName ?? 'Building') : idleMessage}
           </span>
         ) : null}
       </span>
@@ -139,6 +140,11 @@ interface ManufacturingSlotsRowProps {
   onSelectSlot?: (slotIndex: number) => void
   emptyHint?: string
   className?: string
+  onAddSlot?: () => void
+  addSlotLabel?: string
+  onRemoveSlot?: () => void
+  removeSlotLabel?: string
+  canRemoveSlot?: boolean
 }
 
 export function ManufacturingSlotsRow({
@@ -147,6 +153,11 @@ export function ManufacturingSlotsRow({
   onSelectSlot,
   emptyHint = 'Industry slots from Mass Production skills',
   className = '',
+  onAddSlot,
+  addSlotLabel = 'Add slot',
+  onRemoveSlot,
+  removeSlotLabel = 'Remove slot',
+  canRemoveSlot = false,
 }: ManufacturingSlotsRowProps) {
   const allIdle = slots.every((slot) => !slot.active)
 
@@ -155,18 +166,46 @@ export function ManufacturingSlotsRow({
       {allIdle && slots.length > 0 ? (
         <p className="manufacturing-slots__hint">{emptyHint}</p>
       ) : null}
-      <div
-        className="manufacturing-slots__row"
-        style={{ ['--slot-count' as string]: slots.length }}
-      >
-        {slots.map((slot) => (
-          <ManufacturingSlotRing
-            key={slot.slotIndex}
-            {...slot}
-            selected={selectedSlotIndex === slot.slotIndex}
-            onSelect={onSelectSlot}
-          />
-        ))}
+      <div className="manufacturing-slots__row-wrap">
+        <div
+          className="manufacturing-slots__row"
+          style={{ ['--slot-count' as string]: slots.length }}
+        >
+          {slots.map((slot) => (
+            <ManufacturingSlotRing
+              key={slot.slotIndex}
+              {...slot}
+              selected={selectedSlotIndex === slot.slotIndex}
+              onSelect={onSelectSlot}
+            />
+          ))}
+        </div>
+        {onAddSlot || onRemoveSlot ? (
+          <div className="manufacturing-slots__controls">
+            {onRemoveSlot && canRemoveSlot ? (
+              <button
+                type="button"
+                className="manufacturing-slots__remove btn btn-circle btn-ghost btn-sm"
+                aria-label={removeSlotLabel}
+                title={removeSlotLabel}
+                onClick={onRemoveSlot}
+              >
+                −
+              </button>
+            ) : null}
+            {onAddSlot ? (
+              <button
+                type="button"
+                className="manufacturing-slots__add btn btn-circle btn-ghost btn-sm"
+                aria-label={addSlotLabel}
+                title={addSlotLabel}
+                onClick={onAddSlot}
+              >
+                +
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </div>
   )

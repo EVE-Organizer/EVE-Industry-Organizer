@@ -18,6 +18,7 @@ import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
 import { skillLevel } from '@/lib/skillFields'
 import { activeConcurrentCopies } from '@/lib/supplyChainSlots'
+import { activePlanRoots } from '@/lib/planRootEnabled'
 
 /** One industry job = one in-game timer. Never multiply by Mass Production slots. */
 export const IN_GAME_JOB_LINES = 1
@@ -29,10 +30,7 @@ function skillTimeLevels(settings: GlobalSettings): { industry: number; advanced
   }
 }
 
-function structureTeForBlueprint(
-  blueprint: BlueprintInfo,
-  settings: GlobalSettings,
-): number {
+function structureTeForBlueprint(blueprint: BlueprintInfo, settings: GlobalSettings): number {
   const structure = resolveRecipeModifiers(settings, blueprint)
   return structure.teBonusPercent
 }
@@ -58,12 +56,7 @@ export function jobTimeSecondsForRuns(
 
   if (isReactionRecipe(blueprint)) {
     const reactions = skillLevel(settings.skills, 'reactions')
-    return applyReactionTime(
-      blueprint.manufacturingTime,
-      runsPerJob,
-      reactions,
-      structureTe,
-    )
+    return applyReactionTime(blueprint.manufacturingTime, runsPerJob, reactions, structureTe)
   }
 
   const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride, blueprint)
@@ -94,11 +87,7 @@ export function runsFromDurationHours(
 
   if (isReactionRecipe(blueprint)) {
     const reactions = skillLevel(settings.skills, 'reactions')
-    const perRun = reactionTimePerRun(
-      blueprint.manufacturingTime,
-      reactions,
-      structureTe,
-    )
+    const perRun = reactionTimePerRun(blueprint.manufacturingTime, reactions, structureTe)
     if (perRun <= 0) return 1
     const reactionRunsPerLine = Math.max(1, Math.floor(availableSec / perRun))
     return Math.max(1, reactionRunsPerLine * lines)
@@ -126,13 +115,7 @@ export function inGameRunsFromDurationHours(
   durationHours: number,
   meTeOverride?: PlanNodeOverride,
 ): number {
-  return runsFromDurationHours(
-    blueprint,
-    settings,
-    durationHours,
-    IN_GAME_JOB_LINES,
-    meTeOverride,
-  )
+  return runsFromDurationHours(blueprint, settings, durationHours, IN_GAME_JOB_LINES, meTeOverride)
 }
 
 /** Shrink runs so this product's ready-by time fits `deadlineHours`. Never grows. */
@@ -220,6 +203,92 @@ export function fitPlanToRootReadyDeadlines(input: {
   return { roots: nextRoots, nodeOverrides }
 }
 
+export type OverallDeadlineTarget = { rootId: string; deadlineHours: number }
+
+/** Enabled roots with a stored ready-by deadline (Overall mode). */
+export function overallDeadlineTargets(roots: PlanRootEntry[]): OverallDeadlineTarget[] {
+  return activePlanRoots(roots)
+    .filter((r) => r.productionDurationHours > 0)
+    .map((r) => ({ rootId: r.id, deadlineHours: r.productionDurationHours }))
+}
+
+/** Stable key for plan root membership — detects add, remove, enable toggle. */
+export function planRootsKey(roots: PlanRootEntry[]): string {
+  return roots.map((r) => `${r.id}:${r.enabled !== false ? 1 : 0}`).join('|')
+}
+
+/** Re-derive root runs from stored duration targets (Production-mode reset). */
+export function resetPlanRootsFromDuration(
+  roots: PlanRootEntry[],
+  settings: GlobalSettings,
+  nodeOverrides: Record<number, PlanNodeOverride>,
+  getBlueprint: (productTypeId: number) => BlueprintInfo | undefined,
+): PlanRootEntry[] {
+  return roots.map((root) =>
+    applyRootEntryPatch(
+      root,
+      { productionDurationHours: root.productionDurationHours },
+      getBlueprint(root.productTypeId),
+      settings,
+      nodeOverrides[root.productTypeId],
+    ),
+  )
+}
+
+/** Fit roots and sub-build pins to stored Overall deadlines against a fresh schedule. */
+export function fitPlanForOverallDeadlines(input: {
+  roots: PlanRootEntry[]
+  nodeOverrides: Record<number, PlanNodeOverride>
+  targets: OverallDeadlineTarget[]
+  readyHoursByProductId: Map<number, number>
+  nodes: Array<Pick<PlanNode, 'productTypeId' | 'childProductTypeIds' | 'isRoot' | 'mode'>>
+  settings: GlobalSettings
+  getBlueprint: (productTypeId: number) => BlueprintInfo | undefined
+}): { roots: PlanRootEntry[]; nodeOverrides: Record<number, PlanNodeOverride> } {
+  if (input.targets.length === 0) {
+    return { roots: input.roots, nodeOverrides: input.nodeOverrides }
+  }
+
+  const hoursByRootId = new Map(input.targets.map((t) => [t.rootId, t.deadlineHours]))
+  const stamped = input.roots.map((r) => {
+    const hours = hoursByRootId.get(r.id)
+    return hours == null ? r : { ...r, productionDurationHours: hours }
+  })
+
+  return fitPlanToRootReadyDeadlines({
+    roots: stamped,
+    targets: input.targets,
+    readyHoursByProductId: input.readyHoursByProductId,
+    nodes: input.nodes,
+    nodeOverrides: input.nodeOverrides,
+    settings: input.settings,
+    getBlueprint: input.getBlueprint,
+  })
+}
+
+/** True when Overall fit changed any root or pinned sub-build runs. */
+export function overallPlanFitChanged(
+  before: { roots: PlanRootEntry[]; nodeOverrides: Record<number, PlanNodeOverride> },
+  after: { roots: PlanRootEntry[]; nodeOverrides: Record<number, PlanNodeOverride> },
+): boolean {
+  if (before.roots.length !== after.roots.length) return true
+  for (let i = 0; i < before.roots.length; i++) {
+    if (before.roots[i]!.runs !== after.roots[i]!.runs) return true
+  }
+
+  const overrideIds = new Set([
+    ...Object.keys(before.nodeOverrides),
+    ...Object.keys(after.nodeOverrides),
+  ])
+  for (const id of overrideIds) {
+    const productTypeId = Number(id)
+    if (before.nodeOverrides[productTypeId]?.runs !== after.nodeOverrides[productTypeId]?.runs) {
+      return true
+    }
+  }
+  return false
+}
+
 /** Wall-clock hours to finish `runs` manufacturing runs (matches in-game job timer × waves). */
 export function durationHoursFromRuns(
   blueprint: BlueprintInfo,
@@ -280,13 +349,7 @@ export function rootJobTimeHours(
   meTeOverride?: PlanNodeOverride,
 ): number {
   if (!blueprint || root.runs <= 0) return root.productionDurationHours
-  return durationHoursFromRuns(
-    blueprint,
-    settings,
-    root.runs,
-    IN_GAME_JOB_LINES,
-    meTeOverride,
-  )
+  return durationHoursFromRuns(blueprint, settings, root.runs, IN_GAME_JOB_LINES, meTeOverride)
 }
 
 export function inGameDurationHoursFromRuns(
@@ -315,7 +378,8 @@ export function parallelLinesForRoot(
   nodeOverride?: PlanNodeOverride,
 ): number {
   if (nodeOverride?.copies != null) return nodeOverride.copies
-  const runsPerBpc = nodeOverride?.runsPerBpc ?? defaultRunsPerBpc(blueprint, defaultRunsPerBpcTemplate)
+  const runsPerBpc =
+    nodeOverride?.runsPerBpc ?? defaultRunsPerBpc(blueprint, defaultRunsPerBpcTemplate)
   const bpcCount = bpcCountForRuns(root.runs, runsPerBpc)
   return activeConcurrentCopies(true, bpcCount, skillSlots, rootRunsTotal)
 }

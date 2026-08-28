@@ -2,20 +2,19 @@ import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
-import { Layout } from '@/components/Layout'
+import { Layout } from '@/components/layout/Layout'
 import { useAppStore } from '@/stores/appStore'
-import { BlueprintsPage } from '@/pages/BlueprintsPage'
-import { ProductionGraphPage } from '@/pages/ProductionGraphPage'
-import { ItemDetailPage } from '@/pages/ItemDetailPage'
-import { PlanPage } from '@/pages/PlanPage'
-import { MapPage } from '@/pages/MapPage'
-import { JobsPage } from '@/pages/JobsPage'
-import { SettingsPage } from '@/pages/SettingsPage'
-import { MiningIskHrPage } from '@/pages/MiningIskHrPage'
-import { RouteRiskPage } from '@/pages/RouteRiskPage'
-import { FitSkillsPage } from '@/pages/FitSkillsPage'
-import { SkillsPage } from '@/pages/SkillsPage'
-import { AuthCallbackPage } from '@/pages/AuthCallbackPage'
+import { BlueprintsPage } from '@/pages/Blueprints/BlueprintsPage'
+import { ProductionGraphPage } from '@/pages/Graph/ProductionGraphPage'
+import { ItemDetailPage } from '@/pages/Item/ItemDetailPage'
+import { PlanPage } from '@/pages/Plan/PlanPage'
+import { JobsPage } from '@/pages/Jobs/JobsPage'
+import { SettingsPage } from '@/pages/Settings/SettingsPage'
+import { MiningIskHrPage } from '@/pages/Mining/MiningIskHrPage'
+import { RouteRiskPage } from '@/pages/RouteRisk/RouteRiskPage'
+import { FitSkillsPage } from '@/pages/FitSkills/FitSkillsPage'
+import { SkillsPage } from '@/pages/Skills/SkillsPage'
+import { AuthCallbackPage } from '@/pages/Auth/AuthCallbackPage'
 import { useAuthStore } from '@/stores/authStore'
 
 function LegacyBlueprintRedirect() {
@@ -58,7 +57,6 @@ function AppRoutes() {
         <Route path="/blueprints/:typeId" element={<LegacyBlueprintRedirect />} />
         <Route path="/stations" element={<Navigate to="/" replace />} />
         <Route path="/plan" element={<PlanPage />} />
-        <Route path="/map" element={<MapPage />} />
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/tools/route-risk" element={<RouteRiskPage />} />
         <Route path="/skills" element={<SkillsPage />} />
@@ -71,7 +69,6 @@ function AppRoutes() {
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/accounts" element={<Navigate to="/settings" replace />} />
         <Route path="/progression" element={<Navigate to="/settings" replace />} />
-        <Route path="/onboarding" element={<Navigate to="/" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

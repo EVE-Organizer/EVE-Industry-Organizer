@@ -7,13 +7,8 @@ import type {
   ScienceFacilitySettings,
   SystemInfo,
 } from '@/types'
-import {
-  HUBS,
-  MAX_ME,
-  MAX_TE,
-  REACTION_FAMILY_GROUPS,
-  STRUCTURE_HULL_PRESETS,
-} from '@/types'
+import { HUBS, MAX_ME, MAX_TE, REACTION_FAMILY_GROUPS } from '@/types'
+import { structureHullPreset } from '@/lib/upwellCatalog'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
@@ -120,7 +115,7 @@ function StructurePresetBonuses({
     settings.structureType === 'raitaru' ||
     settings.structureType === 'azbel' ||
     settings.structureType === 'sotiyo'
-      ? STRUCTURE_HULL_PRESETS[settings.structureType]
+      ? structureHullPreset(settings.structureType)
       : null
   if (!hull) return null
 
@@ -186,11 +181,7 @@ export function CommonSettingsSection({ settings, onChange, size = 'md' }: Setti
 
   return (
     <div className={`flex flex-col ${gap}`}>
-      <SettingField
-        label="Primary hub"
-        tooltip={GLOBAL_SETTING_TOOLTIPS.primaryHub}
-        size={size}
-      >
+      <SettingField label="Primary hub" tooltip={GLOBAL_SETTING_TOOLTIPS.primaryHub} size={size}>
         <select
           className={selectClass}
           value={settings.primaryHub}
@@ -213,17 +204,11 @@ export function CommonSettingsSection({ settings, onChange, size = 'md' }: Setti
         </select>
       </SettingField>
 
-      <SettingField
-        label="Sell hub"
-        tooltip={GLOBAL_SETTING_TOOLTIPS.sellHubId}
-        size={size}
-      >
+      <SettingField label="Sell hub" tooltip={GLOBAL_SETTING_TOOLTIPS.sellHubId} size={size}>
         <select
           className={selectClass}
           value={settings.sellHubId ?? settings.primaryHub}
-          onChange={(e) =>
-            onChange({ sellHubId: e.target.value as GlobalSettings['sellHubId'] })
-          }
+          onChange={(e) => onChange({ sellHubId: e.target.value as GlobalSettings['sellHubId'] })}
         >
           {HUBS.map((h) => (
             <option key={h.id} value={h.id}>
@@ -233,11 +218,7 @@ export function CommonSettingsSection({ settings, onChange, size = 'md' }: Setti
         </select>
       </SettingField>
 
-      <SettingField
-        label="Price method"
-        tooltip={GLOBAL_SETTING_TOOLTIPS.priceMethod}
-        size={size}
-      >
+      <SettingField label="Price method" tooltip={GLOBAL_SETTING_TOOLTIPS.priceMethod} size={size}>
         <select
           className={selectClass}
           value={settings.priceMethod}
@@ -422,12 +403,7 @@ export function ReactionFacilityBonusFields({
         />
       ) : null}
 
-      <ReactionRigFields
-        settings={settings}
-        onChange={onChange}
-        security={security}
-        size={size}
-      />
+      <ReactionRigFields settings={settings} onChange={onChange} security={security} size={size} />
 
       {showHull ? (
         rigLayout === 'split' ? (
@@ -554,33 +530,28 @@ export function ScienceFacilityBonusFields({
 }: SettingsSectionProps & { activity: ScienceActivity; systems?: SystemInfo[] }) {
   const gap = sectionGap(size)
   const facilityKey = activity === 'copy' ? 'copyFacility' : 'inventionFacility'
-  const facility =
-    settings[facilityKey] ?? {
-      systemId: settings.manufacturingSystemId,
-      systemSecurity: 1,
-      structureType: 'npc' as const,
-      hullTeBonusPercent: 0,
-      hullJobCostBonusPercent: 0,
-      costRig: 'none' as const,
-      teRig: 'none' as const,
-      optimizationRig: 'none' as const,
-      rigTeBonusPercent: 0,
-      rigJobCostBonusPercent: 0,
-      taxPercent: 0,
-    }
+  const facility = settings[facilityKey] ?? {
+    systemId: settings.manufacturingSystemId,
+    systemSecurity: 1,
+    structureType: 'npc' as const,
+    hullTeBonusPercent: 0,
+    hullJobCostBonusPercent: 0,
+    costRig: 'none' as const,
+    teRig: 'none' as const,
+    optimizationRig: 'none' as const,
+    rigTeBonusPercent: 0,
+    rigJobCostBonusPercent: 0,
+    taxPercent: 0,
+  }
   if (!isPlayerStructure(facility.structureType)) return null
 
   const hull =
     facility.structureType === 'raitaru' ||
     facility.structureType === 'azbel' ||
     facility.structureType === 'sotiyo'
-      ? STRUCTURE_HULL_PRESETS[facility.structureType]
+      ? structureHullPreset(facility.structureType)
       : null
-  const security = securityForSystem(
-    systems,
-    facility.systemId,
-    facility.systemSecurity ?? 1,
-  )
+  const security = securityForSystem(systems, facility.systemId, facility.systemSecurity ?? 1)
   const showHull = size !== 'sm'
 
   function patchFacility(patch: Partial<ScienceFacilitySettings>) {
@@ -598,10 +569,7 @@ export function ScienceFacilityBonusFields({
           <div className="grid grid-cols-3 gap-3">
             <StructureBonusTile label="Hull ME" value={0} />
             <StructureBonusTile label="Hull TE" value={hull.hullTeBonusPercent} />
-            <StructureBonusTile
-              label="Hull job cost"
-              value={hull.hullJobCostBonusPercent}
-            />
+            <StructureBonusTile label="Hull job cost" value={hull.hullJobCostBonusPercent} />
           </div>
         </div>
       ) : showHull ? (
@@ -624,9 +592,7 @@ export function ScienceFacilityBonusFields({
             min={0}
             max={10}
             step={0.1}
-            onChange={(hullJobCostBonusPercent) =>
-              patchFacility({ hullJobCostBonusPercent })
-            }
+            onChange={(hullJobCostBonusPercent) => patchFacility({ hullJobCostBonusPercent })}
           />
         </div>
       ) : null}
@@ -669,26 +635,29 @@ export function ScienceFacilitySection({
 }) {
   const gap = sectionGap(size)
   const facilityKey = activity === 'copy' ? 'copyFacility' : 'inventionFacility'
-  const facility =
-    settings[facilityKey] ?? {
-      systemId: settings.manufacturingSystemId,
-      systemSecurity: 1,
-      structureType: 'npc' as const,
-      hullTeBonusPercent: 0,
-      hullJobCostBonusPercent: 0,
-      costRig: 'none' as const,
-      teRig: 'none' as const,
-      optimizationRig: 'none' as const,
-      rigTeBonusPercent: 0,
-      rigJobCostBonusPercent: 0,
-      taxPercent: 0,
-    }
+  const facility = settings[facilityKey] ?? {
+    systemId: settings.manufacturingSystemId,
+    systemSecurity: 1,
+    structureType: 'npc' as const,
+    hullTeBonusPercent: 0,
+    hullJobCostBonusPercent: 0,
+    costRig: 'none' as const,
+    teRig: 'none' as const,
+    optimizationRig: 'none' as const,
+    rigTeBonusPercent: 0,
+    rigJobCostBonusPercent: 0,
+    taxPercent: 0,
+  }
   const locationLocked =
     activity === 'copy' ? settings.copyLocationId != null : settings.inventionLocationId != null
   const locationTooltip =
-    activity === 'copy' ? GLOBAL_SETTING_TOOLTIPS.copyFacility : GLOBAL_SETTING_TOOLTIPS.inventionFacility
+    activity === 'copy'
+      ? GLOBAL_SETTING_TOOLTIPS.copyFacility
+      : GLOBAL_SETTING_TOOLTIPS.inventionFacility
   const systemTooltip =
-    activity === 'copy' ? GLOBAL_SETTING_TOOLTIPS.copySystemId : GLOBAL_SETTING_TOOLTIPS.inventionSystemId
+    activity === 'copy'
+      ? GLOBAL_SETTING_TOOLTIPS.copySystemId
+      : GLOBAL_SETTING_TOOLTIPS.inventionSystemId
 
   function patchFacility(patch: Partial<ScienceFacilitySettings>) {
     onChange({ [facilityKey]: { ...facility, ...patch } })
@@ -712,11 +681,7 @@ export function ScienceFacilitySection({
 
       <SettingField
         label={activity === 'copy' ? 'Copy system' : 'Invention system'}
-        tooltip={
-          locationLocked
-            ? 'Set automatically from the selected location.'
-            : systemTooltip
-        }
+        tooltip={locationLocked ? 'Set automatically from the selected location.' : systemTooltip}
         size={size}
       >
         <ManufacturingSystemPicker
@@ -776,18 +741,6 @@ export function BpoCostSettingsSection({ settings, onChange, size = 'md' }: Sett
           Profit and budget ignore BPO purchase, BPC copies, and invention costs.
         </p>
       )}
-    </div>
-  )
-}
-
-/** @deprecated Use section components directly on the settings page. */
-export function GlobalSettingsForm({ settings, onChange, size = 'md' }: SettingsSectionProps) {
-  const gap = sectionGap(size)
-  return (
-    <div className={`flex flex-col ${gap}`}>
-      <CommonSettingsSection settings={settings} onChange={onChange} size={size} />
-      <BpoCostSettingsSection settings={settings} onChange={onChange} size={size} />
-      <ManufacturingSettingsSection settings={settings} onChange={onChange} size={size} />
     </div>
   )
 }
