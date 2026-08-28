@@ -1,0 +1,3012 @@
+{
+  "generatedAt": "2026-08-28T15:50:12.363Z",
+  "hulls": [
+    {
+      "typeId": 35825,
+      "name": "Raitaru",
+      "kind": "engineering",
+      "size": "m",
+      "roleBonuses": {
+        "me": 1,
+        "te": 15,
+        "jobCost": 3
+      }
+    },
+    {
+      "typeId": 35826,
+      "name": "Azbel",
+      "kind": "engineering",
+      "size": "l",
+      "roleBonuses": {
+        "me": 1,
+        "te": 20,
+        "jobCost": 4
+      }
+    },
+    {
+      "typeId": 35827,
+      "name": "Sotiyo",
+      "kind": "engineering",
+      "size": "xl",
+      "roleBonuses": {
+        "me": 1,
+        "te": 30,
+        "jobCost": 5
+      }
+    },
+    {
+      "typeId": 35835,
+      "name": "Athanor",
+      "kind": "refinery",
+      "size": "m",
+      "roleBonuses": {
+        "me": 0,
+        "te": 0,
+        "jobCost": 0
+      }
+    },
+    {
+      "typeId": 35836,
+      "name": "Tatara",
+      "kind": "refinery",
+      "size": "l",
+      "roleBonuses": {
+        "me": 0,
+        "te": 25,
+        "jobCost": 0
+      }
+    }
+  ],
+  "rigs": [
+    {
+      "typeId": 37146,
+      "name": "Standup M-Set Basic Medium Ship Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37147,
+      "name": "Standup M-Set Basic Medium Ship Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37148,
+      "name": "Standup M-Set Drone and Fighter Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37149,
+      "name": "Standup M-Set Drone and Fighter Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37150,
+      "name": "Standup M-Set Ammunition Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37151,
+      "name": "Standup M-Set Ammunition Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37152,
+      "name": "Standup M-Set Basic Large Ship Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37153,
+      "name": "Standup M-Set Basic Medium Ship Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37154,
+      "name": "Standup M-Set Basic Small Ship Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37155,
+      "name": "Standup M-Set Basic Small Ship Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37156,
+      "name": "Standup M-Set Drone and Fighter Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37157,
+      "name": "Standup M-Set Drone and Fighter Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37158,
+      "name": "Standup M-Set Ammunition Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37159,
+      "name": "Standup M-Set Ammunition Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37160,
+      "name": "Standup M-Set Equipment Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37161,
+      "name": "Standup M-Set Equipment Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37162,
+      "name": "Standup M-Set Basic Small Ship Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37163,
+      "name": "Standup M-Set Basic Small Ship Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37164,
+      "name": "Standup L-Set Ammunition Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37165,
+      "name": "Standup L-Set Ammunition Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37166,
+      "name": "Standup L-Set Basic Large Ship Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37167,
+      "name": "Standup L-Set Basic Large Ship Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37168,
+      "name": "Standup L-Set Advanced Large Ship Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37169,
+      "name": "Standup L-Set Advanced Large Ship Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37170,
+      "name": "Standup L-Set Equipment Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37171,
+      "name": "Standup L-Set Equipment Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37172,
+      "name": "Standup L-Set Capital Ship Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_capital"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37173,
+      "name": "Standup L-Set Capital Ship Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_capital"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37174,
+      "name": "Standup L-Set Advanced Component Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37175,
+      "name": "Standup L-Set Advanced Component Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37178,
+      "name": "Standup XL-Set Equipment and Consumable Manufacturing Efficiency I",
+      "size": "xl",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ammo",
+        "drones",
+        "equipment"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37179,
+      "name": "Standup XL-Set Equipment and Consumable Manufacturing Efficiency II",
+      "size": "xl",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ammo",
+        "drones",
+        "equipment"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37180,
+      "name": "Standup XL-Set Ship Manufacturing Efficiency I",
+      "size": "xl",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small",
+        "ships_t1_medium",
+        "ships_t1_large",
+        "ships_t2_small",
+        "ships_t2_medium",
+        "ships_t2_large",
+        "ships_capital"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37181,
+      "name": "Standup XL-Set Ship Manufacturing Efficiency II",
+      "size": "xl",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small",
+        "ships_t1_medium",
+        "ships_t1_large",
+        "ships_t2_small",
+        "ships_t2_medium",
+        "ships_t2_large",
+        "ships_capital"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37182,
+      "name": "Standup XL-Set Laboratory Optimization II",
+      "size": "xl",
+      "tier": "t2",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 24,
+      "jobCost": 12
+    },
+    {
+      "typeId": 37183,
+      "name": "Standup XL-Set Laboratory Optimization I",
+      "size": "xl",
+      "tier": "t1",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 20,
+      "jobCost": 10
+    },
+    {
+      "typeId": 37309,
+      "name": "Standup L-Set Ammunition Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37310,
+      "name": "Standup XL-Set Equipment and Consumable Manufacturing Efficiency I Blueprint",
+      "size": "xl",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ammo",
+        "drones",
+        "equipment"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37329,
+      "name": "Standup L-Set Ammunition Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37330,
+      "name": "Standup L-Set Basic Large Ship Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37331,
+      "name": "Standup L-Set Basic Large Ship Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37332,
+      "name": "Standup L-Set Advanced Large Ship Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37333,
+      "name": "Standup L-Set Advanced Large Ship Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37334,
+      "name": "Standup L-Set Equipment Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37335,
+      "name": "Standup L-Set Equipment Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37338,
+      "name": "Standup L-Set Advanced Component Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37339,
+      "name": "Standup L-Set Advanced Component Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37342,
+      "name": "Standup XL-Set Equipment and Consumable Manufacturing Efficiency II Blueprint",
+      "size": "xl",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ammo",
+        "drones",
+        "equipment"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37343,
+      "name": "Standup XL-Set Ship Manufacturing Efficiency I Blueprint",
+      "size": "xl",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small",
+        "ships_t1_medium",
+        "ships_t1_large",
+        "ships_t2_small",
+        "ships_t2_medium",
+        "ships_t2_large",
+        "ships_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37344,
+      "name": "Standup XL-Set Ship Manufacturing Efficiency II Blueprint",
+      "size": "xl",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small",
+        "ships_t1_medium",
+        "ships_t1_large",
+        "ships_t2_small",
+        "ships_t2_medium",
+        "ships_t2_large",
+        "ships_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37345,
+      "name": "Standup XL-Set Laboratory Optimization II Blueprint",
+      "size": "xl",
+      "tier": "t1",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37346,
+      "name": "Standup XL-Set Laboratory Optimization I Blueprint",
+      "size": "xl",
+      "tier": "t2",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37376,
+      "name": "Standup XL-Set Structure and Component Manufacturing Efficiency I Blueprint",
+      "size": "xl",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2",
+        "components_capital",
+        "structures"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 37377,
+      "name": "Standup XL-Set Structure and Component Manufacturing Efficiency II Blueprint",
+      "size": "xl",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2",
+        "components_capital",
+        "structures"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43704,
+      "name": "Standup XL-Set Structure and Component Manufacturing Efficiency I",
+      "size": "xl",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2",
+        "components_capital",
+        "structures"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43705,
+      "name": "Standup XL-Set Structure and Component Manufacturing Efficiency II",
+      "size": "xl",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2",
+        "components_capital",
+        "structures"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43707,
+      "name": "Standup L-Set Advanced Small Ship Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43708,
+      "name": "Standup L-Set Advanced Small Ship Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43709,
+      "name": "Standup L-Set Advanced Medium Ship Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43711,
+      "name": "Standup L-Set Advanced Medium Ship Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43712,
+      "name": "Standup L-Set Drone and Fighter Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43713,
+      "name": "Standup L-Set Drone and Fighter Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43714,
+      "name": "Standup L-Set Basic Small Ship Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43715,
+      "name": "Standup L-Set Basic Small Ship Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43716,
+      "name": "Standup L-Set Basic Medium Ship Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43717,
+      "name": "Standup L-Set Basic Medium Ship Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43718,
+      "name": "Standup L-Set Basic Capital Component Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43719,
+      "name": "Standup L-Set Basic Capital Component Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43720,
+      "name": "Standup L-Set Structure Manufacturing Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43721,
+      "name": "Standup L-Set Structure Manufacturing Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43722,
+      "name": "Standup L-Set Invention Optimization I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 20,
+      "jobCost": 10
+    },
+    {
+      "typeId": 43723,
+      "name": "Standup L-Set Invention Optimization II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 24,
+      "jobCost": 12
+    },
+    {
+      "typeId": 43729,
+      "name": "Standup L-Set Blueprint Copy Optimization I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 20,
+      "jobCost": 10
+    },
+    {
+      "typeId": 43730,
+      "name": "Standup L-Set Blueprint Copy Optimization II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 24,
+      "jobCost": 12
+    },
+    {
+      "typeId": 43732,
+      "name": "Standup M-Set Basic Large Ship Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43733,
+      "name": "Standup M-Set Basic Large Ship Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43734,
+      "name": "Standup M-Set Basic Large Ship Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43854,
+      "name": "Standup M-Set Advanced Small Ship Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43855,
+      "name": "Standup M-Set Advanced Small Ship Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43856,
+      "name": "Standup M-Set Advanced Small Ship Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43857,
+      "name": "Standup M-Set Advanced Small Ship Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43858,
+      "name": "Standup M-Set Advanced Medium Ship Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43859,
+      "name": "Standup M-Set Advanced Medium Ship Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43860,
+      "name": "Standup M-Set Advanced Medium Ship Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43861,
+      "name": "Standup M-Set Advanced Medium Ship Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43862,
+      "name": "Standup M-Set Advanced Large Ship Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43863,
+      "name": "Standup M-Set Advanced Large Ship Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43864,
+      "name": "Standup M-Set Advanced Large Ship Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43865,
+      "name": "Standup M-Set Advanced Large Ship Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43866,
+      "name": "Standup M-Set Advanced Component Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43867,
+      "name": "Standup M-Set Advanced Component Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43868,
+      "name": "Standup M-Set Advanced Component Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43869,
+      "name": "Standup M-Set Advanced Component Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43870,
+      "name": "Standup M-Set Basic Capital Component Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43871,
+      "name": "Standup M-Set Basic Capital Component Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43872,
+      "name": "Standup M-Set Basic Capital Component Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43873,
+      "name": "Standup M-Set Basic Capital Component Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43874,
+      "name": "Standup M-Set Structure Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43875,
+      "name": "Standup M-Set Structure Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43876,
+      "name": "Standup M-Set Structure Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43877,
+      "name": "Standup M-Set Structure Manufacturing Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43878,
+      "name": "Standup M-Set Invention Cost Optimization II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 12
+    },
+    {
+      "typeId": 43879,
+      "name": "Standup M-Set Invention Cost Optimization I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 10
+    },
+    {
+      "typeId": 43880,
+      "name": "Standup M-Set Invention Accelerator I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43881,
+      "name": "Standup M-Set Invention Accelerator II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43890,
+      "name": "Standup M-Set Blueprint Copy Cost Optimization II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 12
+    },
+    {
+      "typeId": 43891,
+      "name": "Standup M-Set Blueprint Copy Cost Optimization I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 10
+    },
+    {
+      "typeId": 43892,
+      "name": "Standup M-Set Blueprint Copy Accelerator II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43893,
+      "name": "Standup M-Set Blueprint Copy Accelerator I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43919,
+      "name": "Standup M-Set Basic Medium Ship Manufacturing Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43920,
+      "name": "Standup M-Set Equipment Manufacturing Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 43921,
+      "name": "Standup M-Set Equipment Manufacturing Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44002,
+      "name": "Standup M-Set Equipment Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44003,
+      "name": "Standup M-Set Equipment Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44004,
+      "name": "Standup M-Set Equipment Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44005,
+      "name": "Standup M-Set Equipment Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "equipment"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44006,
+      "name": "Standup M-Set Ammunition Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44007,
+      "name": "Standup M-Set Ammunition Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44008,
+      "name": "Standup M-Set Ammunition Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44009,
+      "name": "Standup M-Set Ammunition Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ammo"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44010,
+      "name": "Standup M-Set Drone and Fighter Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44011,
+      "name": "Standup M-Set Drone and Fighter Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44012,
+      "name": "Standup M-Set Drone and Fighter Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44013,
+      "name": "Standup M-Set Drone and Fighter Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44014,
+      "name": "Standup M-Set Basic Small Ship Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44015,
+      "name": "Standup M-Set Basic Small Ship Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44016,
+      "name": "Standup M-Set Basic Small Ship Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44017,
+      "name": "Standup M-Set Basic Small Ship Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44018,
+      "name": "Standup M-Set Basic Medium Ship Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44019,
+      "name": "Standup M-Set Basic Medium Ship Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44020,
+      "name": "Standup M-Set Basic Medium Ship Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44021,
+      "name": "Standup M-Set Basic Medium Ship Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44022,
+      "name": "Standup M-Set Basic Large Ship Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44023,
+      "name": "Standup M-Set Basic Large Ship Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44024,
+      "name": "Standup M-Set Basic Large Ship Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44025,
+      "name": "Standup M-Set Basic Large Ship Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44026,
+      "name": "Standup M-Set Advanced Small Ship Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44027,
+      "name": "Standup M-Set Advanced Small Ship Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44028,
+      "name": "Standup M-Set Advanced Small Ship Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44029,
+      "name": "Standup M-Set Advanced Small Ship Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44030,
+      "name": "Standup M-Set Advanced Medium Ship Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44031,
+      "name": "Standup M-Set Advanced Medium Ship Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44032,
+      "name": "Standup M-Set Advanced Medium Ship Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44033,
+      "name": "Standup M-Set Advanced Medium Ship Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44034,
+      "name": "Standup M-Set Advanced Large Ship Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44035,
+      "name": "Standup M-Set Advanced Large Ship Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44036,
+      "name": "Standup M-Set Advanced Large Ship Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44037,
+      "name": "Standup M-Set Advanced Large Ship Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_large"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44038,
+      "name": "Standup M-Set Advanced Component Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44039,
+      "name": "Standup M-Set Advanced Component Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44040,
+      "name": "Standup M-Set Advanced Component Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44041,
+      "name": "Standup M-Set Advanced Component Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44042,
+      "name": "Standup M-Set Basic Capital Component Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44043,
+      "name": "Standup M-Set Basic Capital Component Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44044,
+      "name": "Standup M-Set Basic Capital Component Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44045,
+      "name": "Standup M-Set Basic Capital Component Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44046,
+      "name": "Standup M-Set Structure Manufacturing Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44047,
+      "name": "Standup M-Set Structure Manufacturing Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44048,
+      "name": "Standup M-Set Structure Manufacturing Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44049,
+      "name": "Standup M-Set Structure Manufacturing Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44050,
+      "name": "Standup M-Set Invention Cost Optimization I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44051,
+      "name": "Standup M-Set Invention Cost Optimization II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44052,
+      "name": "Standup M-Set Invention Accelerator I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44053,
+      "name": "Standup M-Set Invention Accelerator II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44062,
+      "name": "Standup M-Set Blueprint Copy Cost Optimization I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44063,
+      "name": "Standup M-Set Blueprint Copy Cost Optimization II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44064,
+      "name": "Standup M-Set Blueprint Copy Accelerator I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44065,
+      "name": "Standup M-Set Blueprint Copy Accelerator II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44074,
+      "name": "Standup L-Set Advanced Medium Ship Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44075,
+      "name": "Standup L-Set Advanced Medium Ship Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44076,
+      "name": "Standup L-Set Advanced Small Ship Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44077,
+      "name": "Standup L-Set Advanced Small Ship Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t2_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44078,
+      "name": "Standup L-Set Basic Capital Component Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44079,
+      "name": "Standup L-Set Basic Capital Component Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44080,
+      "name": "Standup L-Set Basic Medium Ship Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44081,
+      "name": "Standup L-Set Basic Medium Ship Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_medium"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44082,
+      "name": "Standup L-Set Basic Small Ship Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44083,
+      "name": "Standup L-Set Basic Small Ship Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_t1_small"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44084,
+      "name": "Standup L-Set Blueprint Copy Optimization I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44085,
+      "name": "Standup L-Set Blueprint Copy Optimization II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "copy",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44086,
+      "name": "Standup L-Set Capital Ship Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "ships_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44087,
+      "name": "Standup L-Set Capital Ship Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "ships_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44088,
+      "name": "Standup L-Set Drone and Fighter Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44089,
+      "name": "Standup L-Set Drone and Fighter Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "drones"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44090,
+      "name": "Standup L-Set Invention Optimization I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44091,
+      "name": "Standup L-Set Invention Optimization II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "invention",
+      "families": [],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44094,
+      "name": "Standup L-Set Structure Manufacturing Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 44095,
+      "name": "Standup L-Set Structure Manufacturing Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "manufacturing",
+      "families": [
+        "structures"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 45544,
+      "name": "Standup M-Set Thukker Basic Capital Component Manufacturing Material Efficiency",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 45545,
+      "name": "Standup M-Set Thukker Basic Capital Component Manufacturing Material Efficiency Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 45546,
+      "name": "Standup L-Set Thukker Basic Capital Component Manufacturing Efficiency",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 45547,
+      "name": "Standup L-Set Thukker Basic Capital Component Manufacturing Efficiency Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_capital"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 45548,
+      "name": "Standup XL-Set Thukker Structure and Component Manufacturing Efficiency",
+      "size": "xl",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2",
+        "components_capital",
+        "structures"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 45549,
+      "name": "Standup XL-Set Thukker Structure and Component Manufacturing Efficiency Blueprint",
+      "size": "xl",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2",
+        "components_capital",
+        "structures"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 45640,
+      "name": "Standup M-Set Thukker Advanced Component Manufacturing Material Efficiency",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 45641,
+      "name": "Standup L-Set Thukker Advanced Component Manufacturing Efficiency",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 45642,
+      "name": "Standup M-Set Thukker Advanced Component Manufacturing Material Efficiency Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 45643,
+      "name": "Standup L-Set Thukker Advanced Component Manufacturing Efficiency Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "manufacturing",
+      "families": [
+        "components_t2"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46484,
+      "name": "Standup M-Set Composite Reactor Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46485,
+      "name": "Standup M-Set Composite Reactor Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46486,
+      "name": "Standup M-Set Composite Reactor Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46487,
+      "name": "Standup M-Set Composite Reactor Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46488,
+      "name": "Standup M-Set Hybrid Reactor Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46489,
+      "name": "Standup M-Set Hybrid Reactor Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46490,
+      "name": "Standup M-Set Hybrid Reactor Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "hybrid"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46491,
+      "name": "Standup M-Set Hybrid Reactor Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "hybrid"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46492,
+      "name": "Standup M-Set Biochemical Reactor Time Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "biochemical"
+      ],
+      "me": 0,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46493,
+      "name": "Standup M-Set Biochemical Reactor Time Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "biochemical"
+      ],
+      "me": 0,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46494,
+      "name": "Standup M-Set Biochemical Reactor Material Efficiency I",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "biochemical"
+      ],
+      "me": 2,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46495,
+      "name": "Standup M-Set Biochemical Reactor Material Efficiency II",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "biochemical"
+      ],
+      "me": 2.4,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46496,
+      "name": "Standup L-Set Reactor Efficiency I",
+      "size": "l",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 2,
+      "te": 20,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46497,
+      "name": "Standup L-Set Reactor Efficiency II",
+      "size": "l",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 2.4,
+      "te": 24,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46506,
+      "name": "Standup M-Set Composite Reactor Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46507,
+      "name": "Standup M-Set Composite Reactor Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46508,
+      "name": "Standup M-Set Composite Reactor Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46509,
+      "name": "Standup M-Set Composite Reactor Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46510,
+      "name": "Standup M-Set Hybrid Reactor Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46511,
+      "name": "Standup M-Set Hybrid Reactor Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46512,
+      "name": "Standup M-Set Hybrid Reactor Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46513,
+      "name": "Standup M-Set Hybrid Reactor Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46514,
+      "name": "Standup M-Set Biochemical Reactor Time Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "biochemical"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46515,
+      "name": "Standup M-Set Biochemical Reactor Time Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "biochemical"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46516,
+      "name": "Standup M-Set Biochemical Reactor Material Efficiency I Blueprint",
+      "size": "m",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "biochemical"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46517,
+      "name": "Standup M-Set Biochemical Reactor Material Efficiency II Blueprint",
+      "size": "m",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "biochemical"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46518,
+      "name": "Standup L-Set Reactor Efficiency I Blueprint",
+      "size": "l",
+      "tier": "t1",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    },
+    {
+      "typeId": 46519,
+      "name": "Standup L-Set Reactor Efficiency II Blueprint",
+      "size": "l",
+      "tier": "t2",
+      "activity": "reaction",
+      "families": [
+        "composite",
+        "biochemical",
+        "hybrid"
+      ],
+      "me": 0,
+      "te": 0,
+      "jobCost": 0
+    }
+  ]
+}
