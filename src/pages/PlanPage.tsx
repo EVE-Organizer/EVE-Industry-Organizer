@@ -37,15 +37,14 @@ import { pickHubMaps, sanitizeBuyPriceMap } from '@/lib/hubPriceSanity'
 import type { PlanBuyPriceSource } from '@/lib/planBuyPrices'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/lib/planTreeLines'
-import { readyHoursByProductId as readyHoursByProductIdFromJobs } from '@/lib/planScheduler'
+import { windowHoursFromJobs } from '@/lib/planScheduler'
 import { buildManufactureDisplayRows } from '@/lib/planManufactureDisplay'
 import {
   applyRootEntryPatch,
-  applyRootOverallReadyHours,
   createSyncedPlanRootEntry,
   resolveRunsFromPatch,
   rootJobTimeHours,
-  runsForOverallReadyHours,
+  scaleRunsToSlotDeadline,
   syncRootEntry,
 } from '@/lib/rootRunsDuration'
 import { createPlanRootId } from '@/services/sync/types'
@@ -594,11 +593,6 @@ export function PlanPage() {
     return withTreeLineMeta([...rootRows, ...subRows])
   }, [activeTemplate, planNodesByProductId, blueprints, typeMap, blueprintTypeIdByProduct, activeSettings])
 
-  const readyHoursByProductId = useMemo(
-    () => readyHoursByProductIdFromJobs(plan.productionJobs),
-    [plan.productionJobs],
-  )
-
   const manufactureRows = useMemo(() => {
     if (!activeTemplate) return []
     return buildManufactureDisplayRows(
@@ -884,6 +878,43 @@ export function PlanPage() {
     [plan.nodes],
   )
 
+  const applyManufacturingDeadline = useCallback(
+    (deadlineHours: number) => {
+      const template = selectedPlanTemplateFromStore()
+      if (!template || deadlineHours <= 0) return
+      const scheduledHours = windowHoursFromJobs(plan.productionJobs)
+      let roots = template.roots
+      const nodeOverrides = { ...template.nodeOverrides }
+      if (scheduledHours > deadlineHours + 1 / 3600) {
+        roots = template.roots.map((r) => {
+          const bp = getBlueprintForProduct(blueprints, r.productTypeId)
+          const runs = scaleRunsToSlotDeadline(r.runs, scheduledHours, deadlineHours)
+          return applyRootEntryPatch(
+            r,
+            { runs },
+            bp,
+            storeSettings,
+            template.nodeOverrides[r.productTypeId],
+          )
+        })
+        for (const node of plan.nodes) {
+          if (node.mode !== 'build' || node.isRoot) continue
+          if (nodeOverrides[node.productTypeId]?.runs == null) continue
+          nodeOverrides[node.productTypeId] = {
+            ...nodeOverrides[node.productTypeId],
+            runs: scaleRunsToSlotDeadline(node.runs, scheduledHours, deadlineHours),
+          }
+        }
+      }
+      updatePlanTemplate(template.id, {
+        roots,
+        nodeOverrides,
+        productionWindowHours: deadlineHours,
+      })
+    },
+    [plan.productionJobs, plan.nodes, blueprints, storeSettings, updatePlanTemplate],
+  )
+
   const addRoot = (productTypeId: number) => {
     if (isSharedView) return
     const templateId = useAppStore.getState().selectedPlanTemplateId
@@ -978,7 +1009,7 @@ export function PlanPage() {
               { label: 'Roots', value: String(activeTemplate.roots.length) },
               { label: 'Nodes', value: String(plan.nodes.length) },
               { label: 'Slots', value: String(slots) },
-              { label: 'Timeline', value: `${formatDecimal(plan.windowHours, 1)}h` },
+              { label: 'Timeline', value: `${formatDecimal(plan.productionWindowHours, 1)}h` },
             ]}
             actions={
               isSharedView ? null : (
@@ -1073,7 +1104,6 @@ export function PlanPage() {
                 rows={buildRows}
                 profitByRootId={profitByRootId}
                 readOnly={isSharedView}
-                readyHoursByProductId={readyHoursByProductId}
                 planWindowHours={plan.productionWindowHours}
                 onOpenSetup={setSetupDetailRootId}
                 onOpenProfit={setProfitDetailRootId}
@@ -1086,23 +1116,17 @@ export function PlanPage() {
                         const template = selectedPlanTemplateFromStore()
                         if (!template) return
 
+                        if (patch.overallDurationHours != null) {
+                          applyManufacturingDeadline(patch.overallDurationHours)
+                          return
+                        }
+
                         if (rootId) {
                           updatePlanTemplate(template.id, {
                             roots: template.roots.map((r) => {
                               if (r.id !== rootId) return r
                               const bp = getBlueprintForProduct(blueprints, r.productTypeId)
                               const override = template.nodeOverrides[r.productTypeId]
-                              if (patch.overallDurationHours != null && bp) {
-                                return applyRootOverallReadyHours(
-                                  r,
-                                  patch.overallDurationHours,
-                                  readyHoursByProductId.get(r.productTypeId) ?? null,
-                                  rootJobTimeHours(r, bp, storeSettings, override),
-                                  bp,
-                                  storeSettings,
-                                  override,
-                                )
-                              }
                               return applyRootEntryPatch(r, patch, bp, storeSettings, override)
                             }),
                           })
@@ -1112,18 +1136,7 @@ export function PlanPage() {
                         const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
                         if (!node) return
                         const bp = getBlueprintForProduct(blueprints, productTypeId)
-                        const runs =
-                          patch.overallDurationHours != null && bp
-                            ? runsForOverallReadyHours({
-                                targetReadyHours: patch.overallDurationHours,
-                                currentReadyHours: readyHoursByProductId.get(productTypeId) ?? null,
-                                currentJobHours: node.jobTimeSeconds / 3600,
-                                currentRuns: node.runs,
-                                blueprint: bp,
-                                settings: storeSettings,
-                                meTeOverride: template.nodeOverrides[productTypeId],
-                              })
-                            : resolveRunsFromPatch(node.runs, patch, bp, storeSettings)
+                        const runs = resolveRunsFromPatch(node.runs, patch, bp, storeSettings)
 
                         updatePlanTemplate(template.id, {
                           nodeOverrides: {
@@ -1136,52 +1149,7 @@ export function PlanPage() {
                         })
                       }
                 }
-                onFitRunsToOverall={
-                  isSharedView
-                    ? undefined
-                    : (targets) => {
-                        const template = selectedPlanTemplateFromStore()
-                        if (!template) return
-                        let roots = template.roots
-                        const nodeOverrides = { ...template.nodeOverrides }
-                        for (const target of targets) {
-                          const bp = getBlueprintForProduct(blueprints, target.productTypeId)
-                          if (!bp) continue
-                          const override = nodeOverrides[target.productTypeId]
-                          if (target.rootId) {
-                            roots = roots.map((r) =>
-                              r.id === target.rootId
-                                ? applyRootOverallReadyHours(
-                                    r,
-                                    target.targetReadyHours,
-                                    readyHoursByProductId.get(r.productTypeId) ?? null,
-                                    target.jobHours,
-                                    bp,
-                                    storeSettings,
-                                    override,
-                                  )
-                                : r,
-                            )
-                          } else {
-                            const node = plan.nodes.find((n) => n.productTypeId === target.productTypeId)
-                            if (!node) continue
-                            nodeOverrides[target.productTypeId] = {
-                              ...nodeOverrides[target.productTypeId],
-                              runs: runsForOverallReadyHours({
-                                targetReadyHours: target.targetReadyHours,
-                                currentReadyHours: readyHoursByProductId.get(target.productTypeId) ?? null,
-                                currentJobHours: target.jobHours,
-                                currentRuns: target.currentRuns,
-                                blueprint: bp,
-                                settings: storeSettings,
-                                meTeOverride: override,
-                              }),
-                            }
-                          }
-                        }
-                        updatePlanTemplate(template.id, { roots, nodeOverrides })
-                      }
-                }
+                onFitRunsToOverall={isSharedView ? undefined : applyManufacturingDeadline}
                 onSetAllDuration={
                   isSharedView
                     ? undefined
@@ -1189,39 +1157,7 @@ export function PlanPage() {
                         const template = selectedPlanTemplateFromStore()
                         if (!template) return
                         if (mode === 'overall') {
-                          const roots = template.roots.map((r) => {
-                            const bp = getBlueprintForProduct(blueprints, r.productTypeId)
-                            const override = template.nodeOverrides[r.productTypeId]
-                            return applyRootOverallReadyHours(
-                              r,
-                              hours,
-                              readyHoursByProductId.get(r.productTypeId) ?? null,
-                              bp ? rootJobTimeHours(r, bp, storeSettings, override) : r.productionDurationHours,
-                              bp,
-                              storeSettings,
-                              override,
-                            )
-                          })
-                          const nodeOverrides = { ...template.nodeOverrides }
-                          for (const node of plan.nodes) {
-                            if (node.mode !== 'build' || node.isRoot) continue
-                            const bp = getBlueprintForProduct(blueprints, node.productTypeId)
-                            if (!bp) continue
-                            const runs = runsForOverallReadyHours({
-                              targetReadyHours: hours,
-                              currentReadyHours: readyHoursByProductId.get(node.productTypeId) ?? null,
-                              currentJobHours: node.jobTimeSeconds / 3600,
-                              currentRuns: node.runs,
-                              blueprint: bp,
-                              settings: storeSettings,
-                              meTeOverride: nodeOverrides[node.productTypeId],
-                            })
-                            nodeOverrides[node.productTypeId] = {
-                              ...nodeOverrides[node.productTypeId],
-                              runs,
-                            }
-                          }
-                          updatePlanTemplate(template.id, { roots, nodeOverrides })
+                          applyManufacturingDeadline(hours)
                           return
                         }
                         const patch = { productionDurationHours: hours }
@@ -1293,7 +1229,7 @@ export function PlanPage() {
           </section>
 
           <PlanTimelinePanel
-            windowHours={plan.windowHours}
+            windowHours={plan.productionWindowHours}
             nodes={plan.nodes}
             jobs={plan.jobs}
             slots={slots}

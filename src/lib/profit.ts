@@ -185,7 +185,7 @@ export function formatDurationHms(seconds: number): string {
   return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 }
 
-/** Parse H:MM:SS, M:SS, or plain seconds into total seconds. Returns null when invalid. */
+/** Parse H:MM:SS, M:SS, or a plain hour count (16 = 16h) into total seconds. */
 export function parseDurationHms(input: string): number | null {
   const trimmed = input.trim()
   if (!trimmed || trimmed === '—') return null
@@ -209,10 +209,11 @@ export function parseDurationHms(input: string): number | null {
     return total > 0 ? total : null
   }
 
-  const plain = Number(trimmed)
-  if (Number.isFinite(plain) && plain > 0) return Math.floor(plain)
-
-  return null
+  if (!/^\d+(\.\d+)?$/.test(trimmed)) return null
+  const hours = Number(trimmed)
+  if (!Number.isFinite(hours) || hours <= 0) return null
+  const total = Math.round(hours * 3_600)
+  return total > 0 ? total : null
 }
 
 function trimCompactDecimal(value: number, decimals: number): string {

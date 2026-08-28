@@ -85,11 +85,13 @@ describe('formatDurationHms', () => {
 })
 
 describe('parseDurationHms', () => {
-  it('parses H:MM:SS and M:SS', () => {
+  it('parses H:MM:SS, M:SS, and a plain hour count', () => {
     expect(parseDurationHms('0:57:36')).toBe(3_456)
     expect(parseDurationHms('1:01:05')).toBe(3_665)
     expect(parseDurationHms('57:36')).toBe(3_456)
-    expect(parseDurationHms('3600')).toBe(3_600)
+    expect(parseDurationHms('16')).toBe(16 * 3_600)
+    expect(parseDurationHms('168')).toBe(168 * 3_600)
+    expect(parseDurationHms('16.5')).toBe(Math.round(16.5 * 3_600))
   })
 
   it('returns null for invalid input', () => {

@@ -43,21 +43,11 @@ interface PlanRootListProps {
     patch: { runs?: number; productionDurationHours?: number; overallDurationHours?: number },
   ) => void
   onSetAllDuration?: (hours: number, mode: 'production' | 'overall') => void
-  onFitRunsToOverall?: (
-    targets: Array<{
-      rootId?: string
-      productTypeId: number
-      targetReadyHours: number
-      jobHours: number
-      currentRuns: number
-    }>,
-  ) => void
+  onFitRunsToOverall?: (deadlineHours: number) => void
   onDuplicate?: (rootId: string) => void
   onToggleEnabled?: (rootId: string, enabled: boolean) => void
   onRemove?: (rootId: string) => void
   onReorder?: (fromRootId: string, toRootId: string) => void
-  /** Clock time until each product is ready (timeline finish). */
-  readyHoursByProductId?: Map<number, number>
   planWindowHours?: number
 }
 
@@ -165,7 +155,7 @@ function DurationInput({
       type="text"
       inputMode="numeric"
       className="input input-bordered input-xs w-full tabular-nums text-info"
-      placeholder="H:MM:SS"
+      placeholder="hours"
       aria-label="Duration"
       value={display}
       onChange={(e) => setDraft(e.target.value)}
@@ -201,7 +191,7 @@ function SetAllDurationInput({ onCommit }: { onCommit: (hours: number) => void }
       type="text"
       inputMode="numeric"
       className="input input-bordered input-xs w-[6.25rem] tabular-nums text-info"
-      placeholder="H:MM:SS"
+      placeholder="hours"
       aria-label="Set duration for all jobs"
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
@@ -314,7 +304,6 @@ export function PlanRootList({
   onToggleEnabled,
   onRemove,
   onReorder,
-  readyHoursByProductId,
   planWindowHours,
 }: PlanRootListProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
@@ -385,18 +374,12 @@ export function PlanRootList({
                 type="button"
                 className={`btn btn-ghost btn-xs join-item ${overallMode ? 'btn-active' : ''}`}
                 onClick={() => {
-                  if (!readOnly && onFitRunsToOverall) {
-                    onFitRunsToOverall(
-                      rows
-                        .filter((row) => row.enabled !== false)
-                        .map((row) => ({
-                          rootId: row.rootId,
-                          productTypeId: row.productTypeId,
-                          targetReadyHours: row.jobTimeHours,
-                          jobHours: row.jobTimeHours,
-                          currentRuns: row.runs,
-                        })),
+                  if (!readOnly && onFitRunsToOverall && enabledRoots.length > 0) {
+                    const deadlineHours = enabledRoots.reduce(
+                      (max, row) => Math.max(max, row.jobTimeHours),
+                      0,
                     )
+                    if (deadlineHours > 0) onFitRunsToOverall(deadlineHours)
                   }
                   setDurationMode('overall')
                 }}
@@ -409,7 +392,7 @@ export function PlanRootList({
                 <Tooltip
                   text={
                     overallMode
-                      ? 'Sets this clock time as the finish deadline for every job. Runs shrink to fit; they do not grow.'
+                      ? 'Manufacturing slot deadline. Sub-builds that would push the plan past this clock lose runs. The window stays this long.'
                       : 'Applies this job timer to every blueprint. Runs update to match.'
                   }
                   placement="bottom"
@@ -447,7 +430,7 @@ export function PlanRootList({
                 <Tooltip
                   text={
                     overallMode
-                      ? 'Finish deadline for this product from manufacture and reaction jobs only. Copy, invention, and other research are left out. Runs shrink to this clock.'
+                      ? 'Manufacturing slot deadline for the whole chain. Copy, invention, and other research are left out.'
                       : 'This job\'s industry timer (hours:minutes:seconds)'
                   }
                   placement="top"
@@ -583,7 +566,7 @@ export function PlanRootList({
                       <span className="tabular-nums text-sm whitespace-nowrap">
                         {formatDurationHms(
                           (overallMode
-                            ? (readyHoursByProductId?.get(row.productTypeId) ?? row.jobTimeHours)
+                            ? (planWindowHours ?? row.jobTimeHours)
                             : row.jobTimeHours) * 3600,
                         )}
                       </span>
@@ -592,7 +575,7 @@ export function PlanRootList({
                         key={`${rowKey}-${durationMode}`}
                         hours={
                           overallMode
-                            ? (readyHoursByProductId?.get(row.productTypeId) ?? row.jobTimeHours)
+                            ? (planWindowHours ?? row.jobTimeHours)
                             : row.jobTimeHours
                         }
                         onCommit={(hours) =>
@@ -711,7 +694,7 @@ export function PlanRootList({
       )}
       <p className="text-[10px] text-base-content/40 px-4 pb-3 pt-2 sm:px-5">
         {overallMode
-          ? 'Overall is the finish deadline for the manufacture and reaction chain, including sub-builds. Copy, invention, and other research are not counted. Runs shrink to that clock; they do not grow.'
+          ? 'Overall is the manufacturing slot deadline. Sub-builds that would push past this clock lose runs. The schedule keeps this window. Copy, invention, and other research are not counted.'
           : 'Production is this job\'s industry timer. Editing duration or runs keeps the other field in sync. Set all applies the same timer to every job.'}
       </p>
     </PlanChainSection>

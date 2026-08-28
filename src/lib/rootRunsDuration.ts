@@ -167,6 +167,17 @@ export function runsForOverallReadyHours(input: {
   return Math.min(Math.max(1, currentRuns), next)
 }
 
+/** Shrink runs so a chain that overruns `deadlineHours` fits the manufacturing slot. Never grows. */
+export function scaleRunsToSlotDeadline(
+  currentRuns: number,
+  currentWindowHours: number,
+  deadlineHours: number,
+): number {
+  if (currentRuns <= 1 || deadlineHours <= 0) return Math.max(1, currentRuns)
+  if (currentWindowHours <= deadlineHours + 1 / 3600) return currentRuns
+  return Math.max(1, Math.floor(currentRuns * (deadlineHours / currentWindowHours)))
+}
+
 /** Wall-clock hours to finish `runs` manufacturing runs (matches in-game job timer × waves). */
 export function durationHoursFromRuns(
   blueprint: BlueprintInfo,

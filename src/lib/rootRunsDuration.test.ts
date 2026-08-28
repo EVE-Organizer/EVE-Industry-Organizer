@@ -5,6 +5,7 @@ import {
   inGameDurationHoursFromRuns,
   inGameRunsFromDurationHours,
   runsForOverallReadyHours,
+  scaleRunsToSlotDeadline,
   jobTimeSecondsForRuns,
   resolveRunsFromPatch,
   runsForDemand,
@@ -152,6 +153,16 @@ describe('runsForOverallReadyHours', () => {
     })
     expect(next).toBe(currentRuns)
     expect(next).toBeLessThan(inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 168))
+  })
+})
+
+describe('scaleRunsToSlotDeadline', () => {
+  it('shrinks runs when the chain overruns the manufacturing slot', () => {
+    expect(scaleRunsToSlotDeadline(1000, 2063, 168)).toBe(Math.floor(1000 * (168 / 2063)))
+  })
+
+  it('leaves runs alone when the chain already finishes inside the deadline', () => {
+    expect(scaleRunsToSlotDeadline(100, 22, 168)).toBe(100)
   })
 })
 
