@@ -10,16 +10,20 @@ type TimelineTab = 'manufacturing' | 'research'
 
 export function PlanTimelinePanel({
   windowHours,
+  researchWindowHours,
   nodes,
   jobs,
+  productionJobs,
   slots,
   scienceSlots = 1,
   blueprintTypeIdByProduct,
   embedded = false,
 }: {
   windowHours: number
+  researchWindowHours?: number
   nodes: PlanNode[]
   jobs: ScheduledPlanJob[]
+  productionJobs?: ScheduledPlanJob[]
   slots: number
   scienceSlots?: number
   blueprintTypeIdByProduct: Map<number, number>
@@ -27,14 +31,17 @@ export function PlanTimelinePanel({
 }) {
   const [tab, setTab] = useState<TimelineTab>('manufacturing')
   const [focusedSlotIndex, setFocusedSlotIndex] = useState<number | null>(null)
+  const scienceWindowHours = researchWindowHours ?? windowHours
+  const mfgJobs = productionJobs ?? jobs
+  const axisHours = tab === 'research' ? scienceWindowHours : windowHours
 
   const mfgLanes = useMemo(
-    () => buildPlanGanttLanes(jobs, nodes, slots, windowHours, 'manufacturing'),
-    [jobs, nodes, slots, windowHours],
+    () => buildPlanGanttLanes(mfgJobs, nodes, slots, windowHours, 'manufacturing'),
+    [mfgJobs, nodes, slots, windowHours],
   )
   const scienceLanes = useMemo(
-    () => buildPlanGanttLanes(jobs, nodes, scienceSlots, windowHours, 'science'),
-    [jobs, nodes, scienceSlots, windowHours],
+    () => buildPlanGanttLanes(jobs, nodes, scienceSlots, scienceWindowHours, 'science'),
+    [jobs, nodes, scienceSlots, scienceWindowHours],
   )
 
   const activePool = tab === 'research' ? 'science' : 'manufacturing'
@@ -67,22 +74,22 @@ export function PlanTimelinePanel({
   }, [])
 
   const formatTick = useCallback(
-    (ratio: number) => formatPlanGanttTick(ratio, windowHours),
-    [windowHours],
+    (ratio: number) => formatPlanGanttTick(ratio, axisHours),
+    [axisHours],
   )
 
   const formatScrub = useCallback(
-    (ratio: number) => formatPlanScrubLabel(ratio, windowHours),
-    [windowHours],
+    (ratio: number) => formatPlanScrubLabel(ratio, axisHours),
+    [axisHours],
   )
 
   const formatBarRange = useCallback(
     (bar: { start: number; end: number; duration: number }) => {
-      const startHour = bar.start * windowHours
-      const endHour = bar.end * windowHours
-      return `${formatPlanGanttTick(startHour / windowHours, windowHours)} – ${formatPlanGanttTick(endHour / windowHours, windowHours)} · ${formatDecimal(bar.duration, 1)}h`
+      const startHour = bar.start * axisHours
+      const endHour = bar.end * axisHours
+      return `${formatPlanGanttTick(startHour / axisHours, axisHours)} – ${formatPlanGanttTick(endHour / axisHours, axisHours)} · ${formatDecimal(bar.duration, 1)}h`
     },
-    [windowHours],
+    [axisHours],
   )
 
   const formatBarMeta = useCallback((bar: { meta?: Record<string, unknown> }) => {
@@ -165,12 +172,16 @@ export function PlanTimelinePanel({
       <div className="plan-timeline__hero">
         <div className="plan-timeline__hero-top">
           <UiTooltip
-            text="Hour when the last scheduled job on this plan finishes, after packing work onto manufacturing and research slots."
+            text={
+              tab === 'research'
+                ? 'Hour when the last copy or invention job finishes.'
+                : 'Hour when the last manufacture or reaction job finishes. Copy and invention are on the Research tab.'
+            }
             placement="bottom"
           >
             <p className="plan-timeline__finish">
               Finishes in{' '}
-              <span className="plan-timeline__finish-value">{formatDecimal(windowHours, 1)}h</span>
+              <span className="plan-timeline__finish-value">{formatDecimal(axisHours, 1)}h</span>
             </p>
           </UiTooltip>
           {embedded ? tabs : null}

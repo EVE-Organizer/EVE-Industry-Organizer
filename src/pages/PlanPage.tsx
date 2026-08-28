@@ -1225,8 +1225,10 @@ export function PlanPage() {
 
           <PlanTimelinePanel
             windowHours={plan.productionWindowHours}
+            researchWindowHours={plan.windowHours}
             nodes={plan.nodes}
             jobs={plan.jobs}
+            productionJobs={plan.productionJobs}
             slots={slots}
             scienceSlots={plan.scienceSlots}
             blueprintTypeIdByProduct={blueprintTypeIdByProduct}

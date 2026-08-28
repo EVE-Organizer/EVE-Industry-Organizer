@@ -21,7 +21,9 @@ export function buildPlanGanttLanes(
   const rootById = new Map(nodes.map((n) => [n.productTypeId, n.isRoot]))
   const slots = Math.max(1, slotCount)
   const span = Math.max(windowHours, 1)
-  const poolJobs = jobs.filter((j) => (j.pool ?? 'manufacturing') === pool)
+  const poolJobs = jobs.filter(
+    (j) => (j.pool ?? 'manufacturing') === pool && j.startHour < span,
+  )
 
   const bySlot = new Map<number, ScheduledPlanJob[]>()
   for (let s = 0; s < slots; s++) bySlot.set(s, [])
