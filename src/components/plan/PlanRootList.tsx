@@ -41,6 +41,7 @@ interface PlanRootListProps {
     productTypeId: number,
     patch: { runs?: number; productionDurationHours?: number },
   ) => void
+  onSetAllDuration?: (productionDurationHours: number) => void
   onDuplicate?: (rootId: string) => void
   onRemove?: (rootId: string) => void
   onReorder?: (fromRootId: string, toRootId: string) => void
@@ -171,6 +172,40 @@ function DurationInput({
   )
 }
 
+function SetAllDurationInput({ onCommit }: { onCommit: (hours: number) => void }) {
+  const [draft, setDraft] = useState('')
+
+  function commit() {
+    const parsedSeconds = parseDurationHms(draft)
+    setDraft('')
+    if (parsedSeconds == null || parsedSeconds <= 0) return
+    onCommit(parsedSeconds / 3600)
+  }
+
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      className="input input-bordered input-xs w-[6.25rem] tabular-nums text-info"
+      placeholder="H:MM:SS"
+      aria-label="Set duration for all jobs"
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          commit()
+        }
+        if (e.key === 'Escape') {
+          setDraft('')
+          e.currentTarget.blur()
+        }
+      }}
+    />
+  )
+}
+
 function ProductCell({
   row,
   expanded,
@@ -259,6 +294,7 @@ export function PlanRootList({
   onOpenMeTe,
   readOnly = false,
   onChange,
+  onSetAllDuration,
   onDuplicate,
   onRemove,
   onReorder,
@@ -307,7 +343,22 @@ export function PlanRootList({
       embedded
       actions={
         rows.length > 0 ? (
-          <PlanSectionExpandActions onExpandAll={expandAll} onCollapseAll={collapseAll} />
+          <>
+            {onSetAllDuration && !readOnly ? (
+              <label className="flex items-center gap-1.5 mr-1">
+                <Tooltip
+                  text="Applies this job timer to every blueprint. Runs update to match."
+                  placement="bottom"
+                >
+                  <span className="text-[11px] font-normal normal-case tracking-normal opacity-55 whitespace-nowrap cursor-help border-b border-dotted border-current/40">
+                    Set all
+                  </span>
+                </Tooltip>
+                <SetAllDurationInput onCommit={onSetAllDuration} />
+              </label>
+            ) : null}
+            <PlanSectionExpandActions onExpandAll={expandAll} onCollapseAll={collapseAll} />
+          </>
         ) : undefined
       }
     >
@@ -557,7 +608,7 @@ export function PlanRootList({
       )}
       <p className="text-[10px] text-base-content/40 px-4 pb-3 pt-2 sm:px-5">
         Duration matches the in-game industry timer. Editing duration or runs keeps the other field in
-        sync.
+        sync. Set all applies the same timer to every job.
       </p>
     </PlanChainSection>
   )

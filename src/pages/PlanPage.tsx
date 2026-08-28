@@ -1124,6 +1124,43 @@ export function PlanPage() {
                         })
                       }
                 }
+                onSetAllDuration={
+                  isSharedView
+                    ? undefined
+                    : (productionDurationHours) => {
+                        const template = selectedPlanTemplateFromStore()
+                        if (!template) return
+                        const patch = { productionDurationHours }
+                        const roots = template.roots.map((r) => {
+                          const bp = getBlueprintForProduct(blueprints, r.productTypeId)
+                          return applyRootEntryPatch(
+                            r,
+                            patch,
+                            bp,
+                            storeSettings,
+                            undefined,
+                            template.nodeOverrides[r.productTypeId],
+                          )
+                        })
+                        const nodeOverrides = { ...template.nodeOverrides }
+                        for (const node of plan.nodes) {
+                          if (node.mode !== 'build' || node.isRoot) continue
+                          const bp = getBlueprintForProduct(blueprints, node.productTypeId)
+                          const runs = resolveRunsFromPatch(
+                            node.runs,
+                            patch,
+                            bp,
+                            storeSettings,
+                            node.concurrentCopies,
+                          )
+                          nodeOverrides[node.productTypeId] = {
+                            ...nodeOverrides[node.productTypeId],
+                            runs,
+                          }
+                        }
+                        updatePlanTemplate(template.id, { roots, nodeOverrides })
+                      }
+                }
                 onDuplicate={
                   isSharedView
                     ? undefined
