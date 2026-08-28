@@ -4,11 +4,14 @@ import {
   manufacturingFacilityDetail,
   migrateManufacturingRigs,
   normalizeReactionFacility,
+  normalizeScienceFacility,
   reactionFacilityDetail,
   resolveManufacturingModifiers,
   resolveReactionModifiers,
+  resolveScienceModifiers,
   rigPercentFromCombined,
 } from '@/lib/facilityModifiers'
+import { patchScienceStructureType } from '@/lib/structureSettings'
 import { normalizeGlobalSettings } from '@/services/sync/types'
 import { DEFAULT_SETTINGS } from '@/types'
 
@@ -88,15 +91,63 @@ describe('facilityModifiers', () => {
     expect(settings.manufacturingRigs.familyRigs).toEqual(familyRigs)
   })
 
-  it('applies Tatara hull and composite rig for reactions', () => {
+  it('migrates legacy Tatara family rig tiers into reactorEfficiencyRig', () => {
+    const facility = normalizeReactionFacility(
+      {
+        refineryType: 'tatara',
+        reactionSystemSecurity: 0,
+        familyModifiers: {
+          composite: {
+            meRig: 't1',
+            teRig: 't1',
+            rigMeBonusPercent: 0,
+            rigTeBonusPercent: 0,
+            taxPercent: 0,
+          },
+        },
+      },
+      30000172,
+    )
+    expect(facility.reactorEfficiencyRig).toBe('t1')
+  })
+
+  it('keeps legacy Tatara family rig bonuses when reactorEfficiencyRig is unset', () => {
     const settings = {
       ...DEFAULT_SETTINGS,
+      buildSystemSecurity: 0,
       reactionFacility: {
         ...DEFAULT_SETTINGS.reactionFacility,
         refineryType: 'tatara' as const,
+        reactionSystemSecurity: 0,
         familyModifiers: {
           ...DEFAULT_SETTINGS.reactionFacility.familyModifiers,
-          composite: { rigMeBonusPercent: 2.2, rigTeBonusPercent: 22, taxPercent: 1 },
+          composite: {
+            meRig: 't1',
+            teRig: 't1',
+            rigMeBonusPercent: 0,
+            rigTeBonusPercent: 0,
+            taxPercent: 0,
+          },
+        },
+      },
+    }
+    const detail = reactionFacilityDetail(settings, { reactionFamily: 'composite' })
+    expect(detail.effectiveMeBonusPercent).toBeCloseTo(2.2, 5)
+    expect(detail.effectiveTeBonusPercent).toBeCloseTo(41.5, 1)
+  })
+
+  it('applies Tatara hull and L-Set reactor efficiency rig', () => {
+    const settings = {
+      ...DEFAULT_SETTINGS,
+      buildSystemSecurity: 0,
+      reactionFacility: {
+        ...DEFAULT_SETTINGS.reactionFacility,
+        refineryType: 'tatara' as const,
+        reactionSystemSecurity: 0,
+        reactorEfficiencyRig: 't1' as const,
+        familyModifiers: {
+          ...DEFAULT_SETTINGS.reactionFacility.familyModifiers,
+          composite: { rigMeBonusPercent: 0, rigTeBonusPercent: 0, taxPercent: 1 },
         },
       },
     }
@@ -173,5 +224,65 @@ describe('facilityModifiers', () => {
     expect(settings.reactionFacility.hullTeBonusPercent).toBe(25)
     expect(settings.reactionFacility.familyModifiers.composite.rigTeBonusPercent).toBe(0)
     expect(settings.reactionFacility.familyModifiers.composite.taxPercent).toBe(2)
+  })
+
+  it('resolves Sotiyo science hull TE and job cost without ME', () => {
+    const facility = {
+      ...DEFAULT_SETTINGS.copyFacility,
+      structureType: 'sotiyo' as const,
+    }
+    const mods = resolveScienceModifiers(facility)
+    expect(mods.meBonusPercent).toBe(0)
+    expect(mods.teBonusPercent).toBe(25)
+    expect(mods.jobCostBonusPercent).toBeCloseTo(5, 5)
+  })
+
+  it('scales science T2 TE with cached system security', () => {
+    const mods = resolveScienceModifiers({
+      ...DEFAULT_SETTINGS.copyFacility,
+      structureType: 'raitaru',
+      systemSecurity: 0,
+      teRig: 't2',
+    })
+    expect(mods.teBonusPercent).toBeCloseTo(combineBonusPercent(15, 24 * 2.1), 5)
+  })
+
+  it('uses custom science hull percents and stacks M-Set cost and time rigs', () => {
+    const mods = resolveScienceModifiers({
+      ...DEFAULT_SETTINGS.copyFacility,
+      structureType: 'custom',
+      hullTeBonusPercent: 10,
+      hullJobCostBonusPercent: 2,
+      costRig: 't1',
+      teRig: 't2',
+      taxPercent: 1,
+    })
+    expect(mods.teBonusPercent).toBeCloseTo(combineBonusPercent(10, 24), 5)
+    expect(mods.jobCostBonusPercent).toBeCloseTo(combineBonusPercent(2, 10), 5)
+    expect(mods.taxPercent).toBe(1)
+  })
+
+  it('does not overwrite custom science percents when flipping to custom', () => {
+    const current = {
+      ...DEFAULT_SETTINGS.copyFacility,
+      structureType: 'sotiyo' as const,
+      hullTeBonusPercent: 12,
+      hullJobCostBonusPercent: 4,
+    }
+    const patch = patchScienceStructureType('copyFacility', 'custom', current)
+    expect(patch.copyFacility?.structureType).toBe('custom')
+    expect(patch.copyFacility?.hullTeBonusPercent).toBe(12)
+    expect(patch.copyFacility?.hullJobCostBonusPercent).toBe(4)
+  })
+
+  it('fills missing copy and invention facilities as NPC on normalize', () => {
+    const settings = normalizeGlobalSettings({
+      manufacturingSystemId: 30000172,
+    })
+    expect(settings.copyFacility.structureType).toBe('npc')
+    expect(settings.copyFacility.systemId).toBe(30000172)
+    expect(settings.inventionFacility.structureType).toBe('npc')
+    expect(settings.inventionFacility.systemId).toBe(30000172)
+    expect(normalizeScienceFacility(undefined, 30000172).structureType).toBe('npc')
   })
 })

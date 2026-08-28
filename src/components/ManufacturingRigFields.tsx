@@ -8,6 +8,7 @@ import { DEFAULT_MANUFACTURING_RIGS } from '@/types'
 import { EveImage } from '@/components/EveImage'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
+import { RigEfficiencyHeader, RigMeTeHeaders } from '@/components/RigSelectHeaders'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 import {
   manufacturingRigTierLabel,
@@ -157,6 +158,7 @@ export function ManufacturingRigFields({
         {sections.map((section) => (
           <div key={section.title}>
             <p className="text-[10px] uppercase tracking-wide opacity-50 mb-1">{section.title}</p>
+            {section.rows[0]?.combinedMeTe ? <RigEfficiencyHeader /> : <RigMeTeHeaders />}
             <div className="space-y-1">
               {section.rows.map((row) => {
                 if (row.combinedMeTe) {

@@ -238,11 +238,12 @@ describe('schedulePlanJobs', () => {
       expect(job.pool).toBe('manufacturing')
     }
 
-    const inventJob = scienceJobs.find((j) => j.activity === 'invention')
+    const inventJobs = scienceJobs.filter((j) => j.activity === 'invention')
     const mfgJob = mfgJobs.find((j) => j.productTypeId === productTypeId)
-    expect(inventJob).toBeDefined()
+    expect(inventJobs.length).toBeGreaterThan(0)
     expect(mfgJob).toBeDefined()
-    expect(mfgJob!.startHour).toBeGreaterThanOrEqual(inventJob!.endHour - 1e-6)
+    const lastInventEnd = Math.max(...inventJobs.map((j) => j.endHour))
+    expect(mfgJob!.startHour).toBeGreaterThanOrEqual(lastInventEnd - 1e-6)
 
     const productionOnly = schedulePlanJobs({
       nodes,
@@ -256,6 +257,57 @@ describe('schedulePlanJobs', () => {
     expect(productReadyHours(productionOnly, productTypeId)).toBeLessThan(
       productReadyHours(jobs, productTypeId) ?? 0,
     )
+  })
+
+  it('packs invention attempts across science slots instead of one serial job', () => {
+    const productTypeId = 900
+    const nodes = [
+      mockNode({
+        productTypeId,
+        name: 'T2',
+        isRoot: true,
+        depth: 0,
+        runs: 1,
+        jobTimeSeconds: 3600,
+        outputQty: 1,
+      }),
+    ]
+    const pipeline = {
+      scienceSlots: 2,
+      manufacturingSlots: 1,
+      stages: [
+        {
+          id: `invent-${productTypeId}`,
+          productTypeId,
+          name: 'T2 (invention)',
+          activity: 'invention' as const,
+          pool: 'science' as const,
+          runs: 4,
+          durationHours: 10,
+          dependsOn: [],
+        },
+        {
+          id: `mfg-${productTypeId}`,
+          productTypeId,
+          name: 'T2',
+          activity: 'manufacture' as const,
+          pool: 'manufacturing' as const,
+          runs: 1,
+          durationHours: 1,
+          dependsOn: [`invent-${productTypeId}`],
+        },
+      ],
+    }
+    const jobs = schedulePlanJobs({
+      nodes,
+      slots: 1,
+      scienceSlots: 2,
+      windowHours: 500,
+      pipeline,
+    })
+    const invent = jobs.filter((j) => j.activity === 'invention')
+    expect(invent).toHaveLength(4)
+    expect(Math.max(...invent.map((j) => j.endHour))).toBeCloseTo(20, 5)
   })
 })
 

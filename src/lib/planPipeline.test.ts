@@ -89,6 +89,8 @@ describe('buildPlanPipeline', () => {
     expect(copy!.dependsOn).toEqual([])
     expect(invent!.dependsOn).toEqual([`copy-${productTypeId}`])
     expect(mfg!.dependsOn).toEqual([`copy-${productTypeId}`, `invent-${productTypeId}`])
+    expect(copy!.durationHours).toBeLessThan(1.2)
+    expect(invent!.durationHours).toBeLessThan(0.7)
   })
 
   it('skips pipeline stages for buy-mode nodes', () => {
@@ -164,5 +166,57 @@ describe('buildPlanPipeline', () => {
       activity: 'reaction',
       pool: 'manufacturing',
     })
+  })
+
+  it('applies Sotiyo science TE so copy and invention finish faster than NPC', () => {
+    const productTypeId = 502
+    const blueprints = [
+      mockBlueprint({
+        blueprintTypeId: 15002,
+        productTypeId,
+        tier: 't2',
+        invention: {
+          t1BlueprintTypeId: 14002,
+          datacores: [{ typeId: 11467, quantity: 1 }],
+          runsPerBPC: 10,
+          baseChance: 1,
+          copyTime: 3600,
+          inventionTime: 1800,
+        },
+      }),
+    ]
+    const nodes = [
+      mockNode({
+        productTypeId,
+        name: 'T2 Module',
+        runs: 10,
+        jobTimeSeconds: 7200,
+        unitPrice: 1,
+      }),
+    ]
+    const npc = buildPlanPipeline({
+      nodes,
+      blueprints,
+      settings,
+      scienceSlots: 2,
+      manufacturingSlots: 5,
+    })
+    const sotiyo = buildPlanPipeline({
+      nodes,
+      blueprints,
+      settings: {
+        ...settings,
+        copyFacility: { ...settings.copyFacility, structureType: 'sotiyo' },
+        inventionFacility: { ...settings.inventionFacility, structureType: 'sotiyo' },
+      },
+      scienceSlots: 2,
+      manufacturingSlots: 5,
+    })
+    const npcCopy = npc.stages.find((s) => s.id === `copy-${productTypeId}`)!
+    const sotiyoCopy = sotiyo.stages.find((s) => s.id === `copy-${productTypeId}`)!
+    const npcInvent = npc.stages.find((s) => s.id === `invent-${productTypeId}`)!
+    const sotiyoInvent = sotiyo.stages.find((s) => s.id === `invent-${productTypeId}`)!
+    expect(sotiyoCopy.durationHours).toBeCloseTo(npcCopy.durationHours * 0.75, 5)
+    expect(sotiyoInvent.durationHours).toBeCloseTo(npcInvent.durationHours * 0.75, 5)
   })
 })

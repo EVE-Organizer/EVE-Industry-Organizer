@@ -81,7 +81,7 @@ function StageGroup({
               <th>Step</th>
               <th>Activity</th>
               <th className="text-right">Runs / attempts</th>
-              <th className="text-right">Duration</th>
+              <th className="text-right">Duration / job</th>
               <th>Depends on</th>
             </tr>
           </thead>

@@ -6,6 +6,7 @@ import {
   CommonSettingsSection,
   ManufacturingSettingsSection,
   ReactionFacilitySection,
+  ScienceFacilitySection,
 } from '@/components/GlobalSettingsForm'
 import { Panel } from '@/components/Panel'
 import { EveCharacterPanel } from '@/components/EveCharacterPanel'
@@ -70,13 +71,51 @@ export function SettingsPage() {
           )}
         </Panel>
 
-        <Panel title="Reaction facility">
+        <Panel title="Reaction">
           <p className="text-xs opacity-70 mb-3">
-            Refinery for reaction formulas in plans and supply chains. Uses a separate build system
-            and reaction cost index from manufacturing.
+            Refinery for reaction jobs. Hull role bonuses come from the structure type; enter
+            fitted rig values separately.
           </p>
           {sde ? (
             <ReactionFacilitySection
+              size="sm"
+              settings={settings}
+              onChange={updateSettings}
+              systems={sde.systems}
+              regions={sde.regions}
+            />
+          ) : (
+            <p className="text-sm opacity-60">Loading systems…</p>
+          )}
+        </Panel>
+
+        <Panel title="Copy">
+          <p className="text-xs opacity-70 mb-3">
+            Engineering complex for copy jobs. Hull role bonuses come from the structure type;
+            enter fitted rig values separately.
+          </p>
+          {sde ? (
+            <ScienceFacilitySection
+              activity="copy"
+              size="sm"
+              settings={settings}
+              onChange={updateSettings}
+              systems={sde.systems}
+              regions={sde.regions}
+            />
+          ) : (
+            <p className="text-sm opacity-60">Loading systems…</p>
+          )}
+        </Panel>
+
+        <Panel title="Invention">
+          <p className="text-xs opacity-70 mb-3">
+            Engineering complex for invention jobs. Hull role bonuses come from the structure type;
+            enter fitted rig values separately.
+          </p>
+          {sde ? (
+            <ScienceFacilitySection
+              activity="invention"
               size="sm"
               settings={settings}
               onChange={updateSettings}

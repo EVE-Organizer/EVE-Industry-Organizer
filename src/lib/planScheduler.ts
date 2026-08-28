@@ -119,32 +119,48 @@ function scheduleScienceStages(
   const slotFreeAt = Array.from({ length: Math.max(1, scienceSlots) }, () => 0)
   const jobs: ScheduledPlanJob[] = []
   const stageEnd = new Map<string, number>()
+  const attemptEndsByStage = new Map<string, number[]>()
   const readyByProduct = new Map<number, number>()
 
-  // Topological-ish: process in array order (copy before invent for same product).
+  // Copy then invent in pipeline order. Each attempt is its own job (invention cannot batch).
   for (const stage of scienceStages) {
-    let depEnd = 0
-    for (const dep of stage.dependsOn) {
-      depEnd = Math.max(depEnd, stageEnd.get(dep) ?? 0)
+    const attempts = Math.max(1, Math.ceil(stage.runs))
+    const copyDepId = stage.dependsOn.find((id) => id.startsWith('copy-'))
+    const copyAttemptEnds = copyDepId ? attemptEndsByStage.get(copyDepId) : undefined
+    const attemptEnds: number[] = []
+
+    for (let i = 0; i < attempts; i++) {
+      let depEnd = 0
+      if (copyAttemptEnds?.[i] != null) {
+        depEnd = copyAttemptEnds[i]!
+      } else {
+        for (const dep of stage.dependsOn) {
+          depEnd = Math.max(depEnd, stageEnd.get(dep) ?? 0)
+        }
+      }
+      const slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
+      const startHour = Math.max(slotFreeAt[slot] ?? 0, depEnd)
+      const endHour = startHour + stage.durationHours
+      jobs.push({
+        productTypeId: stage.productTypeId,
+        name: stage.name,
+        slot,
+        startHour,
+        endHour,
+        runs: 1,
+        outputQty: 1,
+        activity: stage.activity,
+        pool: 'science',
+      })
+      slotFreeAt[slot] = endHour
+      attemptEnds.push(endHour)
     }
-    const slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
-    const startHour = Math.max(slotFreeAt[slot] ?? 0, depEnd)
-    const endHour = startHour + stage.durationHours
-    jobs.push({
-      productTypeId: stage.productTypeId,
-      name: stage.name,
-      slot,
-      startHour,
-      endHour,
-      runs: stage.runs,
-      outputQty: stage.runs,
-      activity: stage.activity,
-      pool: 'science',
-    })
-    slotFreeAt[slot] = endHour
-    stageEnd.set(stage.id, endHour)
+
+    const lastEnd = attemptEnds[attemptEnds.length - 1] ?? 0
+    stageEnd.set(stage.id, lastEnd)
+    attemptEndsByStage.set(stage.id, attemptEnds)
     const prev = readyByProduct.get(stage.productTypeId) ?? 0
-    readyByProduct.set(stage.productTypeId, Math.max(prev, endHour))
+    readyByProduct.set(stage.productTypeId, Math.max(prev, lastEnd))
   }
 
   return { jobs, readyByProduct, stageEnd }

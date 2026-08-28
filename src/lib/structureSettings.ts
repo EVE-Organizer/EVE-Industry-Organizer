@@ -1,5 +1,12 @@
-import type { GlobalSettings, ManufacturingSettings, StructureType } from '@/types'
-import { DEFAULT_BATCH_SIZE, MAX_RANKING_TIME_HOURS, MIN_RANKING_TIME_HOURS, STRUCTURE_HULL_PRESETS } from '@/types'
+import type {
+  GlobalSettings,
+  ManufacturingSettings,
+  ScienceFacilitySettings,
+  StructureType,
+} from '@/types'
+import { DEFAULT_BATCH_SIZE, MAX_RANKING_TIME_HOURS, MIN_RANKING_TIME_HOURS, STRUCTURE_HULL_PRESETS, defaultScienceFacility } from '@/types'
+
+export type ScienceFacilityKey = 'copyFacility' | 'inventionFacility'
 
 /** EVE type icons for manufacturing location options. */
 export const STRUCTURE_TYPE_IDS: Record<StructureType, number> = {
@@ -56,6 +63,88 @@ export function isPlayerStructure(type: StructureType): boolean {
 
 export function isPresetPlayerStructure(type: StructureType): boolean {
   return type === 'raitaru' || type === 'azbel' || type === 'sotiyo'
+}
+
+/** Apply preset hull TE / job-cost when the user picks a copy or invention structure. */
+export function patchScienceStructureType(
+  key: ScienceFacilityKey,
+  structureType: StructureType,
+  current: ScienceFacilitySettings,
+): Partial<GlobalSettings> {
+  if (structureType === 'npc') {
+    return {
+      [key]: {
+        ...current,
+        structureType,
+        hullTeBonusPercent: 0,
+        hullJobCostBonusPercent: 0,
+        taxPercent: 0,
+      },
+    }
+  }
+  if (structureType === 'custom') {
+    return { [key]: { ...current, structureType } }
+  }
+  const hull = STRUCTURE_HULL_PRESETS[structureType]
+  return {
+    [key]: {
+      ...current,
+      structureType,
+      hullTeBonusPercent: hull.hullTeBonusPercent,
+      hullJobCostBonusPercent: hull.hullJobCostBonusPercent,
+    },
+  }
+}
+
+export function scienceFacilityForSystem(
+  current: ScienceFacilitySettings,
+  systemId: number,
+  security: number,
+): ScienceFacilitySettings {
+  return { ...current, systemId, systemSecurity: security }
+}
+
+/** Sync copy/invention facility from a saved character location. Returns null when already aligned or system unknown. */
+export function patchScienceFacilityFromLocation(
+  key: ScienceFacilityKey,
+  facility: ScienceFacilitySettings | undefined,
+  structureType: StructureType,
+  solarSystemId: number,
+  systems: { systemId: number; security: number }[] | undefined,
+  manufacturingSystemId: number,
+): Partial<GlobalSettings> | null {
+  if (solarSystemId <= 0) return null
+
+  const base = facility ?? defaultScienceFacility(manufacturingSystemId)
+  const systemSecurity = securityForSystem(systems, solarSystemId, base.systemSecurity ?? 1)
+  if (
+    base.structureType === structureType &&
+    base.systemId === solarSystemId &&
+    Math.abs((base.systemSecurity ?? 1) - systemSecurity) < 1e-9
+  ) {
+    return null
+  }
+
+  const synced = scienceFacilityForSystem(base, solarSystemId, systemSecurity)
+  return patchScienceStructureType(key, structureType, synced)
+}
+
+export function scienceCostIndex(
+  systems:
+    | {
+        systemId: number
+        costIndex?: number
+        copyingCostIndex?: number
+        inventionCostIndex?: number
+      }[]
+    | undefined,
+  systemId: number,
+  kind: 'copying' | 'invention',
+  fallback = 0,
+): number {
+  const sys = systems?.find((s) => s.systemId === systemId)
+  const specific = kind === 'copying' ? sys?.copyingCostIndex : sys?.inventionCostIndex
+  return specific ?? sys?.costIndex ?? fallback
 }
 
 export function securityForSystem(

@@ -679,8 +679,8 @@ export function PlanRootList({
       )}
       <p className="text-[10px] text-base-content/40 px-4 pb-3 pt-2 sm:px-5">
         {overallMode
-          ? 'Overall treats your stored duration as the ready-by deadline. Switching Production/Overall does not change that number. Set all or edit duration to apply it. Copy and invention are not counted.'
-          : 'Production treats your stored duration as this job\'s industry timer. Switching modes does not change that number. Set all applies it to every job.'}
+          ? 'Overall uses your stored duration as the ready-by deadline and shrinks runs if the chain would finish late. The duration number stays put. Copy and invention are not counted.'
+          : 'Production uses your stored duration as this job\'s industry timer and sets runs from that. The duration number stays put.'}
       </p>
     </PlanChainSection>
   )

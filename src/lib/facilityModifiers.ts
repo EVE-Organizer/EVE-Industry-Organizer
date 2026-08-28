@@ -4,9 +4,11 @@ import type {
   FacilityBonusDetail,
   GlobalSettings,
   ManufacturingRigModifiers,
+  ManufacturingRigTier,
   ReactionFamily,
   ReactionFamilyGroup,
   ReactionFacilitySettings,
+  ScienceFacilitySettings,
   StructureModifiers,
   StructureType,
 } from '@/types'
@@ -16,11 +18,17 @@ import {
   REFINERY_HULL_PRESETS,
   STRUCTURE_HULL_PRESETS,
   defaultReactionFamilyModifiers,
+  defaultScienceFacility,
 } from '@/types'
 import {
+  inferRigTier,
   normalizeManufacturingRigs,
   resolveRigBonuses,
+  scaledLabOptimizationBonuses,
+  scaledRigBonus,
 } from '@/lib/manufacturingRigs'
+import { reactionRigLayout } from '@/lib/reactionRigFamilies'
+import { scienceRigLayout } from '@/lib/scienceRigFamilies'
 /** Multiplicative bonus combine: hull 25% + rig 20% -> 40% effective reduction. */
 export function combineBonusPercent(hullPercent: number, rigPercent: number): number {
   if (hullPercent <= 0 && rigPercent <= 0) return 0
@@ -130,6 +138,36 @@ function refineryHullTe(facility: ReactionFacilitySettings): number {
   return facility.hullTeBonusPercent
 }
 
+function legacyReactionRigBonuses(
+  familyModifiers: ReactionFacilitySettings['familyModifiers'],
+  security: number,
+): { me: number; te: number } {
+  let me = 0
+  let te = 0
+  for (const group of ['composite', 'biochemical', 'hybrid'] as ReactionFamilyGroup[]) {
+    const row = familyModifiers[group]
+    me = Math.max(me, scaledRigBonus(row.meRig, row.rigMeBonusPercent, 'me', security, 'reaction'))
+    te = Math.max(te, scaledRigBonus(row.teRig, row.rigTeBonusPercent, 'te', security, 'reaction'))
+  }
+  return { me, te }
+}
+
+function inferReactorEfficiencyRig(
+  familyModifiers: ReactionFacilitySettings['familyModifiers'],
+  security: number,
+): ManufacturingRigTier {
+  for (const group of ['composite', 'biochemical', 'hybrid'] as ReactionFamilyGroup[]) {
+    const row = familyModifiers[group]
+    if (row.meRig === 't2' || row.teRig === 't2') return 't2'
+    if (row.meRig === 't1' || row.teRig === 't1') return 't1'
+    const meTier = inferRigTier(row.rigMeBonusPercent, 'me', security, 'reaction')
+    const teTier = inferRigTier(row.rigTeBonusPercent, 'te', security, 'reaction')
+    if (meTier === 't2' || teTier === 't2') return 't2'
+    if (meTier === 't1' || teTier === 't1') return 't1'
+  }
+  return 'none'
+}
+
 export function reactionFacilityDetail(
   settings: GlobalSettings,
   blueprint: Pick<BlueprintInfo, 'reactionFamily'>,
@@ -138,16 +176,40 @@ export function reactionFacilityDetail(
   const group = reactionFamilyGroup(blueprint.reactionFamily) ?? 'composite'
   const family = facility.familyModifiers[group] ?? DEFAULT_REACTION_FAMILY_MODIFIERS
   const hullTe = refineryHullTe(facility)
+  const security =
+    facility.reactionSystemSecurity ??
+    (facility.reactionSystemId === settings.manufacturingSystemId
+      ? (settings.buildSystemSecurity ?? 1)
+      : 1)
+  const layout = reactionRigLayout(facility.refineryType)
+  let rigMe = 0
+  let rigTe = 0
+  if (layout === 'optimization') {
+    const storedTier = facility.reactorEfficiencyRig ?? 'none'
+    const tier =
+      storedTier !== 'none' ? storedTier : inferReactorEfficiencyRig(facility.familyModifiers, security)
+    if (tier !== 'none' && tier !== 'custom') {
+      rigMe = scaledRigBonus(tier, 0, 'me', security, 'reaction')
+      rigTe = scaledRigBonus(tier, 0, 'te', security, 'reaction')
+    } else {
+      const legacy = legacyReactionRigBonuses(facility.familyModifiers, security)
+      rigMe = legacy.me
+      rigTe = legacy.te
+    }
+  } else if (layout === 'split') {
+    rigMe = scaledRigBonus(family.meRig, family.rigMeBonusPercent, 'me', security, 'reaction')
+    rigTe = scaledRigBonus(family.teRig, family.rigTeBonusPercent, 'te', security, 'reaction')
+  }
 
   return {
     hullMeBonusPercent: 0,
     hullTeBonusPercent: hullTe,
     hullJobCostBonusPercent: 0,
-    rigMeBonusPercent: family.rigMeBonusPercent,
-    rigTeBonusPercent: family.rigTeBonusPercent,
+    rigMeBonusPercent: rigMe,
+    rigTeBonusPercent: rigTe,
     rigJobCostBonusPercent: 0,
-    effectiveMeBonusPercent: family.rigMeBonusPercent,
-    effectiveTeBonusPercent: combineBonusPercent(hullTe, family.rigTeBonusPercent),
+    effectiveMeBonusPercent: rigMe,
+    effectiveTeBonusPercent: combineBonusPercent(hullTe, rigTe),
     effectiveJobCostBonusPercent: 0,
     taxPercent: family.taxPercent,
   }
@@ -196,14 +258,125 @@ export function resolveRecipeModifiersForBlueprint(
   return resolveRecipeModifiers(settings, { ...blueprint, category })
 }
 
+function scienceHullBonuses(facility: ScienceFacilitySettings): {
+  te: number
+  jobCost: number
+} {
+  if (facility.structureType === 'npc') return { te: 0, jobCost: 0 }
+  if (
+    facility.structureType === 'raitaru' ||
+    facility.structureType === 'azbel' ||
+    facility.structureType === 'sotiyo'
+  ) {
+    const hull = STRUCTURE_HULL_PRESETS[facility.structureType]
+    return { te: hull.hullTeBonusPercent, jobCost: hull.hullJobCostBonusPercent }
+  }
+  return {
+    te: facility.hullTeBonusPercent,
+    jobCost: facility.hullJobCostBonusPercent,
+  }
+}
+
+export function scienceFacilityDetail(facility: ScienceFacilitySettings): FacilityBonusDetail {
+  const hull = scienceHullBonuses(facility)
+  const security = facility.systemSecurity ?? 1
+  const layout = scienceRigLayout(facility.structureType)
+  let rigTe = 0
+  let rigJobCost = 0
+  if (layout === 'split') {
+    rigTe = scaledRigBonus(facility.teRig, facility.rigTeBonusPercent, 'te', security)
+    rigJobCost = scaledRigBonus(
+      facility.costRig,
+      facility.rigJobCostBonusPercent,
+      'cost',
+      security,
+    )
+  } else if (layout === 'optimization' || layout === 'xl-laboratory') {
+    const opt = scaledLabOptimizationBonuses(facility.optimizationRig, security)
+    rigTe = opt.time
+    rigJobCost = opt.cost
+  }
+  return {
+    hullMeBonusPercent: 0,
+    hullTeBonusPercent: hull.te,
+    hullJobCostBonusPercent: hull.jobCost,
+    rigMeBonusPercent: 0,
+    rigTeBonusPercent: rigTe,
+    rigJobCostBonusPercent: rigJobCost,
+    effectiveMeBonusPercent: 0,
+    effectiveTeBonusPercent: combineBonusPercent(hull.te, rigTe),
+    effectiveJobCostBonusPercent: combineBonusPercent(hull.jobCost, rigJobCost),
+    taxPercent: facility.taxPercent,
+  }
+}
+
+export function resolveScienceModifiers(facility: ScienceFacilitySettings): StructureModifiers {
+  if (facility.structureType === 'npc') {
+    return {
+      meBonusPercent: 0,
+      teBonusPercent: 0,
+      jobCostBonusPercent: 0,
+      taxPercent: 0,
+    }
+  }
+  const detail = scienceFacilityDetail(facility)
+  return {
+    meBonusPercent: 0,
+    teBonusPercent: detail.effectiveTeBonusPercent,
+    jobCostBonusPercent: detail.effectiveJobCostBonusPercent,
+    taxPercent: detail.taxPercent,
+  }
+}
+
+export function normalizeScienceFacility(
+  parsed: Partial<ScienceFacilitySettings> | undefined,
+  manufacturingSystemId: number,
+): ScienceFacilitySettings {
+  const defaults = defaultScienceFacility(manufacturingSystemId)
+  if (!parsed) return defaults
+  const structureType = parsed.structureType ?? 'npc'
+  let hullTeBonusPercent = parsed.hullTeBonusPercent ?? 0
+  let hullJobCostBonusPercent = parsed.hullJobCostBonusPercent ?? 0
+  if (
+    structureType === 'raitaru' ||
+    structureType === 'azbel' ||
+    structureType === 'sotiyo'
+  ) {
+    const hull = STRUCTURE_HULL_PRESETS[structureType]
+    hullTeBonusPercent = hull.hullTeBonusPercent
+    hullJobCostBonusPercent = hull.hullJobCostBonusPercent
+  }
+  if (structureType === 'npc') {
+    hullTeBonusPercent = 0
+    hullJobCostBonusPercent = 0
+  }
+  return {
+    systemId: typeof parsed.systemId === 'number' ? parsed.systemId : manufacturingSystemId,
+    structureType,
+    hullTeBonusPercent,
+    hullJobCostBonusPercent,
+    systemSecurity: typeof parsed.systemSecurity === 'number' ? parsed.systemSecurity : 1,
+    costRig:
+      parsed.costRig ??
+      inferRigTier(parsed.rigJobCostBonusPercent ?? 0, 'cost', parsed.systemSecurity ?? 1),
+    teRig: parsed.teRig ?? inferRigTier(parsed.rigTeBonusPercent ?? 0, 'te'),
+    optimizationRig: parsed.optimizationRig ?? 'none',
+    rigTeBonusPercent: parsed.rigTeBonusPercent ?? 0,
+    rigJobCostBonusPercent: parsed.rigJobCostBonusPercent ?? 0,
+    taxPercent: structureType === 'npc' ? 0 : (parsed.taxPercent ?? 0),
+  }
+}
+
 export function normalizeReactionFacility(
   parsed: Partial<ReactionFacilitySettings> | undefined,
   manufacturingSystemId: number,
 ): ReactionFacilitySettings {
   const defaults = {
     reactionSystemId: manufacturingSystemId,
+    reactionSystemSecurity: 1,
     refineryType: 'none' as const,
     hullTeBonusPercent: 0,
+    reactorEfficiencyRig: 'none' as const,
     familyModifiers: defaultReactionFamilyModifiers(),
   }
   if (!parsed) return defaults
@@ -214,6 +387,8 @@ export function normalizeReactionFacility(
       const row = parsed.familyModifiers[group]
       if (row) {
         familyModifiers[group] = {
+          meRig: row.meRig ?? inferRigTier(row.rigMeBonusPercent ?? 0, 'me', 1, 'reaction'),
+          teRig: row.teRig ?? inferRigTier(row.rigTeBonusPercent ?? 0, 'te', 1, 'reaction'),
           rigMeBonusPercent: row.rigMeBonusPercent ?? 0,
           rigTeBonusPercent: row.rigTeBonusPercent ?? 0,
           taxPercent: row.taxPercent ?? 0,
@@ -222,13 +397,23 @@ export function normalizeReactionFacility(
     }
   }
 
+  const refineryType = parsed.refineryType ?? 'none'
+  const reactionSystemSecurity =
+    typeof parsed.reactionSystemSecurity === 'number' ? parsed.reactionSystemSecurity : 1
+  const storedReactorRig = parsed.reactorEfficiencyRig ?? 'none'
+
   return {
     reactionSystemId:
       typeof parsed.reactionSystemId === 'number'
         ? parsed.reactionSystemId
         : manufacturingSystemId,
-    refineryType: parsed.refineryType ?? 'none',
+    reactionSystemSecurity,
+    refineryType,
     hullTeBonusPercent: parsed.hullTeBonusPercent ?? 0,
+    reactorEfficiencyRig:
+      refineryType === 'tatara' && storedReactorRig === 'none'
+        ? inferReactorEfficiencyRig(familyModifiers, reactionSystemSecurity)
+        : storedReactorRig,
     familyModifiers,
   }
 }

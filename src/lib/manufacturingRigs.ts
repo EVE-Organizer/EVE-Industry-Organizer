@@ -150,6 +150,143 @@ export function normalizeManufacturingRigs(
   }
 }
 
+/** Laboratory and manufacturing cost rigs (M-Set cost / L-Set optimization cost). */
+export const RIG_COST_BASE: Record<'t1' | 't2', number> = { t1: 10, t2: 12 }
+
+export type RigBonusKind = 'me' | 'te' | 'cost'
+
+/** Engineering complex rigs scale with HS/LS/nullsec (ESI attrs 2355-2357). */
+export function engineeringRigSecurityMultiplier(security: number): number {
+  return rigSecurityMultiplier(security)
+}
+
+/** Resource-processing reactor rigs: nullsec/WH only (+10%). */
+export function reactionRigSecurityMultiplier(security: number): number {
+  const shown = displayedSystemSecurity(security)
+  if (shown <= 0) return 1.1
+  return 1
+}
+
+function scaledEngineeringPercent(basePercent: number, security: number): number {
+  return basePercent * engineeringRigSecurityMultiplier(security)
+}
+
+function scaledReactionPercent(basePercent: number, security: number): number {
+  return basePercent * reactionRigSecurityMultiplier(security)
+}
+
+function rigBase(kind: RigBonusKind, tier: 't1' | 't2'): number {
+  if (kind === 'cost') return RIG_COST_BASE[tier]
+  if (kind === 'me') return RIG_ME_BASE[tier]
+  return RIG_TE_BASE[tier]
+}
+
+/** Infer T1/T2 from a stored bonus, matching both raw and security-scaled values. */
+export function inferRigTier(
+  percent: number,
+  kind: RigBonusKind,
+  security = 1,
+  domain: 'engineering' | 'reaction' = 'engineering',
+): ManufacturingRigTier {
+  if (percent <= 0) return 'none'
+  const t1 = rigBase(kind, 't1')
+  const t2 = rigBase(kind, 't2')
+  const scale =
+    domain === 'reaction' ? reactionRigSecurityMultiplier(security) : engineeringRigSecurityMultiplier(security)
+  const scaledT1 = t1 * scale
+  const scaledT2 = t2 * scale
+  if (Math.abs(percent - t2) < 0.05 || Math.abs(percent - scaledT2) < 0.05) return 't2'
+  if (Math.abs(percent - t1) < 0.05 || Math.abs(percent - scaledT1) < 0.05) return 't1'
+  return 'custom'
+}
+
+export function scaledRigBonus(
+  tier: ManufacturingRigTier | undefined,
+  storedPercent: number,
+  kind: RigBonusKind,
+  security: number,
+  domain: 'engineering' | 'reaction' = 'engineering',
+): number {
+  const resolved =
+    tier === 't1' || tier === 't2' || tier === 'custom'
+      ? tier
+      : inferRigTier(storedPercent, kind, security, domain)
+  if (resolved === 't1' || resolved === 't2') {
+    const base = rigBase(kind, resolved)
+    return domain === 'reaction'
+      ? scaledReactionPercent(base, security)
+      : scaledEngineeringPercent(base, security)
+  }
+  return storedPercent
+}
+
+export function scaledLabOptimizationBonuses(
+  tier: ManufacturingRigTier,
+  security: number,
+): { cost: number; time: number } {
+  if (tier === 'none' || tier === 'custom') return { cost: 0, time: 0 }
+  return {
+    cost: scaledEngineeringPercent(RIG_COST_BASE[tier], security),
+    time: scaledEngineeringPercent(RIG_TE_BASE[tier], security),
+  }
+}
+
+export function labRigPreview(
+  kind: 'cost' | 'time' | 'optimization',
+  tier: ManufacturingRigTier,
+  security: number,
+): string {
+  if (tier === 'none' || tier === 'custom') return manufacturingRigTierLabel(tier)
+  if (kind === 'optimization') {
+    const { cost, time } = scaledLabOptimizationBonuses(tier, security)
+    return `${tier.toUpperCase()} Cost ${cost.toFixed(1)}% / Time ${time.toFixed(1)}%`
+  }
+  const rigKind = kind === 'time' ? 'te' : 'cost'
+  const scaled = scaledRigBonus(tier, 0, rigKind, security)
+  const label = kind === 'cost' ? 'Cost' : 'Time'
+  return `${label} ${tier.toUpperCase()} ${scaled.toFixed(1)}%`
+}
+
+export function reactionCombinedPreview(
+  tier: ManufacturingRigTier,
+  security: number,
+): string {
+  if (tier === 'none' || tier === 'custom') return manufacturingRigTierLabel(tier)
+  const me = scaledRigBonus(tier, 0, 'me', security, 'reaction')
+  const te = scaledRigBonus(tier, 0, 'te', security, 'reaction')
+  return `${tier.toUpperCase()} ME ${me.toFixed(1)}% / TE ${te.toFixed(1)}%`
+}
+
+export function manufacturingRigPreview(
+  kind: 'me' | 'te',
+  tier: ManufacturingRigTier,
+  security: number,
+): string {
+  if (tier === 'none' || tier === 'custom') return manufacturingRigTierLabel(tier)
+  const scaled = scaledRigBonus(tier, 0, kind, security)
+  return `${kind.toUpperCase()} ${tier.toUpperCase()} ${scaled.toFixed(1)}%`
+}
+
+export function reactionRigPreview(
+  kind: 'me' | 'te',
+  tier: ManufacturingRigTier,
+  security: number,
+): string {
+  if (tier === 'none' || tier === 'custom') return manufacturingRigTierLabel(tier)
+  const scaled = scaledRigBonus(tier, 0, kind, security, 'reaction')
+  return `${kind.toUpperCase()} ${tier.toUpperCase()} ${scaled.toFixed(1)}%`
+}
+
+export function manufacturingCombinedPreview(
+  tier: ManufacturingRigTier,
+  security: number,
+): string {
+  if (tier === 'none' || tier === 'custom') return manufacturingRigTierLabel(tier)
+  const me = scaledRigBonus(tier, 0, 'me', security)
+  const te = scaledRigBonus(tier, 0, 'te', security)
+  return `${tier.toUpperCase()} ME ${me.toFixed(1)}% / TE ${te.toFixed(1)}%`
+}
+
 export function manufacturingRigTierLabel(tier: ManufacturingRigTier): string {
   switch (tier) {
     case 'none':

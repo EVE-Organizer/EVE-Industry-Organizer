@@ -33,6 +33,7 @@ import {
 import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
 import { computeFlatSetup, type PriceContext } from '@/lib/blueprintEconomics'
+import { getBlueprintForBpo } from '@/services/data/sdeLoader'
 import { meetsBuildRequirements } from '@/lib/buildRequirements'
 import { skillLevel } from '@/lib/skillFields'
 import { tradingFeeRates } from '@/lib/tradingFees'
@@ -421,6 +422,8 @@ function computeRow(
   advancedIndustry: number,
   feeRates: ReturnType<typeof tradingFeeRates>,
   contracts: ContractsData | null | undefined,
+  systems?: SystemInfo[],
+  blueprints?: BlueprintInfo[],
 ): RankedBlueprintRow | null {
   if (
     !hasValidPrices(
@@ -475,6 +478,10 @@ function computeRow(
     jitaSpotPrices,
     contracts,
     priceCtx,
+    systems,
+    t1Blueprint: blueprint.invention
+      ? getBlueprintForBpo(blueprints ?? [], blueprint.invention.t1BlueprintTypeId)
+      : undefined,
     haulInIskPerM3,
     haulOutIskPerM3,
     includeHaulCost,
@@ -787,6 +794,8 @@ export function rankBlueprintsFromMarket(
       advancedIndustry,
       feeRates,
       contracts,
+      systems,
+      registry.blueprints,
     )
     if (!row) continue
     if (row.upfrontCapital < filters.minSetupCost) continue

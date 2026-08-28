@@ -119,6 +119,10 @@ export interface SystemInfo {
   costIndex?: number
   /** Reaction cost index from ESI. Present only on active-industry systems. */
   reactionCostIndex?: number
+  /** Copying cost index from ESI. Present only on active-industry systems. */
+  copyingCostIndex?: number
+  /** Invention cost index from ESI. Present only on active-industry systems. */
+  inventionCostIndex?: number
   hubId?: HubId
 }
 
@@ -278,6 +282,8 @@ export type RefineryType = 'none' | 'athanor' | 'tatara' | 'custom'
 export type ReactionFamilyGroup = 'composite' | 'biochemical' | 'hybrid'
 
 export interface ReactionFamilyModifiers {
+  meRig: ManufacturingRigTier
+  teRig: ManufacturingRigTier
   rigMeBonusPercent: number
   rigTeBonusPercent: number
   taxPercent: number
@@ -290,6 +296,8 @@ export const REACTION_FAMILY_GROUPS: ReactionFamilyGroup[] = [
 ]
 
 export const DEFAULT_REACTION_FAMILY_MODIFIERS: ReactionFamilyModifiers = {
+  meRig: 'none',
+  teRig: 'none',
   rigMeBonusPercent: 0,
   rigTeBonusPercent: 0,
   taxPercent: 0,
@@ -308,9 +316,13 @@ export function defaultReactionFamilyModifiers(): Record<
 
 export interface ReactionFacilitySettings {
   reactionSystemId: number
+  /** Cached SDE security for T1/T2 rig scaling. */
+  reactionSystemSecurity: number
   refineryType: RefineryType
   /** Hull TE role bonus for custom refinery; presets use REFINERY_HULL_PRESETS. */
   hullTeBonusPercent: number
+  /** Tatara L-Set Reactor Efficiency rig (all reaction families). */
+  reactorEfficiencyRig: ManufacturingRigTier
   familyModifiers: Record<ReactionFamilyGroup, ReactionFamilyModifiers>
 }
 
@@ -325,9 +337,48 @@ export const REFINERY_HULL_PRESETS: Record<
 export function defaultReactionFacility(manufacturingSystemId: number): ReactionFacilitySettings {
   return {
     reactionSystemId: manufacturingSystemId,
+    reactionSystemSecurity: 1,
     refineryType: 'none',
     hullTeBonusPercent: 0,
+    reactorEfficiencyRig: 'none',
     familyModifiers: defaultReactionFamilyModifiers(),
+  }
+}
+
+export type ScienceActivity = 'copy' | 'invention'
+
+/** Engineering complex used for copy or invention jobs. */
+export interface ScienceFacilitySettings {
+  systemId: number
+  /** Cached SDE security for T1/T2 rig scaling. */
+  systemSecurity: number
+  structureType: StructureType
+  /** Custom hull TE; presets use STRUCTURE_HULL_PRESETS. */
+  hullTeBonusPercent: number
+  /** Custom hull job-cost bonus; presets use STRUCTURE_HULL_PRESETS. */
+  hullJobCostBonusPercent: number
+  costRig: ManufacturingRigTier
+  teRig: ManufacturingRigTier
+  /** L-Set or XL-Set combined optimization rig. */
+  optimizationRig: ManufacturingRigTier
+  rigTeBonusPercent: number
+  rigJobCostBonusPercent: number
+  taxPercent: number
+}
+
+export function defaultScienceFacility(systemId: number): ScienceFacilitySettings {
+  return {
+    systemId,
+    systemSecurity: 1,
+    structureType: 'npc',
+    hullTeBonusPercent: 0,
+    hullJobCostBonusPercent: 0,
+    costRig: 'none',
+    teRig: 'none',
+    optimizationRig: 'none',
+    rigTeBonusPercent: 0,
+    rigJobCostBonusPercent: 0,
+    taxPercent: 0,
   }
 }
 
@@ -374,6 +425,10 @@ export interface GlobalSettings {
   structureTaxPercent: number
   /** Refinery and per-type reaction rig/tax settings. */
   reactionFacility: ReactionFacilitySettings
+  /** Engineering complex for copy jobs. */
+  copyFacility: ScienceFacilitySettings
+  /** Engineering complex for invention jobs. */
+  inventionFacility: ScienceFacilitySettings
   priceMethod: 'sell_orders' | 'buy_orders'
   /** Hub price / history window for material and product pricing (Plan + Blueprints default). */
   priceWindow: TimeRange
@@ -393,6 +448,12 @@ export interface GlobalSettings {
   /** Selected station or structure ID for reaction jobs. */
   reactionLocationId?: number | null
   reactionLocationKind?: ProductionLocationKind | null
+  /** Selected station or structure ID for copy jobs. */
+  copyLocationId?: number | null
+  copyLocationKind?: ProductionLocationKind | null
+  /** Selected station or structure ID for invention jobs. */
+  inventionLocationId?: number | null
+  inventionLocationKind?: ProductionLocationKind | null
   /** Mining ISK/hr page: reference hull for m³/hr scale. */
   miningShipId?: MiningShipId
   /** Mining ISK/hr page: yield buff toggles (stack multiplicatively). */
@@ -977,6 +1038,8 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   manufacturingRigs: { ...DEFAULT_MANUFACTURING_RIGS },
   structureTaxPercent: 0,
   reactionFacility: defaultReactionFacility(30000144),
+  copyFacility: defaultScienceFacility(30000144),
+  inventionFacility: defaultScienceFacility(30000144),
   priceMethod: 'sell_orders',
   priceWindow: '1m',
   includeHaulCost: true,
@@ -988,6 +1051,10 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   productionLocationKind: null,
   reactionLocationId: null,
   reactionLocationKind: null,
+  copyLocationId: null,
+  copyLocationKind: null,
+  inventionLocationId: null,
+  inventionLocationKind: null,
   miningShipId: 'retriever',
   miningBuffIds: [],
   miningBoostSpace: 'highsec',

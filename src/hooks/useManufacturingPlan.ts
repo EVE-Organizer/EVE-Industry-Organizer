@@ -7,7 +7,7 @@ import { buildPlanPipeline } from '@/lib/planPipeline'
 import { schedulePlanJobs, detectOverUnder, windowHoursFromJobs } from '@/lib/planScheduler'
 import { simulatePlanFlow } from '@/lib/planSimulator'
 import { manufacturingSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
-import type { GlobalSettings, ManufacturingPlanTemplate } from '@/types'
+import type { GlobalSettings, ManufacturingPlanTemplate, SystemInfo } from '@/types'
 
 export interface UseManufacturingPlanOptions {
   /** When false, skips flow simulation (graph tab only). */
@@ -22,6 +22,7 @@ export function useManufacturingPlan(
   settings: GlobalSettings,
   systemCostIndex: number,
   reactionCostIndex: number,
+  systems?: SystemInfo[],
   options: UseManufacturingPlanOptions = {},
 ) {
   const includeSimulation = options.includeSimulation !== false
@@ -55,6 +56,7 @@ export function useManufacturingPlan(
       settings,
       systemCostIndex,
       reactionCostIndex,
+      systems,
     })
     const pipeline = buildPlanPipeline({
       nodes: expanded.nodes,
@@ -101,7 +103,7 @@ export function useManufacturingPlan(
       missingPriceTypeIds: expanded.missingPriceTypeIds,
       hasReliablePrices: expanded.missingPriceTypeIds.length === 0,
     }
-  }, [template, blueprints, typeMap, prices, settings, systemCostIndex, reactionCostIndex, includeSimulation])
+  }, [template, blueprints, typeMap, prices, settings, systemCostIndex, reactionCostIndex, systems, includeSimulation])
 }
 
 export function usePlanSkills() {

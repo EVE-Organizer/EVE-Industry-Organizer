@@ -4,9 +4,10 @@ import {
   buildManufacturingSettings,
   effectiveManufacturingSystemId,
   patchManufacturingSystemIfStale,
+  patchScienceFacilityFromLocation,
   securityForSystem,
 } from '@/lib/structureSettings'
-import { DEFAULT_SETTINGS } from '@/types'
+import { DEFAULT_SETTINGS, defaultScienceFacility } from '@/types'
 
 describe('structureSettings manufacturing scope', () => {
   const systems = [
@@ -87,5 +88,54 @@ describe('structureSettings manufacturing scope', () => {
     expect(scoped.manufacturingSystemId).toBe(30002780)
     expect(scoped.buildSystemSecurity).toBe(-0.5)
     expect(scoped.rankingTargetTimeSeconds).toBe(720 * 3600)
+  })
+})
+
+describe('patchScienceFacilityFromLocation', () => {
+  const systems = [{ systemId: 30000144, security: 1, name: 'Perimeter', regionId: 10000002 }]
+
+  it('skips sync when the location system is not known yet', () => {
+    expect(
+      patchScienceFacilityFromLocation(
+        'copyFacility',
+        defaultScienceFacility(30000144),
+        'sotiyo',
+        0,
+        systems,
+        30000144,
+      ),
+    ).toBeNull()
+  })
+
+  it('returns null when facility already matches the location', () => {
+    const facility = {
+      ...defaultScienceFacility(30000144),
+      structureType: 'sotiyo' as const,
+      systemId: 30000144,
+      systemSecurity: 1,
+    }
+    expect(
+      patchScienceFacilityFromLocation(
+        'copyFacility',
+        facility,
+        'sotiyo',
+        30000144,
+        systems,
+        30000144,
+      ),
+    ).toBeNull()
+  })
+
+  it('patches structure and system when the saved location differs', () => {
+    const patch = patchScienceFacilityFromLocation(
+      'inventionFacility',
+      { ...defaultScienceFacility(30000144), structureType: 'npc' },
+      'azbel',
+      30000144,
+      systems,
+      30000144,
+    )
+    expect(patch?.inventionFacility?.structureType).toBe('azbel')
+    expect(patch?.inventionFacility?.systemId).toBe(30000144)
   })
 })

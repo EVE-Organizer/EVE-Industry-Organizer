@@ -1,5 +1,12 @@
 import type { ReactNode } from 'react'
-import type { GlobalSettings, ReactionFamilyGroup, RegionsData, SystemInfo } from '@/types'
+import type {
+  GlobalSettings,
+  ReactionFamilyGroup,
+  RegionsData,
+  ScienceActivity,
+  ScienceFacilitySettings,
+  SystemInfo,
+} from '@/types'
 import {
   HUBS,
   MAX_ME,
@@ -14,15 +21,20 @@ import { formatHubLabel } from '@/lib/hubDisplay'
 import {
   isPlayerStructure,
   isPresetPlayerStructure,
+  scienceFacilityForSystem,
+  securityForSystem,
 } from '@/lib/structureSettings'
 import {
   isActiveRefinery,
   isPresetRefinery,
-  refineryHullTePercent,
   REACTION_FAMILY_LABELS,
+  refineryHullTePercent,
 } from '@/lib/refinerySettings'
+import { reactionRigLayout } from '@/lib/reactionRigFamilies'
 import { ManufacturingLocationPicker } from '@/components/ManufacturingLocationPicker'
 import { ManufacturingRigFields } from '@/components/ManufacturingRigFields'
+import { ReactionRigFields } from '@/components/ReactionRigFields'
+import { ScienceRigFields } from '@/components/ScienceRigFields'
 import { RefineryLocationPicker } from '@/components/RefineryLocationPicker'
 import { ManufacturingSystemPicker } from '@/components/ManufacturingSystemPicker'
 
@@ -354,6 +366,114 @@ export function ManufacturingSettingsSection({
   )
 }
 
+export function ReactionFacilityBonusFields({
+  settings,
+  onChange,
+  systems,
+  size = 'md',
+}: SettingsSectionProps & { systems?: SystemInfo[] }) {
+  const gap = sectionGap(size)
+  const facility = settings.reactionFacility
+  if (!isActiveRefinery(facility.refineryType)) return null
+
+  const hullTe = refineryHullTePercent(facility.refineryType, facility.hullTeBonusPercent)
+  const security = securityForSystem(systems, facility.reactionSystemId, 1)
+  const showHull = size !== 'sm'
+  const rigLayout = reactionRigLayout(facility.refineryType)
+
+  function patchFamilyTax(group: ReactionFamilyGroup, taxPercent: number) {
+    onChange({
+      reactionFacility: {
+        ...facility,
+        familyModifiers: {
+          ...facility.familyModifiers,
+          [group]: { ...facility.familyModifiers[group], taxPercent },
+        },
+      },
+    })
+  }
+
+  return (
+    <div className={`flex flex-col ${gap}`}>
+      {showHull && isPresetRefinery(facility.refineryType) ? (
+        <div className="rounded-lg border border-eve-border bg-base-300/20 px-3 py-3">
+          <div className="flex items-center gap-1.5 text-xs font-medium opacity-70 mb-2">
+            <span>Hull role bonuses</span>
+            <InfoTooltip text="Fixed for this hull type. Fitted rig bonuses are entered below." />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <StructureBonusTile label="Hull ME" value={0} />
+            <StructureBonusTile label="Hull TE" value={hullTe} />
+            <StructureBonusTile label="Hull job cost" value={0} />
+          </div>
+        </div>
+      ) : showHull ? (
+        <NumberField
+          label="Hull TE bonus %"
+          tooltip={GLOBAL_SETTING_TOOLTIPS.refineryHullTeBonusPercent}
+          size={size}
+          value={facility.hullTeBonusPercent}
+          min={0}
+          max={50}
+          step={0.1}
+          onChange={(hullTeBonusPercent) =>
+            onChange({ reactionFacility: { ...facility, hullTeBonusPercent } })
+          }
+        />
+      ) : null}
+
+      <ReactionRigFields
+        settings={settings}
+        onChange={onChange}
+        security={security}
+        size={size}
+      />
+
+      {showHull ? (
+        rigLayout === 'split' ? (
+          <div className={`grid grid-cols-1 ${size === 'sm' ? 'gap-2' : 'gap-3'}`}>
+            {REACTION_FAMILY_GROUPS.map((group) => (
+              <NumberField
+                key={group}
+                label={`${REACTION_FAMILY_LABELS[group]} owner tax %`}
+                tooltip={GLOBAL_SETTING_TOOLTIPS.reactionTaxPercent}
+                size={size}
+                value={facility.familyModifiers[group].taxPercent}
+                min={0}
+                max={50}
+                step={0.1}
+                onChange={(taxPercent) => patchFamilyTax(group, taxPercent)}
+              />
+            ))}
+          </div>
+        ) : (
+          <NumberField
+            label="Owner tax %"
+            tooltip={GLOBAL_SETTING_TOOLTIPS.reactionTaxPercent}
+            size={size}
+            value={facility.familyModifiers.composite.taxPercent}
+            min={0}
+            max={50}
+            step={0.1}
+            onChange={(taxPercent) =>
+              onChange({
+                reactionFacility: {
+                  ...facility,
+                  familyModifiers: {
+                    composite: { ...facility.familyModifiers.composite, taxPercent },
+                    biochemical: { ...facility.familyModifiers.biochemical, taxPercent },
+                    hybrid: { ...facility.familyModifiers.hybrid, taxPercent },
+                  },
+                },
+              })
+            }
+          />
+        )
+      ) : null}
+    </div>
+  )
+}
+
 export function ReactionFacilitySection({
   settings,
   onChange,
@@ -366,26 +486,23 @@ export function ReactionFacilitySection({
 }) {
   const gap = sectionGap(size)
   const facility = settings.reactionFacility
-  const hullTe = refineryHullTePercent(facility.refineryType, facility.hullTeBonusPercent)
   const reactionSystemLocked = settings.reactionLocationId != null
-
-  function patchFamily(
-    group: ReactionFamilyGroup,
-    patch: Partial<(typeof facility.familyModifiers)[ReactionFamilyGroup]>,
-  ) {
-    onChange({
-      reactionFacility: {
-        ...facility,
-        familyModifiers: {
-          ...facility.familyModifiers,
-          [group]: { ...facility.familyModifiers[group], ...patch },
-        },
-      },
-    })
-  }
 
   return (
     <div className={`flex flex-col ${gap}`}>
+      <SettingField
+        label="Reaction location"
+        tooltip={GLOBAL_SETTING_TOOLTIPS.refineryType}
+        size={size}
+      >
+        <RefineryLocationPicker
+          settings={settings}
+          onChange={onChange}
+          systems={systems}
+          size={size}
+        />
+      </SettingField>
+
       <SettingField
         label="Reaction system"
         tooltip={
@@ -398,7 +515,17 @@ export function ReactionFacilitySection({
         <ManufacturingSystemPicker
           value={facility.reactionSystemId}
           onChange={(reactionSystemId) =>
-            onChange({ reactionFacility: { ...facility, reactionSystemId } })
+            onChange({
+              reactionFacility: {
+                ...facility,
+                reactionSystemId,
+                reactionSystemSecurity: securityForSystem(
+                  systems,
+                  reactionSystemId,
+                  facility.reactionSystemSecurity ?? 1,
+                ),
+              },
+            })
           }
           systems={systems}
           regions={regions}
@@ -408,122 +535,216 @@ export function ReactionFacilitySection({
         />
       </SettingField>
 
+      <ReactionFacilityBonusFields
+        settings={settings}
+        onChange={onChange}
+        systems={systems}
+        size={size}
+      />
+    </div>
+  )
+}
+
+export function ScienceFacilityBonusFields({
+  activity,
+  settings,
+  onChange,
+  systems,
+  size = 'md',
+}: SettingsSectionProps & { activity: ScienceActivity; systems?: SystemInfo[] }) {
+  const gap = sectionGap(size)
+  const facilityKey = activity === 'copy' ? 'copyFacility' : 'inventionFacility'
+  const facility =
+    settings[facilityKey] ?? {
+      systemId: settings.manufacturingSystemId,
+      systemSecurity: 1,
+      structureType: 'npc' as const,
+      hullTeBonusPercent: 0,
+      hullJobCostBonusPercent: 0,
+      costRig: 'none' as const,
+      teRig: 'none' as const,
+      optimizationRig: 'none' as const,
+      rigTeBonusPercent: 0,
+      rigJobCostBonusPercent: 0,
+      taxPercent: 0,
+    }
+  if (!isPlayerStructure(facility.structureType)) return null
+
+  const hull =
+    facility.structureType === 'raitaru' ||
+    facility.structureType === 'azbel' ||
+    facility.structureType === 'sotiyo'
+      ? STRUCTURE_HULL_PRESETS[facility.structureType]
+      : null
+  const security = securityForSystem(
+    systems,
+    facility.systemId,
+    facility.systemSecurity ?? 1,
+  )
+  const showHull = size !== 'sm'
+
+  function patchFacility(patch: Partial<ScienceFacilitySettings>) {
+    onChange({ [facilityKey]: { ...facility, ...patch } })
+  }
+
+  return (
+    <div className={`flex flex-col ${gap}`}>
+      {showHull && isPresetPlayerStructure(facility.structureType) && hull ? (
+        <div className="rounded-lg border border-eve-border bg-base-300/20 px-3 py-3">
+          <div className="flex items-center gap-1.5 text-xs font-medium opacity-70 mb-2">
+            <span>Hull role bonuses</span>
+            <InfoTooltip text="Fixed for this hull type. Fitted rig bonuses are entered below." />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <StructureBonusTile label="Hull ME" value={0} />
+            <StructureBonusTile label="Hull TE" value={hull.hullTeBonusPercent} />
+            <StructureBonusTile
+              label="Hull job cost"
+              value={hull.hullJobCostBonusPercent}
+            />
+          </div>
+        </div>
+      ) : showHull ? (
+        <div className={`grid grid-cols-2 ${gap}`}>
+          <NumberField
+            label="Hull TE bonus %"
+            tooltip={GLOBAL_SETTING_TOOLTIPS.scienceHullTeBonusPercent}
+            size={size}
+            value={facility.hullTeBonusPercent}
+            min={0}
+            max={50}
+            step={0.1}
+            onChange={(hullTeBonusPercent) => patchFacility({ hullTeBonusPercent })}
+          />
+          <NumberField
+            label="Hull job cost bonus %"
+            tooltip={GLOBAL_SETTING_TOOLTIPS.scienceHullJobCostBonusPercent}
+            size={size}
+            value={facility.hullJobCostBonusPercent}
+            min={0}
+            max={10}
+            step={0.1}
+            onChange={(hullJobCostBonusPercent) =>
+              patchFacility({ hullJobCostBonusPercent })
+            }
+          />
+        </div>
+      ) : null}
+
+      <ScienceRigFields
+        activity={activity}
+        facility={facility}
+        onChange={patchFacility}
+        security={security}
+        size={size}
+      />
+
+      {showHull ? (
+        <NumberField
+          label="Owner tax %"
+          tooltip={GLOBAL_SETTING_TOOLTIPS.scienceTaxPercent}
+          size={size}
+          value={facility.taxPercent}
+          min={0}
+          max={50}
+          step={0.1}
+          onChange={(taxPercent) => patchFacility({ taxPercent })}
+        />
+      ) : null}
+    </div>
+  )
+}
+
+export function ScienceFacilitySection({
+  activity,
+  settings,
+  onChange,
+  systems,
+  regions,
+  size = 'md',
+}: SettingsSectionProps & {
+  activity: ScienceActivity
+  systems: SystemInfo[]
+  regions: RegionsData
+}) {
+  const gap = sectionGap(size)
+  const facilityKey = activity === 'copy' ? 'copyFacility' : 'inventionFacility'
+  const facility =
+    settings[facilityKey] ?? {
+      systemId: settings.manufacturingSystemId,
+      systemSecurity: 1,
+      structureType: 'npc' as const,
+      hullTeBonusPercent: 0,
+      hullJobCostBonusPercent: 0,
+      costRig: 'none' as const,
+      teRig: 'none' as const,
+      optimizationRig: 'none' as const,
+      rigTeBonusPercent: 0,
+      rigJobCostBonusPercent: 0,
+      taxPercent: 0,
+    }
+  const locationLocked =
+    activity === 'copy' ? settings.copyLocationId != null : settings.inventionLocationId != null
+  const locationTooltip =
+    activity === 'copy' ? GLOBAL_SETTING_TOOLTIPS.copyFacility : GLOBAL_SETTING_TOOLTIPS.inventionFacility
+  const systemTooltip =
+    activity === 'copy' ? GLOBAL_SETTING_TOOLTIPS.copySystemId : GLOBAL_SETTING_TOOLTIPS.inventionSystemId
+
+  function patchFacility(patch: Partial<ScienceFacilitySettings>) {
+    onChange({ [facilityKey]: { ...facility, ...patch } })
+  }
+
+  return (
+    <div className={`flex flex-col ${gap}`}>
       <SettingField
-        label="Refinery"
-        tooltip={GLOBAL_SETTING_TOOLTIPS.refineryType}
+        label={activity === 'copy' ? 'Copy location' : 'Invention location'}
+        tooltip={locationTooltip}
         size={size}
       >
-        <RefineryLocationPicker settings={settings} onChange={onChange} size={size} />
+        <ManufacturingLocationPicker
+          activity={activity}
+          settings={settings}
+          onChange={onChange}
+          systems={systems}
+          size={size}
+        />
       </SettingField>
 
-      {isActiveRefinery(facility.refineryType) ? (
-        <>
-          {isPresetRefinery(facility.refineryType) ? (
-            <div className="rounded-lg border border-eve-border bg-base-300/20 px-3 py-3">
-              <div className="flex items-center gap-1.5 text-xs font-medium opacity-70 mb-2">
-                <span>Hull role bonus</span>
-              </div>
-              <StructureBonusTile label="Hull TE" value={hullTe} />
-            </div>
-          ) : (
-            <NumberField
-              label="Hull TE bonus %"
-              tooltip={GLOBAL_SETTING_TOOLTIPS.refineryHullTeBonusPercent}
-              size={size}
-              value={facility.hullTeBonusPercent}
-              min={0}
-              max={50}
-              step={0.1}
-              onChange={(hullTeBonusPercent) =>
-                onChange({ reactionFacility: { ...facility, hullTeBonusPercent } })
-              }
-            />
-          )}
+      <SettingField
+        label={activity === 'copy' ? 'Copy system' : 'Invention system'}
+        tooltip={
+          locationLocked
+            ? 'Set automatically from the selected location.'
+            : systemTooltip
+        }
+        size={size}
+      >
+        <ManufacturingSystemPicker
+          value={facility.systemId}
+          onChange={(systemId) =>
+            patchFacility(
+              scienceFacilityForSystem(
+                facility,
+                systemId,
+                securityForSystem(systems, systemId, facility.systemSecurity ?? 1),
+              ),
+            )
+          }
+          systems={systems}
+          regions={regions}
+          costIndexKind={activity === 'copy' ? 'copying' : 'invention'}
+          size={size}
+          disabled={locationLocked}
+        />
+      </SettingField>
 
-          <details className="manufacturing-rig-fields">
-            <summary className="manufacturing-rig-fields__summary">
-              <span className="flex min-w-0 flex-1 items-center gap-1.5">
-                <span>Structure rigs and tax by type</span>
-                <span
-                  className="shrink-0"
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.stopPropagation()}
-                >
-                  <InfoTooltip text="Match the in-game Reaction tooltip: Composite, Biochemical, and Hybrid rows." />
-                </span>
-              </span>
-            </summary>
-            <div className="manufacturing-rig-fields__body overflow-x-auto">
-            <table className="table table-sm w-full min-w-[20rem]">
-              <thead>
-                <tr className="text-xs opacity-60">
-                  <th>Type</th>
-                  <th>Rig ME %</th>
-                  <th>Rig TE %</th>
-                  <th>Tax %</th>
-                </tr>
-              </thead>
-              <tbody>
-                {REACTION_FAMILY_GROUPS.map((group) => {
-                  const row = facility.familyModifiers[group]
-                  const inputClass =
-                    size === 'sm' ? 'input input-bordered input-xs w-full' : 'input input-bordered input-sm w-full'
-                  return (
-                    <tr key={group}>
-                      <td className="text-sm font-medium whitespace-nowrap">
-                        {REACTION_FAMILY_LABELS[group]}
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          min={0}
-                          max={10}
-                          step={0.1}
-                          className={inputClass}
-                          value={row.rigMeBonusPercent}
-                          onChange={(e) =>
-                            patchFamily(group, { rigMeBonusPercent: +e.target.value || 0 })
-                          }
-                          aria-label={`${REACTION_FAMILY_LABELS[group]} rig ME`}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          min={0}
-                          max={50}
-                          step={0.1}
-                          className={inputClass}
-                          value={row.rigTeBonusPercent}
-                          onChange={(e) =>
-                            patchFamily(group, { rigTeBonusPercent: +e.target.value || 0 })
-                          }
-                          aria-label={`${REACTION_FAMILY_LABELS[group]} rig TE`}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          min={0}
-                          max={50}
-                          step={0.1}
-                          className={inputClass}
-                          value={row.taxPercent}
-                          onChange={(e) =>
-                            patchFamily(group, { taxPercent: +e.target.value || 0 })
-                          }
-                          aria-label={`${REACTION_FAMILY_LABELS[group]} tax`}
-                        />
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-            </div>
-          </details>
-        </>
-      ) : null}
+      <ScienceFacilityBonusFields
+        activity={activity}
+        settings={settings}
+        onChange={onChange}
+        systems={systems}
+        size={size}
+      />
     </div>
   )
 }

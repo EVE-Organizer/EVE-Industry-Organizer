@@ -62,7 +62,7 @@ import {
 import { hubDisplayName } from '@/lib/hubDisplay'
 import { formatDecimal } from '@/lib/profit'
 import { buildManufacturingSettings } from '@/lib/structureSettings'
-import { DEFAULT_BATCH_SIZE, DEFAULT_SETTINGS, HUBS, type HubId } from '@/types'
+import { DEFAULT_BATCH_SIZE, DEFAULT_SETTINGS, HUBS, type HubId, type PlanDurationMode } from '@/types'
 import type {
   GlobalSettings,
   ManufacturingPlanTemplate,
@@ -351,6 +351,7 @@ export function PlanPage() {
             settings: activeSettings,
             systemCostIndex,
             reactionCostIndex,
+            systems: data.systems,
           }
         : null,
     [activeTemplate, data, blueprints, typeMap, prices, activeSettings, systemCostIndex, reactionCostIndex],
@@ -370,6 +371,7 @@ export function PlanPage() {
     activeSettings,
     systemCostIndex,
     reactionCostIndex,
+    data?.systems,
     { includeSimulation: tab === 'graph' },
   )
 
@@ -879,6 +881,52 @@ export function PlanPage() {
     [plan.nodes],
   )
 
+  const applyStoredDurationMode = useCallback(
+    (mode: PlanDurationMode) => {
+      const template = selectedPlanTemplateFromStore()
+      if (!template) return
+
+      if (mode === 'overall') {
+        const targets = activePlanRoots(template.roots)
+          .filter((r) => r.productionDurationHours > 0)
+          .map((r) => ({ rootId: r.id, deadlineHours: r.productionDurationHours }))
+        if (targets.length === 0) {
+          updatePlanTemplate(template.id, { durationMode: mode })
+          return
+        }
+        const hoursByRootId = new Map(targets.map((t) => [t.rootId, t.deadlineHours]))
+        const stamped = template.roots.map((r) => {
+          const hours = hoursByRootId.get(r.id)
+          return hours == null ? r : { ...r, productionDurationHours: hours }
+        })
+        const { roots, nodeOverrides } = fitPlanToRootReadyDeadlines({
+          roots: stamped,
+          targets,
+          readyHoursByProductId: readyHoursByProductIdFromJobs(plan.jobs),
+          nodes: plan.nodes,
+          nodeOverrides: template.nodeOverrides,
+          settings: storeSettings,
+          getBlueprint: (id) => getBlueprintForProduct(blueprints, id),
+        })
+        updatePlanTemplate(template.id, { roots, nodeOverrides, durationMode: mode })
+        return
+      }
+
+      const roots = template.roots.map((r) => {
+        const bp = getBlueprintForProduct(blueprints, r.productTypeId)
+        return applyRootEntryPatch(
+          r,
+          { productionDurationHours: r.productionDurationHours },
+          bp,
+          storeSettings,
+          template.nodeOverrides[r.productTypeId],
+        )
+      })
+      updatePlanTemplate(template.id, { roots, durationMode: mode })
+    },
+    [plan.jobs, plan.nodes, blueprints, storeSettings, updatePlanTemplate],
+  )
+
   const fitRootsToReadyDeadlines = useCallback(
     (targets: Array<{ rootId: string; deadlineHours: number }>) => {
       const template = selectedPlanTemplateFromStore()
@@ -891,7 +939,7 @@ export function PlanPage() {
       const { roots, nodeOverrides } = fitPlanToRootReadyDeadlines({
         roots: stamped,
         targets,
-        readyHoursByProductId: readyHoursByProductIdFromJobs(plan.productionJobs),
+        readyHoursByProductId: readyHoursByProductIdFromJobs(plan.jobs),
         nodes: plan.nodes,
         nodeOverrides: template.nodeOverrides,
         settings: storeSettings,
@@ -899,7 +947,7 @@ export function PlanPage() {
       })
       updatePlanTemplate(template.id, { roots, nodeOverrides })
     },
-    [plan.productionJobs, plan.nodes, blueprints, storeSettings, updatePlanTemplate],
+    [plan.jobs, plan.nodes, blueprints, storeSettings, updatePlanTemplate],
   )
 
   const addRoot = (productTypeId: number) => {
@@ -1092,16 +1140,12 @@ export function PlanPage() {
                 profitByRootId={profitByRootId}
                 readOnly={isSharedView}
                 durationMode={activeTemplate.durationMode === 'overall' ? 'overall' : 'production'}
-                onDurationModeChange={
-                  isSharedView
-                    ? undefined
-                    : (mode) => {
-                        const template = selectedPlanTemplateFromStore()
-                        if (!template) return
-                        updatePlanTemplate(template.id, { durationMode: mode })
-                      }
+                onDurationModeChange={isSharedView ? undefined : applyStoredDurationMode}
+                planWindowHours={
+                  activeTemplate.durationMode === 'overall'
+                    ? plan.windowHours
+                    : plan.productionWindowHours
                 }
-                planWindowHours={plan.productionWindowHours}
                 onOpenSetup={setSetupDetailRootId}
                 onOpenProfit={setProfitDetailRootId}
                 onOpenGraph={openGraph}

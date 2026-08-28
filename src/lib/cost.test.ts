@@ -4,9 +4,11 @@ import {
   applyTE,
   estimatedItemValue,
   estimateJobCost,
+  inventionBlueprintCostForSettings,
   inventionBlueprintCostPerRun,
   teTimeFactor,
 } from '@/lib/cost'
+import { DEFAULT_SETTINGS } from '@/types'
 
 describe('teTimeFactor', () => {
   it('treats TE 0–20 as 1% per point (TE 20 → 20% faster)', () => {
@@ -96,5 +98,62 @@ describe('inventionBlueprintCostPerRun', () => {
     })
     expect(skilled.chance).toBeCloseTo(0.3 * 1.04 ** 3, 5)
     expect(skilled.costPerRun).toBeLessThan(base.costPerRun)
+  })
+
+  it('adds copy and invention job fees when cost indices are set', () => {
+    const prices = new Map([
+      [11467, 100_000],
+      [34, 10],
+    ])
+    const blueprint = {
+      ...{
+        productTypeId: 1,
+        blueprintTypeId: 2,
+        productQuantity: 1,
+        manufacturingTime: 60,
+        materials: [{ typeId: 34, quantity: 100 }],
+        requiredSkills: {},
+        tier: 't2' as const,
+        productGroup: 'Module',
+        bpIconUrl: '',
+        productIconUrl: '',
+        productRenderUrl: '',
+        invention: {
+          t1BlueprintTypeId: 3,
+          datacores: [{ typeId: 11467, quantity: 1 }],
+          runsPerBPC: 10,
+          baseChance: 1,
+        },
+      },
+    }
+    const datacoresOnly = inventionBlueprintCostPerRun({
+      datacores: blueprint.invention.datacores,
+      prices,
+      baseChance: 1,
+      runsPerBPC: 10,
+      skillLevel: 0,
+    })
+    const withFees = inventionBlueprintCostForSettings({
+      blueprint,
+      t1Blueprint: { materials: [{ typeId: 34, quantity: 50 }] },
+      settings: DEFAULT_SETTINGS,
+      prices,
+      systems: [
+        {
+          systemId: DEFAULT_SETTINGS.copyFacility.systemId,
+          name: 'Perimeter',
+          regionId: 10000002,
+          security: 1,
+          costIndex: 0.02,
+          copyingCostIndex: 0.01,
+          inventionCostIndex: 0.02,
+        },
+      ],
+    })
+    expect(withFees).not.toBeNull()
+    expect(withFees!.attemptCost).toBeGreaterThan(datacoresOnly.attemptCost)
+    expect(withFees!.attemptCost).toBe(
+      datacoresOnly.attemptCost + 50 * 10 * 0.01 + 100 * 10 * 0.02,
+    )
   })
 })

@@ -5,11 +5,12 @@ import type {
   PlanBuildMode,
   PlanNode,
   PlanNodeOverride,
+  SystemInfo,
 } from '@/types'
 import { MIN_BATCH_SIZE } from '@/types'
 import {
   applyME,
-  inventionBlueprintCostPerRun,
+  inventionBlueprintCostForSettings,
   materialCost,
   resolveBlueprintMeTe,
   totalManufacturingCost,
@@ -55,6 +56,7 @@ export interface ExpandPlanInput {
   settings: GlobalSettings
   systemCostIndex: number
   reactionCostIndex: number
+  systems?: SystemInfo[]
 }
 
 export interface ExpandPlanResult {
@@ -155,25 +157,26 @@ function computeInventionPrereqCost(
   depth: number,
   maxDepth: number,
   cache?: BuildCostCache,
+  systems?: SystemInfo[],
 ): number {
   const inv = blueprint.invention
   if (!inv || blueprint.tier !== 't2') return 0
 
-  const invCost = inventionBlueprintCostPerRun({
-    datacores: inv.datacores,
+  const t1Bp = getBlueprintForBpo(blueprints, inv.t1BlueprintTypeId)
+  const invCost = inventionBlueprintCostForSettings({
+    blueprint,
+    t1Blueprint: t1Bp,
+    settings,
     prices,
-    baseChance: inv.baseChance,
-    runsPerBPC: inv.runsPerBPC,
-    skillLevel: settings.inventionSkillLevel,
+    systems,
   })
+  if (!invCost) return 0
   const attempts = Math.max(
     1,
     Math.ceil(runs / Math.max(1, invCost.expectedRunsPerAttempt)),
   )
 
   let cost = invCost.attemptCost * attempts
-
-  const t1Bp = getBlueprintForBpo(blueprints, inv.t1BlueprintTypeId)
   if (!t1Bp || depth >= maxDepth) return cost
 
   const t1Runs = attempts
@@ -192,6 +195,7 @@ function computeInventionPrereqCost(
     depth + 1,
     maxDepth,
     cache,
+    systems,
   )
   const buyCost = (prices.get(t1Bp.productTypeId) ?? 0) * t1Runs
   const override = modeOverrides.get(t1Bp.productTypeId)
@@ -217,6 +221,7 @@ export function computePlanBuildCostForRuns(
   depth: number,
   maxDepth: number,
   cache?: BuildCostCache,
+  systems?: SystemInfo[],
 ): number {
   const cached = cachedBuildCost(cache, blueprint.productTypeId, runs, depth)
   if (cached !== undefined) return cached
@@ -278,6 +283,7 @@ export function computePlanBuildCostForRuns(
       depth + 1,
       maxDepth,
       cache,
+      systems,
     )
     const mode: PlanBuildMode = override ?? (subBuildCost <= buyCost ? 'build' : 'buy')
     childBuild += mode === 'build' ? subBuildCost : buyCost
@@ -298,6 +304,7 @@ export function computePlanBuildCostForRuns(
     depth,
     maxDepth,
     cache,
+    systems,
   )
 
   const total = childBuild + (buildTotal - buyTotal) + inventionCost
@@ -359,14 +366,16 @@ function expandInventionPrereqs(
   const inv = blueprint.invention
   if (!inv || blueprint.tier !== 't2') return
 
-  const { settings, blueprints, typeMap, prices, systemCostIndex, reactionCostIndex } = input
-  const invCost = inventionBlueprintCostPerRun({
-    datacores: inv.datacores,
+  const { settings, blueprints, typeMap, prices, systemCostIndex, reactionCostIndex, systems } = input
+  const t1ForFees = getBlueprintForBpo(blueprints, inv.t1BlueprintTypeId)
+  const invCost = inventionBlueprintCostForSettings({
+    blueprint,
+    t1Blueprint: t1ForFees,
+    settings,
     prices,
-    baseChance: inv.baseChance,
-    runsPerBPC: inv.runsPerBPC,
-    skillLevel: settings.inventionSkillLevel,
+    systems,
   })
+  if (!invCost) return
   const attempts = Math.max(
     1,
     Math.ceil(runs / Math.max(1, invCost.expectedRunsPerAttempt)),
@@ -402,6 +411,7 @@ function expandInventionPrereqs(
     parentNode.depth + 1,
     maxDepth,
     cache,
+    systems,
   )
   const unitPrice = prices.get(t1Bp.productTypeId) ?? 0
   const buyCost = unitPrice * t1Runs
@@ -493,6 +503,7 @@ function expandMaterials(
       depth + 1,
       maxDepth,
       cache,
+      input.systems,
     )
     const forceBuild = input.template.nodeOverrides[mat.typeId]?.forceInclude
     const { mode, missingPrice } = resolveBuildBuyMode({
@@ -613,6 +624,7 @@ function finalizeNodes(
         accum.depth,
         10,
         cache,
+        input.systems,
       )
       savings = buyCost - buildCost
       recommendedMode =
@@ -679,6 +691,7 @@ export function computePlanRootBuildCost(
     0,
     10,
     costCache,
+    input.systems,
   )
 }
 

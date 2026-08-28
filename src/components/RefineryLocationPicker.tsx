@@ -11,11 +11,13 @@ import {
   REFINERY_TYPES,
   refineryTypeLabel,
 } from '@/lib/refinerySettings'
-import type { GlobalSettings, ProductionLocation, RefineryType } from '@/types'
+import { securityForSystem } from '@/lib/structureSettings'
+import type { GlobalSettings, ProductionLocation, RefineryType, SystemInfo } from '@/types'
 
 interface RefineryLocationPickerProps {
   settings: GlobalSettings
   onChange: (patch: Partial<GlobalSettings>) => void
+  systems?: SystemInfo[]
   size?: 'sm' | 'md'
 }
 
@@ -50,6 +52,7 @@ function matchesQuery(text: string, query: string): boolean {
 export function RefineryLocationPicker({
   settings,
   onChange,
+  systems,
   size = 'md',
 }: RefineryLocationPickerProps) {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -149,15 +152,24 @@ export function RefineryLocationPicker({
     const systemId = selectedLocation.solarSystemId
     if (systemId <= 0 || facility.reactionSystemId === systemId) return
     onChange({
-      reactionFacility: { ...settings.reactionFacility, reactionSystemId: systemId },
+      reactionFacility: {
+        ...settings.reactionFacility,
+        reactionSystemId: systemId,
+        reactionSystemSecurity: securityForSystem(
+          systems,
+          systemId,
+          settings.reactionFacility.reactionSystemSecurity ?? 1,
+        ),
+      },
     })
   }, [
     facility.reactionSystemId,
+    facility.reactionSystemSecurity,
     isLoading,
     onChange,
     selectedLocation,
-    settings.reactionFacility,
     settings.reactionLocationId,
+    systems,
   ])
 
   function selectPreset(type: RefineryType) {
@@ -177,6 +189,11 @@ export function RefineryLocationPicker({
       ...patchRefineryType(refineryType, {
         ...facility,
         reactionSystemId: location.solarSystemId || facility.reactionSystemId,
+        reactionSystemSecurity: securityForSystem(
+          systems,
+          location.solarSystemId || facility.reactionSystemId,
+          facility.reactionSystemSecurity ?? 1,
+        ),
       }),
     })
     setOpen(false)

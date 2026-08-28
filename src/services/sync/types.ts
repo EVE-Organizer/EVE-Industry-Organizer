@@ -22,6 +22,7 @@ import { SKILL_FIELDS } from '@/lib/skillFields'
 import {
   migrateManufacturingRigs,
   normalizeReactionFacility,
+  normalizeScienceFacility,
   rigPercentFromCombined,
 } from '@/lib/facilityModifiers'
 import { normalizeManufacturingRigs } from '@/lib/manufacturingRigs'
@@ -104,6 +105,8 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     skills: parsedSkills,
     manufacturingRigs: parsedRigs,
     reactionFacility: parsedReactionFacility,
+    copyFacility: parsedCopyFacility,
+    inventionFacility: parsedInventionFacility,
     ...rest
   } = parsed
 
@@ -153,6 +156,11 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
   manufacturingRigs = normalizeManufacturingRigs(manufacturingRigs)
 
   const reactionFacility = normalizeReactionFacility(parsedReactionFacility, manufacturingSystemId)
+  const copyFacility = normalizeScienceFacility(parsedCopyFacility, manufacturingSystemId)
+  const inventionFacility = normalizeScienceFacility(
+    parsedInventionFacility,
+    manufacturingSystemId,
+  )
 
   const hadPlayerStructure =
     structureType !== 'npc' &&
@@ -191,6 +199,8 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     structureJobCostBonusPercent,
     manufacturingRigs,
     reactionFacility,
+    copyFacility,
+    inventionFacility,
     priceMethod: rest.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
     priceWindow: rest.priceWindow ?? DEFAULT_SETTINGS.priceWindow,
     includeHaulCost: rest.includeHaulCost ?? DEFAULT_SETTINGS.includeHaulCost,
@@ -200,6 +210,10 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     productionLocationKind: rest.productionLocationKind ?? null,
     reactionLocationId: rest.reactionLocationId ?? null,
     reactionLocationKind: rest.reactionLocationKind ?? null,
+    copyLocationId: rest.copyLocationId ?? null,
+    copyLocationKind: rest.copyLocationKind ?? null,
+    inventionLocationId: rest.inventionLocationId ?? null,
+    inventionLocationKind: rest.inventionLocationKind ?? null,
     miningShipId: normalizeMiningShipId(
       (rest.miningShipId as MiningShipId | undefined) ?? DEFAULT_MINING_SHIP_ID,
       'ore',

@@ -51,4 +51,22 @@ export const GLOBAL_SETTING_TOOLTIPS = {
     'L-Set reaction rig time bonus for this reaction type.',
   reactionTaxPercent:
     'Owner tax for this reaction type shown in the in-game Reaction tooltip.',
+  copyFacility:
+    'Where you run copy jobs. Same hull types as manufacturing. Custom lets you paste hull TE and job-cost bonuses.',
+  inventionFacility:
+    'Where you run invention jobs. Same hull types as manufacturing. Custom lets you paste hull TE and job-cost bonuses.',
+  copySystemId:
+    'Solar system for copy jobs. Drives the copying cost index.',
+  inventionSystemId:
+    'Solar system for invention jobs. Drives the invention cost index.',
+  scienceHullTeBonusPercent:
+    'Custom hull time bonus for copy or invention when using Custom structure.',
+  scienceHullJobCostBonusPercent:
+    'Custom hull installation fee bonus for copy or invention when using Custom structure.',
+  scienceRigTeBonusPercent:
+    'Copy or invention time rig bonus from the in-game tooltip.',
+  scienceRigJobCostBonusPercent:
+    'Copy or invention job-cost rig bonus from the in-game tooltip.',
+  scienceTaxPercent:
+    'Owner tax on copy or invention jobs at this structure.',
 } as const

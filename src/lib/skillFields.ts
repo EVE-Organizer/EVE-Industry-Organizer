@@ -75,7 +75,7 @@ export const SKILL_FIELDS: SkillFieldDef[] = [
     skillId: 3403,
     label: 'Science',
     tooltip:
-      'Required by a small set of blueprints (e.g. some tech items). Prerequisite for Laboratory Operation. Used for the buildable filter and skill gap flags.',
+      'Cuts copy job time by 5% per level. Required by a small set of blueprints. Prerequisite for Laboratory Operation. Used for the buildable filter and skill gap flags.',
   },
   {
     key: 'accounting',

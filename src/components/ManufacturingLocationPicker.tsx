@@ -6,22 +6,82 @@ import { usePlayerStructureLocations } from '@/hooks/usePlayerStructureLocations
 import { findProductionLocation } from '@/lib/productionLocations'
 import { structureTypeFromTypeId } from '@/lib/structureTypeFromTypeId'
 import {
+  patchScienceStructureType,
   patchStructureType,
   patchManufacturingSystemFromList,
   patchManufacturingSystemIfStale,
+  patchScienceFacilityFromLocation,
+  scienceFacilityForSystem,
+  securityForSystem,
   STRUCTURE_TYPE_IDS,
   STRUCTURE_TYPES,
   structureTypeLabel,
+  type ScienceFacilityKey,
 } from '@/lib/structureSettings'
-import type { GlobalSettings, ProductionLocation, StructureType, SystemInfo } from '@/types'
+import { defaultScienceFacility } from '@/types'
+import type {
+  GlobalSettings,
+  ProductionLocation,
+  ProductionLocationKind,
+  ScienceFacilitySettings,
+  StructureType,
+  SystemInfo,
+} from '@/types'
+
+export type EngineeringActivity = 'manufacturing' | 'copy' | 'invention'
 
 interface ManufacturingLocationPickerProps {
   settings: GlobalSettings
   onChange: (patch: Partial<GlobalSettings>) => void
   systems?: SystemInfo[]
   size?: 'sm' | 'md'
+  activity?: EngineeringActivity
   /** Show buy-list inventory hint when a character station is selected (Plan page). */
   showInventoryHint?: boolean
+}
+
+function scienceFacilityKey(activity: 'copy' | 'invention'): ScienceFacilityKey {
+  return activity === 'copy' ? 'copyFacility' : 'inventionFacility'
+}
+
+function activityLocation(
+  settings: GlobalSettings,
+  activity: EngineeringActivity,
+): {
+  locationId: number | null | undefined
+  locationKind: ProductionLocationKind | null | undefined
+  structureType: StructureType
+  fallbackSystemId: number
+  facility?: ScienceFacilitySettings
+} {
+  if (activity === 'copy') {
+    const facility =
+      settings.copyFacility ?? defaultScienceFacility(settings.manufacturingSystemId)
+    return {
+      locationId: settings.copyLocationId,
+      locationKind: settings.copyLocationKind,
+      structureType: facility.structureType,
+      fallbackSystemId: facility.systemId,
+      facility,
+    }
+  }
+  if (activity === 'invention') {
+    const facility =
+      settings.inventionFacility ?? defaultScienceFacility(settings.manufacturingSystemId)
+    return {
+      locationId: settings.inventionLocationId,
+      locationKind: settings.inventionLocationKind,
+      structureType: facility.structureType,
+      fallbackSystemId: facility.systemId,
+      facility,
+    }
+  }
+  return {
+    locationId: settings.productionLocationId,
+    locationKind: settings.productionLocationKind,
+    structureType: settings.structureType,
+    fallbackSystemId: settings.manufacturingSystemId,
+  }
 }
 
 function LocationArt({
@@ -63,12 +123,20 @@ export function ManufacturingLocationPicker({
   onChange,
   systems,
   size = 'md',
+  activity = 'manufacturing',
   showInventoryHint = false,
 }: ManufacturingLocationPickerProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const current = activityLocation(settings, activity)
+  const scienceFacility =
+    activity === 'copy'
+      ? settings.copyFacility
+      : activity === 'invention'
+        ? settings.inventionFacility
+        : undefined
 
   const configured = useAuthStore((s) => s.configured)
   const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
@@ -78,25 +146,25 @@ export function ManufacturingLocationPicker({
     jumpsTo,
     isLoading,
     error,
-  } = usePlayerStructureLocations(settings.manufacturingSystemId, 'manufacturing')
+  } = usePlayerStructureLocations(current.fallbackSystemId, 'manufacturing')
 
   const selectedLocation = useMemo(
     () =>
       findProductionLocation(
         locations,
-        settings.productionLocationId,
-        settings.productionLocationKind,
+        current.locationId,
+        current.locationKind,
       ),
-    [locations, settings.productionLocationId, settings.productionLocationKind],
+    [locations, current.locationId, current.locationKind],
   )
 
   const triggerLabel = selectedLocation
     ? selectedLocation.name
-    : structureTypeLabel(settings.structureType)
+    : structureTypeLabel(current.structureType)
 
   const triggerStructureType = selectedLocation
     ? locationStructureType(selectedLocation)
-    : settings.structureType
+    : current.structureType
 
   const filteredLocations = useMemo(() => {
     const q = query.trim()
@@ -144,19 +212,27 @@ export function ManufacturingLocationPicker({
   }, [open])
 
   useEffect(() => {
-    if (settings.productionLocationId == null || isLoading) return
+    if (current.locationId == null || isLoading) return
     if (selectedLocation) return
-    onChange({ productionLocationId: null, productionLocationKind: null })
+    if (activity === 'copy') {
+      onChange({ copyLocationId: null, copyLocationKind: null })
+    } else if (activity === 'invention') {
+      onChange({ inventionLocationId: null, inventionLocationKind: null })
+    } else {
+      onChange({ productionLocationId: null, productionLocationKind: null })
+    }
   }, [
+    activity,
     activeCharacterId,
+    current.locationId,
     isLoading,
     onChange,
     selectedLocation,
-    settings.productionLocationId,
   ])
 
   // Keep build system + security aligned when location or SDE loads asynchronously.
   useEffect(() => {
+    if (activity !== 'manufacturing') return
     if (settings.productionLocationId == null || isLoading || !selectedLocation) return
     const patch = patchManufacturingSystemIfStale(
       systems,
@@ -168,6 +244,7 @@ export function ManufacturingLocationPicker({
     )
     if (patch) onChange(patch)
   }, [
+    activity,
     isLoading,
     onChange,
     selectedLocation,
@@ -177,25 +254,83 @@ export function ManufacturingLocationPicker({
     systems,
   ])
 
+  // Apply structure type and system when a saved copy/invention location loads.
+  useEffect(() => {
+    if (activity !== 'copy' && activity !== 'invention') return
+    if (current.locationId == null || isLoading || !selectedLocation) return
+    const patch = patchScienceFacilityFromLocation(
+      scienceFacilityKey(activity),
+      current.facility ?? scienceFacility,
+      locationStructureType(selectedLocation),
+      selectedLocation.solarSystemId,
+      systems,
+      settings.manufacturingSystemId,
+    )
+    if (patch) onChange(patch)
+  }, [
+    activity,
+    current.facility,
+    current.locationId,
+    isLoading,
+    onChange,
+    selectedLocation,
+    scienceFacility?.structureType,
+    scienceFacility?.systemId,
+    scienceFacility?.systemSecurity,
+    settings.manufacturingSystemId,
+    systems,
+  ])
+
   function selectPreset(type: StructureType) {
-    onChange({
-      productionLocationId: null,
-      productionLocationKind: null,
-      ...patchStructureType(type),
-    })
+    if (activity === 'copy' || activity === 'invention') {
+      const key = scienceFacilityKey(activity)
+      const facility = current.facility ?? settings[key]
+      onChange({
+        ...(activity === 'copy'
+          ? { copyLocationId: null, copyLocationKind: null }
+          : { inventionLocationId: null, inventionLocationKind: null }),
+        ...patchScienceStructureType(key, type, facility),
+      })
+    } else {
+      onChange({
+        productionLocationId: null,
+        productionLocationKind: null,
+        ...patchStructureType(type),
+      })
+    }
     setOpen(false)
   }
 
   function selectLocation(location: ProductionLocation) {
     const systemId = location.solarSystemId
-    onChange({
-      productionLocationId: location.locationId,
-      productionLocationKind: location.kind,
-      ...(systemId > 0
-        ? patchManufacturingSystemFromList(systems, systemId, settings.buildSystemSecurity ?? 1)
-        : {}),
-      ...patchStructureType(locationStructureType(location)),
-    })
+    const structureType = locationStructureType(location)
+    if (activity === 'copy' || activity === 'invention') {
+      const key = scienceFacilityKey(activity)
+      const base = current.facility ?? settings[key]
+      const facility =
+        systemId > 0
+          ? scienceFacilityForSystem(
+              base,
+              systemId,
+              securityForSystem(systems, systemId, base.systemSecurity ?? 1),
+            )
+          : base
+      onChange({
+        ...(activity === 'copy'
+          ? { copyLocationId: location.locationId, copyLocationKind: location.kind }
+          : { inventionLocationId: location.locationId, inventionLocationKind: location.kind }),
+        ...patchScienceStructureType(key, structureType, facility),
+      })
+    } else {
+      onChange({
+        productionLocationId: location.locationId,
+        productionLocationKind: location.kind,
+        ...(systemId > 0
+          ? patchManufacturingSystemFromList(systems, systemId, settings.buildSystemSecurity ?? 1)
+          : {}),
+        ...patchStructureType(structureType),
+      })
+    }
     setOpen(false)
   }
 
@@ -232,7 +367,13 @@ export function ManufacturingLocationPicker({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onMouseDown={(e) => e.stopPropagation()}
-                aria-label="Search manufacturing locations"
+                aria-label={
+                  activity === 'copy'
+                    ? 'Search copy locations'
+                    : activity === 'invention'
+                      ? 'Search invention locations'
+                      : 'Search manufacturing locations'
+                }
               />
             </div>
 
@@ -301,7 +442,7 @@ export function ManufacturingLocationPicker({
                     </li>
                   ) : null}
                   {filteredPresets.map((type) => {
-                    const selected = !selectedLocation && type === settings.structureType
+                    const selected = !selectedLocation && type === current.structureType
                     return (
                       <li key={type} role="option" aria-selected={selected}>
                         <button
@@ -327,11 +468,11 @@ export function ManufacturingLocationPicker({
 
       {error ? (
         <p className="text-xs text-error mt-1">
-          {error instanceof Error ? error.message : 'Failed to load manufacturing locations'}
+          {error instanceof Error ? error.message : 'Failed to load locations'}
         </p>
       ) : null}
 
-      {showInventoryHint && selectedLocation ? (
+      {showInventoryHint && activity === 'manufacturing' && selectedLocation ? (
         <p className="text-[11px] opacity-60 mt-1">
           Buy-list inventory matches {selectedLocation.name} for the nav bar character.
         </p>

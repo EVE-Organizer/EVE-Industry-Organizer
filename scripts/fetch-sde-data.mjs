@@ -161,6 +161,8 @@ function buildHubSystems(hubs, stations, systems) {
 function buildIndustrySystems(hubs, stations, mapSolarSystems, costIndices) {
   const mfgIndices = costIndices.manufacturing ?? costIndices
   const rxnIndices = costIndices.reaction ?? new Map()
+  const copyIndices = costIndices.copying ?? new Map()
+  const inventIndices = costIndices.invention ?? new Map()
 
   const stationById = new Map(stations.map((s) => [s.stationID, s]))
   const systemById = new Map(mapSolarSystems.map((s) => [num(s.solarSystemID), s]))
@@ -195,6 +197,10 @@ function buildIndustrySystems(hubs, stations, mapSolarSystems, costIndices) {
     if (costIndex !== undefined) entry.costIndex = costIndex
     const reactionCostIndex = rxnIndices.get(systemId)
     if (reactionCostIndex !== undefined) entry.reactionCostIndex = reactionCostIndex
+    const copyingCostIndex = copyIndices.get(systemId)
+    if (copyingCostIndex !== undefined) entry.copyingCostIndex = copyingCostIndex
+    const inventionCostIndex = inventIndices.get(systemId)
+    if (inventionCostIndex !== undefined) entry.inventionCostIndex = inventionCostIndex
     const hubId = hubIdBySystemId.get(systemId)
     if (hubId) entry.hubId = hubId
     results.push(entry)

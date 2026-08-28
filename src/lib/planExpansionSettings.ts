@@ -15,6 +15,8 @@ export function planExpansionSettingsKey(settings: GlobalSettings): string {
     buildSystemSecurity: settings.buildSystemSecurity,
     structureTaxPercent: settings.structureTaxPercent,
     reactionFacility: settings.reactionFacility,
+    copyFacility: settings.copyFacility,
+    inventionFacility: settings.inventionFacility,
     includeBlueprintCost: settings.includeBlueprintCost,
   })
 }

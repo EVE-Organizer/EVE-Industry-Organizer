@@ -524,8 +524,20 @@
     inset 0 1px 0 0 rgb(255 255 255 / 0.04),
     0 2px 8px -4px rgb(0 0 0 / 0.45);
 
-  &__grid {
-    @apply grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2 xl:grid-cols-4;
+  &__sections {
+    @apply flex flex-col gap-4;
+  }
+
+  &__section {
+    @apply flex min-w-0 flex-col gap-2;
+
+    &:not(:last-child) {
+      @apply border-b border-eve-border/50 pb-4;
+    }
+  }
+
+  &__row {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2;
   }
 
   &__field {
@@ -533,10 +545,6 @@
 
     .label {
       @apply min-h-[1.25rem] py-0;
-    }
-
-    &--wide {
-      @apply col-span-full mb-1;
     }
   }
 

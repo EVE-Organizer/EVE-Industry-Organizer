@@ -16,6 +16,7 @@ import type {
   HubMarketData,
   ManufacturingSettings,
   SetupCostBreakdown,
+  SystemInfo,
   TimeRange,
   TypeInfo,
 } from '@/types'
@@ -23,7 +24,7 @@ import {
   applyME,
   estimateJobCost,
   estimatedItemValue,
-  inventionBlueprintCostPerRun,
+  inventionBlueprintCostForSettings,
   materialCost,
   resolveBlueprintMeTe,
   revenueFromSale,
@@ -128,6 +129,8 @@ export interface FlatSetupInput {
   typeVolumes?: Map<number, number>
   avgVolume?: number
   volumeCapDays?: number
+  systems?: SystemInfo[]
+  t1Blueprint?: Pick<BlueprintInfo, 'materials'>
 }
 
 export interface FlatSetupResult {
@@ -253,19 +256,35 @@ function computeBlueprintAcquisition(
   jitaSpotPrices: Map<number, number> | undefined,
   contracts: ContractsData | null | undefined,
   priceCtx: PriceContext | undefined,
+  systems?: SystemInfo[],
+  t1Blueprint?: Pick<BlueprintInfo, 'materials'>,
 ): { charged: number; upfront: number; bpoUnitPrice: number; breakdown: BlueprintCostBreakdown } {
   const isCharge = isChargeProduct(productCategory)
   const include = settings.includeBlueprintCost && !isCharge
 
   if (blueprint.tier === 't2' && blueprint.invention) {
     const inv = blueprint.invention
-    const r = inventionBlueprintCostPerRun({
-      datacores: inv.datacores,
+    const r = inventionBlueprintCostForSettings({
+      blueprint,
+      t1Blueprint,
+      settings,
       prices,
-      baseChance: inv.baseChance,
-      runsPerBPC: inv.runsPerBPC,
-      skillLevel: settings.inventionSkillLevel,
+      systems,
     })
+    if (!r) {
+      return {
+        charged: 0,
+        upfront: 0,
+        bpoUnitPrice: 0,
+        breakdown: {
+          mode: 'invention',
+          charged: 0,
+          upfront: 0,
+          chargeExcluded: isCharge,
+          selectedHub,
+        },
+      }
+    }
     const charged = include && Number.isFinite(r.costPerRun) ? r.costPerRun * runs : 0
     return {
       charged,
@@ -339,6 +358,8 @@ export function computeFlatSetup(input: FlatSetupInput): FlatSetupResult {
     typeVolumes = new Map(),
     avgVolume = 0,
     volumeCapDays = 7,
+    systems,
+    t1Blueprint,
   } = input
 
   const { me } = resolveBlueprintMeTe(blueprint.tier, settings, undefined, blueprint)
@@ -380,6 +401,8 @@ export function computeFlatSetup(input: FlatSetupInput): FlatSetupResult {
     jitaSpotPrices,
     contracts,
     priceCtx,
+    systems,
+    t1Blueprint,
   )
 
   const operatingCost = matCost + jobCost + haulIn

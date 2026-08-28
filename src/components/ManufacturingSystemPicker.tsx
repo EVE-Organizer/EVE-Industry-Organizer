@@ -11,7 +11,7 @@ interface ManufacturingSystemPickerProps {
   className?: string
   size?: 'md' | 'sm'
   /** Which system cost index to show in search results. */
-  costIndexKind?: 'manufacturing' | 'reaction'
+  costIndexKind?: 'manufacturing' | 'reaction' | 'copying' | 'invention'
   disabled?: boolean
 }
 
@@ -27,10 +27,16 @@ function formatSecurity(security: number): string {
 
 function formatCostIndex(
   system: SystemInfo,
-  kind: 'manufacturing' | 'reaction',
+  kind: 'manufacturing' | 'reaction' | 'copying' | 'invention',
 ): string {
   const index =
-    kind === 'reaction' ? system.reactionCostIndex ?? system.costIndex : system.costIndex
+    kind === 'reaction'
+      ? system.reactionCostIndex ?? system.costIndex
+      : kind === 'copying'
+        ? system.copyingCostIndex ?? system.costIndex
+        : kind === 'invention'
+          ? system.inventionCostIndex ?? system.costIndex
+          : system.costIndex
   if (index === undefined) return ''
   return `${(index * 100).toFixed(2)}%`
 }

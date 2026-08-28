@@ -2,8 +2,10 @@
  * Research / manufacturing pipeline stages derived from an expanded plan.
  * Science pool: copy → invention. Manufacturing pool: manufacture + reaction.
  */
-import { inventionBlueprintCostPerRun } from '@/lib/cost'
+import { applyCopyTime, applyInventionTime, inventionBlueprintCostForSettings } from '@/lib/cost'
+import { resolveScienceModifiers } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
+import { defaultScienceFacility } from '@/types'
 import type {
   BlueprintInfo,
   GlobalSettings,
@@ -21,6 +23,7 @@ export interface PlanPipelineStage {
   pool: PlanJobPool
   /** Job runs / invention attempts. */
   runs: number
+  /** One copy job or one invention attempt (hours). Packed across science slots. */
   durationHours: number
   /** Stages that must finish before this one can start. */
   dependsOn: string[]
@@ -50,13 +53,12 @@ function inventionAttempts(
 ): number {
   const inv = blueprint.invention
   if (!inv) return 0
-  const invCost = inventionBlueprintCostPerRun({
-    datacores: inv.datacores,
+  const invCost = inventionBlueprintCostForSettings({
+    blueprint,
+    settings,
     prices,
-    baseChance: inv.baseChance,
-    runsPerBPC: inv.runsPerBPC,
-    skillLevel: settings.inventionSkillLevel,
   })
+  if (!invCost) return 0
   return Math.max(1, Math.ceil(manufactureRuns / Math.max(1, invCost.expectedRunsPerAttempt)))
 }
 
@@ -87,6 +89,14 @@ export function buildPlanPipeline(input: BuildPlanPipelineInput): PlanPipeline {
       const attempts = inventionAttempts(blueprint, node.runs, settings, prices)
       const copySeconds = blueprint.invention.copyTime ?? 0
       const inventSeconds = blueprint.invention.inventionTime ?? 0
+      const copyMods = resolveScienceModifiers(
+        settings.copyFacility ?? defaultScienceFacility(settings.manufacturingSystemId),
+      )
+      const inventMods = resolveScienceModifiers(
+        settings.inventionFacility ?? defaultScienceFacility(settings.manufacturingSystemId),
+      )
+      const advancedIndustry = settings.skills.advancedIndustry ?? 0
+      const science = settings.skills.science ?? 0
       const copyId = `copy-${node.productTypeId}`
       const inventId = `invent-${node.productTypeId}`
 
@@ -98,7 +108,9 @@ export function buildPlanPipeline(input: BuildPlanPipelineInput): PlanPipeline {
           activity: 'copy',
           pool: 'science',
           runs: attempts,
-          durationHours: (copySeconds * attempts) / 3600,
+          durationHours:
+            applyCopyTime(copySeconds, 1, science, advancedIndustry, copyMods.teBonusPercent) /
+            3600,
           dependsOn: [],
           blueprintTypeId: blueprint.invention.t1BlueprintTypeId,
         })
@@ -113,7 +125,9 @@ export function buildPlanPipeline(input: BuildPlanPipelineInput): PlanPipeline {
           activity: 'invention',
           pool: 'science',
           runs: attempts,
-          durationHours: (inventSeconds * attempts) / 3600,
+          durationHours:
+            applyInventionTime(inventSeconds, 1, advancedIndustry, inventMods.teBonusPercent) /
+            3600,
           dependsOn: copySeconds > 0 ? [copyId] : [],
           blueprintTypeId: blueprint.invention.t1BlueprintTypeId,
           datacoreTypeIds: blueprint.invention.datacores.map((d) => d.typeId),

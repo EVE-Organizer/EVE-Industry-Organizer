@@ -1,8 +1,18 @@
-import type { BlueprintInfo, BlueprintMaterial, BlueprintTier, GlobalSettings, ManufacturingSettings, StructureModifiers } from '@/types'
+import type {
+  BlueprintInfo,
+  BlueprintMaterial,
+  BlueprintTier,
+  GlobalSettings,
+  ManufacturingSettings,
+  StructureModifiers,
+  SystemInfo,
+} from '@/types'
+import { scienceCostIndex } from '@/lib/structureSettings'
 import { isReactionRecipe, recipeKind } from '@/lib/recipes'
 import {
   resolveManufacturingModifiers,
   resolveRecipeModifiers,
+  resolveScienceModifiers,
 } from '@/lib/facilityModifiers'
 import {
   BATCH_SIZE_STEP,
@@ -11,6 +21,7 @@ import {
   MIN_BATCH_SIZE,
   T2_INVENTED_ME,
   T2_INVENTED_TE,
+  defaultScienceFacility,
 } from '@/types'
 
 const ME_BONUS = 0.01
@@ -25,6 +36,8 @@ const INDUSTRY_BONUS = 0.04
 const ADVANCED_INDUSTRY_BONUS = 0.03
 /** Reactions skill: 4% reaction time reduction per level. */
 const REACTIONS_BONUS = 0.04
+/** Science skill: 5% copy time reduction per level. */
+const SCIENCE_COPY_BONUS = 0.05
 
 /**
  * Rough EIV fraction for full ME10 + TE20 research, charged once per BPO.
@@ -62,6 +75,10 @@ export function advancedIndustryTimeFactor(advancedIndustry: number): number {
 
 export function reactionsTimeFactor(reactions: number): number {
   return 1 - reactions * REACTIONS_BONUS
+}
+
+export function scienceCopyTimeFactor(science: number): number {
+  return 1 - science * SCIENCE_COPY_BONUS
 }
 
 /**
@@ -125,6 +142,60 @@ export function reactionTimePerRun(
   structureTeBonusPercent = 0,
 ): number {
   return applyReactionTime(baseTimeSeconds, 1, reactions, structureTeBonusPercent)
+}
+
+export function applyCopyTime(
+  baseTimeSeconds: number,
+  runs: number,
+  science: number,
+  advancedIndustry: number,
+  structureTeBonusPercent = 0,
+): number {
+  return (
+    baseTimeSeconds *
+    runs *
+    scienceCopyTimeFactor(science) *
+    advancedIndustryTimeFactor(advancedIndustry) *
+    bonusFactor(structureTeBonusPercent)
+  )
+}
+
+export function applyInventionTime(
+  baseTimeSeconds: number,
+  runs: number,
+  advancedIndustry: number,
+  structureTeBonusPercent = 0,
+): number {
+  return (
+    baseTimeSeconds *
+    runs *
+    advancedIndustryTimeFactor(advancedIndustry) *
+    bonusFactor(structureTeBonusPercent)
+  )
+}
+
+export function inventionScienceFees(args: {
+  settings: GlobalSettings
+  t2Materials: { typeId: number; quantity: number }[]
+  t1Materials?: { typeId: number; quantity: number }[]
+  prices: Map<number, number>
+  copyingCostIndex: number
+  inventionCostIndex: number
+}): { copyFeePerAttempt: number; inventionFeePerAttempt: number } {
+  const copyFacility =
+    args.settings.copyFacility ?? defaultScienceFacility(args.settings.manufacturingSystemId)
+  const inventionFacility =
+    args.settings.inventionFacility ?? defaultScienceFacility(args.settings.manufacturingSystemId)
+  const copyMods = resolveScienceModifiers(copyFacility)
+  const inventMods = resolveScienceModifiers(inventionFacility)
+  const copyEiv = args.t1Materials
+    ? estimatedItemValue(args.t1Materials, 1, args.prices)
+    : 0
+  const inventEiv = estimatedItemValue(args.t2Materials, 1, args.prices)
+  return {
+    copyFeePerAttempt: estimateJobCost(copyEiv, args.copyingCostIndex, copyMods),
+    inventionFeePerAttempt: estimateJobCost(inventEiv, args.inventionCostIndex, inventMods),
+  }
 }
 
 export function manufacturingTimePerRun(
@@ -422,6 +493,7 @@ export function inventionBlueprintCostPerRun({
   runsPerBPC,
   skillLevel,
   copyFeePerAttempt = 0,
+  inventionFeePerAttempt = 0,
 }: {
   datacores: BlueprintMaterial[]
   prices: Map<number, number>
@@ -429,13 +501,56 @@ export function inventionBlueprintCostPerRun({
   runsPerBPC: number
   skillLevel: number
   copyFeePerAttempt?: number
+  inventionFeePerAttempt?: number
 }): InventionCostResult {
   const datacoreCost = materialCost(datacores, prices)
-  const attemptCost = datacoreCost + copyFeePerAttempt
+  const attemptCost = datacoreCost + copyFeePerAttempt + inventionFeePerAttempt
   // Encryption and both datacore skills add +1% per level (multiplicative).
   const skillFactor = 1 + skillLevel * 0.01
   const chance = Math.min(1, baseChance * skillFactor * skillFactor * skillFactor)
   const expectedRunsPerAttempt = chance * runsPerBPC
   const costPerRun = expectedRunsPerAttempt > 0 ? attemptCost / expectedRunsPerAttempt : Infinity
   return { datacoreCost, attemptCost, chance, expectedRunsPerAttempt, costPerRun }
+}
+
+export function inventionBlueprintCostForSettings(args: {
+  blueprint: BlueprintInfo
+  t1Blueprint?: Pick<BlueprintInfo, 'materials'>
+  settings: GlobalSettings
+  prices: Map<number, number>
+  systems?: SystemInfo[]
+  fallbackCostIndex?: number
+}): InventionCostResult | null {
+  const inv = args.blueprint.invention
+  if (!inv) return null
+  const fallback = args.fallbackCostIndex ?? 0
+  const fees = inventionScienceFees({
+    settings: args.settings,
+    t2Materials: args.blueprint.materials,
+    t1Materials: args.t1Blueprint?.materials,
+    prices: args.prices,
+    copyingCostIndex: scienceCostIndex(
+      args.systems,
+      (args.settings.copyFacility ?? defaultScienceFacility(args.settings.manufacturingSystemId))
+        .systemId,
+      'copying',
+      fallback,
+    ),
+    inventionCostIndex: scienceCostIndex(
+      args.systems,
+      (args.settings.inventionFacility ??
+        defaultScienceFacility(args.settings.manufacturingSystemId)).systemId,
+      'invention',
+      fallback,
+    ),
+  })
+  return inventionBlueprintCostPerRun({
+    datacores: inv.datacores,
+    prices: args.prices,
+    baseChance: inv.baseChance,
+    runsPerBPC: inv.runsPerBPC,
+    skillLevel: args.settings.inventionSkillLevel,
+    copyFeePerAttempt: fees.copyFeePerAttempt,
+    inventionFeePerAttempt: fees.inventionFeePerAttempt,
+  })
 }

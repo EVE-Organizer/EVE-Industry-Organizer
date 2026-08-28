@@ -335,16 +335,28 @@ export async function getMarketHistory(
 export async function getCostIndices(forceRefresh = false): Promise<{
   manufacturing: Record<number, number>
   reaction: Record<number, number>
+  copying: Record<number, number>
+  invention: Record<number, number>
 }> {
   const key = cacheKey('esi', 'costIndices', {})
 
   if (!forceRefresh) {
-    const cached = getCached<{ manufacturing: Record<number, number>; reaction: Record<number, number> }>(key)
+    const cached = getCached<{
+      manufacturing: Record<number, number>
+      reaction: Record<number, number>
+      copying: Record<number, number>
+      invention: Record<number, number>
+    }>(key)
     if (cached && !cached.stale) return cached.data
   }
 
   return dedupe(key, async () => {
-    const cached = getCached<{ manufacturing: Record<number, number>; reaction: Record<number, number> }>(key)
+    const cached = getCached<{
+      manufacturing: Record<number, number>
+      reaction: Record<number, number>
+      copying: Record<number, number>
+      invention: Record<number, number>
+    }>(key)
     try {
       await throttle()
       const res = await fetch(`${ESI_BASE}/industry/systems/`)
@@ -353,17 +365,23 @@ export async function getCostIndices(forceRefresh = false): Promise<{
       const systems = (await res.json()) as { solar_system_id: number; cost_indices: { activity: string; cost_index: number }[] }[]
       const manufacturing: Record<number, number> = {}
       const reaction: Record<number, number> = {}
+      const copying: Record<number, number> = {}
+      const invention: Record<number, number> = {}
       for (const sys of systems) {
         const mfg = sys.cost_indices.find((c) => c.activity === 'manufacturing')
         const rxn = sys.cost_indices.find((c) => c.activity === 'reaction')
+        const copy = sys.cost_indices.find((c) => c.activity === 'copying')
+        const invent = sys.cost_indices.find((c) => c.activity === 'invention')
         if (mfg) manufacturing[sys.solar_system_id] = mfg.cost_index
         if (rxn) reaction[sys.solar_system_id] = rxn.cost_index
+        if (copy) copying[sys.solar_system_id] = copy.cost_index
+        if (invent) invention[sys.solar_system_id] = invent.cost_index
       }
-      const data = { manufacturing, reaction }
+      const data = { manufacturing, reaction, copying, invention }
       setCached(key, data, 'esi', TTL.costIndex.fresh, TTL.costIndex.stale)
       return data
     } catch {
-      return cached?.data ?? { manufacturing: {}, reaction: {} }
+      return cached?.data ?? { manufacturing: {}, reaction: {}, copying: {}, invention: {} }
     }
   })
 }

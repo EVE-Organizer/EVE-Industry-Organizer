@@ -70,13 +70,19 @@ export async function fetchCostIndices() {
   const systems = await res.json()
   const manufacturing = new Map()
   const reaction = new Map()
+  const copying = new Map()
+  const invention = new Map()
   for (const sys of systems) {
     const mfg = sys.cost_indices.find((c) => c.activity === 'manufacturing')
     const rxn = sys.cost_indices.find((c) => c.activity === 'reaction')
+    const copy = sys.cost_indices.find((c) => c.activity === 'copying')
+    const invent = sys.cost_indices.find((c) => c.activity === 'invention')
     if (mfg) manufacturing.set(sys.solar_system_id, mfg.cost_index)
     if (rxn) reaction.set(sys.solar_system_id, rxn.cost_index)
+    if (copy) copying.set(sys.solar_system_id, copy.cost_index)
+    if (invent) invention.set(sys.solar_system_id, invent.cost_index)
   }
-  return { manufacturing, reaction }
+  return { manufacturing, reaction, copying, invention }
 }
 
 export function collectBlueprintTypeIds(blueprints) {
