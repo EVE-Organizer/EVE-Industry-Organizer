@@ -231,14 +231,29 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
   return jobs.filter((j) => j.startHour < windowHours)
 }
 
-/** Clock time from plan start until this product's last scheduled job finishes. */
+export function isSciencePlanJob(job: ScheduledPlanJob): boolean {
+  return job.pool === 'science' || job.activity === 'copy' || job.activity === 'invention'
+}
+
+/** Clock time from plan start until this product's last production job finishes. */
 export function productReadyHours(jobs: ScheduledPlanJob[], productTypeId: number): number | null {
   let end = -1
   for (const job of jobs) {
     if (job.productTypeId !== productTypeId) continue
+    if (isSciencePlanJob(job)) continue
     if (job.endHour > end) end = job.endHour
   }
   return end >= 0 ? end : null
+}
+
+export function readyHoursByProductId(jobs: ScheduledPlanJob[]): Map<number, number> {
+  const map = new Map<number, number>()
+  for (const job of jobs) {
+    if (isSciencePlanJob(job)) continue
+    const prev = map.get(job.productTypeId) ?? 0
+    if (job.endHour > prev) map.set(job.productTypeId, job.endHour)
+  }
+  return map
 }
 
 export function scheduledDurationHours(jobs: ScheduledPlanJob[], productTypeId: number): number {

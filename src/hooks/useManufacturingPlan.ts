@@ -34,11 +34,13 @@ export function useManufacturingPlan(
       return {
         nodes: [],
         jobs: [],
+        productionJobs: [],
         pipeline: null,
         simulations: new Map(),
         slots: mfgSlots,
         scienceSlots,
         windowHours: 1,
+        productionWindowHours: 1,
         warnings: [] as { productTypeId: number; message: string }[],
         missingPriceTypeIds: [] as number[],
         hasReliablePrices: true,
@@ -69,7 +71,14 @@ export function useManufacturingPlan(
       pipeline,
       blueprints,
     })
+    const productionJobs = schedulePlanJobs({
+      nodes: expanded.nodes,
+      slots: expanded.slots,
+      windowHours: Number.POSITIVE_INFINITY,
+      blueprints,
+    })
     const windowHours = windowHoursFromJobs(jobs)
+    const productionWindowHours = windowHoursFromJobs(productionJobs)
     const simulations = includeSimulation
       ? simulatePlanFlow({
           nodes: expanded.nodes,
@@ -81,11 +90,13 @@ export function useManufacturingPlan(
     return {
       nodes: expanded.nodes,
       jobs,
+      productionJobs,
       pipeline,
       simulations,
       slots: expanded.slots,
       scienceSlots: expanded.scienceSlots,
       windowHours,
+      productionWindowHours,
       warnings: [...expanded.warnings, ...detectOverUnder(expanded.nodes)],
       missingPriceTypeIds: expanded.missingPriceTypeIds,
       hasReliablePrices: expanded.missingPriceTypeIds.length === 0,

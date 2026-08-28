@@ -129,8 +129,8 @@ export function inGameRunsFromDurationHours(
 
 /**
  * Runs so this product is ready by `targetReadyHours` on the timeline.
- * Subtracts wait time (copy, invention, sub-builds) instead of treating the
- * target as this job's industry timer (which would inflate runs).
+ * Subtracts wait time for sub-builds (not copy, invention, or other research)
+ * instead of treating the target as this job's industry timer.
  */
 export function runsForOverallReadyHours(input: {
   targetReadyHours: number
@@ -274,7 +274,6 @@ export function syncRootEntry(
   root: PlanRootEntry,
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
-  _parallelLines = IN_GAME_JOB_LINES,
   meTeOverride?: PlanNodeOverride,
 ): PlanRootEntry {
   if (!blueprint) return root
@@ -309,7 +308,6 @@ export function applyRootEntryPatch(
   patch: Partial<PlanRootEntry>,
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
-  _parallelLines = IN_GAME_JOB_LINES,
   meTeOverride?: PlanNodeOverride,
 ): PlanRootEntry {
   const next = { ...root, ...patch }
@@ -340,18 +338,39 @@ export function applyRootEntryPatch(
   return next
 }
 
+export function applyRootOverallReadyHours(
+  root: PlanRootEntry,
+  targetReadyHours: number,
+  currentReadyHours: number | null,
+  currentJobHours: number,
+  blueprint: BlueprintInfo | undefined,
+  settings: GlobalSettings,
+  meTeOverride?: PlanNodeOverride,
+): PlanRootEntry {
+  if (!blueprint) return root
+  const runs = runsForOverallReadyHours({
+    targetReadyHours,
+    currentReadyHours,
+    currentJobHours,
+    currentRuns: root.runs,
+    blueprint,
+    settings,
+    meTeOverride,
+  })
+  return applyRootEntryPatch(root, { runs }, blueprint, settings, meTeOverride)
+}
+
 export function bpcCountForRuns(runs: number, runsPerBpc: number): number {
   const per = Math.max(1, runsPerBpc)
   return Math.max(1, Math.ceil(runs / per))
 }
 
-/** Resolve runs after a runs or job-time edit (uses concurrentCopies, not full skill slots). */
+/** Resolve runs after a runs or job-time edit. */
 export function resolveRunsFromPatch(
   currentRuns: number,
   patch: { runs?: number; productionDurationHours?: number },
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
-  _concurrentCopies: number,
   meTeOverride?: PlanNodeOverride,
 ): number {
   if (patch.runs != null) return patch.runs

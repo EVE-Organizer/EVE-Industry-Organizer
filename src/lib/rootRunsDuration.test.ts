@@ -146,14 +146,13 @@ describe('resolveRunsFromPatch', () => {
       { productionDurationHours: 24 },
       blueprint,
       DEFAULT_SETTINGS,
-      3,
     )
     expect(runs).toBe(inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24))
     expect(runs).not.toBe(runsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24, 3))
   })
 
   it('returns explicit runs when provided', () => {
-    expect(resolveRunsFromPatch(100, { runs: 150 }, blueprint, DEFAULT_SETTINGS, 3)).toBe(150)
+    expect(resolveRunsFromPatch(100, { runs: 150 }, blueprint, DEFAULT_SETTINGS)).toBe(150)
   })
 })
 

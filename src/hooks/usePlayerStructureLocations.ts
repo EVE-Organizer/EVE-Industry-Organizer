@@ -46,9 +46,12 @@ export function usePlayerStructureLocations(
   const publicQuery = useNearbyPublicStructures(originSystemId, kind)
 
   const locations = useMemo(() => {
-    const ranged = playerStructuresInRange(personal, nearbySystems)
+    // Keep every citadel from jobs/assets/corp/BPs. Jump range is only for the
+    // public catalog; using it on personal rows hid structures after origin
+    // fell back to the selected build/reaction system.
+    const known = playerStructuresInRange(personal, null)
     const publicNear = publicQuery.data?.locations ?? []
-    const merged = mergeProductionLocations(ranged, publicNear)
+    const merged = mergeProductionLocations(known, publicNear)
     const filtered = merged.filter((loc) => {
       if (kind === 'manufacturing') return !isRefineryStructureTypeId(loc.structureTypeId)
       return !isEngineeringStructureTypeId(loc.structureTypeId)
@@ -78,7 +81,7 @@ export function usePlayerStructureLocations(
     originSystemId,
     nearbySystems,
     jumpsTo,
-    isLoading: locationsQuery.isLoading || publicQuery.isLoading,
+    isLoading: locationsQuery.isLoading,
     error: locationsQuery.error ?? publicQuery.error ?? null,
   }
 }

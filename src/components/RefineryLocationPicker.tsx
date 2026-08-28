@@ -240,7 +240,8 @@ export function RefineryLocationPicker({
                     <li className="px-3 py-2 text-xs opacity-60">Loading locations…</li>
                   ) : !hasSearch && locations.length === 0 ? (
                     <li className="px-3 py-2 text-xs opacity-60">
-                      No refineries within 3 jumps of this character. Private citadels still need
+                      No structures from this character's jobs, assets, or corp, and no public
+                      refineries within 3 jumps. Private citadels still need
                       corp access or a prior dock.
                     </li>
                   ) : (

@@ -23,5 +23,5 @@ export function isPlayerStructureTypeId(typeId: number | undefined): boolean {
 }
 
 export function isEngineeringStructureTypeId(typeId: number | undefined): boolean {
-  return typeId === 35825 || typeId === 35826 || typeId === 35827
+  return isPlayerStructureTypeId(typeId)
 }

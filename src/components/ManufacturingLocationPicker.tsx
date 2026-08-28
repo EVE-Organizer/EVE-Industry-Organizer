@@ -257,8 +257,8 @@ export function ManufacturingLocationPicker({
                     <li className="px-3 py-2 text-xs opacity-60">Loading locations…</li>
                   ) : !hasSearch && locations.length === 0 ? (
                     <li className="px-3 py-2 text-xs opacity-60">
-                      No engineering complexes within 3 jumps of this character. Private citadels
-                      still need corp access or a prior dock.
+                      No structures from this character's jobs, assets, or corp, and no public
+                      engineering complexes within 3 jumps.
                     </li>
                   ) : (
                     filteredLocations.map((location) => {

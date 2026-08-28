@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildPlanPipeline } from '@/lib/planPipeline'
-import { schedulePlanJobs, detectOverUnder, productReadyHours, scheduledDurationHours, windowHoursFromJobs } from '@/lib/planScheduler'
+import { schedulePlanJobs, detectOverUnder, productReadyHours, readyHoursByProductId, scheduledDurationHours, windowHoursFromJobs } from '@/lib/planScheduler'
 import { simulatePlanFlow } from '@/lib/planSimulator'
 import { DEFAULT_SETTINGS } from '@/types'
 import type { BlueprintInfo, PlanNode } from '@/types'
@@ -243,19 +243,33 @@ describe('schedulePlanJobs', () => {
     expect(inventJob).toBeDefined()
     expect(mfgJob).toBeDefined()
     expect(mfgJob!.startHour).toBeGreaterThanOrEqual(inventJob!.endHour - 1e-6)
+
+    const productionOnly = schedulePlanJobs({
+      nodes,
+      slots: 3,
+      windowHours: 500,
+      blueprints,
+    })
+    const productionMfg = productionOnly.find((j) => j.pool !== 'science' && j.productTypeId === productTypeId)
+    expect(productionMfg).toBeDefined()
+    expect(productionMfg!.startHour).toBeLessThan(mfgJob!.startHour)
+    expect(productReadyHours(productionOnly, productTypeId)).toBeLessThan(
+      productReadyHours(jobs, productTypeId) ?? 0,
+    )
   })
 })
 
 describe('productReadyHours', () => {
-  it('returns the latest finish hour for that product', () => {
+  it('returns the latest production finish and ignores copy and invention', () => {
     const jobs = [
-      { productTypeId: 1, name: 'A', slot: 0, startHour: 1894, endHour: 2063, runs: 1, outputQty: 1 },
-      { productTypeId: 1, name: 'A copy', slot: 0, startHour: 0, endHour: 10, runs: 1, outputQty: 1 },
-      { productTypeId: 2, name: 'B', slot: 0, startHour: 0, endHour: 50, runs: 1, outputQty: 1 },
+      { productTypeId: 1, name: 'A', slot: 0, startHour: 1894, endHour: 2063, runs: 1, outputQty: 1, activity: 'manufacture' as const, pool: 'manufacturing' as const },
+      { productTypeId: 1, name: 'A copy', slot: 0, startHour: 0, endHour: 3000, runs: 1, outputQty: 1, activity: 'copy' as const, pool: 'science' as const },
+      { productTypeId: 2, name: 'B', slot: 0, startHour: 0, endHour: 50, runs: 1, outputQty: 1, activity: 'manufacture' as const, pool: 'manufacturing' as const },
     ]
     expect(productReadyHours(jobs, 1)).toBe(2063)
     expect(productReadyHours(jobs, 2)).toBe(50)
     expect(productReadyHours(jobs, 99)).toBeNull()
+    expect(readyHoursByProductId(jobs).get(1)).toBe(2063)
   })
 })
 

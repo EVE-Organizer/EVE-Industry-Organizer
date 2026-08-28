@@ -43,15 +43,6 @@ interface PlanRootListProps {
     patch: { runs?: number; productionDurationHours?: number; overallDurationHours?: number },
   ) => void
   onSetAllDuration?: (hours: number, mode: 'production' | 'overall') => void
-  onFitRunsToOverall?: (
-    targets: Array<{
-      rootId?: string
-      productTypeId: number
-      targetReadyHours: number
-      jobHours: number
-      currentRuns: number
-    }>,
-  ) => void
   onDuplicate?: (rootId: string) => void
   onToggleEnabled?: (rootId: string, enabled: boolean) => void
   onRemove?: (rootId: string) => void
@@ -309,7 +300,6 @@ export function PlanRootList({
   readOnly = false,
   onChange,
   onSetAllDuration,
-  onFitRunsToOverall,
   onDuplicate,
   onToggleEnabled,
   onRemove,
@@ -384,22 +374,7 @@ export function PlanRootList({
               <button
                 type="button"
                 className={`btn btn-ghost btn-xs join-item ${overallMode ? 'btn-active' : ''}`}
-                onClick={() => {
-                  if (!readOnly && onFitRunsToOverall) {
-                    onFitRunsToOverall(
-                      rows
-                        .filter((row) => row.enabled !== false)
-                        .map((row) => ({
-                          rootId: row.rootId,
-                          productTypeId: row.productTypeId,
-                          targetReadyHours: row.jobTimeHours,
-                          jobHours: row.jobTimeHours,
-                          currentRuns: row.runs,
-                        })),
-                    )
-                  }
-                  setDurationMode('overall')
-                }}
+                onClick={() => setDurationMode('overall')}
               >
                 Overall
               </button>
@@ -447,7 +422,7 @@ export function PlanRootList({
                 <Tooltip
                   text={
                     overallMode
-                      ? 'Ready-by time for this product. Runs are sized so the chain finishes by then, not so this job alone lasts that long.'
+                      ? 'Ready-by time for this product from manufacture and reaction jobs only. Copy, invention, and other research are left out.'
                       : 'This job\'s industry timer (hours:minutes:seconds)'
                   }
                   placement="top"
@@ -711,7 +686,7 @@ export function PlanRootList({
       )}
       <p className="text-[10px] text-base-content/40 px-4 pb-3 pt-2 sm:px-5">
         {overallMode
-          ? 'Overall is the ready-by time. Runs shrink to fit copy, invention, and sub-builds inside that clock. They do not grow as if this were one long industry job.'
+          ? 'Overall is manufacture and reaction chain time, including sub-builds. Copy, invention, and other research are not counted.'
           : 'Production is this job\'s industry timer. Editing duration or runs keeps the other field in sync. Set all applies the same timer to every job.'}
       </p>
     </PlanChainSection>
