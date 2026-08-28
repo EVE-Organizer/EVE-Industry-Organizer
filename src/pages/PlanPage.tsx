@@ -1041,7 +1041,6 @@ export function PlanPage() {
               {data ? (
                 <div className={isSharedView ? 'pointer-events-none opacity-80' : undefined}>
                   <PlanFacilityControls
-                    className="mb-4"
                     settings={activeSettings}
                     onChange={isSharedView ? () => {} : updateSettings}
                     systems={data.systems}

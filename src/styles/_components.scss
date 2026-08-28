@@ -445,11 +445,11 @@
   }
 
   &__body {
-    @apply flex flex-col gap-0 p-4 sm:p-5;
+    @apply flex flex-col gap-6 p-4 sm:p-5;
   }
 
   &__compose {
-    @apply flex flex-col gap-3 pb-4;
+    @apply flex flex-col gap-3;
 
     &:has(.plan-search-wrap--open) {
       /* Jobs table sits below in DOM and steals clicks once the plan grows. */
@@ -514,7 +514,7 @@
 }
 
 .plan-facility-controls {
-  @apply mb-0 rounded-lg border border-eve-border/80 px-3 py-3 sm:px-4;
+  @apply rounded-lg border border-eve-border/80 px-3 py-3 sm:px-4;
   background-image: linear-gradient(
     145deg,
     rgb(48 54 61 / 0.35) 0%,
