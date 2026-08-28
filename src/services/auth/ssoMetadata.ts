@@ -16,15 +16,20 @@ export const EVE_SCOPES = [
   'esi-corporations.read_structures.v1',
   'esi-assets.read_corporation_assets.v1',
   'esi-universe.read_structures.v1',
+  'esi-location.read_location.v1',
 ] as const
 
 export const EVE_BLUEPRINT_SCOPE = 'esi-characters.read_blueprints.v1' as const
+export const EVE_LOCATION_SCOPE = 'esi-location.read_location.v1' as const
 
 export type EveScope = (typeof EVE_SCOPES)[number]
 
+/** Location is requested on login but not required to use industry data. */
+const REQUIRED_SCOPES = EVE_SCOPES.filter((scope) => scope !== EVE_LOCATION_SCOPE)
+
 export function missingScopes(granted: readonly string[]): EveScope[] {
   const set = new Set(granted)
-  return EVE_SCOPES.filter((scope) => !set.has(scope))
+  return REQUIRED_SCOPES.filter((scope) => !set.has(scope))
 }
 
 export function hasAllScopes(granted: readonly string[]): boolean {

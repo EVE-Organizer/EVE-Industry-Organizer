@@ -27,6 +27,14 @@ export async function refreshCharacterApiCaches(
     ...invalidateOnly,
   })
   await queryClient.invalidateQueries({
+    queryKey: ['nearby-public-structures', characterId],
+    ...invalidateOnly,
+  })
+  await queryClient.invalidateQueries({
+    queryKey: ['character-solar-system', characterId],
+    ...invalidateOnly,
+  })
+  await queryClient.invalidateQueries({
     queryKey: ['character-blueprints', characterId],
     ...invalidateOnly,
   })

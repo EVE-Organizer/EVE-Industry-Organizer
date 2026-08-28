@@ -21,3 +21,7 @@ export function structureTypeFromTypeId(typeId: number | undefined): StructureTy
 export function isPlayerStructureTypeId(typeId: number | undefined): boolean {
   return typeId != null && typeId in TYPE_ID_TO_STRUCTURE
 }
+
+export function isEngineeringStructureTypeId(typeId: number | undefined): boolean {
+  return typeId === 35825 || typeId === 35826 || typeId === 35827
+}

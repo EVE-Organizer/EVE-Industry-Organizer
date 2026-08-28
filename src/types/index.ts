@@ -669,6 +669,7 @@ export interface ProductionLocation {
     | 'industry_job'
     | 'blueprint'
     | 'station'
+    | 'public_structure'
 }
 
 export interface UserData {

@@ -141,6 +141,46 @@ export async function buildProductionLocations(input: {
   return locations.sort((a, b) => a.name.localeCompare(b.name))
 }
 
+export const PLAYER_STRUCTURE_JUMP_RADIUS = 3
+
+export function inferOriginSystemId(locations: ProductionLocation[]): number | null {
+  const counts = new Map<number, number>()
+  for (const loc of locations) {
+    if (loc.kind !== 'structure' || loc.solarSystemId <= 0) continue
+    counts.set(loc.solarSystemId, (counts.get(loc.solarSystemId) ?? 0) + 1)
+  }
+  let best: number | null = null
+  let bestCount = 0
+  for (const [systemId, count] of counts) {
+    if (count > bestCount) {
+      best = systemId
+      bestCount = count
+    }
+  }
+  return best
+}
+
+export function playerStructuresInRange(
+  locations: ProductionLocation[],
+  nearbySystems: Set<number> | null,
+): ProductionLocation[] {
+  const player = locations.filter((loc) => loc.kind === 'structure')
+  if (!nearbySystems) return player
+  return player.filter((loc) => loc.solarSystemId <= 0 || nearbySystems.has(loc.solarSystemId))
+}
+
+export function mergeProductionLocations(
+  ...lists: ProductionLocation[][]
+): ProductionLocation[] {
+  const byId = new Map<string, ProductionLocation>()
+  for (const list of lists) {
+    for (const loc of list) {
+      if (!byId.has(loc.id)) byId.set(loc.id, loc)
+    }
+  }
+  return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name))
+}
+
 export function findProductionLocation(
   locations: ProductionLocation[],
   locationId: number | null | undefined,

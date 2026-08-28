@@ -5,6 +5,10 @@ const TYPE_ID_TO_REFINERY: Record<number, RefineryType> = {
   35836: 'tatara',
 }
 
+export function isRefineryStructureTypeId(typeId: number | undefined): boolean {
+  return typeId === 35835 || typeId === 35836
+}
+
 export function refineryTypeFromTypeId(
   typeId: number | undefined,
   kind: ProductionLocationKind,

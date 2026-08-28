@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { EveImage } from '@/components/EveImage'
 import { useAuthStore } from '@/stores/authStore'
 import { useAuthScopes } from '@/hooks/useAuthScopes'
-import { useProductionLocations } from '@/hooks/useCharacterIndustryData'
+import { usePlayerStructureLocations } from '@/hooks/usePlayerStructureLocations'
 import { findProductionLocation } from '@/lib/productionLocations'
 import { structureTypeFromTypeId } from '@/lib/structureTypeFromTypeId'
 import {
@@ -73,9 +73,12 @@ export function ManufacturingLocationPicker({
   const configured = useAuthStore((s) => s.configured)
   const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
   const { hasAll, missing } = useAuthScopes(activeCharacterId)
-  const { data: locations = [], isLoading, error } = useProductionLocations(
-    configured && activeCharacterId != null ? activeCharacterId : null,
-  )
+  const {
+    locations,
+    jumpsTo,
+    isLoading,
+    error,
+  } = usePlayerStructureLocations(settings.manufacturingSystemId, 'manufacturing')
 
   const selectedLocation = useMemo(
     () =>
@@ -242,7 +245,7 @@ export function ManufacturingLocationPicker({
                 <>
                   {!hasSearch ? (
                     <li className="menu-title px-3 py-1.5 text-[10px] uppercase tracking-wide opacity-50">
-                      Your locations
+                      Player structures (3 jumps)
                     </li>
                   ) : null}
                   {!hasAll ? (
@@ -253,13 +256,14 @@ export function ManufacturingLocationPicker({
                     <li className="px-3 py-2 text-xs opacity-60">Loading locations…</li>
                   ) : !hasSearch && locations.length === 0 ? (
                     <li className="px-3 py-2 text-xs opacity-60">
-                      No build locations found. Run a job, store assets, or keep blueprints at a
-                      station.
+                      No player structures within 3 jumps. ESI lists public structures plus ones
+                      your corp owns or you have used, not every citadel in range.
                     </li>
                   ) : (
                     filteredLocations.map((location) => {
                       const selected = selectedLocation?.id === location.id
                       const structureType = locationStructureType(location)
+                      const jumps = jumpsTo(location)
                       return (
                         <li key={location.id} role="option" aria-selected={selected}>
                           <button
@@ -274,7 +278,11 @@ export function ManufacturingLocationPicker({
                             <span className="min-w-0 truncate">
                               <span className="font-medium">{location.name}</span>
                               <span className="ml-1 text-xs opacity-50">
-                                {location.kind === 'structure' ? '(structure)' : '(station)'}
+                                {jumps == null
+                                  ? 'structure'
+                                  : jumps === 0
+                                    ? 'this system'
+                                    : `${jumps} jump${jumps === 1 ? '' : 's'}`}
                               </span>
                             </span>
                           </button>

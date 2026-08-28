@@ -10,14 +10,18 @@ import {
   mapEsiBlueprint,
   type BlueprintItemState,
 } from '@/services/character/characterBlueprintsService'
-import { EVE_BLUEPRINT_SCOPE } from '@/services/auth/ssoMetadata'
+import { EVE_BLUEPRINT_SCOPE, EVE_LOCATION_SCOPE } from '@/services/auth/ssoMetadata'
+import { fetchCharacterSolarSystemId } from '@/services/character/characterLocationService'
+import { resolvePublicStructuresNear } from '@/services/character/publicStructuresService'
 import {
   fetchCharacterCorporationId,
   fetchCorporationAssets,
   fetchCorporationStructures,
 } from '@/services/character/corporationIndustryService'
 import { fetchCharacterAssets } from '@/services/character/characterAssetsService'
-import { buildProductionLocations } from '@/lib/productionLocations'
+import { buildProductionLocations, PLAYER_STRUCTURE_JUMP_RADIUS } from '@/lib/productionLocations'
+import { systemsWithinJumps } from '@/lib/nearestPublicHub'
+import { buildMapGraph, loadMapData } from '@/services/data/mapLoader'
 import { aggregateAssetsAtLocation } from '@/lib/locationInventory'
 import type { LiveIndustryJob, ProductionLocation } from '@/types'
 
@@ -229,4 +233,57 @@ export function useLocationInventory(
   }
 
   return { ...query, refetch: refresh }
+}
+
+export function characterSolarSystemQueryOptions(characterId: number) {
+  return {
+    queryKey: ['character-solar-system', characterId] as const,
+    staleTime: CHARACTER_DATA_STALE_MS,
+    gcTime: CHARACTER_DATA_GC_MS,
+    queryFn: async (): Promise<number | null> => {
+      const accessToken = await getValidAccessToken(characterId)
+      if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
+      return fetchCharacterSolarSystemId(characterId, accessToken)
+    },
+  }
+}
+
+export function useCharacterSolarSystem(
+  characterId: number | null | undefined,
+  grantedScopes: readonly string[] = [],
+) {
+  return useQuery({
+    ...characterSolarSystemQueryOptions(characterId!),
+    enabled: characterId != null && grantedScopes.includes(EVE_LOCATION_SCOPE),
+  })
+}
+
+export function nearbyPublicStructuresQueryOptions(characterId: number, originSystemId: number) {
+  return {
+    queryKey: ['nearby-public-structures', characterId, originSystemId] as const,
+    staleTime: (query: { state: { data?: { unresolved: number } } }) =>
+      (query.state.data?.unresolved ?? 0) > 0 ? 45_000 : 24 * 60 * 60 * 1000,
+    gcTime: CHARACTER_DATA_GC_MS,
+    queryFn: async () => {
+      const accessToken = await getValidAccessToken(characterId)
+      if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
+      const mapData = await loadMapData()
+      const nearby = systemsWithinJumps(
+        buildMapGraph(mapData),
+        originSystemId,
+        PLAYER_STRUCTURE_JUMP_RADIUS,
+      )
+      return resolvePublicStructuresNear(accessToken, nearby)
+    },
+  }
+}
+
+export function useNearbyPublicStructures(
+  characterId: number | null | undefined,
+  originSystemId: number | null | undefined,
+) {
+  return useQuery({
+    ...nearbyPublicStructuresQueryOptions(characterId!, originSystemId!),
+    enabled: characterId != null && originSystemId != null && originSystemId > 0,
+  })
 }
