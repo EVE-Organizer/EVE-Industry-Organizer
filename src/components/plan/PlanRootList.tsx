@@ -515,7 +515,8 @@ export function PlanRootList({
                         <Tooltip text={rowEnabled ? 'Included in the plan' : 'Off: left out of the plan'} placement="top">
                           <input
                             type="checkbox"
-                            className="checkbox checkbox-xs mt-1.5 shrink-0"
+                            role="switch"
+                            className="toggle toggle-xs toggle-primary mt-1.5 shrink-0"
                             checked={rowEnabled}
                             aria-label={`${rowEnabled ? 'Disable' : 'Enable'} ${row.name}`}
                             onClick={stopRowToggle}

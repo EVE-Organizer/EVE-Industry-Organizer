@@ -18,6 +18,14 @@ interface TabRailProps {
 
 const TAB_DRAG_TYPE = 'text/plain'
 
+function GripIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5" aria-hidden>
+      <path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm8-12a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0z" />
+    </svg>
+  )
+}
+
 export function TabRail({ items, selectedId, onSelect, onReorder, ariaLabel, emptyMessage }: TabRailProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
@@ -97,6 +105,11 @@ export function TabRail({ items, selectedId, onSelect, onReorder, ariaLabel, emp
               setDragOverId(null)
             }}
           >
+            {canReorder ? (
+              <span className="inline-flex shrink-0 opacity-40" aria-hidden>
+                <GripIcon />
+              </span>
+            ) : null}
             {item.icon ? <span className="shrink-0">{item.icon}</span> : null}
             <span className="truncate max-w-[12rem] sm:max-w-none">{item.label}</span>
             {item.count != null ? (
