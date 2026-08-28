@@ -7,11 +7,10 @@ import {
   useProductionLocations,
 } from '@/hooks/useCharacterIndustryData'
 import { buildMapGraph } from '@/services/data/mapLoader'
-import { jumpDistance, systemsWithinJumps } from '@/lib/nearestPublicHub'
+import { jumpDistance } from '@/lib/nearestPublicHub'
 import {
   inferOriginSystemId,
   mergeProductionLocations,
-  PLAYER_STRUCTURE_JUMP_RADIUS,
   playerStructuresInRange,
 } from '@/lib/productionLocations'
 import { isEngineeringStructureTypeId } from '@/lib/structureTypeFromTypeId'
@@ -38,20 +37,12 @@ export function usePlayerStructureLocations(
     characterSystemId ?? inferOriginSystemId(personal) ?? fallbackSystemId ?? null
 
   const graph = useMemo(() => (mapData ? buildMapGraph(mapData) : null), [mapData])
-  const nearbySystems = useMemo(() => {
-    if (!graph || originSystemId == null || originSystemId <= 0) return null
-    return systemsWithinJumps(graph, originSystemId, PLAYER_STRUCTURE_JUMP_RADIUS)
-  }, [graph, originSystemId])
-
-  const publicQuery = useNearbyPublicStructures(originSystemId, kind)
+  const publicQuery = useNearbyPublicStructures(kind)
 
   const locations = useMemo(() => {
-    // Keep every citadel from jobs/assets/corp/BPs. Jump range is only for the
-    // public catalog; using it on personal rows hid structures after origin
-    // fell back to the selected build/reaction system.
     const known = playerStructuresInRange(personal, null)
-    const publicNear = publicQuery.data?.locations ?? []
-    const merged = mergeProductionLocations(known, publicNear)
+    const publicAll = publicQuery.data?.locations ?? []
+    const merged = mergeProductionLocations(known, publicAll)
     const filtered = merged.filter((loc) => {
       if (kind === 'manufacturing') return !isRefineryStructureTypeId(loc.structureTypeId)
       return !isEngineeringStructureTypeId(loc.structureTypeId)
@@ -68,7 +59,7 @@ export function usePlayerStructureLocations(
       if (jumpA !== jumpB) return jumpA - jumpB
       return a.name.localeCompare(b.name)
     })
-  }, [graph, kind, nearbySystems, originSystemId, personal, publicQuery.data?.locations])
+  }, [graph, kind, originSystemId, personal, publicQuery.data?.locations])
 
   function jumpsTo(location: ProductionLocation): number | null {
     if (!graph || originSystemId == null || location.solarSystemId <= 0) return null
@@ -79,7 +70,6 @@ export function usePlayerStructureLocations(
     characterId,
     locations,
     originSystemId,
-    nearbySystems,
     jumpsTo,
     isLoading: locationsQuery.isLoading,
     error: locationsQuery.error ?? publicQuery.error ?? null,

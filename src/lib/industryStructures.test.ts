@@ -32,4 +32,9 @@ describe('industryStructuresInRange', () => {
     const rows = industryStructuresInRange([raitaru, tatara, farAzbel], nearby, 'refinery')
     expect(rows.map((r) => r.locationId)).toEqual([2])
   })
+
+  it('keeps every matching structure when range is not applied', () => {
+    const rows = industryStructuresInRange([raitaru, tatara, farAzbel], null, 'manufacturing')
+    expect(rows.map((r) => r.locationId).sort()).toEqual([1, 3])
+  })
 })

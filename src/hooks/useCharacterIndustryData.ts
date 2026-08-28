@@ -19,9 +19,7 @@ import {
   fetchCorporationStructures,
 } from '@/services/character/corporationIndustryService'
 import { fetchCharacterAssets } from '@/services/character/characterAssetsService'
-import { buildProductionLocations, PLAYER_STRUCTURE_JUMP_RADIUS } from '@/lib/productionLocations'
-import { systemsWithinJumps } from '@/lib/nearestPublicHub'
-import { buildMapGraph, loadMapData } from '@/services/data/mapLoader'
+import { buildProductionLocations } from '@/lib/productionLocations'
 import { aggregateAssetsAtLocation } from '@/lib/locationInventory'
 import type { LiveIndustryJob, ProductionLocation } from '@/types'
 
@@ -258,32 +256,15 @@ export function useCharacterSolarSystem(
   })
 }
 
-export function nearbyPublicStructuresQueryOptions(
-  originSystemId: number,
-  kind: 'manufacturing' | 'refinery',
-) {
+export function nearbyPublicStructuresQueryOptions(kind: 'manufacturing' | 'refinery') {
   return {
-    queryKey: ['nearby-public-structures', originSystemId, kind] as const,
+    queryKey: ['nearby-public-structures', kind] as const,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: CHARACTER_DATA_GC_MS,
-    queryFn: async () => {
-      const mapData = await loadMapData()
-      const nearby = systemsWithinJumps(
-        buildMapGraph(mapData),
-        originSystemId,
-        PLAYER_STRUCTURE_JUMP_RADIUS,
-      )
-      return resolvePublicStructuresNear(nearby, kind)
-    },
+    queryFn: () => resolvePublicStructuresNear(kind),
   }
 }
 
-export function useNearbyPublicStructures(
-  originSystemId: number | null | undefined,
-  kind: 'manufacturing' | 'refinery',
-) {
-  return useQuery({
-    ...nearbyPublicStructuresQueryOptions(originSystemId!, kind),
-    enabled: originSystemId != null && originSystemId > 0,
-  })
+export function useNearbyPublicStructures(kind: 'manufacturing' | 'refinery') {
+  return useQuery(nearbyPublicStructuresQueryOptions(kind))
 }

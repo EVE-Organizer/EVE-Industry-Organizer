@@ -12,12 +12,12 @@ export interface IndustryStructureRow {
 
 export function industryStructuresInRange(
   structures: IndustryStructureRow[],
-  nearbySystems: Set<number>,
+  nearbySystems: Set<number> | null,
   kind: 'manufacturing' | 'refinery',
 ): ProductionLocation[] {
   return structures
     .filter((row) => {
-      if (!nearbySystems.has(row.solarSystemId)) return false
+      if (nearbySystems && !nearbySystems.has(row.solarSystemId)) return false
       return kind === 'manufacturing'
         ? isEngineeringStructureTypeId(row.typeId)
         : isRefineryStructureTypeId(row.typeId)

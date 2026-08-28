@@ -141,8 +141,6 @@ export async function buildProductionLocations(input: {
   return locations.sort((a, b) => a.name.localeCompare(b.name))
 }
 
-export const PLAYER_STRUCTURE_JUMP_RADIUS = 3
-
 export function inferOriginSystemId(locations: ProductionLocation[]): number | null {
   const counts = new Map<number, number>()
   for (const loc of locations) {

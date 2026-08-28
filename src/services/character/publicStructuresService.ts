@@ -21,8 +21,8 @@ export async function loadIndustryStructures(): Promise<IndustryStructureRow[]> 
 }
 
 export async function resolvePublicStructuresNear(
-  nearbySystems: Set<number>,
   kind: 'manufacturing' | 'refinery',
+  nearbySystems: Set<number> | null = null,
 ): Promise<{ locations: ProductionLocation[]; unresolved: number }> {
   const structures = await loadIndustryStructures()
   return {

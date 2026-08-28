@@ -245,7 +245,7 @@ export function ManufacturingLocationPicker({
                 <>
                   {!hasSearch ? (
                     <li className="menu-title px-3 py-1.5 text-[10px] uppercase tracking-wide opacity-50">
-                      Player structures (3 jumps)
+                      Player structures
                       {locations.length > 0 ? ` · ${locations.length}` : ''}
                     </li>
                   ) : null}
@@ -258,7 +258,7 @@ export function ManufacturingLocationPicker({
                   ) : !hasSearch && locations.length === 0 ? (
                     <li className="px-3 py-2 text-xs opacity-60">
                       No structures from this character's jobs, assets, or corp, and no public
-                      engineering complexes within 3 jumps.
+                      engineering complexes.
                     </li>
                   ) : (
                     filteredLocations.map((location) => {
