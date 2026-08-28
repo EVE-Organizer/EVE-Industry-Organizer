@@ -599,6 +599,15 @@ export function PlanPage() {
     return withTreeLineMeta([...rootRows, ...subRows])
   }, [activeTemplate, planNodesByProductId, blueprints, typeMap, blueprintTypeIdByProduct, activeSettings])
 
+  const readyHoursByProductId = useMemo(() => {
+    const map = new Map<number, number>()
+    for (const job of plan.jobs) {
+      const prev = map.get(job.productTypeId) ?? 0
+      if (job.endHour > prev) map.set(job.productTypeId, job.endHour)
+    }
+    return map
+  }, [plan.jobs])
+
   const manufactureRows = useMemo(() => {
     if (!activeTemplate) return []
     return buildManufactureDisplayRows(
@@ -1078,6 +1087,8 @@ export function PlanPage() {
                 rows={buildRows}
                 profitByRootId={profitByRootId}
                 readOnly={isSharedView}
+                readyHoursByProductId={readyHoursByProductId}
+                planWindowHours={plan.windowHours}
                 onOpenSetup={setSetupDetailRootId}
                 onOpenProfit={setProfitDetailRootId}
                 onOpenGraph={openGraph}

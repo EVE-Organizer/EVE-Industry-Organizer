@@ -47,6 +47,9 @@ interface PlanRootListProps {
   onToggleEnabled?: (rootId: string, enabled: boolean) => void
   onRemove?: (rootId: string) => void
   onReorder?: (fromRootId: string, toRootId: string) => void
+  /** Clock time until each product is ready (timeline finish). */
+  readyHoursByProductId?: Map<number, number>
+  planWindowHours?: number
 }
 
 function ChevronIcon({ open }: { open: boolean }) {
@@ -301,8 +304,12 @@ export function PlanRootList({
   onToggleEnabled,
   onRemove,
   onReorder,
+  readyHoursByProductId,
+  planWindowHours,
 }: PlanRootListProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
+  const [durationMode, setDurationMode] = useState<'production' | 'overall'>('production')
+  const overallMode = durationMode === 'overall'
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
 
@@ -320,11 +327,14 @@ export function PlanRootList({
   const canReorder = !readOnly && !!onReorder && rootCount > 1
   const summary = useMemo(() => {
     const totalRuns = enabledRoots.reduce((sum, row) => sum + row.runs, 0)
-    const totalHours = enabledRoots.reduce((sum, row) => sum + row.jobTimeHours, 0)
     const off = rootCount - enabledRoots.length
-    const scheduled = `${formatDecimal(totalRuns, 0)} runs · ${formatDurationHms(totalHours * 3600)} scheduled`
+    const timeHours = overallMode
+      ? (planWindowHours ?? 0)
+      : enabledRoots.reduce((sum, row) => sum + row.jobTimeHours, 0)
+    const timeLabel = overallMode ? 'until last product' : 'scheduled'
+    const scheduled = `${formatDecimal(totalRuns, 0)} runs · ${formatDurationHms(timeHours * 3600)} ${timeLabel}`
     return off > 0 ? `${scheduled} · ${off} off` : scheduled
-  }, [enabledRoots, rootCount])
+  }, [enabledRoots, overallMode, planWindowHours, rootCount])
 
   function toggleCollapse(key: string) {
     setCollapsed((prev) => {
@@ -353,7 +363,23 @@ export function PlanRootList({
       actions={
         rows.length > 0 ? (
           <>
-            {onSetAllDuration && !readOnly ? (
+            <div className="join mr-1">
+              <button
+                type="button"
+                className={`btn btn-ghost btn-xs join-item ${!overallMode ? 'btn-active' : ''}`}
+                onClick={() => setDurationMode('production')}
+              >
+                Production
+              </button>
+              <button
+                type="button"
+                className={`btn btn-ghost btn-xs join-item ${overallMode ? 'btn-active' : ''}`}
+                onClick={() => setDurationMode('overall')}
+              >
+                Overall
+              </button>
+            </div>
+            {onSetAllDuration && !readOnly && !overallMode ? (
               <label className="flex items-center gap-1.5 mr-1">
                 <Tooltip
                   text="Applies this job timer to every blueprint. Runs update to match."
@@ -387,7 +413,14 @@ export function PlanRootList({
                 </Tooltip>
               </th>
               <th className="plan-jobs-table__duration-col">
-                <Tooltip text="Total job duration (hours:minutes:seconds)" placement="top">
+                <Tooltip
+                  text={
+                    overallMode
+                      ? 'Clock time until this product is ready, including copy, invention, and sub-builds'
+                      : 'This job\'s industry timer (hours:minutes:seconds)'
+                  }
+                  placement="top"
+                >
                   <span className="cursor-help border-b border-dotted border-current/40">Duration</span>
                 </Tooltip>
               </th>
@@ -514,7 +547,13 @@ export function PlanRootList({
                     )}
                   </td>
                   <td className="plan-jobs-table__duration-col" onClick={stopRowToggle}>
-                    {readOnly || !onChange ? (
+                    {overallMode ? (
+                      <span className="tabular-nums text-sm whitespace-nowrap text-info">
+                        {readyHoursByProductId?.has(row.productTypeId)
+                          ? formatDurationHms((readyHoursByProductId.get(row.productTypeId) ?? 0) * 3600)
+                          : '—'}
+                      </span>
+                    ) : readOnly || !onChange ? (
                       <span className="tabular-nums text-sm whitespace-nowrap">
                         {formatDurationHms(row.jobTimeHours * 3600)}
                       </span>
@@ -631,9 +670,9 @@ export function PlanRootList({
         </div>
       )}
       <p className="text-[10px] text-base-content/40 px-4 pb-3 pt-2 sm:px-5">
-        Duration matches the in-game industry timer. Editing duration or runs keeps the other field in
-        sync. Set all applies the same timer to every job. Unchecked jobs stay in the list but drop
-        out of the plan, timeline, and profit.
+        {overallMode
+          ? 'Overall is clock time until this product is ready on the timeline (copy, invention, and sub-builds included). Switch to Production to edit the job timer.'
+          : 'Production is this job\'s industry timer. Editing duration or runs keeps the other field in sync. Set all applies the same timer to every job.'}
       </p>
     </PlanChainSection>
   )

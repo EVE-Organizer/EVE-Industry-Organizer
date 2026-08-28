@@ -231,6 +231,16 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
   return jobs.filter((j) => j.startHour < windowHours)
 }
 
+/** Clock time from plan start until this product's last scheduled job finishes. */
+export function productReadyHours(jobs: ScheduledPlanJob[], productTypeId: number): number | null {
+  let end = -1
+  for (const job of jobs) {
+    if (job.productTypeId !== productTypeId) continue
+    if (job.endHour > end) end = job.endHour
+  }
+  return end >= 0 ? end : null
+}
+
 export function scheduledDurationHours(jobs: ScheduledPlanJob[], productTypeId: number): number {
   const productJobs = jobs.filter((j) => j.productTypeId === productTypeId)
   if (productJobs.length === 0) return 0
