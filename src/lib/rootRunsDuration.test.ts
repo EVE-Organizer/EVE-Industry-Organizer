@@ -4,6 +4,7 @@ import {
   createSyncedPlanRootEntry,
   inGameDurationHoursFromRuns,
   inGameRunsFromDurationHours,
+  runsForOverallReadyHours,
   jobTimeSecondsForRuns,
   resolveRunsFromPatch,
   runsForDemand,
@@ -101,6 +102,40 @@ describe('applyRootEntryPatch', () => {
     expect(next.productionDurationHours).toBe(
       inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 200),
     )
+  })
+})
+
+describe('runsForOverallReadyHours', () => {
+  it('uses leftover job time after chain wait, and does not raise runs when shrinking', () => {
+    const currentRuns = 100
+    const currentJobHours = inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, currentRuns)
+    const currentReadyHours = currentJobHours + 1894
+
+    const next = runsForOverallReadyHours({
+      targetReadyHours: currentJobHours,
+      currentReadyHours,
+      currentJobHours,
+      currentRuns,
+      blueprint,
+      settings: DEFAULT_SETTINGS,
+    })
+
+    expect(next).toBe(1)
+    expect(next).toBeLessThan(currentRuns)
+  })
+
+  it('matches production runs when there is no wait before the job', () => {
+    const hours = 24
+    expect(
+      runsForOverallReadyHours({
+        targetReadyHours: hours,
+        currentReadyHours: hours,
+        currentJobHours: hours,
+        currentRuns: 10,
+        blueprint,
+        settings: DEFAULT_SETTINGS,
+      }),
+    ).toBe(inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, hours))
   })
 })
 

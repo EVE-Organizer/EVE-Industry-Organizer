@@ -40,9 +40,18 @@ interface PlanRootListProps {
   onChange?: (
     rootId: string | undefined,
     productTypeId: number,
-    patch: { runs?: number; productionDurationHours?: number },
+    patch: { runs?: number; productionDurationHours?: number; overallDurationHours?: number },
   ) => void
-  onSetAllDuration?: (productionDurationHours: number) => void
+  onSetAllDuration?: (hours: number, mode: 'production' | 'overall') => void
+  onFitRunsToOverall?: (
+    targets: Array<{
+      rootId?: string
+      productTypeId: number
+      targetReadyHours: number
+      jobHours: number
+      currentRuns: number
+    }>,
+  ) => void
   onDuplicate?: (rootId: string) => void
   onToggleEnabled?: (rootId: string, enabled: boolean) => void
   onRemove?: (rootId: string) => void
@@ -300,6 +309,7 @@ export function PlanRootList({
   readOnly = false,
   onChange,
   onSetAllDuration,
+  onFitRunsToOverall,
   onDuplicate,
   onToggleEnabled,
   onRemove,
@@ -374,22 +384,43 @@ export function PlanRootList({
               <button
                 type="button"
                 className={`btn btn-ghost btn-xs join-item ${overallMode ? 'btn-active' : ''}`}
-                onClick={() => setDurationMode('overall')}
+                onClick={() => {
+                  if (!readOnly && onFitRunsToOverall) {
+                    onFitRunsToOverall(
+                      rows
+                        .filter((row) => row.enabled !== false)
+                        .map((row) => ({
+                          rootId: row.rootId,
+                          productTypeId: row.productTypeId,
+                          targetReadyHours: row.jobTimeHours,
+                          jobHours: row.jobTimeHours,
+                          currentRuns: row.runs,
+                        })),
+                    )
+                  }
+                  setDurationMode('overall')
+                }}
               >
                 Overall
               </button>
             </div>
-            {onSetAllDuration && !readOnly && !overallMode ? (
+            {onSetAllDuration && !readOnly ? (
               <label className="flex items-center gap-1.5 mr-1">
                 <Tooltip
-                  text="Applies this job timer to every blueprint. Runs update to match."
+                  text={
+                    overallMode
+                      ? 'Fits every job so the product is ready by this time. Runs shrink to cover chain wait; they do not treat this as a longer job timer.'
+                      : 'Applies this job timer to every blueprint. Runs update to match.'
+                  }
                   placement="bottom"
                 >
                   <span className="text-[11px] font-normal normal-case tracking-normal opacity-55 whitespace-nowrap cursor-help border-b border-dotted border-current/40">
                     Set all
                   </span>
                 </Tooltip>
-                <SetAllDurationInput onCommit={onSetAllDuration} />
+                <SetAllDurationInput
+                  onCommit={(hours) => onSetAllDuration(hours, overallMode ? 'overall' : 'production')}
+                />
               </label>
             ) : null}
             <PlanSectionExpandActions onExpandAll={expandAll} onCollapseAll={collapseAll} />
@@ -416,7 +447,7 @@ export function PlanRootList({
                 <Tooltip
                   text={
                     overallMode
-                      ? 'Clock time until this product is ready, including copy, invention, and sub-builds'
+                      ? 'Ready-by time for this product. Runs are sized so the chain finishes by then, not so this job alone lasts that long.'
                       : 'This job\'s industry timer (hours:minutes:seconds)'
                   }
                   placement="top"
@@ -548,22 +579,30 @@ export function PlanRootList({
                     )}
                   </td>
                   <td className="plan-jobs-table__duration-col" onClick={stopRowToggle}>
-                    {overallMode ? (
-                      <span className="tabular-nums text-sm whitespace-nowrap text-info">
-                        {readyHoursByProductId?.has(row.productTypeId)
-                          ? formatDurationHms((readyHoursByProductId.get(row.productTypeId) ?? 0) * 3600)
-                          : '—'}
-                      </span>
-                    ) : readOnly || !onChange ? (
+                    {readOnly || !onChange ? (
                       <span className="tabular-nums text-sm whitespace-nowrap">
-                        {formatDurationHms(row.jobTimeHours * 3600)}
+                        {formatDurationHms(
+                          (overallMode
+                            ? (readyHoursByProductId?.get(row.productTypeId) ?? row.jobTimeHours)
+                            : row.jobTimeHours) * 3600,
+                        )}
                       </span>
                     ) : (
                       <DurationInput
-                        key={rowKey}
-                        hours={row.jobTimeHours}
-                        onCommit={(productionDurationHours) =>
-                          onChange(row.rootId, row.productTypeId, { productionDurationHours })
+                        key={`${rowKey}-${durationMode}`}
+                        hours={
+                          overallMode
+                            ? (readyHoursByProductId?.get(row.productTypeId) ?? row.jobTimeHours)
+                            : row.jobTimeHours
+                        }
+                        onCommit={(hours) =>
+                          onChange(
+                            row.rootId,
+                            row.productTypeId,
+                            overallMode
+                              ? { overallDurationHours: hours }
+                              : { productionDurationHours: hours },
+                          )
                         }
                       />
                     )}
@@ -672,7 +711,7 @@ export function PlanRootList({
       )}
       <p className="text-[10px] text-base-content/40 px-4 pb-3 pt-2 sm:px-5">
         {overallMode
-          ? 'Overall is clock time until this product is ready on the timeline (copy, invention, and sub-builds included). Switch to Production to edit the job timer.'
+          ? 'Overall is the ready-by time. Runs shrink to fit copy, invention, and sub-builds inside that clock. They do not grow as if this were one long industry job.'
           : 'Production is this job\'s industry timer. Editing duration or runs keeps the other field in sync. Set all applies the same timer to every job.'}
       </p>
     </PlanChainSection>

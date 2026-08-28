@@ -43,6 +43,7 @@ import {
   createSyncedPlanRootEntry,
   resolveRunsFromPatch,
   rootJobTimeHours,
+  runsForOverallReadyHours,
   syncRootEntry,
 } from '@/lib/rootRunsDuration'
 import { createPlanRootId } from '@/services/sync/types'
@@ -1104,13 +1105,26 @@ export function PlanPage() {
                             roots: template.roots.map((r) => {
                               if (r.id !== rootId) return r
                               const bp = getBlueprintForProduct(blueprints, r.productTypeId)
+                              const override = template.nodeOverrides[r.productTypeId]
+                              if (patch.overallDurationHours != null && bp) {
+                                const runs = runsForOverallReadyHours({
+                                  targetReadyHours: patch.overallDurationHours,
+                                  currentReadyHours: readyHoursByProductId.get(r.productTypeId) ?? null,
+                                  currentJobHours: rootJobTimeHours(r, bp, storeSettings, override),
+                                  currentRuns: r.runs,
+                                  blueprint: bp,
+                                  settings: storeSettings,
+                                  meTeOverride: override,
+                                })
+                                return applyRootEntryPatch(r, { runs }, bp, storeSettings, undefined, override)
+                              }
                               return applyRootEntryPatch(
                                 r,
                                 patch,
                                 bp,
                                 storeSettings,
                                 undefined,
-                                template.nodeOverrides[r.productTypeId],
+                                override,
                               )
                             }),
                           })
@@ -1120,13 +1134,24 @@ export function PlanPage() {
                         const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
                         if (!node) return
                         const bp = getBlueprintForProduct(blueprints, productTypeId)
-                        const runs = resolveRunsFromPatch(
-                          node.runs,
-                          patch,
-                          bp,
-                          storeSettings,
-                          node.concurrentCopies,
-                        )
+                        const runs =
+                          patch.overallDurationHours != null && bp
+                            ? runsForOverallReadyHours({
+                                targetReadyHours: patch.overallDurationHours,
+                                currentReadyHours: readyHoursByProductId.get(productTypeId) ?? null,
+                                currentJobHours: node.jobTimeSeconds / 3600,
+                                currentRuns: node.runs,
+                                blueprint: bp,
+                                settings: storeSettings,
+                                meTeOverride: template.nodeOverrides[productTypeId],
+                              })
+                            : resolveRunsFromPatch(
+                                node.runs,
+                                patch,
+                                bp,
+                                storeSettings,
+                                node.concurrentCopies,
+                              )
 
                         updatePlanTemplate(template.id, {
                           nodeOverrides: {
@@ -1139,13 +1164,89 @@ export function PlanPage() {
                         })
                       }
                 }
+                onFitRunsToOverall={
+                  isSharedView
+                    ? undefined
+                    : (targets) => {
+                        const template = selectedPlanTemplateFromStore()
+                        if (!template) return
+                        let roots = template.roots
+                        const nodeOverrides = { ...template.nodeOverrides }
+                        for (const target of targets) {
+                          const bp = getBlueprintForProduct(blueprints, target.productTypeId)
+                          if (!bp) continue
+                          const override = nodeOverrides[target.productTypeId]
+                          const runs = runsForOverallReadyHours({
+                            targetReadyHours: target.targetReadyHours,
+                            currentReadyHours: readyHoursByProductId.get(target.productTypeId) ?? null,
+                            currentJobHours: target.jobHours,
+                            currentRuns: target.currentRuns,
+                            blueprint: bp,
+                            settings: storeSettings,
+                            meTeOverride: override,
+                          })
+                          if (target.rootId) {
+                            roots = roots.map((r) =>
+                              r.id === target.rootId
+                                ? applyRootEntryPatch(r, { runs }, bp, storeSettings, undefined, override)
+                                : r,
+                            )
+                          } else {
+                            nodeOverrides[target.productTypeId] = {
+                              ...nodeOverrides[target.productTypeId],
+                              runs,
+                            }
+                          }
+                        }
+                        updatePlanTemplate(template.id, { roots, nodeOverrides })
+                      }
+                }
                 onSetAllDuration={
                   isSharedView
                     ? undefined
-                    : (productionDurationHours) => {
+                    : (hours, mode) => {
                         const template = selectedPlanTemplateFromStore()
                         if (!template) return
-                        const patch = { productionDurationHours }
+                        if (mode === 'overall') {
+                          const roots = template.roots.map((r) => {
+                            const bp = getBlueprintForProduct(blueprints, r.productTypeId)
+                            if (!bp) return r
+                            const override = template.nodeOverrides[r.productTypeId]
+                            const jobHours = rootJobTimeHours(r, bp, storeSettings, override)
+                            const runs = runsForOverallReadyHours({
+                              targetReadyHours: hours,
+                              currentReadyHours: readyHoursByProductId.get(r.productTypeId) ?? null,
+                              currentJobHours: jobHours,
+                              currentRuns: r.runs,
+                              blueprint: bp,
+                              settings: storeSettings,
+                              meTeOverride: override,
+                            })
+                            return applyRootEntryPatch(r, { runs }, bp, storeSettings, undefined, override)
+                          })
+                          const nodeOverrides = { ...template.nodeOverrides }
+                          for (const node of plan.nodes) {
+                            if (node.mode !== 'build' || node.isRoot) continue
+                            const bp = getBlueprintForProduct(blueprints, node.productTypeId)
+                            if (!bp) continue
+                            const runs = runsForOverallReadyHours({
+                              targetReadyHours: hours,
+                              currentReadyHours: readyHoursByProductId.get(node.productTypeId) ?? null,
+                              currentJobHours: node.jobTimeSeconds / 3600,
+                              currentRuns: node.runs,
+                              blueprint: bp,
+                              settings: storeSettings,
+                              meTeOverride: nodeOverrides[node.productTypeId],
+                            })
+                            nodeOverrides[node.productTypeId] = {
+                              ...nodeOverrides[node.productTypeId],
+                              runs,
+                            }
+                          }
+                          updatePlanTemplate(template.id, { roots, nodeOverrides })
+                          return
+                        }
+                        const patch = { productionDurationHours: hours }
                         const roots = template.roots.map((r) => {
                           const bp = getBlueprintForProduct(blueprints, r.productTypeId)
                           return applyRootEntryPatch(
