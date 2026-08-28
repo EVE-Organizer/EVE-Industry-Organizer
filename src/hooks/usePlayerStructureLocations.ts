@@ -43,17 +43,29 @@ export function usePlayerStructureLocations(
     return systemsWithinJumps(graph, originSystemId, PLAYER_STRUCTURE_JUMP_RADIUS)
   }, [graph, originSystemId])
 
-  const publicQuery = useNearbyPublicStructures(characterId, originSystemId)
+  const publicQuery = useNearbyPublicStructures(originSystemId, kind)
 
   const locations = useMemo(() => {
     const ranged = playerStructuresInRange(personal, nearbySystems)
     const publicNear = publicQuery.data?.locations ?? []
     const merged = mergeProductionLocations(ranged, publicNear)
-    return merged.filter((loc) => {
+    const filtered = merged.filter((loc) => {
       if (kind === 'manufacturing') return !isRefineryStructureTypeId(loc.structureTypeId)
       return !isEngineeringStructureTypeId(loc.structureTypeId)
     })
-  }, [kind, nearbySystems, personal, publicQuery.data?.locations])
+    return filtered.sort((a, b) => {
+      const jumpA =
+        graph && originSystemId != null && a.solarSystemId > 0
+          ? (jumpDistance(graph, originSystemId, a.solarSystemId) ?? 99)
+          : 99
+      const jumpB =
+        graph && originSystemId != null && b.solarSystemId > 0
+          ? (jumpDistance(graph, originSystemId, b.solarSystemId) ?? 99)
+          : 99
+      if (jumpA !== jumpB) return jumpA - jumpB
+      return a.name.localeCompare(b.name)
+    })
+  }, [graph, kind, nearbySystems, originSystemId, personal, publicQuery.data?.locations])
 
   function jumpsTo(location: ProductionLocation): number | null {
     if (!graph || originSystemId == null || location.solarSystemId <= 0) return null
@@ -66,7 +78,7 @@ export function usePlayerStructureLocations(
     originSystemId,
     nearbySystems,
     jumpsTo,
-    isLoading: locationsQuery.isLoading,
+    isLoading: locationsQuery.isLoading || publicQuery.isLoading,
     error: locationsQuery.error ?? publicQuery.error ?? null,
   }
 }

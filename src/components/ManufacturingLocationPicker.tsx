@@ -236,7 +236,7 @@ export function ManufacturingLocationPicker({
               />
             </div>
 
-            <ul className="max-h-72 overflow-y-auto py-1" role="listbox">
+            <ul className="max-h-[min(36rem,70vh)] overflow-y-auto py-1" role="listbox">
               {noMatches ? (
                 <li className="px-3 py-2 text-xs opacity-60">No matching locations.</li>
               ) : null}
@@ -246,6 +246,7 @@ export function ManufacturingLocationPicker({
                   {!hasSearch ? (
                     <li className="menu-title px-3 py-1.5 text-[10px] uppercase tracking-wide opacity-50">
                       Player structures (3 jumps)
+                      {locations.length > 0 ? ` · ${locations.length}` : ''}
                     </li>
                   ) : null}
                   {!hasAll ? (
@@ -256,8 +257,8 @@ export function ManufacturingLocationPicker({
                     <li className="px-3 py-2 text-xs opacity-60">Loading locations…</li>
                   ) : !hasSearch && locations.length === 0 ? (
                     <li className="px-3 py-2 text-xs opacity-60">
-                      No player structures within 3 jumps. ESI lists public structures plus ones
-                      your corp owns or you have used, not every citadel in range.
+                      No engineering complexes within 3 jumps of this character. Private citadels
+                      still need corp access or a prior dock.
                     </li>
                   ) : (
                     filteredLocations.map((location) => {

@@ -17,6 +17,7 @@
     "rebuild-contracts": "node scripts/rebuild-contracts.mjs",
     "rebuild-map": "node scripts/rebuild-map.mjs",
     "rebuild-mining": "node scripts/rebuild-mining.mjs",
+    "rebuild-structures": "node scripts/rebuild-structures.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

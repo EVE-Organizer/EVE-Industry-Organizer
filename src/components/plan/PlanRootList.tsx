@@ -487,12 +487,12 @@ export function PlanRootList({
                   }
                 >
                   <td className="align-top py-2 min-w-0">
-                    <div className="flex items-start gap-0.5 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       {canReorder && row.isRoot && row.rootId ? (
                         <span
                           role="button"
                           tabIndex={0}
-                          className="inline-flex items-center justify-center w-6 h-6 mt-1 shrink-0 cursor-grab active:cursor-grabbing opacity-40 hover:opacity-80"
+                          className="inline-flex items-center justify-center size-8 shrink-0 cursor-grab active:cursor-grabbing opacity-40 hover:opacity-80"
                           aria-label={`Reorder ${row.name}`}
                           draggable
                           onClick={stopRowToggle}
@@ -516,7 +516,7 @@ export function PlanRootList({
                           <input
                             type="checkbox"
                             role="switch"
-                            className="toggle toggle-xs toggle-primary mt-1.5 shrink-0"
+                            className="toggle toggle-sm toggle-primary shrink-0"
                             checked={rowEnabled}
                             aria-label={`${rowEnabled ? 'Disable' : 'Enable'} ${row.name}`}
                             onClick={stopRowToggle}

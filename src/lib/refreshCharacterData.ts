@@ -27,7 +27,7 @@ export async function refreshCharacterApiCaches(
     ...invalidateOnly,
   })
   await queryClient.invalidateQueries({
-    queryKey: ['nearby-public-structures', characterId],
+    queryKey: ['nearby-public-structures'],
     ...invalidateOnly,
   })
   await queryClient.invalidateQueries({

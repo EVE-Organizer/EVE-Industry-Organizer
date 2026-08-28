@@ -258,32 +258,32 @@ export function useCharacterSolarSystem(
   })
 }
 
-export function nearbyPublicStructuresQueryOptions(characterId: number, originSystemId: number) {
+export function nearbyPublicStructuresQueryOptions(
+  originSystemId: number,
+  kind: 'manufacturing' | 'refinery',
+) {
   return {
-    queryKey: ['nearby-public-structures', characterId, originSystemId] as const,
-    staleTime: (query: { state: { data?: { unresolved: number } } }) =>
-      (query.state.data?.unresolved ?? 0) > 0 ? 45_000 : 24 * 60 * 60 * 1000,
+    queryKey: ['nearby-public-structures', originSystemId, kind] as const,
+    staleTime: 24 * 60 * 60 * 1000,
     gcTime: CHARACTER_DATA_GC_MS,
     queryFn: async () => {
-      const accessToken = await getValidAccessToken(characterId)
-      if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
       const mapData = await loadMapData()
       const nearby = systemsWithinJumps(
         buildMapGraph(mapData),
         originSystemId,
         PLAYER_STRUCTURE_JUMP_RADIUS,
       )
-      return resolvePublicStructuresNear(accessToken, nearby)
+      return resolvePublicStructuresNear(nearby, kind)
     },
   }
 }
 
 export function useNearbyPublicStructures(
-  characterId: number | null | undefined,
   originSystemId: number | null | undefined,
+  kind: 'manufacturing' | 'refinery',
 ) {
   return useQuery({
-    ...nearbyPublicStructuresQueryOptions(characterId!, originSystemId!),
-    enabled: characterId != null && originSystemId != null && originSystemId > 0,
+    ...nearbyPublicStructuresQueryOptions(originSystemId!, kind),
+    enabled: originSystemId != null && originSystemId > 0,
   })
 }
