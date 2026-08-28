@@ -11,6 +11,7 @@ import {
   saveUserDataToLocal,
 } from '@/services/sync/types'
 import { mergeSharedSettingsForImport, sharedTemplateToSavedTemplate } from '@/lib/planShare'
+import { moveItemById } from '@/lib/planRootOrder'
 import { clearPriceCache as clearPriceCacheStorage } from '@/services/cache/cacheStore'
 
 interface AppStore {
@@ -27,6 +28,7 @@ interface AppStore {
   addPlanTemplate: (name?: string) => ManufacturingPlanTemplate
   updatePlanTemplate: (id: string, patch: Partial<ManufacturingPlanTemplate>) => void
   deletePlanTemplate: (id: string) => void
+  reorderPlanTemplates: (fromId: string, toId: string) => void
   duplicatePlanTemplate: (id: string) => ManufacturingPlanTemplate | null
   importSharedPlan: (
     template: ManufacturingPlanTemplate,
@@ -145,6 +147,11 @@ export const useAppStore = create<AppStore>((set, get) => ({
         resolveSelectedPlanTemplateId(userData.planTemplates, null),
       )
     }
+  },
+
+  reorderPlanTemplates: (fromId, toId) => {
+    const userData = touchTemplates(get().userData, (templates) => moveItemById(templates, fromId, toId))
+    get().setUserData(userData)
   },
 
   duplicatePlanTemplate: (id) => {

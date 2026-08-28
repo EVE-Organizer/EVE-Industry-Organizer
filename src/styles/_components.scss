@@ -379,6 +379,10 @@
     @apply border-primary/30 bg-primary/10 text-primary shadow-sm;
   }
 
+  &--drop-target {
+    @apply border-info/40 bg-info/15;
+  }
+
   &__count {
     @apply inline-flex min-w-[1.25rem] items-center justify-center rounded-md bg-base-content/10 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums leading-none;
   }

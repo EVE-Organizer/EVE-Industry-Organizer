@@ -109,14 +109,6 @@ function IconBtn({
   )
 }
 
-function PencilIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-      <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
-    </svg>
-  )
-}
-
 function CopyIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -227,6 +219,7 @@ export function PlanPage() {
   const addPlanTemplate = useAppStore((s) => s.addPlanTemplate)
   const updatePlanTemplate = useAppStore((s) => s.updatePlanTemplate)
   const deletePlanTemplate = useAppStore((s) => s.deletePlanTemplate)
+  const reorderPlanTemplates = useAppStore((s) => s.reorderPlanTemplates)
   const duplicatePlanTemplate = useAppStore((s) => s.duplicatePlanTemplate)
   const importSharedPlan = useAppStore((s) => s.importSharedPlan)
   const addRootToPlanTemplate = useAppStore((s) => s.addRootToPlanTemplate)
@@ -930,6 +923,7 @@ export function PlanPage() {
           templates={templates}
           selectedId={selectedId}
           onSelect={setSelectedId}
+          onReorder={reorderPlanTemplates}
         />
       ) : null}
 
@@ -964,6 +958,15 @@ export function PlanPage() {
 
           <PlanDetailHeader
             name={activeTemplate.name}
+            onRename={
+              isSharedView
+                ? undefined
+                : () => {
+                    if (!storeTemplate) return
+                    const n = prompt('Plan name', storeTemplate.name)
+                    if (n?.trim()) updatePlanTemplate(storeTemplate.id, { name: n.trim() })
+                  }
+            }
             stats={[
               { label: 'Roots', value: String(activeTemplate.roots.length) },
               { label: 'Nodes', value: String(plan.nodes.length) },
@@ -978,16 +981,6 @@ export function PlanPage() {
                     onClick={() => void copyShareLink()}
                   >
                     <ShareLinkIcon />
-                  </IconBtn>
-                  <IconBtn
-                    label="Rename"
-                    onClick={() => {
-                      if (!storeTemplate) return
-                      const n = prompt('Plan name', storeTemplate.name)
-                      if (n?.trim()) updatePlanTemplate(storeTemplate.id, { name: n.trim() })
-                    }}
-                  >
-                    <PencilIcon />
                   </IconBtn>
                   <IconBtn
                     label="Duplicate"

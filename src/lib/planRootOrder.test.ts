@@ -6,7 +6,7 @@ function root(id: string, productTypeId = 1): PlanRootEntry {
   return { id, productTypeId, runs: 1, productionDurationHours: 1 }
 }
 
-describe('movePlanRootById', () => {
+describe('moveItemById', () => {
   it('moves a root to the drop target index', () => {
     const roots = [root('a'), root('b'), root('c')]
     expect(movePlanRootById(roots, 'a', 'c').map((r) => r.id)).toEqual(['b', 'c', 'a'])

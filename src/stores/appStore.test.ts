@@ -126,4 +126,26 @@ describe('useAppStore plan templates', () => {
     expect(state.userData.settings.primaryHub).toBe('amarr')
     expect(state.userData.settings.skills.industry).toBe(5)
   })
+
+  it('reorders plan templates', () => {
+    const planA = { ...createDefaultPlanTemplate('A'), id: 'plan-a' }
+    const planB = { ...createDefaultPlanTemplate('B'), id: 'plan-b' }
+    const planC = { ...createDefaultPlanTemplate('C'), id: 'plan-c' }
+    useAppStore.setState({
+      userData: {
+        ...createDefaultUserData(),
+        planTemplates: [planA, planB, planC],
+      },
+      hydrated: true,
+      selectedPlanTemplateId: 'plan-a',
+    })
+
+    useAppStore.getState().reorderPlanTemplates('plan-a', 'plan-c')
+
+    expect(useAppStore.getState().userData.planTemplates.map((t) => t.id)).toEqual([
+      'plan-b',
+      'plan-c',
+      'plan-a',
+    ])
+  })
 })

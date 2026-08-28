@@ -1,18 +1,26 @@
 import type { PlanRootEntry } from '@/types'
 
+export function moveItemById<T extends { id: string }>(
+  items: T[],
+  fromId: string,
+  toId: string,
+): T[] {
+  const from = items.findIndex((r) => r.id === fromId)
+  const to = items.findIndex((r) => r.id === toId)
+  if (from < 0 || to < 0 || from === to) return items
+  const next = items.slice()
+  const [item] = next.splice(from, 1)
+  if (!item) return items
+  next.splice(to, 0, item)
+  return next
+}
+
 export function movePlanRootById(
   roots: PlanRootEntry[],
   fromId: string,
   toId: string,
 ): PlanRootEntry[] {
-  const from = roots.findIndex((r) => r.id === fromId)
-  const to = roots.findIndex((r) => r.id === toId)
-  if (from < 0 || to < 0 || from === to) return roots
-  const next = roots.slice()
-  const [item] = next.splice(from, 1)
-  if (!item) return roots
-  next.splice(to, 0, item)
-  return next
+  return moveItemById(roots, fromId, toId)
 }
 
 export function duplicatePlanRootAfter(
