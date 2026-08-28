@@ -302,6 +302,7 @@ export function ensurePlanRootIds(roots: PlanRootEntry[] | undefined): PlanRootE
     productTypeId: Number(r.productTypeId),
     runs: Math.max(1, Number(r.runs) || 1),
     productionDurationHours: Number(r.productionDurationHours) || 0,
+    enabled: r.enabled === false ? false : undefined,
   }))
 }
 

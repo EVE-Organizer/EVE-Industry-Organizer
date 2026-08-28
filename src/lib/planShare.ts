@@ -14,6 +14,7 @@ export interface PlanShareRoot {
   productTypeId: number
   runs: number
   productionDurationHours: number
+  enabled?: boolean
 }
 
 export interface PlanShareTemplate {
@@ -111,6 +112,7 @@ export function buildPlanSharePayload(
         productTypeId: root.productTypeId,
         runs: root.runs,
         productionDurationHours: root.productionDurationHours,
+        ...(root.enabled === false ? { enabled: false } : {}),
       })),
       modeOverrides,
       nodeOverrides,
@@ -135,6 +137,7 @@ export function sharedPayloadToTemplate(payload: PlanSharePayload): Manufacturin
       productTypeId: Number(root.productTypeId),
       runs: Math.max(1, Number(root.runs) || 1),
       productionDurationHours: Number(root.productionDurationHours) || 0,
+      enabled: root.enabled === false ? false : undefined,
     })),
     modeOverrides: toNumericRecord(payload.template.modeOverrides ?? {}),
     nodeOverrides: toNumericRecord(payload.template.nodeOverrides ?? {}),

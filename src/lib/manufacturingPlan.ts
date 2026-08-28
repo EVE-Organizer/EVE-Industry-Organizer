@@ -23,6 +23,7 @@ import {
   runsForDemand,
 } from '@/lib/rootRunsDuration'
 import { activeConcurrentCopies, totalRootRuns } from '@/lib/supplyChainSlots'
+import { templateWithActiveRoots } from '@/lib/planRootEnabled'
 import { manufacturingSlotsFromSkills, researchSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { getBlueprintForBpo, getBlueprintForProduct } from '@/services/data/sdeLoader'
 import { isRawMaterial } from '@/lib/supplyChain'
@@ -682,7 +683,8 @@ export function computePlanRootBuildCost(
 }
 
 export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResult {
-  const { template, settings } = input
+  const template = templateWithActiveRoots(input.template)
+  const { settings } = input
   const modeOverrides = modeOverridesMap(template)
   const nodeMap = new Map<number, NodeAccum>()
   const slots = manufacturingSlotsFromSkills(settings.skills)

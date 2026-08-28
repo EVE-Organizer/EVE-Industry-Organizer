@@ -47,6 +47,7 @@ import {
 } from '@/lib/rootRunsDuration'
 import { createPlanRootId } from '@/services/sync/types'
 import { duplicatePlanRootAfter, movePlanRootById } from '@/lib/planRootOrder'
+import { activePlanRoots, displayNodeForRoot } from '@/lib/planRootEnabled'
 import { computePlanProfitSummary, computeRootProfitBreakdown, computeRootSetupBreakdown } from '@/lib/planProfit'
 import { productionGraphRoute } from '@/lib/paths'
 import {
@@ -415,7 +416,10 @@ export function PlanPage() {
   }, [activeCharacterId, refreshCharacter])
 
   const rootRunsTotal = useMemo(
-    () => (activeTemplate ? activeTemplate.roots.reduce((sum, r) => sum + r.runs, 0) : 0),
+    () =>
+      activeTemplate
+        ? activePlanRoots(activeTemplate.roots).reduce((sum, r) => sum + r.runs, 0)
+        : 0,
     [activeTemplate],
   )
 
@@ -540,8 +544,14 @@ export function PlanPage() {
 
     const rootRows = activeTemplate.roots.flatMap((root) => {
       const bp = getBlueprintForProduct(blueprints, root.productTypeId)
-      const node = planNodesByProductId.get(root.productTypeId)
-      if (!bp || !node) return []
+      if (!bp) return []
+      const name = typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`
+      const node = displayNodeForRoot(
+        root,
+        name,
+        bp,
+        planNodesByProductId.get(root.productTypeId),
+      )
 
       const instance = (rootSeen.get(root.productTypeId) ?? 0) + 1
       rootSeen.set(root.productTypeId, instance)
@@ -557,7 +567,7 @@ export function PlanPage() {
         ancestorCollapseKeys: [] as string[],
         productTypeId: root.productTypeId,
         blueprintTypeId: blueprintTypeIdByProduct.get(root.productTypeId),
-        name: typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`,
+        name,
         runs: root.runs,
         jobTimeHours: bp
           ? rootJobTimeHours(
@@ -569,6 +579,7 @@ export function PlanPage() {
           : root.productionDurationHours,
         outputQty: root.runs * bp.productQuantity,
         isRoot: true,
+        enabled: root.enabled !== false,
       }]
     })
 
@@ -592,7 +603,7 @@ export function PlanPage() {
     if (!activeTemplate) return []
     return buildManufactureDisplayRows(
       plan.nodes,
-      activeTemplate.roots,
+      activePlanRoots(activeTemplate.roots),
       (id) => getBlueprintForProduct(blueprints, id),
       activeSettings,
       slots,
@@ -1013,7 +1024,8 @@ export function PlanPage() {
             <div className="plan-build-card__header">
               <h2 className="plan-build-card__title">Build blueprints</h2>
               <span className="plan-build-card__badge">
-                {activeTemplate.roots.length} root{activeTemplate.roots.length === 1 ? '' : 's'}
+                {activePlanRoots(activeTemplate.roots).length} root
+                {activePlanRoots(activeTemplate.roots).length === 1 ? '' : 's'}
               </span>
             </div>
             <div className="plan-build-card__body">
@@ -1154,6 +1166,19 @@ export function PlanPage() {
                         updatePlanTemplate(template.id, { roots, nodeOverrides })
                       }
                 }
+                onToggleEnabled={
+                  isSharedView
+                    ? undefined
+                    : (rootId, enabled) => {
+                        const template = selectedPlanTemplateFromStore()
+                        if (!template) return
+                        updatePlanTemplate(template.id, {
+                          roots: template.roots.map((r) =>
+                            r.id === rootId ? { ...r, enabled } : r,
+                          ),
+                        })
+                      }
+                }
                 onDuplicate={
                   isSharedView
                     ? undefined
@@ -1218,7 +1243,7 @@ export function PlanPage() {
               <PlanChainTable
                 nodes={plan.nodes}
                 manufactureRows={manufactureRows}
-                planRoots={activeTemplate.roots}
+                planRoots={activePlanRoots(activeTemplate.roots)}
                 skillSlots={slots}
                 hubPricesByHub={hubPricesByHub}
                 hubVolumesByHub={hubVolumesByHub}

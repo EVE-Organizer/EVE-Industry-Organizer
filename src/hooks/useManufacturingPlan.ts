@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useAppStore } from '@/stores/appStore'
 import { useAuthStore } from '@/stores/authStore'
 import { expandManufacturingPlan } from '@/lib/manufacturingPlan'
+import { activePlanRoots } from '@/lib/planRootEnabled'
 import { buildPlanPipeline } from '@/lib/planPipeline'
 import { schedulePlanJobs, detectOverUnder, windowHoursFromJobs } from '@/lib/planScheduler'
 import { simulatePlanFlow } from '@/lib/planSimulator'
@@ -29,7 +30,7 @@ export function useManufacturingPlan(
     const mfgSlots = manufacturingSlotsFromSkills(settings.skills)
     const scienceSlots = researchSlotsFromSkills(settings.skills)
 
-    if (!template || template.roots.length === 0) {
+    if (!template || activePlanRoots(template.roots).length === 0) {
       return {
         nodes: [],
         jobs: [],

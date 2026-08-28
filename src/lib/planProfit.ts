@@ -1,4 +1,5 @@
 import type { BlueprintInfo, GlobalSettings, ManufacturingPlanTemplate, PlanRootEntry, TypeInfo } from '@/types'
+import { isPlanRootEnabled } from '@/lib/planRootEnabled'
 import {
   applyME,
   resolveBlueprintMeTe,
@@ -423,6 +424,7 @@ export function computePlanProfitSummary(
   const buildCostCache = createBuildCostCache()
 
   for (const root of template.roots) {
+    if (!isPlanRootEnabled(root)) continue
     const blueprint = getBlueprintForProduct(expandInput.blueprints, root.productTypeId)
     if (!blueprint) continue
     rootRows.push(

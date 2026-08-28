@@ -76,6 +76,27 @@ describe('expandManufacturingPlan', () => {
     expect(tri?.buyCost).toBe(5 * tri!.totalDemandQty)
   })
 
+  it('skips disabled roots', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [
+      { id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 24 },
+      { id: 'root-b', productTypeId: 201, runs: 10, productionDurationHours: 24, enabled: false },
+    ]
+
+    const { nodes } = expandManufacturingPlan({
+      template,
+      blueprints,
+      typeMap,
+      prices,
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    })
+
+    expect(nodes.some((n) => n.productTypeId === 200 && n.isRoot)).toBe(true)
+    expect(nodes.some((n) => n.productTypeId === 201)).toBe(false)
+  })
+
   it('timeline hours follow the longest root job time', () => {
     const template = createDefaultPlanTemplate('test')
     template.productionWindowHours = 999

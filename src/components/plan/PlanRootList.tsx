@@ -26,6 +26,7 @@ export type BuildBlueprintRow = ExpandablePlanRow & {
   jobTimeHours: number
   outputQty: number
   isRoot: boolean
+  enabled?: boolean
 }
 
 interface PlanRootListProps {
@@ -43,6 +44,7 @@ interface PlanRootListProps {
   ) => void
   onSetAllDuration?: (productionDurationHours: number) => void
   onDuplicate?: (rootId: string) => void
+  onToggleEnabled?: (rootId: string, enabled: boolean) => void
   onRemove?: (rootId: string) => void
   onReorder?: (fromRootId: string, toRootId: string) => void
 }
@@ -296,6 +298,7 @@ export function PlanRootList({
   onChange,
   onSetAllDuration,
   onDuplicate,
+  onToggleEnabled,
   onRemove,
   onReorder,
 }: PlanRootListProps) {
@@ -310,12 +313,18 @@ export function PlanRootList({
 
   const rootRows = useMemo(() => rows.filter((row) => row.isRoot), [rows])
   const rootCount = rootRows.length
+  const enabledRoots = useMemo(
+    () => rootRows.filter((row) => row.enabled !== false),
+    [rootRows],
+  )
   const canReorder = !readOnly && !!onReorder && rootCount > 1
   const summary = useMemo(() => {
-    const totalRuns = rootRows.reduce((sum, row) => sum + row.runs, 0)
-    const totalHours = rootRows.reduce((sum, row) => sum + row.jobTimeHours, 0)
-    return `${formatDecimal(totalRuns, 0)} runs · ${formatDurationHms(totalHours * 3600)} scheduled`
-  }, [rootRows])
+    const totalRuns = enabledRoots.reduce((sum, row) => sum + row.runs, 0)
+    const totalHours = enabledRoots.reduce((sum, row) => sum + row.jobTimeHours, 0)
+    const off = rootCount - enabledRoots.length
+    const scheduled = `${formatDecimal(totalRuns, 0)} runs · ${formatDurationHms(totalHours * 3600)} scheduled`
+    return off > 0 ? `${scheduled} · ${off} off` : scheduled
+  }, [enabledRoots, rootCount])
 
   function toggleCollapse(key: string) {
     setCollapsed((prev) => {
@@ -404,12 +413,15 @@ export function PlanRootList({
               const rowKey = row.rootId ?? `job-${row.productTypeId}-${row.depth}-${rowIndex}`
               const profit = row.rootId ? profitByRootId?.get(row.rootId) : undefined
               const isDropTarget = !!row.rootId && dragOverId === row.rootId && draggingId !== row.rootId
+              const rowEnabled = row.enabled !== false
               return (
                 <tr
                   key={rowKey}
                   className={`${planTableRowClass(isParentRow)}${row.kind === 'parent' ? ' cursor-pointer' : ''}${
                     draggingId && row.rootId === draggingId ? ' opacity-50' : ''
-                  }${isDropTarget ? ' plan-jobs-table__drop-target' : ''}`}
+                  }${isDropTarget ? ' plan-jobs-table__drop-target' : ''}${
+                    row.isRoot && !rowEnabled ? ' opacity-40' : ''
+                  }`}
                   {...rowToggle}
                   onDragOver={
                     canReorder && row.isRoot && row.rootId
@@ -465,6 +477,18 @@ export function PlanRootList({
                         >
                           <GripIcon />
                         </span>
+                      ) : null}
+                      {row.isRoot && row.rootId && onToggleEnabled && !readOnly ? (
+                        <Tooltip text={rowEnabled ? 'Included in the plan' : 'Off: left out of the plan'} placement="top">
+                          <input
+                            type="checkbox"
+                            className="checkbox checkbox-xs mt-1.5 shrink-0"
+                            checked={rowEnabled}
+                            aria-label={`${rowEnabled ? 'Disable' : 'Enable'} ${row.name}`}
+                            onClick={stopRowToggle}
+                            onChange={(e) => onToggleEnabled(row.rootId!, e.target.checked)}
+                          />
+                        </Tooltip>
                       ) : null}
                       <div className="min-w-0 flex-1">
                         <ProductCell
@@ -608,7 +632,8 @@ export function PlanRootList({
       )}
       <p className="text-[10px] text-base-content/40 px-4 pb-3 pt-2 sm:px-5">
         Duration matches the in-game industry timer. Editing duration or runs keeps the other field in
-        sync. Set all applies the same timer to every job.
+        sync. Set all applies the same timer to every job. Unchecked jobs stay in the list but drop
+        out of the plan, timeline, and profit.
       </p>
     </PlanChainSection>
   )

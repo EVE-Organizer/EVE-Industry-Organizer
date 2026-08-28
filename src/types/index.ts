@@ -516,6 +516,8 @@ export interface PlanRootEntry {
   productTypeId: number
   runs: number
   productionDurationHours: number
+  /** Off jobs stay in the list but are left out of the plan. Default on. */
+  enabled?: boolean
 }
 
 export interface PlanNodeOverride {
