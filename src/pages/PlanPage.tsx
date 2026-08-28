@@ -1136,6 +1136,52 @@ export function PlanPage() {
                         })
                       }
                 }
+                onFitRunsToOverall={
+                  isSharedView
+                    ? undefined
+                    : (targets) => {
+                        const template = selectedPlanTemplateFromStore()
+                        if (!template) return
+                        let roots = template.roots
+                        const nodeOverrides = { ...template.nodeOverrides }
+                        for (const target of targets) {
+                          const bp = getBlueprintForProduct(blueprints, target.productTypeId)
+                          if (!bp) continue
+                          const override = nodeOverrides[target.productTypeId]
+                          if (target.rootId) {
+                            roots = roots.map((r) =>
+                              r.id === target.rootId
+                                ? applyRootOverallReadyHours(
+                                    r,
+                                    target.targetReadyHours,
+                                    readyHoursByProductId.get(r.productTypeId) ?? null,
+                                    target.jobHours,
+                                    bp,
+                                    storeSettings,
+                                    override,
+                                  )
+                                : r,
+                            )
+                          } else {
+                            const node = plan.nodes.find((n) => n.productTypeId === target.productTypeId)
+                            if (!node) continue
+                            nodeOverrides[target.productTypeId] = {
+                              ...nodeOverrides[target.productTypeId],
+                              runs: runsForOverallReadyHours({
+                                targetReadyHours: target.targetReadyHours,
+                                currentReadyHours: readyHoursByProductId.get(target.productTypeId) ?? null,
+                                currentJobHours: target.jobHours,
+                                currentRuns: target.currentRuns,
+                                blueprint: bp,
+                                settings: storeSettings,
+                                meTeOverride: override,
+                              }),
+                            }
+                          }
+                        }
+                        updatePlanTemplate(template.id, { roots, nodeOverrides })
+                      }
+                }
                 onSetAllDuration={
                   isSharedView
                     ? undefined

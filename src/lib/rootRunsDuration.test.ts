@@ -126,16 +126,32 @@ describe('runsForOverallReadyHours', () => {
 
   it('matches production runs when there is no wait before the job', () => {
     const hours = 24
+    const currentRuns = inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, hours)
     expect(
       runsForOverallReadyHours({
         targetReadyHours: hours,
         currentReadyHours: hours,
         currentJobHours: hours,
-        currentRuns: 10,
+        currentRuns,
         blueprint,
         settings: DEFAULT_SETTINGS,
       }),
-    ).toBe(inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, hours))
+    ).toBe(currentRuns)
+  })
+
+  it('does not raise runs when the deadline is later than current ready time', () => {
+    const currentRuns = 10
+    const currentJobHours = inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, currentRuns)
+    const next = runsForOverallReadyHours({
+      targetReadyHours: 168,
+      currentReadyHours: currentJobHours,
+      currentJobHours,
+      currentRuns,
+      blueprint,
+      settings: DEFAULT_SETTINGS,
+    })
+    expect(next).toBe(currentRuns)
+    expect(next).toBeLessThan(inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 168))
   })
 })
 

@@ -129,8 +129,8 @@ export function inGameRunsFromDurationHours(
 
 /**
  * Runs so this product is ready by `targetReadyHours` on the timeline.
- * Subtracts wait time for sub-builds (not copy, invention, or other research)
- * instead of treating the target as this job's industry timer.
+ * Subtracts wait time for sub-builds (not copy, invention, or other research).
+ * The target is a deadline: runs never go up to fill leftover clock time.
  */
 export function runsForOverallReadyHours(input: {
   targetReadyHours: number
@@ -158,19 +158,13 @@ export function runsForOverallReadyHours(input: {
     currentJobHours <= 0 ||
     currentReadyHours <= currentJobHours + 1 / 3600
 
-  if (noLead) {
-    return inGameRunsFromDurationHours(blueprint, settings, targetReadyHours, meTeOverride)
-  }
-
-  const leadHours = currentReadyHours - currentJobHours
-  const targetJobHours = targetReadyHours - leadHours
+  const targetJobHours = noLead
+    ? targetReadyHours
+    : targetReadyHours - (currentReadyHours - currentJobHours)
   if (targetJobHours <= 0) return 1
 
   const next = inGameRunsFromDurationHours(blueprint, settings, targetJobHours, meTeOverride)
-  if (targetReadyHours < currentReadyHours - 1 / 3600) {
-    return Math.min(Math.max(1, currentRuns), next)
-  }
-  return next
+  return Math.min(Math.max(1, currentRuns), next)
 }
 
 /** Wall-clock hours to finish `runs` manufacturing runs (matches in-game job timer × waves). */
