@@ -39,12 +39,21 @@ const root: PlanRootEntry = {
 }
 
 describe('syncRootEntry', () => {
-  it('recomputes job time from runs', () => {
-    const synced = syncRootEntry(root, blueprint, DEFAULT_SETTINGS)
+  it('seeds job time from runs only when duration is unset', () => {
+    const synced = syncRootEntry(
+      { ...root, productionDurationHours: 0 },
+      blueprint,
+      DEFAULT_SETTINGS,
+    )
     expect(synced.productionDurationHours).toBe(
       inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, root.runs),
     )
-    expect(synced.productionDurationHours).not.toBe(24)
+  })
+
+  it('keeps a stored duration target', () => {
+    const synced = syncRootEntry(root, blueprint, DEFAULT_SETTINGS)
+    expect(synced.productionDurationHours).toBe(24)
+    expect(synced).toBe(root)
   })
 })
 
@@ -60,7 +69,7 @@ describe('createSyncedPlanRootEntry', () => {
 })
 
 describe('applyRootEntryPatch', () => {
-  it('snaps job time to actual wall-clock duration after hours input', () => {
+  it('keeps the typed duration and updates runs to match the job timer', () => {
     const next = applyRootEntryPatch(
       root,
       { productionDurationHours: 24 },
@@ -69,18 +78,12 @@ describe('applyRootEntryPatch', () => {
     )
 
     const expectedRuns = inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24)
-    const expectedHours = inGameDurationHoursFromRuns(
-      blueprint,
-      DEFAULT_SETTINGS,
-      expectedRuns,
-    )
 
     expect(next.runs).toBe(expectedRuns)
-    expect(next.productionDurationHours).toBe(expectedHours)
-    expect(next.productionDurationHours).not.toBe(24)
+    expect(next.productionDurationHours).toBe(24)
   })
 
-  it('preserves long job time input for a single root line', () => {
+  it('preserves long duration input as the stored target', () => {
     const next = applyRootEntryPatch(
       root,
       { productionDurationHours: 168 },
@@ -88,11 +91,11 @@ describe('applyRootEntryPatch', () => {
       DEFAULT_SETTINGS,
     )
 
-    expect(next.productionDurationHours).toBeGreaterThan(160)
-    expect(next.productionDurationHours).toBeLessThanOrEqual(168.01)
+    expect(next.productionDurationHours).toBe(168)
+    expect(next.runs).toBe(inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 168))
   })
 
-  it('updates job time when runs change', () => {
+  it('does not overwrite stored duration when runs change', () => {
     const next = applyRootEntryPatch(
       root,
       { runs: 200 },
@@ -101,9 +104,7 @@ describe('applyRootEntryPatch', () => {
     )
 
     expect(next.runs).toBe(200)
-    expect(next.productionDurationHours).toBe(
-      inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 200),
-    )
+    expect(next.productionDurationHours).toBe(24)
   })
 })
 
@@ -162,6 +163,7 @@ describe('fitPlanToRootReadyDeadlines', () => {
       getBlueprint: (id) => bps.get(id),
     })
     expect(roots[0]!.runs).toBe(Math.floor(1000 * (168 / 2063)))
+    expect(roots[0]!.productionDurationHours).toBe(168)
     expect(roots[1]!.runs).toBe(80)
   })
 
@@ -311,7 +313,7 @@ describe('Nova Heavy Missile (product 206)', () => {
     expect(hours).not.toBe(24)
   })
 
-  it('syncs job time when runs change from stale 24 h default', () => {
+  it('keeps a stored 24 h target even when runs imply a longer job', () => {
     const staleRoot: PlanRootEntry = {
       id: 'root-nova',
       productTypeId: 206,
@@ -319,8 +321,7 @@ describe('Nova Heavy Missile (product 206)', () => {
       productionDurationHours: 24,
     }
     const synced = syncRootEntry(staleRoot, novaHeavyMissile, noBonusSettings)
-    expect(synced.productionDurationHours).toBeCloseTo(181.833333, 3)
-    expect(synced.productionDurationHours).not.toBe(24)
+    expect(synced.productionDurationHours).toBe(24)
   })
 })
 

@@ -511,10 +511,13 @@ export interface WatchlistItem {
 export type PlanSlotSource = 'skills' | 'manual'
 export type PlanBuildMode = 'buy' | 'build'
 
+export type PlanDurationMode = 'production' | 'overall'
+
 export interface PlanRootEntry {
   id: string
   productTypeId: number
   runs: number
+  /** User-entered duration. Switching Production/Overall does not overwrite this. */
   productionDurationHours: number
   /** Off jobs stay in the list but are left out of the plan. Default on. */
   enabled?: boolean
@@ -542,6 +545,8 @@ export interface ManufacturingPlanTemplate {
   slotSource: PlanSlotSource
   manufacturingSlots: number
   defaultRunsPerBpc: number
+  /** How Duration is applied: job timer vs ready-by deadline. Displayed hours stay the stored input. */
+  durationMode?: PlanDurationMode
   roots: PlanRootEntry[]
   modeOverrides: Record<number, PlanBuildMode>
   nodeOverrides: Record<number, PlanNodeOverride>

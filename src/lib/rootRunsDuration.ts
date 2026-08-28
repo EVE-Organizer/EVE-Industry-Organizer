@@ -314,22 +314,21 @@ export function parallelLinesForRoot(
   return activeConcurrentCopies(true, bpcCount, skillSlots, rootRunsTotal)
 }
 
-/** Recompute job time from runs using current skills (in-game single job). */
+/** Seed duration from runs when the user has not set one yet. Never overwrites a stored target. */
 export function syncRootEntry(
   root: PlanRootEntry,
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
   meTeOverride?: PlanNodeOverride,
 ): PlanRootEntry {
-  if (!blueprint) return root
+  if (!blueprint || root.productionDurationHours > 0) return root
   const productionDurationHours = inGameDurationHoursFromRuns(
     blueprint,
     settings,
     root.runs,
     meTeOverride,
   )
-  if (root.productionDurationHours === productionDurationHours) return root
-  if (Math.abs(root.productionDurationHours - productionDurationHours) < 0.005) return root
+  if (Math.abs(productionDurationHours) < 0.005) return root
   return { ...root, productionDurationHours }
 }
 
@@ -347,7 +346,7 @@ export function createSyncedPlanRootEntry(
   return synced
 }
 
-/** Apply a runs or job-time edit and keep the other field in sync (in-game single job). */
+/** Apply a runs or duration edit. User-entered duration is kept; only an explicit duration patch replaces it. */
 export function applyRootEntryPatch(
   root: PlanRootEntry,
   patch: Partial<PlanRootEntry>,
@@ -365,19 +364,7 @@ export function applyRootEntryPatch(
       patch.productionDurationHours,
       meTeOverride,
     )
-    next.productionDurationHours = inGameDurationHoursFromRuns(
-      blueprint,
-      settings,
-      next.runs,
-      meTeOverride,
-    )
-  } else if (patch.runs != null && patch.productionDurationHours == null) {
-    next.productionDurationHours = inGameDurationHoursFromRuns(
-      blueprint,
-      settings,
-      patch.runs,
-      meTeOverride,
-    )
+    next.productionDurationHours = patch.productionDurationHours
   }
 
   return next

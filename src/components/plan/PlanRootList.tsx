@@ -14,6 +14,7 @@ import { expandableCollapseKeys, isExpandableRowVisible, type ExpandablePlanRow 
 import { formatDecimal, formatDurationHms, formatGraphQuantity, formatIsk, formatPercent, parseDurationHms } from '@/lib/profit'
 import type { RootProfitRow } from '@/lib/planProfit'
 import { textLinkClass } from '@/lib/textLink'
+import type { PlanDurationMode } from '@/types'
 
 export type BuildBlueprintRow = ExpandablePlanRow & {
   rootId?: string
@@ -24,6 +25,8 @@ export type BuildBlueprintRow = ExpandablePlanRow & {
   name: string
   runs: number
   jobTimeHours: number
+  /** User-entered duration for roots. Shown in both Production and Overall. */
+  durationHours?: number
   outputQty: number
   isRoot: boolean
   enabled?: boolean
@@ -40,16 +43,15 @@ interface PlanRootListProps {
   onChange?: (
     rootId: string | undefined,
     productTypeId: number,
-    patch: { runs?: number; productionDurationHours?: number; overallDurationHours?: number },
+    patch: { runs?: number; productionDurationHours?: number },
   ) => void
-  onSetAllDuration?: (hours: number, mode: 'production' | 'overall') => void
-  onFitRunsToOverall?: (targets: Array<{ rootId: string; deadlineHours: number }>) => void
+  onSetAllDuration?: (hours: number, mode: PlanDurationMode) => void
+  durationMode?: PlanDurationMode
+  onDurationModeChange?: (mode: PlanDurationMode) => void
   onDuplicate?: (rootId: string) => void
   onToggleEnabled?: (rootId: string, enabled: boolean) => void
   onRemove?: (rootId: string) => void
   onReorder?: (fromRootId: string, toRootId: string) => void
-  /** Clock time until each product is ready (updates when runs change). */
-  readyHoursByProductId?: Map<number, number>
   planWindowHours?: number
 }
 
@@ -132,13 +134,8 @@ function RunsInput({
   )
 }
 
-function rowDurationHours(
-  row: BuildBlueprintRow,
-  overallMode: boolean,
-  readyHoursByProductId?: Map<number, number>,
-): number {
-  if (!overallMode) return row.jobTimeHours
-  return readyHoursByProductId?.get(row.productTypeId) ?? row.jobTimeHours
+function rowDurationHours(row: BuildBlueprintRow): number {
+  return row.durationHours ?? row.jobTimeHours
 }
 
 function DurationInput({
@@ -310,16 +307,15 @@ export function PlanRootList({
   readOnly = false,
   onChange,
   onSetAllDuration,
-  onFitRunsToOverall,
+  durationMode = 'production',
+  onDurationModeChange,
   onDuplicate,
   onToggleEnabled,
   onRemove,
   onReorder,
-  readyHoursByProductId,
   planWindowHours,
 }: PlanRootListProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
-  const [durationMode, setDurationMode] = useState<'production' | 'overall'>('production')
   const overallMode = durationMode === 'overall'
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
@@ -378,22 +374,14 @@ export function PlanRootList({
               <button
                 type="button"
                 className={`btn btn-ghost btn-xs join-item ${!overallMode ? 'btn-active' : ''}`}
-                onClick={() => setDurationMode('production')}
+                onClick={() => onDurationModeChange?.('production')}
               >
                 Production
               </button>
               <button
                 type="button"
                 className={`btn btn-ghost btn-xs join-item ${overallMode ? 'btn-active' : ''}`}
-                onClick={() => {
-                  if (!overallMode && !readOnly && onFitRunsToOverall && enabledRoots.length > 0) {
-                    const targets = enabledRoots
-                      .filter((row) => row.rootId && row.jobTimeHours > 0)
-                      .map((row) => ({ rootId: row.rootId!, deadlineHours: row.jobTimeHours }))
-                    if (targets.length > 0) onFitRunsToOverall(targets)
-                  }
-                  setDurationMode('overall')
-                }}
+                onClick={() => onDurationModeChange?.('overall')}
               >
                 Overall
               </button>
@@ -403,8 +391,8 @@ export function PlanRootList({
                 <Tooltip
                   text={
                     overallMode
-                      ? 'Ready-by deadline for each root product. That chain loses runs if it would finish late. Runs never go up.'
-                      : 'Applies this job timer to every blueprint. Runs update to match.'
+                      ? 'Writes this duration as each root\'s ready-by deadline and shrinks runs if the chain would finish late. The number you type is kept.'
+                      : 'Writes this duration as the job timer for every blueprint. Runs update. The number you type is kept.'
                   }
                   placement="bottom"
                 >
@@ -441,8 +429,8 @@ export function PlanRootList({
                 <Tooltip
                   text={
                     overallMode
-                      ? 'Clock time until this product is ready. For a root, the value you type is that product\'s deadline. Copy, invention, and other research are left out.'
-                      : 'This job\'s industry timer (hours:minutes:seconds)'
+                      ? 'Your target duration. Overall uses it as the ready-by deadline. Switching modes does not change this number.'
+                      : 'Your target duration. Production uses it as this job\'s industry timer. Switching modes does not change this number.'
                   }
                   placement="top"
                 >
@@ -575,20 +563,14 @@ export function PlanRootList({
                   <td className="plan-jobs-table__duration-col" onClick={stopRowToggle}>
                     {readOnly || !onChange ? (
                       <span className="tabular-nums text-sm whitespace-nowrap">
-                        {formatDurationHms(rowDurationHours(row, overallMode, readyHoursByProductId) * 3600)}
+                        {formatDurationHms(rowDurationHours(row) * 3600)}
                       </span>
                     ) : (
                       <DurationInput
-                        key={`${rowKey}-${durationMode}-${row.runs}`}
-                        hours={rowDurationHours(row, overallMode, readyHoursByProductId)}
+                        key={`${rowKey}-duration`}
+                        hours={rowDurationHours(row)}
                         onCommit={(hours) =>
-                          onChange(
-                            row.rootId,
-                            row.productTypeId,
-                            overallMode && row.isRoot
-                              ? { overallDurationHours: hours }
-                              : { productionDurationHours: hours },
-                          )
+                          onChange(row.rootId, row.productTypeId, { productionDurationHours: hours })
                         }
                       />
                     )}
@@ -697,8 +679,8 @@ export function PlanRootList({
       )}
       <p className="text-[10px] text-base-content/40 px-4 pb-3 pt-2 sm:px-5">
         {overallMode
-          ? 'Overall is when that product is ready. A root duration you type is its deadline. Sub-builds that feed it may lose runs. Copy, invention, and other research are not counted.'
-          : 'Production is this job\'s industry timer. Editing duration or runs keeps the other field in sync. Set all applies the same timer to every job.'}
+          ? 'Overall treats your stored duration as the ready-by deadline. Switching Production/Overall does not change that number. Set all or edit duration to apply it. Copy and invention are not counted.'
+          : 'Production treats your stored duration as this job\'s industry timer. Switching modes does not change that number. Set all applies it to every job.'}
       </p>
     </PlanChainSection>
   )

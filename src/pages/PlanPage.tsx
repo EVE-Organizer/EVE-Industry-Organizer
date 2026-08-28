@@ -563,6 +563,7 @@ export function PlanPage() {
         blueprintTypeId: blueprintTypeIdByProduct.get(root.productTypeId),
         name,
         runs: root.runs,
+        durationHours: root.productionDurationHours,
         jobTimeHours: bp
           ? rootJobTimeHours(
               root,
@@ -592,11 +593,6 @@ export function PlanPage() {
 
     return withTreeLineMeta([...rootRows, ...subRows])
   }, [activeTemplate, planNodesByProductId, blueprints, typeMap, blueprintTypeIdByProduct, activeSettings])
-
-  const readyHoursByProductId = useMemo(
-    () => readyHoursByProductIdFromJobs(plan.productionJobs),
-    [plan.productionJobs],
-  )
 
   const manufactureRows = useMemo(() => {
     if (!activeTemplate) return []
@@ -887,8 +883,13 @@ export function PlanPage() {
     (targets: Array<{ rootId: string; deadlineHours: number }>) => {
       const template = selectedPlanTemplateFromStore()
       if (!template || targets.length === 0) return
+      const hoursByRootId = new Map(targets.map((t) => [t.rootId, t.deadlineHours]))
+      const stamped = template.roots.map((r) => {
+        const hours = hoursByRootId.get(r.id)
+        return hours == null ? r : { ...r, productionDurationHours: hours }
+      })
       const { roots, nodeOverrides } = fitPlanToRootReadyDeadlines({
-        roots: template.roots,
+        roots: stamped,
         targets,
         readyHoursByProductId: readyHoursByProductIdFromJobs(plan.productionJobs),
         nodes: plan.nodes,
@@ -1090,7 +1091,16 @@ export function PlanPage() {
                 rows={buildRows}
                 profitByRootId={profitByRootId}
                 readOnly={isSharedView}
-                readyHoursByProductId={readyHoursByProductId}
+                durationMode={activeTemplate.durationMode === 'overall' ? 'overall' : 'production'}
+                onDurationModeChange={
+                  isSharedView
+                    ? undefined
+                    : (mode) => {
+                        const template = selectedPlanTemplateFromStore()
+                        if (!template) return
+                        updatePlanTemplate(template.id, { durationMode: mode })
+                      }
+                }
                 planWindowHours={plan.productionWindowHours}
                 onOpenSetup={setSetupDetailRootId}
                 onOpenProfit={setProfitDetailRootId}
@@ -1103,12 +1113,10 @@ export function PlanPage() {
                         const template = selectedPlanTemplateFromStore()
                         if (!template) return
 
-                        if (patch.overallDurationHours != null) {
-                          if (rootId) {
-                            fitRootsToReadyDeadlines([
-                              { rootId, deadlineHours: patch.overallDurationHours },
-                            ])
-                          }
+                        if (patch.productionDurationHours != null && rootId && template.durationMode === 'overall') {
+                          fitRootsToReadyDeadlines([
+                            { rootId, deadlineHours: patch.productionDurationHours },
+                          ])
                           return
                         }
 
@@ -1140,7 +1148,6 @@ export function PlanPage() {
                         })
                       }
                 }
-                onFitRunsToOverall={isSharedView ? undefined : fitRootsToReadyDeadlines}
                 onSetAllDuration={
                   isSharedView
                     ? undefined
