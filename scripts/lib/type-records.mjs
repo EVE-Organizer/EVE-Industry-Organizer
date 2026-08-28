@@ -37,12 +37,17 @@ export function buildAllTypeRecords(
   const includeTypeIds = onlyIds
     ? new Set([...onlyIds].map(String))
     : new Set(types.filter((type) => type.published === '1').map((type) => type.typeID))
-  for (const typeId of blueprintTypeIds) {
+  const unpublishedBlueprintIds = new Set(blueprintTypeIds.filter((id) => id != null).map(String))
+  for (const typeId of unpublishedBlueprintIds) {
     includeTypeIds.add(String(typeId))
   }
 
   return types
-    .filter((type) => type.published === '1' && includeTypeIds.has(type.typeID))
+    .filter((type) => {
+      if (!includeTypeIds.has(type.typeID)) return false
+      if (type.published === '1') return true
+      return unpublishedBlueprintIds.has(type.typeID)
+    })
     .map((type) => {
       const typeId = num(type.typeID)
       const group = groupById.get(type.groupID)

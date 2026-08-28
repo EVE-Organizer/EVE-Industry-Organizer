@@ -29,7 +29,7 @@ import {
   isInteractive,
 } from './lib/run-progress.mjs'
 import { HUBS, resolveSellSystemId } from './lib/hubs.mjs'
-import { buildFittingRecords } from './lib/fitting-records.mjs'
+import { buildFittingRecords, collectFittingSkillIds } from './lib/fitting-records.mjs'
 import { buildMapData, systemsFromSdeJsonl } from './lib/map-data.mjs'
 import { buildGateIntelData } from './lib/gate-intel-data.mjs'
 import { loadMapSolarSystemsJsonl } from './lib/sde-jsonl.mjs'
@@ -292,9 +292,6 @@ async function main() {
                 .map((type) => [num(type.typeID), type.typeName]),
             )
 
-            ctx.skills = buildSkillRecords(types, groups, ctx.csvData.dgmTypeAttributes, {
-              activitySkills: ctx.csvData.industryActivitySkills,
-            })
             const { blueprints, typeById, groupById, categoryById } = buildBlueprintRecords({
               activity: ctx.csvData.industryActivity,
               products: ctx.csvData.industryActivityProducts,
@@ -316,6 +313,10 @@ async function main() {
               ctx.csvData.dgmTypeAttributes,
               ctx.csvData.invTraits,
             )
+            ctx.skills = buildSkillRecords(types, groups, ctx.csvData.dgmTypeAttributes, {
+              activitySkills: ctx.csvData.industryActivitySkills,
+              fittingSkillIds: collectFittingSkillIds(ctx.fittingTypes),
+            })
             ctx.typeRecords = buildCalcTypeRecords(types, groupById, categoryById, blueprints)
             ctx.upwell = buildUpwellCatalog(types, groups, ctx.csvData.dgmTypeAttributes)
             ctx.stations = buildHubStations(

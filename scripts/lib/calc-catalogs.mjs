@@ -157,11 +157,16 @@ function rigSizeFromName(name) {
 
 export function collectRecipeTypeIds(blueprints) {
   const ids = new Set()
+  const blueprintTypeIds = []
   for (const bp of blueprints) {
     ids.add(bp.productTypeId)
+    if (bp.blueprintTypeId != null) {
+      ids.add(bp.blueprintTypeId)
+      blueprintTypeIds.push(bp.blueprintTypeId)
+    }
     for (const material of bp.materials ?? []) ids.add(material.typeId)
   }
-  return ids
+  return { ids, blueprintTypeIds }
 }
 
 export function collectUsedSkillIds({ activitySkills, attrsByType, extraIds = SKILL_FIELD_IDS }) {
@@ -218,10 +223,14 @@ export function buildSkillRecords(types, groups, typeAttributes, options = {}) {
   )
   const groupById = new Map(groups.map((group) => [group.groupID, group]))
   const attrsByType = buildAttributesByType(typeAttributes)
+  const extraIds = [
+    ...(options.skillFieldIds ?? SKILL_FIELD_IDS),
+    ...(options.fittingSkillIds ?? []),
+  ]
   const usedIds = collectUsedSkillIds({
     activitySkills: options.activitySkills,
     attrsByType,
-    extraIds: options.skillFieldIds ?? SKILL_FIELD_IDS,
+    extraIds,
   })
 
   return types
@@ -264,10 +273,10 @@ export function buildSkillRecords(types, groups, typeAttributes, options = {}) {
 }
 
 export function buildCalcTypeRecords(types, groupById, categoryById, blueprints) {
-  const wanted = collectRecipeTypeIds(blueprints)
-  return buildAllTypeRecords(types, groupById, categoryById, [], { onlyIds: wanted }).filter(
-    (row) => !isExcludedCatalogText(row.name, row.group, row.category),
-  )
+  const { ids, blueprintTypeIds } = collectRecipeTypeIds(blueprints)
+  return buildAllTypeRecords(types, groupById, categoryById, blueprintTypeIds, {
+    onlyIds: ids,
+  }).filter((row) => !isExcludedCatalogText(row.name, row.group, row.category))
 }
 
 function hullKind(groupName) {

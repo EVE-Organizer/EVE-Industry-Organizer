@@ -27,7 +27,12 @@ function requiredSkills(attrs) {
 
 const ELECTRONICS_UPGRADES_ID = 3432
 
-const TURRET_GROUPS = new Set(['Energy Weapon', 'Projectile Weapon', 'Hybrid Weapon', 'Precursor Weapon'])
+const TURRET_GROUPS = new Set([
+  'Energy Weapon',
+  'Projectile Weapon',
+  'Hybrid Weapon',
+  'Precursor Weapon',
+])
 const LAUNCHER_GROUPS = new Set([
   'Missile Launcher Rocket',
   'Missile Launcher Light',
@@ -121,7 +126,8 @@ function weaponKind(groupName) {
 
 function weaponFamily(groupName) {
   if (groupName === 'Energy Weapon' || groupName === 'Rig Energy Weapon') return 'energy'
-  if (groupName === 'Projectile Weapon' || groupName === 'Rig Projectile Weapon') return 'projectile'
+  if (groupName === 'Projectile Weapon' || groupName === 'Rig Projectile Weapon')
+    return 'projectile'
   if (groupName === 'Hybrid Weapon' || groupName === 'Rig Hybrid Weapon') return 'hybrid'
   if (groupName.startsWith('Missile Launcher') || groupName === 'Rig Launcher') return 'launcher'
   if (groupName === 'Armor Repairer') return 'armorRepair'
@@ -133,9 +139,15 @@ function rigDrawback(groupName, attrs) {
   if (pct === 0) return undefined
 
   const family = weaponFamily(groupName)
-  if (family === 'energy' || family === 'projectile' || family === 'hybrid' || family === 'launcher') {
+  if (
+    family === 'energy' ||
+    family === 'projectile' ||
+    family === 'hybrid' ||
+    family === 'launcher'
+  ) {
     if (attrNum(attrs, 64) > 1) return { family, stat: 'cpu', pct }
-    if (attrNum(attrs, 204) !== 0 || attrNum(attrs, 310) !== 0) return { family, stat: 'power', pct }
+    if (attrNum(attrs, 204) !== 0 || attrNum(attrs, 310) !== 0)
+      return { family, stat: 'power', pct }
     return undefined
   }
 
@@ -197,7 +209,8 @@ function extractCombat(attrs, category, groupName) {
     if (attrNum(attrs, ATTR.capCapacity)) combat.capCapacity = attrNum(attrs, ATTR.capCapacity)
     if (attrNum(attrs, ATTR.capRecharge)) combat.capRecharge = attrNum(attrs, ATTR.capRecharge)
     if (attrNum(attrs, ATTR.calibration)) combat.calibration = attrNum(attrs, ATTR.calibration)
-    if (attrNum(attrs, ATTR.droneBandwidth)) combat.droneBandwidth = attrNum(attrs, ATTR.droneBandwidth)
+    if (attrNum(attrs, ATTR.droneBandwidth))
+      combat.droneBandwidth = attrNum(attrs, ATTR.droneBandwidth)
     if (attrNum(attrs, ATTR.droneBay)) combat.droneBay = attrNum(attrs, ATTR.droneBay)
     if (attrNum(attrs, ATTR.scanRes)) combat.scanRes = attrNum(attrs, ATTR.scanRes)
     if (attrNum(attrs, ATTR.maxTargets)) combat.maxTargets = attrNum(attrs, ATTR.maxTargets)
@@ -206,18 +219,22 @@ function extractCombat(attrs, category, groupName) {
   }
 
   if (category === 'Module') {
-    if (attrNum(attrs, ATTR.damageMultiplier)) combat.damageMultiplier = attrNum(attrs, ATTR.damageMultiplier)
+    if (attrNum(attrs, ATTR.damageMultiplier))
+      combat.damageMultiplier = attrNum(attrs, ATTR.damageMultiplier)
     if (attrNum(attrs, ATTR.cycleTime)) combat.cycleTime = attrNum(attrs, ATTR.cycleTime)
     if (attrNum(attrs, ATTR.optimalRange)) combat.optimal = attrNum(attrs, ATTR.optimalRange)
     if (attrNum(attrs, ATTR.falloff)) combat.falloff = attrNum(attrs, ATTR.falloff)
     if (attrNum(attrs, ATTR.trackingSpeed)) combat.tracking = attrNum(attrs, ATTR.trackingSpeed)
-    if (attrNum(attrs, ATTR.capacitorNeed)) combat.capacitorNeed = attrNum(attrs, ATTR.capacitorNeed)
-    if (attrNum(attrs, ATTR.calibrationCost)) combat.calibrationCost = attrNum(attrs, ATTR.calibrationCost)
+    if (attrNum(attrs, ATTR.capacitorNeed))
+      combat.capacitorNeed = attrNum(attrs, ATTR.capacitorNeed)
+    if (attrNum(attrs, ATTR.calibrationCost))
+      combat.calibrationCost = attrNum(attrs, ATTR.calibrationCost)
     if (attrNum(attrs, ATTR.speedFactor)) combat.speedFactor = attrNum(attrs, ATTR.speedFactor)
     if (attrNum(attrs, ATTR.shieldBonus)) combat.shieldBonus = attrNum(attrs, ATTR.shieldBonus)
     if (attrNum(attrs, ATTR.armorHpBonus)) combat.armorBonus = attrNum(attrs, ATTR.armorHpBonus)
     if (attrNum(attrs, ATTR.damageBonus)) combat.damageBonus = attrNum(attrs, ATTR.damageBonus)
-    if (attrNum(attrs, ATTR.laserDamageBonus)) combat.laserDamageBonus = attrNum(attrs, ATTR.laserDamageBonus)
+    if (attrNum(attrs, ATTR.laserDamageBonus))
+      combat.laserDamageBonus = attrNum(attrs, ATTR.laserDamageBonus)
     if (attrNum(attrs, ATTR.rofBonus)) combat.rofBonus = attrNum(attrs, ATTR.rofBonus)
     if (attrNum(attrs, ATTR.miningAmount)) combat.miningAmount = attrNum(attrs, ATTR.miningAmount)
     if (attrNum(attrs, ATTR.repairAmount)) combat.repairAmount = attrNum(attrs, ATTR.repairAmount)
@@ -246,16 +263,19 @@ function extractCombat(attrs, category, groupName) {
     if (attrNum(attrs, ATTR.chargeSize)) combat.chargeSize = attrNum(attrs, ATTR.chargeSize)
     if (attrNum(attrs, ATTR.optimalRange)) combat.optimalBonus = attrNum(attrs, ATTR.optimalRange)
     if (attrNum(attrs, ATTR.falloff)) combat.falloffBonus = attrNum(attrs, ATTR.falloff)
-    if (attrNum(attrs, ATTR.chargeDamageMult)) combat.chargeDamageMult = attrNum(attrs, ATTR.chargeDamageMult)
+    if (attrNum(attrs, ATTR.chargeDamageMult))
+      combat.chargeDamageMult = attrNum(attrs, ATTR.chargeDamageMult)
     if (attrNum(attrs, ATTR.optimalMod)) combat.optimalMod = attrNum(attrs, ATTR.optimalMod)
     if (attrNum(attrs, ATTR.falloffMod)) combat.falloffMod = attrNum(attrs, ATTR.falloffMod)
     if (attrNum(attrs, ATTR.trackingMod)) combat.trackingMod = attrNum(attrs, ATTR.trackingMod)
   }
 
   if (category === 'Drone') {
-    if (attrNum(attrs, ATTR.damageMultiplier)) combat.damageMultiplier = attrNum(attrs, ATTR.damageMultiplier)
+    if (attrNum(attrs, ATTR.damageMultiplier))
+      combat.damageMultiplier = attrNum(attrs, ATTR.damageMultiplier)
     if (attrNum(attrs, ATTR.cycleTime)) combat.cycleTime = attrNum(attrs, ATTR.cycleTime)
-    if (attrNum(attrs, ATTR.droneBandwidth)) combat.droneBandwidth = attrNum(attrs, ATTR.droneBandwidth)
+    if (attrNum(attrs, ATTR.droneBandwidth))
+      combat.droneBandwidth = attrNum(attrs, ATTR.droneBandwidth)
     const damage = {}
     if (attrNum(attrs, 116)) damage.em = attrNum(attrs, 116)
     if (attrNum(attrs, 119)) damage.thermal = attrNum(attrs, 119)
@@ -373,4 +393,22 @@ export function buildFittingRecords(types, groups, categories, typeAttributes, i
   }
 
   return records.sort((a, b) => a.typeId - b.typeId)
+}
+
+/** Skill IDs referenced by fit-skills UI (fitting dogma + fitting-level constants). */
+export const FITTING_SKILL_IDS = [
+  3426, 3413, 3318, 11207, 3432, 26258, 26259, 26260, 26261, 26253, 3419, 3394, 3392, 3417, 3424,
+  3449, 3422, 3452, 3440, 3450, 3312, 3301, 3300, 3310, 3436, 3442, 3348, 3349, 3416, 3394, 3386,
+  3410,
+]
+
+export function collectFittingSkillIds(fittingRecords) {
+  const ids = new Set(FITTING_SKILL_IDS)
+  for (const type of fittingRecords) {
+    for (const req of type.skills ?? []) ids.add(req.skillId)
+    for (const trait of type.traits ?? []) {
+      if (trait.skillId > 0) ids.add(trait.skillId)
+    }
+  }
+  return [...ids]
 }

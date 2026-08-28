@@ -35,13 +35,15 @@ describe('calc catalog filters', () => {
     const blueprints = [
       {
         productTypeId: 587,
+        blueprintTypeId: 1234,
         materials: [
           { typeId: 34, quantity: 1 },
           { typeId: 1, quantity: 1 },
         ],
       },
     ]
-    expect([...collectRecipeTypeIds(blueprints)].sort()).toEqual([1, 34, 587])
+    const { ids } = collectRecipeTypeIds(blueprints)
+    expect([...ids].sort((a, b) => a - b)).toEqual([1, 34, 587, 1234])
     const records = buildCalcTypeRecords(types, groupById, categoryById, blueprints)
     expect(records.map((row) => row.name).sort()).toEqual(['Rifter', 'Tritanium'])
   })
