@@ -77,9 +77,8 @@ export function useManufacturingPlan(
       windowHours: Number.POSITIVE_INFINITY,
       blueprints,
     })
-    const deadlineHours = Math.max(1, template.productionWindowHours)
-    const windowHours = Math.max(windowHoursFromJobs(jobs), deadlineHours)
-    const productionWindowHours = Math.max(windowHoursFromJobs(productionJobs), deadlineHours)
+    const windowHours = Math.max(1, windowHoursFromJobs(jobs))
+    const productionWindowHours = Math.max(1, windowHoursFromJobs(productionJobs))
     const simulations = includeSimulation
       ? simulatePlanFlow({
           nodes: expanded.nodes,

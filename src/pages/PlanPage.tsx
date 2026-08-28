@@ -37,14 +37,14 @@ import { pickHubMaps, sanitizeBuyPriceMap } from '@/lib/hubPriceSanity'
 import type { PlanBuyPriceSource } from '@/lib/planBuyPrices'
 import { manufacturingSlotsFromSkills } from '@/lib/manufacturingSlots'
 import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/lib/planTreeLines'
-import { windowHoursFromJobs } from '@/lib/planScheduler'
+import { readyHoursByProductId as readyHoursByProductIdFromJobs } from '@/lib/planScheduler'
 import { buildManufactureDisplayRows } from '@/lib/planManufactureDisplay'
 import {
   applyRootEntryPatch,
   createSyncedPlanRootEntry,
+  fitPlanToRootReadyDeadlines,
   resolveRunsFromPatch,
   rootJobTimeHours,
-  scaleRunsToSlotDeadline,
   syncRootEntry,
 } from '@/lib/rootRunsDuration'
 import { createPlanRootId } from '@/services/sync/types'
@@ -593,6 +593,11 @@ export function PlanPage() {
     return withTreeLineMeta([...rootRows, ...subRows])
   }, [activeTemplate, planNodesByProductId, blueprints, typeMap, blueprintTypeIdByProduct, activeSettings])
 
+  const readyHoursByProductId = useMemo(
+    () => readyHoursByProductIdFromJobs(plan.productionJobs),
+    [plan.productionJobs],
+  )
+
   const manufactureRows = useMemo(() => {
     if (!activeTemplate) return []
     return buildManufactureDisplayRows(
@@ -878,39 +883,20 @@ export function PlanPage() {
     [plan.nodes],
   )
 
-  const applyManufacturingDeadline = useCallback(
-    (deadlineHours: number) => {
+  const fitRootsToReadyDeadlines = useCallback(
+    (targets: Array<{ rootId: string; deadlineHours: number }>) => {
       const template = selectedPlanTemplateFromStore()
-      if (!template || deadlineHours <= 0) return
-      const scheduledHours = windowHoursFromJobs(plan.productionJobs)
-      let roots = template.roots
-      const nodeOverrides = { ...template.nodeOverrides }
-      if (scheduledHours > deadlineHours + 1 / 3600) {
-        roots = template.roots.map((r) => {
-          const bp = getBlueprintForProduct(blueprints, r.productTypeId)
-          const runs = scaleRunsToSlotDeadline(r.runs, scheduledHours, deadlineHours)
-          return applyRootEntryPatch(
-            r,
-            { runs },
-            bp,
-            storeSettings,
-            template.nodeOverrides[r.productTypeId],
-          )
-        })
-        for (const node of plan.nodes) {
-          if (node.mode !== 'build' || node.isRoot) continue
-          if (nodeOverrides[node.productTypeId]?.runs == null) continue
-          nodeOverrides[node.productTypeId] = {
-            ...nodeOverrides[node.productTypeId],
-            runs: scaleRunsToSlotDeadline(node.runs, scheduledHours, deadlineHours),
-          }
-        }
-      }
-      updatePlanTemplate(template.id, {
-        roots,
-        nodeOverrides,
-        productionWindowHours: deadlineHours,
+      if (!template || targets.length === 0) return
+      const { roots, nodeOverrides } = fitPlanToRootReadyDeadlines({
+        roots: template.roots,
+        targets,
+        readyHoursByProductId: readyHoursByProductIdFromJobs(plan.productionJobs),
+        nodes: plan.nodes,
+        nodeOverrides: template.nodeOverrides,
+        settings: storeSettings,
+        getBlueprint: (id) => getBlueprintForProduct(blueprints, id),
       })
+      updatePlanTemplate(template.id, { roots, nodeOverrides })
     },
     [plan.productionJobs, plan.nodes, blueprints, storeSettings, updatePlanTemplate],
   )
@@ -1104,6 +1090,7 @@ export function PlanPage() {
                 rows={buildRows}
                 profitByRootId={profitByRootId}
                 readOnly={isSharedView}
+                readyHoursByProductId={readyHoursByProductId}
                 planWindowHours={plan.productionWindowHours}
                 onOpenSetup={setSetupDetailRootId}
                 onOpenProfit={setProfitDetailRootId}
@@ -1117,7 +1104,11 @@ export function PlanPage() {
                         if (!template) return
 
                         if (patch.overallDurationHours != null) {
-                          applyManufacturingDeadline(patch.overallDurationHours)
+                          if (rootId) {
+                            fitRootsToReadyDeadlines([
+                              { rootId, deadlineHours: patch.overallDurationHours },
+                            ])
+                          }
                           return
                         }
 
@@ -1149,7 +1140,7 @@ export function PlanPage() {
                         })
                       }
                 }
-                onFitRunsToOverall={isSharedView ? undefined : applyManufacturingDeadline}
+                onFitRunsToOverall={isSharedView ? undefined : fitRootsToReadyDeadlines}
                 onSetAllDuration={
                   isSharedView
                     ? undefined
@@ -1157,7 +1148,11 @@ export function PlanPage() {
                         const template = selectedPlanTemplateFromStore()
                         if (!template) return
                         if (mode === 'overall') {
-                          applyManufacturingDeadline(hours)
+                          fitRootsToReadyDeadlines(
+                            template.roots
+                              .filter((r) => r.enabled !== false)
+                              .map((r) => ({ rootId: r.id, deadlineHours: hours })),
+                          )
                           return
                         }
                         const patch = { productionDurationHours: hours }

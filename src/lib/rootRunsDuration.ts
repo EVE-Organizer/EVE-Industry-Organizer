@@ -1,4 +1,10 @@
-import type { BlueprintInfo, GlobalSettings, PlanNodeOverride, PlanRootEntry } from '@/types'
+import type {
+  BlueprintInfo,
+  GlobalSettings,
+  PlanNode,
+  PlanNodeOverride,
+  PlanRootEntry,
+} from '@/types'
 import { DEFAULT_BATCH_SIZE } from '@/types'
 import {
   applyReactionTime,
@@ -127,55 +133,89 @@ export function inGameRunsFromDurationHours(
   )
 }
 
-/**
- * Runs so this product is ready by `targetReadyHours` on the timeline.
- * Subtracts wait time for sub-builds (not copy, invention, or other research).
- * The target is a deadline: runs never go up to fill leftover clock time.
- */
-export function runsForOverallReadyHours(input: {
-  targetReadyHours: number
-  currentReadyHours: number | null
-  currentJobHours: number
-  currentRuns: number
-  blueprint: BlueprintInfo
-  settings: GlobalSettings
-  meTeOverride?: PlanNodeOverride
-}): number {
-  const {
-    targetReadyHours,
-    currentReadyHours,
-    currentJobHours,
-    currentRuns,
-    blueprint,
-    settings,
-    meTeOverride,
-  } = input
-
-  if (targetReadyHours <= 0) return 1
-
-  const noLead =
-    currentReadyHours == null ||
-    currentJobHours <= 0 ||
-    currentReadyHours <= currentJobHours + 1 / 3600
-
-  const targetJobHours = noLead
-    ? targetReadyHours
-    : targetReadyHours - (currentReadyHours - currentJobHours)
-  if (targetJobHours <= 0) return 1
-
-  const next = inGameRunsFromDurationHours(blueprint, settings, targetJobHours, meTeOverride)
-  return Math.min(Math.max(1, currentRuns), next)
-}
-
-/** Shrink runs so a chain that overruns `deadlineHours` fits the manufacturing slot. Never grows. */
+/** Shrink runs so this product's ready-by time fits `deadlineHours`. Never grows. */
 export function scaleRunsToSlotDeadline(
   currentRuns: number,
-  currentWindowHours: number,
+  currentReadyHours: number,
   deadlineHours: number,
 ): number {
   if (currentRuns <= 1 || deadlineHours <= 0) return Math.max(1, currentRuns)
-  if (currentWindowHours <= deadlineHours + 1 / 3600) return currentRuns
-  return Math.max(1, Math.floor(currentRuns * (deadlineHours / currentWindowHours)))
+  if (currentReadyHours <= deadlineHours + 1 / 3600) return currentRuns
+  return Math.max(1, Math.floor(currentRuns * (deadlineHours / currentReadyHours)))
+}
+
+export function descendantProductIds(
+  rootProductTypeId: number,
+  nodes: Array<Pick<PlanNode, 'productTypeId' | 'childProductTypeIds'>>,
+): Set<number> {
+  const byId = new Map(nodes.map((n) => [n.productTypeId, n] as const))
+  const out = new Set<number>()
+  const stack = [...(byId.get(rootProductTypeId)?.childProductTypeIds ?? [])]
+  while (stack.length) {
+    const id = stack.pop()!
+    if (out.has(id)) continue
+    out.add(id)
+    for (const child of byId.get(id)?.childProductTypeIds ?? []) stack.push(child)
+  }
+  return out
+}
+
+/** Fit each targeted root so that product is ready by its own deadline. Runs never grow. */
+export function fitPlanToRootReadyDeadlines(input: {
+  roots: PlanRootEntry[]
+  targets: Array<{ rootId: string; deadlineHours: number }>
+  readyHoursByProductId: Map<number, number>
+  nodes: Array<Pick<PlanNode, 'productTypeId' | 'childProductTypeIds' | 'isRoot' | 'mode'>>
+  nodeOverrides: Record<number, PlanNodeOverride>
+  settings: GlobalSettings
+  getBlueprint: (productTypeId: number) => BlueprintInfo | undefined
+}): { roots: PlanRootEntry[]; nodeOverrides: Record<number, PlanNodeOverride> } {
+  const { roots, targets, readyHoursByProductId, nodes, settings, getBlueprint } = input
+  if (targets.length === 0) return { roots, nodeOverrides: input.nodeOverrides }
+
+  const deadlineByRootId = new Map(targets.map((t) => [t.rootId, t.deadlineHours]))
+  const ratioByRootId = new Map<string, number>()
+  const descendantsByRootId = new Map<string, Set<number>>()
+
+  const nextRoots = roots.map((root) => {
+    const deadlineHours = deadlineByRootId.get(root.id)
+    if (deadlineHours == null || deadlineHours <= 0) return root
+    descendantsByRootId.set(root.id, descendantProductIds(root.productTypeId, nodes))
+    const readyHours = readyHoursByProductId.get(root.productTypeId) ?? 0
+    const runs = scaleRunsToSlotDeadline(root.runs, readyHours, deadlineHours)
+    ratioByRootId.set(root.id, runs / Math.max(1, root.runs))
+    if (runs === root.runs) return root
+    return applyRootEntryPatch(
+      root,
+      { runs },
+      getBlueprint(root.productTypeId),
+      settings,
+      input.nodeOverrides[root.productTypeId],
+    )
+  })
+
+  const nodeOverrides = { ...input.nodeOverrides }
+  for (const [id, override] of Object.entries(nodeOverrides)) {
+    if (override.runs == null) continue
+    const productTypeId = Number(id)
+    const node = nodes.find((n) => n.productTypeId === productTypeId)
+    if (!node || node.isRoot || node.mode !== 'build') continue
+
+    let seen = false
+    let maxRatio = 0
+    for (const [rootId, descendants] of descendantsByRootId) {
+      if (!descendants.has(productTypeId)) continue
+      seen = true
+      maxRatio = Math.max(maxRatio, ratioByRootId.get(rootId) ?? 1)
+    }
+    if (!seen) continue
+    // ponytail: shared pins keep the least-shrink ratio so another root is not starved
+    const runs = Math.max(1, Math.floor(override.runs * maxRatio))
+    if (runs === override.runs) continue
+    nodeOverrides[productTypeId] = { ...override, runs }
+  }
+
+  return { roots: nextRoots, nodeOverrides }
 }
 
 /** Wall-clock hours to finish `runs` manufacturing runs (matches in-game job timer × waves). */
@@ -341,28 +381,6 @@ export function applyRootEntryPatch(
   }
 
   return next
-}
-
-export function applyRootOverallReadyHours(
-  root: PlanRootEntry,
-  targetReadyHours: number,
-  currentReadyHours: number | null,
-  currentJobHours: number,
-  blueprint: BlueprintInfo | undefined,
-  settings: GlobalSettings,
-  meTeOverride?: PlanNodeOverride,
-): PlanRootEntry {
-  if (!blueprint) return root
-  const runs = runsForOverallReadyHours({
-    targetReadyHours,
-    currentReadyHours,
-    currentJobHours,
-    currentRuns: root.runs,
-    blueprint,
-    settings,
-    meTeOverride,
-  })
-  return applyRootEntryPatch(root, { runs }, blueprint, settings, meTeOverride)
 }
 
 export function bpcCountForRuns(runs: number, runsPerBpc: number): number {

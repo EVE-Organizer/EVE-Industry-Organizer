@@ -4,7 +4,8 @@ import {
   createSyncedPlanRootEntry,
   inGameDurationHoursFromRuns,
   inGameRunsFromDurationHours,
-  runsForOverallReadyHours,
+  descendantProductIds,
+  fitPlanToRootReadyDeadlines,
   scaleRunsToSlotDeadline,
   jobTimeSecondsForRuns,
   resolveRunsFromPatch,
@@ -106,63 +107,110 @@ describe('applyRootEntryPatch', () => {
   })
 })
 
-describe('runsForOverallReadyHours', () => {
-  it('uses leftover job time after chain wait, and does not raise runs when shrinking', () => {
-    const currentRuns = 100
-    const currentJobHours = inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, currentRuns)
-    const currentReadyHours = currentJobHours + 1894
-
-    const next = runsForOverallReadyHours({
-      targetReadyHours: currentJobHours,
-      currentReadyHours,
-      currentJobHours,
-      currentRuns,
-      blueprint,
-      settings: DEFAULT_SETTINGS,
-    })
-
-    expect(next).toBe(1)
-    expect(next).toBeLessThan(currentRuns)
-  })
-
-  it('matches production runs when there is no wait before the job', () => {
-    const hours = 24
-    const currentRuns = inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, hours)
-    expect(
-      runsForOverallReadyHours({
-        targetReadyHours: hours,
-        currentReadyHours: hours,
-        currentJobHours: hours,
-        currentRuns,
-        blueprint,
-        settings: DEFAULT_SETTINGS,
-      }),
-    ).toBe(currentRuns)
-  })
-
-  it('does not raise runs when the deadline is later than current ready time', () => {
-    const currentRuns = 10
-    const currentJobHours = inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, currentRuns)
-    const next = runsForOverallReadyHours({
-      targetReadyHours: 168,
-      currentReadyHours: currentJobHours,
-      currentJobHours,
-      currentRuns,
-      blueprint,
-      settings: DEFAULT_SETTINGS,
-    })
-    expect(next).toBe(currentRuns)
-    expect(next).toBeLessThan(inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 168))
-  })
-})
-
 describe('scaleRunsToSlotDeadline', () => {
-  it('shrinks runs when the chain overruns the manufacturing slot', () => {
+  it('shrinks runs when ready-by overruns the root deadline', () => {
     expect(scaleRunsToSlotDeadline(1000, 2063, 168)).toBe(Math.floor(1000 * (168 / 2063)))
   })
 
-  it('leaves runs alone when the chain already finishes inside the deadline', () => {
+  it('leaves runs alone when the product already finishes inside the deadline', () => {
     expect(scaleRunsToSlotDeadline(100, 22, 168)).toBe(100)
+  })
+})
+
+describe('descendantProductIds', () => {
+  it('walks children and does not include the root', () => {
+    const ids = descendantProductIds(1, [
+      { productTypeId: 1, childProductTypeIds: [2, 3] },
+      { productTypeId: 2, childProductTypeIds: [4] },
+      { productTypeId: 3, childProductTypeIds: [] },
+      { productTypeId: 4, childProductTypeIds: [] },
+    ])
+    expect([...ids].sort()).toEqual([2, 3, 4])
+  })
+})
+
+describe('fitPlanToRootReadyDeadlines', () => {
+  const childBp: BlueprintInfo = { ...blueprint, blueprintTypeId: 10002, productTypeId: 200 }
+  const otherBp: BlueprintInfo = { ...blueprint, blueprintTypeId: 10003, productTypeId: 300 }
+  const bps = new Map<number, BlueprintInfo>([
+    [100, blueprint],
+    [200, childBp],
+    [300, otherBp],
+  ])
+  const nodes = [
+    { productTypeId: 100, childProductTypeIds: [200], isRoot: true, mode: 'build' as const },
+    { productTypeId: 200, childProductTypeIds: [], isRoot: false, mode: 'build' as const },
+    { productTypeId: 300, childProductTypeIds: [200], isRoot: true, mode: 'build' as const },
+  ]
+
+  it('scales only the overrunning root to its own ready-by deadline', () => {
+    const late: PlanRootEntry = { id: 'late', productTypeId: 100, runs: 1000, productionDurationHours: 168 }
+    const onTime: PlanRootEntry = { id: 'ok', productTypeId: 300, runs: 80, productionDurationHours: 20 }
+    const { roots } = fitPlanToRootReadyDeadlines({
+      roots: [late, onTime],
+      targets: [
+        { rootId: 'late', deadlineHours: 168 },
+        { rootId: 'ok', deadlineHours: 168 },
+      ],
+      readyHoursByProductId: new Map([
+        [100, 2063],
+        [300, 20],
+      ]),
+      nodes,
+      nodeOverrides: {},
+      settings: DEFAULT_SETTINGS,
+      getBlueprint: (id) => bps.get(id),
+    })
+    expect(roots[0]!.runs).toBe(Math.floor(1000 * (168 / 2063)))
+    expect(roots[1]!.runs).toBe(80)
+  })
+
+  it('does not grow runs when the deadline is later than ready-by', () => {
+    const { roots } = fitPlanToRootReadyDeadlines({
+      roots: [root],
+      targets: [{ rootId: root.id, deadlineHours: 168 }],
+      readyHoursByProductId: new Map([[100, 22]]),
+      nodes: [{ productTypeId: 100, childProductTypeIds: [], isRoot: true, mode: 'build' }],
+      nodeOverrides: {},
+      settings: DEFAULT_SETTINGS,
+      getBlueprint: () => blueprint,
+    })
+    expect(roots[0]!.runs).toBe(root.runs)
+  })
+
+  it('keeps a shared sub-build pin when another root still needs it', () => {
+    const late: PlanRootEntry = { id: 'late', productTypeId: 100, runs: 1000, productionDurationHours: 168 }
+    const onTime: PlanRootEntry = { id: 'ok', productTypeId: 300, runs: 80, productionDurationHours: 20 }
+    const { nodeOverrides } = fitPlanToRootReadyDeadlines({
+      roots: [late, onTime],
+      targets: [
+        { rootId: 'late', deadlineHours: 168 },
+        { rootId: 'ok', deadlineHours: 168 },
+      ],
+      readyHoursByProductId: new Map([
+        [100, 2063],
+        [300, 20],
+      ]),
+      nodes,
+      nodeOverrides: { 200: { runs: 500 } },
+      settings: DEFAULT_SETTINGS,
+      getBlueprint: (id) => bps.get(id),
+    })
+    expect(nodeOverrides[200]!.runs).toBe(500)
+  })
+
+  it('shrinks an unshared sub-build pin with the overrunning root', () => {
+    const late: PlanRootEntry = { id: 'late', productTypeId: 100, runs: 1000, productionDurationHours: 168 }
+    const { nodeOverrides } = fitPlanToRootReadyDeadlines({
+      roots: [late],
+      targets: [{ rootId: 'late', deadlineHours: 168 }],
+      readyHoursByProductId: new Map([[100, 2063]]),
+      nodes,
+      nodeOverrides: { 200: { runs: 500 } },
+      settings: DEFAULT_SETTINGS,
+      getBlueprint: (id) => bps.get(id),
+    })
+    expect(nodeOverrides[200]!.runs).toBe(Math.floor(500 * (168 / 2063)))
   })
 })
 
