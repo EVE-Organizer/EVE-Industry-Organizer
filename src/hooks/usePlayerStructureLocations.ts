@@ -7,8 +7,9 @@ import {
   useProductionLocations,
 } from '@/hooks/useCharacterIndustryData'
 import { buildMapGraph } from '@/services/data/mapLoader'
-import { jumpDistance } from '@/lib/nearestPublicHub'
+import { jumpDistance, systemsWithinJumps } from '@/lib/nearestPublicHub'
 import {
+  STRUCTURE_PICKER_MAX_JUMPS,
   inferOriginSystemId,
   mergeProductionLocations,
   playerStructuresInRange,
@@ -38,11 +39,18 @@ export function usePlayerStructureLocations(
 
   const graph = useMemo(() => (mapData ? buildMapGraph(mapData) : null), [mapData])
   const publicQuery = useNearbyPublicStructures(kind)
+  const nearbySystems = useMemo(() => {
+    if (!graph || originSystemId == null) return null
+    return systemsWithinJumps(graph, originSystemId, STRUCTURE_PICKER_MAX_JUMPS)
+  }, [graph, originSystemId])
 
   const locations = useMemo(() => {
-    const known = playerStructuresInRange(personal, null)
-    const publicAll = publicQuery.data?.locations ?? []
-    const merged = mergeProductionLocations(known, publicAll)
+    const known = playerStructuresInRange(personal, nearbySystems)
+    // ponytail: skip the full public list until range is known (1196 × BFS froze character switch)
+    const publicNearby = nearbySystems
+      ? (publicQuery.data?.locations ?? []).filter((loc) => nearbySystems.has(loc.solarSystemId))
+      : []
+    const merged = mergeProductionLocations(known, publicNearby)
     const filtered = merged.filter((loc) => {
       if (kind === 'manufacturing') return !isRefineryStructureTypeId(loc.structureTypeId)
       return !isEngineeringStructureTypeId(loc.structureTypeId)
@@ -59,7 +67,7 @@ export function usePlayerStructureLocations(
       if (jumpA !== jumpB) return jumpA - jumpB
       return a.name.localeCompare(b.name)
     })
-  }, [graph, kind, originSystemId, personal, publicQuery.data?.locations])
+  }, [graph, kind, nearbySystems, originSystemId, personal, publicQuery.data?.locations])
 
   function jumpsTo(location: ProductionLocation): number | null {
     if (!graph || originSystemId == null || location.solarSystemId <= 0) return null

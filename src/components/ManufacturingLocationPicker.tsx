@@ -257,8 +257,7 @@ export function ManufacturingLocationPicker({
                     <li className="px-3 py-2 text-xs opacity-60">Loading locations…</li>
                   ) : !hasSearch && locations.length === 0 ? (
                     <li className="px-3 py-2 text-xs opacity-60">
-                      No structures from this character's jobs, assets, or corp, and no public
-                      engineering complexes.
+                      No structures within 5 jumps, and none holding this character's items.
                     </li>
                   ) : (
                     filteredLocations.map((location) => {

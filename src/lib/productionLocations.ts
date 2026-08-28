@@ -158,13 +158,27 @@ export function inferOriginSystemId(locations: ProductionLocation[]): number | n
   return best
 }
 
+/** Public + corp structures past this are dropped; hangars with items stay. */
+export const STRUCTURE_PICKER_MAX_JUMPS = 5
+
+function hasStoredItems(location: ProductionLocation): boolean {
+  return (
+    location.source === 'character_asset' ||
+    location.source === 'corp_asset' ||
+    location.source === 'blueprint'
+  )
+}
+
 export function playerStructuresInRange(
   locations: ProductionLocation[],
   nearbySystems: Set<number> | null,
 ): ProductionLocation[] {
   const player = locations.filter((loc) => loc.kind === 'structure')
   if (!nearbySystems) return player
-  return player.filter((loc) => loc.solarSystemId <= 0 || nearbySystems.has(loc.solarSystemId))
+  return player.filter(
+    (loc) =>
+      hasStoredItems(loc) || loc.solarSystemId <= 0 || nearbySystems.has(loc.solarSystemId),
+  )
 }
 
 export function mergeProductionLocations(

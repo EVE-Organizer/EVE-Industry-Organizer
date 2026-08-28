@@ -35,6 +35,19 @@ describe('playerStructuresInRange', () => {
     expect(rows.map((r) => r.locationId)).toEqual([1])
   })
 
+  it('keeps far structures that already hold character items', () => {
+    const hangar = makeProductionLocation({
+      locationId: 9,
+      kind: 'structure',
+      name: 'Far hangar',
+      solarSystemId: 99,
+      source: 'character_asset',
+    })
+    const farCorp = structure(2, 99)
+    const rows = playerStructuresInRange([hangar, farCorp], new Set([10]))
+    expect(rows.map((r) => r.locationId)).toEqual([9])
+  })
+
   it('keeps every player structure when range is unknown', () => {
     const rows = playerStructuresInRange([station(1, 1), structure(2, 9)], null)
     expect(rows).toHaveLength(1)

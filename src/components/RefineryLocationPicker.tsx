@@ -240,8 +240,7 @@ export function RefineryLocationPicker({
                     <li className="px-3 py-2 text-xs opacity-60">Loading locations…</li>
                   ) : !hasSearch && locations.length === 0 ? (
                     <li className="px-3 py-2 text-xs opacity-60">
-                      No structures from this character's jobs, assets, or corp, and no public
-                      refineries. Private citadels still need corp access or a prior dock.
+                      No refineries within 5 jumps, and none holding this character's items.
                     </li>
                   ) : (
                     filteredLocations.map((location) => {
