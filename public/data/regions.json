@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-31T10:16:43.438Z",
+  "generatedAt": "2026-09-01T09:00:54.495Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0382,
+      "costIndex": 0.0379,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
