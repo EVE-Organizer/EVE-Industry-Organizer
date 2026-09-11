@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T08:30:40.632Z",
+  "generatedAt": "2026-09-11T08:25:11.871Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -797,23 +797,23 @@
       "regionId": 10000065,
       "name": "Kor-Azor",
       "securityClass": "highsec",
-      "buildSystemId": 30005043,
-      "buildSystemName": "Nakregde",
-      "buildSystemSecurity": 0.830615,
+      "buildSystemId": 30005046,
+      "buildSystemName": "Jinkah",
+      "buildSystemSecurity": 0.847549,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30005043
+      "marketSystemId": 30005046
     },
     {
       "regionId": 10000016,
       "name": "Lonetrek",
-      "securityClass": "lowsec",
-      "buildSystemId": 30001388,
-      "buildSystemName": "Mara",
-      "buildSystemSecurity": 0.419988,
+      "securityClass": "highsec",
+      "buildSystemId": 30001416,
+      "buildSystemName": "Liukikka",
+      "buildSystemSecurity": 0.564361,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30001388
+      "marketSystemId": 30001416
     },
     {
       "regionId": 10000013,
@@ -830,9 +830,9 @@
       "regionId": 10000042,
       "name": "Metropolis",
       "securityClass": "highsec",
-      "buildSystemId": 30013410,
-      "buildSystemName": "Abrat",
-      "buildSystemSecurity": 0.949,
+      "buildSystemId": 30003403,
+      "buildSystemName": "Meimungen",
+      "buildSystemSecurity": 0.907195,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30002053
@@ -1149,11 +1149,11 @@
       "regionId": 10000003,
       "name": "Vale of the Silent",
       "securityClass": "nullsec",
-      "buildSystemId": 30000288,
-      "buildSystemName": "1W-0KS",
-      "buildSystemSecurity": -0.102556,
+      "buildSystemId": 30000272,
+      "buildSystemName": "MA-XAP",
+      "buildSystemSecurity": -0.09721,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0014,
+      "reactionCostIndex": 0.0245,
       "marketSystemId": 30000240
     },
     {
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0318,
+      "costIndex": 0.0309,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
