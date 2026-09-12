@@ -44,6 +44,8 @@ import {
   createSyncedPlanRootEntry,
   fitPlanForOverallDeadlines,
   overallDeadlineTargets,
+  overallFitInputKey,
+  overallFitPassState,
   overallPlanFitChanged,
   planRootsKey,
   resetPlanRootsFromDuration,
@@ -272,6 +274,7 @@ export function PlanPage() {
   const [shareLinkError, setShareLinkError] = useState(false)
   const handledAddRef = useRef<string | null>(null)
   const overallRootsKeyRef = useRef<string>('')
+  const overallFitPassRef = useRef({ key: '', passes: 0 })
 
   const storeTemplate = templates.find((t) => t.id === selectedId) ?? null
   const isSharedView = sharedView != null
@@ -803,7 +806,12 @@ export function PlanPage() {
 
   /* ----- Keep Overall runs fitted to the live production schedule ----- */
   useEffect(() => {
-    if (blockStoreMutations || !storeTemplate || storeTemplate.durationMode !== 'overall') return
+    if (blockStoreMutations || !storeTemplate) return
+    if (storeTemplate.durationMode !== 'overall') {
+      overallRootsKeyRef.current = overallRootsKey
+      overallFitPassRef.current = { key: '', passes: 0 }
+      return
+    }
     if (activePlanRoots(storeTemplate.roots).length === 0) {
       overallRootsKeyRef.current = overallRootsKey
       return
@@ -815,6 +823,7 @@ export function PlanPage() {
 
     // Root add/remove/enable changed membership — reset runs from duration before refit
     if (rootsKeyChanged) {
+      overallFitPassRef.current = { key: '', passes: 0 }
       const resetRoots = resetPlanRootsFromDuration(
         storeTemplate.roots,
         storeSettings,
@@ -829,6 +838,12 @@ export function PlanPage() {
         return
       }
     }
+
+    // Cap writes: a barely-late chain can shrink 1 run per commit and freeze the tab
+    const fitKey = overallFitInputKey(storeTemplate, storeSettings)
+    const pass = overallFitPassState(overallFitPassRef.current, fitKey)
+    overallFitPassRef.current = { key: pass.key, passes: pass.passes }
+    if (!pass.allow) return
 
     const targets = overallDeadlineTargets(storeTemplate.roots)
     if (targets.length === 0) return
@@ -852,6 +867,7 @@ export function PlanPage() {
       return
     }
 
+    overallFitPassRef.current = { key: pass.key, passes: pass.passes + 1 }
     updatePlanTemplate(storeTemplate.id, { roots, nodeOverrides })
   }, [
     blockStoreMutations,

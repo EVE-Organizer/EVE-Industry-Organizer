@@ -8,8 +8,11 @@ import {
   fitPlanForOverallDeadlines,
   fitPlanToRootReadyDeadlines,
   overallDeadlineTargets,
+  overallFitInputKey,
+  overallFitPassState,
   overallPlanFitChanged,
   planRootsKey,
+  MAX_OVERALL_FIT_PASSES,
   resetPlanRootsFromDuration,
   scaleRunsToSlotDeadline,
   jobTimeSecondsForRuns,
@@ -190,6 +193,52 @@ describe('planRootsKey', () => {
     const withTwo = planRootsKey([root, other])
     const withOne = planRootsKey([root])
     expect(withTwo).not.toBe(withOne)
+  })
+})
+
+describe('overallFitInputKey', () => {
+  const template = {
+    roots: [root],
+    modeOverrides: {},
+    nodeOverrides: {} as Record<number, import('@/types').PlanNodeOverride>,
+  }
+
+  it('ignores run count so a fit pass cannot retrigger itself', () => {
+    const shrunk = {
+      ...template,
+      roots: [{ ...root, runs: 1 }],
+    }
+    expect(overallFitInputKey(shrunk, DEFAULT_SETTINGS)).toBe(
+      overallFitInputKey(template, DEFAULT_SETTINGS),
+    )
+  })
+
+  it('changes when ME is edited', () => {
+    const withMe = {
+      ...template,
+      nodeOverrides: { 100: { me: 8 } },
+    }
+    expect(overallFitInputKey(withMe, DEFAULT_SETTINGS)).not.toBe(
+      overallFitInputKey(template, DEFAULT_SETTINGS),
+    )
+  })
+})
+
+describe('overallFitPassState', () => {
+  it('stops after MAX_OVERALL_FIT_PASSES on the same input key', () => {
+    let state = { key: '', passes: 0 }
+    for (let i = 0; i < MAX_OVERALL_FIT_PASSES; i++) {
+      const next = overallFitPassState(state, 'same')
+      expect(next.allow).toBe(true)
+      state = { key: next.key, passes: next.passes + 1 }
+    }
+    expect(overallFitPassState(state, 'same').allow).toBe(false)
+  })
+
+  it('resets the cap when the input key changes', () => {
+    const blocked = overallFitPassState({ key: 'old', passes: MAX_OVERALL_FIT_PASSES }, 'old')
+    expect(blocked.allow).toBe(false)
+    expect(overallFitPassState(blocked, 'new').allow).toBe(true)
   })
 })
 

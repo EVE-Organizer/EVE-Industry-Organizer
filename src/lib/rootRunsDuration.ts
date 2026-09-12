@@ -1,6 +1,7 @@
 import type {
   BlueprintInfo,
   GlobalSettings,
+  ManufacturingPlanTemplate,
   PlanNode,
   PlanNodeOverride,
   PlanRootEntry,
@@ -215,6 +216,44 @@ export function overallDeadlineTargets(roots: PlanRootEntry[]): OverallDeadlineT
 /** Stable key for plan root membership — detects add, remove, enable toggle. */
 export function planRootsKey(roots: PlanRootEntry[]): string {
   return roots.map((r) => `${r.id}:${r.enabled !== false ? 1 : 0}`).join('|')
+}
+
+/** Max store writes per Overall input key. Stops 1-run-at-a-time refit freezes. */
+export const MAX_OVERALL_FIT_PASSES = 4
+
+type OverallFitTemplate = Pick<
+  ManufacturingPlanTemplate,
+  'roots' | 'modeOverrides' | 'nodeOverrides' | 'manufacturingSlotBonus' | 'reactionSlotBonus'
+>
+
+/** Schedule inputs that should start a new Overall refit. Runs are omitted on purpose. */
+export function overallFitInputKey(template: OverallFitTemplate, settings: GlobalSettings): string {
+  const modes = Object.entries(template.modeOverrides ?? {})
+    .map(([id, mode]) => `${id}:${mode}`)
+    .sort()
+    .join(',')
+  const pins = Object.entries(template.nodeOverrides)
+    .map(
+      ([id, override]) =>
+        `${id}:${override.me ?? ''}:${override.te ?? ''}:${override.copies ?? ''}:${override.runsPerBpc ?? ''}:${override.forceInclude ? 1 : 0}`,
+    )
+    .sort()
+    .join(',')
+  const timeSkills = `${skillLevel(settings.skills, 'industry')}:${skillLevel(settings.skills, 'advancedIndustry')}:${skillLevel(settings.skills, 'reactions')}`
+  return `${planRootsKey(template.roots)}|${modes}|${pins}|${timeSkills}|${settings.teDefault}|${settings.meDefault}|${settings.manufacturingSystemId}|${template.manufacturingSlotBonus ?? 0}|${template.reactionSlotBonus ?? 0}`
+}
+
+export type OverallFitPassState = { key: string; passes: number }
+
+/** Allow another Overall store write unless this input key already hit the pass cap. */
+export function overallFitPassState(
+  prev: OverallFitPassState,
+  nextKey: string,
+  maxPasses = MAX_OVERALL_FIT_PASSES,
+): OverallFitPassState & { allow: boolean } {
+  if (prev.key !== nextKey) return { key: nextKey, passes: 0, allow: true }
+  if (prev.passes >= maxPasses) return { key: nextKey, passes: prev.passes, allow: false }
+  return { key: nextKey, passes: prev.passes, allow: true }
 }
 
 /** Re-derive root runs from stored duration targets (Production-mode reset). */
