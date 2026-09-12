@@ -135,6 +135,7 @@ function addBlueprintLocations(
 
 export async function buildProductionLocations(input: {
   accessToken: string
+  forceRefresh?: boolean
   characterAssets: EsiAsset[]
   corpAssets: EsiAsset[]
   blueprints: EsiBlueprint[]
@@ -163,11 +164,16 @@ export async function buildProductionLocations(input: {
   addBlueprintLocations(byId, input.blueprints, itemLocations)
 
   const locations = [...byId.values()]
+  const locationFetchOpts = input.forceRefresh ? { forceRefresh: true } : undefined
   for (const loc of locations) {
     if (!needsLocationEnrichment(loc)) continue
 
     if (loc.kind === 'structure') {
-      const info = await fetchUniverseStructure(loc.locationId, input.accessToken)
+      const info = await fetchUniverseStructure(
+        loc.locationId,
+        input.accessToken,
+        locationFetchOpts,
+      )
       if (info) {
         loc.name = info.name
         loc.solarSystemId = info.solar_system_id
@@ -182,7 +188,7 @@ export async function buildProductionLocations(input: {
         loc.structureTypeId = catalog.typeId
       }
     } else {
-      const info = await fetchUniverseStation(loc.locationId)
+      const info = await fetchUniverseStation(loc.locationId, locationFetchOpts)
       if (info) {
         loc.name = info.name
         loc.solarSystemId = info.system_id

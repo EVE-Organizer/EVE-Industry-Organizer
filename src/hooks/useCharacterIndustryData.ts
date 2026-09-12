@@ -143,6 +143,7 @@ function fetchProductionLocations(characterId: number, forceRefresh = false) {
 
     return buildProductionLocations({
       accessToken,
+      forceRefresh,
       characterAssets,
       corpAssets,
       blueprints,
@@ -184,7 +185,9 @@ function fetchLocationInventoryQueryFn(
     const corporationId = await fetchCharacterCorporationId(characterId)
     if (corporationId) {
       try {
-        const corpAssets = await fetchCorporationAssets(corporationId, accessToken, { forceRefresh })
+        const corpAssets = await fetchCorporationAssets(corporationId, accessToken, {
+          forceRefresh,
+        })
         allAssets = [...allAssets, ...corpAssets]
       } catch {
         // Corp assets unavailable without roles; character assets still count.
@@ -225,15 +228,14 @@ export function useLocationInventory(
       queryKey: ['location-inventory', characterId, locationId],
       refetchType: 'none',
     })
-    return queryClient.fetchQuery(
-      locationInventoryQueryOptions(characterId, locationId, true),
-    )
+    return queryClient.fetchQuery(locationInventoryQueryOptions(characterId, locationId, true))
   }
 
   return { ...query, refetch: refresh }
 }
 
-export function characterSolarSystemQueryOptions(characterId: number) {
+export function characterSolarSystemQueryOptions(characterId: number, forceRefresh = false) {
+  const fetchOpts = forceRefresh ? { forceRefresh: true } : undefined
   return {
     queryKey: ['character-solar-system', characterId] as const,
     staleTime: CHARACTER_DATA_STALE_MS,
@@ -241,7 +243,7 @@ export function characterSolarSystemQueryOptions(characterId: number) {
     queryFn: async (): Promise<number | null> => {
       const accessToken = await getValidAccessToken(characterId)
       if (!accessToken) throw new EsiAuthError('Session expired. Sign in again.', 401)
-      return fetchCharacterSolarSystemId(characterId, accessToken)
+      return fetchCharacterSolarSystemId(characterId, accessToken, fetchOpts)
     },
   }
 }

@@ -1,5 +1,10 @@
 import type { EsiFetchOptions } from '@/services/character/esiAuthFetch'
-import { EsiAuthError, esiAuthGet, esiAuthGetAllPages, esiPublicGet } from '@/services/character/esiAuthFetch'
+import {
+  EsiAuthError,
+  esiAuthGet,
+  esiAuthGetAllPages,
+  esiPublicGet,
+} from '@/services/character/esiAuthFetch'
 import { setCached, TTL } from '@/services/cache/cacheStore'
 import type { EsiAsset } from '@/services/character/characterAssetsService'
 
@@ -65,6 +70,7 @@ export async function fetchCorporationAssets(
 export async function fetchUniverseStructure(
   structureId: number,
   accessToken: string,
+  options?: { forceRefresh?: boolean },
 ): Promise<EsiUniverseStructure | null> {
   const cacheKey = `esi:structure:${structureId}`
 
@@ -72,7 +78,7 @@ export async function fetchUniverseStructure(
     return await esiAuthGet<EsiUniverseStructure>(
       `/universe/structures/${structureId}/`,
       accessToken,
-      { cacheKey },
+      { cacheKey, ...options },
     )
   } catch (err) {
     if (err instanceof EsiAuthError && err.status === 403) {
@@ -82,8 +88,12 @@ export async function fetchUniverseStructure(
   }
 }
 
-export async function fetchUniverseStation(stationId: number): Promise<EsiStation | null> {
+export async function fetchUniverseStation(
+  stationId: number,
+  options?: { forceRefresh?: boolean },
+): Promise<EsiStation | null> {
   return esiPublicGet<EsiStation>(`/universe/stations/${stationId}/`, {
     cacheKey: `esi:station:${stationId}`,
+    ...options,
   })
 }

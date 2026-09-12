@@ -9,6 +9,7 @@ interface EsiCharacterLocation {
 export async function fetchCharacterSolarSystemId(
   characterId: number,
   accessToken: string,
+  options?: { forceRefresh?: boolean },
 ): Promise<number | null> {
   const data = await esiAuthGet<EsiCharacterLocation | null>(
     `/characters/${characterId}/location/`,
@@ -16,6 +17,7 @@ export async function fetchCharacterSolarSystemId(
     {
       cacheKey: `esi:char-location:${characterId}`,
       forbiddenFallback: null,
+      ...options,
     },
   )
   return data?.solar_system_id && data.solar_system_id > 0 ? data.solar_system_id : null
