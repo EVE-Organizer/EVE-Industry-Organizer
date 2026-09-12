@@ -50,7 +50,6 @@ const VALID_PRICE_METHODS: GlobalSettings['priceMethod'][] = ['sell_orders', 'bu
 const VALID_SORT_KEYS: BlueprintSortKey[] = [
   'setupCost',
   'netProfit',
-  'iph',
   'margin',
   'avgVolume',
   'tradedIsk',

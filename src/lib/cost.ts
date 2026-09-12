@@ -245,7 +245,12 @@ export function runsForJobTime(
   industry: number,
   advancedIndustry: number,
   structureTeBonusPercent = 0,
-  options?: { step?: number; maxRuns?: number | null },
+  options?: {
+    step?: number
+    maxRuns?: number | null
+    requiredSkills?: Record<string, number>
+    skills?: Partial<SkillLevels>
+  },
 ): number {
   const perRun = manufacturingTimePerRun(
     baseTimeSeconds,
@@ -253,6 +258,8 @@ export function runsForJobTime(
     industry,
     advancedIndustry,
     structureTeBonusPercent,
+    options?.requiredSkills,
+    options?.skills,
   )
   const step = options?.step ?? BATCH_SIZE_STEP
   const minRuns = minRunsForStep(step)

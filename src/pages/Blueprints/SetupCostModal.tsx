@@ -67,8 +67,7 @@ function RunsExplanation({ breakdown }: { breakdown: SetupCostBreakdown }) {
         Runs for setup & profit: <strong>{runs}</strong> (from job time)
       </li>
       <li>
-        Market fits ~<strong>{maxRuns}</strong> runs in {volumeCapDays} days at hub volume (ISK/hr
-        uses this cap)
+        Market fits ~<strong>{maxRuns}</strong> runs in {volumeCapDays} days at hub volume
       </li>
       <li>
         Output qty: {runs} × {productQuantity} = <strong>{formatQuantity(outputQty)}</strong> units

@@ -117,7 +117,12 @@ export function resolveRankingRunsFromTime(
         industry,
         advancedIndustry,
         structure.teBonusPercent,
-        { step: 1, maxRuns: MAX_BATCH_SIZE },
+        {
+          step: 1,
+          maxRuns: MAX_BATCH_SIZE,
+          requiredSkills: blueprint.requiredSkills,
+          skills: settings.skills,
+        },
       )
 
   const clamped = Math.min(MAX_BATCH_SIZE, Math.max(MIN_BATCH_SIZE, runs))
@@ -174,13 +179,7 @@ export interface RankingFilters {
   limit?: number
 }
 
-export type BlueprintSortKey =
-  | 'setupCost'
-  | 'netProfit'
-  | 'iph'
-  | 'margin'
-  | 'avgVolume'
-  | 'tradedIsk'
+export type BlueprintSortKey = 'setupCost' | 'netProfit' | 'margin' | 'avgVolume' | 'tradedIsk'
 export type SortDirection = 'asc' | 'desc'
 
 export function sortBlueprintRows(

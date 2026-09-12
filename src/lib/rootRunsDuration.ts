@@ -104,7 +104,12 @@ export function runsFromDurationHours(
     industry,
     advancedIndustry,
     structureTe,
-    { step: 1, maxRuns: null },
+    {
+      step: 1,
+      maxRuns: null,
+      requiredSkills: blueprint.requiredSkills,
+      skills: settings.skills,
+    },
   )
   return Math.max(1, runsPerLine * lines)
 }

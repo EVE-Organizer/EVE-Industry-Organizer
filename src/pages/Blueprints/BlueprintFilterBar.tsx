@@ -17,10 +17,7 @@ import { SetupBudgetRange } from '@/pages/Blueprints/SetupBudgetRange'
 import { PlanFacilityControls } from '@/components/plan/PlanFacilityControls'
 import { buildBlueprintRankingSettings } from '@/lib/structureSettings'
 import { planExpansionSettingsKey } from '@/lib/planExpansionSettings'
-import {
-  EconomicsFilterSection,
-  FilterSection,
-} from '@/components/EconomicsFilterSection'
+import { EconomicsFilterSection, FilterSection } from '@/components/EconomicsFilterSection'
 import { BlueprintPickerFilterSection } from '@/pages/Blueprints/BlueprintPickerFilterSection'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { formatAvgVolume, formatDuration, formatInputDecimal } from '@/lib/profit'
@@ -36,13 +33,7 @@ interface BlueprintFilterBarProps {
   resultPending?: boolean
 }
 
-function LimitsTile({
-  children,
-  className = '',
-}: {
-  children: ReactNode
-  className?: string
-}) {
+function LimitsTile({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <div
       className={`rounded-md border border-eve-border/70 bg-base-300/10 p-3 flex flex-col gap-2 min-w-0 ${className}`}
@@ -91,7 +82,14 @@ export function BlueprintFilterBar({
         rankingTimeHours: query.rankingTimeHours,
         priceMethod: query.priceMethod,
       }),
-    [settings, facilitySettingsKey, sde?.systems, query.mfgSystem, query.rankingTimeHours, query.priceMethod],
+    [
+      settings,
+      facilitySettingsKey,
+      sde?.systems,
+      query.mfgSystem,
+      query.rankingTimeHours,
+      query.priceMethod,
+    ],
   )
 
   function handleReset() {
@@ -133,9 +131,7 @@ export function BlueprintFilterBar({
       <header className="blueprint-filters__header">
         <div className="min-w-0">
           <h2 className="blueprint-filters__title">Filters</h2>
-          <p className="blueprint-filters__subtitle">
-            Station, market window, and what to rank
-          </p>
+          <p className="blueprint-filters__subtitle">Station, market window, and what to rank</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button type="button" className="btn btn-ghost btn-xs" onClick={handleReset}>
@@ -154,7 +150,7 @@ export function BlueprintFilterBar({
             onChange={onFacilityChange}
             systems={sde.systems}
             regions={sde.regions}
-            hint="Structure, rigs, and build system apply to ranking cost and ISK/hr estimates."
+            hint="Structure, rigs, and build system apply to ranking cost and profit."
           />
         ) : null}
 
@@ -239,7 +235,7 @@ export function BlueprintFilterBar({
                 <CompactSliderField
                   variant="panel"
                   label="Job time"
-                  tooltip="Target total job duration. Runs sync per blueprint from its base time, TE, and your skills. Setup cost, profit, and ISK/hr use those runs."
+                  tooltip="Target total job duration. Runs sync per blueprint from its base time, TE, and your skills. Setup cost and profit use those runs."
                   value={query.rankingTimeHours}
                   onChange={(rankingTimeHours) => onChange({ rankingTimeHours })}
                   min={MIN_RANKING_TIME_HOURS}

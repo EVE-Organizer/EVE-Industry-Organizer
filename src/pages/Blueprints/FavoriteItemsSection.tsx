@@ -71,7 +71,6 @@ export function FavoriteItemsSection({
                     <th>Blueprint</th>
                     <th>Setup</th>
                     <th>Profit</th>
-                    <th>ISK/hr</th>
                     <th>Margin</th>
                     <th>Vol/day</th>
                     <th>Amount traded</th>

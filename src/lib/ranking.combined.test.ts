@@ -37,7 +37,7 @@ describe('combined ranking includes high-iph formulas', () => {
     includeHaulCost: q.includeHaul,
     minVolume: q.minVolume,
     tiers: q.tiers,
-    sortBy: 'iph' as const,
+    sortBy: 'netProfit' as const,
     sortDirection: 'desc' as const,
     limit: 50,
   }
@@ -131,7 +131,7 @@ describe('combined ranking includes high-iph formulas', () => {
         blueprint: { kind: 'manufacturing' },
         iph: 100,
         setupCost: 0,
-        netProfit: 0,
+        netProfit: 100,
         margin: 0,
         avgVolume: 0,
       } as never,
@@ -139,7 +139,7 @@ describe('combined ranking includes high-iph formulas', () => {
         blueprint: { kind: 'manufacturing' },
         iph: 90,
         setupCost: 0,
-        netProfit: 0,
+        netProfit: 90,
         margin: 0,
         avgVolume: 0,
       } as never,
@@ -147,7 +147,7 @@ describe('combined ranking includes high-iph formulas', () => {
         blueprint: { kind: 'reaction' },
         iph: 80,
         setupCost: 0,
-        netProfit: 0,
+        netProfit: 80,
         margin: 0,
         avgVolume: 0,
       } as never,
@@ -155,19 +155,19 @@ describe('combined ranking includes high-iph formulas', () => {
         blueprint: { kind: 'reaction' },
         iph: 200,
         setupCost: 0,
-        netProfit: 0,
+        netProfit: 200,
         margin: 0,
         avgVolume: 0,
       } as never,
     ]
     const out = finalizeRankedRows(rows, {
       recipeKinds: ['manufacturing', 'reaction'],
-      sortBy: 'iph',
+      sortBy: 'netProfit',
       sortDirection: 'desc',
       limit: 1,
     })
     expect(out).toHaveLength(2)
-    expect(out[0]!.iph).toBe(200)
-    expect(out[1]!.iph).toBe(100)
+    expect(out[0]!.netProfit).toBe(200)
+    expect(out[1]!.netProfit).toBe(100)
   })
 })

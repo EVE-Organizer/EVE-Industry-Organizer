@@ -117,19 +117,9 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
           type="button"
           className={textLinkClass('tabular-nums')}
           onClick={onOpenIph}
-          aria-label={`Profit and ISK/hr breakdown for ${row.product.name}`}
+          aria-label={`Profit breakdown for ${row.product.name}`}
         >
           {formatIsk(row.netProfit)}
-        </button>
-      </td>
-      <td className="whitespace-nowrap" onClick={stopRowToggle}>
-        <button
-          type="button"
-          className={textLinkClass('tabular-nums')}
-          onClick={onOpenIph}
-          aria-label={`ISK per hour breakdown for ${row.product.name}`}
-        >
-          {formatIsk(row.iph)}
         </button>
       </td>
       <td>{formatPercent(row.margin)}</td>
@@ -228,19 +218,9 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
             type="button"
             className={textLinkClass(row.netProfit >= 0 ? '!text-success' : '!text-error')}
             onClick={onOpenIph}
-            aria-label={`Profit and ISK/hr breakdown for ${row.product.name}`}
+            aria-label={`Profit breakdown for ${row.product.name}`}
           >
             {formatIsk(row.netProfit)}
-          </button>
-        </MobileStat>
-        <MobileStat label="ISK/hr">
-          <button
-            type="button"
-            className={textLinkClass()}
-            onClick={onOpenIph}
-            aria-label={`ISK per hour breakdown for ${row.product.name}`}
-          >
-            {formatIsk(row.iph)}
           </button>
         </MobileStat>
         <MobileStat label="Margin">{formatPercent(row.margin)}</MobileStat>
@@ -296,7 +276,6 @@ export function BlueprintUnrankedRow({
           No price data for current hub and window
         </span>
       </td>
-      <td>—</td>
       <td>—</td>
       <td>—</td>
       <td>—</td>

@@ -71,7 +71,6 @@ function haulCostRouteLabels(
 const SORT_LABELS: Record<BlueprintSortKey, string> = {
   setupCost: 'Setup',
   netProfit: 'Profit',
-  iph: 'ISK/hr',
   margin: 'Margin',
   avgVolume: 'Vol/day',
   tradedIsk: 'Amount traded',
@@ -432,17 +431,6 @@ const BlueprintResults = memo(function BlueprintResults({
                   onSort={onSort}
                 />
                 <SortableTh
-                  label="ISK/hr"
-                  sortKey="iph"
-                  activeKey={rankingQuery.sortBy}
-                  direction={rankingQuery.sortDir}
-                  onSort={onSort}
-                >
-                  <InfoTooltip
-                    text={`Setup cost and profit use runs derived from your job time filter. ISK/hr uses min(production/day, market volume/day) × profit per unit, scaled down when your production share exceeds daily hub volume (competition penalty).`}
-                  />
-                </SortableTh>
-                <SortableTh
                   label="Margin"
                   sortKey="margin"
                   activeKey={rankingQuery.sortBy}
@@ -456,7 +444,7 @@ const BlueprintResults = memo(function BlueprintResults({
                   direction={rankingQuery.sortDir}
                   onSort={onSort}
                 >
-                  <InfoTooltip text="Average daily traded volume for liquidity (batch cap, IPH, filters). With a 1y price window, volume uses the 1m average. Shows — when only spot price is available." />
+                  <InfoTooltip text="Average daily traded volume for liquidity (batch cap and volume filter). With a 1y price window, volume uses the 1m average. Shows — when only spot price is available." />
                 </SortableTh>
                 <SortableTh
                   label="Amount traded"
