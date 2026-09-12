@@ -138,8 +138,12 @@ export function PlanTimelinePanel({
     const runs = bar.meta?.runs
     const outputQty = bar.meta?.outputQty
     const activity = bar.meta?.activity
+    const count = bar.meta?.count
     const parts: string[] = []
     if (typeof activity === 'string') parts.push(activity)
+    if (typeof count === 'number' && count > 1) {
+      parts.push(`${formatDecimal(count, 0)} jobs`)
+    }
     if (typeof runs === 'number' && typeof outputQty === 'number') {
       parts.push(`${formatDecimal(runs, 0)} runs · ${formatDecimal(outputQty, 0)} output`)
     } else if (typeof runs === 'number') {

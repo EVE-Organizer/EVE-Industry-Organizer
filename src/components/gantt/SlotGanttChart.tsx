@@ -116,6 +116,8 @@ function GanttBarButton({
   const fill = bar.color ?? '#4a9eff'
   const { ref, triggerProps, TooltipPortal } = useAnchorTooltip('top')
   const showLabel = layout.visualWidthPct >= 6 || bar.duration >= 2.5
+  const mergedCount = typeof bar.meta?.count === 'number' ? bar.meta.count : 0
+  const showCount = mergedCount > 1
   const job = bar.meta?.job as LiveIndustryJob | undefined
   const isLive = job != null && nowMs != null
   const isAnimating = isLive && job != null && liveJobProgress(job, nowMs).animating
@@ -138,9 +140,17 @@ function GanttBarButton({
         {...triggerProps}
       >
         {isLive && job ? (
-          <LiveBarProgress bar={bar} layout={layout} fill={fill} nowMs={nowMs} nowRatio={nowRatio} />
+          <LiveBarProgress
+            bar={bar}
+            layout={layout}
+            fill={fill}
+            nowMs={nowMs}
+            nowRatio={nowRatio}
+          />
         ) : null}
-        {isAnimating ? <span className="plan-timeline__bar-sweep" style={{ color: fill }} aria-hidden /> : null}
+        {isAnimating ? (
+          <span className="plan-timeline__bar-sweep" style={{ color: fill }} aria-hidden />
+        ) : null}
         {bar.productTypeId ? (
           <PlanProductIcon
             productTypeId={bar.productTypeId}
@@ -149,6 +159,11 @@ function GanttBarButton({
             alt=""
             className="plan-timeline__bar-icon"
           />
+        ) : null}
+        {showCount ? (
+          <span className="plan-timeline__bar-count" aria-label={`${mergedCount} jobs`}>
+            x{mergedCount}
+          </span>
         ) : null}
         {showLabel ? <span className="plan-timeline__bar-label">{bar.label}</span> : null}
       </button>
@@ -170,7 +185,15 @@ function GanttBarButton({
   )
 }
 
-function ScrubTooltip({ clientX, clientY, text }: { clientX: number; clientY: number; text: string }) {
+function ScrubTooltip({
+  clientX,
+  clientY,
+  text,
+}: {
+  clientX: number
+  clientY: number
+  text: string
+}) {
   const style: CSSProperties = {
     top: clientY + 14,
     left: clientX,
@@ -279,10 +302,8 @@ export function SlotGanttChart({
       const ganttRect = ganttRef.current.getBoundingClientRect()
       const x = clientX - ganttRect.left
       const y = clientY - ganttRect.top
-      const inColumn =
-        x >= scrubBounds.left && x <= scrubBounds.left + scrubBounds.width
-      const inRows =
-        y >= scrubBounds.top && y <= scrubBounds.top + scrubBounds.height
+      const inColumn = x >= scrubBounds.left && x <= scrubBounds.left + scrubBounds.width
+      const inRows = y >= scrubBounds.top && y <= scrubBounds.top + scrubBounds.height
 
       if (!inColumn || !inRows) {
         setScrub(null)
@@ -443,7 +464,11 @@ export function SlotGanttChart({
         ) : null}
 
         {scrub ? (
-          <ScrubTooltip clientX={scrub.clientX} clientY={scrub.clientY} text={formatScrub(scrub.ratio)} />
+          <ScrubTooltip
+            clientX={scrub.clientX}
+            clientY={scrub.clientY}
+            text={formatScrub(scrub.ratio)}
+          />
         ) : null}
       </div>
     </div>

@@ -2222,6 +2222,15 @@
     @apply shrink-0 pointer-events-none relative z-[2];
   }
 
+  &__bar-count {
+    @apply shrink-0 rounded px-0.5 text-[9px] font-bold tabular-nums leading-none relative z-[3];
+    background: rgb(0 0 0 / 0.35);
+  }
+
+  &__bar--compact &__bar-count {
+    @apply absolute bottom-0 right-0;
+  }
+
   &__bar-label {
     @apply min-w-0 truncate leading-8 relative z-[2];
   }
