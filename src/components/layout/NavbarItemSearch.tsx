@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EveImage } from '@/components/EveImage'
-import { useSdeData } from '@/hooks/useSdeData'
-import { buildTypeMap } from '@/services/data/sdeLoader'
+import { useSdeData, useTypesData } from '@/hooks/useSdeData'
+import { useTypeMap } from '@/hooks/useTypeMap'
 import {
   loadRecentItemSearchIds,
   MAX_RECENT_ITEM_SEARCHES,
@@ -30,12 +30,14 @@ function toPickerItem(type: TypeInfo): PickerItem {
 export function NavbarItemSearch({ className = '' }: { className?: string }) {
   const rootRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
-  const { data: sde } = useSdeData()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [wantTypes, setWantTypes] = useState(false)
   const [recentIds, setRecentIds] = useState(loadRecentItemSearchIds)
-
-  const typeMap = useMemo(() => (sde ? buildTypeMap(sde.types) : new Map()), [sde])
+  const cachedSde = useSdeData({ enabled: false })
+  const typesOnly = useTypesData({ enabled: wantTypes && !cachedSde.data })
+  const types = cachedSde.data?.types ?? typesOnly.data
+  const typeMap = useTypeMap(types)
 
   const recentItems = useMemo(() => {
     const items: PickerItem[] = []
@@ -50,15 +52,15 @@ export function NavbarItemSearch({ className = '' }: { className?: string }) {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (q.length < 2 || !sde) return []
+    if (q.length < 2 || !types) return []
     const results: PickerItem[] = []
-    for (const type of sde.types) {
+    for (const type of types) {
       if (!type.name.toLowerCase().includes(q)) continue
       results.push(toPickerItem(type))
     }
     results.sort((a, b) => a.name.localeCompare(b.name))
     return results.slice(0, MAX_RESULTS)
-  }, [sde, query])
+  }, [types, query])
 
   const showRecent = open && query.trim().length < 2
   const showSearch = open && query.trim().length >= 2
@@ -107,14 +109,17 @@ export function NavbarItemSearch({ className = '' }: { className?: string }) {
         role="combobox"
         aria-expanded={open}
         aria-autocomplete="list"
-        placeholder={sde ? 'Search items…' : 'Loading items…'}
-        disabled={!sde}
+        placeholder={wantTypes && !types ? 'Loading items…' : 'Search items…'}
         value={query}
         onChange={(e) => {
+          setWantTypes(true)
           setQuery(e.target.value)
           setOpen(true)
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          setWantTypes(true)
+          setOpen(true)
+        }}
       />
       {(showRecent || showSearch) && (
         <ul className="navbar-item-search__menu">

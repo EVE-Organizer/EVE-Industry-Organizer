@@ -10,7 +10,7 @@ export const DEFAULT_BATCH_SIZE = 100
 /** Blueprint ranking filter: target job duration (hours in UI, seconds in settings). */
 export const MIN_RANKING_TIME_HOURS = 1
 export const MAX_RANKING_TIME_HOURS = 720
-export const DEFAULT_RANKING_TIME_HOURS = 720
+export const DEFAULT_RANKING_TIME_HOURS = 168 // 1 week
 
 export type BlueprintTier = 't1' | 't2' | 'faction'
 
@@ -283,6 +283,10 @@ export interface FittedManufacturingRig {
 export interface ManufacturingFamilyRigTiers {
   meRig: ManufacturingRigTier
   teRig: ManufacturingRigTier
+  /** Pasted ME % when meRig is custom. */
+  rigMeBonusPercent?: number
+  /** Pasted TE % when teRig is custom. */
+  rigTeBonusPercent?: number
 }
 
 export interface ManufacturingRigModifiers {
@@ -1000,6 +1004,8 @@ export interface RankedBlueprintRow {
   margin: number
   iph: number
   avgVolume: number
+  /** Hub daily ISK: avgVolume × sell/buy unit price. */
+  tradedIsk: number
   daysToClear: number
   volatility: number
   jobTimeSeconds: number

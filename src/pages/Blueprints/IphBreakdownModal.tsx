@@ -1,6 +1,13 @@
 import type { ReactNode } from 'react'
 import type { RankedBlueprintRow, SetupCostBreakdown, TypeInfo } from '@/types'
-import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
+import {
+  formatAvgVolume,
+  formatDecimal,
+  formatIsk,
+  formatNumber,
+  formatPercent,
+  formatQuantity,
+} from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
 import { JobCostFormula, jobCostStepTitle } from '@/pages/Blueprints/JobCostFormula'
 import { formatFacilityBonusLine } from '@/lib/facilityModifiers'
@@ -81,7 +88,15 @@ function CalcStep({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-function SkillTile({ label, value, detail }: { label: string; value: number | string; detail: string }) {
+function SkillTile({
+  label,
+  value,
+  detail,
+}: {
+  label: string
+  value: number | string
+  detail: string
+}) {
   return (
     <div className="rounded-md border border-eve-border/50 bg-base-300/20 px-3 py-3 text-center">
       <p className="text-[11px] font-medium uppercase tracking-wide opacity-50">{label}</p>
@@ -175,7 +190,11 @@ export function IphBreakdownModal({
               <p className="text-sm opacity-70 truncate">{row.product.name}</p>
             </div>
           </div>
-          <button type="button" className="btn btn-sm btn-circle btn-ghost shrink-0" onClick={onClose}>
+          <button
+            type="button"
+            className="btn btn-sm btn-circle btn-ghost shrink-0"
+            onClick={onClose}
+          >
             ✕
           </button>
         </div>
@@ -208,17 +227,30 @@ export function IphBreakdownModal({
             >
               {isReaction ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <SkillTile label="ME" value={0} detail="Reactions do not use ME" />
                   <SkillTile
                     label="Reactions"
                     value={iph.reactions ?? 0}
                     detail="4% faster jobs per level"
                   />
+                  <SkillTile
+                    label="Formula ME"
+                    value={0}
+                    detail="Reactions have no researched ME"
+                  />
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <SkillTile label="ME" value={iph.me} detail="1% less material per level" />
-                  <SkillTile label="TE" value={iph.te} detail="1% faster jobs per TE point (0–20)" />
+                  <SkillTile
+                    label="TE"
+                    value={iph.te}
+                    detail="1% faster jobs per TE point (0–20)"
+                  />
+                  <SkillTile
+                    label="Industry"
+                    value={iph.industry}
+                    detail="4% faster jobs per level"
+                  />
                   <SkillTile
                     label="Adv. Industry"
                     value={iph.advancedIndustry}
@@ -226,7 +258,11 @@ export function IphBreakdownModal({
                   />
                 </div>
               )}
-              {isPlayerStructure(iph.structureType) && !isReaction ? (
+              {!isReaction &&
+              (isPlayerStructure(iph.structureType) ||
+                iph.structureMeBonusPercent > 0 ||
+                iph.structureTeBonusPercent > 0 ||
+                iph.structureTaxPercent > 0) ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
                   <SkillTile
                     label="Struct. ME"
@@ -253,8 +289,21 @@ export function IphBreakdownModal({
                   />
                 </div>
               ) : null}
-              {isReaction && iph.structureTeBonusPercent > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+              {isReaction &&
+              (iph.structureMeBonusPercent > 0 ||
+                iph.structureTeBonusPercent > 0 ||
+                iph.structureTaxPercent > 0 ||
+                iph.facilityBonus) ? (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+                  <SkillTile
+                    label="Refinery ME"
+                    value={
+                      iph.facilityBonus
+                        ? formatFacilityBonusLine(iph.facilityBonus, 'me')
+                        : `${formatDecimal(iph.structureMeBonusPercent, 1)}%`
+                    }
+                    detail="Reaction rig material reduction"
+                  />
                   <SkillTile
                     label="Refinery TE"
                     value={
@@ -262,7 +311,7 @@ export function IphBreakdownModal({
                         ? formatFacilityBonusLine(iph.facilityBonus, 'te')
                         : `${formatDecimal(iph.structureTeBonusPercent, 1)}%`
                     }
-                    detail="Hull + rig time reduction from Settings refinery"
+                    detail="Hull + rig time reduction"
                   />
                   <SkillTile
                     label="Owner tax"
@@ -334,7 +383,8 @@ export function IphBreakdownModal({
                   </CalcStep>
                   <CalcStep label="Multiply">
                     {formatDuration(iph.baseTimePerRunSeconds)} × {iph.runs} runs ×{' '}
-                    {formatDecimal(iph.teTimeFactor, 4)} × {formatDecimal(iph.industryTimeFactor, 4)}
+                    {formatDecimal(iph.teTimeFactor, 4)} ×{' '}
+                    {formatDecimal(iph.industryTimeFactor, 4)}
                     {isPlayerStructure(iph.structureType) && iph.structureTeBonusPercent > 0
                       ? ` × ${formatDecimal(iph.structureTeTimeFactor, 4)}`
                       : ''}{' '}
@@ -345,10 +395,7 @@ export function IphBreakdownModal({
             </StepCard>
           </div>
 
-          <PhaseHeader
-            title="Part 2 · Revenue"
-            description={revenuePhaseDescription}
-          />
+          <PhaseHeader title="Part 2 · Revenue" description={revenuePhaseDescription} />
 
           <StepCard
             step={4}
@@ -362,9 +409,7 @@ export function IphBreakdownModal({
               {formatQuantity(iph.outputQty)} units = <strong>{formatIsk(iph.grossRevenue)}</strong>
             </CalcStep>
             {usesBuyOrders ? (
-              <CalcStep label="Broker fee">
-                Not charged on instant buy-order sales
-              </CalcStep>
+              <CalcStep label="Broker fee">Not charged on instant buy-order sales</CalcStep>
             ) : (
               <CalcStep label="Broker fee">
                 {iph.brokerFeePercent}% of gross = −{formatIsk(iph.brokerFee)}
@@ -469,10 +514,10 @@ export function IphBreakdownModal({
               step={6}
               title="Material cost"
               note={
-                isPlayerStructure(iph.structureType) && iph.structureMeBonusPercent > 0
+                iph.structureMeBonusPercent > 0
                   ? iph.facilityBonus
-                    ? `ME ${iph.me} + ${formatFacilityBonusLine(iph.facilityBonus, 'me')} structure`
-                    : `ME ${iph.me} + ${formatDecimal(iph.structureMeBonusPercent, 1)}% structure: ceil(base qty × runs × (1 − ME × 1%) × (1 − structure bonus)) × hub price`
+                    ? `ME ${iph.me} + ${formatFacilityBonusLine(iph.facilityBonus, 'me')} ${isReaction ? 'refinery' : 'structure'}`
+                    : `ME ${iph.me} + ${formatDecimal(iph.structureMeBonusPercent, 1)}% ${isReaction ? 'refinery' : 'structure'}: ceil(base qty × runs × (1 − ME × 1%) × (1 − facility bonus)) × hub price`
                   : `ME ${iph.me}: ceil(base qty × runs × (1 − ME × 1%)) × hub price`
               }
               result={formatIsk(iph.materialCost)}
@@ -531,13 +576,10 @@ export function IphBreakdownModal({
               resultLabel="Haul in cost"
             >
               <CalcStep label="Material volume × route rate">
-                {formatDecimal(iph.materialVolumeM3, 2)} m³ ×{' '}
-                {formatIsk(iph.haulInIskPerM3)}/m³ ={' '}
+                {formatDecimal(iph.materialVolumeM3, 2)} m³ × {formatIsk(iph.haulInIskPerM3)}/m³ ={' '}
                 <strong>
                   {formatIsk(
-                    iph.haulExcluded
-                      ? iph.materialVolumeM3 * iph.haulInIskPerM3
-                      : iph.haulIn,
+                    iph.haulExcluded ? iph.materialVolumeM3 * iph.haulInIskPerM3 : iph.haulIn,
                   )}
                 </strong>
                 {iph.haulExcluded ? (
@@ -568,12 +610,7 @@ export function IphBreakdownModal({
                 }
               >
                 {formatIsk(iph.bpoCost)} + {formatIsk(iph.materialCost)} + {formatIsk(iph.jobCost)}
-                {iph.haulExcluded ? null : (
-                  <>
-                    {' '}
-                    + {formatIsk(iph.haulIn)}
-                  </>
-                )}
+                {iph.haulExcluded ? null : <> + {formatIsk(iph.haulIn)}</>}
               </CalcStep>
               <CalcStep label="Upfront cash to start (budget filter)">
                 <strong>{formatIsk(iph.upfrontCapital)}</strong> = full blueprint + this batch
@@ -587,13 +624,10 @@ export function IphBreakdownModal({
               resultLabel="Haul out cost"
             >
               <CalcStep label="Product volume × route rate">
-                {formatDecimal(iph.productVolumeM3, 2)} m³ ×{' '}
-                {formatIsk(iph.haulOutIskPerM3)}/m³ ={' '}
+                {formatDecimal(iph.productVolumeM3, 2)} m³ × {formatIsk(iph.haulOutIskPerM3)}/m³ ={' '}
                 <strong>
                   {formatIsk(
-                    iph.haulExcluded
-                      ? iph.productVolumeM3 * iph.haulOutIskPerM3
-                      : iph.haulOut,
+                    iph.haulExcluded ? iph.productVolumeM3 * iph.haulOutIskPerM3 : iph.haulOut,
                   )}
                 </strong>
                 {iph.haulExcluded ? (
@@ -608,7 +642,7 @@ export function IphBreakdownModal({
             <StepCard
               step={11}
               title="Batch profit"
-              note="This is the profit pool ISK/hr spreads over time and market volume."
+              note="ISK/hr is this batch profit divided by the job time you set."
               result={formatIsk(iph.profitPerUnit) + '/unit'}
               resultLabel="Profit per unit"
             >
@@ -625,89 +659,51 @@ export function IphBreakdownModal({
 
           <PhaseHeader
             title="Part 4 · ISK/hr rate"
-            description="Turn batch profit into an hourly rate, then adjust for how much the market can absorb."
+            description="Same job time for every blueprint, so the rate is batch profit ÷ job hours."
           />
 
           <div className="space-y-4">
             <StepCard
               step={12}
-              title="Production rate"
-              note="How many units you could finish per day at this job time."
-              result={`${formatAvgVolume(iph.productionPerDay)} units/day`}
-              resultLabel="Units produced per day"
+              title="ISK/hr"
+              note="Matches Plan: profit for this job divided by how long the job runs."
+              result={formatIsk(iph.iph) + '/hr'}
+              resultLabel="ISK per hour"
             >
-              <CalcStep label="Spread batch output across 24 hours">
-                {formatQuantity(iph.outputQty)} units ÷ {formatDecimal(jobHours, 2)} hr × 24 hr/day
+              <CalcStep label="Batch profit ÷ job time">
+                {formatIsk(iph.netProfit)} ÷ {formatDecimal(jobHours, 2)} hr
               </CalcStep>
             </StepCard>
 
             <StepCard
               step={13}
-              title="Sellable volume"
-              note="You cannot sell faster than the hub trades, even if you build faster."
+              title="Hub volume check"
+              note="Does not change the ranked ISK/hr. Use it to see if the hub can absorb this batch."
               result={`${formatAvgVolume(iph.sellablePerDay)} units/day`}
-              resultLabel="Units sold per day"
+              resultLabel="Sellable vs produced"
             >
+              <CalcStep label="This job produces">
+                {formatQuantity(iph.outputQty)} units ÷ {formatDecimal(jobHours, 2)} hr × 24 ={' '}
+                <strong>{formatAvgVolume(iph.productionPerDay)}</strong> units/day
+              </CalcStep>
               {iph.avgVolume > 0 ? (
-                <CalcStep label="Take the lower of production and hub volume">
-                  min({formatAvgVolume(iph.productionPerDay)} produced,{' '}
-                  {formatAvgVolume(iph.avgVolume)} hub avg)
+                <CalcStep label="Hub average volume">
+                  {formatAvgVolume(iph.avgVolume)} units/day
+                  {iph.productionPerDay > iph.avgVolume
+                    ? ' — production is faster than the hub trades'
+                    : ''}
                 </CalcStep>
               ) : (
-                <CalcStep label="No volume history">
-                  Sellable rate equals production: {formatAvgVolume(iph.sellablePerDay)} units/day
-                </CalcStep>
+                <CalcStep label="Hub average volume">No volume history for this window</CalcStep>
               )}
-            </StepCard>
-
-            <StepCard
-              step={14}
-              title="Competition penalty"
-              note="If your daily output is a large share of hub volume, profit is scaled down."
-              result={formatDecimal(iph.competitionFactor, 4)}
-              resultLabel="Competition factor"
-            >
-              {iph.avgVolume > 0 && iph.productionPerDay > 0 ? (
-                <>
-                  <CalcStep label="Your share of daily hub volume">
-                    {formatAvgVolume(iph.productionPerDay)} ÷ {formatAvgVolume(iph.avgVolume)} ={' '}
-                    <strong>{formatDecimal(iph.marketShare * 100, 1)}%</strong>
-                  </CalcStep>
-                  <CalcStep label="Penalty formula">
-                    1 ÷ (1 + {formatDecimal(iph.marketShare * 100, 1)}%) ={' '}
-                    <strong>{formatDecimal(iph.competitionFactor, 4)}</strong>
-                  </CalcStep>
-                </>
-              ) : (
-                <CalcStep label="No volume penalty">
-                  Factor stays at <strong>{formatDecimal(iph.competitionFactor, 4)}</strong>
-                </CalcStep>
-              )}
-            </StepCard>
-
-            <StepCard
-              step={15}
-              title="Final ISK/hr"
-              note="Daily profit at sellable rate, adjusted for competition, divided by 24 hours."
-              result={formatIsk(iph.iph) + '/hr'}
-              resultLabel="ISK per hour"
-            >
-              <CalcStep label="Daily profit at sellable rate">
-                {formatAvgVolume(iph.sellablePerDay)} units/day × {formatIsk(iph.profitPerUnit)}/unit
-                × {formatDecimal(iph.competitionFactor, 4)} ={' '}
-                <strong>{formatIsk(iph.realizedDailyProfit)}/day</strong>
-              </CalcStep>
-              <CalcStep label="Convert to hourly">
-                {formatIsk(iph.realizedDailyProfit)}/day ÷ 24 hr
-              </CalcStep>
             </StepCard>
           </div>
         </div>
 
         <div className="px-5 py-3 border-t border-eve-border bg-base-200/40 text-[11px] opacity-60 space-y-1">
           <p>
-            Rankings use global ME/TE defaults and skill levels from Settings (Advanced Industry,
-            Accounting, Broker Relations).
+            Rankings use Settings skills (Industry, Advanced Industry or Reactions, Accounting,
+            Broker Relations) and the manufacturing or refinery rigs on this page.
           </p>
         </div>
       </div>

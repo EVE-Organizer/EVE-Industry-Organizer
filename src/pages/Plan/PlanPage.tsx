@@ -1251,6 +1251,7 @@ export function PlanPage() {
             priceMethod={activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod}
             includeHaulCost={activeSettings.includeHaulCost ?? true}
             haulApplicable={haulApplicable}
+            skills={activeSettings.skills ?? DEFAULT_SETTINGS.skills}
           />
 
           <section className="plan-build-card">
@@ -1308,6 +1309,7 @@ export function PlanPage() {
               ) : null}
               <PlanRootList
                 rows={buildRows}
+                typeMap={typeMap}
                 profitByRootId={profitByRootId}
                 readOnly={isSharedView}
                 durationMode={activeTemplate.durationMode === 'overall' ? 'overall' : 'production'}
@@ -1485,6 +1487,7 @@ export function PlanPage() {
                 onOpenGraph={openGraph}
                 onOpenMeTe={openMeTe}
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+                typeMap={typeMap}
                 inventoryByTypeId={locationInventory ?? null}
               />
             ) : null}

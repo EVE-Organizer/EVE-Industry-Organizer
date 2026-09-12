@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   computePlanProfitSummary,
+  computeRootProfitBreakdown,
   computeRootProfitRow,
   computeRootSetupBreakdown,
 } from '@/pages/Plan/planProfit'
@@ -94,6 +95,41 @@ describe('planProfit', () => {
     expect(row.iph).toBeCloseTo(row.netProfit / 10, 5)
   })
 
+  it('exposes Accounting and Broker Relations percents on the profit breakdown', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 }]
+    const expandInput: ExpandPlanInput = {
+      template,
+      blueprints,
+      typeMap,
+      prices: sellPrices,
+      settings: {
+        ...DEFAULT_SETTINGS,
+        skills: { ...DEFAULT_SETTINGS.skills, accounting: 5, brokerRelations: 5 },
+        priceMethod: 'sell_orders',
+      },
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+
+    const breakdown = computeRootProfitBreakdown(
+      template.roots[0],
+      widget,
+      expandInput,
+      sellPrices,
+      buyPrices,
+      10,
+      'Widget',
+    )
+
+    expect(breakdown.brokerFeePercent).toBeCloseTo(1.5, 5)
+    expect(breakdown.salesTaxPercent).toBeCloseTo(3.375, 3)
+    expect(breakdown.brokerFee).toBeGreaterThan(0)
+    expect(breakdown.salesTax).toBeGreaterThan(0)
+    expect(breakdown.setup.totalSetupCost).toBeCloseTo(breakdown.setupCost, 5)
+    expect(breakdown.setup.buildJobs.length).toBeGreaterThan(0)
+  })
+
   it('aggregates root rows into a plan summary', () => {
     const template = createDefaultPlanTemplate('test')
     template.roots = [{ id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 }]
@@ -164,7 +200,11 @@ describe('planProfit', () => {
 
     expect(breakdown.totalSetupCost).toBeGreaterThan(0)
     expect(breakdown.buyLines.some((line) => line.productTypeId === 34)).toBe(true)
-    expect(breakdown.buildChainCost).toBeGreaterThanOrEqual(0)
+    expect(breakdown.rootMode).toBe('build')
+    expect(breakdown.buildJobs.length).toBeGreaterThan(0)
+    expect(breakdown.jobFeeTotal).toBeGreaterThan(0)
+    expect(breakdown.rootMaterials.some((line) => line.typeId === 34)).toBe(true)
+    expect(breakdown.buildChainCost).toBeCloseTo(breakdown.jobFeeTotal, 5)
     const parts =
       breakdown.buyLines.reduce((s, l) => s + l.cost, 0) +
       breakdown.buildChainCost +
@@ -334,5 +374,83 @@ describe('planProfit', () => {
     expect(row.setupCost).toBeLessThan(100 * 2000)
     expect(row.sellPricePerUnit).toBe(2000)
     expect(row.netRevenue).toBeGreaterThan(row.setupCost)
+  })
+
+  it('marks a buy-mode root without inventing a build chain', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 }]
+    template.modeOverrides[100] = 'buy'
+    const expandInput: ExpandPlanInput = {
+      template,
+      blueprints,
+      typeMap,
+      prices: sellPrices,
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+
+    const breakdown = computeRootSetupBreakdown(template.roots[0], widget, expandInput, 'Widget')
+
+    expect(breakdown.rootMode).toBe('buy')
+    expect(breakdown.buildJobs).toEqual([])
+    expect(breakdown.buyLines).toHaveLength(1)
+    expect(breakdown.totalSetupCost).toBe(1000 * 100)
+  })
+
+  it('keeps haul estimates when haul is excluded from setup', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 }]
+    const expandInput: ExpandPlanInput = {
+      template,
+      blueprints,
+      typeMap: new Map([
+        [
+          34,
+          {
+            typeId: 34,
+            name: 'Tritanium',
+            group: '',
+            category: '',
+            volume: 0.01,
+            iconUrl: '',
+            renderUrl: '',
+            bpIconUrl: '',
+          },
+        ],
+        [
+          100,
+          {
+            typeId: 100,
+            name: 'Widget',
+            group: '',
+            category: '',
+            volume: 1,
+            iconUrl: '',
+            renderUrl: '',
+            bpIconUrl: '',
+          },
+        ],
+      ]),
+      prices: sellPrices,
+      settings: { ...DEFAULT_SETTINGS, includeHaulCost: false },
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+
+    const breakdown = computeRootSetupBreakdown(template.roots[0], widget, expandInput, 'Widget', {
+      haulInIskPerM3: 100,
+      haulOutIskPerM3: 200,
+      includeHaulCost: false,
+    })
+
+    expect(breakdown.haulExcluded).toBe(true)
+    expect(breakdown.haulIn).toBeGreaterThan(0)
+    expect(breakdown.haulOut).toBeGreaterThan(0)
+    const chainOnly =
+      breakdown.buyLines.reduce((s, l) => s + l.cost, 0) +
+      breakdown.buildChainCost +
+      breakdown.packagedBuyCost
+    expect(chainOnly).toBeCloseTo(breakdown.totalSetupCost, 5)
   })
 })

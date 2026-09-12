@@ -51,10 +51,15 @@ async function loadSkills(): Promise<SkillInfo[]> {
   return skills
 }
 
+export async function loadTypes(): Promise<TypeInfo[]> {
+  const typesRaw = await fetchJson<TypeInfo[] | { types: TypeInfo[] }>('types.json')
+  return Array.isArray(typesRaw) ? typesRaw : typesRaw.types
+}
+
 export async function loadSdeData(): Promise<SdeData> {
-  const [typesRaw, registry, market, contracts, regions, skills, systems, upwellRaw] =
+  const [types, registry, market, contracts, regions, skills, systems, upwellRaw] =
     await Promise.all([
-      fetchJson<TypeInfo[] | { types: TypeInfo[] }>('types.json'),
+      loadTypes(),
       fetchJson<BlueprintRegistry>('blueprints.json'),
       fetchJson<MarketData>('market.json'),
       fetchJson<ContractsData>('contracts.json').catch(() => null),
@@ -63,7 +68,6 @@ export async function loadSdeData(): Promise<SdeData> {
       fetchJson<SystemInfo[]>('systems.json'),
       fetchJson<unknown>('upwell.json').catch(() => null),
     ])
-  const types: TypeInfo[] = Array.isArray(typesRaw) ? typesRaw : typesRaw.types
   const upwell = parseUpwellCatalog(upwellRaw)
   setUpwellCatalog(upwell)
   setSkillCalcCatalog(skills)

@@ -74,6 +74,7 @@ export function FavoriteItemsSection({
                     <th>ISK/hr</th>
                     <th>Margin</th>
                     <th>Vol/day</th>
+                    <th>Amount traded</th>
                     <th></th>
                   </tr>
                 </thead>

@@ -4,7 +4,7 @@
  * Intentional differences:
  * - Flat mode: single-recipe materials + one job + BPO/invention line (ranking).
  * - Plan chain: rolled-up build/buy via computePlanRootBuildCost + packaged self-buy.
- * - Ranking IPH uses marketAwareIph; Plan IPH uses netProfit / scheduled hours.
+ * - Ranking and Plan IPH are both netProfit / job hours. Hub volume is a market check only.
  * - Material buys always use sell-side window prices; revenue follows priceMethod.
  */
 import type {
@@ -81,10 +81,7 @@ export function priceSourceForProduct(productTypeId: number, ctx: PriceContext):
   return priceSourceForMaterial(productTypeId, ctx)
 }
 
-export function collectMissingMaterialPrices(
-  typeIds: number[],
-  ctx: PriceContext,
-): number[] {
+export function collectMissingMaterialPrices(typeIds: number[], ctx: PriceContext): number[] {
   return typeIds.filter((id) => materialUnitPrice(id, ctx) <= 0)
 }
 
@@ -415,9 +412,7 @@ export function computeFlatSetup(input: FlatSetupInput): FlatSetupResult {
 
   const baseQtyByType = new Map(blueprint.materials.map((m) => [m.typeId, m.quantity]))
   const setup: SetupCostBreakdown = {
-    targetJobTimeSeconds:
-      settings.rankingTargetTimeSeconds ??
-      settings.batchSize * 3600,
+    targetJobTimeSeconds: settings.rankingTargetTimeSeconds ?? settings.batchSize * 3600,
     productQuantity: blueprint.productQuantity,
     avgVolume,
     volumeCapDays,

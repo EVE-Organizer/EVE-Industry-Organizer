@@ -6,6 +6,10 @@ import {
   resolveRigMePercent,
   resolveRigTePercent,
   rigSecurityMultiplier,
+  parseTypedRigPercent,
+  parseTypedRigPercentPair,
+  resolveTypedRigPair,
+  resolveTypedRigSingle,
 } from '@/lib/manufacturingRigs'
 import { combineBonusPercent, manufacturingFacilityDetail } from '@/lib/facilityModifiers'
 import { DEFAULT_MANUFACTURING_RIGS, DEFAULT_SETTINGS } from '@/types'
@@ -36,6 +40,27 @@ describe('manufacturingRigs', () => {
       resolveRigBonuses(rigs, 0, { productGroup: 'Projectile Ammo', category: 'Charge' }).te,
     ).toBeCloseTo(50.4, 1)
     expect(resolveRigBonuses(rigs, 0, { productGroup: 'Frigate', category: 'Ship' }).te).toBe(0)
+  })
+
+  it('parses typed rig percents and snaps T1/T2 values', () => {
+    expect(parseTypedRigPercent(' 12.0% ')).toBe(12)
+    expect(parseTypedRigPercentPair('10 / 20')).toEqual({ a: 10, b: 20 })
+    expect(resolveTypedRigSingle('2', 'me', 1)).toEqual({ tier: 't1', percent: 2 })
+    expect(resolveTypedRigSingle('3.1', 'me', 1)).toEqual({ tier: 'custom', percent: 3.1 })
+    expect(resolveTypedRigSingle('', 'me', 1)).toEqual({ tier: 'none', percent: 0 })
+    expect(resolveTypedRigPair('10 / 20', 1, { a: 'cost', b: 'te' })?.tier).toBe('t1')
+    expect(resolveTypedRigPair('11 / 19', 1, { a: 'cost', b: 'te' })?.tier).toBe('custom')
+  })
+
+  it('uses per-family custom ME percent without security scaling', () => {
+    const rigs = normalizeManufacturingRigs({
+      familyRigs: {
+        ammo: { meRig: 'custom', teRig: 'none', rigMeBonusPercent: 3.3 },
+      },
+    })
+    expect(
+      resolveRigBonuses(rigs, 0, { productGroup: 'Projectile Ammo', category: 'Charge' }).me,
+    ).toBeCloseTo(3.3, 5)
   })
 
   it('uses custom TE percent as-is without security scaling', () => {

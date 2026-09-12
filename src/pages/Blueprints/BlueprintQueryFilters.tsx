@@ -1,10 +1,10 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo } from 'react'
-import { buildProductGroupTree, buildTypeMap, type SdeData } from '@/services/data/sdeLoader'
+import { buildProductGroupTree, type SdeData } from '@/services/data/sdeLoader'
 import { BlueprintFilterBar } from '@/pages/Blueprints/BlueprintFilterBar'
 import { useBlueprintQuery } from '@/pages/Blueprints/useBlueprintQuery'
 import { useDebouncedValue } from '@/pages/Blueprints/useDebouncedValue'
 import type { BlueprintQuery } from '@/lib/blueprintQuery'
-import { DEFAULT_RECIPE_KINDS } from '@/types'
+import { DEFAULT_RECIPE_KINDS, type TypeInfo } from '@/types'
 
 const SLIDER_DEBOUNCE_MS = 1000
 
@@ -14,6 +14,7 @@ export interface BlueprintQueryFiltersHandle {
 
 interface BlueprintQueryFiltersProps {
   sde: SdeData | undefined
+  typeMap: Map<number, TypeInfo>
   resultCount: number
   rankingDeferPending?: boolean
   onRankingQueryChange: (query: BlueprintQuery) => void
@@ -45,14 +46,12 @@ export const BlueprintQueryFilters = forwardRef<
   BlueprintQueryFiltersHandle,
   BlueprintQueryFiltersProps
 >(function BlueprintQueryFilters(
-  { sde, resultCount, rankingDeferPending = false, onRankingQueryChange },
+  { sde, typeMap, resultCount, rankingDeferPending = false, onRankingQueryChange },
   ref,
 ) {
   const { query, setQuery } = useBlueprintQuery()
 
   useImperativeHandle(ref, () => ({ setQuery }), [setQuery])
-
-  const typeMap = useMemo(() => (sde ? buildTypeMap(sde.types) : new Map()), [sde])
 
   const productGroupTree = useMemo(() => {
     if (!sde) return []

@@ -149,6 +149,51 @@ describe('hull percent mapping', () => {
     })
     expect(byId[37151]).toMatchObject({ tier: 't2', te: 24, me: 0, families: ['ammo'] })
   })
+
+  it('maps Composite M-Set to composite only and L-Set Reactor Efficiency to all families', () => {
+    const types = [
+      {
+        typeID: '46486',
+        typeName: 'Standup M-Set Composite Reactor Material Efficiency I',
+        groupID: '1830',
+        published: '1',
+      },
+      {
+        typeID: '46494',
+        typeName: 'Standup M-Set Biochemical Reactor Material Efficiency I',
+        groupID: '1831',
+        published: '1',
+      },
+      {
+        typeID: '46496',
+        typeName: 'Standup L-Set Reactor Efficiency I',
+        groupID: '1832',
+        published: '1',
+      },
+    ]
+    const groups = [
+      { groupID: '1830', groupName: 'Structure Resource Processing Rig M', categoryID: '66' },
+      { groupID: '1831', groupName: 'Structure Resource Processing Rig M', categoryID: '66' },
+      { groupID: '1832', groupName: 'Structure Resource Processing Rig L', categoryID: '66' },
+    ]
+    const typeAttributes = [
+      attr(46486, 1547, 2),
+      attr(46486, 422, 1),
+      attr(46486, 2714, -2),
+      attr(46494, 1547, 2),
+      attr(46494, 422, 1),
+      attr(46494, 2714, -2),
+      attr(46496, 1547, 3),
+      attr(46496, 422, 1),
+      attr(46496, 2714, -2),
+      attr(46496, 2713, -20),
+    ]
+    const { rigs } = buildUpwellCatalog(types, groups, typeAttributes)
+    const byId = Object.fromEntries(rigs.map((r) => [r.typeId, r]))
+    expect(byId[46486].families).toEqual(['composite'])
+    expect(byId[46494].families).toEqual(['biochemical'])
+    expect(byId[46496].families).toEqual(['composite', 'biochemical', 'hybrid'])
+  })
 })
 
 describe('skill calc fields', () => {

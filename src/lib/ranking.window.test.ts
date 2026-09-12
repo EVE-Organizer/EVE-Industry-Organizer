@@ -61,7 +61,7 @@ describe('window-based material costs', () => {
     const market = loadFixture<MarketData>('public/data/market.json')
     const regions = loadFixture<RegionsData>('public/data/regions.json')
     const typesRaw = loadFixture<{ types?: TypeInfo[] } | TypeInfo[]>('public/data/types.json')
-    const types = Array.isArray(typesRaw) ? typesRaw : typesRaw.types ?? []
+    const types = Array.isArray(typesRaw) ? typesRaw : (typesRaw.types ?? [])
     const typeMap = buildTypeMap(types)
 
     const hubMarket = getHubMarket(market, 'jita')!
@@ -92,7 +92,12 @@ describe('window-based material costs', () => {
           typeMap,
           'jita',
           window,
-          { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 } satisfies ManufacturingSettings,
+          {
+            ...DEFAULT_SETTINGS,
+            batchSize: DEFAULT_BATCH_SIZE,
+            meDefault: 10,
+            teDefault: 20,
+          } satisfies ManufacturingSettings,
           {
             minSetupCost: 0,
             maxSetupCost: Number.MAX_SAFE_INTEGER,
@@ -110,7 +115,12 @@ describe('window-based material costs', () => {
     expect(volumeByWindow['1m']).not.toBeNull()
     expect(new Set(Object.values(volumeByWindow)).size).toBeGreaterThan(1)
 
-    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = {
+      ...DEFAULT_SETTINGS,
+      batchSize: DEFAULT_BATCH_SIZE,
+      meDefault: 10,
+      teDefault: 20,
+    }
     const filters = {
       minSetupCost: 0,
       maxSetupCost: Number.MAX_SAFE_INTEGER,
@@ -184,14 +194,19 @@ describe('market-aware blueprint ranking', () => {
   const market = loadFixture<MarketData>('public/data/market.json')
   const regions = loadFixture<RegionsData>('public/data/regions.json')
   const typesRaw = loadFixture<{ types?: TypeInfo[] } | TypeInfo[]>('public/data/types.json')
-  const types = Array.isArray(typesRaw) ? typesRaw : typesRaw.types ?? []
+  const types = Array.isArray(typesRaw) ? typesRaw : (typesRaw.types ?? [])
   const typeMap = buildTypeMap(types)
 
   const PROJECTILE_AMMO = 178
   const CONDENSER_GALVASURGE = 54773
 
   it('ranks charge blueprints even when hub BPO price is missing', () => {
-    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = {
+      ...DEFAULT_SETTINGS,
+      batchSize: DEFAULT_BATCH_SIZE,
+      meDefault: 10,
+      teDefault: 20,
+    }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,
@@ -215,10 +230,19 @@ describe('market-aware blueprint ranking', () => {
     expect(condenser!.setupBreakdown.blueprintCost.chargeExcluded).toBe(true)
     expect(condenser!.setupBreakdown.blueprintCost.bpoPriceMissing).toBe(true)
     expect(condenser!.setupBreakdown.bpoCost).toBe(0)
+    expect(condenser!.tradedIsk).toBeCloseTo(
+      condenser!.avgVolume * condenser!.iphBreakdown.sellPricePerUnit,
+      5,
+    )
   })
 
   it('hides charge blueprints with no BPO/BPC when requireBlueprintPrice is on', () => {
-    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = {
+      ...DEFAULT_SETTINGS,
+      batchSize: DEFAULT_BATCH_SIZE,
+      meDefault: 10,
+      teDefault: 20,
+    }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,
@@ -241,7 +265,12 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('includes T1 ice compression BPOs once blueprint BPO types are in types.json', () => {
-    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = {
+      ...DEFAULT_SETTINGS,
+      batchSize: DEFAULT_BATCH_SIZE,
+      meDefault: 10,
+      teDefault: 20,
+    }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,
@@ -265,7 +294,12 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('excludes T1 blueprints with no BPO or BPC price when blueprint cost is included', () => {
-    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = {
+      ...DEFAULT_SETTINGS,
+      batchSize: DEFAULT_BATCH_SIZE,
+      meDefault: 10,
+      teDefault: 20,
+    }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,
@@ -298,7 +332,12 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('excludes BPO cost for charges (huge volume from one reusable BPO)', () => {
-    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = {
+      ...DEFAULT_SETTINGS,
+      batchSize: DEFAULT_BATCH_SIZE,
+      meDefault: 10,
+      teDefault: 20,
+    }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,
@@ -330,7 +369,12 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('excludes haul cost when includeHaulCost is off', () => {
-    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = {
+      ...DEFAULT_SETTINGS,
+      batchSize: DEFAULT_BATCH_SIZE,
+      meDefault: 10,
+      teDefault: 20,
+    }
     const baseFilters = {
       minSetupCost: 0,
       maxSetupCost: Number.MAX_SAFE_INTEGER,
@@ -419,7 +463,12 @@ describe('market-aware blueprint ranking', () => {
   })
 
   it('ranks faction blueprints as BPCs with no BPO acquisition cost', () => {
-    const settings: ManufacturingSettings = { ...DEFAULT_SETTINGS, batchSize: DEFAULT_BATCH_SIZE, meDefault: 10, teDefault: 20 }
+    const settings: ManufacturingSettings = {
+      ...DEFAULT_SETTINGS,
+      batchSize: DEFAULT_BATCH_SIZE,
+      meDefault: 10,
+      teDefault: 20,
+    }
     const rows = rankBlueprintsFromMarket(
       registry,
       market,

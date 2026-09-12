@@ -26,7 +26,6 @@ import {
   type BlueprintQuery,
 } from '@/lib/blueprintQuery'
 import {
-  MAX_DAYS_TO_CLEAR,
   TOP_N,
   rankBlueprintsFromMarket,
   setupBudgetFromSlider,
@@ -75,6 +74,7 @@ const SORT_LABELS: Record<BlueprintSortKey, string> = {
   iph: 'ISK/hr',
   margin: 'Margin',
   avgVolume: 'Vol/day',
+  tradedIsk: 'Amount traded',
 }
 
 function SortableTh({
@@ -308,12 +308,13 @@ export function BlueprintsPage() {
     <div className="flex flex-col flex-1 min-h-0">
       <PageHeader
         title="Top Blueprints"
-        subtitle={`${rankingLimitLabel}${formatGroupFilterSubtitle(deferredRankingQuery.groups)} by ${SORT_LABELS[deferredRankingQuery.sortBy]} · sized to ${MAX_DAYS_TO_CLEAR} days of hub volume${marketUpdated ? ` · market ${marketUpdated}` : ''}`}
+        subtitle={`${rankingLimitLabel}${formatGroupFilterSubtitle(deferredRankingQuery.groups)} by ${SORT_LABELS[deferredRankingQuery.sortBy]} · runs sized to job time${marketUpdated ? ` · market ${marketUpdated}` : ''}`}
       />
 
       <BlueprintQueryFilters
         ref={filtersRef}
         sde={sde}
+        typeMap={typeMap}
         resultCount={rows.length}
         rankingDeferPending={rankingDeferPending}
         onRankingQueryChange={handleRankingQueryChange}
@@ -456,6 +457,15 @@ const BlueprintResults = memo(function BlueprintResults({
                   onSort={onSort}
                 >
                   <InfoTooltip text="Average daily traded volume for liquidity (batch cap, IPH, filters). With a 1y price window, volume uses the 1m average. Shows — when only spot price is available." />
+                </SortableTh>
+                <SortableTh
+                  label="Amount traded"
+                  sortKey="tradedIsk"
+                  activeKey={rankingQuery.sortBy}
+                  direction={rankingQuery.sortDir}
+                  onSort={onSort}
+                >
+                  <InfoTooltip text="Daily hub ISK: Vol/day × the same unit price used for profit (sell window or buy orders)." />
                 </SortableTh>
                 <th></th>
               </tr>

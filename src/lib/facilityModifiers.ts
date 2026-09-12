@@ -189,7 +189,11 @@ export function reactionFacilityDetail(
       storedTier !== 'none'
         ? storedTier
         : inferReactorEfficiencyRig(facility.familyModifiers, security)
-    if (tier !== 'none' && tier !== 'custom') {
+    if (tier === 'custom') {
+      const stored = facility.familyModifiers.composite ?? DEFAULT_REACTION_FAMILY_MODIFIERS
+      rigMe = Math.max(0, stored.rigMeBonusPercent)
+      rigTe = Math.max(0, stored.rigTeBonusPercent)
+    } else if (tier !== 'none') {
       rigMe = scaledRigBonus(tier, 0, 'me', security, 'reaction')
       rigTe = scaledRigBonus(tier, 0, 'te', security, 'reaction')
     } else {
@@ -288,7 +292,10 @@ export function scienceFacilityDetail(facility: ScienceFacilitySettings): Facili
     rigTe = scaledRigBonus(facility.teRig, facility.rigTeBonusPercent, 'te', security)
     rigJobCost = scaledRigBonus(facility.costRig, facility.rigJobCostBonusPercent, 'cost', security)
   } else if (layout === 'optimization' || layout === 'xl-laboratory') {
-    const opt = scaledLabOptimizationBonuses(facility.optimizationRig, security)
+    const opt = scaledLabOptimizationBonuses(facility.optimizationRig, security, {
+      cost: facility.rigJobCostBonusPercent,
+      time: facility.rigTeBonusPercent,
+    })
     rigTe = opt.time
     rigJobCost = opt.cost
   }

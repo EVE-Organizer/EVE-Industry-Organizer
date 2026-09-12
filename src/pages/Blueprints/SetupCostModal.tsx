@@ -1,10 +1,21 @@
 import { PriceSourceBadge } from '@/components/PriceSourceBadge'
-import type { BlueprintCostBreakdown, RankedBlueprintRow, SetupCostBreakdown, TypeInfo } from '@/types'
-import { formatAvgVolume, formatDecimal, formatIsk, formatNumber, formatPercent, formatQuantity } from '@/lib/profit'
+import type {
+  BlueprintCostBreakdown,
+  RankedBlueprintRow,
+  SetupCostBreakdown,
+  TypeInfo,
+} from '@/types'
+import {
+  formatAvgVolume,
+  formatDecimal,
+  formatIsk,
+  formatNumber,
+  formatPercent,
+  formatQuantity,
+} from '@/lib/profit'
 import { EveImage } from '@/components/EveImage'
 import { JobCostFormula, jobCostStepTitle } from '@/pages/Blueprints/JobCostFormula'
 import { formatFacilityBonusLine } from '@/lib/facilityModifiers'
-import { isPlayerStructure } from '@/lib/structureSettings'
 import { blueprintJitaFallbackNote } from '@/lib/blueprintCostDisplay'
 
 interface SetupCostModalProps {
@@ -33,9 +44,9 @@ function RunsExplanation({ breakdown }: { breakdown: SetupCostBreakdown }) {
     return (
       <p className="text-sm">
         No volume history for this window. Your job time setting (
-        <strong>{formatDuration(targetJobTimeSeconds)}</strong>) gives{' '}
-        <strong>{runs}</strong> run{runs === 1 ? '' : 's'} × {productQuantity} ={' '}
-        <strong>{formatQuantity(outputQty)}</strong> units for this blueprint.
+        <strong>{formatDuration(targetJobTimeSeconds)}</strong>) gives <strong>{runs}</strong> run
+        {runs === 1 ? '' : 's'} × {productQuantity} = <strong>{formatQuantity(outputQty)}</strong>{' '}
+        units for this blueprint.
       </p>
     )
   }
@@ -49,8 +60,8 @@ function RunsExplanation({ breakdown }: { breakdown: SetupCostBreakdown }) {
         <strong>{runs}</strong> runs for this blueprint
       </li>
       <li>
-        Hub avg volume/day ({volumeCapDays}-day cap):{' '}
-        <strong>{formatAvgVolume(avgVolume)}</strong> units/day
+        Hub avg volume/day ({volumeCapDays}-day cap): <strong>{formatAvgVolume(avgVolume)}</strong>{' '}
+        units/day
       </li>
       <li>
         Runs for setup & profit: <strong>{runs}</strong> (from job time)
@@ -60,8 +71,7 @@ function RunsExplanation({ breakdown }: { breakdown: SetupCostBreakdown }) {
         uses this cap)
       </li>
       <li>
-        Output qty: {runs} × {productQuantity} = <strong>{formatQuantity(outputQty)}</strong>{' '}
-        units
+        Output qty: {runs} × {productQuantity} = <strong>{formatQuantity(outputQty)}</strong> units
       </li>
     </ol>
   )
@@ -97,12 +107,11 @@ function BlueprintCostSection({
     return (
       <section>
         <h4 className="font-semibold text-sm mb-2">
-          2. Blueprint{' '}
-          <span className="badge badge-secondary badge-xs">faction BPC</span>
+          2. Blueprint <span className="badge badge-secondary badge-xs">faction BPC</span>
         </h4>
         <p className="text-xs opacity-60 mb-2">
-          Faction blueprints are copies bought from NPC LP stores or contracts, not BPOs. There is no
-          BPO to buy, and the copy cost is paid in loyalty points, so no ISK acquisition cost is
+          Faction blueprints are copies bought from NPC LP stores or contracts, not BPOs. There is
+          no BPO to buy, and the copy cost is paid in loyalty points, so no ISK acquisition cost is
           charged here.
         </p>
         <div className="font-mono text-xs sm:text-sm space-y-1 break-all">
@@ -118,8 +127,7 @@ function BlueprintCostSection({
     return (
       <section>
         <h4 className="font-semibold text-sm mb-2">
-          2. Blueprint{' '}
-          <span className="badge badge-warning badge-xs">BPC from invention</span>
+          2. Blueprint <span className="badge badge-warning badge-xs">BPC from invention</span>
         </h4>
         <p className="text-xs opacity-60 mb-2">
           T2 has no reusable BPO. Each batch consumes invented copies, so the full invention cost is
@@ -191,8 +199,8 @@ function BlueprintCostSection({
       </h4>
       {jitaNote ? <p className="text-xs text-warning mb-2">{jitaNote}</p> : null}
       <p className="text-xs opacity-60 mb-2">
-        T1 BPOs are reusable forever. The purchase price counts toward upfront capital, not per-batch
-        profit.
+        T1 BPOs are reusable forever. The purchase price counts toward upfront capital, not
+        per-batch profit.
       </p>
       <div className="font-mono text-xs sm:text-sm space-y-1 break-all">
         <div>
@@ -227,9 +235,23 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
               <p className="text-sm opacity-70 truncate">{row.product.name}</p>
             </div>
           </div>
-          <button type="button" className="btn btn-sm btn-circle btn-ghost shrink-0" onClick={onClose}>
+          <button
+            type="button"
+            className="btn btn-sm btn-circle btn-ghost shrink-0"
+            onClick={onClose}
+          >
             ✕
           </button>
+        </div>
+
+        <div className="px-5 py-4 border-b border-eve-border bg-base-300/20">
+          <p className="text-xs font-medium uppercase tracking-wide opacity-60">Total setup</p>
+          <p className="text-2xl font-bold tabular-nums mt-0.5">{formatIsk(b.setupCost)}</p>
+          <p className="text-xs opacity-60 mt-1">
+            {formatQuantity(b.runs)} runs → {formatQuantity(b.outputQty)} units · upfront{' '}
+            {formatIsk(b.upfrontCapital)}
+            {b.haulExcluded ? ' · haul excluded' : ''}
+          </p>
         </div>
 
         <div className="px-5 py-4 max-h-[min(70dvh,32rem)] overflow-y-auto space-y-5">
@@ -243,19 +265,19 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
           <section>
             <h4 className="font-semibold text-sm mb-2">
               3. Materials (ME {b.me}
-              {isPlayerStructure(b.structureType) && b.structureMeBonusPercent > 0
+              {b.structureMeBonusPercent > 0
                 ? b.facilityBonus
-                  ? ` + ${formatFacilityBonusLine(b.facilityBonus, 'me')} structure`
-                  : ` + ${formatDecimal(b.structureMeBonusPercent, 1)}% structure`
+                  ? ` + ${formatFacilityBonusLine(b.facilityBonus, 'me')} facility`
+                  : ` + ${formatDecimal(b.structureMeBonusPercent, 1)}% facility`
                 : ''}
               )
             </h4>
             <p className="text-xs opacity-60 mb-2">
               Per line: ceil(base qty × runs × (1 − ME × 1%)
-              {isPlayerStructure(b.structureType) && b.structureMeBonusPercent > 0
+              {b.structureMeBonusPercent > 0
                 ? b.facilityBonus
-                  ? ` × (1 − ${formatFacilityBonusLine(b.facilityBonus, 'me')} structure bonus)`
-                  : ` × (1 − structure ${formatDecimal(b.structureMeBonusPercent, 1)}%)`
+                  ? ` × (1 − ${formatFacilityBonusLine(b.facilityBonus, 'me')} facility bonus)`
+                  : ` × (1 − facility ${formatDecimal(b.structureMeBonusPercent, 1)}%)`
                 : ''}
               ) × hub window price
             </p>
@@ -277,7 +299,9 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
                         {typeName(typeMap, line.typeId)}
                         {line.priceSource ? <PriceSourceBadge source={line.priceSource} /> : null}
                       </td>
-                      <td className="text-right tabular-nums">{formatQuantity(line.baseQtyPerRun)}</td>
+                      <td className="text-right tabular-nums">
+                        {formatQuantity(line.baseQtyPerRun)}
+                      </td>
                       <td className="text-right tabular-nums">{formatQuantity(line.quantity)}</td>
                       <td className="text-right tabular-nums whitespace-nowrap">
                         {formatIsk(line.unitPrice)}
@@ -319,8 +343,7 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
               </p>
             ) : null}
             <p className="text-sm font-mono text-xs sm:text-sm break-all">
-              {formatDecimal(b.materialVolumeM3, 2)} m³ ×{' '}
-              {formatIsk(b.haulInIskPerM3)}/m³ ={' '}
+              {formatDecimal(b.materialVolumeM3, 2)} m³ × {formatIsk(b.haulInIskPerM3)}/m³ ={' '}
               <strong>
                 {formatIsk(b.haulExcluded ? b.materialVolumeM3 * b.haulInIskPerM3 : b.haulIn)}
               </strong>
@@ -334,12 +357,13 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
             <h4 className="font-semibold text-sm mb-1">Setup total (for profit)</h4>
             <p className="text-sm font-mono text-xs sm:text-sm break-all">
               {formatIsk(b.bpoCost)} + {formatIsk(b.materialCost)} + {formatIsk(b.jobCost)} +{' '}
-              {formatIsk(b.haulIn)} = <strong className="text-base">{formatIsk(b.setupCost)}</strong>
+              {formatIsk(b.haulIn)} ={' '}
+              <strong className="text-base">{formatIsk(b.setupCost)}</strong>
             </p>
             <p className="text-xs opacity-70">
               Upfront cash to start:{' '}
-              <strong className="tabular-nums">{formatIsk(b.upfrontCapital)}</strong> (full blueprint
-              + this batch). The budget filter uses this.
+              <strong className="tabular-nums">{formatIsk(b.upfrontCapital)}</strong> (full
+              blueprint + this batch). The budget filter uses this.
             </p>
           </section>
         </div>
@@ -348,12 +372,16 @@ export function SetupCostModal({ row, typeMap, haulInLabel, onClose }: SetupCost
           <p>
             Setup = blueprint + materials + job cost
             {b.haulExcluded ? '' : ' + haul in'}. T1 BPOs are upfront capital only; BPC copies are
-            charged per batch; T2 charges full invention; faction BPCs carry no ISK acquisition cost.
+            charged per batch; T2 charges full invention; faction BPCs carry no ISK acquisition
+            cost.
             {b.haulExcluded
               ? ' Haul in and haul out are excluded from this ranking.'
               : ` Haul out (${formatIsk(row.haulOut)}) is subtracted separately in profit, not included here.`}
           </p>
-          <p>Material prices use the selected time window average when history exists; otherwise spot sell orders.</p>
+          <p>
+            Material prices use the selected time window average when history exists; otherwise spot
+            sell orders.
+          </p>
         </div>
       </div>
       <form method="dialog" className="modal-backdrop">

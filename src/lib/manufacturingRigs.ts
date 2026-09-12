@@ -100,6 +100,8 @@ function resolveFamilyTier(
   const tier = kind === 'me' ? row.meRig : row.teRig
   if (tier === 'none') return 0
   if (tier === 'custom') {
+    const stored = kind === 'me' ? row.rigMeBonusPercent : row.rigTeBonusPercent
+    if (stored != null) return Math.max(0, stored)
     return kind === 'me'
       ? Math.max(0, global.rigMeBonusPercent)
       : Math.max(0, global.rigTeBonusPercent)
@@ -242,11 +244,114 @@ export function scaledRigBonus(
   return storedPercent
 }
 
+export function parseTypedRigPercent(raw: string): number | null {
+  const cleaned = raw.trim().replace(/%/g, '').replace(/,/g, '')
+  if (!cleaned) return null
+  const n = Number(cleaned)
+  if (!Number.isFinite(n) || n < 0 || n > 100) return null
+  return n
+}
+
+export function parseTypedRigPercentPair(raw: string): { a: number; b: number } | null {
+  const parts = raw
+    .trim()
+    .split(/[/|;]+/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+  if (parts.length === 1) {
+    const n = parseTypedRigPercent(parts[0])
+    return n == null ? null : { a: n, b: n }
+  }
+  if (parts.length < 2) return null
+  const a = parseTypedRigPercent(parts[0])
+  const b = parseTypedRigPercent(parts[1])
+  if (a == null || b == null) return null
+  return { a, b }
+}
+
+export function formatTypedRigPercent(value: number): string {
+  return value.toFixed(1)
+}
+
+export function formatTypedRigPercentPair(a: number, b: number): string {
+  return `${formatTypedRigPercent(a)} / ${formatTypedRigPercent(b)}`
+}
+
+export function resolveTypedRigSingle(
+  raw: string,
+  kind: RigBonusKind,
+  security: number,
+  domain: 'engineering' | 'reaction' = 'engineering',
+): { tier: ManufacturingRigTier; percent: number } | null {
+  if (!raw.trim()) return { tier: 'none', percent: 0 }
+  const percent = parseTypedRigPercent(raw)
+  if (percent == null) return null
+  const inferred = inferRigTier(percent, kind, security, domain)
+  if (inferred === 't1' || inferred === 't2') return { tier: inferred, percent }
+  return { tier: 'custom', percent }
+}
+
+export function resolveTypedRigPair(
+  raw: string,
+  security: number,
+  kinds: { a: RigBonusKind; b: RigBonusKind },
+  domain: 'engineering' | 'reaction' = 'engineering',
+): { tier: ManufacturingRigTier; a: number; b: number } | null {
+  if (!raw.trim()) return { tier: 'none', a: 0, b: 0 }
+  const pair = parseTypedRigPercentPair(raw)
+  if (!pair) return null
+  const aTier = inferRigTier(pair.a, kinds.a, security, domain)
+  const bTier = inferRigTier(pair.b, kinds.b, security, domain)
+  if (aTier === bTier && (aTier === 't1' || aTier === 't2')) {
+    return { tier: aTier, ...pair }
+  }
+  return { tier: 'custom', ...pair }
+}
+
+export function customRigClosedLabel(percent: number): string {
+  return `Custom ${formatTypedRigPercent(percent)}%`
+}
+
+export function customRigPairClosedLabel(a: number, b: number): string {
+  return `Custom ${formatTypedRigPercent(a)}% / ${formatTypedRigPercent(b)}%`
+}
+
+export function seedSingleRigDraft(
+  tier: ManufacturingRigTier,
+  storedPercent: number,
+  kind: RigBonusKind,
+  security: number,
+  domain: 'engineering' | 'reaction' = 'engineering',
+): string {
+  if (tier === 'none') return ''
+  if (tier === 'custom') return formatTypedRigPercent(storedPercent)
+  return formatTypedRigPercent(scaledRigBonus(tier, 0, kind, security, domain))
+}
+
+export function seedPairRigDraft(
+  tier: ManufacturingRigTier,
+  stored: { a: number; b: number },
+  security: number,
+  kinds: { a: RigBonusKind; b: RigBonusKind },
+  domain: 'engineering' | 'reaction' = 'engineering',
+): string {
+  if (tier === 'none') return ''
+  if (tier === 'custom') return formatTypedRigPercentPair(stored.a, stored.b)
+  return formatTypedRigPercentPair(
+    scaledRigBonus(tier, 0, kinds.a, security, domain),
+    scaledRigBonus(tier, 0, kinds.b, security, domain),
+  )
+}
+
 export function scaledLabOptimizationBonuses(
   tier: ManufacturingRigTier,
   security: number,
+  custom?: { cost: number; time: number },
 ): { cost: number; time: number } {
-  if (tier === 'none' || tier === 'custom') return { cost: 0, time: 0 }
+  if (tier === 'custom') {
+    return { cost: Math.max(0, custom?.cost ?? 0), time: Math.max(0, custom?.time ?? 0) }
+  }
+  if (tier === 'none') return { cost: 0, time: 0 }
   return {
     cost: scaledEngineeringPercent(rigCostBase(tier), security),
     time: scaledEngineeringPercent(rigTeBase(tier), security),
@@ -301,6 +406,14 @@ export function manufacturingCombinedPreview(tier: ManufacturingRigTier, securit
   const me = scaledRigBonus(tier, 0, 'me', security)
   const te = scaledRigBonus(tier, 0, 'te', security)
   return `${tier.toUpperCase()} ME ${me.toFixed(1)}% / TE ${te.toFixed(1)}%`
+}
+
+export const PRESET_RIG_TIERS = ['none', 't1', 't2'] as const
+
+export function presetRigOptions(
+  preview: (tier: (typeof PRESET_RIG_TIERS)[number]) => string,
+): { value: (typeof PRESET_RIG_TIERS)[number]; label: string }[] {
+  return PRESET_RIG_TIERS.map((value) => ({ value, label: preview(value) }))
 }
 
 export function manufacturingRigTierLabel(tier: ManufacturingRigTier): string {

@@ -133,9 +133,10 @@ function manufacturingFamiliesFromName(name) {
 }
 
 function reactionFamiliesFromName(name) {
+  if (/reactor efficiency/i.test(name)) return ['composite', 'biochemical', 'hybrid']
   if (/biochemical/i.test(name)) return ['biochemical']
   if (/hybrid/i.test(name)) return ['hybrid']
-  if (/composite|reactor efficiency/i.test(name)) return ['composite', 'biochemical', 'hybrid']
+  if (/composite/i.test(name)) return ['composite']
   return []
 }
 

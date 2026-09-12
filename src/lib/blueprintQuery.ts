@@ -47,7 +47,14 @@ export interface BlueprintQuery {
 const VALID_TIERS = new Set<string>(BLUEPRINT_TIERS)
 const VALID_WINDOWS: TimeRange[] = ['1d', '1w', '1m', '1y', 'all']
 const VALID_PRICE_METHODS: GlobalSettings['priceMethod'][] = ['sell_orders', 'buy_orders']
-const VALID_SORT_KEYS: BlueprintSortKey[] = ['setupCost', 'netProfit', 'iph', 'margin', 'avgVolume']
+const VALID_SORT_KEYS: BlueprintSortKey[] = [
+  'setupCost',
+  'netProfit',
+  'iph',
+  'margin',
+  'avgVolume',
+  'tradedIsk',
+]
 const VALID_SORT_DIRS: SortDirection[] = ['asc', 'desc']
 const VALID_HUBS: HubId[] = HUBS.map((hub) => hub.id)
 
@@ -80,7 +87,7 @@ export function defaultQuery(settings: GlobalSettings): BlueprintQuery {
     includeHaul: settings.includeHaulCost ?? true,
     minVolume: 0,
     rankingTimeHours: DEFAULT_RANKING_TIME_HOURS,
-    sortBy: 'iph',
+    sortBy: 'netProfit',
     sortDir: 'desc',
   }
 }
@@ -125,7 +132,7 @@ export function searchParamsToQuery(
   const hub = rawHub && (VALID_HUBS as string[]).includes(rawHub) ? (rawHub as HubId) : def.hub
 
   const rawSys = params.get('sys')
-  const mfgSystem = rawSys ? (parseInt(rawSys, 10) || def.mfgSystem) : def.mfgSystem
+  const mfgSystem = rawSys ? parseInt(rawSys, 10) || def.mfgSystem : def.mfgSystem
 
   const rawTier = params.get('tier')
   const tiers = parseTiers(rawTier, def.tiers)
@@ -143,20 +150,15 @@ export function searchParamsToQuery(
       : def.priceMethod
 
   const rawBmin = params.get('bmin')
-  const budgetMinSlider = rawBmin
-    ? clampSlider(parseInt(rawBmin, 10))
-    : def.budgetMinSlider
+  const budgetMinSlider = rawBmin ? clampSlider(parseInt(rawBmin, 10)) : def.budgetMinSlider
 
   const rawBmax = params.get('bmax')
-  const budgetMaxSlider = rawBmax
-    ? clampSlider(parseInt(rawBmax, 10))
-    : def.budgetMaxSlider
+  const budgetMaxSlider = rawBmax ? clampSlider(parseInt(rawBmax, 10)) : def.budgetMaxSlider
 
   const buildableOnly = params.get('buildable') === '1'
 
   const rawBpPrice = params.get('bpprice')
-  const requireBlueprintPrice =
-    rawBpPrice === null ? def.requireBlueprintPrice : rawBpPrice === '1'
+  const requireBlueprintPrice = rawBpPrice === null ? def.requireBlueprintPrice : rawBpPrice === '1'
 
   const rawRecipe = params.get('recipe')
   const rawFormulas = params.get('formulas')
@@ -231,7 +233,14 @@ function parseRecipeKinds(raw: string | null, fallback: RecipeKind[]): RecipeKin
 function parseGroups(raw: string | null, fallback: string[]): string[] {
   if (raw === null) return fallback
   if (raw === '' || raw === 'all') return []
-  return [...new Set(raw.split(',').map((g) => g.trim()).filter(Boolean))]
+  return [
+    ...new Set(
+      raw
+        .split(',')
+        .map((g) => g.trim())
+        .filter(Boolean),
+    ),
+  ]
 }
 
 function groupsEqual(a: string[], b: string[]): boolean {

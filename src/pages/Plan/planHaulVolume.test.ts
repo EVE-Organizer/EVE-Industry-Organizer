@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { buyHaulQuantity, nodeHaulInVolumeM3, nodeHaulOutVolumeM3, volumeM3 } from '@/pages/Plan/planHaulVolume'
+import {
+  buyHaulQuantity,
+  nodeHaulInVolumeM3,
+  nodeHaulOutVolumeM3,
+  sumBuyHaulVolumeM3,
+  sumManufactureOutputVolumeM3,
+  volumeM3,
+} from '@/pages/Plan/planHaulVolume'
 import type { PlanNode } from '@/types'
 
 function planNode(partial: Partial<PlanNode> & Pick<PlanNode, 'productTypeId'>): PlanNode {
@@ -45,5 +52,23 @@ describe('planHaulVolume', () => {
     const node = planNode({ productTypeId: 100, outputQty: 3, isRoot: true })
     expect(nodeHaulOutVolumeM3(node, typeVolumes)).toBe(15)
     expect(volumeM3(34, 1000, typeVolumes)).toBe(10)
+  })
+
+  it('sums buy-list haul volume across nodes', () => {
+    const nodes = [
+      planNode({ productTypeId: 100, totalDemandQty: 20 }),
+      planNode({ productTypeId: 34, totalDemandQty: 1000 }),
+    ]
+    const inventory = new Map<number, number>([[100, 5]])
+    expect(sumBuyHaulVolumeM3(nodes, inventory, false, typeVolumes)).toBe(110)
+    expect(sumBuyHaulVolumeM3(nodes, inventory, true, typeVolumes)).toBe(85)
+  })
+
+  it('sums manufacture output volume across nodes', () => {
+    const nodes = [
+      planNode({ productTypeId: 100, outputQty: 3, mode: 'build' }),
+      planNode({ productTypeId: 34, outputQty: 1000, mode: 'build' }),
+    ]
+    expect(sumManufactureOutputVolumeM3(nodes, typeVolumes)).toBe(25)
   })
 })

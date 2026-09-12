@@ -1,11 +1,7 @@
 import { toBuyQuantity } from '@/lib/locationInventory'
 import type { PlanBuildMode, PlanNode } from '@/types'
 
-export function buyHaulQuantity(
-  node: PlanNode,
-  have: number,
-  useInventory: boolean,
-): number {
+export function buyHaulQuantity(node: PlanNode, have: number, useInventory: boolean): number {
   if (useInventory) return toBuyQuantity(node.totalDemandQty, have)
   return node.totalDemandQty
 }
@@ -28,11 +24,29 @@ export function nodeHaulInVolumeM3(
   return volumeM3(node.productTypeId, buyHaulQuantity(node, have, useInventory), typeVolumes)
 }
 
-export function nodeHaulOutVolumeM3(
-  node: PlanNode,
+/** Packed cargo m³ for buy-list nodes (to-buy qty when inventory is on). */
+export function sumBuyHaulVolumeM3(
+  nodes: PlanNode[],
+  inventoryByTypeId: Map<number, number> | null | undefined,
+  useInventory: boolean,
   typeVolumes: Map<number, number>,
 ): number {
+  return nodes.reduce((sum, node) => {
+    const have = inventoryByTypeId?.get(node.productTypeId) ?? 0
+    return sum + nodeHaulInVolumeM3(node, have, useInventory, typeVolumes)
+  }, 0)
+}
+
+export function nodeHaulOutVolumeM3(node: PlanNode, typeVolumes: Map<number, number>): number {
   return volumeM3(node.productTypeId, node.outputQty, typeVolumes)
+}
+
+/** Packed cargo m³ of scheduled manufacture output. */
+export function sumManufactureOutputVolumeM3(
+  nodes: PlanNode[],
+  typeVolumes: Map<number, number>,
+): number {
+  return nodes.reduce((sum, node) => sum + nodeHaulOutVolumeM3(node, typeVolumes), 0)
 }
 
 /** Cargo hauled from hub for buy-mode nodes and packaged self-input. Root buy skips haul. */

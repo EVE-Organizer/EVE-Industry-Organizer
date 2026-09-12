@@ -109,8 +109,18 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
           {formatIsk(row.setupCost)}
         </button>
       </td>
-      <td className={row.netProfit >= 0 ? 'text-success' : 'text-error'}>
-        {formatIsk(row.netProfit)}
+      <td
+        className={`whitespace-nowrap ${row.netProfit >= 0 ? 'text-success' : 'text-error'}`}
+        onClick={stopRowToggle}
+      >
+        <button
+          type="button"
+          className={textLinkClass('tabular-nums')}
+          onClick={onOpenIph}
+          aria-label={`Profit and ISK/hr breakdown for ${row.product.name}`}
+        >
+          {formatIsk(row.netProfit)}
+        </button>
       </td>
       <td className="whitespace-nowrap" onClick={stopRowToggle}>
         <button
@@ -124,6 +134,9 @@ export const BlueprintRow = memo(function BlueprintRow(props: BlueprintItemProps
       </td>
       <td>{formatPercent(row.margin)}</td>
       <td>{formatAvgVolume(row.avgVolume)}</td>
+      <td className="whitespace-nowrap tabular-nums">
+        {row.tradedIsk > 0 ? formatIsk(row.tradedIsk) : '—'}
+      </td>
       <td onClick={stopRowToggle}>
         <div className="flex items-center gap-0.5">
           <AddToPlanMenu productTypeId={row.blueprint.productTypeId} />
@@ -211,9 +224,14 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
           </button>
         </MobileStat>
         <MobileStat label="Profit">
-          <span className={row.netProfit >= 0 ? 'text-success' : 'text-error'}>
+          <button
+            type="button"
+            className={textLinkClass(row.netProfit >= 0 ? '!text-success' : '!text-error')}
+            onClick={onOpenIph}
+            aria-label={`Profit and ISK/hr breakdown for ${row.product.name}`}
+          >
             {formatIsk(row.netProfit)}
-          </span>
+          </button>
         </MobileStat>
         <MobileStat label="ISK/hr">
           <button
@@ -227,6 +245,9 @@ export const BlueprintMobileRow = memo(function BlueprintMobileRow(props: Bluepr
         </MobileStat>
         <MobileStat label="Margin">{formatPercent(row.margin)}</MobileStat>
         <MobileStat label="Vol/day">{formatAvgVolume(row.avgVolume)}</MobileStat>
+        <MobileStat label="Amount traded">
+          {row.tradedIsk > 0 ? formatIsk(row.tradedIsk) : '—'}
+        </MobileStat>
       </dl>
     </article>
   )
@@ -275,6 +296,7 @@ export function BlueprintUnrankedRow({
           No price data for current hub and window
         </span>
       </td>
+      <td>—</td>
       <td>—</td>
       <td>—</td>
       <td>—</td>

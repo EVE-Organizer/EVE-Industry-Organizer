@@ -64,6 +64,7 @@ describe('combined ranking includes high-iph formulas', () => {
     const goal = relaxed.find((r) => r.blueprint.productTypeId === GOAL_ORIENTING_TYPE_ID)
     expect(goal).toBeDefined()
     expect(goal!.iph).toBeGreaterThan(400_000)
+    expect(goal!.iph).toBeCloseTo(goal!.netProfit / (goal!.jobTimeSeconds / 3600), 5)
     expect(goal!.upfrontCapital).toBeGreaterThan(20_000_000)
 
     const cappedBudget = rankBlueprintsFromMarket(
@@ -126,10 +127,38 @@ describe('combined ranking includes high-iph formulas', () => {
 
   it('finalizeRankedRows takes top N from each kind when both are active', () => {
     const rows = [
-      { blueprint: { kind: 'manufacturing' }, iph: 100, setupCost: 0, netProfit: 0, margin: 0, avgVolume: 0 } as never,
-      { blueprint: { kind: 'manufacturing' }, iph: 90, setupCost: 0, netProfit: 0, margin: 0, avgVolume: 0 } as never,
-      { blueprint: { kind: 'reaction' }, iph: 80, setupCost: 0, netProfit: 0, margin: 0, avgVolume: 0 } as never,
-      { blueprint: { kind: 'reaction' }, iph: 200, setupCost: 0, netProfit: 0, margin: 0, avgVolume: 0 } as never,
+      {
+        blueprint: { kind: 'manufacturing' },
+        iph: 100,
+        setupCost: 0,
+        netProfit: 0,
+        margin: 0,
+        avgVolume: 0,
+      } as never,
+      {
+        blueprint: { kind: 'manufacturing' },
+        iph: 90,
+        setupCost: 0,
+        netProfit: 0,
+        margin: 0,
+        avgVolume: 0,
+      } as never,
+      {
+        blueprint: { kind: 'reaction' },
+        iph: 80,
+        setupCost: 0,
+        netProfit: 0,
+        margin: 0,
+        avgVolume: 0,
+      } as never,
+      {
+        blueprint: { kind: 'reaction' },
+        iph: 200,
+        setupCost: 0,
+        netProfit: 0,
+        margin: 0,
+        avgVolume: 0,
+      } as never,
     ]
     const out = finalizeRankedRows(rows, {
       recipeKinds: ['manufacturing', 'reaction'],

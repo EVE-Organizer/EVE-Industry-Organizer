@@ -1,18 +1,21 @@
-import type {
-  GlobalSettings,
-  ManufacturingRigTier,
-  ReactionFamilyGroup,
-  ReactionFamilyModifiers,
-} from '@/types'
+import type { GlobalSettings, ReactionFamilyGroup, ReactionFamilyModifiers } from '@/types'
 import { REACTION_FAMILY_GROUPS } from '@/types'
 import { EveImage } from '@/components/EveImage'
 import { InfoTooltip } from '@/components/InfoTooltip'
-import { LabOptimizationHeader, RigMeTeHeaders } from '@/components/RigSelectHeaders'
+import { RigEfficiencyHeader, RigMeTeHeaders } from '@/components/RigSelectHeaders'
+import { RigTierCombobox } from '@/components/RigTierCombobox'
 import {
+  customRigClosedLabel,
+  customRigPairClosedLabel,
   reactionCombinedPreview,
   reactionRigPreview,
   reactionRigSecurityMultiplier,
+  resolveTypedRigPair,
+  resolveTypedRigSingle,
   rigSecurityLabel,
+  presetRigOptions,
+  seedPairRigDraft,
+  seedSingleRigDraft,
 } from '@/lib/manufacturingRigs'
 import {
   reactionFamilyRigIcon,
@@ -21,8 +24,6 @@ import {
   reactionRigSetLabel,
 } from '@/lib/reactionRigFamilies'
 import { REACTION_FAMILY_LABELS } from '@/lib/refinerySettings'
-
-const FAMILY_TIERS: ManufacturingRigTier[] = ['none', 't1', 't2']
 
 interface ReactionRigFieldsProps {
   settings: GlobalSettings
@@ -41,13 +42,14 @@ export function ReactionRigFields({
   const layout = reactionRigLayout(facility.refineryType)
   if (!layout) return null
 
-  const selectClass = size === 'sm' ? 'select select-bordered select-sm' : 'select select-bordered'
   const setLabel = reactionRigSetLabel(layout)
   const secMultiplier = reactionRigSecurityMultiplier(security)
   const secLabel =
     secMultiplier > 1
       ? `${rigSecurityLabel(security)} (${secMultiplier.toFixed(1)}x)`
       : rigSecurityLabel(security)
+  const reactorTier = facility.reactorEfficiencyRig ?? 'none'
+  const composite = facility.familyModifiers.composite
 
   function patchFamily(group: ReactionFamilyGroup, patch: Partial<ReactionFamilyModifiers>) {
     onChange({
@@ -61,15 +63,6 @@ export function ReactionRigFields({
     })
   }
 
-  function patchReactorEfficiency(reactorEfficiencyRig: ManufacturingRigTier) {
-    onChange({
-      reactionFacility: { ...facility, reactorEfficiencyRig },
-    })
-  }
-
-  const reactorTier =
-    facility.reactorEfficiencyRig === 'custom' ? 'none' : (facility.reactorEfficiencyRig ?? 'none')
-
   return (
     <details className="manufacturing-rig-fields">
       <summary className="manufacturing-rig-fields__summary">
@@ -80,7 +73,7 @@ export function ReactionRigFields({
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
           >
-            <InfoTooltip text="Athanor fits M-Set reactor rigs (separate ME and TE per family). Tatara fits one L-Set Reactor Efficiency rig for all reaction types. Reactor rigs use a +10% bonus in nullsec and wormhole space only." />
+            <InfoTooltip text="Athanor fits M-Set reactor rigs per family. Tatara fits one L-Set Reactor Efficiency rig. Pick T1/T2 or type a custom percent. Nullsec/WH adds +10%." />
           </span>
         </span>
         <span className="manufacturing-rig-fields__summary-meta shrink-0 tabular-nums">
@@ -95,7 +88,7 @@ export function ReactionRigFields({
 
             {layout === 'optimization' ? (
               <>
-                <LabOptimizationHeader />
+                <RigEfficiencyHeader />
                 <div className="grid grid-cols-[1.75rem_minmax(0,1fr)_minmax(9rem,1fr)] items-center gap-2">
                   <EveImage
                     id={reactorEfficiencyRigIcon()}
@@ -106,18 +99,58 @@ export function ReactionRigFields({
                     alt=""
                   />
                   <span className="text-xs truncate">Reactor efficiency</span>
-                  <select
-                    className={`${selectClass} w-full`}
-                    aria-label="Reactor efficiency rig"
-                    value={reactorTier}
-                    onChange={(e) => patchReactorEfficiency(e.target.value as ManufacturingRigTier)}
-                  >
-                    {FAMILY_TIERS.map((option) => (
-                      <option key={option} value={option}>
-                        {reactionCombinedPreview(option, security)}
-                      </option>
-                    ))}
-                  </select>
+                  <RigTierCombobox
+                    ariaLabel="Reactor efficiency rig"
+                    size={size}
+                    selected={reactorTier}
+                    selectedLabel={
+                      reactorTier === 'custom'
+                        ? customRigPairClosedLabel(
+                            composite.rigMeBonusPercent,
+                            composite.rigTeBonusPercent,
+                          )
+                        : reactionCombinedPreview(reactorTier, security)
+                    }
+                    options={presetRigOptions((option) =>
+                      reactionCombinedPreview(option, security),
+                    )}
+                    seedDraft={seedPairRigDraft(
+                      reactorTier,
+                      { a: composite.rigMeBonusPercent, b: composite.rigTeBonusPercent },
+                      security,
+                      { a: 'me', b: 'te' },
+                      'reaction',
+                    )}
+                    customHint="Type custom ME% / TE%"
+                    onPick={(reactorEfficiencyRig) =>
+                      onChange({ reactionFacility: { ...facility, reactorEfficiencyRig } })
+                    }
+                    onCommitDraft={(raw) => {
+                      const next = resolveTypedRigPair(
+                        raw,
+                        security,
+                        { a: 'me', b: 'te' },
+                        'reaction',
+                      )
+                      if (!next) return
+                      onChange({
+                        reactionFacility: {
+                          ...facility,
+                          reactorEfficiencyRig: next.tier,
+                          familyModifiers: {
+                            ...facility.familyModifiers,
+                            composite: {
+                              ...composite,
+                              meRig: next.tier,
+                              teRig: next.tier,
+                              rigMeBonusPercent: next.a,
+                              rigTeBonusPercent: next.b,
+                            },
+                          },
+                        },
+                      })
+                    }}
+                  />
                 </div>
               </>
             ) : (
@@ -126,9 +159,6 @@ export function ReactionRigFields({
                 <div className="space-y-1">
                   {REACTION_FAMILY_GROUPS.map((group) => {
                     const row = facility.familyModifiers[group]
-                    const meRig = row.meRig === 'custom' ? 'none' : (row.meRig ?? 'none')
-                    const teRig = row.teRig === 'custom' ? 'none' : (row.teRig ?? 'none')
-
                     return (
                       <div
                         key={group}
@@ -143,38 +173,66 @@ export function ReactionRigFields({
                           alt=""
                         />
                         <span className="text-xs truncate">{REACTION_FAMILY_LABELS[group]}</span>
-                        <select
-                          className={`${selectClass} w-full`}
-                          aria-label={`${REACTION_FAMILY_LABELS[group]} ME rig`}
-                          value={meRig}
-                          onChange={(e) =>
-                            patchFamily(group, {
-                              meRig: e.target.value as ManufacturingRigTier,
-                            })
+                        <RigTierCombobox
+                          ariaLabel={`${REACTION_FAMILY_LABELS[group]} ME rig`}
+                          size={size}
+                          selected={row.meRig}
+                          selectedLabel={
+                            row.meRig === 'custom'
+                              ? customRigClosedLabel(row.rigMeBonusPercent)
+                              : reactionRigPreview('me', row.meRig, security)
                           }
-                        >
-                          {FAMILY_TIERS.map((option) => (
-                            <option key={option} value={option}>
-                              {reactionRigPreview('me', option, security)}
-                            </option>
-                          ))}
-                        </select>
-                        <select
-                          className={`${selectClass} w-full`}
-                          aria-label={`${REACTION_FAMILY_LABELS[group]} TE rig`}
-                          value={teRig}
-                          onChange={(e) =>
+                          options={presetRigOptions((option) =>
+                            reactionRigPreview('me', option, security),
+                          )}
+                          seedDraft={seedSingleRigDraft(
+                            row.meRig,
+                            row.rigMeBonusPercent,
+                            'me',
+                            security,
+                            'reaction',
+                          )}
+                          customHint="Type a custom ME %"
+                          onPick={(meRig) => patchFamily(group, { meRig })}
+                          onCommitDraft={(raw) => {
+                            const next = resolveTypedRigSingle(raw, 'me', security, 'reaction')
+                            if (!next) return
                             patchFamily(group, {
-                              teRig: e.target.value as ManufacturingRigTier,
+                              meRig: next.tier,
+                              rigMeBonusPercent: next.percent,
                             })
+                          }}
+                        />
+                        <RigTierCombobox
+                          ariaLabel={`${REACTION_FAMILY_LABELS[group]} TE rig`}
+                          size={size}
+                          selected={row.teRig}
+                          selectedLabel={
+                            row.teRig === 'custom'
+                              ? customRigClosedLabel(row.rigTeBonusPercent)
+                              : reactionRigPreview('te', row.teRig, security)
                           }
-                        >
-                          {FAMILY_TIERS.map((option) => (
-                            <option key={option} value={option}>
-                              {reactionRigPreview('te', option, security)}
-                            </option>
-                          ))}
-                        </select>
+                          options={presetRigOptions((option) =>
+                            reactionRigPreview('te', option, security),
+                          )}
+                          seedDraft={seedSingleRigDraft(
+                            row.teRig,
+                            row.rigTeBonusPercent,
+                            'te',
+                            security,
+                            'reaction',
+                          )}
+                          customHint="Type a custom TE %"
+                          onPick={(teRig) => patchFamily(group, { teRig })}
+                          onCommitDraft={(raw) => {
+                            const next = resolveTypedRigSingle(raw, 'te', security, 'reaction')
+                            if (!next) return
+                            patchFamily(group, {
+                              teRig: next.tier,
+                              rigTeBonusPercent: next.percent,
+                            })
+                          }}
+                        />
                       </div>
                     )
                   })}

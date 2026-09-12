@@ -2627,9 +2627,7 @@
       "tier": "t1",
       "activity": "reaction",
       "families": [
-        "composite",
-        "biochemical",
-        "hybrid"
+        "composite"
       ],
       "me": 0,
       "te": 20,
@@ -2642,9 +2640,7 @@
       "tier": "t2",
       "activity": "reaction",
       "families": [
-        "composite",
-        "biochemical",
-        "hybrid"
+        "composite"
       ],
       "me": 0,
       "te": 24,
@@ -2657,9 +2653,7 @@
       "tier": "t1",
       "activity": "reaction",
       "families": [
-        "composite",
-        "biochemical",
-        "hybrid"
+        "composite"
       ],
       "me": 2,
       "te": 0,
@@ -2672,9 +2666,7 @@
       "tier": "t2",
       "activity": "reaction",
       "families": [
-        "composite",
-        "biochemical",
-        "hybrid"
+        "composite"
       ],
       "me": 2.4,
       "te": 0,
@@ -2821,9 +2813,7 @@
       "tier": "t1",
       "activity": "reaction",
       "families": [
-        "composite",
-        "biochemical",
-        "hybrid"
+        "composite"
       ],
       "me": 0,
       "te": 0,
@@ -2836,9 +2826,7 @@
       "tier": "t2",
       "activity": "reaction",
       "families": [
-        "composite",
-        "biochemical",
-        "hybrid"
+        "composite"
       ],
       "me": 0,
       "te": 0,
@@ -2851,9 +2839,7 @@
       "tier": "t1",
       "activity": "reaction",
       "families": [
-        "composite",
-        "biochemical",
-        "hybrid"
+        "composite"
       ],
       "me": 0,
       "te": 0,
@@ -2866,9 +2852,7 @@
       "tier": "t2",
       "activity": "reaction",
       "families": [
-        "composite",
-        "biochemical",
-        "hybrid"
+        "composite"
       ],
       "me": 0,
       "te": 0,

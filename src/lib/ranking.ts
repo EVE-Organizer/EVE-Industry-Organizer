@@ -174,7 +174,13 @@ export interface RankingFilters {
   limit?: number
 }
 
-export type BlueprintSortKey = 'setupCost' | 'netProfit' | 'iph' | 'margin' | 'avgVolume'
+export type BlueprintSortKey =
+  | 'setupCost'
+  | 'netProfit'
+  | 'iph'
+  | 'margin'
+  | 'avgVolume'
+  | 'tradedIsk'
 export type SortDirection = 'asc' | 'desc'
 
 export function sortBlueprintRows(
@@ -191,7 +197,7 @@ export function finalizeRankedRows(
   rows: RankedBlueprintRow[],
   filters: Pick<RankingFilters, 'sortBy' | 'sortDirection' | 'limit' | 'recipeKinds'>,
 ): RankedBlueprintRow[] {
-  const sortBy = filters.sortBy ?? 'iph'
+  const sortBy = filters.sortBy ?? 'netProfit'
   const sortDirection = filters.sortDirection ?? 'desc'
   const limit = filters.limit ?? TOP_N
   const kinds = filters.recipeKinds?.length ? filters.recipeKinds : DEFAULT_RECIPE_KINDS
@@ -558,7 +564,10 @@ function computeRow(
       )
   const jobHours = jobTimeSeconds / 3600
   const daysToClear = avgVolume > 0 ? outputQty / avgVolume : Infinity
-  const { iph, marketShare, competitionFactor } = marketAwareIph(
+  // Job-time ranking: IPH is batch profit ÷ this job. Volume/competition stay in the
+  // breakdown as a market check and no longer reorder the list.
+  const iph = jobHours > 0 ? netProfit / jobHours : 0
+  const { marketShare, competitionFactor } = marketAwareIph(
     netProfit,
     outputQty,
     jobHours,
@@ -645,6 +654,7 @@ function computeRow(
     margin,
     iph,
     avgVolume,
+    tradedIsk: avgVolume > 0 && sellPricePerUnit > 0 ? avgVolume * sellPricePerUnit : 0,
     daysToClear,
     volatility,
     jobTimeSeconds,

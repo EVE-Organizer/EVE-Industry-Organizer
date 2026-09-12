@@ -1,6 +1,8 @@
 import type { PlanProfitSummary } from '@/pages/Plan/planProfit'
-import type { GlobalSettings } from '@/types'
+import type { GlobalSettings, SkillLevels } from '@/types'
 import { formatDecimal, formatIsk, formatPercent } from '@/lib/profit'
+import { skillLevel } from '@/lib/skillFields'
+import { tradingFeeRates } from '@/lib/tradingFees'
 import { ScoreBar } from '@/pages/Plan/ScoreBar'
 
 interface PlanProfitSummaryProps {
@@ -10,6 +12,7 @@ interface PlanProfitSummaryProps {
   priceMethod: GlobalSettings['priceMethod']
   includeHaulCost: boolean
   haulApplicable: boolean
+  skills: SkillLevels
 }
 
 function ProfitMetric({
@@ -42,6 +45,7 @@ export function PlanProfitSummaryPanel({
   priceMethod,
   includeHaulCost,
   haulApplicable,
+  skills,
 }: PlanProfitSummaryProps) {
   if (summary.rootRows.length === 0) return null
 
@@ -49,15 +53,26 @@ export function PlanProfitSummaryPanel({
   const marginCap = 100
   const marginDisplay = Math.min(marginCap, Math.max(-marginCap, summary.margin))
   const priceLabel = priceMethod === 'buy_orders' ? 'buy orders' : 'sell orders'
+  const feeRates = tradingFeeRates(
+    skillLevel(skills, 'accounting'),
+    skillLevel(skills, 'brokerRelations'),
+  )
+  const feeLabel =
+    priceMethod === 'buy_orders'
+      ? `tax ${formatDecimal(feeRates.salesTaxPercent, 2)}%`
+      : `broker ${formatDecimal(feeRates.brokerFeePercent, 1)}% · tax ${formatDecimal(feeRates.salesTaxPercent, 2)}%`
   const haulLabel = !haulApplicable
     ? 'haul n/a (build in market system)'
     : includeHaulCost
       ? 'haul included'
       : 'haul excluded'
   const hubLabel =
-    buyHubName === sellHubName
-      ? `${buyHubName} hub`
-      : `buy ${buyHubName} · sell ${sellHubName}`
+    buyHubName === sellHubName ? `${buyHubName} hub` : `buy ${buyHubName} · sell ${sellHubName}`
+  const setupHint = !haulApplicable
+    ? 'Build/buy chain'
+    : includeHaulCost
+      ? 'Chain + haul in'
+      : 'Chain (no haul)'
   const profitHint =
     haulApplicable && includeHaulCost ? 'Revenue − setup − haul out' : 'Revenue − setup'
 
@@ -67,7 +82,7 @@ export function PlanProfitSummaryPanel({
         <div>
           <h2 className="plan-profit-panel__title">Plan economics</h2>
           <p className="plan-profit-panel__subtitle">
-            {hubLabel} · {priceLabel} · {haulLabel}
+            {hubLabel} · {priceLabel} · {feeLabel} · {haulLabel}
           </p>
         </div>
         {!summary.hasPrices ? (
@@ -76,8 +91,12 @@ export function PlanProfitSummaryPanel({
       </div>
 
       <dl className="plan-profit-panel__grid">
-        <ProfitMetric label="Setup cost" value={formatIsk(summary.setupCost)} hint="Materials + jobs" />
-        <ProfitMetric label="Revenue" value={formatIsk(summary.netRevenue)} hint="After broker & tax" />
+        <ProfitMetric label="Setup cost" value={formatIsk(summary.setupCost)} hint={setupHint} />
+        <ProfitMetric
+          label="Revenue"
+          value={formatIsk(summary.netRevenue)}
+          hint="After broker & tax"
+        />
         <ProfitMetric
           label="Profit"
           value={formatIsk(summary.netProfit)}

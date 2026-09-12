@@ -2,19 +2,26 @@ import type {
   GlobalSettings,
   ManufacturingFamilyRigTiers,
   ManufacturingRigModifiers,
-  ManufacturingRigTier,
 } from '@/types'
 import { DEFAULT_MANUFACTURING_RIGS } from '@/types'
 import { EveImage } from '@/components/EveImage'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { RigEfficiencyHeader, RigMeTeHeaders } from '@/components/RigSelectHeaders'
+import { RigTierCombobox } from '@/components/RigTierCombobox'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 import {
+  customRigClosedLabel,
+  customRigPairClosedLabel,
   manufacturingCombinedPreview,
   manufacturingRigPreview,
+  resolveTypedRigPair,
+  resolveTypedRigSingle,
   rigSecurityLabel,
   rigSecurityMultiplier,
+  presetRigOptions,
+  seedPairRigDraft,
+  seedSingleRigDraft,
 } from '@/lib/manufacturingRigs'
 import { isPlayerStructure } from '@/lib/structureSettings'
 import {
@@ -30,8 +37,6 @@ interface ManufacturingRigFieldsProps {
   onChange: (patch: Partial<GlobalSettings>) => void
   size?: 'md' | 'sm'
 }
-
-const FAMILY_TIERS: ManufacturingRigTier[] = ['none', 't1', 't2']
 
 function NumberField({
   label,
@@ -90,7 +95,6 @@ export function ManufacturingRigFields({
 }: ManufacturingRigFieldsProps) {
   if (!isPlayerStructure(settings.structureType)) return null
 
-  const selectClass = size === 'sm' ? 'select select-bordered select-sm' : 'select select-bordered'
   const rigs = settings.manufacturingRigs ?? DEFAULT_MANUFACTURING_RIGS
   const security = settings.buildSystemSecurity ?? 1
   const fitSize = manufacturingRigFitSize(settings.structureType)
@@ -108,15 +112,14 @@ export function ManufacturingRigFields({
     onChange({ manufacturingRigs: patchRigs(rigs, { familyRigs }) })
   }
 
-  function combinedTier(row: HullManufacturingRigRow): ManufacturingRigTier {
+  function combinedTier(row: HullManufacturingRigRow) {
     const first = familyTiers(rigs, row.families[0])
-    if (first.meRig !== first.teRig) return 'none'
+    if (first.meRig !== first.teRig) return 'none' as const
     const same = row.families.every((family) => {
       const t = familyTiers(rigs, family)
       return t.meRig === first.meRig && t.teRig === first.teRig
     })
-    if (!same || first.meRig === 'custom') return 'none'
-    return first.meRig
+    return same ? first.meRig : ('none' as const)
   }
 
   return (
@@ -129,7 +132,7 @@ export function ManufacturingRigFields({
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
           >
-            <InfoTooltip text="Raitaru fits M-Set (separate ME and TE per category). Azbel fits L-Set Efficiency (ME and TE in one rig). Sotiyo fits XL-Set bundles: equipment and consumable, all ships, and structure and component. Values scale with system security." />
+            <InfoTooltip text="Raitaru fits M-Set (separate ME and TE). Azbel fits L-Set Efficiency. Sotiyo fits XL-Set bundles. Pick T1/T2 or type a custom percent. Values scale with system security." />
           </span>
         </span>
         <span className="manufacturing-rig-fields__summary-meta shrink-0 tabular-nums">
@@ -147,6 +150,9 @@ export function ManufacturingRigFields({
                 {section.rows.map((row) => {
                   if (row.combinedMeTe) {
                     const tier = combinedTier(row)
+                    const first = familyTiers(rigs, row.families[0])
+                    const me = first.rigMeBonusPercent ?? 0
+                    const te = first.rigTeBonusPercent ?? 0
                     return (
                       <div
                         key={row.id}
@@ -161,27 +167,43 @@ export function ManufacturingRigFields({
                           alt=""
                         />
                         <span className="text-xs truncate">{row.label}</span>
-                        <select
-                          className={`${selectClass} w-full`}
-                          aria-label={`${row.label} efficiency`}
-                          value={tier}
-                          onChange={(e) => {
-                            const next = e.target.value as ManufacturingRigTier
-                            setFamilies(row.families, { meRig: next, teRig: next })
+                        <RigTierCombobox
+                          ariaLabel={`${row.label} efficiency`}
+                          size={size}
+                          selected={tier}
+                          selectedLabel={
+                            tier === 'custom'
+                              ? customRigPairClosedLabel(me, te)
+                              : manufacturingCombinedPreview(tier, security)
+                          }
+                          options={presetRigOptions((option) =>
+                            manufacturingCombinedPreview(option, security),
+                          )}
+                          seedDraft={seedPairRigDraft(tier, { a: me, b: te }, security, {
+                            a: 'me',
+                            b: 'te',
+                          })}
+                          customHint="Type custom ME% / TE%"
+                          onPick={(next) => setFamilies(row.families, { meRig: next, teRig: next })}
+                          onCommitDraft={(raw) => {
+                            const next = resolveTypedRigPair(raw, security, { a: 'me', b: 'te' })
+                            if (!next) return
+                            setFamilies(row.families, {
+                              meRig: next.tier,
+                              teRig: next.tier,
+                              rigMeBonusPercent: next.a,
+                              rigTeBonusPercent: next.b,
+                            })
                           }}
-                        >
-                          {FAMILY_TIERS.map((option) => (
-                            <option key={option} value={option}>
-                              {manufacturingCombinedPreview(option, security)}
-                            </option>
-                          ))}
-                        </select>
+                        />
                       </div>
                     )
                   }
 
                   const family = row.families[0]
                   const familyRow = familyTiers(rigs, family)
+                  const me = familyRow.rigMeBonusPercent ?? 0
+                  const te = familyRow.rigTeBonusPercent ?? 0
                   return (
                     <div
                       key={row.id}
@@ -196,38 +218,54 @@ export function ManufacturingRigFields({
                         alt=""
                       />
                       <span className="text-xs truncate">{row.label}</span>
-                      <select
-                        className={`${selectClass} w-full`}
-                        aria-label={`${manufacturingRigFamilyLabel(family)} ME`}
-                        value={familyRow.meRig}
-                        onChange={(e) =>
-                          setFamilies([family], {
-                            meRig: e.target.value as ManufacturingRigTier,
-                          })
+                      <RigTierCombobox
+                        ariaLabel={`${manufacturingRigFamilyLabel(family)} ME`}
+                        size={size}
+                        selected={familyRow.meRig}
+                        selectedLabel={
+                          familyRow.meRig === 'custom'
+                            ? customRigClosedLabel(me)
+                            : manufacturingRigPreview('me', familyRow.meRig, security)
                         }
-                      >
-                        {FAMILY_TIERS.map((option) => (
-                          <option key={option} value={option}>
-                            {manufacturingRigPreview('me', option, security)}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        className={`${selectClass} w-full`}
-                        aria-label={`${manufacturingRigFamilyLabel(family)} TE`}
-                        value={familyRow.teRig}
-                        onChange={(e) =>
+                        options={presetRigOptions((option) =>
+                          manufacturingRigPreview('me', option, security),
+                        )}
+                        seedDraft={seedSingleRigDraft(familyRow.meRig, me, 'me', security)}
+                        customHint="Type a custom ME %"
+                        onPick={(meRig) => setFamilies([family], { meRig })}
+                        onCommitDraft={(raw) => {
+                          const next = resolveTypedRigSingle(raw, 'me', security)
+                          if (!next) return
                           setFamilies([family], {
-                            teRig: e.target.value as ManufacturingRigTier,
+                            meRig: next.tier,
+                            rigMeBonusPercent: next.percent,
                           })
+                        }}
+                      />
+                      <RigTierCombobox
+                        ariaLabel={`${manufacturingRigFamilyLabel(family)} TE`}
+                        size={size}
+                        selected={familyRow.teRig}
+                        selectedLabel={
+                          familyRow.teRig === 'custom'
+                            ? customRigClosedLabel(te)
+                            : manufacturingRigPreview('te', familyRow.teRig, security)
                         }
-                      >
-                        {FAMILY_TIERS.map((option) => (
-                          <option key={option} value={option}>
-                            {manufacturingRigPreview('te', option, security)}
-                          </option>
-                        ))}
-                      </select>
+                        options={presetRigOptions((option) =>
+                          manufacturingRigPreview('te', option, security),
+                        )}
+                        seedDraft={seedSingleRigDraft(familyRow.teRig, te, 'te', security)}
+                        customHint="Type a custom TE %"
+                        onPick={(teRig) => setFamilies([family], { teRig })}
+                        onCommitDraft={(raw) => {
+                          const next = resolveTypedRigSingle(raw, 'te', security)
+                          if (!next) return
+                          setFamilies([family], {
+                            teRig: next.tier,
+                            rigTeBonusPercent: next.percent,
+                          })
+                        }}
+                      />
                     </div>
                   )
                 })}

@@ -94,12 +94,18 @@ export function catalogRigIconTypeId(
   family: string,
   size: 'm' | 'l' | 'xl' = 'm',
 ): number | undefined {
-  const match = catalog.rigs.find(
+  const matches = catalog.rigs.filter(
     (rig) =>
       rig.activity === activity &&
       rig.size === size &&
       rig.tier === 't1' &&
       (family === '' || rig.families.includes(family)),
   )
-  return match?.typeId
+  if (matches.length === 0) return undefined
+  matches.sort((a, b) => {
+    const familyDelta = a.families.length - b.families.length
+    if (familyDelta !== 0) return familyDelta
+    return Number(b.me > 0) - Number(a.me > 0)
+  })
+  return matches[0]?.typeId
 }

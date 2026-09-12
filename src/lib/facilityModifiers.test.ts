@@ -161,6 +161,71 @@ describe('facilityModifiers', () => {
     expect(mods.taxPercent).toBe(1)
   })
 
+  it('uses pasted Tatara custom ME/TE percents as-is', () => {
+    const settings = {
+      ...DEFAULT_SETTINGS,
+      reactionFacility: {
+        ...DEFAULT_SETTINGS.reactionFacility,
+        refineryType: 'tatara' as const,
+        reactionSystemSecurity: 0,
+        reactorEfficiencyRig: 'custom' as const,
+        familyModifiers: {
+          ...DEFAULT_SETTINGS.reactionFacility.familyModifiers,
+          composite: {
+            meRig: 'custom' as const,
+            teRig: 'custom' as const,
+            rigMeBonusPercent: 3.1,
+            rigTeBonusPercent: 18,
+            taxPercent: 0,
+          },
+        },
+      },
+    }
+    const detail = reactionFacilityDetail(settings, { reactionFamily: 'polymer' })
+    expect(detail.rigMeBonusPercent).toBeCloseTo(3.1, 5)
+    expect(detail.rigTeBonusPercent).toBeCloseTo(18, 5)
+  })
+
+  it('applies Athanor M-Set ME only to the matching reaction family', () => {
+    const settings = {
+      ...DEFAULT_SETTINGS,
+      reactionFacility: {
+        ...DEFAULT_SETTINGS.reactionFacility,
+        refineryType: 'athanor' as const,
+        reactionSystemSecurity: 1,
+        familyModifiers: {
+          composite: {
+            meRig: 't1' as const,
+            teRig: 'none' as const,
+            rigMeBonusPercent: 0,
+            rigTeBonusPercent: 0,
+            taxPercent: 0,
+          },
+          biochemical: {
+            meRig: 'none' as const,
+            teRig: 'none' as const,
+            rigMeBonusPercent: 0,
+            rigTeBonusPercent: 0,
+            taxPercent: 0,
+          },
+          hybrid: {
+            meRig: 'none' as const,
+            teRig: 'none' as const,
+            rigMeBonusPercent: 0,
+            rigTeBonusPercent: 0,
+            taxPercent: 0,
+          },
+        },
+      },
+    }
+    expect(
+      reactionFacilityDetail(settings, { reactionFamily: 'composite' }).rigMeBonusPercent,
+    ).toBe(2)
+    expect(
+      reactionFacilityDetail(settings, { reactionFamily: 'biochemical' }).rigMeBonusPercent,
+    ).toBe(0)
+  })
+
   it('uses per-family tax only for matching reaction type', () => {
     const settings = {
       ...DEFAULT_SETTINGS,
@@ -174,12 +239,8 @@ describe('facilityModifiers', () => {
         },
       },
     }
-    expect(
-      resolveReactionModifiers(settings, { reactionFamily: 'polymer' }).taxPercent,
-    ).toBe(3)
-    expect(
-      resolveReactionModifiers(settings, { reactionFamily: 'biochemical' }).taxPercent,
-    ).toBe(2)
+    expect(resolveReactionModifiers(settings, { reactionFamily: 'polymer' }).taxPercent).toBe(3)
+    expect(resolveReactionModifiers(settings, { reactionFamily: 'biochemical' }).taxPercent).toBe(2)
   })
 
   it('defaults reaction facility from manufacturing system', () => {

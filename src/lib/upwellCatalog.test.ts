@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   catalogRigBase,
+  catalogRigIconTypeId,
   refineryHullPreset,
   setUpwellCatalog,
   structureHullPreset,
@@ -96,5 +97,60 @@ describe('upwellCatalog hull presets', () => {
         { typeId: 37151, name: 'ignored', meBase: 0, teBase: 0, jobCostBase: 0 },
       ]).ammo,
     ).toEqual({ meRig: 'none', teRig: 't2' })
+  })
+
+  it('picks the family-specific ME reaction rig icon, not Composite for every family', () => {
+    setUpwellCatalog({
+      hulls: [],
+      rigs: [
+        {
+          typeId: 46484,
+          name: 'Standup M-Set Composite Reactor Time Efficiency I',
+          size: 'm',
+          tier: 't1',
+          activity: 'reaction',
+          families: ['composite'],
+          me: 0,
+          te: 20,
+          jobCost: 0,
+        },
+        {
+          typeId: 46486,
+          name: 'Standup M-Set Composite Reactor Material Efficiency I',
+          size: 'm',
+          tier: 't1',
+          activity: 'reaction',
+          families: ['composite'],
+          me: 2,
+          te: 0,
+          jobCost: 0,
+        },
+        {
+          typeId: 46494,
+          name: 'Standup M-Set Biochemical Reactor Material Efficiency I',
+          size: 'm',
+          tier: 't1',
+          activity: 'reaction',
+          families: ['biochemical'],
+          me: 2,
+          te: 0,
+          jobCost: 0,
+        },
+        {
+          typeId: 46496,
+          name: 'Standup L-Set Reactor Efficiency I',
+          size: 'l',
+          tier: 't1',
+          activity: 'reaction',
+          families: ['composite', 'biochemical', 'hybrid'],
+          me: 2,
+          te: 20,
+          jobCost: 0,
+        },
+      ],
+    })
+    expect(catalogRigIconTypeId('reaction', 'composite')).toBe(46486)
+    expect(catalogRigIconTypeId('reaction', 'biochemical')).toBe(46494)
+    expect(catalogRigIconTypeId('reaction', 'composite', 'l')).toBe(46496)
   })
 })

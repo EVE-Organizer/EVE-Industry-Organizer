@@ -1,11 +1,9 @@
 import { InfoTooltip } from '@/components/InfoTooltip'
 
-const ME_TOOLTIP =
-  'Material Efficiency (ME) rig fitted for this row. Lowers input materials. Pick None, T1, or T2 to match what is installed in-game.'
-const TE_TOOLTIP =
-  'Time Efficiency (TE) rig fitted for this row. Shortens job duration. Pick None, T1, or T2 to match what is installed in-game.'
+const ME_TOOLTIP = 'Material Efficiency (ME) rig. Pick T1/T2 or type the in-game tooltip percent.'
+const TE_TOOLTIP = 'Time Efficiency (TE) rig. Pick T1/T2 or type the in-game tooltip percent.'
 const EFFICIENCY_TOOLTIP =
-  'Combined ME and TE rig (L-Set). One fitted rig applies both material and time bonuses. Pick None, T1, or T2 to match what is installed in-game.'
+  'Combined ME and TE rig. Pick T1/T2 or type custom ME% / TE% from the in-game tooltip.'
 
 function HeaderCell({
   label,
@@ -49,12 +47,10 @@ export function RigEfficiencyHeader() {
   )
 }
 
-const COST_TOOLTIP =
-  'Cost optimization rig fitted for this row. Lowers science job fees (copy/invention cost index). Pick None, T1, or T2 to match what is installed in-game.'
-const LAB_TIME_TOOLTIP =
-  'Accelerator rig fitted for this row. Shortens copy or invention job duration. Pick None, T1, or T2 to match what is installed in-game.'
+const COST_TOOLTIP = 'Cost optimization rig. Pick T1/T2 or type the in-game tooltip percent.'
+const LAB_TIME_TOOLTIP = 'Accelerator rig. Pick T1/T2 or type the in-game tooltip percent.'
 const LAB_OPTIMIZATION_TOOLTIP =
-  'Combined cost and time optimization rig (L-Set or XL-Set). One fitted rig applies both bonuses. Pick None, T1, or T2 to match what is installed in-game.'
+  'Combined cost and time optimization rig. Pick T1/T2 or type custom cost% / time%.'
 
 /** Column labels above laboratory cost and time rig dropdowns (M-Set layout). */
 export function RigCostTimeHeaders() {
