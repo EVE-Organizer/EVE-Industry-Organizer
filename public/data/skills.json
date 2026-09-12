@@ -639,6 +639,20 @@
     "iconUrl": "https://images.evetech.net/types/13278/icon?size=32"
   },
   {
+    "skillId": 26253,
+    "name": "Armor Rigging",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 3
+      }
+    ],
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory",
+    "iconUrl": "https://images.evetech.net/types/26253/icon?size=32"
+  },
+  {
     "skillId": 20494,
     "name": "Armored Command",
     "rank": 2,
@@ -669,20 +683,6 @@
     "primaryAttribute": "charisma",
     "secondaryAttribute": "willpower",
     "iconUrl": "https://images.evetech.net/types/11569/icon?size=32"
-  },
-  {
-    "skillId": 26253,
-    "name": "Armor Rigging",
-    "rank": 3,
-    "prerequisites": [
-      {
-        "skillId": 26252,
-        "level": 3
-      }
-    ],
-    "primaryAttribute": "intelligence",
-    "secondaryAttribute": "memory",
-    "iconUrl": "https://images.evetech.net/types/26253/icon?size=32"
   },
   {
     "skillId": 12095,
@@ -1648,24 +1648,6 @@
     "iconUrl": "https://images.evetech.net/types/21802/icon?size=32"
   },
   {
-    "skillId": 62451,
-    "name": "Capital Shipboard Compression Technology",
-    "rank": 3,
-    "prerequisites": [
-      {
-        "skillId": 28585,
-        "level": 1
-      },
-      {
-        "skillId": 62450,
-        "level": 4
-      }
-    ],
-    "primaryAttribute": "memory",
-    "secondaryAttribute": "intelligence",
-    "iconUrl": "https://images.evetech.net/types/62451/icon?size=32"
-  },
-  {
     "skillId": 22242,
     "name": "Capital Ship Construction",
     "rank": 14,
@@ -1686,6 +1668,24 @@
     "primaryAttribute": "intelligence",
     "secondaryAttribute": "memory",
     "iconUrl": "https://images.evetech.net/types/22242/icon?size=32"
+  },
+  {
+    "skillId": 62451,
+    "name": "Capital Shipboard Compression Technology",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 28585,
+        "level": 1
+      },
+      {
+        "skillId": 62450,
+        "level": 4
+      }
+    ],
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "intelligence",
+    "iconUrl": "https://images.evetech.net/types/62451/icon?size=32"
   },
   {
     "skillId": 20533,
@@ -1918,24 +1918,6 @@
     "iconUrl": "https://images.evetech.net/types/3426/icon?size=32"
   },
   {
-    "skillId": 3326,
-    "name": "Cruise Missiles",
-    "rank": 5,
-    "prerequisites": [
-      {
-        "skillId": 3319,
-        "level": 5
-      },
-      {
-        "skillId": 3324,
-        "level": 3
-      }
-    ],
-    "primaryAttribute": "perception",
-    "secondaryAttribute": "willpower",
-    "iconUrl": "https://images.evetech.net/types/3326/icon?size=32"
-  },
-  {
     "skillId": 20212,
     "name": "Cruise Missile Specialization",
     "rank": 8,
@@ -1952,6 +1934,24 @@
     "primaryAttribute": "perception",
     "secondaryAttribute": "willpower",
     "iconUrl": "https://images.evetech.net/types/20212/icon?size=32"
+  },
+  {
+    "skillId": 3326,
+    "name": "Cruise Missiles",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 5
+      },
+      {
+        "skillId": 3324,
+        "level": 3
+      }
+    ],
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower",
+    "iconUrl": "https://images.evetech.net/types/3326/icon?size=32"
   },
   {
     "skillId": 3411,
@@ -2127,15 +2127,6 @@
     "iconUrl": "https://images.evetech.net/types/12305/icon?size=32"
   },
   {
-    "skillId": 3436,
-    "name": "Drones",
-    "rank": 1,
-    "prerequisites": [],
-    "primaryAttribute": "memory",
-    "secondaryAttribute": "perception",
-    "iconUrl": "https://images.evetech.net/types/3436/icon?size=32"
-  },
-  {
     "skillId": 23606,
     "name": "Drone Sharpshooting",
     "rank": 1,
@@ -2148,6 +2139,15 @@
     "primaryAttribute": "memory",
     "secondaryAttribute": "perception",
     "iconUrl": "https://images.evetech.net/types/23606/icon?size=32"
+  },
+  {
+    "skillId": 3436,
+    "name": "Drones",
+    "rank": 1,
+    "prerequisites": [],
+    "primaryAttribute": "memory",
+    "secondaryAttribute": "perception",
+    "iconUrl": "https://images.evetech.net/types/3436/icon?size=32"
   },
   {
     "skillId": 26255,
@@ -2293,6 +2293,20 @@
     "iconUrl": "https://images.evetech.net/types/26256/icon?size=32"
   },
   {
+    "skillId": 3427,
+    "name": "Electronic Warfare",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3426,
+        "level": 1
+      }
+    ],
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory",
+    "iconUrl": "https://images.evetech.net/types/3427/icon?size=32"
+  },
+  {
     "skillId": 3432,
     "name": "Electronics Upgrades",
     "rank": 2,
@@ -2309,20 +2323,6 @@
     "primaryAttribute": "intelligence",
     "secondaryAttribute": "memory",
     "iconUrl": "https://images.evetech.net/types/3432/icon?size=32"
-  },
-  {
-    "skillId": 3427,
-    "name": "Electronic Warfare",
-    "rank": 2,
-    "prerequisites": [
-      {
-        "skillId": 3426,
-        "level": 1
-      }
-    ],
-    "primaryAttribute": "intelligence",
-    "secondaryAttribute": "memory",
-    "iconUrl": "https://images.evetech.net/types/3427/icon?size=32"
   },
   {
     "skillId": 3424,
@@ -2992,24 +2992,6 @@
     "iconUrl": "https://images.evetech.net/types/16591/icon?size=32"
   },
   {
-    "skillId": 25719,
-    "name": "Heavy Assault Missiles",
-    "rank": 3,
-    "prerequisites": [
-      {
-        "skillId": 3319,
-        "level": 3
-      },
-      {
-        "skillId": 3321,
-        "level": 3
-      }
-    ],
-    "primaryAttribute": "perception",
-    "secondaryAttribute": "willpower",
-    "iconUrl": "https://images.evetech.net/types/25719/icon?size=32"
-  },
-  {
     "skillId": 25718,
     "name": "Heavy Assault Missile Specialization",
     "rank": 5,
@@ -3026,6 +3008,24 @@
     "primaryAttribute": "perception",
     "secondaryAttribute": "willpower",
     "iconUrl": "https://images.evetech.net/types/25718/icon?size=32"
+  },
+  {
+    "skillId": 25719,
+    "name": "Heavy Assault Missiles",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 3
+      },
+      {
+        "skillId": 3321,
+        "level": 3
+      }
+    ],
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower",
+    "iconUrl": "https://images.evetech.net/types/25719/icon?size=32"
   },
   {
     "skillId": 3441,
@@ -3064,24 +3064,6 @@
     "iconUrl": "https://images.evetech.net/types/28609/icon?size=32"
   },
   {
-    "skillId": 3324,
-    "name": "Heavy Missiles",
-    "rank": 3,
-    "prerequisites": [
-      {
-        "skillId": 3319,
-        "level": 3
-      },
-      {
-        "skillId": 3321,
-        "level": 3
-      }
-    ],
-    "primaryAttribute": "perception",
-    "secondaryAttribute": "willpower",
-    "iconUrl": "https://images.evetech.net/types/3324/icon?size=32"
-  },
-  {
     "skillId": 20211,
     "name": "Heavy Missile Specialization",
     "rank": 5,
@@ -3098,6 +3080,24 @@
     "primaryAttribute": "perception",
     "secondaryAttribute": "willpower",
     "iconUrl": "https://images.evetech.net/types/20211/icon?size=32"
+  },
+  {
+    "skillId": 3324,
+    "name": "Heavy Missiles",
+    "rank": 3,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 3
+      },
+      {
+        "skillId": 3321,
+        "level": 3
+      }
+    ],
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower",
+    "iconUrl": "https://images.evetech.net/types/3324/icon?size=32"
   },
   {
     "skillId": 11433,
@@ -3810,20 +3810,6 @@
     "iconUrl": "https://images.evetech.net/types/24241/icon?size=32"
   },
   {
-    "skillId": 3321,
-    "name": "Light Missiles",
-    "rank": 2,
-    "prerequisites": [
-      {
-        "skillId": 3319,
-        "level": 2
-      }
-    ],
-    "primaryAttribute": "perception",
-    "secondaryAttribute": "willpower",
-    "iconUrl": "https://images.evetech.net/types/3321/icon?size=32"
-  },
-  {
     "skillId": 20210,
     "name": "Light Missile Specialization",
     "rank": 3,
@@ -3840,6 +3826,20 @@
     "primaryAttribute": "perception",
     "secondaryAttribute": "willpower",
     "iconUrl": "https://images.evetech.net/types/20210/icon?size=32"
+  },
+  {
+    "skillId": 3321,
+    "name": "Light Missiles",
+    "rank": 2,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 2
+      }
+    ],
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower",
+    "iconUrl": "https://images.evetech.net/types/3321/icon?size=32"
   },
   {
     "skillId": 12096,
@@ -5348,20 +5348,6 @@
     "iconUrl": "https://images.evetech.net/types/32797/icon?size=32"
   },
   {
-    "skillId": 3320,
-    "name": "Rockets",
-    "rank": 1,
-    "prerequisites": [
-      {
-        "skillId": 3319,
-        "level": 1
-      }
-    ],
-    "primaryAttribute": "perception",
-    "secondaryAttribute": "willpower",
-    "iconUrl": "https://images.evetech.net/types/3320/icon?size=32"
-  },
-  {
     "skillId": 11449,
     "name": "Rocket Science",
     "rank": 5,
@@ -5397,6 +5383,20 @@
     "primaryAttribute": "perception",
     "secondaryAttribute": "willpower",
     "iconUrl": "https://images.evetech.net/types/20209/icon?size=32"
+  },
+  {
+    "skillId": 3320,
+    "name": "Rockets",
+    "rank": 1,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 1
+      }
+    ],
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower",
+    "iconUrl": "https://images.evetech.net/types/3320/icon?size=32"
   },
   {
     "skillId": 3440,
@@ -6091,24 +6091,6 @@
     "iconUrl": "https://images.evetech.net/types/19921/icon?size=32"
   },
   {
-    "skillId": 3325,
-    "name": "Torpedoes",
-    "rank": 4,
-    "prerequisites": [
-      {
-        "skillId": 3319,
-        "level": 4
-      },
-      {
-        "skillId": 3324,
-        "level": 3
-      }
-    ],
-    "primaryAttribute": "perception",
-    "secondaryAttribute": "willpower",
-    "iconUrl": "https://images.evetech.net/types/3325/icon?size=32"
-  },
-  {
     "skillId": 20213,
     "name": "Torpedo Specialization",
     "rank": 8,
@@ -6125,6 +6107,24 @@
     "primaryAttribute": "perception",
     "secondaryAttribute": "willpower",
     "iconUrl": "https://images.evetech.net/types/20213/icon?size=32"
+  },
+  {
+    "skillId": 3325,
+    "name": "Torpedoes",
+    "rank": 4,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 4
+      },
+      {
+        "skillId": 3324,
+        "level": 3
+      }
+    ],
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower",
+    "iconUrl": "https://images.evetech.net/types/3325/icon?size=32"
   },
   {
     "skillId": 3443,
@@ -6407,24 +6407,6 @@
     "iconUrl": "https://images.evetech.net/types/11574/icon?size=32"
   },
   {
-    "skillId": 32435,
-    "name": "XL Cruise Missiles",
-    "rank": 7,
-    "prerequisites": [
-      {
-        "skillId": 3319,
-        "level": 5
-      },
-      {
-        "skillId": 3326,
-        "level": 5
-      }
-    ],
-    "primaryAttribute": "perception",
-    "secondaryAttribute": "willpower",
-    "iconUrl": "https://images.evetech.net/types/32435/icon?size=32"
-  },
-  {
     "skillId": 41410,
     "name": "XL Cruise Missile Specialization",
     "rank": 10,
@@ -6443,8 +6425,8 @@
     "iconUrl": "https://images.evetech.net/types/41410/icon?size=32"
   },
   {
-    "skillId": 21668,
-    "name": "XL Torpedoes",
+    "skillId": 32435,
+    "name": "XL Cruise Missiles",
     "rank": 7,
     "prerequisites": [
       {
@@ -6452,13 +6434,13 @@
         "level": 5
       },
       {
-        "skillId": 3325,
+        "skillId": 3326,
         "level": 5
       }
     ],
     "primaryAttribute": "perception",
     "secondaryAttribute": "willpower",
-    "iconUrl": "https://images.evetech.net/types/21668/icon?size=32"
+    "iconUrl": "https://images.evetech.net/types/32435/icon?size=32"
   },
   {
     "skillId": 41409,
@@ -6477,6 +6459,24 @@
     "primaryAttribute": "perception",
     "secondaryAttribute": "willpower",
     "iconUrl": "https://images.evetech.net/types/41409/icon?size=32"
+  },
+  {
+    "skillId": 21668,
+    "name": "XL Torpedoes",
+    "rank": 7,
+    "prerequisites": [
+      {
+        "skillId": 3319,
+        "level": 5
+      },
+      {
+        "skillId": 3325,
+        "level": 5
+      }
+    ],
+    "primaryAttribute": "perception",
+    "secondaryAttribute": "willpower",
+    "iconUrl": "https://images.evetech.net/types/21668/icon?size=32"
   },
   {
     "skillId": 23124,
