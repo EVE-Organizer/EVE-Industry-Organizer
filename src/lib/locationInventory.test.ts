@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { aggregateAssetsAtLocation, toBuyQuantity } from '@/lib/locationInventory'
+import {
+  aggregateAssetsAtLocation,
+  buildItemLocationMap,
+  resolveFacilityId,
+  toBuyQuantity,
+} from '@/lib/locationInventory'
 import type { EsiAsset } from '@/services/character/characterAssetsService'
 
 function asset(partial: Partial<EsiAsset> & Pick<EsiAsset, 'type_id' | 'quantity'>): EsiAsset {
@@ -33,5 +38,22 @@ describe('locationInventory', () => {
     expect(toBuyQuantity(100, 40)).toBe(60)
     expect(toBuyQuantity(100, 120)).toBe(0)
     expect(toBuyQuantity(0, 10)).toBe(0)
+  })
+
+  it('walks blueprint container ids up to the parent structure', () => {
+    const citadelId = 1_000_000_000_001
+    const containerId = 123456789
+    const assets: EsiAsset[] = [
+      asset({
+        item_id: containerId,
+        type_id: 3,
+        quantity: 1,
+        is_singleton: true,
+        location_type: 'item',
+        location_id: citadelId,
+      }),
+    ]
+    const itemLocations = buildItemLocationMap(assets)
+    expect(resolveFacilityId(containerId, itemLocations)).toBe(citadelId)
   })
 })

@@ -1,18 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import {
+  findProductionLocation,
   inferOriginSystemId,
   makeProductionLocation,
   mergeProductionLocations,
+  playerManufacturingStructures,
   playerStructuresInRange,
 } from '@/lib/productionLocations'
 
-function structure(locationId: number, solarSystemId: number, name = `S${locationId}`) {
+function structure(
+  locationId: number,
+  solarSystemId: number,
+  name = `S${locationId}`,
+  source: 'corp_structure' | 'blueprint' | 'industry_job' | 'character_asset' = 'corp_structure',
+) {
   return makeProductionLocation({
     locationId,
     kind: 'structure',
     name,
     solarSystemId,
-    source: 'corp_structure',
+    source,
   })
 }
 
@@ -55,6 +62,25 @@ describe('playerStructuresInRange', () => {
   })
 })
 
+describe('playerManufacturingStructures', () => {
+  it('keeps blueprint and industry job structures only', () => {
+    const rows = playerManufacturingStructures([
+      station(60003760, 30000142),
+      structure(1, 10, 'Near yard', 'blueprint'),
+      structure(2, 99, 'Far yard', 'blueprint'),
+      structure(3, 10, 'Asset hangar', 'character_asset'),
+      structure(4, 10, 'Active job', 'industry_job'),
+      structure(5, 10, 'Empty corp', 'corp_structure'),
+    ])
+    expect(rows.map((r) => r.locationId).sort()).toEqual([1, 2, 4])
+  })
+
+  it('keeps far blueprint hangars without a jump filter', () => {
+    const far = structure(9, 99, 'T-ZWA1 - NVU Public Shipyard', 'blueprint')
+    expect(playerManufacturingStructures([far])).toEqual([far])
+  })
+})
+
 describe('inferOriginSystemId', () => {
   it('picks the system with the most player structures', () => {
     expect(
@@ -69,5 +95,50 @@ describe('mergeProductionLocations', () => {
     const copy = structure(1, 10, 'A')
     const b = structure(2, 11, 'B')
     expect(mergeProductionLocations([a], [copy, b])).toHaveLength(2)
+  })
+
+  it('prefers a real name over a placeholder', () => {
+    const placeholder = structure(1_000_000_000_001, 10, 'Structure 1000000000001', 'blueprint')
+    const named = makeProductionLocation({
+      locationId: 1_000_000_000_001,
+      kind: 'structure',
+      name: 'T-ZWA1 - NVU Public Shipyard',
+      solarSystemId: 10,
+      structureTypeId: 35827,
+      source: 'public_structure',
+    })
+    const merged = mergeProductionLocations([placeholder], [named])
+    expect(merged).toHaveLength(1)
+    expect(merged[0]?.name).toBe('T-ZWA1 - NVU Public Shipyard')
+  })
+
+  it('upgrades source to blueprint when merging asset and blueprint rows', () => {
+    const assetRow = structure(1, 10, 'Asset hangar', 'character_asset')
+    const blueprintRow = structure(1, 10, 'Asset hangar', 'blueprint')
+    const merged = mergeProductionLocations([assetRow], [blueprintRow])
+    expect(merged[0]?.source).toBe('blueprint')
+  })
+})
+
+describe('findProductionLocation', () => {
+  const citadel = makeProductionLocation({
+    locationId: 1_000_000_000_001,
+    kind: 'structure',
+    name: 'T-ZWA1 - NVU Public Shipyard',
+    solarSystemId: 10,
+    structureTypeId: 35827,
+    source: 'blueprint',
+  })
+
+  it('matches by preferred kind', () => {
+    expect(findProductionLocation([citadel], citadel.locationId, 'structure')).toBe(citadel)
+  })
+
+  it('matches when saved kind is wrong', () => {
+    expect(findProductionLocation([citadel], citadel.locationId, 'station')).toBe(citadel)
+  })
+
+  it('matches by location id when kind is omitted', () => {
+    expect(findProductionLocation([citadel], citadel.locationId, null)).toBe(citadel)
   })
 })

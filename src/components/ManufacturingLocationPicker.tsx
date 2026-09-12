@@ -106,14 +106,14 @@ export function ManufacturingLocationPicker({
   const configured = useAuthStore((s) => s.configured)
   const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
   const { hasAll, missing } = useAuthScopes(activeCharacterId)
-  const { locations, jumpsTo, isLoading, error } = usePlayerStructureLocations(
-    current.fallbackSystemId,
-    'manufacturing',
-  )
+  const { locations, personalLocations, jumpsTo, isLoading, isResolving, error } =
+    usePlayerStructureLocations(current.fallbackSystemId, 'manufacturing')
 
   const selectedLocation = useMemo(
-    () => findProductionLocation(locations, current.locationId, current.locationKind),
-    [locations, current.locationId, current.locationKind],
+    () =>
+      findProductionLocation(personalLocations, current.locationId, current.locationKind) ??
+      findProductionLocation(locations, current.locationId, current.locationKind),
+    [personalLocations, locations, current.locationId, current.locationKind],
   )
 
   const triggerStructureType = selectedLocation
@@ -121,7 +121,7 @@ export function ManufacturingLocationPicker({
     : current.structureType
 
   useEffect(() => {
-    if (current.locationId == null || isLoading) return
+    if (current.locationId == null || isLoading || isResolving) return
     if (selectedLocation) return
     if (activity === 'copy') {
       onChange({ copyLocationId: null, copyLocationKind: null })
@@ -130,7 +130,15 @@ export function ManufacturingLocationPicker({
     } else {
       onChange({ productionLocationId: null, productionLocationKind: null })
     }
-  }, [activity, activeCharacterId, current.locationId, isLoading, onChange, selectedLocation])
+  }, [
+    activity,
+    activeCharacterId,
+    current.locationId,
+    isLoading,
+    isResolving,
+    onChange,
+    selectedLocation,
+  ])
 
   // Keep build system + security aligned when location or SDE loads asynchronously.
   useEffect(() => {
@@ -267,7 +275,7 @@ export function ManufacturingLocationPicker({
       missing={missing}
       error={error}
       locationsHeading={`Player structures${locations.length > 0 ? ` · ${locations.length}` : ''}`}
-      emptyLocations="No structures within 5 jumps, and none holding this character's items."
+      emptyLocations="No structures holding this character's blueprints."
       errorFallback="Failed to load locations"
     >
       {showInventoryHint && activity === 'manufacturing' && selectedLocation ? (
