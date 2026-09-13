@@ -31,7 +31,7 @@ export interface SdeData {
 }
 
 /** Bump when public/data shape changes so React Query refetches cached SDE bundles. */
-export const SDE_DATA_VERSION = 3
+export const SDE_DATA_VERSION = 5
 
 async function fetchJson<T>(file: string): Promise<T> {
   const response = await fetch(publicDataUrl(file), { cache: 'no-store' })

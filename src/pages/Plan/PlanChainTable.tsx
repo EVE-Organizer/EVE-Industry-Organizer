@@ -1,7 +1,11 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import { EveImage } from '@/components/EveImage'
 import { Tooltip } from '@/components/Tooltip'
-import { PlanChainSection, PlanSectionExpandActions } from '@/pages/Plan/PlanChainSection'
+import {
+  PlanChainSection,
+  PlanCopyMultibuyButton,
+  PlanSectionExpandActions,
+} from '@/pages/Plan/PlanChainSection'
 import { PlanModeLockedMarket, PlanModeToggle } from '@/pages/Plan/PlanModeToggle'
 import { PlanProductIcon, PLAN_ROW_ICON_SIZE } from '@/components/plan/PlanProductIcon'
 import {
@@ -26,6 +30,7 @@ import {
   type PlanBuyTableRow,
 } from '@/pages/Plan/planBuyGroups'
 import { packagedBuyNodesFromPlan } from '@/pages/Plan/planPackagedBuy'
+import { eveMultibuyTextFromBuyNodes } from '@/lib/eveMultibuy'
 import { toBuyQuantity } from '@/lib/locationInventory'
 import {
   nodeHaulInVolumeM3,
@@ -979,6 +984,11 @@ function BuySection({
     return map
   }, [buyGroups, inventoryByTypeId, showInventory, typeVolumes])
 
+  const multibuyText = useMemo(
+    () => eveMultibuyTextFromBuyNodes(buyNodes, inventoryByTypeId, showInventory),
+    [buyNodes, inventoryByTypeId, showInventory],
+  )
+
   if (buyNodes.length === 0) return null
 
   function toggleCollapse(key: string) {
@@ -1018,7 +1028,12 @@ function BuySection({
       title="Buy from market"
       count={buyNodes.length}
       summary={`${formatGraphQuantity(totalUnits)} units · ${formatVolumeM3(totalVolumeM3)} · ${formatIsk(buyTotal)} total`}
-      actions={<PlanSectionExpandActions onExpandAll={expandAll} onCollapseAll={collapseAll} />}
+      actions={
+        <>
+          <PlanCopyMultibuyButton text={multibuyText} />
+          <PlanSectionExpandActions onExpandAll={expandAll} onCollapseAll={collapseAll} />
+        </>
+      }
     >
       <table className="table table-compact w-full">
         <thead>

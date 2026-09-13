@@ -45,8 +45,10 @@ export function buildAllTypeRecords(
   return types
     .filter((type) => {
       if (!includeTypeIds.has(type.typeID)) return false
+      if (!String(type.typeName ?? '').trim()) return false
       if (type.published === '1') return true
-      return unpublishedBlueprintIds.has(type.typeID)
+      // Unpublished BPOs and other recipe refs still need a name for plan/multibuy.
+      return unpublishedBlueprintIds.has(type.typeID) || onlyIds != null
     })
     .map((type) => {
       const typeId = num(type.typeID)

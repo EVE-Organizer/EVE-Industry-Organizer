@@ -42,10 +42,100 @@ describe('calc catalog filters', () => {
         ],
       },
     ]
-    const { ids } = collectRecipeTypeIds(blueprints)
-    expect([...ids].sort((a, b) => a - b)).toEqual([1, 34, 587, 1234])
+    const { ids } = collectRecipeTypeIds([
+      ...blueprints,
+      {
+        productTypeId: 191,
+        blueprintTypeId: 1911,
+        materials: [{ typeId: 189, quantity: 1 }],
+        invention: { t1BlueprintTypeId: 890, datacores: [{ typeId: 20423, quantity: 3 }] },
+      },
+    ])
+    expect([...ids].sort((a, b) => a - b)).toEqual([1, 34, 189, 191, 587, 890, 1234, 1911, 20423])
     const records = buildCalcTypeRecords(types, groupById, categoryById, blueprints)
-    expect(records.map((row) => row.name).sort()).toEqual(['Rifter', 'Tritanium'])
+    expect(records.map((row) => row.name).sort()).toEqual([
+      'Festival Launcher',
+      'Rifter',
+      'Tritanium',
+    ])
+  })
+
+  it('keeps Limited and unpublished recipe names for plan buy lines', () => {
+    const types = [
+      {
+        typeID: '23148',
+        typeName: 'Blood Raider Limited Ballistic Control',
+        groupID: '528',
+        published: '1',
+        volume: '1',
+      },
+      {
+        typeID: '27029',
+        typeName: 'Chalcopyrite',
+        groupID: '18',
+        published: '0',
+        volume: '0.01',
+      },
+    ]
+    const groups = [
+      { groupID: '528', groupName: 'Construction Components', categoryID: '17' },
+      { groupID: '18', groupName: 'Mineral', categoryID: '4' },
+    ]
+    const categories = [
+      { categoryID: '17', categoryName: 'Commodity' },
+      { categoryID: '4', categoryName: 'Material' },
+    ]
+    const groupById = new Map(groups.map((g) => [g.groupID, g]))
+    const categoryById = new Map(categories.map((c) => [c.categoryID, c.categoryName]))
+    const records = buildCalcTypeRecords(types, groupById, categoryById, [
+      {
+        productTypeId: 1,
+        blueprintTypeId: 2,
+        materials: [
+          { typeId: 23148, quantity: 1 },
+          { typeId: 27029, quantity: 10 },
+        ],
+      },
+    ])
+    expect(records.map((row) => row.name).sort()).toEqual([
+      'Blood Raider Limited Ballistic Control',
+      'Chalcopyrite',
+    ])
+  })
+
+  it('keeps invention datacore names used as plan buy lines', () => {
+    const types = [
+      { typeID: '191', typeName: 'Harpy', groupID: '25', published: '1', volume: '2700' },
+      {
+        typeID: '20423',
+        typeName: 'Datacore - Amarrian Starship Engineering',
+        groupID: '333',
+        published: '1',
+        volume: '0.01',
+      },
+    ]
+    const groups = [
+      { groupID: '25', groupName: 'Assault Frigate', categoryID: '6' },
+      { groupID: '333', groupName: 'Datacores', categoryID: '17' },
+    ]
+    const categories = [
+      { categoryID: '6', categoryName: 'Ship' },
+      { categoryID: '17', categoryName: 'Commodity' },
+    ]
+    const groupById = new Map(groups.map((g) => [g.groupID, g]))
+    const categoryById = new Map(categories.map((c) => [c.categoryID, c.categoryName]))
+    const records = buildCalcTypeRecords(types, groupById, categoryById, [
+      {
+        productTypeId: 191,
+        blueprintTypeId: 1911,
+        materials: [],
+        invention: { datacores: [{ typeId: 20423, quantity: 3 }] },
+      },
+    ])
+    expect(records.map((row) => row.name).sort()).toEqual([
+      'Datacore - Amarrian Starship Engineering',
+      'Harpy',
+    ])
   })
 })
 

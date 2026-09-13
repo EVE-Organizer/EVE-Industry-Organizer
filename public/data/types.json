@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-12T08:14:45.221Z",
+  "generatedAt": "2026-09-13T06:39:58.367Z",
   "types": [
     {
       "typeId": 18,
@@ -27005,6 +27005,30 @@
       "bpIconUrl": "https://images.evetech.net/types/20138/bp?size=32"
     },
     {
+      "typeId": 20171,
+      "name": "Datacore - Hydromagnetic Physics",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of hydromagnetic physics.",
+      "iconUrl": "https://images.evetech.net/types/20171/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20171/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20171/bp?size=32"
+    },
+    {
+      "typeId": 20172,
+      "name": "Datacore - Minmatar Starship Engineering",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of Matari starship engineering.",
+      "iconUrl": "https://images.evetech.net/types/20172/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20172/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20172/bp?size=32"
+    },
+    {
       "typeId": 20175,
       "name": "Simple Reactor Array",
       "group": "Mobile Reactor",
@@ -27266,6 +27290,174 @@
       "iconUrl": "https://images.evetech.net/types/20354/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/20354/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/20354/bp?size=32"
+    },
+    {
+      "typeId": 20410,
+      "name": "Datacore - Gallentean Starship Engineering",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of Gallentean starship engineering.",
+      "iconUrl": "https://images.evetech.net/types/20410/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20410/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20410/bp?size=32"
+    },
+    {
+      "typeId": 20411,
+      "name": "Datacore - High Energy Physics",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of high energy physics.",
+      "iconUrl": "https://images.evetech.net/types/20411/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20411/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20411/bp?size=32"
+    },
+    {
+      "typeId": 20412,
+      "name": "Datacore - Plasma Physics",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of plasma physics.",
+      "iconUrl": "https://images.evetech.net/types/20412/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20412/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20412/bp?size=32"
+    },
+    {
+      "typeId": 20413,
+      "name": "Datacore - Laser Physics",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of laser physics.",
+      "iconUrl": "https://images.evetech.net/types/20413/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20413/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20413/bp?size=32"
+    },
+    {
+      "typeId": 20414,
+      "name": "Datacore - Quantum Physics",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of quantum physics.",
+      "iconUrl": "https://images.evetech.net/types/20414/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20414/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20414/bp?size=32"
+    },
+    {
+      "typeId": 20415,
+      "name": "Datacore - Molecular Engineering",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of molecular engineering.",
+      "iconUrl": "https://images.evetech.net/types/20415/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20415/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20415/bp?size=32"
+    },
+    {
+      "typeId": 20416,
+      "name": "Datacore - Nanite Engineering",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of nanite engineering.",
+      "iconUrl": "https://images.evetech.net/types/20416/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20416/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20416/bp?size=32"
+    },
+    {
+      "typeId": 20417,
+      "name": "Datacore - Electromagnetic Physics",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of electromagnetic physics.",
+      "iconUrl": "https://images.evetech.net/types/20417/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20417/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20417/bp?size=32"
+    },
+    {
+      "typeId": 20418,
+      "name": "Datacore - Electronic Engineering",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of electronic engineering.",
+      "iconUrl": "https://images.evetech.net/types/20418/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20418/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20418/bp?size=32"
+    },
+    {
+      "typeId": 20419,
+      "name": "Datacore - Graviton Physics",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of graviton physics.",
+      "iconUrl": "https://images.evetech.net/types/20419/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20419/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20419/bp?size=32"
+    },
+    {
+      "typeId": 20420,
+      "name": "Datacore - Rocket Science",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of rocket science.",
+      "iconUrl": "https://images.evetech.net/types/20420/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20420/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20420/bp?size=32"
+    },
+    {
+      "typeId": 20421,
+      "name": "Datacore - Amarrian Starship Engineering",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of Amarrian starship engineering.",
+      "iconUrl": "https://images.evetech.net/types/20421/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20421/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20421/bp?size=32"
+    },
+    {
+      "typeId": 20423,
+      "name": "Datacore - Nuclear Physics",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of nuclear physics.",
+      "iconUrl": "https://images.evetech.net/types/20423/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20423/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20423/bp?size=32"
+    },
+    {
+      "typeId": 20424,
+      "name": "Datacore - Mechanical Engineering",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of mechanical engineering.",
+      "iconUrl": "https://images.evetech.net/types/20424/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/20424/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/20424/bp?size=32"
     },
     {
       "typeId": 20444,
@@ -29069,6 +29261,28 @@
       "iconUrl": "https://images.evetech.net/types/21492/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/21492/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/21492/bp?size=32"
+    },
+    {
+      "typeId": 21493,
+      "name": "Limited Expanded 'Archiver' Cargo",
+      "group": "Expanded Cargohold",
+      "category": "Module",
+      "volume": 5,
+      "mass": 50,
+      "description": "Increases cargo hold capacity at the expense of maximum velocity and hull strength.",
+      "iconUrl": "https://images.evetech.net/types/21493/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/21493/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/21493/bp?size=32"
+    },
+    {
+      "typeId": 21494,
+      "name": "Limited Expanded 'Archiver' Cargo Blueprint",
+      "group": "Hull Mods Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/21494/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/21494/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/21494/bp?size=32"
     },
     {
       "typeId": 21496,
@@ -32175,6 +32389,17 @@
       "iconUrl": "https://images.evetech.net/types/23147/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/23147/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/23147/bp?size=32"
+    },
+    {
+      "typeId": 23148,
+      "name": "Blood Raider Limited Ballistic Control",
+      "group": "Artifacts and Prototypes",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "iconUrl": "https://images.evetech.net/types/23148/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/23148/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/23148/bp?size=32"
     },
     {
       "typeId": 23149,
@@ -37371,6 +37596,18 @@
       "bpIconUrl": "https://images.evetech.net/types/25862/bp?size=32"
     },
     {
+      "typeId": 25887,
+      "name": "Datacore - Caldari Starship Engineering",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of Caldari starship engineering.",
+      "iconUrl": "https://images.evetech.net/types/25887/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/25887/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/25887/bp?size=32"
+    },
+    {
       "typeId": 25888,
       "name": "Large Explosive Armor Reinforcer I",
       "group": "Rig Armor",
@@ -41067,6 +41304,17 @@
       "iconUrl": "https://images.evetech.net/types/26932/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/26932/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/26932/bp?size=32"
+    },
+    {
+      "typeId": 27029,
+      "name": "Chalcopyrite",
+      "group": "Mineral",
+      "category": "Material",
+      "volume": 0.01,
+      "description": "This mineral is of interest only to civilian and rookie pilot factory production.",
+      "iconUrl": "https://images.evetech.net/types/27029/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/27029/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/27029/bp?size=32"
     },
     {
       "typeId": 27038,
@@ -62051,6 +62299,40 @@
       "bpIconUrl": "https://images.evetech.net/types/33012/bp?size=32"
     },
     {
+      "typeId": 33017,
+      "name": "Deactivated Station Key Pass",
+      "group": "Special Edition Commodities",
+      "category": "Special Edition Assets",
+      "volume": 0.01,
+      "mass": 0.01,
+      "description": "At the end of YC114, station managers across New Eden were surprised and shocked by the accidental delivery of station key passes to large numbers of pilots due to an inventory error in the InterBus central database. With recall next to impossible, the recommendation of veteran station manager Scotty, now consulting with the SCC, was to simply send out a general deactivation order and replace the master key passes used by station staff. The mistakenly delivered passes are now nothing more than souvenirs of an odd but ultimately harmless incident.",
+      "iconUrl": "https://images.evetech.net/types/33017/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/33017/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/33017/bp?size=32"
+    },
+    {
+      "typeId": 33019,
+      "name": "Scotty the Docking Manager's Clone",
+      "group": "Special Edition Commodities",
+      "category": "Special Edition Assets",
+      "volume": 0.01,
+      "mass": 90,
+      "description": "How did you think he ran all those stations?",
+      "iconUrl": "https://images.evetech.net/types/33019/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/33019/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/33019/bp?size=32"
+    },
+    {
+      "typeId": 33067,
+      "name": "Deactivated Station Key Pass Blueprint",
+      "group": "Special Edition Commodity Blueprints",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/33067/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/33067/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/33067/bp?size=32"
+    },
+    {
       "typeId": 33076,
       "name": "Small Ancillary Armor Repairer",
       "group": "Ancillary Armor Repairer",
@@ -64426,6 +64708,28 @@
       "bpIconUrl": "https://images.evetech.net/types/33916/bp?size=32"
     },
     {
+      "typeId": 33981,
+      "name": "Limited Hyperspatial Accelerator",
+      "group": "Warp Accelerator",
+      "category": "Module",
+      "volume": 5,
+      "mass": 50,
+      "description": "This unit increases warp speed and acceleration.\n\nNo more than three Hyperspatial Accelerators can be fit to one ship.",
+      "iconUrl": "https://images.evetech.net/types/33981/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/33981/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/33981/bp?size=32"
+    },
+    {
+      "typeId": 33982,
+      "name": "Limited Hyperspatial Accelerator Blueprint",
+      "group": "Hull Mods Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/33982/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/33982/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/33982/bp?size=32"
+    },
+    {
       "typeId": 33983,
       "name": "Experimental Hyperspatial Accelerator",
       "group": "Warp Accelerator",
@@ -64468,6 +64772,28 @@
       "iconUrl": "https://images.evetech.net/types/33986/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/33986/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/33986/bp?size=32"
+    },
+    {
+      "typeId": 34122,
+      "name": "Limited Jump Drive Economizer",
+      "group": "Jump Drive Economizer",
+      "category": "Module",
+      "volume": 3500,
+      "mass": 50,
+      "description": "This unit decreases the isotope fuel requirements of starship jump drives.\n\nCan only be fitted to Jump Freighters and Rorquals.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.",
+      "iconUrl": "https://images.evetech.net/types/34122/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/34122/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/34122/bp?size=32"
+    },
+    {
+      "typeId": 34123,
+      "name": "Limited Jump Drive Economizer Blueprint",
+      "group": "Hull Mods Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/34123/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/34123/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/34123/bp?size=32"
     },
     {
       "typeId": 34124,
@@ -65045,6 +65371,18 @@
       "iconUrl": "https://images.evetech.net/types/34575/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/34575/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/34575/bp?size=32"
+    },
+    {
+      "typeId": 34590,
+      "name": "Victorieux Luxury Yacht",
+      "group": "Special Edition Yachts",
+      "category": "Ship",
+      "volume": 115000,
+      "mass": 1000000,
+      "description": "Developed for use by station governors and other well-connected members of the Intaki Syndicate, Victorieux-class Luxury Yachts combine opulent accommodations with state of the art cloaking and propulsion systems. The Victorieux enables comfortable and discreet travel for business or pleasure, from Poitot to Intaki and beyond.\n\nThe Syndicate has steadfastly refused to answer inquiries on how they obtained the technology necessary to enable simultaneous cloak and warp drive activation on this yacht.\n\nIn early YC117, Silphy en Diabel announced that the Syndicate would be sponsoring an invitational tournament and making limited run blueprints for the Victorieux available to all capsuleer supporters of the winning team.",
+      "iconUrl": "https://images.evetech.net/types/34590/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/34590/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/34590/bp?size=32"
     },
     {
       "typeId": 34591,
@@ -70439,6 +70777,18 @@
       "bpIconUrl": "https://images.evetech.net/types/41077/bp?size=32"
     },
     {
+      "typeId": 41078,
+      "name": "Limited Precise Triple Neutron Blaster Cannon",
+      "group": "Hybrid Weapon",
+      "category": "Module",
+      "volume": 4000,
+      "mass": 40000,
+      "description": "Three specialized high angle turrets fitted with neutron blaster cannons are designed for engaging sub-capital threats.\nNote: May only be fitted to capital class ships.\n\nRequires hybrid charge types: Antimatter, Iridium, Iron, Lead, Plutonium, Thorium, Tungsten, Uranium.",
+      "iconUrl": "https://images.evetech.net/types/41078/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/41078/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/41078/bp?size=32"
+    },
+    {
       "typeId": 41079,
       "name": "Shadow Serpentis Triple Neutron Blaster Cannon",
       "group": "Hybrid Weapon",
@@ -70537,6 +70887,16 @@
       "iconUrl": "https://images.evetech.net/types/41088/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/41088/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/41088/bp?size=32"
+    },
+    {
+      "typeId": 41089,
+      "name": "Limited Precise Triple Neutron Blaster Cannon Blueprint",
+      "group": "Hybrid Weapon Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/41089/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/41089/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/41089/bp?size=32"
     },
     {
       "typeId": 41090,
@@ -70939,6 +71299,18 @@
       "bpIconUrl": "https://images.evetech.net/types/41128/bp?size=32"
     },
     {
+      "typeId": 41129,
+      "name": "Limited Precise Ion Siege Blaster",
+      "group": "Hybrid Weapon",
+      "category": "Module",
+      "volume": 4000,
+      "mass": 40000,
+      "description": "One of the largest weapons currently in existence, this massive blaster is designed for extended sieges of stationary installations and other large targets.\nNote: May only be fitted to capital class ships.\n\nRequires hybrid charge types: Antimatter, Iridium, Iron, Lead, Plutonium, Thorium, Tungsten, Uranium.",
+      "iconUrl": "https://images.evetech.net/types/41129/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/41129/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/41129/bp?size=32"
+    },
+    {
       "typeId": 41130,
       "name": "Shadow Serpentis Ion Siege Blaster",
       "group": "Hybrid Weapon",
@@ -70979,6 +71351,16 @@
       "iconUrl": "https://images.evetech.net/types/41134/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/41134/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/41134/bp?size=32"
+    },
+    {
+      "typeId": 41135,
+      "name": "Limited Precise Ion Siege Blaster Blueprint",
+      "group": "Hybrid Weapon Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/41135/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/41135/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/41135/bp?size=32"
     },
     {
       "typeId": 41136,
@@ -86209,6 +86591,18 @@
       "bpIconUrl": "https://images.evetech.net/types/52255/bp?size=32"
     },
     {
+      "typeId": 52309,
+      "name": "Datacore - Triglavian Quantum Engineering",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is of Triglavian design and contains a vast amount of information pertaining to Triglavian approaches to quantum engineering. The device should be invaluable in reverse-engineering Triglavian designs and making breakthroughs in the invention of new technologies based on the precursor civilization's science.",
+      "iconUrl": "https://images.evetech.net/types/52309/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/52309/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/52309/bp?size=32"
+    },
+    {
       "typeId": 52310,
       "name": "Radiation Absorption Thruster",
       "group": "Construction Components",
@@ -94535,6 +94929,18 @@
       "bpIconUrl": "https://images.evetech.net/types/81049/bp?size=32"
     },
     {
+      "typeId": 81051,
+      "name": "Datacore - Upwell Starship Engineering",
+      "group": "Datacores",
+      "category": "Commodity",
+      "volume": 0.1,
+      "mass": 1,
+      "description": "This datacore is a veritable storehouse of information, containing a considerable portion of mankind's collected knowledge in the field of Upwell starship engineering.",
+      "iconUrl": "https://images.evetech.net/types/81051/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/81051/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/81051/bp?size=32"
+    },
+    {
       "typeId": 81054,
       "name": "Avalanche Blueprint",
       "group": "Freighter Blueprint",
@@ -101107,6 +101513,66 @@
       "iconUrl": "https://images.evetech.net/types/88267/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/88267/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/88267/bp?size=32"
+    },
+    {
+      "typeId": 88268,
+      "name": "Narrowband Emission Amplifier Blueprint",
+      "group": "Special Edition Commodity Blueprints",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/88268/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/88268/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/88268/bp?size=32"
+    },
+    {
+      "typeId": 88269,
+      "name": "Narrowband Emission Limiter Blueprint",
+      "group": "Special Edition Commodity Blueprints",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/88269/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/88269/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/88269/bp?size=32"
+    },
+    {
+      "typeId": 88270,
+      "name": "Midband Emission Amplifier Blueprint",
+      "group": "Special Edition Commodity Blueprints",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/88270/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/88270/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/88270/bp?size=32"
+    },
+    {
+      "typeId": 88271,
+      "name": "Midband Emission Limiter Blueprint",
+      "group": "Special Edition Commodity Blueprints",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/88271/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/88271/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/88271/bp?size=32"
+    },
+    {
+      "typeId": 88272,
+      "name": "Wideband Emission Amplifier Blueprint",
+      "group": "Special Edition Commodity Blueprints",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/88272/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/88272/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/88272/bp?size=32"
+    },
+    {
+      "typeId": 88273,
+      "name": "Wideband Emission Limiter Blueprint",
+      "group": "Special Edition Commodity Blueprints",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/88273/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/88273/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/88273/bp?size=32"
     },
     {
       "typeId": 88709,

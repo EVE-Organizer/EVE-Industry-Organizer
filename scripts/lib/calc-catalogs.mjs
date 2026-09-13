@@ -166,6 +166,8 @@ export function collectRecipeTypeIds(blueprints) {
       blueprintTypeIds.push(bp.blueprintTypeId)
     }
     for (const material of bp.materials ?? []) ids.add(material.typeId)
+    if (bp.invention?.t1BlueprintTypeId != null) ids.add(bp.invention.t1BlueprintTypeId)
+    for (const datacore of bp.invention?.datacores ?? []) ids.add(datacore.typeId)
   }
   return { ids, blueprintTypeIds }
 }
@@ -275,9 +277,11 @@ export function buildSkillRecords(types, groups, typeAttributes, options = {}) {
 
 export function buildCalcTypeRecords(types, groupById, categoryById, blueprints) {
   const { ids, blueprintTypeIds } = collectRecipeTypeIds(blueprints)
+  // Keep every recipe type that has an SDE name, including Limited / unpublished
+  // inputs so plan buy lines and Multibuy can copy real names.
   return buildAllTypeRecords(types, groupById, categoryById, blueprintTypeIds, {
     onlyIds: ids,
-  }).filter((row) => !isExcludedCatalogText(row.name, row.group, row.category))
+  })
 }
 
 function hullKind(groupName) {

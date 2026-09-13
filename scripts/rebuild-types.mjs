@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Rebuild public/data/types.json from SDE CSVs (includes item descriptions).
- * Materials + products from published manufacturing/reaction blueprints only.
+ * Materials, products, T1 invention BPOs, and datacores from industry blueprints.
+ * Includes Limited / unpublished recipe types when the SDE still has a name.
  * Does not touch market.json. Run rebuild-market for prices.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'fs'

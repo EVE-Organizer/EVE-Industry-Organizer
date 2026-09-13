@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
+import { Tooltip } from '@/components/Tooltip'
 
 export type PlanChainSectionTone = 'manufacture' | 'buy' | 'info'
 
@@ -43,10 +44,8 @@ export function PlanChainSection({
         <div className="plan-chain-embedded__header">
           <h3 className="plan-chain-embedded__title">{title}</h3>
           <span className={`badge badge-xs ${style.badge}`}>{count}</span>
-          {summary ? (
-            <p className="plan-chain-embedded__summary tabular-nums">{summary}</p>
-          ) : null}
-          {actions ? <div className="flex items-center gap-1 ml-auto">{actions}</div> : null}
+          {summary ? <p className="plan-chain-embedded__summary tabular-nums">{summary}</p> : null}
+          {actions ? <div className="flex items-center gap-2 ml-auto">{actions}</div> : null}
         </div>
         <div className="overflow-x-auto">{children}</div>
       </section>
@@ -61,7 +60,7 @@ export function PlanChainSection({
         {summary ? (
           <p className="text-[11px] opacity-55 tabular-nums leading-none">{summary}</p>
         ) : null}
-        {actions ? <div className="flex items-center gap-1 ml-auto">{actions}</div> : null}
+        {actions ? <div className="flex items-center gap-2 ml-auto">{actions}</div> : null}
       </div>
       <div className="overflow-x-auto px-2 py-1">{children}</div>
     </section>
@@ -84,5 +83,59 @@ export function PlanSectionExpandActions({
         Collapse all
       </button>
     </>
+  )
+}
+
+function CopyIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M6.25 5.75h5.5a1.25 1.25 0 0 1 1.25 1.25v5.5a1.25 1.25 0 0 1-1.25 1.25h-5.5A1.25 1.25 0 0 1 5 12.5v-5.5a1.25 1.25 0 0 1 1.25-1.25Z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M3.75 10.25V4.75A1.25 1.25 0 0 1 5 3.5h5.5"
+      />
+    </svg>
+  )
+}
+
+export function PlanCopyMultibuyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+
+  async function copy() {
+    if (!text) return
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopied(false)
+    }
+  }
+
+  const label = copied ? 'Copied' : 'Copy multibuy'
+  const hint = text ? 'Copy To buy lines for in-game Multibuy (Ctrl+V)' : 'Nothing left to buy'
+
+  return (
+    <Tooltip text={copied ? 'Copied' : hint} placement="top">
+      <button
+        type="button"
+        className={`btn btn-sm gap-1.5 font-semibold shadow-sm ${
+          copied ? 'btn-success' : 'btn-warning'
+        }`}
+        disabled={!text}
+        aria-label={copied ? 'Multibuy list copied' : hint}
+        onClick={() => void copy()}
+      >
+        <CopyIcon className="size-3.5 shrink-0" />
+        {label}
+      </button>
+    </Tooltip>
   )
 }
