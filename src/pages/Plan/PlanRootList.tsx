@@ -636,7 +636,7 @@ export function PlanRootList({
                       )}
                     </td>
                     <td className="plan-jobs-table__duration-col" onClick={stopRowToggle}>
-                      {readOnly || !onChange ? (
+                      {readOnly || !onChange || (overallMode && !row.isRoot) ? (
                         <span className="tabular-nums text-sm whitespace-nowrap">
                           {formatDurationHms(rowDurationHours(row) * 3600)}
                         </span>

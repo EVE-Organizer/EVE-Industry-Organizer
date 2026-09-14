@@ -314,38 +314,7 @@ describe('fitPlanToRootReadyDeadlines', () => {
     expect(roots[0]!.runs).toBe(root.runs)
   })
 
-  it('keeps a shared sub-build pin when another root still needs it', () => {
-    const late: PlanRootEntry = {
-      id: 'late',
-      productTypeId: 100,
-      runs: 1000,
-      productionDurationHours: 168,
-    }
-    const onTime: PlanRootEntry = {
-      id: 'ok',
-      productTypeId: 300,
-      runs: 80,
-      productionDurationHours: 20,
-    }
-    const { nodeOverrides } = fitPlanToRootReadyDeadlines({
-      roots: [late, onTime],
-      targets: [
-        { rootId: 'late', deadlineHours: 168 },
-        { rootId: 'ok', deadlineHours: 168 },
-      ],
-      readyHoursByProductId: new Map([
-        [100, 2063],
-        [300, 20],
-      ]),
-      nodes,
-      nodeOverrides: { 200: { runs: 500 } },
-      settings: DEFAULT_SETTINGS,
-      getBlueprint: (id) => bps.get(id),
-    })
-    expect(nodeOverrides[200]!.runs).toBe(500)
-  })
-
-  it('shrinks an unshared sub-build pin with the overrunning root', () => {
+  it('drops sub-build run pins so children follow demand after a root shrink', () => {
     const late: PlanRootEntry = {
       id: 'late',
       productTypeId: 100,
@@ -357,11 +326,12 @@ describe('fitPlanToRootReadyDeadlines', () => {
       targets: [{ rootId: 'late', deadlineHours: 168 }],
       readyHoursByProductId: new Map([[100, 2063]]),
       nodes,
-      nodeOverrides: { 200: { runs: 500 } },
+      nodeOverrides: { 200: { runs: 1, me: 10 } },
       settings: DEFAULT_SETTINGS,
       getBlueprint: (id) => bps.get(id),
     })
-    expect(nodeOverrides[200]!.runs).toBe(Math.floor(500 * (168 / 2063)))
+    expect(nodeOverrides[200]?.runs).toBeUndefined()
+    expect(nodeOverrides[200]?.me).toBe(10)
   })
 })
 

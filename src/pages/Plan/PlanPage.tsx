@@ -1351,6 +1351,13 @@ export function PlanPage() {
 
                         const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
                         if (!node) return
+                        if (
+                          template.durationMode === 'overall' &&
+                          patch.productionDurationHours != null &&
+                          patch.runs == null
+                        ) {
+                          return
+                        }
                         const bp = getBlueprintForProduct(blueprints, productTypeId)
                         const runs = resolveRunsFromPatch(node.runs, patch, bp, storeSettings)
 

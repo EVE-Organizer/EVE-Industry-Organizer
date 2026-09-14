@@ -151,6 +151,24 @@ export function descendantProductIds(
   return out
 }
 
+/** Drop persisted run pins on non-root builds so expand recomputes from parent demand. */
+export function stripSubBuildRunPins(
+  nodeOverrides: Record<number, PlanNodeOverride>,
+  nodes: Array<Pick<PlanNode, 'productTypeId' | 'isRoot'>>,
+): Record<number, PlanNodeOverride> {
+  const next = { ...nodeOverrides }
+  for (const [id, override] of Object.entries(next)) {
+    if (override.runs == null) continue
+    const productTypeId = Number(id)
+    const node = nodes.find((n) => n.productTypeId === productTypeId)
+    if (node?.isRoot) continue
+    const { runs: _runs, ...rest } = override
+    if (Object.keys(rest).length === 0) delete next[productTypeId]
+    else next[productTypeId] = rest
+  }
+  return next
+}
+
 /** Fit each targeted root so that product is ready by its own deadline. Runs never grow. */
 export function fitPlanToRootReadyDeadlines(input: {
   roots: PlanRootEntry[]
@@ -165,16 +183,12 @@ export function fitPlanToRootReadyDeadlines(input: {
   if (targets.length === 0) return { roots, nodeOverrides: input.nodeOverrides }
 
   const deadlineByRootId = new Map(targets.map((t) => [t.rootId, t.deadlineHours]))
-  const ratioByRootId = new Map<string, number>()
-  const descendantsByRootId = new Map<string, Set<number>>()
 
   const nextRoots = roots.map((root) => {
     const deadlineHours = deadlineByRootId.get(root.id)
     if (deadlineHours == null || deadlineHours <= 0) return root
-    descendantsByRootId.set(root.id, descendantProductIds(root.productTypeId, nodes))
     const readyHours = readyHoursByProductId.get(root.productTypeId) ?? 0
     const runs = scaleRunsToSlotDeadline(root.runs, readyHours, deadlineHours)
-    ratioByRootId.set(root.id, runs / Math.max(1, root.runs))
     if (runs === root.runs) return root
     return applyRootEntryPatch(
       root,
@@ -185,26 +199,9 @@ export function fitPlanToRootReadyDeadlines(input: {
     )
   })
 
-  const nodeOverrides = { ...input.nodeOverrides }
-  for (const [id, override] of Object.entries(nodeOverrides)) {
-    if (override.runs == null) continue
-    const productTypeId = Number(id)
-    const node = nodes.find((n) => n.productTypeId === productTypeId)
-    if (!node || node.isRoot || node.mode !== 'build') continue
-
-    let seen = false
-    let maxRatio = 0
-    for (const [rootId, descendants] of descendantsByRootId) {
-      if (!descendants.has(productTypeId)) continue
-      seen = true
-      maxRatio = Math.max(maxRatio, ratioByRootId.get(rootId) ?? 1)
-    }
-    if (!seen) continue
-    // ponytail: shared pins keep the least-shrink ratio so another root is not starved
-    const runs = Math.max(1, Math.floor(override.runs * maxRatio))
-    if (runs === override.runs) continue
-    nodeOverrides[productTypeId] = { ...override, runs }
-  }
+  // Overall shrinks roots; sub-builds must follow demand. Leftover production pins
+  // (set-all job time) would otherwise scale to 1 and freeze the chain.
+  const nodeOverrides = stripSubBuildRunPins(input.nodeOverrides, nodes)
 
   return { roots: nextRoots, nodeOverrides }
 }
