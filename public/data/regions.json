@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T09:23:23.839Z",
+  "generatedAt": "2026-09-15T09:04:13.991Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -1094,9 +1094,9 @@
       "regionId": 10000002,
       "name": "The Forge",
       "securityClass": "highsec",
-      "buildSystemId": 30000122,
-      "buildSystemName": "Mahtista",
-      "buildSystemSecurity": 0.658238,
+      "buildSystemId": 30000183,
+      "buildSystemName": "Nuken",
+      "buildSystemSecurity": 0.761306,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30000142
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.03,
+      "costIndex": 0.0298,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
