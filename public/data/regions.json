@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-18T08:36:30.541Z",
+  "generatedAt": "2026-09-19T08:23:29.682Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -269,12 +269,12 @@
       "regionId": 10000007,
       "name": "Cache",
       "securityClass": "nullsec",
-      "buildSystemId": 30000613,
-      "buildSystemName": "D-6H64",
-      "buildSystemSecurity": -0.063389,
+      "buildSystemId": 30000618,
+      "buildSystemName": "Q-UEN6",
+      "buildSystemSecurity": -0.055487,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30000613
+      "marketSystemId": 30000618
     },
     {
       "regionId": 10000014,
@@ -1149,9 +1149,9 @@
       "regionId": 10000003,
       "name": "Vale of the Silent",
       "securityClass": "nullsec",
-      "buildSystemId": 30000315,
-      "buildSystemName": "WMBZ-U",
-      "buildSystemSecurity": -0.086599,
+      "buildSystemId": 30000288,
+      "buildSystemName": "1W-0KS",
+      "buildSystemSecurity": -0.102556,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30000240
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.03,
+      "costIndex": 0.0304,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
