@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T09:26:22.442Z",
+  "generatedAt": "2026-09-22T08:55:04.563Z",
   "types": [
     {
       "typeId": 18,
@@ -22371,7 +22371,7 @@
       "group": "Ice Product",
       "category": "Material",
       "volume": 0.4,
-      "description": "Dideuterium oxide. Water with significant nuclear properties which make it extremely effective as a neutron moderator in various types of power reactors. One of the materials required to keep Control Towers online.\n\nMay be obtained by reprocessing the following ice ores:\n\n1.0 security status solar system or lower:\nBlue Ice\nClear Icicle\nGlacial Mass\nWhite Glaze\n\n0.3 security status solar system or lower:\nGlare Crust\n\n0.1 security status solar system or lower:\nDark Glitter\n\n0.0 security status solar system or lower:\nEnriched Clear Icicle\nGelidus\nKrystallos\nPristine White Glaze\nSmooth Glacial Mass\nThick Blue Ice",
+      "description": "Dideuterium oxide. Water with significant nuclear properties which make it extremely effective as a neutron moderator in various types of power reactors. One of the materials required to keep Control Towers online.\n\nMay be obtained by reprocessing the following ice ores:\n\n1.0 security status solar system or lower:\nBlue Ice\nClear Icicle\nGlacial Mass\nWhite Glaze\n\n0.4 security status solar system or lower:\nGlare Crust\n\n0.1 security status solar system or lower:\nDark Glitter\n\n0.0 security status solar system or lower:\nEnriched Clear Icicle\nGelidus\nKrystallos\nPristine White Glaze\nSmooth Glacial Mass\nThick Blue Ice",
       "iconUrl": "https://images.evetech.net/types/16272/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/16272/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/16272/bp?size=32"
@@ -22382,7 +22382,7 @@
       "group": "Ice Product",
       "category": "Material",
       "volume": 0.4,
-      "description": "Liquid Ozone is used as a cleaning and disinfectant substance, and plays a vital role in ensuring the smooth day-to-day operation of a starbase. One of the materials required to keep Control Towers online.\n\nMay be obtained by reprocessing the following ice ores:\n\n1.0 security status solar system or lower:\nBlue Ice\nClear Icicle\nGlacial Mass\nWhite Glaze\n\n0.3 security status solar system or lower:\nGlare Crust\n\n0.1 security status solar system or lower:\nDark Glitter\n\n0.0 security status solar system or lower:\nEnriched Clear Icicle\nGelidus\nKrystallos\nPristine White Glaze\nSmooth Glacial Mass\nThick Blue Ice",
+      "description": "Liquid Ozone is used as a cleaning and disinfectant substance, and plays a vital role in ensuring the smooth day-to-day operation of a starbase. One of the materials required to keep Control Towers online.\n\nMay be obtained by reprocessing the following ice ores:\n\n1.0 security status solar system or lower:\nBlue Ice\nClear Icicle\nGlacial Mass\nWhite Glaze\n\n0.4 security status solar system or lower:\nGlare Crust\n\n0.1 security status solar system or lower:\nDark Glitter\n\n0.0 security status solar system or lower:\nEnriched Clear Icicle\nGelidus\nKrystallos\nPristine White Glaze\nSmooth Glacial Mass\nThick Blue Ice",
       "iconUrl": "https://images.evetech.net/types/16273/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/16273/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/16273/bp?size=32"
@@ -22404,7 +22404,7 @@
       "group": "Ice Product",
       "category": "Material",
       "volume": 3,
-      "description": "An unstable compound of strontium molecules encased in the crystal structure of water. When fed to a Control Tower's force field generator, these clathrates bond with the molecules already in place in the field to create a nigh-invulnerable barrier of energy. A necessary ingredient for Control Towers to go into reinforced mode.\n\nMay be obtained by reprocessing the following ice ores:\n\n1.0 security status solar system or lower:\nBlue Ice\nClear Icicle\nGlacial Mass\nWhite Glaze\n\n0.3 security status solar system or lower:\nGlare Crust\n\n0.1 security status solar system or lower:\nDark Glitter\n\n0.0 security status solar system or lower:\nEnriched Clear Icicle\nGelidus\nKrystallos\nPristine White Glaze\nSmooth Glacial Mass\nThick Blue Ice",
+      "description": "An unstable compound of strontium molecules encased in the crystal structure of water. When fed to a Control Tower's force field generator, these clathrates bond with the molecules already in place in the field to create a nigh-invulnerable barrier of energy. A necessary ingredient for Control Towers to go into reinforced mode.\n\nMay be obtained by reprocessing the following ice ores:\n\n1.0 security status solar system or lower:\nBlue Ice\nClear Icicle\nGlacial Mass\nWhite Glaze\n\n0.4 security status solar system or lower:\nGlare Crust\n\n0.1 security status solar system or lower:\nDark Glitter\n\n0.0 security status solar system or lower:\nEnriched Clear Icicle\nGelidus\nKrystallos\nPristine White Glaze\nSmooth Glacial Mass\nThick Blue Ice",
       "iconUrl": "https://images.evetech.net/types/16275/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/16275/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/16275/bp?size=32"

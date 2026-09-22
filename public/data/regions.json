@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T09:25:40.319Z",
+  "generatedAt": "2026-09-22T08:54:10.322Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -269,12 +269,12 @@
       "regionId": 10000007,
       "name": "Cache",
       "securityClass": "nullsec",
-      "buildSystemId": 30000618,
-      "buildSystemName": "Q-UEN6",
-      "buildSystemSecurity": -0.055487,
+      "buildSystemId": 30000613,
+      "buildSystemName": "D-6H64",
+      "buildSystemSecurity": -0.063389,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30000618
+      "marketSystemId": 30000613
     },
     {
       "regionId": 10000014,
@@ -467,9 +467,9 @@
       "regionId": 10000043,
       "name": "Domain",
       "securityClass": "highsec",
-      "buildSystemId": 30002190,
-      "buildSystemName": "Mabnen",
-      "buildSystemSecurity": 0.940368,
+      "buildSystemId": 30003549,
+      "buildSystemName": "Lashkai",
+      "buildSystemSecurity": 0.917045,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30002187
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0304,
+      "costIndex": 0.0295,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
