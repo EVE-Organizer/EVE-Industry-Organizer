@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T08:55:04.563Z",
+  "generatedAt": "2026-09-23T08:57:33.471Z",
   "blueprints": [
     {
       "blueprintTypeId": 879,
@@ -195065,7 +195065,7 @@
         },
         {
           "typeId": 52312,
-          "quantity": 6666
+          "quantity": 4800
         },
         {
           "typeId": 52313,
