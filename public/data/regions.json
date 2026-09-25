@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-24T08:51:58.606Z",
+  "generatedAt": "2026-09-25T09:12:38.220Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -797,12 +797,12 @@
       "regionId": 10000065,
       "name": "Kor-Azor",
       "securityClass": "highsec",
-      "buildSystemId": 30005046,
-      "buildSystemName": "Jinkah",
-      "buildSystemSecurity": 0.847549,
+      "buildSystemId": 30005043,
+      "buildSystemName": "Nakregde",
+      "buildSystemSecurity": 0.830615,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30005046
+      "marketSystemId": 30005043
     },
     {
       "regionId": 10000016,
