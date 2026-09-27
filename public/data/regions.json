@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-26T08:56:12.524Z",
+  "generatedAt": "2026-09-27T09:39:42.631Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -1116,12 +1116,12 @@
       "regionId": 10000018,
       "name": "The Spire",
       "securityClass": "nullsec",
-      "buildSystemId": 30001584,
-      "buildSystemName": "XR-ZL7",
-      "buildSystemSecurity": -0.084715,
+      "buildSystemId": 30001582,
+      "buildSystemName": "Z19-B8",
+      "buildSystemSecurity": -0.072119,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30001584
+      "marketSystemId": 30001582
     },
     {
       "regionId": 10000010,
@@ -1171,12 +1171,12 @@
       "regionId": 10000068,
       "name": "Verge Vendor",
       "securityClass": "highsec",
-      "buildSystemId": 30005314,
-      "buildSystemName": "Theruesse",
-      "buildSystemSecurity": 0.879221,
+      "buildSystemId": 30005303,
+      "buildSystemName": "Merolles",
+      "buildSystemSecurity": 0.884628,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30005314
+      "marketSystemId": 30005303
     },
     {
       "regionId": 14000001,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.028,
+      "costIndex": 0.0289,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
