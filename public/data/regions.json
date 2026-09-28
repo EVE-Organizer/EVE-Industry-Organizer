@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T09:39:42.631Z",
+  "generatedAt": "2026-09-28T10:18:57.044Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -720,12 +720,12 @@
       "regionId": 10000025,
       "name": "Immensea",
       "securityClass": "nullsec",
-      "buildSystemId": 30002106,
-      "buildSystemName": "PPFB-U",
-      "buildSystemSecurity": -0.074166,
+      "buildSystemId": 30002152,
+      "buildSystemName": "F76-8Q",
+      "buildSystemSecurity": -0.060216,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0014,
-      "marketSystemId": 30002106
+      "reactionCostIndex": 0.0334,
+      "marketSystemId": 30002152
     },
     {
       "regionId": 10000031,
@@ -995,9 +995,9 @@
       "regionId": 10000032,
       "name": "Sinq Laison",
       "securityClass": "highsec",
-      "buildSystemId": 30002712,
-      "buildSystemName": "Alillere",
-      "buildSystemSecurity": 0.847828,
+      "buildSystemId": 30002639,
+      "buildSystemName": "Adreland",
+      "buildSystemSecurity": 0.872502,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30002659
