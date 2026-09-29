@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-28T10:18:57.044Z",
+  "generatedAt": "2026-09-29T10:15:08.559Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -724,7 +724,7 @@
       "buildSystemName": "F76-8Q",
       "buildSystemSecurity": -0.060216,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0334,
+      "reactionCostIndex": 0.0337,
       "marketSystemId": 30002152
     },
     {
@@ -1116,12 +1116,12 @@
       "regionId": 10000018,
       "name": "The Spire",
       "securityClass": "nullsec",
-      "buildSystemId": 30001582,
-      "buildSystemName": "Z19-B8",
-      "buildSystemSecurity": -0.072119,
+      "buildSystemId": 30001584,
+      "buildSystemName": "XR-ZL7",
+      "buildSystemSecurity": -0.084715,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30001582
+      "marketSystemId": 30001584
     },
     {
       "regionId": 10000010,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0289,
+      "costIndex": 0.0292,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
