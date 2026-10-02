@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T10:34:44.347Z",
+  "generatedAt": "2026-10-02T10:09:40.215Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -724,7 +724,7 @@
       "buildSystemName": "F76-8Q",
       "buildSystemSecurity": -0.060216,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0338,
+      "reactionCostIndex": 0.0336,
       "marketSystemId": 30002152
     },
     {
