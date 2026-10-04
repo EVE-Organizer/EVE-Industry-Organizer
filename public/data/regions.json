@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T09:31:39.002Z",
+  "generatedAt": "2026-10-04T10:18:39.155Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0014,
+      "reactionCostIndex": 0.019,
       "marketSystemId": 30004552
     },
     {
@@ -1072,12 +1072,12 @@
       "regionId": 10000038,
       "name": "The Bleak Lands",
       "securityClass": "highsec",
-      "buildSystemId": 30003083,
-      "buildSystemName": "Junsen",
-      "buildSystemSecurity": 0.809591,
+      "buildSystemId": 30003080,
+      "buildSystemName": "Jarkkolen",
+      "buildSystemSecurity": 0.820601,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30003083
+      "marketSystemId": 30003080
     },
     {
       "regionId": 10000033,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0299,
+      "costIndex": 0.031,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
