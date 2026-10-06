@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T10:59:27.084Z",
+  "generatedAt": "2026-10-06T10:54:52.207Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0189,
+      "reactionCostIndex": 0.0199,
       "marketSystemId": 30004552
     },
     {
@@ -830,9 +830,9 @@
       "regionId": 10000042,
       "name": "Metropolis",
       "securityClass": "highsec",
-      "buildSystemId": 30003403,
-      "buildSystemName": "Meimungen",
-      "buildSystemSecurity": 0.907195,
+      "buildSystemId": 30033410,
+      "buildSystemName": "Erego",
+      "buildSystemSecurity": 0.928317,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30002053
