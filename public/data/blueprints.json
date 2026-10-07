@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T10:55:35.128Z",
+  "generatedAt": "2026-10-07T10:43:28.863Z",
   "blueprints": [
     {
       "blueprintTypeId": 879,
@@ -41207,6 +41207,80 @@
         "copyTime": 480,
         "inventionTime": 45600
       }
+    },
+    {
+      "blueprintTypeId": 97715,
+      "productTypeId": 13957,
+      "productQuantity": 1,
+      "manufacturingTime": 2700,
+      "materials": [
+        {
+          "typeId": 3538,
+          "quantity": 1
+        },
+        {
+          "typeId": 34,
+          "quantity": 4662
+        },
+        {
+          "typeId": 35,
+          "quantity": 1857
+        },
+        {
+          "typeId": 36,
+          "quantity": 1027
+        },
+        {
+          "typeId": 37,
+          "quantity": 44
+        },
+        {
+          "typeId": 38,
+          "quantity": 51
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Armor Repair Unit",
+      "bpIconUrl": "https://images.evetech.net/types/97715/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/13957/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/13957/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97714,
+      "productTypeId": 14262,
+      "productQuantity": 1,
+      "manufacturingTime": 1800,
+      "materials": [
+        {
+          "typeId": 526,
+          "quantity": 1
+        },
+        {
+          "typeId": 34,
+          "quantity": 862
+        },
+        {
+          "typeId": 35,
+          "quantity": 792
+        },
+        {
+          "typeId": 36,
+          "quantity": 529
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Stasis Web",
+      "bpIconUrl": "https://images.evetech.net/types/97714/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/14262/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/14262/render?size=128"
     },
     {
       "blueprintTypeId": 2748,
@@ -196082,10 +196156,6 @@
         {
           "typeId": 20280,
           "quantity": 1
-        },
-        {
-          "typeId": 88087,
-          "quantity": 150000
         }
       ],
       "requiredSkills": {
@@ -199149,6 +199219,475 @@
       "bpIconUrl": "https://images.evetech.net/types/95530/bp?size=32",
       "productIconUrl": "https://images.evetech.net/types/95529/icon?size=32",
       "productRenderUrl": "https://images.evetech.net/types/95529/render?size=128"
+    },
+    {
+      "blueprintTypeId": 95742,
+      "productTypeId": 95741,
+      "productQuantity": 1,
+      "manufacturingTime": 15000,
+      "materials": [
+        {
+          "typeId": 57486,
+          "quantity": 78
+        },
+        {
+          "typeId": 83468,
+          "quantity": 100
+        },
+        {
+          "typeId": 57478,
+          "quantity": 156
+        },
+        {
+          "typeId": 40,
+          "quantity": 624
+        },
+        {
+          "typeId": 39,
+          "quantity": 3120
+        },
+        {
+          "typeId": 38,
+          "quantity": 12480
+        },
+        {
+          "typeId": 37,
+          "quantity": 31200
+        },
+        {
+          "typeId": 36,
+          "quantity": 280800
+        },
+        {
+          "typeId": 35,
+          "quantity": 1560000
+        },
+        {
+          "typeId": 34,
+          "quantity": 4368000
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Attack Battlecruiser",
+      "bpIconUrl": "https://images.evetech.net/types/95742/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/95741/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/95741/render?size=128",
+      "copyTime": 12000
+    },
+    {
+      "blueprintTypeId": 97676,
+      "productTypeId": 97641,
+      "productQuantity": 1,
+      "manufacturingTime": 3600,
+      "materials": [
+        {
+          "typeId": 97638,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 250
+        },
+        {
+          "typeId": 85400,
+          "quantity": 250
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97676/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97641/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97641/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97678,
+      "productTypeId": 97642,
+      "productQuantity": 1,
+      "manufacturingTime": 10800,
+      "materials": [
+        {
+          "typeId": 97639,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 1000
+        },
+        {
+          "typeId": 85400,
+          "quantity": 1000
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 3
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97678/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97642/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97642/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97677,
+      "productTypeId": 97643,
+      "productQuantity": 1,
+      "manufacturingTime": 7200,
+      "materials": [
+        {
+          "typeId": 97640,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 500
+        },
+        {
+          "typeId": 85400,
+          "quantity": 500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 2
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97677/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97643/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97643/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97679,
+      "productTypeId": 97653,
+      "productQuantity": 1,
+      "manufacturingTime": 3600,
+      "materials": [
+        {
+          "typeId": 97650,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 125
+        },
+        {
+          "typeId": 85399,
+          "quantity": 125
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97679/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97653/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97653/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97681,
+      "productTypeId": 97654,
+      "productQuantity": 1,
+      "manufacturingTime": 10800,
+      "materials": [
+        {
+          "typeId": 97651,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 500
+        },
+        {
+          "typeId": 85399,
+          "quantity": 500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 3
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97681/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97654/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97654/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97680,
+      "productTypeId": 97655,
+      "productQuantity": 1,
+      "manufacturingTime": 7200,
+      "materials": [
+        {
+          "typeId": 97652,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 250
+        },
+        {
+          "typeId": 85399,
+          "quantity": 250
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 2
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97680/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97655/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97655/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97682,
+      "productTypeId": 97665,
+      "productQuantity": 1,
+      "manufacturingTime": 3600,
+      "materials": [
+        {
+          "typeId": 97661,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 60
+        },
+        {
+          "typeId": 85398,
+          "quantity": 60
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97682/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97665/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97665/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97683,
+      "productTypeId": 97666,
+      "productQuantity": 1,
+      "manufacturingTime": 10800,
+      "materials": [
+        {
+          "typeId": 97662,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 240
+        },
+        {
+          "typeId": 85398,
+          "quantity": 240
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 3
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97683/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97666/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97666/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97684,
+      "productTypeId": 97667,
+      "productQuantity": 1,
+      "manufacturingTime": 7200,
+      "materials": [
+        {
+          "typeId": 97663,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 120
+        },
+        {
+          "typeId": 85398,
+          "quantity": 120
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 2
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97684/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97667/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97667/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97685,
+      "productTypeId": 97672,
+      "productQuantity": 1,
+      "manufacturingTime": 3600,
+      "materials": [
+        {
+          "typeId": 97669,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 25
+        },
+        {
+          "typeId": 85397,
+          "quantity": 25
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97685/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97672/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97672/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97687,
+      "productTypeId": 97673,
+      "productQuantity": 1,
+      "manufacturingTime": 10800,
+      "materials": [
+        {
+          "typeId": 97670,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 100
+        },
+        {
+          "typeId": 85397,
+          "quantity": 100
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 3
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97687/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97673/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97673/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97686,
+      "productTypeId": 97674,
+      "productQuantity": 1,
+      "manufacturingTime": 7200,
+      "materials": [
+        {
+          "typeId": 97671,
+          "quantity": 1
+        },
+        {
+          "typeId": 85390,
+          "quantity": 50
+        },
+        {
+          "typeId": 85397,
+          "quantity": 50
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 2
+      },
+      "tier": "t1",
+      "kind": "manufacturing",
+      "productGroup": "Mutaplasmids",
+      "bpIconUrl": "https://images.evetech.net/types/97686/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97674/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97674/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97716,
+      "productTypeId": 97710,
+      "productQuantity": 1,
+      "manufacturingTime": 7200,
+      "materials": [
+        {
+          "typeId": 40665,
+          "quantity": 1
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Energy Nosferatu",
+      "bpIconUrl": "https://images.evetech.net/types/97716/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97710/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97710/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97717,
+      "productTypeId": 97711,
+      "productQuantity": 1,
+      "manufacturingTime": 7200,
+      "materials": [
+        {
+          "typeId": 40659,
+          "quantity": 1
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Energy Neutralizer",
+      "bpIconUrl": "https://images.evetech.net/types/97717/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97711/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97711/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97718,
+      "productTypeId": 97712,
+      "productQuantity": 1,
+      "manufacturingTime": 7200,
+      "materials": [
+        {
+          "typeId": 52915,
+          "quantity": 1
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Precursor Weapon",
+      "bpIconUrl": "https://images.evetech.net/types/97718/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97712/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97712/render?size=128"
     }
   ]
 }
