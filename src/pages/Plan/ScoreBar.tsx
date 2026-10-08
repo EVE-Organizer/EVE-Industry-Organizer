@@ -4,6 +4,9 @@ interface ScoreBarProps {
   label?: string
   accent?: string
   className?: string
+  done?: number
+  total?: number
+  runningPercent?: number
 }
 
 import { formatDecimal } from '@/lib/profit'

@@ -6,7 +6,6 @@ import type {
   PlanNode,
   PlanRootEntry,
   RecipeKind,
-  TypeInfo,
 } from '@/types'
 import { isPlanRootEnabled } from '@/lib/planRootEnabled'
 import { applyME, resolveBlueprintMeTe, revenueFromSale, totalManufacturingCost } from '@/lib/cost'
@@ -25,9 +24,6 @@ import { getBlueprintForProduct } from '@/services/data/sdeLoader'
 export interface PlanProfitOptions {
   hasReliablePrices?: boolean
   scheduledWindowHours?: number
-  haulInIskPerM3?: number
-  haulOutIskPerM3?: number
-  includeHaulCost?: boolean
   priceMethod?: GlobalSettings['priceMethod']
 }
 
@@ -166,18 +162,6 @@ function packagedSelfBuyCost(
   return (prices.get(blueprint.productTypeId) ?? 0) * selfQty
 }
 
-function typeVolumesFromMap(typeMap: Map<number, TypeInfo>): Map<number, number> {
-  const map = new Map<number, number>()
-  for (const [id, type] of typeMap) {
-    map.set(id, type.volume)
-  }
-  return map
-}
-
-function rootHaulIsk(): { haulIn: number; haulOut: number; haulExcluded: boolean } {
-  return { haulIn: 0, haulOut: 0, haulExcluded: true }
-}
-
 export function computeRootProfitRow(
   root: PlanRootEntry,
   blueprint: BlueprintInfo,
@@ -203,9 +187,6 @@ export function computeRootProfitRow(
       chainCost + packagedSelfBuyCost(blueprint, root.runs, buyHubPrices, settings, meTeOverride)
   }
 
-  const { haulIn, haulOut, haulExcluded } = rootHaulIsk()
-  if (!haulExcluded) setupCost += haulIn
-
   const sellPricePerUnit = sellPriceForProduct(
     blueprint.productTypeId,
     sellPrices,
@@ -222,7 +203,7 @@ export function computeRootProfitRow(
   const { net: netRevenue } = revenueFromSale(sellPricePerUnit, outputQty, feeRates, {
     includeBrokerFee: !usesBuyOrders,
   })
-  const netProfit = netRevenue - setupCost - (haulExcluded ? 0 : haulOut)
+  const netProfit = netRevenue - setupCost
   const margin = setupCost > 0 ? (netProfit / setupCost) * 100 : 0
   const iph = jobTimeHours > 0 && hasPrices ? netProfit / jobTimeHours : 0
 
@@ -339,7 +320,7 @@ export function computeRootSetupBreakdown(
   blueprint: BlueprintInfo,
   expandInput: ExpandPlanInput,
   productName: string,
-  options?: PlanProfitOptions,
+  _options?: PlanProfitOptions,
 ): PlanSetupBreakdown {
   const { settings, template } = expandInput
   const meTeOverride = template.nodeOverrides[root.productTypeId]
@@ -390,8 +371,7 @@ export function computeRootSetupBreakdown(
   )
   const chainSetupCost =
     computePlanRootBuildCost(blueprint, root.runs, expandInput) + packagedBuyCost
-  const { haulIn, haulOut, haulExcluded } = rootHaulIsk()
-  const totalSetupCost = chainSetupCost + (haulExcluded ? 0 : haulIn)
+  const totalSetupCost = chainSetupCost
 
   /* ----- Line items ----- */
 
@@ -427,9 +407,9 @@ export function computeRootSetupBreakdown(
     rootMaterials: rootMaterialLines(blueprint, root.runs, isolated, nodes, meTeOverride),
     facilityNote: facilityNoteForBlueprint(blueprint, settings),
     buildChainCost,
-    haulIn,
-    haulOut,
-    haulExcluded: haulExcluded || undefined,
+    haulIn: 0,
+    haulOut: 0,
+    haulExcluded: true,
   }
 }
 
@@ -462,10 +442,9 @@ export function computeRootProfitBreakdown(
     feeRates,
     { includeBrokerFee: !usesBuyOrders },
   )
-  const haulOutCharged = setup.haulExcluded ? 0 : setup.haulOut
   const hasPrices =
     (options?.hasReliablePrices ?? true) && sellPricePerUnit > 0 && setup.totalSetupCost > 0
-  const netProfit = net - setup.totalSetupCost - haulOutCharged
+  const netProfit = net - setup.totalSetupCost
   const margin = setup.totalSetupCost > 0 ? (netProfit / setup.totalSetupCost) * 100 : 0
   const iph = jobTimeHours > 0 && hasPrices ? netProfit / jobTimeHours : 0
 

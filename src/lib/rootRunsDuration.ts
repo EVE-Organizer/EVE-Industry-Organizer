@@ -168,6 +168,24 @@ export function stripSubBuildRunPins(
   return next
 }
 
+/** Apply the same Overall deadline to every enabled root line for that product. */
+export function expandOverallDeadlineTargets(
+  roots: PlanRootEntry[],
+  targets: Array<{ rootId: string; deadlineHours: number }>,
+): Array<{ rootId: string; deadlineHours: number }> {
+  const rootById = new Map(roots.map((r) => [r.id, r]))
+  const expanded = new Map<string, number>()
+  for (const target of targets) {
+    const edited = rootById.get(target.rootId)
+    if (!edited) continue
+    for (const root of roots) {
+      if (root.enabled === false || root.productTypeId !== edited.productTypeId) continue
+      expanded.set(root.id, target.deadlineHours)
+    }
+  }
+  return [...expanded.entries()].map(([rootId, deadlineHours]) => ({ rootId, deadlineHours }))
+}
+
 /** Fit each targeted root so that product is ready by its own deadline. Runs never grow. */
 export function fitPlanToRootReadyDeadlines(input: {
   roots: PlanRootEntry[]
@@ -178,24 +196,58 @@ export function fitPlanToRootReadyDeadlines(input: {
   settings: GlobalSettings
   getBlueprint: (productTypeId: number) => BlueprintInfo | undefined
 }): { roots: PlanRootEntry[]; nodeOverrides: Record<number, PlanNodeOverride> } {
-  const { roots, targets, readyHoursByProductId, nodes, settings, getBlueprint } = input
+  const { roots, readyHoursByProductId, nodes, settings, getBlueprint } = input
+  const targets = expandOverallDeadlineTargets(roots, input.targets)
   if (targets.length === 0) return { roots, nodeOverrides: input.nodeOverrides }
 
   const deadlineByRootId = new Map(targets.map((t) => [t.rootId, t.deadlineHours]))
+  const enabledByProduct = new Map<number, PlanRootEntry[]>()
+  for (const root of roots) {
+    if (root.enabled === false) continue
+    const list = enabledByProduct.get(root.productTypeId) ?? []
+    list.push(root)
+    enabledByProduct.set(root.productTypeId, list)
+  }
+
+  const scaledRunsByProduct = new Map<number, number>()
+  for (const [productTypeId, siblings] of enabledByProduct) {
+    const deadlineHours = siblings
+      .map((s) => deadlineByRootId.get(s.id))
+      .find((h) => h != null && h > 0)
+    if (deadlineHours == null) continue
+
+    const readyHours = readyHoursByProductId.get(productTypeId) ?? 0
+    const referenceRuns =
+      siblings.length > 1 ? Math.max(...siblings.map((s) => s.runs)) : siblings[0]!.runs
+    scaledRunsByProduct.set(
+      productTypeId,
+      scaleRunsToSlotDeadline(referenceRuns, readyHours, deadlineHours),
+    )
+  }
 
   const nextRoots = roots.map((root) => {
     const deadlineHours = deadlineByRootId.get(root.id)
-    if (deadlineHours == null || deadlineHours <= 0) return root
-    const readyHours = readyHoursByProductId.get(root.productTypeId) ?? 0
-    const runs = scaleRunsToSlotDeadline(root.runs, readyHours, deadlineHours)
-    if (runs === root.runs) return root
-    return applyRootEntryPatch(
-      root,
-      { runs },
-      getBlueprint(root.productTypeId),
-      settings,
-      input.nodeOverrides[root.productTypeId],
-    )
+    const scaledRuns =
+      root.enabled === false ? undefined : scaledRunsByProduct.get(root.productTypeId)
+
+    let next = root
+    if (
+      deadlineHours != null &&
+      deadlineHours > 0 &&
+      next.productionDurationHours !== deadlineHours
+    ) {
+      next = { ...next, productionDurationHours: deadlineHours }
+    }
+    if (scaledRuns != null && scaledRuns !== next.runs) {
+      next = applyRootEntryPatch(
+        next,
+        { runs: scaledRuns },
+        getBlueprint(root.productTypeId),
+        settings,
+        input.nodeOverrides[root.productTypeId],
+      )
+    }
+    return next
   })
 
   // Overall shrinks roots; sub-builds must follow demand. Leftover production pins

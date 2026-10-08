@@ -358,6 +358,34 @@ describe('fitPlanToRootReadyDeadlines', () => {
     expect(roots[0]!.runs).toBe(root.runs)
   })
 
+  it('keeps the same runs on duplicate root lines of one product', () => {
+    const lineA: PlanRootEntry = {
+      id: 'a',
+      productTypeId: 100,
+      runs: 1000,
+      productionDurationHours: 168,
+    }
+    const lineB: PlanRootEntry = {
+      id: 'b',
+      productTypeId: 100,
+      runs: 100,
+      productionDurationHours: 24,
+    }
+    const { roots } = fitPlanToRootReadyDeadlines({
+      roots: [lineA, lineB],
+      targets: [{ rootId: 'a', deadlineHours: 168 }],
+      readyHoursByProductId: new Map([[100, 2063]]),
+      nodes: [{ productTypeId: 100, childProductTypeIds: [], isRoot: true, mode: 'build' }],
+      nodeOverrides: {},
+      settings: DEFAULT_SETTINGS,
+      getBlueprint: () => blueprint,
+    })
+    const expected = Math.floor(1000 * (168 / 2063))
+    expect(roots[0]!.runs).toBe(expected)
+    expect(roots[1]!.runs).toBe(expected)
+    expect(roots[1]!.productionDurationHours).toBe(168)
+  })
+
   it('drops sub-build run pins so children follow demand after a root shrink', () => {
     const late: PlanRootEntry = {
       id: 'late',

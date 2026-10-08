@@ -275,73 +275,6 @@ describe('planProfit', () => {
     expect(withoutPackaged).toBeLessThan(row.setupCost)
   })
 
-  it('does not add haul to setup or profit', () => {
-    const template = createDefaultPlanTemplate('test')
-    template.roots = [{ id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 }]
-    const expandInput: ExpandPlanInput = {
-      template,
-      blueprints,
-      typeMap: new Map([
-        [
-          34,
-          {
-            typeId: 34,
-            name: 'Tritanium',
-            group: '',
-            category: '',
-            volume: 0.01,
-            iconUrl: '',
-            renderUrl: '',
-            bpIconUrl: '',
-          },
-        ],
-        [
-          100,
-          {
-            typeId: 100,
-            name: 'Widget',
-            group: '',
-            category: '',
-            volume: 1,
-            iconUrl: '',
-            renderUrl: '',
-            bpIconUrl: '',
-          },
-        ],
-      ]),
-      prices: sellPrices,
-      settings: { ...DEFAULT_SETTINGS, includeHaulCost: true },
-      systemCostIndex: 0.01,
-      reactionCostIndex: 0.01,
-    }
-    const haulOptions = { haulInIskPerM3: 100, haulOutIskPerM3: 200 }
-
-    const withHaul = computeRootProfitRow(
-      template.roots[0],
-      widget,
-      expandInput,
-      sellPrices,
-      buyPrices,
-      10,
-      undefined,
-      haulOptions,
-    )
-    const withoutHaul = computeRootProfitRow(
-      template.roots[0],
-      widget,
-      { ...expandInput, settings: { ...expandInput.settings, includeHaulCost: false } },
-      sellPrices,
-      buyPrices,
-      10,
-      undefined,
-      haulOptions,
-    )
-
-    expect(withHaul.setupCost).toBe(withoutHaul.setupCost)
-    expect(withHaul.netProfit).toBe(withoutHaul.netProfit)
-    expect(withHaul.netProfit).toBe(withHaul.netRevenue - withHaul.setupCost)
-  })
-
   it('uses buy-hub prices for setup and sell-hub prices for revenue', () => {
     const template = createDefaultPlanTemplate('test')
     template.roots = [{ id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 }]
@@ -398,53 +331,19 @@ describe('planProfit', () => {
     expect(breakdown.totalSetupCost).toBe(1000 * 100)
   })
 
-  it('keeps haul estimates when haul is excluded from setup', () => {
+  it('setup equals buy lines + build chain + packaged', () => {
     const template = createDefaultPlanTemplate('test')
     template.roots = [{ id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 }]
     const expandInput: ExpandPlanInput = {
       template,
       blueprints,
-      typeMap: new Map([
-        [
-          34,
-          {
-            typeId: 34,
-            name: 'Tritanium',
-            group: '',
-            category: '',
-            volume: 0.01,
-            iconUrl: '',
-            renderUrl: '',
-            bpIconUrl: '',
-          },
-        ],
-        [
-          100,
-          {
-            typeId: 100,
-            name: 'Widget',
-            group: '',
-            category: '',
-            volume: 1,
-            iconUrl: '',
-            renderUrl: '',
-            bpIconUrl: '',
-          },
-        ],
-      ]),
+      typeMap,
       prices: sellPrices,
-      settings: { ...DEFAULT_SETTINGS, includeHaulCost: false },
+      settings: DEFAULT_SETTINGS,
       systemCostIndex: 0.01,
       reactionCostIndex: 0.01,
     }
-
-    const breakdown = computeRootSetupBreakdown(template.roots[0], widget, expandInput, 'Widget', {
-      haulInIskPerM3: 100,
-      haulOutIskPerM3: 200,
-      includeHaulCost: false,
-    })
-
-    expect(breakdown.haulExcluded).toBe(true)
+    const breakdown = computeRootSetupBreakdown(template.roots[0], widget, expandInput, 'Widget')
     expect(breakdown.haulIn).toBe(0)
     expect(breakdown.haulOut).toBe(0)
     const chainOnly =

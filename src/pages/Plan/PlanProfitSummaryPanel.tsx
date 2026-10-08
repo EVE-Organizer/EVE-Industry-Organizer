@@ -10,8 +10,6 @@ interface PlanProfitSummaryProps {
   buyHubName: string
   sellHubName: string
   priceMethod: GlobalSettings['priceMethod']
-  includeHaulCost: boolean
-  haulApplicable: boolean
   skills: SkillLevels
 }
 
@@ -43,8 +41,6 @@ export function PlanProfitSummaryPanel({
   buyHubName,
   sellHubName,
   priceMethod,
-  includeHaulCost,
-  haulApplicable,
   skills,
 }: PlanProfitSummaryProps) {
   if (summary.rootRows.length === 0) return null
@@ -61,20 +57,8 @@ export function PlanProfitSummaryPanel({
     priceMethod === 'buy_orders'
       ? `tax ${formatDecimal(feeRates.salesTaxPercent, 2)}%`
       : `broker ${formatDecimal(feeRates.brokerFeePercent, 1)}% · tax ${formatDecimal(feeRates.salesTaxPercent, 2)}%`
-  const haulLabel = !haulApplicable
-    ? 'haul n/a (build in market system)'
-    : includeHaulCost
-      ? 'haul included'
-      : 'haul excluded'
   const hubLabel =
     buyHubName === sellHubName ? `${buyHubName} hub` : `buy ${buyHubName} · sell ${sellHubName}`
-  const setupHint = !haulApplicable
-    ? 'Build/buy chain'
-    : includeHaulCost
-      ? 'Chain + haul in'
-      : 'Chain (no haul)'
-  const profitHint =
-    haulApplicable && includeHaulCost ? 'Revenue − setup − haul out' : 'Revenue − setup'
 
   return (
     <section className="plan-profit-panel" aria-label="Plan profit summary">
@@ -82,7 +66,7 @@ export function PlanProfitSummaryPanel({
         <div>
           <h2 className="plan-profit-panel__title">Plan economics</h2>
           <p className="plan-profit-panel__subtitle">
-            {hubLabel} · {priceLabel} · {feeLabel} · {haulLabel}
+            {hubLabel} · {priceLabel} · {feeLabel}
           </p>
         </div>
         {!summary.hasPrices ? (
@@ -91,7 +75,11 @@ export function PlanProfitSummaryPanel({
       </div>
 
       <dl className="plan-profit-panel__grid">
-        <ProfitMetric label="Setup cost" value={formatIsk(summary.setupCost)} hint={setupHint} />
+        <ProfitMetric
+          label="Setup cost"
+          value={formatIsk(summary.setupCost)}
+          hint="Build/buy chain"
+        />
         <ProfitMetric
           label="Revenue"
           value={formatIsk(summary.netRevenue)}
@@ -101,7 +89,7 @@ export function PlanProfitSummaryPanel({
           label="Profit"
           value={formatIsk(summary.netProfit)}
           tone={profitTone}
-          hint={profitHint}
+          hint="Revenue − setup"
         />
         <ProfitMetric
           label="Margin"

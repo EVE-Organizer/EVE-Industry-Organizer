@@ -328,18 +328,8 @@ export function PlanPage() {
   }, [data, sellHubId])
 
   const buyHubMarket = data ? getHubMarket(data.market, buyHubId) : null
-  const sellHubMarket = data ? getHubMarket(data.market, sellHubId) : null
   const mfgSystemId = activeSettings.manufacturingSystemId
   const reactionSystemId = activeSettings.reactionFacility?.reactionSystemId ?? mfgSystemId
-  const buildSystemId = useMemo(() => {
-    if (!data || !buyHubMarket) return mfgSystemId
-    return resolveBuildSystem(data.systems, data.regions, buyHubMarket, mfgSystemId).buildSystemId
-  }, [data, buyHubMarket, mfgSystemId])
-  const haulApplicable = useMemo(() => {
-    if (!buyHubMarket) return false
-    const sellMarketSystemId = sellHubMarket?.marketSystemId ?? buyHubMarket.marketSystemId
-    return buyHubMarket.marketSystemId !== buildSystemId || sellMarketSystemId !== buildSystemId
-  }, [buyHubMarket, sellHubMarket, buildSystemId])
   const systemCostIndex = useMemo(() => {
     if (!data || !buyHubMarket) return 0.01
     return resolveBuildSystem(data.systems, data.regions, buyHubMarket, mfgSystemId).costIndex
@@ -406,7 +396,6 @@ export function PlanPage() {
       hasReliablePrices: plan.hasReliablePrices,
       scheduledWindowHours:
         activeTemplate?.durationMode === 'overall' ? plan.productionWindowHours : undefined,
-      includeHaulCost: false,
       priceMethod: activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
     }),
     [
@@ -1240,8 +1229,6 @@ export function PlanPage() {
             buyHubName={buyHubName}
             sellHubName={sellHubName}
             priceMethod={activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod}
-            includeHaulCost={false}
-            haulApplicable={haulApplicable}
             skills={activeSettings.skills ?? DEFAULT_SETTINGS.skills}
           />
 

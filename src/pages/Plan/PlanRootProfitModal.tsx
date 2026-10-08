@@ -40,7 +40,6 @@ export function PlanRootProfitModal({ breakdown, onClose }: PlanRootProfitModalP
   const priceLabel = usesBuyOrders ? 'Buy order price' : 'Sell / avg price'
   const revenueTitle = usesBuyOrders ? 'Buy order revenue' : 'Sell revenue'
   const profitTone = breakdown.netProfit >= 0 ? 'text-success' : 'text-error'
-  const haulOutCharged = breakdown.haulExcluded ? 0 : breakdown.haulOut
   const buyTotal = breakdown.setup.buyLines.reduce((sum, line) => sum + line.cost, 0)
   const otherChain = Math.max(0, breakdown.setup.buildChainCost - breakdown.setup.jobFeeTotal)
 
@@ -149,13 +148,7 @@ export function PlanRootProfitModal({ breakdown, onClose }: PlanRootProfitModalP
                   value={formatIsk(breakdown.setup.packagedBuyCost)}
                 />
               ) : null}
-              {breakdown.haulExcluded ? null : (
-                <Line label="Haul in (in setup)" value={formatIsk(breakdown.haulIn)} />
-              )}
               <Line label="Total setup" value={formatIsk(breakdown.setupCost)} />
-              {breakdown.haulExcluded ? null : (
-                <Line label="Haul out (products to hub)" value={formatIsk(haulOutCharged)} />
-              )}
             </div>
             {breakdown.setup.buildJobs.length > 0 ? (
               <div className="overflow-x-auto border border-eve-border rounded-lg mt-3">
@@ -189,7 +182,6 @@ export function PlanRootProfitModal({ breakdown, onClose }: PlanRootProfitModalP
             <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm font-mono">
               <span>
                 {formatIsk(breakdown.netRevenue)} − {formatIsk(breakdown.setupCost)}
-                {haulOutCharged > 0 ? ` − ${formatIsk(haulOutCharged)}` : ''}
               </span>
               <span className={`font-bold tabular-nums ${profitTone}`}>
                 = {formatIsk(breakdown.netProfit)}

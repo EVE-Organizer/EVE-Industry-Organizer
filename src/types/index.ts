@@ -642,8 +642,22 @@ export interface WatchlistItem {
 
 export type PlanSlotSource = 'skills' | 'manual'
 export type PlanBuildMode = 'buy' | 'build'
-
 export type PlanDurationMode = 'production' | 'overall'
+export type PlanCharacterKey = `sso:${number}` | `manual:${string}`
+export type PlanStepStatus = 'todo' | 'running' | 'done'
+export type PlanStepSource = 'esi' | 'stock' | 'manual'
+
+export interface PlanStepProgress {
+  status: PlanStepStatus
+  source: PlanStepSource
+  characterKey?: PlanCharacterKey
+}
+
+export interface ManualCharacter {
+  id: string
+  name: string
+  skills: SkillLevels
+}
 
 export interface PlanRootEntry {
   id: string
@@ -657,6 +671,7 @@ export interface PlanRootEntry {
   runsFromDuration?: boolean
   /** Runs last changed by Ready-by Fix (full-table Ready by column). */
   runsFromReadyBy?: boolean
+  characterKey?: PlanCharacterKey
 }
 
 export interface PlanNodeOverride {
@@ -672,6 +687,10 @@ export interface PlanNodeOverride {
   buyHub?: HubId
   /** Custom buy price in ISK; mutually exclusive with buyHub. */
   buyPrice?: number
+  characterKey?: PlanCharacterKey
+  haveBpcs?: boolean
+  copyBpos?: number
+  runsFromReadyBy?: boolean
 }
 
 export interface PlanSlotBonuses {
@@ -700,6 +719,13 @@ export interface ManufacturingPlanTemplate {
   roots: PlanRootEntry[]
   modeOverrides: Record<number, PlanBuildMode>
   nodeOverrides: Record<number, PlanNodeOverride>
+  characters?: PlanCharacterKey[]
+  characterSlotBonus?: Record<string, PlanSlotBonuses>
+  sellerCharacterKey?: PlanCharacterKey
+  stepProgress?: Record<string, PlanStepProgress>
+  startedAt?: string
+  startStock?: Record<number, number>
+  stockAllocated?: boolean
 }
 
 /** Computed plan node (not persisted). */
@@ -771,6 +797,10 @@ export interface ScheduledPlanJob {
   activity?: PlanJobActivity
   /** Which concurrent-job pool this job occupies. */
   pool?: PlanJobPool
+  characterKey?: PlanCharacterKey
+  stepKey?: string
+  waitsFor?: string
+  bpoIndex?: number
 }
 
 export type PlanJobActivity = 'copy' | 'invention' | 'manufacture' | 'reaction'
@@ -843,6 +873,7 @@ export interface UserData {
   planTemplates: ManufacturingPlanTemplate[]
   /** Last selected plan template tab; restored on reload. */
   selectedPlanTemplateId?: string | null
+  manualCharacters?: ManualCharacter[]
 }
 
 export interface HubConfig {

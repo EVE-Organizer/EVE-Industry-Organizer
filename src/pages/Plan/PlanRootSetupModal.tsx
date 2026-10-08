@@ -30,7 +30,6 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
 
   const buyTotal = breakdown.buyLines.reduce((sum, line) => sum + line.cost, 0)
   const isBuyRoot = breakdown.rootMode === 'buy'
-  const haulCharged = breakdown.haulExcluded ? 0 : breakdown.haulIn
   const otherChain = Math.max(0, breakdown.buildChainCost - breakdown.jobFeeTotal)
 
   return (
@@ -61,7 +60,6 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
           <p className="text-xs opacity-60 mt-1">
             {formatQuantity(breakdown.runs)} runs → {formatGraphQuantity(breakdown.outputQty)} units
             {isBuyRoot ? ' · buy finished product' : ' · build/buy chain'}
-            {breakdown.haulExcluded ? ' · haul excluded' : null}
           </p>
           {breakdown.facilityNote ? (
             <p className="text-xs opacity-70 mt-1">Facility: {breakdown.facilityNote}</p>
@@ -241,24 +239,6 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
             </section>
           ) : null}
 
-          {breakdown.haulIn > 0 && !breakdown.haulExcluded ? (
-            <section>
-              <h4 className="font-semibold text-sm mb-2">
-                Haul in
-                {breakdown.haulExcluded ? (
-                  <span className="badge badge-ghost badge-xs ml-1">excluded</span>
-                ) : null}
-              </h4>
-              <p className="text-sm font-mono">
-                Materials to build system:{' '}
-                <strong>{formatIsk(breakdown.haulExcluded ? 0 : breakdown.haulIn)}</strong>
-                {breakdown.haulExcluded && breakdown.haulIn > 0 ? (
-                  <span className="opacity-70"> (estimate {formatIsk(breakdown.haulIn)})</span>
-                ) : null}
-              </p>
-            </section>
-          ) : null}
-
           <section className="rounded-lg border border-eve-border bg-base-300/30 px-4 py-3 space-y-1.5">
             <TotalRow label="Market buys" value={buyTotal} muted />
             {!isBuyRoot ? <TotalRow label="Job fees" value={breakdown.jobFeeTotal} muted /> : null}
@@ -266,7 +246,6 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
             {breakdown.packagedBuyCost > 0 ? (
               <TotalRow label="Packaged input" value={breakdown.packagedBuyCost} muted />
             ) : null}
-            <TotalRow label="Haul in" value={haulCharged} muted />
             <div className="flex flex-wrap items-baseline justify-between gap-2 pt-1 border-t border-eve-border/60">
               <span className="font-semibold text-sm">Total setup</span>
               <span className="text-lg font-bold tabular-nums">

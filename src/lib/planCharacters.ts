@@ -56,33 +56,6 @@ export function resolvePlanCharacters(input: {
   })
 }
 
-export function nodeOwner(
-  productTypeId: number,
-  pins: Record<number, { characterKey?: PlanCharacterKey } | undefined>,
-  roots: Array<{ productTypeId: number; characterKey?: PlanCharacterKey; childIds?: number[] }>,
-): PlanCharacterKey | 'auto' {
-  const pin = pins[productTypeId]?.characterKey
-  if (pin) return pin
-  const owners = new Set(
-    roots
-      .filter((root) => root.productTypeId === productTypeId || root.childIds?.includes(productTypeId))
-      .map((root) => root.characterKey)
-      .filter((key): key is PlanCharacterKey => !!key),
-  )
-  if (owners.size === 1) return [...owners][0]!
-  return 'auto'
-}
-
-export function canRunJob(
-  skills: Record<string, number | undefined>,
-  requiredSkills: Record<string, number> | undefined,
-  activity: 'manufacture' | 'invention',
-): boolean {
-  if (activity === 'invention') return (skills.encryption ?? 0) > 0
-  if (!requiredSkills) return true
-  return Object.entries(requiredSkills).every(([name, level]) => (skills[name] ?? 0) >= level)
-}
-
 /** Time multiplier for a node's job, relative to the skills the plan was priced with. */
 export function characterDurationFactor(
   skills: SkillLevels,

@@ -146,7 +146,11 @@ function earliestStartWithDependencies(
 function scheduleScienceStages(
   stages: PlanPipelineStage[],
   scienceSlots: number,
-): { jobs: ScheduledPlanJob[]; readyByProduct: Map<number, number>; stageEnd: Map<string, number> } {
+): {
+  jobs: ScheduledPlanJob[]
+  readyByProduct: Map<number, number>
+  stageEnd: Map<string, number>
+} {
   const scienceStages = stages.filter((s) => s.pool === 'science')
   const slotFreeAt = Array.from({ length: Math.max(1, scienceSlots) }, () => 0)
   const jobs: ScheduledPlanJob[] = []
@@ -310,25 +314,8 @@ function scheduleProductionNodes(
           }
         }
 
-        const picked = best ?? {
-          state: characterPools[0]!,
-          slot: 0,
-          startHour: earliestStartWithDependencies(
-            node,
-            runsThisJob,
-            0,
-            nodesById,
-            supplies,
-            demands,
-            scienceReadyByProduct,
-          ),
-          endHour: 0,
-        }
-        if (best == null) {
-          picked.endHour =
-            picked.startHour + baseJobDurationHours * picked.state.character.durationFactor(node)
-        }
-
+        // ponytail: ownerCandidates always returns ≥1 pool
+        const picked = best!
         slot = picked.slot
         startHour = picked.startHour
         endHour = picked.endHour
@@ -392,7 +379,11 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
 
   const scienceResult = pipeline
     ? scheduleScienceStages(pipeline.stages, scienceSlots)
-    : { jobs: [] as ScheduledPlanJob[], readyByProduct: new Map<number, number>(), stageEnd: new Map() }
+    : {
+        jobs: [] as ScheduledPlanJob[],
+        readyByProduct: new Map<number, number>(),
+        stageEnd: new Map(),
+      }
 
   const nodesById = new Map(nodes.map((node) => [node.productTypeId, node]))
   const mfgSlotFreeAt = Array.from({ length: Math.max(1, slots) }, () => 0)
