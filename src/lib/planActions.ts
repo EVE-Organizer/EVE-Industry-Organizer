@@ -388,6 +388,57 @@ export function addPlanCharacter(
   return current.includes(key) ? {} : { characters: [...current, key] }
 }
 
+/** Keep a real character name on the plan so a missing session does not fall back to "Character {id}". */
+export function mergePlanCharacterNames(
+  template: Pick<ManufacturingPlanTemplate, 'characterNames'>,
+  updates: Record<string, string>,
+): TemplatePatch {
+  const next = { ...template.characterNames }
+  let changed = false
+  for (const [key, name] of Object.entries(updates)) {
+    const trimmed = name.trim()
+    if (!trimmed || /^Character \d+$/.test(trimmed)) continue
+    if (next[key] === trimmed) continue
+    next[key] = trimmed
+    changed = true
+  }
+  return changed ? { characterNames: next } : {}
+}
+
+/**
+ * Drop crew members who no longer own a root or component.
+ * Characters are added when an owner is picked, so an unpinned entry is a previous owner.
+ */
+export function pruneUnpinnedPlanCharacters(template: ManufacturingPlanTemplate): TemplatePatch {
+  const pinned = new Set<PlanCharacterKey>()
+  for (const root of template.roots) {
+    if (root.characterKey) pinned.add(root.characterKey)
+  }
+  for (const override of Object.values(template.nodeOverrides)) {
+    if (override?.characterKey) pinned.add(override.characterKey)
+  }
+  const current = template.characters ?? []
+  const next = current.filter((key) => pinned.has(key))
+  if (next.length === current.length) return {}
+  return { characters: next }
+}
+
+/**
+ * Remove a character from the manufacturing crew once nothing is pinned to them.
+ * Seller selection is separate and stays put.
+ */
+export function dropUnpinnedPlanCharacter(
+  template: ManufacturingPlanTemplate,
+  key: PlanCharacterKey,
+): TemplatePatch {
+  const stillPinned =
+    template.roots.some((root) => root.characterKey === key) ||
+    Object.values(template.nodeOverrides).some((override) => override?.characterKey === key)
+  if (stillPinned) return {}
+  if (!(template.characters ?? []).includes(key)) return {}
+  return { characters: (template.characters ?? []).filter((k) => k !== key) }
+}
+
 /** Drop a character and release every pin that pointed at them, so no job is orphaned. */
 export function removePlanCharacter(
   template: ManufacturingPlanTemplate,

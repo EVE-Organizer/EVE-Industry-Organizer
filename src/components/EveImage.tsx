@@ -143,6 +143,11 @@ export function CharacterAvatar({
   const portrait = characterId ? characterPortraitUrl(characterId, size) : null
   const [portraitFailed, setPortraitFailed] = useState(false)
 
+  // A failed portrait for the previous owner must not stick after the character changes
+  useEffect(() => {
+    setPortraitFailed(false)
+  }, [characterId])
+
   return (
     <div className={`relative shrink-0 ${className}`} style={{ width: size, height: size }}>
       {portrait && !portraitFailed ? (

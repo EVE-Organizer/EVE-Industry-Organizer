@@ -66,6 +66,9 @@ import { duplicatePlanRootAfter, movePlanRootById } from '@/lib/planRootOrder'
 import { activePlanRoots, displayNodeForRoot } from '@/lib/planRootEnabled'
 import {
   addPlanCharacter,
+  dropUnpinnedPlanCharacter,
+  mergePlanCharacterNames,
+  pruneUnpinnedPlanCharacters,
   setNodeCopies,
   setNodeOwner,
   setRootOwner,
@@ -84,7 +87,7 @@ import {
   sumPlanCrewSlots,
 } from '@/lib/planCharacters'
 import { PlanOwnerPicker } from '@/components/plan/PlanOwnerPicker'
-import { usePlanCharacters } from '@/pages/Plan/usePlanCharacters'
+import { usePlanCharacters, useRememberPlanCharacterNames } from '@/pages/Plan/usePlanCharacters'
 import type { PlanGanttCrewMember } from '@/pages/Plan/planGanttAdapter'
 import { suggestBlueprintLines } from '@/lib/blueprintLineSuggestion'
 import {
@@ -406,6 +409,38 @@ export function PlanPage() {
     activeTemplate,
     activeSettings,
   )
+
+  const knownCharacterNames = useMemo(() => {
+    const names: Record<string, string> = {}
+    for (const option of planCharacterOptions) names[option.key] = option.name
+    return names
+  }, [planCharacterOptions])
+
+  const saveCharacterNames = useCallback(
+    (names: Record<string, string>) => {
+      const template = selectedPlanTemplateFromStore()
+      if (!template) return
+      const patch = mergePlanCharacterNames(template, names)
+      if (!patch.characterNames) return
+      updatePlanTemplate(template.id, patch)
+    },
+    [updatePlanTemplate],
+  )
+
+  useRememberPlanCharacterNames({
+    enabled: !isSharedView && activeTemplate != null,
+    keys: activeTemplate?.characters ?? [],
+    knownNames: knownCharacterNames,
+    storedNames: activeTemplate?.characterNames,
+    onSave: saveCharacterNames,
+  })
+
+  useEffect(() => {
+    if (isSharedView || !storeTemplate) return
+    const patch = pruneUnpinnedPlanCharacters(storeTemplate)
+    if (!patch.characters) return
+    updatePlanTemplate(storeTemplate.id, patch)
+  }, [isSharedView, storeTemplate, updatePlanTemplate])
 
   const planGanttCrew = useMemo((): PlanGanttCrewMember[] => {
     return planResolvedCrew.map((character) => ({
@@ -894,11 +929,20 @@ export function PlanPage() {
       const template = selectedPlanTemplateFromStore()
       if (!template) return
 
+      const previousKey = target.rootId
+        ? template.roots.find((root) => root.id === target.rootId)?.characterKey
+        : template.nodeOverrides[target.productTypeId]?.characterKey
+
       let draft = template
       const patch: Partial<ManufacturingPlanTemplate> = {}
       if (key) {
         Object.assign(patch, addPlanCharacter(draft, key))
         draft = { ...draft, ...patch }
+        const name = planCharacterOptions.find((option) => option.key === key)?.name
+        if (name) {
+          Object.assign(patch, mergePlanCharacterNames(draft, { [key]: name }))
+          draft = { ...draft, ...patch }
+        }
       }
       if (target.rootId) {
         Object.assign(patch, setRootOwner(draft, target.rootId, key))
@@ -908,6 +952,12 @@ export function PlanPage() {
         Object.assign(patch, setNodeOwner(draft, target.productTypeId, pinKey))
       }
       draft = { ...draft, ...patch }
+
+      // A previous owner with no remaining pins should leave the timeline
+      if (previousKey && previousKey !== key) {
+        Object.assign(patch, dropUnpinnedPlanCharacter(draft, previousKey))
+        draft = { ...draft, ...patch }
+      }
 
       const validKeys = planOwnerValidKeys(
         draft,

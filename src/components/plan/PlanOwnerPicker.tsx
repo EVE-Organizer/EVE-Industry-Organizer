@@ -97,6 +97,7 @@ export function PlanOwnerPicker({
         >
           {selected ? (
             <CharacterAvatar
+              key={selected.characterId ?? selected.key}
               characterId={selected.characterId}
               name={selected.name}
               size={size - 2}

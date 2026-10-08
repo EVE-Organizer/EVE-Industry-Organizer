@@ -726,6 +726,8 @@ export interface ManufacturingPlanTemplate {
   modeOverrides: Record<number, PlanBuildMode>
   nodeOverrides: Record<number, PlanNodeOverride>
   characters?: PlanCharacterKey[]
+  /** Display names for crew keys, kept when that character is not in the live SSO list. */
+  characterNames?: Record<string, string>
   characterSlotBonus?: Record<string, PlanSlotBonuses>
   sellerCharacterKey?: PlanCharacterKey
   stepProgress?: Record<string, PlanStepProgress>

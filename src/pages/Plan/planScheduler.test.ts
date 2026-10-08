@@ -578,6 +578,45 @@ describe('multi-character science and reaction slots', () => {
     expect(jobs.every((j) => j.characterKey === 'sso:2')).toBe(true)
     expect(new Set(jobs.map((j) => j.slot))).toEqual(new Set([0, 1]))
   })
+
+  it('keeps each copy of a duplicated root on its owner instead of a previous crew member', () => {
+    const jobs = schedulePlanJobs({
+      nodes: [
+        mockNode({
+          productTypeId: 1,
+          name: 'Charge',
+          isRoot: true,
+          depth: 0,
+          runs: 20,
+          jobTimeSeconds: 3600,
+          outputQty: 20,
+        }),
+      ],
+      slots: 3,
+      windowHours: 100,
+      characters: [
+        ...crew,
+        {
+          key: 'sso:3' as const,
+          slots: { manufacturing: 1, reactions: 1, research: 1 },
+          durationFactor: () => 1,
+          canRun: () => true,
+        },
+      ],
+      ownerByProduct: new Map([[1, 'auto']]),
+      rootOwnerRuns: new Map([
+        [
+          1,
+          [
+            { characterKey: 'sso:2' as const, runs: 10 },
+            { characterKey: 'sso:3' as const, runs: 10 },
+          ],
+        ],
+      ]),
+    })
+    expect(jobs.map((job) => job.characterKey).sort()).toEqual(['sso:2', 'sso:3'])
+    expect(Math.max(...jobs.map((job) => job.endHour))).toBeCloseTo(0.5, 5)
+  })
 })
 
 describe('detectOverUnder', () => {

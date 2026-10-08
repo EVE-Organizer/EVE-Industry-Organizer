@@ -9,6 +9,7 @@ import {
   logoutAll,
   removeCharacter,
   setActiveCharacter,
+  subscribeAuthAccounts,
   touchCharacterSync,
 } from '@/services/auth/eveAuth'
 import type { EveCharacterSession } from '@/services/auth/authStorage'
@@ -132,6 +133,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         .syncSkills(id)
         .catch(() => {})
     })
+    // Other characters' slot counts stay on Settings skills until their own snapshot exists
+    for (const character of snapshot.characters) {
+      if (character.characterId === snapshot.character?.characterId) continue
+      if (character.skills || character.trainedSkills) continue
+      void get()
+        .syncSkills(character.characterId, { silent: true })
+        .catch(() => {})
+    }
   },
 
   login: async () => {
@@ -241,7 +250,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       const updated = persistEsiSkillSync(targetId, trainedSkills, syncedAt)
 
       const snapshot = readAuthSnapshot()
-      if (!opts?.silent) set({ ...snapshot, isBusy: false })
+      // Silent refresh still has to publish skills, or slots stay stale until the menu character changes
+      set((state) => ({
+        ...snapshot,
+        configured: state.configured,
+        hydrated: state.hydrated,
+        isBusy: opts?.silent ? state.isBusy : false,
+        error: opts?.silent ? state.error : null,
+      }))
 
       if (snapshot.activeCharacterId === targetId && updated) {
         const assumed = assumedLevelsForCharacter(updated)
@@ -344,3 +360,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   clearError: () => set({ error: null }),
 }))
+
+subscribeAuthAccounts(() => {
+  useAuthStore.setState((state) => ({
+    ...readAuthSnapshot(),
+    configured: state.configured,
+    isBusy: state.isBusy,
+    error: state.error,
+    hydrated: state.hydrated,
+  }))
+})

@@ -3,6 +3,9 @@ import {
   applyDeadlineCopies,
   applyDeadlineRootRuns,
   clearChainComponentRunOverrides,
+  dropUnpinnedPlanCharacter,
+  mergePlanCharacterNames,
+  pruneUnpinnedPlanCharacters,
   removePlanCharacter,
   resetPlanPatch,
   setNodeCopies,
@@ -34,6 +37,31 @@ function template() {
 }
 
 describe('planActions', () => {
+  it('drops a previous owner from the crew once nothing is pinned to them', () => {
+    const t = template()
+    t.nodeOverrides = {}
+    t.roots = [
+      { id: 'r1', productTypeId: 1, runs: 10, productionDurationHours: 8, characterKey: 'sso:2' },
+    ]
+    expect(dropUnpinnedPlanCharacter(t, 'sso:1').characters).toEqual(['sso:2'])
+    expect(dropUnpinnedPlanCharacter(t, 'sso:2')).toEqual({})
+  })
+
+  it('prunes crew members who are no longer owners and keeps stored names', () => {
+    const t = template()
+    t.characters = ['sso:1', 'sso:9']
+    t.characterNames = { 'sso:9': 'Zoe Mills 2nd' }
+    const patch = pruneUnpinnedPlanCharacters(t)
+    expect(patch.characters).toEqual(['sso:1'])
+    expect(
+      mergePlanCharacterNames(t, { 'sso:2124647639': 'Zoe Mills 2nd' }).characterNames,
+    ).toEqual({
+      'sso:9': 'Zoe Mills 2nd',
+      'sso:2124647639': 'Zoe Mills 2nd',
+    })
+    expect(mergePlanCharacterNames(t, { 'sso:1': 'Character 1' })).toEqual({})
+  })
+
   it('keeps at least one BPO and merges into the existing override', () => {
     const patch = setNodeCopies(template(), 2, 0)
     expect(patch.nodeOverrides?.[2]).toMatchObject({ copies: 1, characterKey: 'sso:1' })

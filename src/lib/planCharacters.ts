@@ -22,23 +22,42 @@ export interface ResolvedPlanCharacter {
   skillsAssumed: boolean
 }
 
+function ssoIdFromKey(key: string): number | null {
+  if (!key.startsWith('sso:')) return null
+  const id = Number(key.slice(4))
+  return Number.isFinite(id) ? id : null
+}
+
+/** "Character 123" is the placeholder used when a session name is missing. */
+export function isFallbackCharacterName(name: string | undefined): boolean {
+  return !name || /^Character \d+$/.test(name.trim())
+}
+
 export function resolvePlanCharacters(input: {
   keys: PlanCharacterKey[]
   sso: Array<{ characterId: number; characterName: string; skills?: SkillLevels }>
   manual: Array<{ id: string; name: string; skills: SkillLevels }>
   settingsSkills: SkillLevels
   bonuses?: Record<string, PlanSlotBonuses>
+  /** Names remembered on the plan when the live session list does not include this character. */
+  names?: Record<string, string>
 }): ResolvedPlanCharacter[] {
   return input.keys.map((key) => {
     const bonus = input.bonuses?.[key]
-    if (key.startsWith('sso:')) {
-      const id = Number(key.slice(4))
-      const session = input.sso.find((c) => c.characterId === id)
+    const ssoId = ssoIdFromKey(key)
+    if (ssoId != null) {
+      // Compare numerically so a string id from storage still matches the plan key
+      const session = input.sso.find((c) => Number(c.characterId) === ssoId)
       const skillsAssumed = !session?.skills
       const skills = session?.skills ?? input.settingsSkills
+      const remembered = input.names?.[key]
+      const liveName = session?.characterName?.trim()
       return {
         key,
-        name: session?.characterName ?? `Character ${id}`,
+        name:
+          (liveName && !isFallbackCharacterName(liveName) ? liveName : undefined) ??
+          (remembered && !isFallbackCharacterName(remembered) ? remembered : undefined) ??
+          `Character ${ssoId}`,
         skills,
         slots: effectivePlanSlots(skills, bonus),
         isSso: true,
@@ -49,7 +68,7 @@ export function resolvePlanCharacters(input: {
     const skills = manual?.skills ?? input.settingsSkills
     return {
       key,
-      name: manual?.name ?? 'Manual',
+      name: manual?.name ?? input.names?.[key] ?? 'Manual',
       skills,
       slots: effectivePlanSlots(skills, bonus),
       isSso: false,
@@ -193,6 +212,38 @@ export function buildOwnerByProduct(
     const owners = ownersFor(node.productTypeId)
     const only = owners.size === 1 ? [...owners][0] : undefined
     result.set(node.productTypeId, only ?? 'auto')
+  }
+  return result
+}
+
+/**
+ * Run shares for one product built as several roots with different owners.
+ * A single owner is omitted — the product pin already covers that case.
+ */
+export function rootOwnerRunShares(
+  roots: Array<Pick<PlanRootEntry, 'productTypeId' | 'characterKey' | 'runs' | 'enabled'>>,
+  validKeys: PlanCharacterKey[],
+): Map<number, Array<{ characterKey: PlanCharacterKey | 'auto'; runs: number }>> {
+  const valid = new Set(validKeys)
+  const byProduct = new Map<number, Map<string, number>>()
+  for (const root of roots) {
+    if (root.enabled === false) continue
+    const key = root.characterKey && valid.has(root.characterKey) ? root.characterKey : 'auto'
+    const owners = byProduct.get(root.productTypeId) ?? new Map<string, number>()
+    owners.set(key, (owners.get(key) ?? 0) + root.runs)
+    byProduct.set(root.productTypeId, owners)
+  }
+
+  const result = new Map<number, Array<{ characterKey: PlanCharacterKey | 'auto'; runs: number }>>()
+  for (const [productTypeId, owners] of byProduct) {
+    if (owners.size < 2) continue
+    result.set(
+      productTypeId,
+      [...owners].map(([characterKey, runs]) => ({
+        characterKey: characterKey as PlanCharacterKey | 'auto',
+        runs,
+      })),
+    )
   }
   return result
 }

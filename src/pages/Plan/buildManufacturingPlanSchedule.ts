@@ -3,6 +3,7 @@ import {
   buildSchedulerCharacters,
   planOwnerValidKeys,
   resolvePlanCharacters,
+  rootOwnerRunShares,
   settingsWithOwnerTimeSkills,
   sumPlanCrewSlots,
 } from '@/lib/planCharacters'
@@ -121,6 +122,7 @@ export function buildManufacturingPlanSchedule(input: BuildManufacturingPlanSche
     template.nodeOverrides,
     ownerValidKeys,
   )
+  const rootOwnerRuns = rootOwnerRunShares(activePlanRoots(template.roots), ownerValidKeys)
   const settingsForProductTime = (productTypeId: number) => {
     const owner = ownerByProduct.get(productTypeId)
     if (!owner || owner === 'auto') return settings
@@ -170,6 +172,7 @@ export function buildManufacturingPlanSchedule(input: BuildManufacturingPlanSche
               ownerByProduct,
             ),
             ownerByProduct,
+            rootOwnerRuns,
           }
         })()
       : undefined

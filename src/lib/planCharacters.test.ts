@@ -5,6 +5,7 @@ import {
   characterDurationFactor,
   displayOwnerForProduct,
   resolvePlanCharacters,
+  rootOwnerRunShares,
   settingsWithOwnerTimeSkills,
   settingsWithPlanSellerFees,
   sumPlanCrewSlots,
@@ -14,6 +15,28 @@ import { schedulePlanJobs } from '@/pages/Plan/planScheduler'
 import { DEFAULT_SETTINGS } from '@/types'
 
 describe('resolvePlanCharacters', () => {
+  it('uses a remembered name when the signed-in list does not include that id', () => {
+    const [character] = resolvePlanCharacters({
+      keys: ['sso:2124647639'],
+      sso: [],
+      manual: [],
+      settingsSkills: DEFAULT_SETTINGS.skills,
+      names: { 'sso:2124647639': 'Zoe Mills 2nd' },
+    })
+    expect(character?.name).toBe('Zoe Mills 2nd')
+  })
+
+  it('matches a character id stored as a string', () => {
+    const [character] = resolvePlanCharacters({
+      keys: ['sso:2124647639'],
+      sso: [{ characterId: '2124647639' as unknown as number, characterName: 'Zoe Mills 2nd' }],
+      manual: [],
+      settingsSkills: DEFAULT_SETTINGS.skills,
+    })
+    expect(character?.name).toBe('Zoe Mills 2nd')
+    expect(character?.skillsAssumed).toBe(true)
+  })
+
   it('falls back to settings skills when an SSO character has no snapshot', () => {
     const [character] = resolvePlanCharacters({
       keys: ['sso:9'],
@@ -34,6 +57,24 @@ describe('characterDurationFactor', () => {
     expect(
       characterDurationFactor(better, { ...base, industry: 0, advancedIndustry: 0 }, {}),
     ).toBeLessThan(1)
+  })
+})
+
+describe('rootOwnerRunShares', () => {
+  it('splits runs when two copies of one product have different owners', () => {
+    const shares = rootOwnerRunShares(
+      [
+        { productTypeId: 1, characterKey: 'sso:1', runs: 100, enabled: true },
+        { productTypeId: 1, characterKey: 'sso:2', runs: 40 },
+        { productTypeId: 2, characterKey: 'sso:1', runs: 10 },
+      ],
+      ['sso:1', 'sso:2'],
+    )
+    expect(shares.get(1)).toEqual([
+      { characterKey: 'sso:1', runs: 100 },
+      { characterKey: 'sso:2', runs: 40 },
+    ])
+    expect(shares.has(2)).toBe(false)
   })
 })
 

@@ -60,10 +60,7 @@ function sessionFromTokens(tokens: EveAuthTokens): EveAuthSession {
   return { tokens, character }
 }
 
-function storedFromSession(
-  session: EveAuthSession,
-  existing?: StoredCharacter,
-): StoredCharacter {
+function storedFromSession(session: EveAuthSession, existing?: StoredCharacter): StoredCharacter {
   const claims = parseAccessToken(session.tokens.accessToken)
   return {
     characterId: session.character.characterId,
@@ -192,6 +189,7 @@ function updateCharacterTokens(characterId: number, tokens: EveAuthTokens): Stor
   const characters = [...accounts.characters]
   characters[index] = updated
   saveAuthAccounts({ ...accounts, characters })
+  notifyAuthAccountsChanged()
   return updated
 }
 
@@ -217,6 +215,21 @@ export async function getValidAccessToken(characterId?: number): Promise<string 
     removeCharacter(id)
     return null
   }
+}
+
+type AuthAccountsListener = () => void
+let accountsListener: AuthAccountsListener | undefined
+
+/** Auth storage changed outside the Zustand snapshot (token refresh). */
+export function subscribeAuthAccounts(listener: AuthAccountsListener): () => void {
+  accountsListener = listener
+  return () => {
+    if (accountsListener === listener) accountsListener = undefined
+  }
+}
+
+function notifyAuthAccountsChanged(): void {
+  accountsListener?.()
 }
 
 export function setActiveCharacter(characterId: number): EveCharacterSession | null {
@@ -267,9 +280,7 @@ export function touchCharacterSync(
     ...existing,
     lastSyncedAt: patch?.lastSyncedAt ?? existing.lastSyncedAt,
     skills: patch?.skills ? { ...patch.skills } : existing.skills,
-    trainedSkills: patch?.trainedSkills
-      ? { ...patch.trainedSkills }
-      : existing.trainedSkills,
+    trainedSkills: patch?.trainedSkills ? { ...patch.trainedSkills } : existing.trainedSkills,
     skillsSnapshotVersion: CHARACTER_SKILLS_SNAPSHOT_VERSION,
   }
   saveAuthAccounts({ ...accounts, characters })

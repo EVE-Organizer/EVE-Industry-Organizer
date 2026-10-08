@@ -1,5 +1,10 @@
 import { useEffect, useMemo } from 'react'
-import { useCharactersIndustryJobs, useCharactersLocationInventory } from '@/hooks/useCharacterIndustryData'
+import { fetchUniverseCharacterNames } from '@/services/character/characterNamesService'
+import { isFallbackCharacterName } from '@/lib/planCharacters'
+import {
+  useCharactersIndustryJobs,
+  useCharactersLocationInventory,
+} from '@/hooks/useCharacterIndustryData'
 import { resolvePlanCharacters } from '@/lib/planCharacters'
 import { progressStepsFromJobs, syncPlanProgress } from '@/lib/planProgress'
 import { stockStepProgress } from '@/lib/planStock'
@@ -28,6 +33,7 @@ export function usePlanCharacters(
   const manualCharacters = useAppStore((s) => s.userData.manualCharacters)
   const keys = template?.characters
   const bonuses = template?.characterSlotBonus
+  const names = template?.characterNames
 
   return useMemo(() => {
     const manual = manualCharacters ?? []
@@ -41,6 +47,7 @@ export function usePlanCharacters(
       manual,
       settingsSkills: settings.skills,
       bonuses,
+      names,
     })
     const toOption = (key: PlanCharacterKey, name: string): PlanOwnerOption => ({
       key,
@@ -59,7 +66,74 @@ export function usePlanCharacters(
       available: everyone.filter((option) => !onPlan.has(option.key)),
       everyone,
     }
-  }, [keys, bonuses, authCharacters, manualCharacters, settings.skills])
+  }, [keys, bonuses, names, authCharacters, manualCharacters, settings.skills])
+}
+
+/**
+ * Fills plan character names from the signed-in list, then public ESI, and stores them
+ * so a missing session does not keep showing "Character {id}".
+ */
+export function useRememberPlanCharacterNames(input: {
+  enabled: boolean
+  keys: PlanCharacterKey[]
+  knownNames: Record<string, string>
+  storedNames: Record<string, string> | undefined
+  onSave: (names: Record<string, string>) => void
+}) {
+  const { enabled, keys, knownNames, storedNames, onSave } = input
+  const keyList = keys.join(',')
+  const knownList = Object.entries(knownNames)
+    .map(([key, name]) => `${key}=${name}`)
+    .sort()
+    .join('|')
+  const storedList = Object.entries(storedNames ?? {})
+    .map(([key, name]) => `${key}=${name}`)
+    .sort()
+    .join('|')
+
+  useEffect(() => {
+    if (!enabled) return
+    const updates: Record<string, string> = {}
+    const missingIds: number[] = []
+    const missingKeys = new Map<number, PlanCharacterKey>()
+
+    for (const key of keys) {
+      const known = knownNames[key]
+      if (known && !isFallbackCharacterName(known)) {
+        if (storedNames?.[key] !== known) updates[key] = known
+        continue
+      }
+      if (storedNames?.[key] && !isFallbackCharacterName(storedNames[key])) continue
+      if (!key.startsWith('sso:')) continue
+      const id = Number(key.slice(4))
+      if (!Number.isFinite(id)) continue
+      missingIds.push(id)
+      missingKeys.set(id, key)
+    }
+
+    let cancelled = false
+    void (async () => {
+      if (missingIds.length > 0) {
+        try {
+          const fetched = await fetchUniverseCharacterNames(missingIds)
+          for (const [id, name] of fetched) {
+            const key = missingKeys.get(id)
+            if (key) updates[key] = name
+          }
+        } catch {
+          // A failed name lookup leaves the placeholder until the next plan open
+        }
+      }
+      if (cancelled || Object.keys(updates).length === 0) return
+      onSave(updates)
+    })()
+
+    return () => {
+      cancelled = true
+    }
+    // keyList/knownList/storedList are the stable signatures of the object inputs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, keyList, knownList, storedList, onSave])
 }
 
 /**
@@ -79,9 +153,7 @@ export function usePlanProgressSync(input: {
   const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
 
   const characterIds = useMemo(() => {
-    const ids = (template?.characters ?? [])
-      .map(ssoIdOf)
-      .filter((id): id is number => id != null)
+    const ids = (template?.characters ?? []).map(ssoIdOf).filter((id): id is number => id != null)
     if (ids.length === 0 && activeCharacterId != null) ids.push(activeCharacterId)
     return ids
   }, [template?.characters, activeCharacterId])

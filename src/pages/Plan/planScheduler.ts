@@ -38,6 +38,11 @@ export interface SchedulePlanInput {
   /** When set, production jobs use per-character slot pools and owners. */
   characters?: SchedulerCharacter[]
   ownerByProduct?: Map<number, PlanCharacterKey | 'auto'>
+  /**
+   * Root copies of one product that have different owners. Each share is scheduled
+   * on that owner instead of letting Auto put the whole pile on whoever is free.
+   */
+  rootOwnerRuns?: Map<number, Array<{ characterKey: PlanCharacterKey | 'auto'; runs: number }>>
   /** Max parallel copy jobs per T2 product (T1 BPO lines). Default 1. */
   copyBposByProduct?: Map<number, number>
 }
@@ -340,6 +345,7 @@ function scheduleProductionNodes(
   multi?: {
     characters: SchedulerCharacter[]
     ownerByProduct: Map<number, PlanCharacterKey | 'auto'>
+    rootOwnerRuns?: Map<number, Array<{ characterKey: PlanCharacterKey | 'auto'; runs: number }>>
   },
 ): { jobs: ScheduledPlanJob[]; supplies: ScheduleEvent[]; demands: ScheduleEvent[] } {
   const buildNodes = nodes.filter((n) => n.mode === 'build' && n.runs > 0)
@@ -354,34 +360,82 @@ function scheduleProductionNodes(
     const pool: PlanJobPool = activity === 'reaction' ? 'reaction' : 'manufacturing'
     const aggregateSlotFreeAt = pool === 'reaction' ? rxnSlotFreeAt : mfgSlotFreeAt
 
-    let remainingRuns = node.runs
+    // Duplicate roots of this product keep their own owners; one owner uses the product pin
+    const shares = node.isRoot ? multi?.rootOwnerRuns?.get(node.productTypeId) : undefined
+    const chunks =
+      shares && shares.length > 1
+        ? shares
+        : [{ characterKey: undefined as PlanCharacterKey | 'auto' | undefined, runs: node.runs }]
     const runsPerJob = Math.max(1, Math.ceil(node.runs / Math.max(1, node.concurrentCopies)))
 
-    while (remainingRuns > 0) {
-      const runsThisJob = Math.min(remainingRuns, runsPerJob)
-      const baseJobDurationHours =
-        runsPerJob > 0 ? (node.jobTimeSeconds * runsThisJob) / runsPerJob / 3600 : 0
+    for (const chunk of chunks) {
+      let remainingRuns = chunk.runs
+      const forcedOwner = chunk.characterKey
 
-      let slot: number
-      let startHour: number
-      let endHour: number
-      let characterKey: PlanCharacterKey | undefined
+      while (remainingRuns > 0) {
+        const runsThisJob = Math.min(remainingRuns, runsPerJob)
+        const baseJobDurationHours =
+          runsPerJob > 0 ? (node.jobTimeSeconds * runsThisJob) / runsPerJob / 3600 : 0
 
-      if (characterPools && characterPools.length > 0) {
-        const owner = multi!.ownerByProduct.get(node.productTypeId)
-        const candidates = ownerCandidates(owner, characterPools, node)
-        let best: {
-          state: CharacterSlotPools
-          slot: number
-          startHour: number
-          endHour: number
-        } | null = null
+        let slot: number
+        let startHour: number
+        let endHour: number
+        let characterKey: PlanCharacterKey | undefined
 
-        for (const state of candidates) {
-          const slotFreeAt = slotFreeAtForPool(state, pool)
-          const candidateSlot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
-          const slotMinStart = slotFreeAt[candidateSlot] ?? 0
-          const candidateStart = earliestStartWithDependencies(
+        if (characterPools && characterPools.length > 0) {
+          const owner =
+            forcedOwner === 'auto'
+              ? undefined
+              : (forcedOwner ?? multi!.ownerByProduct.get(node.productTypeId))
+          const candidates = ownerCandidates(owner, characterPools, node)
+          let best: {
+            state: CharacterSlotPools
+            slot: number
+            startHour: number
+            endHour: number
+          } | null = null
+
+          for (const state of candidates) {
+            const slotFreeAt = slotFreeAtForPool(state, pool)
+            const candidateSlot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
+            const slotMinStart = slotFreeAt[candidateSlot] ?? 0
+            const candidateStart = earliestStartWithDependencies(
+              node,
+              runsThisJob,
+              slotMinStart,
+              nodesById,
+              supplies,
+              demands,
+              scienceReadyByProduct,
+            )
+            const candidateEnd =
+              candidateStart + baseJobDurationHours * state.character.durationFactor(node)
+            if (
+              !best ||
+              candidateStart < best.startHour - 1e-9 ||
+              (Math.abs(candidateStart - best.startHour) < 1e-9 && candidateEnd < best.endHour)
+            ) {
+              best = {
+                state,
+                slot: candidateSlot,
+                startHour: candidateStart,
+                endHour: candidateEnd,
+              }
+            }
+          }
+
+          // ponytail: ownerCandidates always returns ≥1 pool
+          const picked = best!
+          slot = picked.slot
+          startHour = picked.startHour
+          endHour = picked.endHour
+          characterKey = picked.state.key
+          const slotFreeAt = slotFreeAtForPool(picked.state, pool)
+          slotFreeAt[slot] = endHour
+        } else {
+          slot = aggregateSlotFreeAt.indexOf(Math.min(...aggregateSlotFreeAt))
+          const slotMinStart = aggregateSlotFreeAt[slot] ?? 0
+          startHour = earliestStartWithDependencies(
             node,
             runsThisJob,
             slotMinStart,
@@ -390,73 +444,38 @@ function scheduleProductionNodes(
             demands,
             scienceReadyByProduct,
           )
-          const candidateEnd =
-            candidateStart + baseJobDurationHours * state.character.durationFactor(node)
-          if (
-            !best ||
-            candidateStart < best.startHour - 1e-9 ||
-            (Math.abs(candidateStart - best.startHour) < 1e-9 && candidateEnd < best.endHour)
-          ) {
-            best = {
-              state,
-              slot: candidateSlot,
-              startHour: candidateStart,
-              endHour: candidateEnd,
-            }
+          endHour = startHour + baseJobDurationHours
+          aggregateSlotFreeAt[slot] = endHour
+        }
+
+        const outputQty = runsThisJob * (node.outputQty / Math.max(1, node.runs))
+
+        jobs.push({
+          productTypeId: node.productTypeId,
+          name: node.name,
+          slot,
+          startHour,
+          endHour,
+          runs: runsThisJob,
+          outputQty,
+          activity,
+          pool,
+          characterKey,
+        })
+
+        supplies.push({ productTypeId: node.productTypeId, hour: endHour, qty: outputQty })
+
+        for (const childId of node.childProductTypeIds) {
+          const child = nodesById.get(childId)
+          if (!child || child.mode !== 'build') continue
+          const qty = childDemandForJob(child, node, runsThisJob)
+          if (qty > 0) {
+            demands.push({ productTypeId: child.productTypeId, hour: startHour, qty })
           }
         }
 
-        // ponytail: ownerCandidates always returns ≥1 pool
-        const picked = best!
-        slot = picked.slot
-        startHour = picked.startHour
-        endHour = picked.endHour
-        characterKey = picked.state.key
-        const slotFreeAt = slotFreeAtForPool(picked.state, pool)
-        slotFreeAt[slot] = endHour
-      } else {
-        slot = aggregateSlotFreeAt.indexOf(Math.min(...aggregateSlotFreeAt))
-        const slotMinStart = aggregateSlotFreeAt[slot] ?? 0
-        startHour = earliestStartWithDependencies(
-          node,
-          runsThisJob,
-          slotMinStart,
-          nodesById,
-          supplies,
-          demands,
-          scienceReadyByProduct,
-        )
-        endHour = startHour + baseJobDurationHours
-        aggregateSlotFreeAt[slot] = endHour
+        remainingRuns -= runsThisJob
       }
-
-      const outputQty = runsThisJob * (node.outputQty / Math.max(1, node.runs))
-
-      jobs.push({
-        productTypeId: node.productTypeId,
-        name: node.name,
-        slot,
-        startHour,
-        endHour,
-        runs: runsThisJob,
-        outputQty,
-        activity,
-        pool,
-        characterKey,
-      })
-
-      supplies.push({ productTypeId: node.productTypeId, hour: endHour, qty: outputQty })
-
-      for (const childId of node.childProductTypeIds) {
-        const child = nodesById.get(childId)
-        if (!child || child.mode !== 'build') continue
-        const qty = childDemandForJob(child, node, runsThisJob)
-        if (qty > 0) {
-          demands.push({ productTypeId: child.productTypeId, hour: startHour, qty })
-        }
-      }
-
-      remainingRuns -= runsThisJob
     }
   }
 
@@ -473,6 +492,7 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
       ? {
           characters,
           ownerByProduct: ownerByProduct ?? new Map<number, PlanCharacterKey | 'auto'>(),
+          rootOwnerRuns: input.rootOwnerRuns,
         }
       : undefined
 
