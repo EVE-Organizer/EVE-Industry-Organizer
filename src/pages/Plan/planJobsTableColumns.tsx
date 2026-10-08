@@ -16,9 +16,9 @@ import {
   PlanRunsCell,
   RootRunsInput,
   ReadOnlyJobsBposInput,
+  ReadOnlyRootBposInput,
   ReadOnlyJobsRunsInput,
   ReadOnlyJobsTimeInput,
-  ReadOnlyRootBposInput,
   RemoveIcon,
   VolumeCell,
 } from '@/pages/Plan/planJobsTableCells'
@@ -118,6 +118,7 @@ export interface PlanJobsTableMeta {
   ) => void
   onSetOwner?: (target: { rootId?: string; productTypeId: number }, key?: PlanCharacterKey) => void
   onSetBpos?: (productTypeId: number, copies: number) => void
+  onSetCopyBpos?: (productTypeId: number, copies: number) => void
   onSetReadyBy?: (rootId: string, hours: number | undefined) => void
   onApplyDeadline?: (rootId: string) => void
   onDuplicate?: (rootId: string) => void
@@ -465,22 +466,31 @@ function renderBpos(row: BuildBlueprintRow, rowKey: string, meta: PlanJobsTableM
   if (row.bpos == null) return <span className="opacity-30">—</span>
   const suggestion =
     row.suggestedBpos != null && row.suggestedBpos !== row.bpos ? row.suggestedBpos : null
+  const copySuggestion =
+    row.suggestedCopyBpos != null && row.suggestedCopyBpos !== (row.copyBpos ?? 1)
+      ? row.suggestedCopyBpos
+      : null
+  const bposInput =
+    !row.isRoot && !meta.readOnly && meta.onSetBpos ? (
+      <BposInput
+        key={`${rowKey}-bpos`}
+        bpos={row.bpos}
+        onCommit={(copies) => meta.onSetBpos!(row.productTypeId, copies)}
+      />
+    ) : row.isRoot ? (
+      <ReadOnlyRootBposInput />
+    ) : (
+      <ReadOnlyJobsBposInput bpos={row.bpos} ariaLabel={`Parallel BPOs for ${row.name}`} />
+    )
+
   return (
     <div className="flex flex-col gap-0.5">
       {row.isRoot ? (
         <Tooltip text="Duplicate this job to run it on more BPOs" placement="top">
-          <span className="block w-full">
-            <ReadOnlyRootBposInput />
-          </span>
+          <span className="block w-full">{bposInput}</span>
         </Tooltip>
-      ) : meta.readOnly || !meta.onSetBpos ? (
-        <ReadOnlyJobsBposInput bpos={row.bpos} ariaLabel={`Parallel BPOs for ${row.name}`} />
       ) : (
-        <BposInput
-          key={`${rowKey}-bpos`}
-          bpos={row.bpos}
-          onCommit={(copies) => meta.onSetBpos!(row.productTypeId, copies)}
-        />
+        bposInput
       )}
       {suggestion != null && !row.isRoot && !meta.readOnly && meta.onSetBpos ? (
         <button
@@ -490,6 +500,18 @@ function renderBpos(row: BuildBlueprintRow, rowKey: string, meta: PlanJobsTableM
         >
           suggest {suggestion}
         </button>
+      ) : null}
+      {copySuggestion != null && !row.isRoot && !meta.readOnly && meta.onSetCopyBpos ? (
+        <button
+          type="button"
+          className="text-[10px] text-info hover:underline text-left"
+          onClick={() => meta.onSetCopyBpos!(row.productTypeId, copySuggestion)}
+        >
+          copy {copySuggestion}
+        </button>
+      ) : null}
+      {row.bposHint ? (
+        <span className="text-[10px] text-warning/90 leading-tight">{row.bposHint}</span>
       ) : null}
     </div>
   )

@@ -218,7 +218,7 @@ export function ReadOnlyJobsTimeInput({ hours, ariaLabel }: { hours?: number; ar
   )
 }
 
-const READONLY_BPOS_INPUT_CLASS = `input input-bordered input-xs w-full max-w-[3.25rem] tabular-nums mx-auto ${footerDisabledInputClass}`
+const READONLY_BPOS_INPUT_CLASS = `input input-bordered input-xs w-full max-w-[4.875rem] tabular-nums mx-auto ${footerDisabledInputClass}`
 
 /** Root rows always represent one BPO; duplicate the job for another parallel line. */
 export function ReadOnlyRootBposInput() {
@@ -541,7 +541,7 @@ export function BposInput({
   return (
     <input
       type="number"
-      className="input input-bordered input-xs w-full max-w-[3.25rem] tabular-nums mx-auto"
+      className="input input-bordered input-xs w-full max-w-[4.875rem] tabular-nums mx-auto"
       min={1}
       step={1}
       aria-label="Parallel BPOs"

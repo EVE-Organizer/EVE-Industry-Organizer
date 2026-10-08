@@ -16,6 +16,10 @@ export type BuildBlueprintRow = ExpandablePlanRow & {
   enabled?: boolean
   bpos?: number
   suggestedBpos?: number
+  suggestedCopyBpos?: number
+  /** T1 BPO lines for T2 copy jobs (stored override). */
+  copyBpos?: number
+  bposHint?: string
   readyByHours?: number
   finishesAtHours?: number
   /** Non-root build jobs under this root. Ready-by Fix only applies when this is > 0. */

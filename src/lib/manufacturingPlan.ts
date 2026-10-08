@@ -23,7 +23,11 @@ import {
   jobTimeSecondsForRuns,
   runsForDemand,
 } from '@/lib/rootRunsDuration'
-import { activeConcurrentCopies, totalRootRuns } from '@/lib/supplyChainSlots'
+import {
+  activeConcurrentCopies,
+  totalRootBposForProduct,
+  totalRootRuns,
+} from '@/lib/supplyChainSlots'
 import { templateWithActiveRoots } from '@/lib/planRootEnabled'
 import {
   effectivePlanSlots,
@@ -559,14 +563,6 @@ function finalizeNodes(
   const { blueprints, typeMap, prices, systemCostIndex, reactionCostIndex } = input
   const nodes: PlanNode[] = []
   const rootRunsTotal = totalRootRuns(template.roots.map((r) => r.runs))
-  const rootDuplicateCounts = new Map<number, number>()
-  for (const root of template.roots) {
-    rootDuplicateCounts.set(
-      root.productTypeId,
-      (rootDuplicateCounts.get(root.productTypeId) ?? 0) + 1,
-    )
-  }
-
   for (const accum of nodeMap.values()) {
     const totalDemandQty = accum.demandByParent.reduce((s, d) => s + d.qty, 0)
     const blueprint = accum.blueprint
@@ -588,17 +584,13 @@ function finalizeNodes(
       : template.defaultRunsPerBpc
 
     const bpcCount = blueprint && accum.mode === 'build' ? bpcCountForRuns(runs, runsPerBpc) : 0
-    const concurrent =
-      override?.copies ??
-      (accum.mode === 'build'
-        ? activeConcurrentCopies(
-            accum.isRoot,
-            bpcCount,
-            slots,
-            rootRunsTotal,
-            rootDuplicateCounts.get(accum.productTypeId) ?? 1,
-          )
-        : 0)
+    const rootParallel = totalRootBposForProduct(template.roots, accum.productTypeId)
+    const concurrent = accum.isRoot
+      ? activeConcurrentCopies(true, bpcCount, slots, rootRunsTotal, rootParallel)
+      : (override?.copies ??
+        (accum.mode === 'build'
+          ? activeConcurrentCopies(false, bpcCount, slots, rootRunsTotal, 1)
+          : 0))
 
     const meTe = blueprint
       ? resolveBlueprintMeTe(blueprint.tier, settings, override, blueprint)

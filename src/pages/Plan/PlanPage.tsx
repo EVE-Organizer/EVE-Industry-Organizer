@@ -56,6 +56,8 @@ import {
 import { createPlanRootId } from '@/services/sync/types'
 import { duplicatePlanRootAfter, movePlanRootById } from '@/lib/planRootOrder'
 import { activePlanRoots, displayNodeForRoot } from '@/lib/planRootEnabled'
+import { setNodeCopies, setT2Options } from '@/lib/planActions'
+import { suggestBlueprintLines } from '@/lib/blueprintLineSuggestion'
 import {
   computePlanProfitSummary,
   computeRootProfitBreakdown,
@@ -600,6 +602,14 @@ export function PlanPage() {
   const buildRows = useMemo(() => {
     if (!activeTemplate) return []
 
+    const slotCounts = {
+      manufacturing: plan.slots,
+      reactions: plan.reactionSlots,
+      research: plan.scienceSlots,
+    }
+    const nodeOverrides = activeTemplate.nodeOverrides
+    const enabledRoots = activePlanRoots(activeTemplate.roots)
+
     const nonRootBuild = plan.nodes.filter((n) => n.mode === 'build' && !n.isRoot)
     const subExpandable = flattenPlanNodesExpandable(nonRootBuild, 'build-blueprints')
 
@@ -614,6 +624,7 @@ export function PlanPage() {
       if (!bp) return []
       const name = typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`
       const node = displayNodeForRoot(root, name, bp, planNodesByProductId.get(root.productTypeId))
+      const override = nodeOverrides[root.productTypeId]
 
       const instance = (rootSeen.get(root.productTypeId) ?? 0) + 1
       rootSeen.set(root.productTypeId, instance)
@@ -634,24 +645,38 @@ export function PlanPage() {
           runs: root.runs,
           durationHours: root.productionDurationHours,
           jobTimeHours: bp
-            ? rootJobTimeHours(
-                root,
-                bp,
-                activeSettings,
-                activeTemplate.nodeOverrides[root.productTypeId],
-              )
+            ? rootJobTimeHours(root, bp, activeSettings, override)
             : root.productionDurationHours,
           outputQty: root.runs * bp.productQuantity,
           isRoot: true,
           enabled: root.enabled !== false,
+          bpos: 1,
           runsFromDuration: root.runsFromDuration,
           runsFromReadyBy: root.runsFromReadyBy,
+          haveBpcs: override?.haveBpcs,
         },
       ]
     })
 
     const subRows = subExpandable.map((row) => {
       const productTypeId = row.node.productTypeId
+      const override = nodeOverrides[productTypeId]
+      const bp = getBlueprintForProduct(blueprints, productTypeId)
+      const bpos = override?.copies ?? row.node.concurrentCopies
+      const suggestion =
+        bp &&
+        suggestBlueprintLines({
+          node: row.node,
+          blueprint: bp,
+          settings: activeSettings,
+          roots: enabledRoots,
+          nodes: plan.nodes,
+          blueprints,
+          nodeOverrides,
+          slots: slotCounts,
+          prices: buyPrices,
+        })
+
       return {
         ...row,
         rootId: undefined as string | undefined,
@@ -663,6 +688,14 @@ export function PlanPage() {
         outputQty: row.node.outputQty,
         isRoot: false,
         depth: row.depth + 1,
+        bpos,
+        suggestedBpos: suggestion?.copies,
+        suggestedCopyBpos: suggestion?.copyBpos,
+        copyBpos: override?.copyBpos,
+        haveBpcs: override?.haveBpcs,
+        bposHint: suggestion?.inventionBottleneck
+          ? 'Invention still exceeds root job time; add science slots or lower runs.'
+          : undefined,
       }
     })
 
@@ -670,10 +703,15 @@ export function PlanPage() {
   }, [
     activeTemplate,
     planNodesByProductId,
+    plan.nodes,
+    plan.slots,
+    plan.reactionSlots,
+    plan.scienceSlots,
     blueprints,
     typeMap,
     blueprintTypeIdByProduct,
     activeSettings,
+    buyPrices,
   ])
 
   const manufactureRows = useMemo(() => {
@@ -1351,6 +1389,27 @@ export function PlanPage() {
                         [productTypeId]: nextOverride,
                       },
                     })
+                  }
+            }
+            onSetBpos={
+              isSharedView
+                ? undefined
+                : (productTypeId, copies) => {
+                    const template = selectedPlanTemplateFromStore()
+                    if (!template) return
+                    updatePlanTemplate(template.id, setNodeCopies(template, productTypeId, copies))
+                  }
+            }
+            onSetCopyBpos={
+              isSharedView
+                ? undefined
+                : (productTypeId, copies) => {
+                    const template = selectedPlanTemplateFromStore()
+                    if (!template) return
+                    updatePlanTemplate(
+                      template.id,
+                      setT2Options(template, productTypeId, { copyBpos: copies }),
+                    )
                   }
             }
             onSetAllDuration={

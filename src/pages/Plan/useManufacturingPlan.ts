@@ -17,6 +17,15 @@ import {
 } from '@/lib/manufacturingSlots'
 import type { GlobalSettings, ManufacturingPlanTemplate, SystemInfo } from '@/types'
 
+function copyBposByProductFromTemplate(template: ManufacturingPlanTemplate): Map<number, number> {
+  const map = new Map<number, number>()
+  for (const [key, override] of Object.entries(template.nodeOverrides ?? {})) {
+    if (override.copyBpos == null) continue
+    map.set(Number(key), Math.max(1, Math.floor(override.copyBpos)))
+  }
+  return map
+}
+
 export interface UseManufacturingPlanOptions {
   /** When false, skips flow simulation (graph tab only). */
   includeSimulation?: boolean
@@ -110,6 +119,7 @@ export function useManufacturingPlan(
         : undefined
 
     const scheduleExtras = multiCharacterSchedule ?? {}
+    const copyBposByProduct = copyBposByProductFromTemplate(template)
     const jobs = schedulePlanJobs({
       nodes: expanded.nodes,
       slots: expanded.slots,
@@ -118,6 +128,7 @@ export function useManufacturingPlan(
       windowHours: Number.POSITIVE_INFINITY,
       pipeline,
       blueprints,
+      copyBposByProduct,
       ...scheduleExtras,
     })
     const productionJobs = schedulePlanJobs({
@@ -126,6 +137,7 @@ export function useManufacturingPlan(
       reactionSlots: expanded.reactionSlots,
       windowHours: Number.POSITIVE_INFINITY,
       blueprints,
+      copyBposByProduct,
       ...scheduleExtras,
     })
     const windowHours = Math.max(1, windowHoursFromJobs(jobs))

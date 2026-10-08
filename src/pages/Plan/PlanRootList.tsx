@@ -46,6 +46,8 @@ interface PlanRootListProps {
   onToggleEnabled?: (rootId: string, enabled: boolean) => void
   onRemove?: (rootId: string) => void
   onReorder?: (fromRootId: string, toRootId: string) => void
+  onSetBpos?: (productTypeId: number, copies: number) => void
+  onSetCopyBpos?: (productTypeId: number, copies: number) => void
   planWindowHours?: number
   typeMap: Map<number, TypeInfo>
   /** Search / price controls rendered above the jobs header in the same card. */
@@ -68,6 +70,8 @@ export function PlanRootList({
   onToggleEnabled,
   onRemove,
   onReorder,
+  onSetBpos,
+  onSetCopyBpos,
   planWindowHours,
   typeMap,
   compose,
@@ -229,6 +233,8 @@ export function PlanRootList({
           onOpenSetup={onOpenSetup}
           onOpenProfit={onOpenProfit}
           onChange={onChange}
+          onSetBpos={onSetBpos}
+          onSetCopyBpos={onSetCopyBpos}
           onDuplicate={onDuplicate}
           onRemove={onRemove}
           onToggleEnabled={onToggleEnabled}

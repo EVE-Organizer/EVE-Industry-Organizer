@@ -1,5 +1,9 @@
 import { appRoute } from '@/lib/paths'
-import { createPlanRootId, createPlanTemplateId, normalizeGlobalSettings } from '@/services/sync/types'
+import {
+  createPlanRootId,
+  createPlanTemplateId,
+  normalizeGlobalSettings,
+} from '@/services/sync/types'
 import { DEFAULT_SETTINGS } from '@/types'
 import type {
   GlobalSettings,
@@ -170,7 +174,9 @@ export function mergeSharedSettingsForImport(
   return normalizeGlobalSettings({ ...current, ...sharedPlanContext })
 }
 
-export function normalizeSharedSettings(settings: Partial<GlobalSettings> | undefined): GlobalSettings {
+export function normalizeSharedSettings(
+  settings: Partial<GlobalSettings> | undefined,
+): GlobalSettings {
   return normalizeGlobalSettings({ ...DEFAULT_SETTINGS, ...(settings ?? {}) })
 }
 
@@ -214,7 +220,11 @@ export async function parsePlanShareHash(hash: string): Promise<PlanSharePayload
 
 export function planShareSearchParams(search?: URLSearchParams | string): URLSearchParams {
   const raw =
-    typeof search === 'string' ? new URLSearchParams(search) : search ? new URLSearchParams(search) : null
+    typeof search === 'string'
+      ? new URLSearchParams(search)
+      : search
+        ? new URLSearchParams(search)
+        : null
   const shareSearch = new URLSearchParams()
   const view = raw?.get('view')
   if (view) shareSearch.set('view', view)

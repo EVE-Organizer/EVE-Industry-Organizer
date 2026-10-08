@@ -1,6 +1,26 @@
+import type { PlanRootEntry } from '@/types'
+
 /** Sum of root run counts for the active plan template. */
 export function totalRootRuns(rootRuns: number[]): number {
   return rootRuns.reduce((sum, runs) => sum + runs, 0)
+}
+
+/** Enabled root rows for one product. One BPO per row; duplicate the row for another line. */
+export function totalRootBposForProduct(
+  roots: readonly PlanRootEntry[],
+  productTypeId: number,
+): number {
+  let total = 0
+  for (const root of roots) {
+    if (root.productTypeId !== productTypeId || root.enabled === false) continue
+    total += 1
+  }
+  return Math.max(1, total)
+}
+
+/** Parallel lines that can actually run given skill slots. */
+export function cappedParallelLines(requestedLines: number, skillSlots: number): number {
+  return Math.min(Math.max(1, skillSlots), Math.max(1, requestedLines))
 }
 
 /** How many root entries share the same product (each gets its own industry slot). */
@@ -30,10 +50,10 @@ export function activeConcurrentCopies(
   bpcCount: number,
   skillSlots: number,
   rootRunsTotal: number,
-  duplicateRoots = 1,
+  rootParallelLines = 1,
 ): number {
   if (bpcCount <= 0) return 0
-  if (isRoot) return Math.min(skillSlots, Math.max(1, duplicateRoots))
+  if (isRoot) return cappedParallelLines(rootParallelLines, skillSlots)
   const supply = supplySlotsForComponent(bpcCount, rootRunsTotal)
   return Math.min(skillSlots, bpcCount, supply)
 }

@@ -4,7 +4,7 @@ import {
   type ExpandablePlanRow,
 } from '@/pages/Plan/planTreeLines'
 import { bpcCountForRuns, defaultRunsPerBpc, jobTimeSecondsForRuns } from '@/lib/rootRunsDuration'
-import { activeConcurrentCopies } from '@/lib/supplyChainSlots'
+import { cappedParallelLines } from '@/lib/supplyChainSlots'
 import type { BlueprintInfo, GlobalSettings, PlanNode, PlanRootEntry } from '@/types'
 
 export type ManufactureDisplayRow = ExpandablePlanRow & {
@@ -24,18 +24,10 @@ export function rootDisplayPlanNode(
   meTeOverride?: { me?: number; te?: number },
 ): PlanNode {
   const runs = root.runs
-  const runsPerBpc =
-    runsPerBpcOverride ?? defaultRunsPerBpc(blueprint, defaultRunsPerBpcTemplate)
+  const runsPerBpc = runsPerBpcOverride ?? defaultRunsPerBpc(blueprint, defaultRunsPerBpcTemplate)
   const bpcCount = bpcCountForRuns(runs, runsPerBpc)
-  const rootRunsTotal = runs
-  const concurrent = activeConcurrentCopies(true, bpcCount, slots, rootRunsTotal)
-  const jobTimeSeconds = jobTimeSecondsForRuns(
-    blueprint,
-    settings,
-    runs,
-    concurrent,
-    meTeOverride,
-  )
+  const concurrent = cappedParallelLines(1, slots)
+  const jobTimeSeconds = jobTimeSecondsForRuns(blueprint, settings, runs, concurrent, meTeOverride)
   const outputQty = runs * blueprint.productQuantity
 
   return {

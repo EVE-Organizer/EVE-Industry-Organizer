@@ -38,6 +38,8 @@ export interface SchedulePlanInput {
   /** When set, production jobs use per-character slot pools and owners. */
   characters?: SchedulerCharacter[]
   ownerByProduct?: Map<number, PlanCharacterKey | 'auto'>
+  /** Max parallel copy jobs per T2 product (T1 BPO lines). Default 1. */
+  copyBposByProduct?: Map<number, number>
 }
 
 interface CharacterSlotPools {
@@ -146,6 +148,7 @@ function earliestStartWithDependencies(
 function scheduleScienceStages(
   stages: PlanPipelineStage[],
   scienceSlots: number,
+  copyBposByProduct?: Map<number, number>,
 ): {
   jobs: ScheduledPlanJob[]
   readyByProduct: Map<number, number>
@@ -157,6 +160,7 @@ function scheduleScienceStages(
   const stageEnd = new Map<string, number>()
   const attemptEndsByStage = new Map<string, number[]>()
   const readyByProduct = new Map<number, number>()
+  const copyLaneFreeAt = new Map<number, number[]>()
 
   // Copy then invent in pipeline order. Each attempt is its own job (invention cannot batch).
   for (const stage of scienceStages) {
@@ -174,9 +178,32 @@ function scheduleScienceStages(
           depEnd = Math.max(depEnd, stageEnd.get(dep) ?? 0)
         }
       }
-      const slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
-      const startHour = Math.max(slotFreeAt[slot] ?? 0, depEnd)
+      let slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
+      let startHour = Math.max(slotFreeAt[slot] ?? 0, depEnd)
+      let laneEnds: number[] | undefined
+      let lane = 0
+      if (stage.activity === 'copy') {
+        const lanes = Math.max(1, copyBposByProduct?.get(stage.productTypeId) ?? 1)
+        laneEnds = copyLaneFreeAt.get(stage.productTypeId)
+        if (!laneEnds) {
+          laneEnds = Array.from({ length: lanes }, () => 0)
+          copyLaneFreeAt.set(stage.productTypeId, laneEnds)
+        }
+        lane = laneEnds.indexOf(Math.min(...laneEnds))
+        // Hold the BPO lane, then the science slot that is free by then — don't pin an idle slot.
+        const laneReady = Math.max(depEnd, laneEnds[lane] ?? 0)
+        startHour = Infinity
+        for (let s = 0; s < slotFreeAt.length; s++) {
+          const start = Math.max(slotFreeAt[s] ?? 0, laneReady)
+          if (start < startHour) {
+            startHour = start
+            slot = s
+          }
+        }
+      }
       const endHour = startHour + stage.durationHours
+      if (laneEnds) laneEnds[lane] = endHour
+      slotFreeAt[slot] = endHour
       jobs.push({
         productTypeId: stage.productTypeId,
         name: stage.name,
@@ -188,7 +215,6 @@ function scheduleScienceStages(
         activity: stage.activity,
         pool: 'science',
       })
-      slotFreeAt[slot] = endHour
       attemptEnds.push(endHour)
     }
 
@@ -378,7 +404,7 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
   const reactionSlots = input.reactionSlots ?? 1
 
   const scienceResult = pipeline
-    ? scheduleScienceStages(pipeline.stages, scienceSlots)
+    ? scheduleScienceStages(pipeline.stages, scienceSlots, input.copyBposByProduct)
     : {
         jobs: [] as ScheduledPlanJob[],
         readyByProduct: new Map<number, number>(),

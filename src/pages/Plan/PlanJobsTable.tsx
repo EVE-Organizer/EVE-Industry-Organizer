@@ -275,6 +275,7 @@ export interface PlanJobsTableProps {
   onChange?: PlanJobsTableMeta['onChange']
   onSetOwner?: PlanJobsTableMeta['onSetOwner']
   onSetBpos?: PlanJobsTableMeta['onSetBpos']
+  onSetCopyBpos?: PlanJobsTableMeta['onSetCopyBpos']
   onSetReadyBy?: PlanJobsTableMeta['onSetReadyBy']
   onApplyDeadline?: PlanJobsTableMeta['onApplyDeadline']
   onDuplicate?: (rootId: string) => void
@@ -308,6 +309,7 @@ export function PlanJobsTable({
   onChange,
   onSetOwner,
   onSetBpos,
+  onSetCopyBpos,
   onSetReadyBy,
   onApplyDeadline,
   onDuplicate,
@@ -386,6 +388,7 @@ export function PlanJobsTable({
       onChange,
       onSetOwner,
       onSetBpos,
+      onSetCopyBpos,
       onSetReadyBy,
       onApplyDeadline,
       onDuplicate,
@@ -417,6 +420,7 @@ export function PlanJobsTable({
       onChange,
       onSetOwner,
       onSetBpos,
+      onSetCopyBpos,
       onSetReadyBy,
       onApplyDeadline,
       onDuplicate,

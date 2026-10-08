@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { buildPlanPipeline } from '@/pages/Plan/planPipeline'
-import { schedulePlanJobs, detectOverUnder, productReadyHours, readyHoursByProductId, scheduledDurationHours, windowHoursFromJobs } from '@/pages/Plan/planScheduler'
+import {
+  schedulePlanJobs,
+  detectOverUnder,
+  productReadyHours,
+  readyHoursByProductId,
+  scheduledDurationHours,
+  windowHoursFromJobs,
+} from '@/pages/Plan/planScheduler'
 import { simulatePlanFlow } from '@/pages/Plan/planSimulator'
 import { DEFAULT_SETTINGS } from '@/types'
 import type { BlueprintInfo, PlanNode } from '@/types'
@@ -253,7 +260,9 @@ describe('schedulePlanJobs', () => {
       windowHours: 500,
       blueprints,
     })
-    const productionMfg = productionOnly.find((j) => j.pool !== 'science' && j.productTypeId === productTypeId)
+    const productionMfg = productionOnly.find(
+      (j) => j.pool !== 'science' && j.productTypeId === productTypeId,
+    )
     expect(productionMfg).toBeDefined()
     expect(productionMfg!.startHour).toBeLessThan(mfgJob!.startHour)
     expect(productReadyHours(productionOnly, productTypeId)).toBeLessThan(
@@ -311,14 +320,95 @@ describe('schedulePlanJobs', () => {
     expect(invent).toHaveLength(4)
     expect(Math.max(...invent.map((j) => j.endHour))).toBeCloseTo(20, 5)
   })
+
+  it('keeps a free science slot when copy jobs share one BPO', () => {
+    const nodes = [
+      mockNode({
+        productTypeId: 1,
+        name: 'T2',
+        isRoot: true,
+        depth: 0,
+        runs: 1,
+        jobTimeSeconds: 3600,
+      }),
+    ]
+    const jobs = schedulePlanJobs({
+      nodes,
+      slots: 1,
+      scienceSlots: 2,
+      windowHours: 500,
+      copyBposByProduct: new Map([[1, 1]]),
+      pipeline: {
+        scienceSlots: 2,
+        manufacturingSlots: 1,
+        reactionSlots: 1,
+        stages: [
+          {
+            id: 'copy-1',
+            productTypeId: 1,
+            name: 'Copy',
+            activity: 'copy',
+            pool: 'science',
+            runs: 2,
+            durationHours: 10,
+            dependsOn: [],
+          },
+          {
+            id: 'invent-2',
+            productTypeId: 2,
+            name: 'Invent other',
+            activity: 'invention',
+            pool: 'science',
+            runs: 1,
+            durationHours: 10,
+            dependsOn: [],
+          },
+        ],
+      },
+    })
+    const invent = jobs.find((j) => j.activity === 'invention')
+    expect(invent?.startHour).toBe(0)
+    const copies = jobs.filter((j) => j.activity === 'copy')
+    expect(copies.map((j) => j.slot)).toEqual([0, 0])
+  })
 })
 
 describe('productReadyHours', () => {
   it('returns the latest production finish and ignores copy and invention', () => {
     const jobs = [
-      { productTypeId: 1, name: 'A', slot: 0, startHour: 1894, endHour: 2063, runs: 1, outputQty: 1, activity: 'manufacture' as const, pool: 'manufacturing' as const },
-      { productTypeId: 1, name: 'A copy', slot: 0, startHour: 0, endHour: 3000, runs: 1, outputQty: 1, activity: 'copy' as const, pool: 'science' as const },
-      { productTypeId: 2, name: 'B', slot: 0, startHour: 0, endHour: 50, runs: 1, outputQty: 1, activity: 'manufacture' as const, pool: 'manufacturing' as const },
+      {
+        productTypeId: 1,
+        name: 'A',
+        slot: 0,
+        startHour: 1894,
+        endHour: 2063,
+        runs: 1,
+        outputQty: 1,
+        activity: 'manufacture' as const,
+        pool: 'manufacturing' as const,
+      },
+      {
+        productTypeId: 1,
+        name: 'A copy',
+        slot: 0,
+        startHour: 0,
+        endHour: 3000,
+        runs: 1,
+        outputQty: 1,
+        activity: 'copy' as const,
+        pool: 'science' as const,
+      },
+      {
+        productTypeId: 2,
+        name: 'B',
+        slot: 0,
+        startHour: 0,
+        endHour: 50,
+        runs: 1,
+        outputQty: 1,
+        activity: 'manufacture' as const,
+        pool: 'manufacturing' as const,
+      },
     ]
     expect(productReadyHours(jobs, 1)).toBe(2063)
     expect(productReadyHours(jobs, 2)).toBe(50)
@@ -345,7 +435,15 @@ describe('windowHoursFromJobs', () => {
     expect(windowHoursFromJobs([])).toBe(1)
     expect(
       windowHoursFromJobs([
-        { productTypeId: 1, name: 'A', slot: 0, startHour: 0, endHour: 12.5, runs: 1, outputQty: 1 },
+        {
+          productTypeId: 1,
+          name: 'A',
+          slot: 0,
+          startHour: 0,
+          endHour: 12.5,
+          runs: 1,
+          outputQty: 1,
+        },
       ]),
     ).toBe(12.5)
   })

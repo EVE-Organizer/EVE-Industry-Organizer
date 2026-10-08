@@ -49,7 +49,7 @@ export interface PlanJobsColumnSpec {
 export const PLAN_JOBS_COLUMN_SPECS: Record<PlanJobsColumnId, PlanJobsColumnSpec> = {
   runs: { defaultWidth: 110, minWidth: 84, maxWidth: 140, align: 'center' },
   duration: { defaultWidth: 105, minWidth: 79, maxWidth: 149, align: 'left' },
-  bpos: { defaultWidth: 70, minWidth: 64, maxWidth: 112, align: 'center' },
+  bpos: { defaultWidth: 105, minWidth: 96, maxWidth: 168, align: 'center' },
   owner: { defaultWidth: 60, minWidth: 60, maxWidth: 60, align: 'center' },
   progress: { defaultWidth: 136, minWidth: 120, maxWidth: 200, align: 'left' },
   output: { defaultWidth: 92, minWidth: 80, maxWidth: 140, align: 'right' },
@@ -104,10 +104,11 @@ export const DEFAULT_PLAN_JOBS_SCROLL_ORDER: PlanJobsColumnId[] = [
   'profit',
 ]
 
-/** Production jobs table (PlanRootList) — no owner / progress / bpos columns. */
+/** Production jobs table (PlanRootList) — no owner / progress columns. */
 export const CORE_PLAN_JOBS_SCROLL_ORDER: PlanJobsColumnId[] = [
   'runs',
   'duration',
+  'bpos',
   'output',
   'volume',
   'setup',
