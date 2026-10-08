@@ -117,7 +117,7 @@ describe('rootProgress', () => {
       ],
       { a: { status: 'done', source: 'manual' } },
     )
-    expect(result).toEqual({ done: 1, total: 2, percent: 25 })
+    expect(result).toEqual({ done: 1, total: 2, percent: 25, runningPercent: 0 })
   })
 })
 
@@ -250,6 +250,6 @@ describe('chain progress', () => {
       { a: { status: 'done', source: 'esi' } },
       new Set([1, 2]),
     )
-    expect(result).toEqual({ done: 1, total: 2, percent: 25 })
+    expect(result).toEqual({ done: 1, total: 2, percent: 25, runningPercent: 0 })
   })
 })

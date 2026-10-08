@@ -48,7 +48,17 @@ describe('planJobsTableLayout', () => {
       }),
     )
     const core = filterLayoutToCoreColumns(full)
-    expect(core.order).toEqual(['runs', 'duration', 'bpos', 'output', 'volume', 'setup', 'profit'])
+    expect(core.order).toEqual([
+      'runs',
+      'duration',
+      'bpos',
+      'owner',
+      'output',
+      'have',
+      'volume',
+      'setup',
+      'profit',
+    ])
     expect(core.widths.runs).toBe(90)
     expect(core.widths.bpos).toBe(96)
     expect(core.timeMode).toBe('duration')

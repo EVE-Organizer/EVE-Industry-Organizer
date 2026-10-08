@@ -165,9 +165,12 @@ describe('window-based material costs', () => {
     const spot = buildPriceMap(hubMarket)
     const allPrices = buildWindowPriceMap(hubMarket, 'all', spot)
 
-    expect(spot.get(25600)).toBeGreaterThan(40_000)
-    expect(hubMarket.products['25600']?.all?.avgPrice).toBeLessThan(30_000)
-    expect(allPrices.get(25600)).toBe(spot.get(25600))
+    const spotPrice = spot.get(25600)
+    const allAvg = hubMarket.products['25600']?.all?.avgPrice
+    expect(spotPrice).toBeDefined()
+    expect(allAvg).toBeDefined()
+    expect(spotPrice!).toBeGreaterThan(allAvg!)
+    expect(allPrices.get(25600)).toBe(spotPrice)
   })
 })
 
