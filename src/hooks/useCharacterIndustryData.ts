@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query'
 import { getValidAccessToken } from '@/services/auth/eveAuth'
 import { EsiAuthError } from '@/services/character/esiAuthFetch'
@@ -72,6 +73,36 @@ export function useCharactersIndustryJobs(characterIds: readonly number[]) {
       enabled: true,
     })),
   })
+}
+
+/** Pooled station inventory across plan characters at one facility. */
+export function useCharactersLocationInventory(
+  characterIds: readonly number[],
+  locationId: number | null | undefined,
+) {
+  const queries = useQueries({
+    queries: characterIds.map((characterId) => ({
+      ...locationInventoryQueryOptions(characterId, locationId!),
+      enabled: locationId != null,
+    })),
+  })
+  const dataKey = queries.map((query) => query.dataUpdatedAt).join(',')
+
+  return useMemo(() => {
+    const byCharacter = new Map<number, Map<number, number>>()
+    const pooled = new Map<number, number>()
+    for (let i = 0; i < characterIds.length; i++) {
+      const characterId = characterIds[i]!
+      const map = queries[i]?.data ?? new Map<number, number>()
+      byCharacter.set(characterId, map)
+      for (const [typeId, qty] of map) {
+        pooled.set(typeId, (pooled.get(typeId) ?? 0) + qty)
+      }
+    }
+    return { pooled, byCharacter }
+    // dataKey tracks ESI inventory updates; queries is a new array each render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [characterIds, locationId, dataKey])
 }
 
 export function characterBlueprintsQueryOptions(characterId: number, forceRefresh = false) {

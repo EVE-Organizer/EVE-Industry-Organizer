@@ -1,5 +1,13 @@
 import { create } from 'zustand'
-import type { GlobalSettings, ManufacturingPlanTemplate, PlanRootEntry, UserData, WatchlistItem } from '@/types'
+import type {
+  GlobalSettings,
+  ManualCharacter,
+  ManufacturingPlanTemplate,
+  PlanRootEntry,
+  SkillLevels,
+  UserData,
+  WatchlistItem,
+} from '@/types'
 import {
   createDefaultPlanTemplate,
   createDefaultUserData,
@@ -36,6 +44,12 @@ interface AppStore {
   ) => ManufacturingPlanTemplate
   addRootToPlanTemplate: (templateId: string, root: PlanRootEntry) => void
   removeRootFromPlanTemplate: (templateId: string, rootId: string) => void
+  addManualCharacter: (name: string, skills: SkillLevels) => void
+  updateManualCharacter: (
+    id: string,
+    patch: Partial<Pick<ManualCharacter, 'name' | 'skills'>>,
+  ) => void
+  removeManualCharacter: (id: string) => void
 }
 
 function touchTemplates(
@@ -138,7 +152,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   deletePlanTemplate: (id) => {
-    const userData = touchTemplates(get().userData, (templates) => templates.filter((t) => t.id !== id))
+    const userData = touchTemplates(get().userData, (templates) =>
+      templates.filter((t) => t.id !== id),
+    )
     get().setUserData(userData)
     if (get().selectedPlanTemplateId === id) {
       persistSelectedPlanTemplateId(
@@ -150,7 +166,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   reorderPlanTemplates: (fromId, toId) => {
-    const userData = touchTemplates(get().userData, (templates) => moveItemById(templates, fromId, toId))
+    const userData = touchTemplates(get().userData, (templates) =>
+      moveItemById(templates, fromId, toId),
+    )
     get().setUserData(userData)
   },
 
@@ -213,5 +231,44 @@ export const useAppStore = create<AppStore>((set, get) => ({
       ),
     )
     get().setUserData(userData)
+  },
+
+  addManualCharacter: (name, skills) => {
+    const id =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `manual-${Date.now()}`
+    const character: ManualCharacter = { id, name, skills: { ...skills } }
+    get().setUserData({
+      ...get().userData,
+      manualCharacters: [...(get().userData.manualCharacters ?? []), character],
+      updatedAt: new Date().toISOString(),
+    })
+  },
+
+  updateManualCharacter: (id, patch) => {
+    get().setUserData({
+      ...get().userData,
+      manualCharacters: (get().userData.manualCharacters ?? []).map((character) =>
+        character.id === id
+          ? {
+              ...character,
+              ...patch,
+              skills: patch.skills ? { ...patch.skills } : character.skills,
+            }
+          : character,
+      ),
+      updatedAt: new Date().toISOString(),
+    })
+  },
+
+  removeManualCharacter: (id) => {
+    get().setUserData({
+      ...get().userData,
+      manualCharacters: (get().userData.manualCharacters ?? []).filter(
+        (character) => character.id !== id,
+      ),
+      updatedAt: new Date().toISOString(),
+    })
   },
 }))

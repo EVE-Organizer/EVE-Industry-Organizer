@@ -1,4 +1,72 @@
 import type { QueryClient } from '@tanstack/react-query'
+import { SDE_QUERY_KEY } from '@/hooks/useSdeData'
+import { queryClient } from '@/lib/queryClient'
+import { loadSdeData } from '@/services/data/sdeLoader'
+import { clearPriceCache } from '@/services/cache/cacheStore'
+import {
+  useDataStatusStore,
+  type RefreshScope,
+  type SourceRefreshStatus,
+} from '@/stores/dataStatusStore'
+
+export type { RefreshScope }
+
+export function classifyRefresh(input: {
+  beforeChecksum?: string
+  afterChecksum?: string
+  serverExpiresAt?: number
+  now?: number
+  lastError?: string
+}): SourceRefreshStatus {
+  if (input.lastError) return 'failed'
+  if (input.beforeChecksum !== input.afterChecksum) return 'updated'
+  const now = input.now ?? Date.now()
+  if (
+    input.serverExpiresAt != null &&
+    input.serverExpiresAt > now &&
+    input.beforeChecksum === input.afterChecksum
+  ) {
+    return 'not-yet-updated-by-esi'
+  }
+  return 'unchanged'
+}
+
+/** Manual refresh for header controls and plan character bar. */
+export async function refreshData(scope: RefreshScope, characterIds: number[]): Promise<void> {
+  const { beginRefresh, endRefresh } = useDataStatusStore.getState()
+  const toastId = beginRefresh(scope)
+  const parts: string[] = []
+  const statuses: SourceRefreshStatus[] = []
+
+  try {
+    if (scope === 'characters' || scope === 'all') {
+      const ids = [...new Set(characterIds)]
+      await Promise.all(
+        ids.map((characterId) => refreshCharacterApiCaches(queryClient, characterId)),
+      )
+      parts.push(ids.length > 0 ? `${ids.length} character(s)` : 'Characters')
+      statuses.push('updated')
+    }
+    if (scope === 'prices-live' || scope === 'all') {
+      clearPriceCache()
+      parts.push('Live prices')
+      statuses.push('updated')
+    }
+    if (scope === 'static' || scope === 'all') {
+      await queryClient.invalidateQueries({ queryKey: SDE_QUERY_KEY })
+      await queryClient.fetchQuery({ queryKey: SDE_QUERY_KEY, queryFn: loadSdeData, staleTime: 0 })
+      parts.push('Snapshot')
+      statuses.push('updated')
+    }
+    endRefresh(scope, toastId, { parts, statuses })
+  } catch (err) {
+    endRefresh(scope, toastId, {
+      parts: [err instanceof Error ? err.message : 'Refresh failed'],
+      statuses: ['failed'],
+    })
+    throw err
+  }
+}
 import {
   characterIndustryJobsQueryOptions,
   characterBlueprintsQueryOptions,

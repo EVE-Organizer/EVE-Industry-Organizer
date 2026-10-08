@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
 import { useAnchorTooltip } from '@/components/Tooltip'
@@ -48,6 +49,7 @@ export interface SlotGanttChartProps {
   blueprintTypeIdByProduct?: Map<number, number>
   emptyMessage?: string
   title?: string
+  titleAside?: ReactNode
   nowRatio?: number | null
   nowMs?: number | null
   focusedLaneId?: string | null
@@ -217,6 +219,7 @@ export function SlotGanttChart({
   blueprintTypeIdByProduct,
   emptyMessage = 'No scheduled jobs yet.',
   title = 'Job schedule',
+  titleAside,
   nowRatio = null,
   nowMs = null,
   focusedLaneId: focusedLaneIdProp,
@@ -353,7 +356,10 @@ export function SlotGanttChart({
 
   return (
     <div className="plan-timeline__chart-block">
-      <h3 className="plan-timeline__chart-title">{title}</h3>
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+        <h3 className="plan-timeline__chart-title">{title}</h3>
+        {titleAside}
+      </div>
       <div ref={ganttRef} className="plan-timeline__gantt">
         <div className="plan-timeline__gantt-axis">
           <div className="plan-timeline__gantt-axis-spacer" />

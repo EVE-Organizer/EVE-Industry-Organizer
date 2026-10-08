@@ -651,6 +651,10 @@ export interface PlanStepProgress {
   status: PlanStepStatus
   source: PlanStepSource
   characterKey?: PlanCharacterKey
+  esiJobId?: number
+  startedAt?: string
+  endedAt?: string
+  successfulRuns?: number
 }
 
 export interface ManualCharacter {
@@ -724,8 +728,9 @@ export interface ManufacturingPlanTemplate {
   sellerCharacterKey?: PlanCharacterKey
   stepProgress?: Record<string, PlanStepProgress>
   startedAt?: string
+  stepSnapshot?: Record<string, { runs: number; characterKey?: PlanCharacterKey }>
   startStock?: Record<number, number>
-  stockAllocated?: boolean
+  stockAllocated?: Record<number, number>
 }
 
 /** Computed plan node (not persisted). */

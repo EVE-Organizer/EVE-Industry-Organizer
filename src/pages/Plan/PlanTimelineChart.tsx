@@ -62,33 +62,44 @@ export function PlanTimelinePanel({
   slotBonuses?: { manufacturing: number; reactions: number; research: number }
 }) {
   const [tab, setTab] = useState<TimelineTab>('manufacturing')
+  /** Idle slot rows in the Gantt (lanes with no jobs). Default off — only busy slot rows show. */
+  const [showIdleTimelineSlots, setShowIdleTimelineSlots] = useState(false)
   const [focusedSlotIndex, setFocusedSlotIndex] = useState<number | null>(null)
   const scienceWindowHours = researchWindowHours ?? windowHours
+  const timelineAxisHours = Math.max(windowHours, scienceWindowHours)
   const allProduction = productionJobs ?? jobs
   const mfgJobs = useMemo(() => jobsForPool(allProduction, 'manufacturing'), [allProduction])
   const rxnJobs = useMemo(() => jobsForPool(allProduction, 'reactions'), [allProduction])
   const sciJobs = useMemo(() => jobsForPool(jobs, 'research'), [jobs])
 
-  const axisHours =
-    tab === 'research' ? scienceWindowHours : tab === 'reactions' ? windowHours : windowHours
-
   const mfgLanes = useMemo(
-    () => buildPlanGanttLanes(mfgJobs, nodes, slots, windowHours, 'manufacturing'),
-    [mfgJobs, nodes, slots, windowHours],
+    () => buildPlanGanttLanes(mfgJobs, nodes, slots, timelineAxisHours, 'manufacturing'),
+    [mfgJobs, nodes, slots, timelineAxisHours],
   )
   const reactionLanes = useMemo(
-    () => buildPlanGanttLanes(rxnJobs, nodes, reactionSlots, windowHours, 'reaction'),
-    [rxnJobs, nodes, reactionSlots, windowHours],
+    () => buildPlanGanttLanes(rxnJobs, nodes, reactionSlots, timelineAxisHours, 'reaction'),
+    [rxnJobs, nodes, reactionSlots, timelineAxisHours],
   )
   const scienceLanes = useMemo(
-    () => buildPlanGanttLanes(sciJobs, nodes, scienceSlots, scienceWindowHours, 'science'),
-    [sciJobs, nodes, scienceSlots, scienceWindowHours],
+    () => buildPlanGanttLanes(sciJobs, nodes, scienceSlots, timelineAxisHours, 'science'),
+    [sciJobs, nodes, scienceSlots, timelineAxisHours],
+  )
+
+  const allScheduleLanes = useMemo(
+    () => [...mfgLanes, ...reactionLanes, ...scienceLanes],
+    [mfgLanes, reactionLanes, scienceLanes],
+  )
+
+  const scheduleLanes = useMemo(
+    () =>
+      showIdleTimelineSlots
+        ? allScheduleLanes
+        : allScheduleLanes.filter((lane) => lane.jobCount > 0),
+    [allScheduleLanes, showIdleTimelineSlots],
   )
 
   const activePool =
     tab === 'research' ? 'science' : tab === 'reactions' ? 'reaction' : 'manufacturing'
-  const activeLanes =
-    tab === 'research' ? scienceLanes : tab === 'reactions' ? reactionLanes : mfgLanes
 
   const focusedLaneId = focusedSlotIndex != null ? `${activePool}-slot-${focusedSlotIndex}` : null
 
@@ -116,22 +127,22 @@ export function PlanTimelinePanel({
   }, [])
 
   const formatTick = useCallback(
-    (ratio: number) => formatPlanGanttTick(ratio, axisHours),
-    [axisHours],
+    (ratio: number) => formatPlanGanttTick(ratio, timelineAxisHours),
+    [timelineAxisHours],
   )
 
   const formatScrub = useCallback(
-    (ratio: number) => formatPlanScrubLabel(ratio, axisHours),
-    [axisHours],
+    (ratio: number) => formatPlanScrubLabel(ratio, timelineAxisHours),
+    [timelineAxisHours],
   )
 
   const formatBarRange = useCallback(
     (bar: { start: number; end: number; duration: number }) => {
-      const startHour = bar.start * axisHours
-      const endHour = bar.end * axisHours
-      return `${formatPlanGanttTick(startHour / axisHours, axisHours)} – ${formatPlanGanttTick(endHour / axisHours, axisHours)} · ${formatDecimal(bar.duration, 1)}h`
+      const startHour = bar.start * timelineAxisHours
+      const endHour = bar.end * timelineAxisHours
+      return `${formatPlanGanttTick(startHour / timelineAxisHours, timelineAxisHours)} – ${formatPlanGanttTick(endHour / timelineAxisHours, timelineAxisHours)} · ${formatDecimal(bar.duration, 1)}h`
     },
-    [axisHours],
+    [timelineAxisHours],
   )
 
   const formatBarMeta = useCallback((bar: { meta?: Record<string, unknown> }) => {
@@ -153,11 +164,11 @@ export function PlanTimelinePanel({
   }, [])
 
   const slotRingPropsFor = useCallback(
-    (lanes: typeof mfgLanes, idleMessage: string) =>
+    (lanes: typeof mfgLanes, idleMessage: string, utilizationWindowHours: number) =>
       lanes.map((lane, index) => ({
         slotIndex: index,
         active: lane.jobCount > 0,
-        utilization: windowHours > 0 ? lane.busyHours / windowHours : 0,
+        utilization: utilizationWindowHours > 0 ? lane.busyHours / utilizationWindowHours : 0,
         productTypeId: lane.bars[0]?.productTypeId,
         blueprintTypeId: lane.bars[0]?.productTypeId
           ? blueprintTypeIdByProduct.get(lane.bars[0].productTypeId)
@@ -165,21 +176,23 @@ export function PlanTimelinePanel({
         productName: lane.bars[0]?.label,
         idleMessage,
       })),
-    [windowHours, blueprintTypeIdByProduct],
+    [blueprintTypeIdByProduct],
   )
 
   const mfgSlotRingProps = useMemo(
-    () => slotRingPropsFor(mfgLanes, 'Please install blueprint'),
-    [mfgLanes, slotRingPropsFor],
+    () => slotRingPropsFor(mfgLanes, 'Please install blueprint', windowHours),
+    [mfgLanes, slotRingPropsFor, windowHours],
   )
   const reactionSlotRingProps = useMemo(
-    () => slotRingPropsFor(reactionLanes, 'Idle reaction slot'),
-    [reactionLanes, slotRingPropsFor],
+    () => slotRingPropsFor(reactionLanes, 'Idle reaction slot', windowHours),
+    [reactionLanes, slotRingPropsFor, windowHours],
   )
   const scienceSlotRingProps = useMemo(
-    () => slotRingPropsFor(scienceLanes, 'Idle research slot'),
-    [scienceLanes, slotRingPropsFor],
+    () => slotRingPropsFor(scienceLanes, 'Idle research slot', scienceWindowHours),
+    [scienceLanes, slotRingPropsFor, scienceWindowHours],
   )
+
+  const hasScheduledJobs = mfgJobs.length + rxnJobs.length + sciJobs.length > 0
 
   const activeSlotRingProps =
     tab === 'research'
@@ -248,18 +261,14 @@ export function PlanTimelinePanel({
       <div className="plan-timeline__hero">
         <div className="plan-timeline__hero-top">
           <UiTooltip
-            text={
-              tab === 'research'
-                ? 'Hour when the last copy or invention job finishes.'
-                : tab === 'reactions'
-                  ? 'Hour when the last reaction job finishes.'
-                  : 'Hour when the last manufacture job finishes. Copy, invention, and reactions have their own tabs.'
-            }
+            text="Hour when the last scheduled job finishes (manufacturing, reactions, copy, and invention)."
             placement="bottom"
           >
             <p className="plan-timeline__finish">
               Finishes in{' '}
-              <span className="plan-timeline__finish-value">{formatDecimal(axisHours, 1)}h</span>
+              <span className="plan-timeline__finish-value">
+                {formatDecimal(timelineAxisHours, 1)}h
+              </span>
             </p>
           </UiTooltip>
           {embedded ? tabs : null}
@@ -310,7 +319,7 @@ export function PlanTimelinePanel({
       </div>
 
       <SlotGanttChart
-        lanes={activeLanes}
+        lanes={scheduleLanes}
         formatTick={formatTick}
         formatScrub={formatScrub}
         formatBarRange={formatBarRange}
@@ -318,19 +327,22 @@ export function PlanTimelinePanel({
         blueprintTypeIdByProduct={blueprintTypeIdByProduct}
         focusedLaneId={focusedLaneId}
         onFocusedLaneChange={handleFocusedLaneChange}
-        title={
-          tab === 'research'
-            ? 'Research schedule'
-            : tab === 'reactions'
-              ? 'Reaction schedule'
-              : 'Manufacturing schedule'
+        title="Plan schedule"
+        titleAside={
+          <label className="label cursor-pointer shrink-0 gap-2 py-0">
+            <input
+              type="checkbox"
+              className="checkbox checkbox-sm"
+              checked={showIdleTimelineSlots}
+              onChange={(event) => setShowIdleTimelineSlots(event.target.checked)}
+            />
+            <span className="label-text text-sm font-normal">Show idle slot rows</span>
+          </label>
         }
         emptyMessage={
-          tab === 'research'
-            ? 'No copy or invention jobs on this plan yet. Build a T2 root to schedule research.'
-            : tab === 'reactions'
-              ? 'No reaction jobs on this plan yet.'
-              : undefined
+          hasScheduledJobs
+            ? undefined
+            : 'No jobs on this plan yet. Add blueprints and build a chain to see the schedule.'
         }
       />
     </>
