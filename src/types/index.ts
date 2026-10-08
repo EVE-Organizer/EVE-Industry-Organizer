@@ -653,10 +653,16 @@ export interface PlanRootEntry {
   productionDurationHours: number
   /** Off jobs stay in the list but are left out of the plan. Default on. */
   enabled?: boolean
+  /** Runs last changed to match Duration (Production timer or Overall deadline). */
+  runsFromDuration?: boolean
+  /** Runs last changed by Ready-by Fix (full-table Ready by column). */
+  runsFromReadyBy?: boolean
 }
 
 export interface PlanNodeOverride {
   runs?: number
+  /** User-entered job window for this sub-build (same semantics as root production duration). */
+  productionDurationHours?: number
   copies?: number
   runsPerBpc?: number
   forceInclude?: boolean

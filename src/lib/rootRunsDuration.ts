@@ -3,6 +3,7 @@ import type {
   GlobalSettings,
   ManufacturingPlanTemplate,
   PlanNode,
+  PlanDurationMode,
   PlanNodeOverride,
   PlanRootEntry,
 } from '@/types'
@@ -10,7 +11,6 @@ import { DEFAULT_BATCH_SIZE } from '@/types'
 import {
   applyReactionTime,
   applyTE,
-  manufacturingTimePerRun,
   reactionTimePerRun,
   resolveBlueprintMeTe,
   runsForJobTime,
@@ -18,7 +18,6 @@ import {
 import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
 import { skillLevel } from '@/lib/skillFields'
-import { activeConcurrentCopies } from '@/lib/supplyChainSlots'
 import { activePlanRoots } from '@/lib/planRootEnabled'
 
 /** One industry job = one in-game timer. Never multiply by Mass Production slots. */
@@ -357,17 +356,6 @@ export function durationHoursFromRuns(
 
   const { te } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride, blueprint)
   const { industry, advancedIndustry } = skillTimeLevels(settings)
-  const perRun = manufacturingTimePerRun(
-    blueprint.manufacturingTime,
-    te,
-    industry,
-    advancedIndustry,
-    structureTe,
-    blueprint.requiredSkills,
-    settings.skills,
-  )
-  if (perRun <= 0 || runs <= 0) return 0
-
   const jobTime = applyTE(
     blueprint.manufacturingTime,
     te,
@@ -378,6 +366,7 @@ export function durationHoursFromRuns(
     blueprint.requiredSkills,
     settings.skills,
   )
+  if (jobTime <= 0 || runs <= 0) return 0
   const waves = Math.ceil(runs / (runsPerJob * effectiveLines))
   return (jobTime * waves) / 3600
 }
@@ -407,22 +396,6 @@ export function defaultRunsPerBpc(blueprint: BlueprintInfo, templateDefault: num
     return blueprint.invention.runsPerBPC
   }
   return templateDefault
-}
-
-/** Parallel industry lines for a root entry (always 1 unless copies override). */
-export function parallelLinesForRoot(
-  blueprint: BlueprintInfo,
-  root: PlanRootEntry,
-  skillSlots: number,
-  rootRunsTotal: number,
-  defaultRunsPerBpcTemplate: number,
-  nodeOverride?: PlanNodeOverride,
-): number {
-  if (nodeOverride?.copies != null) return nodeOverride.copies
-  const runsPerBpc =
-    nodeOverride?.runsPerBpc ?? defaultRunsPerBpc(blueprint, defaultRunsPerBpcTemplate)
-  const bpcCount = bpcCountForRuns(root.runs, runsPerBpc)
-  return activeConcurrentCopies(true, bpcCount, skillSlots, rootRunsTotal)
 }
 
 /** Seed duration from runs when the user has not set one yet. Never overwrites a stored target. */
@@ -457,13 +430,46 @@ export function createSyncedPlanRootEntry(
   return synced
 }
 
-/** Apply a runs or duration edit. User-entered duration is kept; only an explicit duration patch replaces it. */
+export type RootEntryPatchOptions = {
+  /** User edited runs. Rewrites stored duration. Overall fit must leave this off. */
+  syncDurationFromRuns?: boolean
+  durationMode?: PlanDurationMode
+  /** Scheduled ready hour before the runs edit (Overall chain clock). */
+  readyHours?: number
+}
+
+/** Duration stored after the user changes runs. Production is the job timer; Overall scales the chain deadline. */
+export function durationHoursForRunsEdit(
+  root: PlanRootEntry,
+  nextRuns: number,
+  blueprint: BlueprintInfo,
+  settings: GlobalSettings,
+  meTeOverride?: PlanNodeOverride,
+  options?: Pick<RootEntryPatchOptions, 'durationMode' | 'readyHours'>,
+): number {
+  const jobHours = inGameDurationHoursFromRuns(blueprint, settings, nextRuns, meTeOverride)
+  if (options?.durationMode !== 'overall') return jobHours
+
+  const readyHours = options.readyHours ?? 0
+  if (root.runs > 0 && readyHours > 0) {
+    return Math.max(jobHours, (readyHours * nextRuns) / root.runs)
+  }
+  return jobHours
+}
+
+function clearRunDerivedFlags(root: PlanRootEntry): PlanRootEntry {
+  const { runsFromDuration: _d, runsFromReadyBy: _r, ...rest } = root
+  return rest
+}
+
+/** Apply a runs or duration edit. Duration drives runs unless the user edited runs. */
 export function applyRootEntryPatch(
   root: PlanRootEntry,
   patch: Partial<PlanRootEntry>,
   blueprint: BlueprintInfo | undefined,
   settings: GlobalSettings,
   meTeOverride?: PlanNodeOverride,
+  options?: RootEntryPatchOptions,
 ): PlanRootEntry {
   const next = { ...root, ...patch }
   if (!blueprint) return next
@@ -476,6 +482,59 @@ export function applyRootEntryPatch(
       meTeOverride,
     )
     next.productionDurationHours = patch.productionDurationHours
+    next.runsFromDuration = true
+    delete next.runsFromReadyBy
+    return next
+  }
+
+  if (
+    options?.syncDurationFromRuns &&
+    patch.runs != null &&
+    patch.productionDurationHours == null
+  ) {
+    next.runs = patch.runs
+    next.productionDurationHours = durationHoursForRunsEdit(
+      root,
+      patch.runs,
+      blueprint,
+      settings,
+      meTeOverride,
+      options,
+    )
+    return clearRunDerivedFlags(next)
+  }
+
+  if (patch.runs != null && patch.productionDurationHours == null) {
+    next.runsFromDuration = true
+    delete next.runsFromReadyBy
+  }
+
+  return next
+}
+
+/** Apply a runs or duration edit to a sub-build node override. */
+export function applyNodeOverridePatch(
+  current: PlanNodeOverride | undefined,
+  patch: { runs?: number; productionDurationHours?: number },
+  blueprint: BlueprintInfo | undefined,
+  settings: GlobalSettings,
+): PlanNodeOverride {
+  const next: PlanNodeOverride = { ...current }
+
+  if (patch.runs != null) {
+    next.runs = patch.runs
+  }
+
+  if (patch.productionDurationHours != null && blueprint) {
+    next.productionDurationHours = patch.productionDurationHours
+    if (patch.runs == null) {
+      next.runs = inGameRunsFromDurationHours(
+        blueprint,
+        settings,
+        patch.productionDurationHours,
+        next,
+      )
+    }
   }
 
   return next

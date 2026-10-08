@@ -372,7 +372,7 @@
 }
 
 .plan-build-card {
-  @apply overflow-visible rounded-xl border border-eve-border/90;
+  @apply min-w-0 overflow-visible rounded-xl border border-eve-border/90;
   background-image: linear-gradient(
     165deg,
     rgb(22 27 34) 0%,
@@ -404,7 +404,7 @@
   }
 
   &__body {
-    @apply flex flex-col gap-6 p-4 sm:p-5;
+    @apply flex min-w-0 flex-col gap-6 p-4 sm:p-5;
   }
 
   &__compose {
@@ -2252,17 +2252,221 @@
   }
 }
 
+.plan-jobs-table-scroll {
+  @apply w-full min-w-0 max-w-full overflow-x-auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .plan-jobs-table {
+  /* separate keeps horizontal sticky columns working (collapse breaks sticky on cells) */
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+
+  th,
+  td {
+    @apply border border-eve-border/60 align-middle;
+    box-sizing: border-box;
+  }
+
   thead tr {
     @apply border-b border-eve-border/60;
   }
 
-  tbody tr:hover {
+  thead th {
+    background-color: #21262d;
+  }
+
+  thead th:not(.plan-jobs-table__pinned) {
+    @apply text-base-content/50;
+  }
+
+  tfoot td {
+    background-color: #1c2128;
+    @apply border-t border-eve-border/70;
+  }
+
+  tbody tr:hover td:not(.plan-jobs-table__pinned) {
     @apply bg-base-300/25;
   }
 
-  tbody tr.plan-jobs-table__drop-target {
+  tbody tr.plan-jobs-table__drop-target td:not(.plan-jobs-table__pinned) {
     @apply bg-info/15;
+  }
+
+  tbody tr:hover td.plan-jobs-table__pinned,
+  tfoot td.plan-jobs-table__pinned {
+    background-color: #21262d;
+  }
+
+  tbody tr.plan-jobs-table__drop-target td.plan-jobs-table__pinned {
+    background-color: #1a2836;
+  }
+
+  tbody tr.plan-jobs-table__row--parent td.plan-jobs-table__pinned {
+    background-color: #1c2128;
+  }
+
+  tbody tr.plan-jobs-table__row--parent:hover td.plan-jobs-table__pinned {
+    background-color: #252b33;
+  }
+
+  tbody tr.plan-jobs-table__row--disabled td:not(.plan-jobs-table__pinned) {
+    @apply opacity-40;
+  }
+
+  tbody tr.plan-jobs-table__row--dragging td:not(.plan-jobs-table__pinned) {
+    @apply opacity-50;
+  }
+
+  &__col {
+    &--left {
+      @apply text-left;
+    }
+
+    &--right {
+      @apply text-right;
+    }
+
+    &--center {
+      @apply text-center;
+    }
+
+    &--product {
+      @apply align-middle py-1;
+    }
+
+    &--actions {
+      @apply px-1 text-center;
+    }
+  }
+
+  &__actions-cell {
+    @apply flex justify-center px-1 py-1.5;
+  }
+
+  &__actions-toolbar {
+    @apply inline-flex items-center gap-0.5 rounded-lg border border-eve-border/70 bg-base-300/30 p-0.5 shadow-sm;
+  }
+
+  &__action-btn {
+    @apply inline-flex size-7 shrink-0 items-center justify-center rounded-md text-base-content/75 transition-colors;
+    @apply hover:bg-base-content/10 hover:text-base-content;
+
+    &--danger {
+      @apply text-error/85 hover:bg-error/15 hover:text-error;
+    }
+  }
+
+  &__col-header {
+    @apply py-2;
+
+    &--time {
+      @apply overflow-visible;
+    }
+
+    &--margin {
+      @apply overflow-visible pr-1;
+    }
+  }
+
+  &__cell-inner {
+    @apply min-w-0 px-2 py-1.5;
+  }
+
+  &__product-row {
+    @apply py-1 pl-1.5 pr-1;
+  }
+
+  &__product-grip {
+    @apply size-6 opacity-40 hover:opacity-80;
+
+    svg {
+      @apply size-4;
+    }
+  }
+
+  &__product-toggle-input {
+    --tglbg: rgb(48 54 61);
+  }
+
+  &__runs-input {
+    @apply w-full min-w-0 max-w-full px-1.5;
+  }
+
+  &__row--child {
+    td:not(.plan-jobs-table__col--product) {
+      @apply text-base-content/70;
+    }
+
+    td.plan-jobs-table__col--product {
+      @apply text-base-content;
+    }
+  }
+
+  .plan-jobs-product {
+    @apply min-w-0 gap-1;
+
+    &__icon-slot {
+      @apply leading-none;
+    }
+
+    &__body {
+      @apply min-w-0;
+
+      .btn-square {
+        @apply size-6 min-h-6 h-6 w-6;
+
+        svg {
+          @apply size-3.5;
+        }
+      }
+
+      a {
+        @apply text-[13px] leading-tight;
+      }
+    }
+
+    &__sub {
+      @apply mt-0.5 block text-[11px] leading-snug text-base-content/50;
+    }
+
+    &__meta {
+      @apply mt-0.5 flex flex-wrap items-center gap-1;
+    }
+
+    &__chip {
+      @apply inline-flex items-center rounded-md border border-eve-border/70 px-1.5 py-px text-[11px] font-medium leading-tight;
+
+      &--root {
+        @apply border-primary/35 bg-primary/10 text-primary;
+      }
+
+      &--t2 {
+        @apply border-warning/40 bg-warning/10 text-warning;
+      }
+
+      &--muted {
+        @apply border-eve-border/60 bg-base-300/40 text-base-content/55;
+      }
+    }
+  }
+
+  &__resize-handle {
+    @apply absolute right-0 top-0 z-[3] h-full w-1.5 cursor-col-resize touch-none select-none;
+    transform: translateX(50%);
+
+    &::after {
+      content: '';
+      @apply absolute inset-y-1 left-1/2 w-px -translate-x-1/2 bg-base-content/15;
+    }
+
+    &--active,
+    &:hover {
+      &::after {
+        @apply bg-primary/70;
+      }
+    }
   }
 
   &__money-col {

@@ -40,14 +40,14 @@ export function PlanChainSection({
 
   if (embedded) {
     return (
-      <section className="plan-chain-embedded">
+      <section className="plan-chain-embedded min-w-0 w-full">
         <div className="plan-chain-embedded__header">
           <h3 className="plan-chain-embedded__title">{title}</h3>
           <span className={`badge badge-xs ${style.badge}`}>{count}</span>
           {summary ? <p className="plan-chain-embedded__summary tabular-nums">{summary}</p> : null}
           {actions ? <div className="flex items-center gap-2 ml-auto">{actions}</div> : null}
         </div>
-        <div className="overflow-x-auto">{children}</div>
+        <div className="min-w-0 w-full">{children}</div>
       </section>
     )
   }

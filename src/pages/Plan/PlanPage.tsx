@@ -40,6 +40,7 @@ import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/pages/Plan/planT
 import { readyHoursByProductId as readyHoursByProductIdFromJobs } from '@/pages/Plan/planScheduler'
 import { buildManufactureDisplayRows } from '@/pages/Plan/planManufactureDisplay'
 import {
+  applyNodeOverridePatch,
   applyRootEntryPatch,
   createSyncedPlanRootEntry,
   fitPlanForOverallDeadlines,
@@ -49,7 +50,6 @@ import {
   overallPlanFitChanged,
   planRootsKey,
   resetPlanRootsFromDuration,
-  resolveRunsFromPatch,
   rootJobTimeHours,
   syncRootEntry,
 } from '@/lib/rootRunsDuration'
@@ -669,22 +669,27 @@ export function PlanPage() {
           outputQty: root.runs * bp.productQuantity,
           isRoot: true,
           enabled: root.enabled !== false,
+          runsFromDuration: root.runsFromDuration,
+          runsFromReadyBy: root.runsFromReadyBy,
         },
       ]
     })
 
-    const subRows = subExpandable.map((row) => ({
-      ...row,
-      rootId: undefined as string | undefined,
-      productTypeId: row.node.productTypeId,
-      blueprintTypeId: blueprintTypeIdByProduct.get(row.node.productTypeId),
-      name: row.node.name,
-      runs: row.node.runs,
-      jobTimeHours: row.node.jobTimeSeconds / 3600,
-      outputQty: row.node.outputQty,
-      isRoot: false,
-      depth: row.depth + 1,
-    }))
+    const subRows = subExpandable.map((row) => {
+      const productTypeId = row.node.productTypeId
+      return {
+        ...row,
+        rootId: undefined as string | undefined,
+        productTypeId,
+        blueprintTypeId: blueprintTypeIdByProduct.get(productTypeId),
+        name: row.node.name,
+        runs: row.node.runs,
+        jobTimeHours: row.node.jobTimeSeconds / 3600,
+        outputQty: row.node.outputQty,
+        isRoot: false,
+        depth: row.depth + 1,
+      }
+    })
 
     return withTreeLineMeta([...rootRows, ...subRows])
   }, [
@@ -1338,12 +1343,27 @@ export function PlanPage() {
                         }
 
                         if (rootId) {
+                          if (
+                            template.durationMode === 'overall' &&
+                            patch.runs != null &&
+                            patch.productionDurationHours == null
+                          ) {
+                            return
+                          }
                           updatePlanTemplate(template.id, {
                             roots: template.roots.map((r) => {
                               if (r.id !== rootId) return r
                               const bp = getBlueprintForProduct(blueprints, r.productTypeId)
                               const override = template.nodeOverrides[r.productTypeId]
-                              return applyRootEntryPatch(r, patch, bp, storeSettings, override)
+                              return applyRootEntryPatch(r, patch, bp, storeSettings, override, {
+                                syncDurationFromRuns:
+                                  patch.runs != null && patch.productionDurationHours == null,
+                                durationMode:
+                                  template.durationMode === 'overall' ? 'overall' : 'production',
+                                readyHours: readyHoursByProductIdFromJobs(plan.productionJobs).get(
+                                  r.productTypeId,
+                                ),
+                              })
                             }),
                           })
                           return
@@ -1351,23 +1371,19 @@ export function PlanPage() {
 
                         const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
                         if (!node) return
-                        if (
-                          template.durationMode === 'overall' &&
-                          patch.productionDurationHours != null &&
-                          patch.runs == null
-                        ) {
-                          return
-                        }
                         const bp = getBlueprintForProduct(blueprints, productTypeId)
-                        const runs = resolveRunsFromPatch(node.runs, patch, bp, storeSettings)
+                        const override = template.nodeOverrides[productTypeId]
+                        const nextOverride = applyNodeOverridePatch(
+                          override,
+                          patch,
+                          bp,
+                          storeSettings,
+                        )
 
                         updatePlanTemplate(template.id, {
                           nodeOverrides: {
                             ...template.nodeOverrides,
-                            [productTypeId]: {
-                              ...template.nodeOverrides[productTypeId],
-                              runs,
-                            },
+                            [productTypeId]: nextOverride,
                           },
                         })
                       }
@@ -1397,17 +1413,7 @@ export function PlanPage() {
                             template.nodeOverrides[r.productTypeId],
                           )
                         })
-                        const nodeOverrides = { ...template.nodeOverrides }
-                        for (const node of plan.nodes) {
-                          if (node.mode !== 'build' || node.isRoot) continue
-                          const bp = getBlueprintForProduct(blueprints, node.productTypeId)
-                          const runs = resolveRunsFromPatch(node.runs, patch, bp, storeSettings)
-                          nodeOverrides[node.productTypeId] = {
-                            ...nodeOverrides[node.productTypeId],
-                            runs,
-                          }
-                        }
-                        updatePlanTemplate(template.id, { roots, nodeOverrides })
+                        updatePlanTemplate(template.id, { roots })
                       }
                 }
                 onToggleEnabled={

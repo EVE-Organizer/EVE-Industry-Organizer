@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  applyNodeOverridePatch,
   applyRootEntryPatch,
   createSyncedPlanRootEntry,
   inGameDurationHoursFromRuns,
@@ -76,6 +77,23 @@ describe('createSyncedPlanRootEntry', () => {
   })
 })
 
+describe('applyNodeOverridePatch', () => {
+  it('keeps typed duration and updates runs for sub-build overrides', () => {
+    const next = applyNodeOverridePatch(
+      { me: 5, te: 10 },
+      { productionDurationHours: 24 },
+      blueprint,
+      DEFAULT_SETTINGS,
+    )
+
+    expect(next.productionDurationHours).toBe(24)
+    expect(next.runs).toBe(
+      inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 24, { me: 5, te: 10 }),
+    )
+    expect(next.me).toBe(5)
+  })
+})
+
 describe('applyRootEntryPatch', () => {
   it('keeps the typed duration and updates runs to match the job timer', () => {
     const next = applyRootEntryPatch(
@@ -89,6 +107,7 @@ describe('applyRootEntryPatch', () => {
 
     expect(next.runs).toBe(expectedRuns)
     expect(next.productionDurationHours).toBe(24)
+    expect(next.runsFromDuration).toBe(true)
   })
 
   it('preserves long duration input as the stored target', () => {
@@ -103,11 +122,36 @@ describe('applyRootEntryPatch', () => {
     expect(next.runs).toBe(inGameRunsFromDurationHours(blueprint, DEFAULT_SETTINGS, 168))
   })
 
-  it('does not overwrite stored duration when runs change', () => {
+  it('keeps the stored deadline when Overall fit shrinks runs', () => {
     const next = applyRootEntryPatch(root, { runs: 200 }, blueprint, DEFAULT_SETTINGS)
 
     expect(next.runs).toBe(200)
     expect(next.productionDurationHours).toBe(24)
+  })
+
+  it('rewrites duration from runs in Production mode', () => {
+    const next = applyRootEntryPatch(root, { runs: 200 }, blueprint, DEFAULT_SETTINGS, undefined, {
+      syncDurationFromRuns: true,
+      durationMode: 'production',
+    })
+
+    expect(next.runs).toBe(200)
+    expect(next.productionDurationHours).toBe(
+      inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 200),
+    )
+    expect(next.runsFromDuration).toBeUndefined()
+  })
+
+  it('scales the Overall deadline with runs using the current ready hour', () => {
+    const next = applyRootEntryPatch(root, { runs: 200 }, blueprint, DEFAULT_SETTINGS, undefined, {
+      syncDurationFromRuns: true,
+      durationMode: 'overall',
+      readyHours: 48,
+    })
+
+    const jobHours = inGameDurationHoursFromRuns(blueprint, DEFAULT_SETTINGS, 200)
+    expect(next.runs).toBe(200)
+    expect(next.productionDurationHours).toBe(Math.max(jobHours, (48 * 200) / root.runs))
   })
 })
 
