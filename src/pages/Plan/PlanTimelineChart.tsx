@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { CharacterAvatar } from '@/components/EveImage'
 import { Tooltip as UiTooltip } from '@/components/Tooltip'
 import { SlotGanttChart } from '@/components/gantt/SlotGanttChart'
 import { ManufacturingSlotsRow } from '@/components/plan/ManufacturingSlotRing'
@@ -6,8 +7,11 @@ import {
   buildPlanGanttLanes,
   formatPlanGanttTick,
   formatPlanScrubLabel,
+  legendForPool,
+  type PlanGanttCrewMember,
 } from '@/pages/Plan/planGanttAdapter'
 import { formatDecimal } from '@/lib/profit'
+import { ChevronIcon } from '@/pages/Plan/planJobsTableCells'
 import type { PlanNode, ScheduledPlanJob } from '@/types'
 
 type TimelineTab = 'manufacturing' | 'reactions' | 'research'
@@ -46,6 +50,7 @@ export function PlanTimelinePanel({
   onAddSlot,
   onRemoveSlot,
   slotBonuses = { manufacturing: 0, reactions: 0, research: 0 },
+  planCrew = [],
 }: {
   windowHours: number
   researchWindowHours?: number
@@ -60,11 +65,14 @@ export function PlanTimelinePanel({
   onAddSlot?: (pool: TimelineTab) => void
   onRemoveSlot?: (pool: TimelineTab) => void
   slotBonuses?: { manufacturing: number; reactions: number; research: number }
+  planCrew?: PlanGanttCrewMember[]
 }) {
   const [tab, setTab] = useState<TimelineTab>('manufacturing')
   /** Idle slot rows in the Gantt (lanes with no jobs). Default off — only busy slot rows show. */
   const [showIdleTimelineSlots, setShowIdleTimelineSlots] = useState(false)
-  const [focusedSlotIndex, setFocusedSlotIndex] = useState<number | null>(null)
+  const [focusedLaneId, setFocusedLaneId] = useState<string | null>(null)
+  /** Collapsed character slot rows; default empty = all expanded. */
+  const [collapsedSlotGroups, setCollapsedSlotGroups] = useState<Set<string>>(() => new Set())
   const scienceWindowHours = researchWindowHours ?? windowHours
   const timelineAxisHours = Math.max(windowHours, scienceWindowHours)
   const allProduction = productionJobs ?? jobs
@@ -73,57 +81,51 @@ export function PlanTimelinePanel({
   const sciJobs = useMemo(() => jobsForPool(jobs, 'research'), [jobs])
 
   const mfgLanes = useMemo(
-    () => buildPlanGanttLanes(mfgJobs, nodes, slots, timelineAxisHours, 'manufacturing'),
-    [mfgJobs, nodes, slots, timelineAxisHours],
+    () => buildPlanGanttLanes(mfgJobs, nodes, slots, timelineAxisHours, 'manufacturing', planCrew),
+    [mfgJobs, nodes, slots, timelineAxisHours, planCrew],
   )
   const reactionLanes = useMemo(
-    () => buildPlanGanttLanes(rxnJobs, nodes, reactionSlots, timelineAxisHours, 'reaction'),
-    [rxnJobs, nodes, reactionSlots, timelineAxisHours],
+    () =>
+      buildPlanGanttLanes(rxnJobs, nodes, reactionSlots, timelineAxisHours, 'reaction', planCrew),
+    [rxnJobs, nodes, reactionSlots, timelineAxisHours, planCrew],
   )
   const scienceLanes = useMemo(
-    () => buildPlanGanttLanes(sciJobs, nodes, scienceSlots, timelineAxisHours, 'science'),
-    [sciJobs, nodes, scienceSlots, timelineAxisHours],
-  )
-
-  const allScheduleLanes = useMemo(
-    () => [...mfgLanes, ...reactionLanes, ...scienceLanes],
-    [mfgLanes, reactionLanes, scienceLanes],
-  )
-
-  const scheduleLanes = useMemo(
-    () =>
-      showIdleTimelineSlots
-        ? allScheduleLanes
-        : allScheduleLanes.filter((lane) => lane.jobCount > 0),
-    [allScheduleLanes, showIdleTimelineSlots],
+    () => buildPlanGanttLanes(sciJobs, nodes, scienceSlots, timelineAxisHours, 'science', planCrew),
+    [sciJobs, nodes, scienceSlots, timelineAxisHours, planCrew],
   )
 
   const activePool =
     tab === 'research' ? 'science' : tab === 'reactions' ? 'reaction' : 'manufacturing'
 
-  const focusedLaneId = focusedSlotIndex != null ? `${activePool}-slot-${focusedSlotIndex}` : null
+  const activeLanes =
+    tab === 'research' ? scienceLanes : tab === 'reactions' ? reactionLanes : mfgLanes
 
-  const handleSelectSlot = useCallback((slotIndex: number) => {
-    setFocusedSlotIndex((prev) => (prev === slotIndex ? null : slotIndex))
+  const scheduleLanes = useMemo(
+    () => (showIdleTimelineSlots ? activeLanes : activeLanes.filter((lane) => lane.jobCount > 0)),
+    [activeLanes, showIdleTimelineSlots],
+  )
+
+  const handleSelectSlot = useCallback((_slotIndex: number, laneId?: string) => {
+    if (!laneId) return
+    setFocusedLaneId((prev) => (prev === laneId ? null : laneId))
   }, [])
 
-  const handleFocusedLaneChange = useCallback(
-    (laneId: string | null) => {
-      if (laneId == null) {
-        setFocusedSlotIndex(null)
-        return
-      }
-      const match = /^(manufacturing|science|reaction)-slot-(\d+)$/.exec(laneId)
-      if (match && match[1] === activePool) {
-        setFocusedSlotIndex(Number(match[2]))
-      }
-    },
-    [activePool],
-  )
+  const toggleSlotGroup = useCallback((groupKey: string) => {
+    setCollapsedSlotGroups((prev) => {
+      const next = new Set(prev)
+      if (next.has(groupKey)) next.delete(groupKey)
+      else next.add(groupKey)
+      return next
+    })
+  }, [])
+
+  const handleFocusedLaneChange = useCallback((laneId: string | null) => {
+    setFocusedLaneId(laneId)
+  }, [])
 
   const handleTabChange = useCallback((next: TimelineTab) => {
     setTab(next)
-    setFocusedSlotIndex(null)
+    setFocusedLaneId(null)
   }, [])
 
   const formatTick = useCallback(
@@ -165,17 +167,22 @@ export function PlanTimelinePanel({
 
   const slotRingPropsFor = useCallback(
     (lanes: typeof mfgLanes, idleMessage: string, utilizationWindowHours: number) =>
-      lanes.map((lane, index) => ({
-        slotIndex: index,
-        active: lane.jobCount > 0,
-        utilization: utilizationWindowHours > 0 ? lane.busyHours / utilizationWindowHours : 0,
-        productTypeId: lane.bars[0]?.productTypeId,
-        blueprintTypeId: lane.bars[0]?.productTypeId
-          ? blueprintTypeIdByProduct.get(lane.bars[0].productTypeId)
-          : undefined,
-        productName: lane.bars[0]?.label,
-        idleMessage,
-      })),
+      lanes.map((lane) => {
+        const slotMatch = /-(\d+)$/.exec(lane.id)
+        const slotIndex = slotMatch ? Number(slotMatch[1]) : 0
+        return {
+          slotIndex,
+          laneId: lane.id,
+          active: lane.jobCount > 0,
+          utilization: utilizationWindowHours > 0 ? lane.busyHours / utilizationWindowHours : 0,
+          productTypeId: lane.bars[0]?.productTypeId,
+          blueprintTypeId: lane.bars[0]?.productTypeId
+            ? blueprintTypeIdByProduct.get(lane.bars[0].productTypeId)
+            : undefined,
+          productName: lane.bars[0]?.label,
+          idleMessage,
+        }
+      }),
     [blueprintTypeIdByProduct],
   )
 
@@ -192,8 +199,6 @@ export function PlanTimelinePanel({
     [scienceLanes, slotRingPropsFor, scienceWindowHours],
   )
 
-  const hasScheduledJobs = mfgJobs.length + rxnJobs.length + sciJobs.length > 0
-
   const activeSlotRingProps =
     tab === 'research'
       ? scienceSlotRingProps
@@ -208,12 +213,48 @@ export function PlanTimelinePanel({
         ? slotBonuses.reactions
         : slotBonuses.manufacturing
 
+  const legend = legendForPool(activePool)
+  const hasCrew = planCrew.length > 0
+  const slotRingGroups = useMemo(() => {
+    if (!hasCrew) {
+      return [
+        {
+          key: 'plan',
+          label: null as string | null,
+          characterId: undefined,
+          slots: activeSlotRingProps,
+        },
+      ]
+    }
+    const byGroup = new Map<
+      string,
+      { key: string; label: string; characterId?: number; slots: typeof activeSlotRingProps }
+    >()
+    for (const lane of activeLanes) {
+      const groupKey = lane.groupId ?? lane.id
+      const existing = byGroup.get(groupKey)
+      const ring = activeSlotRingProps.find((slot) => slot.laneId === lane.id)
+      if (!ring) continue
+      if (existing) {
+        existing.slots.push(ring)
+        continue
+      }
+      byGroup.set(groupKey, {
+        key: groupKey,
+        label: lane.groupLabel ?? lane.characterName ?? 'Slots',
+        characterId: lane.characterId,
+        slots: [ring],
+      })
+    }
+    return [...byGroup.values()]
+  }, [hasCrew, activeLanes, activeSlotRingProps])
+
   const slotTooltip =
     tab === 'research'
-      ? `${scienceSlots} research slots${activeBonus > 0 ? ` (${scienceSlots - activeBonus} from skills + ${activeBonus} bonus)` : ' from Laboratory Operation skills (copy and invention)'}. Click a slot to highlight its row.`
+      ? `${scienceSlots} research slots${hasCrew ? ' across this plan’s characters' : ''}${activeBonus > 0 ? ` (${scienceSlots - activeBonus} from skills + ${activeBonus} bonus)` : hasCrew ? '' : ' from Laboratory Operation skills (copy and invention)'}. Click a slot to highlight its row.`
       : tab === 'reactions'
-        ? `${reactionSlots} reaction slots${activeBonus > 0 ? ` (${reactionSlots - activeBonus} from skills + ${activeBonus} bonus)` : ' from Mass Reactions skills'}. Click a slot to highlight its row.`
-        : `${slots} manufacturing slots${activeBonus > 0 ? ` (${slots - activeBonus} from skills + ${activeBonus} bonus)` : ' from Mass Production skills'}. Click a slot to highlight its row.`
+        ? `${reactionSlots} reaction slots${hasCrew ? ' across this plan’s characters' : ''}${activeBonus > 0 ? ` (${reactionSlots - activeBonus} from skills + ${activeBonus} bonus)` : hasCrew ? '' : ' from Mass Reactions skills'}. Click a slot to highlight its row.`
+        : `${slots} manufacturing slots${hasCrew ? ' across this plan’s characters' : ''}${activeBonus > 0 ? ` (${slots - activeBonus} from skills + ${activeBonus} bonus)` : hasCrew ? '' : ' from Mass Production skills'}. Click a slot to highlight its row.`
 
   const tabs = (
     <div className="plan-timeline__tabs" role="tablist" aria-label="Timeline pool">
@@ -285,35 +326,74 @@ export function PlanTimelinePanel({
             id={`plan-timeline-panel-${tab}`}
             aria-labelledby={`plan-timeline-tab-${tab}`}
           >
-            <ManufacturingSlotsRow
-              slots={activeSlotRingProps}
-              selectedSlotIndex={focusedSlotIndex}
-              onSelectSlot={handleSelectSlot}
-              onAddSlot={onAddSlot ? () => onAddSlot(tab) : undefined}
-              onRemoveSlot={onRemoveSlot ? () => onRemoveSlot(tab) : undefined}
-              canRemoveSlot={activeBonus > 0}
-              addSlotLabel={
-                tab === 'research'
-                  ? 'Add research slot'
-                  : tab === 'reactions'
-                    ? 'Add reaction slot'
-                    : 'Add manufacturing slot'
-              }
-              removeSlotLabel={
-                tab === 'research'
-                  ? 'Remove research slot'
-                  : tab === 'reactions'
-                    ? 'Remove reaction slot'
-                    : 'Remove manufacturing slot'
-              }
-              emptyHint={
-                tab === 'research'
-                  ? 'Idle research slot'
-                  : tab === 'reactions'
-                    ? 'Idle reaction slot'
-                    : 'Please install blueprint'
-              }
-            />
+            <div className="plan-timeline__slot-groups">
+              {slotRingGroups.map((group, groupIndex) => {
+                const slotsExpanded = !group.label || !collapsedSlotGroups.has(group.key)
+                return (
+                  <div key={group.key} className="plan-timeline__slot-group">
+                    {group.label ? (
+                      <button
+                        type="button"
+                        className="plan-timeline__slot-group-head"
+                        aria-expanded={slotsExpanded}
+                        onClick={() => toggleSlotGroup(group.key)}
+                      >
+                        <ChevronIcon open={slotsExpanded} />
+                        <CharacterAvatar
+                          characterId={group.characterId}
+                          name={group.label}
+                          size={24}
+                        />
+                        <span className="truncate text-xs font-medium">{group.label}</span>
+                        <span className="ml-auto shrink-0 tabular-nums text-[10px] opacity-50">
+                          {group.slots.filter((slot) => slot.active).length}/{group.slots.length}{' '}
+                          busy
+                        </span>
+                      </button>
+                    ) : null}
+                    {slotsExpanded ? (
+                      <ManufacturingSlotsRow
+                        slots={group.slots}
+                        selectedLaneId={focusedLaneId}
+                        onSelectSlot={handleSelectSlot}
+                        onAddSlot={
+                          groupIndex === slotRingGroups.length - 1 && onAddSlot
+                            ? () => onAddSlot(tab)
+                            : undefined
+                        }
+                        onRemoveSlot={
+                          groupIndex === slotRingGroups.length - 1 && onRemoveSlot
+                            ? () => onRemoveSlot(tab)
+                            : undefined
+                        }
+                        canRemoveSlot={activeBonus > 0}
+                        addSlotLabel={
+                          tab === 'research'
+                            ? 'Add research slot'
+                            : tab === 'reactions'
+                              ? 'Add reaction slot'
+                              : 'Add manufacturing slot'
+                        }
+                        removeSlotLabel={
+                          tab === 'research'
+                            ? 'Remove research slot'
+                            : tab === 'reactions'
+                              ? 'Remove reaction slot'
+                              : 'Remove manufacturing slot'
+                        }
+                        emptyHint={
+                          tab === 'research'
+                            ? 'Idle research slot'
+                            : tab === 'reactions'
+                              ? 'Idle reaction slot'
+                              : 'Please install blueprint'
+                        }
+                      />
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </UiTooltip>
       </div>
@@ -327,22 +407,46 @@ export function PlanTimelinePanel({
         blueprintTypeIdByProduct={blueprintTypeIdByProduct}
         focusedLaneId={focusedLaneId}
         onFocusedLaneChange={handleFocusedLaneChange}
-        title="Plan schedule"
+        title={
+          tab === 'research'
+            ? 'Research schedule'
+            : tab === 'reactions'
+              ? 'Reaction schedule'
+              : 'Manufacturing schedule'
+        }
         titleAside={
-          <label className="label cursor-pointer shrink-0 gap-2 py-0">
-            <input
-              type="checkbox"
-              className="checkbox checkbox-sm"
-              checked={showIdleTimelineSlots}
-              onChange={(event) => setShowIdleTimelineSlots(event.target.checked)}
-            />
-            <span className="label-text text-sm font-normal">Show idle slot rows</span>
-          </label>
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+            <ul className="plan-timeline__legend" aria-label="Job colors">
+              {legend.map((item) => (
+                <li key={item.activity} className="plan-timeline__legend-item">
+                  <span
+                    className="plan-timeline__legend-swatch"
+                    style={{ backgroundColor: item.color }}
+                    aria-hidden
+                  />
+                  {item.label}
+                </li>
+              ))}
+            </ul>
+            <label className="label cursor-pointer shrink-0 gap-2 py-0">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-sm"
+                checked={showIdleTimelineSlots}
+                onChange={(event) => setShowIdleTimelineSlots(event.target.checked)}
+              />
+              <span className="label-text text-sm font-normal">Show idle slots</span>
+            </label>
+          </div>
         }
         emptyMessage={
-          hasScheduledJobs
+          (tab === 'research' ? sciJobs : tab === 'reactions' ? rxnJobs : mfgJobs).length > 0
             ? undefined
-            : 'No jobs on this plan yet. Add blueprints and build a chain to see the schedule.'
+            : tab === 'research'
+              ? 'No copy or invention jobs on this plan.'
+              : tab === 'reactions'
+                ? 'No reaction jobs on this plan.'
+                : 'No manufacturing jobs on this plan yet. Add blueprints and assign owners to see who runs which slot.'
         }
       />
     </>

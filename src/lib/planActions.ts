@@ -1,20 +1,29 @@
 import { snapshotFromJobs } from '@/lib/planProgress'
+import { settingsWithOwnerTimeSkills } from '@/lib/planCharacters'
 import { allocateStartStock } from '@/lib/planStock'
 import {
+  applyNodeOverridePatch,
   applyRootEntryPatch,
+  descendantProductIds,
+  fitPlanForOverallDeadlines,
   inGameDurationHoursFromRuns,
+  overallDeadlineTargets,
   resolveRunsFromPatch,
 } from '@/lib/rootRunsDuration'
+import { readyHoursByProductId as readyHoursByProductIdFromJobs } from '@/pages/Plan/planScheduler'
 import type {
   BlueprintInfo,
   GlobalSettings,
   ManufacturingPlanTemplate,
   PlanBuildMode,
   PlanCharacterKey,
+  PlanDurationMode,
   PlanNode,
   PlanNodeOverride,
+  PlanRootEntry,
   PlanStepStatus,
   ScheduledPlanJob,
+  SkillLevels,
 } from '@/types'
 import { getBlueprintForProduct } from '@/services/data/sdeLoader'
 
@@ -47,6 +56,141 @@ export function setNodeOwner(
   key: PlanCharacterKey | undefined,
 ): TemplatePatch {
   return { nodeOverrides: withOverride(template, productTypeId, { characterKey: key }) }
+}
+
+type OwnerRunSyncSkillSources = {
+  sso: Array<{
+    characterId: number
+    characterName: string
+    skills?: SkillLevels
+    trainedSkills?: SkillLevels
+  }>
+  manual: Array<{ id: string; name: string; skills: SkillLevels }>
+}
+
+export function settingsForProductOwner(
+  settings: GlobalSettings,
+  productTypeId: number,
+  ownerByProduct: Map<number, PlanCharacterKey | 'auto'>,
+  skillSources: OwnerRunSyncSkillSources,
+): GlobalSettings {
+  const owner = ownerByProduct.get(productTypeId)
+  if (owner && owner !== 'auto') {
+    return settingsWithOwnerTimeSkills(settings, owner, skillSources)
+  }
+  return settings
+}
+
+/** Re-sync every stored production timer using each node's pinned owner skills. */
+export function syncAllPlanRunsFromStoredDuration(
+  template: ManufacturingPlanTemplate,
+  planNodes: Array<Pick<PlanNode, 'productTypeId' | 'mode' | 'isRoot' | 'childProductTypeIds'>>,
+  blueprints: BlueprintInfo[],
+  settings: GlobalSettings,
+  skillSources: OwnerRunSyncSkillSources,
+  ownerByProduct: Map<number, PlanCharacterKey | 'auto'>,
+): TemplatePatch {
+  return syncPlanRunsAfterOwnerChange(
+    template,
+    planNodes,
+    blueprints,
+    settings,
+    skillSources,
+    ownerByProduct,
+    { productTypeId: template.roots[0]?.productTypeId ?? 0 },
+    'overall',
+  )
+}
+
+/** Keep stored job timers; re-derive runs when the owner's time skills change. */
+export function syncPlanRunsAfterOwnerChange(
+  template: ManufacturingPlanTemplate,
+  planNodes: Array<Pick<PlanNode, 'productTypeId' | 'mode' | 'isRoot' | 'childProductTypeIds'>>,
+  blueprints: BlueprintInfo[],
+  settings: GlobalSettings,
+  skillSources: OwnerRunSyncSkillSources,
+  ownerByProduct: Map<number, PlanCharacterKey | 'auto'>,
+  scope: { rootId?: string; productTypeId: number },
+  durationMode?: PlanDurationMode,
+): TemplatePatch {
+  const getBlueprint = (productTypeId: number) => getBlueprintForProduct(blueprints, productTypeId)
+
+  const nodeOverrides = { ...template.nodeOverrides }
+
+  const resyncNodeDuration = (productTypeId: number) => {
+    const override = nodeOverrides[productTypeId]
+    const hours = override?.productionDurationHours
+    if (hours == null || hours <= 0) return
+    const bp = getBlueprint(productTypeId)
+    nodeOverrides[productTypeId] = applyNodeOverridePatch(
+      override,
+      { productionDurationHours: hours },
+      bp,
+      settingsForProductOwner(settings, productTypeId, ownerByProduct, skillSources),
+    )
+  }
+
+  // Overall only shrinks to the deadline, so restore duration-derived runs first
+  // (same as switching Production then Overall). Production only touches the edited job.
+  const resyncRootFromDuration = (root: PlanRootEntry): PlanRootEntry => {
+    if (root.productionDurationHours <= 0) return root
+    return applyRootEntryPatch(
+      root,
+      { productionDurationHours: root.productionDurationHours },
+      getBlueprint(root.productTypeId),
+      settingsForProductOwner(settings, root.productTypeId, ownerByProduct, skillSources),
+      nodeOverrides[root.productTypeId],
+    )
+  }
+
+  let roots = template.roots
+  if (durationMode === 'overall') {
+    roots = roots.map(resyncRootFromDuration)
+    for (const node of planNodes) {
+      if (node.isRoot || node.mode !== 'build') continue
+      resyncNodeDuration(node.productTypeId)
+    }
+  } else if (scope.rootId) {
+    roots = roots.map((r) => (r.id === scope.rootId ? resyncRootFromDuration(r) : r))
+    const rootEntry = template.roots.find((r) => r.id === scope.rootId)
+    if (rootEntry) {
+      for (const productTypeId of descendantProductIds(rootEntry.productTypeId, planNodes)) {
+        resyncNodeDuration(productTypeId)
+      }
+    }
+  } else {
+    resyncNodeDuration(scope.productTypeId)
+  }
+
+  return { roots, nodeOverrides }
+}
+
+/** Refit Overall runs against a schedule built with the updated owner assignment. */
+export function fitOverallPlanToProductionSchedule(
+  template: ManufacturingPlanTemplate,
+  productionJobs: ScheduledPlanJob[],
+  planNodes: Array<Pick<PlanNode, 'productTypeId' | 'childProductTypeIds' | 'isRoot' | 'mode'>>,
+  blueprints: BlueprintInfo[],
+  settings: GlobalSettings,
+): TemplatePatch {
+  const targets = overallDeadlineTargets(template.roots)
+  if (targets.length === 0) return {}
+  return fitPlanForOverallDeadlines({
+    roots: template.roots,
+    nodeOverrides: template.nodeOverrides,
+    targets,
+    readyHoursByProductId: readyHoursByProductIdFromJobs(productionJobs),
+    nodes: planNodes,
+    settings,
+    getBlueprint: (productTypeId) => getBlueprintForProduct(blueprints, productTypeId),
+  })
+}
+
+export function setSellerCharacterKey(
+  template: ManufacturingPlanTemplate,
+  key: PlanCharacterKey | undefined,
+): TemplatePatch {
+  return { sellerCharacterKey: key }
 }
 
 export function setNodeCopies(

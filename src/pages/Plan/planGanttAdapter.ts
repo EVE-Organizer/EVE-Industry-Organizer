@@ -1,13 +1,49 @@
-import type { PlanJobActivity, PlanJobPool, PlanNode, ScheduledPlanJob } from '@/types'
+import type {
+  PlanCharacterKey,
+  PlanJobActivity,
+  PlanJobPool,
+  PlanNode,
+  ScheduledPlanJob,
+} from '@/types'
 import type { GanttBar, GanttLane } from '@/components/gantt/ganttTypes'
-import { ganttBarColor, formatHourTick } from '@/lib/planTimelineChartData'
+import { formatHourTick } from '@/lib/planTimelineChartData'
 import { formatDecimal } from '@/lib/profit'
 
-const ACTIVITY_COLORS: Partial<Record<PlanJobActivity, string>> = {
-  copy: '#a371f7',
-  invention: '#db61a2',
-  reaction: '#3fb950',
+export const PLAN_GANTT_ACTIVITY_COLORS: Record<PlanJobActivity, string> = {
   manufacture: '#f5a623',
+  invention: '#a371f7',
+  copy: '#58a6ff',
+  reaction: '#3fb950',
+}
+
+export const PLAN_GANTT_ACTIVITY_LEGEND: Array<{
+  activity: PlanJobActivity
+  label: string
+  color: string
+}> = [
+  { activity: 'manufacture', label: 'Manufacture', color: PLAN_GANTT_ACTIVITY_COLORS.manufacture },
+  { activity: 'reaction', label: 'Reaction', color: PLAN_GANTT_ACTIVITY_COLORS.reaction },
+  { activity: 'copy', label: 'Copy', color: PLAN_GANTT_ACTIVITY_COLORS.copy },
+  { activity: 'invention', label: 'Invention', color: PLAN_GANTT_ACTIVITY_COLORS.invention },
+]
+
+export interface PlanGanttCrewMember {
+  key: PlanCharacterKey
+  name: string
+  characterId?: number
+  manufacturing: number
+  reactions: number
+  research: number
+}
+
+function slotCountForPool(member: PlanGanttCrewMember, pool: PlanJobPool): number {
+  if (pool === 'reaction') return member.reactions
+  if (pool === 'science') return member.research
+  return member.manufacturing
+}
+
+function laneKey(characterKey: PlanCharacterKey | undefined, slot: number): string {
+  return `${characterKey ?? '__shared__'}:${slot}`
 }
 
 function sameMergeGroup(a: ScheduledPlanJob, b: ScheduledPlanJob): boolean {
@@ -17,9 +53,8 @@ function sameMergeGroup(a: ScheduledPlanJob, b: ScheduledPlanJob): boolean {
 function mergeSlotJobsToBars(
   slotJobs: ScheduledPlanJob[],
   pool: PlanJobPool,
-  slotIndex: number,
+  laneId: string,
   span: number,
-  depthById: Map<number, number>,
   rootById: Map<number, boolean>,
 ): GanttBar[] {
   if (slotJobs.length === 0) return []
@@ -35,21 +70,17 @@ function mergeSlotJobsToBars(
     const startHour = first.startHour
     const endHour = last.endHour
     const durationHours = Math.max(0.01, endHour - startHour)
-    const depth = depthById.get(first.productTypeId) ?? 0
     const isRoot = rootById.get(first.productTypeId) ?? false
     const activity = first.activity
 
     bars.push({
-      id: `${pool}-${first.productTypeId}-${slotIndex}-${from}`,
+      id: `${laneId}-${first.productTypeId}-${from}`,
       label: first.name,
       start: startHour / span,
       end: endHour / span,
       duration: durationHours,
       productTypeId: first.productTypeId,
-      color:
-        activity && ACTIVITY_COLORS[activity]
-          ? ACTIVITY_COLORS[activity]!
-          : ganttBarColor(depth, isRoot),
+      color: PLAN_GANTT_ACTIVITY_COLORS[activity ?? 'manufacture'],
       meta: {
         runs: group.reduce((sum, job) => sum + job.runs, 0),
         outputQty: group.reduce((sum, job) => sum + job.outputQty, 0),
@@ -71,49 +102,124 @@ function mergeSlotJobsToBars(
   return bars
 }
 
+function buildLane(
+  id: string,
+  label: string,
+  slotJobs: ScheduledPlanJob[],
+  pool: PlanJobPool,
+  span: number,
+  rootById: Map<number, boolean>,
+  owner?: {
+    characterId?: number
+    characterName?: string
+    groupId?: string
+    groupLabel?: string
+  },
+): GanttLane {
+  const sorted = [...slotJobs].sort((a, b) => a.startHour - b.startHour)
+  const bars = mergeSlotJobsToBars(sorted, pool, id, span, rootById)
+  const busyHours = sorted.reduce(
+    (sum, job) => sum + Math.max(0.01, job.endHour - job.startHour),
+    0,
+  )
+  const endHour = sorted.length > 0 ? Math.max(...sorted.map((j) => j.endHour)) : 0
+
+  return {
+    id,
+    label,
+    sublabel:
+      sorted.length > 0
+        ? `${sorted.length} job${sorted.length === 1 ? '' : 's'} · ends ${formatHourTick(endHour)}`
+        : 'Idle',
+    bars,
+    jobCount: sorted.length,
+    busyHours,
+    endHour,
+    characterId: owner?.characterId,
+    characterName: owner?.characterName,
+    groupId: owner?.groupId,
+    groupLabel: owner?.groupLabel,
+  }
+}
+
 export function buildPlanGanttLanes(
   jobs: ScheduledPlanJob[],
   nodes: PlanNode[],
   slotCount: number,
   windowHours: number,
   pool: PlanJobPool = 'manufacturing',
+  crew?: PlanGanttCrewMember[],
 ): GanttLane[] {
-  const depthById = new Map(nodes.map((n) => [n.productTypeId, n.depth]))
   const rootById = new Map(nodes.map((n) => [n.productTypeId, n.isRoot]))
-  const slots = Math.max(1, slotCount)
   const span = Math.max(windowHours, 1)
   const poolJobs = jobs.filter((j) => (j.pool ?? 'manufacturing') === pool && j.startHour < span)
 
-  const bySlot = new Map<number, ScheduledPlanJob[]>()
-  for (let s = 0; s < slots; s++) bySlot.set(s, [])
+  const byLane = new Map<string, ScheduledPlanJob[]>()
+
   for (const job of poolJobs) {
-    const list = bySlot.get(job.slot) ?? []
+    const key = laneKey(job.characterKey, job.slot)
+    const list = byLane.get(key) ?? []
     list.push(job)
-    bySlot.set(job.slot, list)
+    byLane.set(key, list)
   }
 
-  const labelPrefix = pool === 'science' ? 'Sci' : pool === 'reaction' ? 'Rxn' : 'Slot'
+  const lanes: GanttLane[] = []
 
-  return Array.from({ length: slots }, (_, slotIndex) => {
-    const slotJobs = [...(bySlot.get(slotIndex) ?? [])].sort((a, b) => a.startHour - b.startHour)
-    const bars = mergeSlotJobsToBars(slotJobs, pool, slotIndex, span, depthById, rootById)
-
-    const busyHours = slotJobs.reduce(
-      (sum, job) => sum + Math.max(0.01, job.endHour - job.startHour),
-      0,
-    )
-    const endHour = slotJobs.length > 0 ? Math.max(...slotJobs.map((j) => j.endHour)) : 0
-
-    return {
-      id: `${pool}-slot-${slotIndex}`,
-      label: `${labelPrefix} ${slotIndex + 1}`,
-      sublabel: `${slotJobs.length} job${slotJobs.length === 1 ? '' : 's'} · ends ${formatHourTick(endHour)}`,
-      bars,
-      jobCount: slotJobs.length,
-      busyHours,
-      endHour,
+  if (crew && crew.length > 0) {
+    for (const member of crew) {
+      const slots = Math.max(1, slotCountForPool(member, pool))
+      for (let slotIndex = 0; slotIndex < slots; slotIndex += 1) {
+        const id = `${pool}-${member.key}-${slotIndex}`
+        const slotJobs = byLane.get(laneKey(member.key, slotIndex)) ?? []
+        lanes.push(
+          buildLane(id, `Slot ${slotIndex + 1}`, slotJobs, pool, span, rootById, {
+            characterId: member.characterId,
+            characterName: member.name,
+            groupId: member.key,
+            groupLabel: member.name,
+          }),
+        )
+      }
     }
-  })
+    for (const [key, slotJobs] of byLane) {
+      if (key.startsWith('__shared__')) {
+        const slotIndex = Number(key.split(':')[1])
+        lanes.push(
+          buildLane(
+            `${pool}-shared-${slotIndex}`,
+            `Slot ${slotIndex + 1}`,
+            slotJobs,
+            pool,
+            span,
+            rootById,
+          ),
+        )
+      }
+    }
+    return lanes
+  }
+
+  const slots = Math.max(1, slotCount)
+  for (let slotIndex = 0; slotIndex < slots; slotIndex += 1) {
+    const slotJobs =
+      byLane.get(laneKey(undefined, slotIndex)) ?? poolJobs.filter((j) => j.slot === slotIndex)
+    lanes.push(
+      buildLane(
+        `${pool}-slot-${slotIndex}`,
+        pool === 'science'
+          ? `Sci ${slotIndex + 1}`
+          : pool === 'reaction'
+            ? `Rxn ${slotIndex + 1}`
+            : `Slot ${slotIndex + 1}`,
+        slotJobs,
+        pool,
+        span,
+        rootById,
+      ),
+    )
+  }
+
+  return lanes
 }
 
 export function formatPlanGanttTick(ratio: number, windowHours: number): string {
@@ -124,4 +230,15 @@ export function formatPlanScrubLabel(ratio: number, windowHours: number): string
   const span = Math.max(windowHours, 1)
   const hours = ratio * span
   return `${formatPlanGanttTick(ratio, windowHours)} · ${formatDecimal(hours, 1)}h from plan start`
+}
+
+export function legendForPool(pool: PlanJobPool): typeof PLAN_GANTT_ACTIVITY_LEGEND {
+  if (pool === 'reaction')
+    return PLAN_GANTT_ACTIVITY_LEGEND.filter((item) => item.activity === 'reaction')
+  if (pool === 'science') {
+    return PLAN_GANTT_ACTIVITY_LEGEND.filter(
+      (item) => item.activity === 'copy' || item.activity === 'invention',
+    )
+  }
+  return PLAN_GANTT_ACTIVITY_LEGEND.filter((item) => item.activity === 'manufacture')
 }

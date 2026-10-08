@@ -25,6 +25,8 @@ export type BuildBlueprintRow = ExpandablePlanRow & {
   /** Non-root build jobs under this root. Ready-by Fix only applies when this is > 0. */
   componentBuildCount?: number
   characterKey?: PlanCharacterKey
+  /** Child row shows an owner inherited from its root, not a stored pin. */
+  ownerInherited?: boolean
   progress?: { percent: number; done: number; total: number; runningPercent?: number }
   haveBpcs?: boolean
   /** Runs synced from Ready by (typed time or Fix), not Duration. */

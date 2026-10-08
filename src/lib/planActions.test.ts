@@ -8,6 +8,9 @@ import {
   setNodeCopies,
   setAllReadyBy,
   setReadyBy,
+  setRootOwner,
+  syncAllPlanRunsFromStoredDuration,
+  syncPlanRunsAfterOwnerChange,
   syncPlanRunsFromProductionHours,
   togglePlanBuildMode,
   setStepStatus,
@@ -183,6 +186,164 @@ describe('planActions', () => {
     expect(patch.roots?.[0]?.characterKey).toBeUndefined()
     expect(patch.nodeOverrides?.[2]?.characterKey).toBeUndefined()
     expect(patch.sellerCharacterKey).toBeUndefined()
+  })
+
+  it('re-derives root runs from stored duration when the root owner changes', () => {
+    const bp: BlueprintInfo = {
+      blueprintTypeId: 10001,
+      productTypeId: 100,
+      productQuantity: 1,
+      manufacturingTime: 3600,
+      materials: [],
+      requiredSkills: {},
+      tier: 't1',
+      productGroup: 'Module',
+      bpIconUrl: '',
+      productIconUrl: '',
+      productRenderUrl: '',
+    }
+    const fastSkills = { ...DEFAULT_SETTINGS.skills, industry: 5, advancedIndustry: 5 }
+    const slowSkills = { ...DEFAULT_SETTINGS.skills, industry: 0, advancedIndustry: 0 }
+    let t = template()
+    t.roots = [
+      {
+        id: 'r1',
+        productTypeId: 100,
+        runs: 100,
+        productionDurationHours: 24,
+        runsFromDuration: true,
+        characterKey: 'manual:fast',
+      },
+    ]
+    t.characters = ['manual:fast', 'manual:slow']
+    t = { ...t, ...setRootOwner(t, 'r1', 'manual:slow') }
+    const ownerByProduct = new Map<number, 'manual:slow'>([[100, 'manual:slow']])
+    const patch = syncPlanRunsAfterOwnerChange(
+      t,
+      [],
+      [bp],
+      DEFAULT_SETTINGS,
+      {
+        sso: [],
+        manual: [
+          { id: 'fast', name: 'Fast', skills: fastSkills },
+          { id: 'slow', name: 'Slow', skills: slowSkills },
+        ],
+      },
+      ownerByProduct,
+      { rootId: 'r1', productTypeId: 100 },
+      'production',
+    )
+    const slowRuns = inGameRunsFromDurationHours(
+      bp,
+      { ...DEFAULT_SETTINGS, skills: slowSkills },
+      24,
+    )
+    expect(patch.roots?.[0]?.runs).toBe(slowRuns)
+    expect(patch.roots?.[0]?.productionDurationHours).toBe(24)
+    expect(slowRuns).toBeLessThan(
+      inGameRunsFromDurationHours(bp, { ...DEFAULT_SETTINGS, skills: fastSkills }, 24),
+    )
+  })
+
+  it('restores duration-derived runs in overall mode when switching back to a faster owner', () => {
+    const bp: BlueprintInfo = {
+      blueprintTypeId: 10001,
+      productTypeId: 100,
+      productQuantity: 1,
+      manufacturingTime: 3600,
+      materials: [],
+      requiredSkills: {},
+      tier: 't1',
+      productGroup: 'Module',
+      bpIconUrl: '',
+      productIconUrl: '',
+      productRenderUrl: '',
+    }
+    const fastSkills = { ...DEFAULT_SETTINGS.skills, industry: 5, advancedIndustry: 5 }
+    const slowSkills = { ...DEFAULT_SETTINGS.skills, industry: 0, advancedIndustry: 0 }
+    const fastSettings = { ...DEFAULT_SETTINGS, skills: fastSkills }
+    const slowSettings = { ...DEFAULT_SETTINGS, skills: slowSkills }
+    const fastRuns = inGameRunsFromDurationHours(bp, fastSettings, 24)
+    const slowRuns = inGameRunsFromDurationHours(bp, slowSettings, 24)
+    const t = template()
+    t.durationMode = 'overall'
+    t.roots = [
+      {
+        id: 'r1',
+        productTypeId: 100,
+        runs: slowRuns,
+        productionDurationHours: 24,
+        runsFromDuration: true,
+        characterKey: 'manual:fast',
+      },
+    ]
+    t.characters = ['manual:fast', 'manual:slow']
+    const patch = syncPlanRunsAfterOwnerChange(
+      t,
+      [],
+      [bp],
+      DEFAULT_SETTINGS,
+      {
+        sso: [],
+        manual: [
+          { id: 'fast', name: 'Fast', skills: fastSkills },
+          { id: 'slow', name: 'Slow', skills: slowSkills },
+        ],
+      },
+      new Map([[100, 'manual:fast']]),
+      { rootId: 'r1', productTypeId: 100 },
+      'overall',
+    )
+    expect(slowRuns).toBeLessThan(fastRuns)
+    expect(patch.roots?.[0]?.runs).toBe(fastRuns)
+    expect(patch.roots?.[0]?.productionDurationHours).toBe(24)
+  })
+
+  it('syncAllPlanRunsFromStoredDuration uses owner skills for every root', () => {
+    const bp: BlueprintInfo = {
+      blueprintTypeId: 10001,
+      productTypeId: 100,
+      productQuantity: 1,
+      manufacturingTime: 3600,
+      materials: [],
+      requiredSkills: {},
+      tier: 't1',
+      productGroup: 'Module',
+      bpIconUrl: '',
+      productIconUrl: '',
+      productRenderUrl: '',
+    }
+    const slowSkills = { ...DEFAULT_SETTINGS.skills, industry: 0, advancedIndustry: 0 }
+    const t = template()
+    t.roots = [
+      {
+        id: 'r1',
+        productTypeId: 100,
+        runs: 999,
+        productionDurationHours: 24,
+        runsFromDuration: true,
+        characterKey: 'manual:slow',
+      },
+    ]
+    t.characters = ['manual:slow']
+    const patch = syncAllPlanRunsFromStoredDuration(
+      t,
+      [],
+      [bp],
+      DEFAULT_SETTINGS,
+      {
+        sso: [],
+        manual: [{ id: 'slow', name: 'Slow', skills: slowSkills }],
+      },
+      new Map([[100, 'manual:slow']]),
+    )
+    const slowRuns = inGameRunsFromDurationHours(
+      bp,
+      { ...DEFAULT_SETTINGS, skills: slowSkills },
+      24,
+    )
+    expect(patch.roots?.[0]?.runs).toBe(slowRuns)
   })
 
   it('starts with a frozen split and stock, and resets to nothing', () => {

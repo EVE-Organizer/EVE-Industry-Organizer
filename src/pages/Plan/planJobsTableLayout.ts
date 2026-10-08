@@ -104,11 +104,12 @@ export const DEFAULT_PLAN_JOBS_SCROLL_ORDER: PlanJobsColumnId[] = [
   'profit',
 ]
 
-/** Production jobs table (PlanRootList) — no owner / progress columns. */
+/** Production jobs table (PlanRootList) — no progress column. */
 export const CORE_PLAN_JOBS_SCROLL_ORDER: PlanJobsColumnId[] = [
   'runs',
   'duration',
   'bpos',
+  'owner',
   'output',
   'volume',
   'setup',

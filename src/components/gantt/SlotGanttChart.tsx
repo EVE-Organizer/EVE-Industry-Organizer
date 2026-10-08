@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { useAnchorTooltip } from '@/components/Tooltip'
+import { CharacterAvatar } from '@/components/EveImage'
 import { PlanProductIcon } from '@/components/plan/PlanProductIcon'
 import {
   barProgressFillRatio,
@@ -54,6 +55,42 @@ export interface SlotGanttChartProps {
   nowMs?: number | null
   focusedLaneId?: string | null
   onFocusedLaneChange?: (laneId: string | null) => void
+}
+
+function groupGanttLanes(lanes: GanttLane[]): Array<{
+  key: string
+  groupId?: string
+  groupLabel?: string
+  characterId?: number
+  characterName?: string
+  lanes: GanttLane[]
+}> {
+  const groups: Array<{
+    key: string
+    groupId?: string
+    groupLabel?: string
+    characterId?: number
+    characterName?: string
+    lanes: GanttLane[]
+  }> = []
+
+  for (const lane of lanes) {
+    const last = groups[groups.length - 1]
+    if (lane.groupId && last?.groupId === lane.groupId) {
+      last.lanes.push(lane)
+      continue
+    }
+    groups.push({
+      key: lane.groupId ?? lane.id,
+      groupId: lane.groupId,
+      groupLabel: lane.groupLabel ?? lane.characterName,
+      characterId: lane.characterId,
+      characterName: lane.characterName,
+      lanes: [lane],
+    })
+  }
+
+  return groups
 }
 
 function barProgressRatio(
@@ -380,72 +417,101 @@ export function SlotGanttChart({
         </div>
 
         <div className="plan-timeline__lanes">
-          {lanes.map((lane, laneIndex) => {
-            const { layouts, rowCount } = laneLayouts[laneIndex]!
-            const isFocused = focusedLaneId === lane.id
+          {groupGanttLanes(lanes).map((group) => {
+            const busy = group.lanes.filter((lane) => lane.jobCount > 0).length
             return (
               <div
-                key={lane.id}
-                ref={(node) => handleLaneRef(lane.id, node)}
-                className={`plan-timeline__lane${isFocused ? ' plan-timeline__lane--focused' : ''}`}
+                key={group.key}
+                className={`plan-timeline__lane-group${group.groupId ? ' plan-timeline__lane-group--crew' : ''}`}
               >
-                <button
-                  type="button"
-                  className="plan-timeline__lane-label text-left"
-                  onClick={() => setFocusedLaneId(focusedLaneId === lane.id ? null : lane.id)}
-                >
-                  <span className="font-medium">{lane.label}</span>
-                  {lane.sublabel ? (
-                    <span className="plan-timeline__lane-meta tabular-nums">{lane.sublabel}</span>
-                  ) : null}
-                </button>
-                <div
-                  ref={(node) => {
-                    if (node) laneTrackRefs.current[laneIndex] = node
-                    else laneTrackRefs.current.splice(laneIndex, 1)
-                  }}
-                  className="plan-timeline__lane-track"
-                  style={{ ['--lane-rows' as string]: rowCount }}
-                >
-                  {ticks.map((ratio) => (
-                    <span
-                      key={ratio}
-                      className="plan-timeline__lane-gridline"
-                      style={{ left: timelineTickPositionFromNormalized(ratio) }}
+                {group.groupId && group.groupLabel ? (
+                  <div className="plan-timeline__crew-header">
+                    <CharacterAvatar
+                      characterId={group.characterId}
+                      name={group.groupLabel}
+                      size={28}
                     />
-                  ))}
-                  {nowRatio != null && nowRatio >= 0 && nowRatio <= 1 ? (
-                    <span
-                      className={`plan-timeline__now-marker${isLiveTimeline ? ' plan-timeline__now-marker--live' : ''}`}
-                      style={{ left: timelineTickPositionFromNormalized(nowRatio) }}
-                      aria-hidden
-                    />
-                  ) : null}
-                  {lane.bars.length === 0 ? (
-                    <span className="plan-timeline__lane-empty">Idle</span>
-                  ) : (
-                    lane.bars.map((bar) => {
-                      const layout = layouts.get(bar.id)
-                      if (!layout) return null
-                      return (
-                        <GanttBarButton
-                          key={bar.id}
-                          bar={bar}
-                          layout={layout}
-                          blueprintTypeId={
-                            bar.productTypeId
-                              ? blueprintTypeIdByProduct?.get(bar.productTypeId)
-                              : undefined
-                          }
-                          formatBarRange={formatBarRange}
-                          formatBarMeta={formatBarMeta}
-                          nowMs={nowMs}
-                          nowRatio={nowRatio}
-                        />
-                      )
-                    })
-                  )}
-                </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-xs">{group.groupLabel}</p>
+                      <p className="plan-timeline__lane-meta tabular-nums">
+                        {busy} of {group.lanes.length} slot{group.lanes.length === 1 ? '' : 's'}{' '}
+                        busy
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+                {group.lanes.map((lane) => {
+                  const laneIndex = lanes.indexOf(lane)
+                  const { layouts, rowCount } = laneLayouts[laneIndex]!
+                  const isFocused = focusedLaneId === lane.id
+                  return (
+                    <div
+                      key={lane.id}
+                      ref={(node) => handleLaneRef(lane.id, node)}
+                      className={`plan-timeline__lane${isFocused ? ' plan-timeline__lane--focused' : ''}`}
+                    >
+                      <button
+                        type="button"
+                        className="plan-timeline__lane-label text-left"
+                        onClick={() => setFocusedLaneId(focusedLaneId === lane.id ? null : lane.id)}
+                      >
+                        <span className="font-medium">{lane.label}</span>
+                        {lane.sublabel ? (
+                          <span className="plan-timeline__lane-meta tabular-nums">
+                            {lane.sublabel}
+                          </span>
+                        ) : null}
+                      </button>
+                      <div
+                        ref={(node) => {
+                          if (node) laneTrackRefs.current[laneIndex] = node
+                          else delete laneTrackRefs.current[laneIndex]
+                        }}
+                        className="plan-timeline__lane-track"
+                        style={{ ['--lane-rows' as string]: rowCount }}
+                      >
+                        {ticks.map((ratio) => (
+                          <span
+                            key={ratio}
+                            className="plan-timeline__lane-gridline"
+                            style={{ left: timelineTickPositionFromNormalized(ratio) }}
+                          />
+                        ))}
+                        {nowRatio != null && nowRatio >= 0 && nowRatio <= 1 ? (
+                          <span
+                            className={`plan-timeline__now-marker${isLiveTimeline ? ' plan-timeline__now-marker--live' : ''}`}
+                            style={{ left: timelineTickPositionFromNormalized(nowRatio) }}
+                            aria-hidden
+                          />
+                        ) : null}
+                        {lane.bars.length === 0 ? (
+                          <span className="plan-timeline__lane-empty">Idle</span>
+                        ) : (
+                          lane.bars.map((bar) => {
+                            const layout = layouts.get(bar.id)
+                            if (!layout) return null
+                            return (
+                              <GanttBarButton
+                                key={bar.id}
+                                bar={bar}
+                                layout={layout}
+                                blueprintTypeId={
+                                  bar.productTypeId
+                                    ? blueprintTypeIdByProduct?.get(bar.productTypeId)
+                                    : undefined
+                                }
+                                formatBarRange={formatBarRange}
+                                formatBarMeta={formatBarMeta}
+                                nowMs={nowMs}
+                                nowRatio={nowRatio}
+                              />
+                            )
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             )
           })}

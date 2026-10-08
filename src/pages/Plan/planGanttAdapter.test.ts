@@ -178,4 +178,53 @@ describe('buildPlanGanttLanes', () => {
     expect(lanes[0]!.jobCount).toBe(4)
     expect(lanes[0]!.sublabel).toContain('4 jobs')
   })
+
+  it('groups crew lanes by character instead of mixing slot numbers', () => {
+    const lanes = buildPlanGanttLanes(
+      [
+        job({
+          name: 'Alloy',
+          startHour: 0,
+          endHour: 4,
+          characterKey: 'sso:1',
+          slot: 0,
+        }),
+        job({
+          name: 'Barrage',
+          productTypeId: 2,
+          startHour: 0,
+          endHour: 3,
+          characterKey: 'sso:2',
+          slot: 0,
+        }),
+      ],
+      [],
+      2,
+      24,
+      'manufacturing',
+      [
+        {
+          key: 'sso:1',
+          name: 'Toki',
+          characterId: 1,
+          manufacturing: 2,
+          reactions: 1,
+          research: 1,
+        },
+        {
+          key: 'sso:2',
+          name: 'Producer',
+          characterId: 2,
+          manufacturing: 1,
+          reactions: 1,
+          research: 1,
+        },
+      ],
+    )
+
+    expect(lanes.map((lane) => lane.groupLabel)).toEqual(['Toki', 'Toki', 'Producer'])
+    expect(lanes.map((lane) => lane.label)).toEqual(['Slot 1', 'Slot 2', 'Slot 1'])
+    expect(lanes[0]!.id).toBe('manufacturing-sso:1-0')
+    expect(lanes[2]!.bars.map((bar) => bar.label)).toEqual(['Barrage'])
+  })
 })

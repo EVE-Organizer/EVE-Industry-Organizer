@@ -20,6 +20,7 @@ import { PlanRootProfitModal } from '@/pages/Plan/PlanRootProfitModal'
 import { useAppStore } from '@/stores/appStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useSdeData } from '@/hooks/useSdeData'
+import { buildManufacturingPlanSchedule } from '@/pages/Plan/buildManufacturingPlanSchedule'
 import { useManufacturingPlan } from '@/pages/Plan/useManufacturingPlan'
 import { useLocationInventory } from '@/hooks/useCharacterIndustryData'
 import {
@@ -35,7 +36,10 @@ import { buildHubWindowMaps, buildWindowPriceMap } from '@/lib/ranking'
 import { mergePlanBuyPrices, applyPlanBuyPriceSource } from '@/pages/Plan/planBuyPrices'
 import { pickHubMaps, sanitizeBuyPriceMap } from '@/lib/hubPriceSanity'
 import type { PlanBuyPriceSource } from '@/pages/Plan/planBuyPrices'
-import { planSlotBonusesFromManufacturingTemplate } from '@/lib/manufacturingSlots'
+import {
+  effectivePlanSlots,
+  planSlotBonusesFromManufacturingTemplate,
+} from '@/lib/manufacturingSlots'
 import { flattenPlanNodesExpandable, withTreeLineMeta } from '@/pages/Plan/planTreeLines'
 import { readyHoursByProductId as readyHoursByProductIdFromJobs } from '@/pages/Plan/planScheduler'
 import { buildManufactureDisplayRows } from '@/pages/Plan/planManufactureDisplay'
@@ -56,7 +60,28 @@ import {
 import { createPlanRootId } from '@/services/sync/types'
 import { duplicatePlanRootAfter, movePlanRootById } from '@/lib/planRootOrder'
 import { activePlanRoots, displayNodeForRoot } from '@/lib/planRootEnabled'
-import { setNodeCopies, setT2Options } from '@/lib/planActions'
+import {
+  addPlanCharacter,
+  setNodeCopies,
+  setNodeOwner,
+  setRootOwner,
+  setSellerCharacterKey,
+  setT2Options,
+  fitOverallPlanToProductionSchedule,
+  settingsForProductOwner,
+  syncAllPlanRunsFromStoredDuration,
+  syncPlanRunsAfterOwnerChange,
+} from '@/lib/planActions'
+import {
+  buildOwnerByProduct,
+  displayOwnerForProduct,
+  planOwnerValidKeys,
+  settingsWithPlanSellerFees,
+  sumPlanCrewSlots,
+} from '@/lib/planCharacters'
+import { PlanOwnerPicker } from '@/components/plan/PlanOwnerPicker'
+import { usePlanCharacters } from '@/pages/Plan/usePlanCharacters'
+import type { PlanGanttCrewMember } from '@/pages/Plan/planGanttAdapter'
 import { suggestBlueprintLines } from '@/lib/blueprintLineSuggestion'
 import {
   computePlanProfitSummary,
@@ -86,6 +111,7 @@ import type {
   ManufacturingPlanTemplate,
   ManufacturingSettings,
   PlanBuildMode,
+  PlanCharacterKey,
   PlanNodeOverride,
 } from '@/types'
 import { PlanPipelineChecklist } from '@/pages/Plan/PlanPipelineChecklist'
@@ -370,6 +396,51 @@ export function PlanPage() {
     ],
   )
 
+  const authCharacters = useAuthStore((s) => s.characters)
+  const manualCharacters = useAppStore((s) => s.userData.manualCharacters)
+  const { everyone: planCharacterOptions, resolved: planResolvedCrew } = usePlanCharacters(
+    activeTemplate,
+    activeSettings,
+  )
+
+  const planGanttCrew = useMemo((): PlanGanttCrewMember[] => {
+    return planResolvedCrew.map((character) => ({
+      key: character.key,
+      name: character.name,
+      characterId: character.isSso ? Number(character.key.slice(4)) : undefined,
+      manufacturing: character.slots.manufacturing,
+      reactions: character.slots.reactions,
+      research: character.slots.research,
+    }))
+  }, [planResolvedCrew])
+
+  const planSkillSources = useMemo(
+    () => ({
+      sso: authCharacters.map((c) => ({
+        characterId: c.characterId,
+        characterName: c.characterName,
+        skills: c.skills ?? c.trainedSkills,
+      })),
+      manual: manualCharacters ?? [],
+    }),
+    [authCharacters, manualCharacters],
+  )
+
+  const planFeeSkills = useMemo(
+    () =>
+      settingsWithPlanSellerFees(
+        activeSettings,
+        activeTemplate?.sellerCharacterKey,
+        authCharacters.map((c) => ({
+          characterId: c.characterId,
+          characterName: c.characterName,
+          skills: c.skills ?? c.trainedSkills,
+        })),
+        manualCharacters ?? [],
+      ).skills,
+    [activeSettings, activeTemplate?.sellerCharacterKey, authCharacters, manualCharacters],
+  )
+
   const manufacturingSettings = useMemo(
     (): ManufacturingSettings =>
       buildManufacturingSettings(activeSettings, data?.systems, { batchSize: DEFAULT_BATCH_SIZE }),
@@ -386,6 +457,63 @@ export function PlanPage() {
     reactionCostIndex,
     data?.systems,
     { includeSimulation: tab === 'graph' },
+  )
+
+  const ownerByProduct = useMemo(() => {
+    if (!activeTemplate) return new Map<number, PlanCharacterKey | 'auto'>()
+    const validKeys = planOwnerValidKeys(
+      activeTemplate,
+      planCharacterOptions.map((option) => option.key),
+    )
+    return buildOwnerByProduct(
+      plan.nodes,
+      activeTemplate.roots,
+      activeTemplate.nodeOverrides,
+      validKeys,
+    )
+  }, [activeTemplate, plan.nodes, planCharacterOptions])
+
+  const profitExpandInput = useMemo(() => {
+    if (!expandInput) return null
+    const feeOverlay = (settings: GlobalSettings) =>
+      settingsWithPlanSellerFees(
+        settings,
+        activeTemplate?.sellerCharacterKey,
+        planSkillSources.sso,
+        planSkillSources.manual,
+      )
+    const slotBonuses = planSlotBonusesFromManufacturingTemplate(activeTemplate ?? undefined)
+    const slotTotals =
+      planResolvedCrew.length > 0
+        ? sumPlanCrewSlots(planResolvedCrew)
+        : effectivePlanSlots(activeSettings.skills, slotBonuses)
+    return {
+      ...expandInput,
+      settings: feeOverlay(expandInput.settings),
+      settingsForProductTime: (productTypeId: number) =>
+        feeOverlay(
+          settingsForProductOwner(
+            expandInput.settings,
+            productTypeId,
+            ownerByProduct,
+            planSkillSources,
+          ),
+        ),
+      slotTotals,
+    }
+  }, [
+    expandInput,
+    activeTemplate,
+    activeSettings.skills,
+    ownerByProduct,
+    planSkillSources,
+    planResolvedCrew,
+  ])
+
+  const settingsForRootJobTime = useCallback(
+    (productTypeId: number) =>
+      settingsForProductOwner(activeSettings, productTypeId, ownerByProduct, planSkillSources),
+    [activeSettings, ownerByProduct, planSkillSources],
   )
 
   const overallRootsKey = useMemo(
@@ -488,7 +616,7 @@ export function PlanPage() {
   }, [activeCharacterId, refreshCharacter])
 
   const profitSummary = useMemo(() => {
-    if (!activeTemplate || !expandInput) {
+    if (!activeTemplate || !profitExpandInput) {
       return {
         setupCost: 0,
         netRevenue: 0,
@@ -508,7 +636,7 @@ export function PlanPage() {
           ? rootJobTimeHours(
               root,
               bp,
-              activeSettings,
+              settingsForRootJobTime(root.productTypeId),
               activeTemplate.nodeOverrides[root.productTypeId],
             )
           : root.productionDurationHours
@@ -518,7 +646,7 @@ export function PlanPage() {
 
     return computePlanProfitSummary(
       activeTemplate,
-      expandInput,
+      profitExpandInput,
       sellPrices,
       buyPrices,
       jobTimeHoursByRootId,
@@ -526,11 +654,11 @@ export function PlanPage() {
     )
   }, [
     activeTemplate,
-    expandInput,
+    profitExpandInput,
     sellPrices,
     buyPrices,
     blueprints,
-    activeSettings,
+    settingsForRootJobTime,
     planProfitOptions,
   ])
 
@@ -540,17 +668,23 @@ export function PlanPage() {
   )
 
   const setupDetailBreakdown = useMemo(() => {
-    if (!setupDetailRootId || !activeTemplate || !expandInput) return null
+    if (!setupDetailRootId || !activeTemplate || !profitExpandInput) return null
     const root = activeTemplate.roots.find((r) => r.id === setupDetailRootId)
     if (!root) return null
     const blueprint = getBlueprintForProduct(blueprints, root.productTypeId)
     if (!blueprint) return null
     const productName = typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`
-    return computeRootSetupBreakdown(root, blueprint, expandInput, productName, planProfitOptions)
-  }, [setupDetailRootId, activeTemplate, expandInput, blueprints, typeMap, planProfitOptions])
+    return computeRootSetupBreakdown(
+      root,
+      blueprint,
+      profitExpandInput,
+      productName,
+      planProfitOptions,
+    )
+  }, [setupDetailRootId, activeTemplate, profitExpandInput, blueprints, typeMap, planProfitOptions])
 
   const profitDetailBreakdown = useMemo(() => {
-    if (!profitDetailRootId || !activeTemplate || !expandInput) return null
+    if (!profitDetailRootId || !activeTemplate || !profitExpandInput) return null
     const root = activeTemplate.roots.find((r) => r.id === profitDetailRootId)
     if (!root) return null
     const blueprint = getBlueprintForProduct(blueprints, root.productTypeId)
@@ -559,13 +693,13 @@ export function PlanPage() {
     const jobHours = rootJobTimeHours(
       root,
       blueprint,
-      activeSettings,
+      settingsForRootJobTime(root.productTypeId),
       activeTemplate.nodeOverrides[root.productTypeId],
     )
     return computeRootProfitBreakdown(
       root,
       blueprint,
-      expandInput,
+      profitExpandInput,
       sellPrices,
       buyPrices,
       jobHours,
@@ -575,12 +709,12 @@ export function PlanPage() {
   }, [
     profitDetailRootId,
     activeTemplate,
-    expandInput,
+    profitExpandInput,
     blueprints,
     typeMap,
     sellPrices,
     buyPrices,
-    activeSettings,
+    settingsForRootJobTime,
     planProfitOptions,
   ])
 
@@ -630,6 +764,14 @@ export function PlanPage() {
       rootSeen.set(root.productTypeId, instance)
       const instanceTotal = rootCounts.get(root.productTypeId) ?? 1
 
+      const rootOwner = displayOwnerForProduct(
+        root.productTypeId,
+        true,
+        root,
+        override,
+        ownerByProduct,
+      )
+
       return [
         {
           kind: 'leaf' as const,
@@ -645,7 +787,7 @@ export function PlanPage() {
           runs: root.runs,
           durationHours: root.productionDurationHours,
           jobTimeHours: bp
-            ? rootJobTimeHours(root, bp, activeSettings, override)
+            ? rootJobTimeHours(root, bp, settingsForRootJobTime(root.productTypeId), override)
             : root.productionDurationHours,
           outputQty: root.runs * bp.productQuantity,
           isRoot: true,
@@ -654,6 +796,8 @@ export function PlanPage() {
           runsFromDuration: root.runsFromDuration,
           runsFromReadyBy: root.runsFromReadyBy,
           haveBpcs: override?.haveBpcs,
+          characterKey: rootOwner.characterKey,
+          ownerInherited: rootOwner.inherited,
         },
       ]
     })
@@ -677,6 +821,14 @@ export function PlanPage() {
           prices: buyPrices,
         })
 
+      const childOwner = displayOwnerForProduct(
+        productTypeId,
+        false,
+        undefined,
+        override,
+        ownerByProduct,
+      )
+
       return {
         ...row,
         rootId: undefined as string | undefined,
@@ -693,6 +845,8 @@ export function PlanPage() {
         suggestedCopyBpos: suggestion?.copyBpos,
         copyBpos: override?.copyBpos,
         haveBpcs: override?.haveBpcs,
+        characterKey: childOwner.characterKey,
+        ownerInherited: childOwner.inherited,
         bposHint: suggestion?.inventionBottleneck
           ? 'Invention still exceeds root job time; add science slots or lower runs.'
           : undefined,
@@ -712,7 +866,106 @@ export function PlanPage() {
     blueprintTypeIdByProduct,
     activeSettings,
     buyPrices,
+    ownerByProduct,
+    settingsForRootJobTime,
   ])
+
+  const handleSetPlanOwner = useCallback(
+    (target: { rootId?: string; productTypeId: number }, key?: PlanCharacterKey) => {
+      const template = selectedPlanTemplateFromStore()
+      if (!template) return
+
+      let draft = template
+      const patch: Partial<ManufacturingPlanTemplate> = {}
+      if (key) {
+        Object.assign(patch, addPlanCharacter(draft, key))
+        draft = { ...draft, ...patch }
+      }
+      if (target.rootId) {
+        Object.assign(patch, setRootOwner(draft, target.rootId, key))
+      } else {
+        const inherited = ownerByProduct.get(target.productTypeId)
+        const pinKey = key && inherited !== 'auto' && key === inherited ? undefined : key
+        Object.assign(patch, setNodeOwner(draft, target.productTypeId, pinKey))
+      }
+      draft = { ...draft, ...patch }
+
+      const validKeys = planOwnerValidKeys(
+        draft,
+        planCharacterOptions.map((option) => option.key),
+      )
+      const nextOwnerByProduct = buildOwnerByProduct(
+        plan.nodes,
+        draft.roots,
+        draft.nodeOverrides,
+        validKeys,
+      )
+      const skillSources = {
+        sso: authCharacters.map((c) => ({
+          characterId: c.characterId,
+          characterName: c.characterName,
+          skills: c.skills ?? c.trainedSkills,
+        })),
+        manual: manualCharacters ?? [],
+      }
+      Object.assign(
+        patch,
+        syncPlanRunsAfterOwnerChange(
+          draft,
+          plan.nodes,
+          blueprints,
+          storeSettings,
+          skillSources,
+          nextOwnerByProduct,
+          target,
+          draft.durationMode,
+        ),
+      )
+      draft = { ...draft, ...patch }
+
+      if (draft.durationMode === 'overall' && data) {
+        overallFitPassRef.current = { key: '', passes: 0 }
+        const scheduled = buildManufacturingPlanSchedule({
+          template: draft,
+          blueprints,
+          typeMap,
+          prices,
+          settings: storeSettings,
+          systemCostIndex,
+          reactionCostIndex,
+          systems: data.systems,
+          skillSources,
+        })
+        Object.assign(
+          patch,
+          fitOverallPlanToProductionSchedule(
+            draft,
+            scheduled.productionJobs,
+            scheduled.nodes,
+            blueprints,
+            storeSettings,
+          ),
+        )
+      }
+
+      updatePlanTemplate(template.id, patch)
+    },
+    [
+      ownerByProduct,
+      updatePlanTemplate,
+      plan.nodes,
+      planCharacterOptions,
+      authCharacters,
+      manualCharacters,
+      blueprints,
+      storeSettings,
+      data,
+      typeMap,
+      prices,
+      systemCostIndex,
+      reactionCostIndex,
+    ],
+  )
 
   const manufactureRows = useMemo(() => {
     if (!activeTemplate) return []
@@ -1088,19 +1341,35 @@ export function PlanPage() {
         return
       }
 
-      const roots = template.roots.map((r) => {
-        const bp = getBlueprintForProduct(blueprints, r.productTypeId)
-        return applyRootEntryPatch(
-          r,
-          { productionDurationHours: r.productionDurationHours },
-          bp,
-          storeSettings,
-          template.nodeOverrides[r.productTypeId],
-        )
-      })
-      updatePlanTemplate(template.id, { roots, durationMode: mode })
+      const validKeys = planOwnerValidKeys(
+        template,
+        planCharacterOptions.map((option) => option.key),
+      )
+      const ownerMap = buildOwnerByProduct(
+        plan.nodes,
+        template.roots,
+        template.nodeOverrides,
+        validKeys,
+      )
+      const { roots, nodeOverrides } = syncAllPlanRunsFromStoredDuration(
+        template,
+        plan.nodes,
+        blueprints,
+        storeSettings,
+        planSkillSources,
+        ownerMap,
+      )
+      updatePlanTemplate(template.id, { roots, nodeOverrides, durationMode: mode })
     },
-    [plan.productionJobs, plan.nodes, blueprints, storeSettings, updatePlanTemplate],
+    [
+      plan.productionJobs,
+      plan.nodes,
+      blueprints,
+      storeSettings,
+      updatePlanTemplate,
+      planCharacterOptions,
+      planSkillSources,
+    ],
   )
 
   const fitRootsToReadyDeadlines = useCallback(
@@ -1267,31 +1536,64 @@ export function PlanPage() {
             buyHubName={buyHubName}
             sellHubName={sellHubName}
             priceMethod={activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod}
-            skills={activeSettings.skills ?? DEFAULT_SETTINGS.skills}
+            skills={planFeeSkills ?? DEFAULT_SETTINGS.skills}
           />
 
           <section className="plan-build-card">
-            <div className="plan-build-card__header">
-              <h2 className="plan-build-card__title">Build blueprints</h2>
-              <span className="plan-build-card__badge">
-                {activePlanRoots(activeTemplate.roots).length} root
-                {activePlanRoots(activeTemplate.roots).length === 1 ? '' : 's'}
-              </span>
-            </div>
-            <div className="plan-build-card__body">
-              {data ? (
-                <div className={isSharedView ? 'pointer-events-none opacity-80' : undefined}>
-                  <PlanFacilityControls
-                    settings={activeSettings}
-                    onChange={isSharedView ? () => {} : updateSettings}
-                    systems={data.systems}
-                    regions={data.regions}
-                    onRefresh={isSharedView ? undefined : () => void handlePlanRefresh()}
-                    isRefreshing={isRefreshing}
-                  />
-                </div>
-              ) : null}
-            </div>
+            <details className="plan-build-card__details">
+              <summary className="plan-build-card__header plan-build-card__summary">
+                <h2 className="plan-build-card__title">Settings</h2>
+                <span className="plan-build-card__badge">
+                  {activePlanRoots(activeTemplate.roots).length} root
+                  {activePlanRoots(activeTemplate.roots).length === 1 ? '' : 's'}
+                </span>
+              </summary>
+              <div className="plan-build-card__body">
+                {data ? (
+                  <div className={isSharedView ? 'pointer-events-none opacity-80' : undefined}>
+                    <PlanFacilityControls
+                      settings={activeSettings}
+                      onChange={isSharedView ? () => {} : updateSettings}
+                      systems={data.systems}
+                      regions={data.regions}
+                      onRefresh={isSharedView ? undefined : () => void handlePlanRefresh()}
+                      isRefreshing={isRefreshing}
+                    />
+                  </div>
+                ) : null}
+                {!isSharedView ? (
+                  <div className="mt-4 flex flex-col gap-2 border-t border-eve-border/40 pt-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[11px] uppercase tracking-wide opacity-50">Seller</span>
+                      {planCharacterOptions.length === 0 ? (
+                        <p className="text-xs opacity-60">
+                          Sign in with EVE or add a manual character in Settings to pick who pays
+                          sales tax and broker fees.
+                        </p>
+                      ) : (
+                        <PlanOwnerPicker
+                          options={planCharacterOptions}
+                          value={activeTemplate.sellerCharacterKey}
+                          emptyLabel="Settings"
+                          label="Seller for trading fees"
+                          onChange={(key) => {
+                            const template = selectedPlanTemplateFromStore()
+                            if (!template) return
+                            updatePlanTemplate(template.id, setSellerCharacterKey(template, key))
+                          }}
+                        />
+                      )}
+                    </div>
+                    {planCharacterOptions.length > 0 ? (
+                      <p className="text-xs opacity-60">
+                        Uses this character&apos;s Accounting and Broker Relations for plan profit
+                        only. Job owners still use their Industry skills for scheduling.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            </details>
           </section>
 
           <PlanRootList
@@ -1412,6 +1714,8 @@ export function PlanPage() {
                     )
                   }
             }
+            ownerOptions={planCharacterOptions}
+            onSetOwner={isSharedView ? undefined : handleSetPlanOwner}
             onSetAllDuration={
               isSharedView
                 ? undefined
@@ -1493,6 +1797,7 @@ export function PlanPage() {
             onAddSlot={isSharedView ? undefined : handleAddPlanSlot}
             onRemoveSlot={isSharedView ? undefined : handleRemovePlanSlot}
             blueprintTypeIdByProduct={blueprintTypeIdByProduct}
+            planCrew={planGanttCrew}
           />
 
           <PlanViewTabs

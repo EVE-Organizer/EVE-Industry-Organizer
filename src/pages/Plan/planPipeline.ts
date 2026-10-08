@@ -6,13 +6,7 @@ import { applyCopyTime, applyInventionTime, inventionBlueprintCostForSettings } 
 import { resolveScienceModifiers } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
 import { defaultScienceFacility } from '@/types'
-import type {
-  BlueprintInfo,
-  GlobalSettings,
-  PlanJobActivity,
-  PlanJobPool,
-  PlanNode,
-} from '@/types'
+import type { BlueprintInfo, GlobalSettings, PlanJobActivity, PlanJobPool, PlanNode } from '@/types'
 import { getBlueprintForProduct } from '@/services/data/sdeLoader'
 
 export interface PlanPipelineStage {
@@ -45,6 +39,8 @@ export interface BuildPlanPipelineInput {
   scienceSlots: number
   manufacturingSlots: number
   reactionSlots: number
+  /** Copy / invention timers use the product owner's Science skills when set. */
+  settingsForProductTime?: (productTypeId: number) => GlobalSettings
 }
 
 function inventionAttempts(
@@ -67,6 +63,8 @@ function inventionAttempts(
 /** Build ordered pipeline stages for build-mode nodes (skip buy roots / buy leaves). */
 export function buildPlanPipeline(input: BuildPlanPipelineInput): PlanPipeline {
   const { nodes, blueprints, settings, scienceSlots, manufacturingSlots, reactionSlots } = input
+  const timeSettingsFor = (productTypeId: number) =>
+    input.settingsForProductTime?.(productTypeId) ?? settings
   const prices = new Map<number, number>()
   for (const node of nodes) {
     if (node.unitPrice != null) prices.set(node.productTypeId, node.unitPrice)
@@ -82,23 +80,22 @@ export function buildPlanPipeline(input: BuildPlanPipelineInput): PlanPipeline {
     const mfgId = `mfg-${node.productTypeId}`
     const dependsOn: string[] = []
 
-    const invent =
-      blueprint.tier === 't2' &&
-      blueprint.invention &&
-      node.mode === 'build'
+    const invent = blueprint.tier === 't2' && blueprint.invention && node.mode === 'build'
 
     if (invent && blueprint.invention) {
       const attempts = inventionAttempts(blueprint, node.runs, settings, prices)
       const copySeconds = blueprint.invention.copyTime ?? 0
       const inventSeconds = blueprint.invention.inventionTime ?? 0
+      const timeSettings = timeSettingsFor(node.productTypeId)
       const copyMods = resolveScienceModifiers(
-        settings.copyFacility ?? defaultScienceFacility(settings.manufacturingSystemId),
+        timeSettings.copyFacility ?? defaultScienceFacility(timeSettings.manufacturingSystemId),
       )
       const inventMods = resolveScienceModifiers(
-        settings.inventionFacility ?? defaultScienceFacility(settings.manufacturingSystemId),
+        timeSettings.inventionFacility ??
+          defaultScienceFacility(timeSettings.manufacturingSystemId),
       )
-      const advancedIndustry = settings.skills.advancedIndustry ?? 0
-      const science = settings.skills.science ?? 0
+      const advancedIndustry = timeSettings.skills.advancedIndustry ?? 0
+      const science = timeSettings.skills.science ?? 0
       const copyId = `copy-${node.productTypeId}`
       const inventId = `invent-${node.productTypeId}`
 

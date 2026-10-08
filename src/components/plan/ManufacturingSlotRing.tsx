@@ -14,6 +14,8 @@ function EmptyBlueprintIcon() {
 
 export interface ManufacturingSlotRingProps {
   slotIndex: number
+  /** Stable id for multi-character timelines; falls back to slotIndex. */
+  laneId?: string
   active?: boolean
   selected?: boolean
   /** 0–1 share of plan window this slot is busy. */
@@ -24,11 +26,12 @@ export interface ManufacturingSlotRingProps {
   idleMessage?: string
   size?: 'sm' | 'md'
   className?: string
-  onSelect?: (slotIndex: number) => void
+  onSelect?: (slotIndex: number, laneId?: string) => void
 }
 
 export function ManufacturingSlotRing({
   slotIndex,
+  laneId,
   active = false,
   selected = false,
   utilization = 0,
@@ -53,7 +56,7 @@ export function ManufacturingSlotRing({
       aria-pressed={selected}
       aria-label={label}
       title={productName ?? idleMessage}
-      onClick={() => onSelect?.(slotIndex)}
+      onClick={() => onSelect?.(slotIndex, laneId)}
     >
       <div className="manufacturing-slot__frame">
         <svg viewBox="0 0 200 200" className="manufacturing-slot__svg" aria-hidden>
@@ -137,7 +140,8 @@ export function ManufacturingSlotRing({
 interface ManufacturingSlotsRowProps {
   slots: ManufacturingSlotRingProps[]
   selectedSlotIndex?: number | null
-  onSelectSlot?: (slotIndex: number) => void
+  selectedLaneId?: string | null
+  onSelectSlot?: (slotIndex: number, laneId?: string) => void
   emptyHint?: string
   className?: string
   onAddSlot?: () => void
@@ -150,6 +154,7 @@ interface ManufacturingSlotsRowProps {
 export function ManufacturingSlotsRow({
   slots,
   selectedSlotIndex = null,
+  selectedLaneId = null,
   onSelectSlot,
   emptyHint = 'Industry slots from Mass Production skills',
   className = '',
@@ -167,15 +172,16 @@ export function ManufacturingSlotsRow({
         <p className="manufacturing-slots__hint">{emptyHint}</p>
       ) : null}
       <div className="manufacturing-slots__row-wrap">
-        <div
-          className="manufacturing-slots__row"
-          style={{ ['--slot-count' as string]: slots.length }}
-        >
+        <div className="manufacturing-slots__row">
           {slots.map((slot) => (
             <ManufacturingSlotRing
-              key={slot.slotIndex}
+              key={slot.laneId ?? slot.slotIndex}
               {...slot}
-              selected={selectedSlotIndex === slot.slotIndex}
+              selected={
+                slot.laneId != null
+                  ? selectedLaneId === slot.laneId
+                  : selectedSlotIndex === slot.slotIndex
+              }
               onSelect={onSelectSlot}
             />
           ))}

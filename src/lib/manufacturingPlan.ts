@@ -64,6 +64,10 @@ export interface ExpandPlanInput {
   systemCostIndex: number
   reactionCostIndex: number
   systems?: SystemInfo[]
+  /** Job timers per product — use assigned owner skills instead of settings.skills. */
+  settingsForProductTime?: (productTypeId: number) => GlobalSettings
+  /** When set, overrides skill-based slot counts (e.g. sum of plan crew). */
+  slotTotals?: { manufacturing: number; reactions: number; research: number }
 }
 
 export interface ExpandPlanResult {
@@ -595,9 +599,10 @@ function finalizeNodes(
     const meTe = blueprint
       ? resolveBlueprintMeTe(blueprint.tier, settings, override, blueprint)
       : { me: settings.meDefault, te: settings.teDefault, locked: false }
+    const timeSettings = input.settingsForProductTime?.(accum.productTypeId) ?? settings
     const jobTimeSeconds =
       blueprint && accum.mode === 'build'
-        ? jobTimeSecondsForRuns(blueprint, settings, runs, concurrent, override)
+        ? jobTimeSecondsForRuns(blueprint, timeSettings, runs, concurrent, override)
         : 0
 
     const outputQty = blueprint ? runs * blueprint.productQuantity : totalDemandQty
@@ -705,11 +710,10 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
   const modeOverrides = modeOverridesMap(template)
   const nodeMap = new Map<number, NodeAccum>()
   const slotBonuses = planSlotBonusesFromManufacturingTemplate(template)
-  const {
-    manufacturing: slots,
-    research: scienceSlots,
-    reactions: reactionSlots,
-  } = effectivePlanSlots(settings.skills, slotBonuses)
+  const fromSkills = effectivePlanSlots(settings.skills, slotBonuses)
+  const slots = input.slotTotals?.manufacturing ?? fromSkills.manufacturing
+  const scienceSlots = input.slotTotals?.research ?? fromSkills.research
+  const reactionSlots = input.slotTotals?.reactions ?? fromSkills.reactions
   const buildCostCache = createBuildCostCache()
 
   for (const root of template.roots) {
@@ -736,10 +740,11 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
 
   const windowFromRoots = template.roots.reduce((m, r) => {
     const blueprint = getBlueprintForProduct(input.blueprints, r.productTypeId)
+    const rootSettings = input.settingsForProductTime?.(r.productTypeId) ?? settings
     const hours = blueprint
       ? inGameDurationHoursFromRuns(
           blueprint,
-          settings,
+          rootSettings,
           r.runs,
           template.nodeOverrides[r.productTypeId],
         )

@@ -245,6 +245,7 @@ describe('overallFitInputKey', () => {
     roots: [root],
     modeOverrides: {},
     nodeOverrides: {} as Record<number, import('@/types').PlanNodeOverride>,
+    characters: [] as import('@/types').PlanCharacterKey[],
   }
 
   it('ignores run count so a fit pass cannot retrigger itself', () => {
@@ -263,6 +264,17 @@ describe('overallFitInputKey', () => {
       nodeOverrides: { 100: { me: 8 } },
     }
     expect(overallFitInputKey(withMe, DEFAULT_SETTINGS)).not.toBe(
+      overallFitInputKey(template, DEFAULT_SETTINGS),
+    )
+  })
+
+  it('changes when a root owner is assigned', () => {
+    const withOwner = {
+      ...template,
+      roots: [{ ...root, characterKey: 'sso:1' as const }],
+      characters: ['sso:1' as const],
+    }
+    expect(overallFitInputKey(withOwner, DEFAULT_SETTINGS)).not.toBe(
       overallFitInputKey(template, DEFAULT_SETTINGS),
     )
   })

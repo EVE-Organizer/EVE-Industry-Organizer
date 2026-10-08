@@ -285,15 +285,16 @@ export function overallFitInputKey(template: OverallFitTemplate, settings: Globa
     .map(([id, mode]) => `${id}:${mode}`)
     .sort()
     .join(',')
+  const rootOwners = template.roots.map((r) => `${r.id}:${r.characterKey ?? ''}`).join('|')
   const pins = Object.entries(template.nodeOverrides)
     .map(
       ([id, override]) =>
-        `${id}:${override.me ?? ''}:${override.te ?? ''}:${override.copies ?? ''}:${override.runsPerBpc ?? ''}:${override.forceInclude ? 1 : 0}`,
+        `${id}:${override.characterKey ?? ''}:${override.me ?? ''}:${override.te ?? ''}:${override.copies ?? ''}:${override.runsPerBpc ?? ''}:${override.forceInclude ? 1 : 0}`,
     )
     .sort()
     .join(',')
   const timeSkills = `${skillLevel(settings.skills, 'industry')}:${skillLevel(settings.skills, 'advancedIndustry')}:${skillLevel(settings.skills, 'reactions')}`
-  return `${planRootsKey(template.roots)}|${modes}|${pins}|${timeSkills}|${settings.teDefault}|${settings.meDefault}|${settings.manufacturingSystemId}|${template.manufacturingSlotBonus ?? 0}|${template.reactionSlotBonus ?? 0}`
+  return `${planRootsKey(template.roots)}|${rootOwners}|${modes}|${pins}|${timeSkills}|${settings.teDefault}|${settings.meDefault}|${settings.manufacturingSystemId}|${template.manufacturingSlotBonus ?? 0}|${template.reactionSlotBonus ?? 0}`
 }
 
 export type OverallFitPassState = { key: string; passes: number }

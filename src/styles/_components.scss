@@ -373,6 +373,35 @@
     0 12px 32px -12px rgb(0 0 0 / 0.7),
     0 4px 12px -4px rgb(0 0 0 / 0.45);
 
+  &__details {
+    @apply block min-w-0;
+
+    summary {
+      @apply list-none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+    }
+
+    &:not([open]) .plan-build-card__header {
+      @apply border-b-0;
+    }
+  }
+
+  &__summary {
+    @apply cursor-pointer;
+  }
+
+  &__summary::after {
+    @apply ml-auto shrink-0 text-sm text-base-content/45;
+    content: '▸';
+  }
+
+  &__details[open] &__summary::after {
+    content: '▾';
+  }
+
   &__header {
     @apply flex flex-wrap items-center gap-2 border-b border-eve-border/80 px-4 py-3.5 sm:px-5;
     background-image: linear-gradient(
@@ -1224,12 +1253,12 @@
   }
 
   &__row-wrap {
-    @apply flex w-full min-w-0 items-center gap-3;
+    @apply flex w-full min-w-0 items-start gap-3;
   }
 
   &__row {
-    @apply grid flex-1 min-w-0 gap-3 sm:gap-4;
-    grid-template-columns: repeat(var(--slot-count, 1), minmax(0, 1fr));
+    @apply flex min-w-0 flex-1 flex-nowrap items-start gap-3 overflow-x-auto overflow-y-hidden pb-1 sm:gap-4;
+    scrollbar-gutter: stable;
   }
 
   &__controls {
@@ -1247,7 +1276,8 @@
 }
 
 .manufacturing-slot {
-  @apply flex w-full flex-col items-center gap-1.5 min-w-0 m-0 cursor-pointer border-0 bg-transparent p-0 text-inherit;
+  @apply flex shrink-0 flex-col items-center gap-1.5 m-0 cursor-pointer border-0 bg-transparent p-0 text-inherit;
+  width: var(--slot-size, 5.5rem);
   transition:
     transform 0.2s ease,
     filter 0.2s ease;
@@ -1274,8 +1304,9 @@
   }
 
   &__frame {
-    @apply relative mx-auto aspect-square w-full;
-    max-width: var(--slot-size, 5.5rem);
+    @apply relative mx-auto aspect-square;
+    width: var(--slot-size, 5.5rem);
+    height: var(--slot-size, 5.5rem);
     transition:
       filter 0.25s ease,
       transform 0.2s ease;
@@ -2109,6 +2140,43 @@
 
   &__lanes {
     @apply flex flex-col gap-3;
+  }
+
+  &__lane-group {
+    @apply flex flex-col gap-2;
+
+    &--crew {
+      @apply rounded-lg border border-eve-border/50 bg-base-300/20 p-2;
+    }
+  }
+
+  &__crew-header {
+    @apply flex min-w-0 items-center gap-2 px-1 pb-1;
+  }
+
+  &__legend {
+    @apply m-0 flex list-none flex-wrap items-center gap-x-2.5 gap-y-1 p-0 text-[11px] text-base-content/70;
+  }
+
+  &__legend-item {
+    @apply inline-flex items-center gap-1.5;
+  }
+
+  &__legend-swatch {
+    @apply size-2.5 shrink-0 rounded-sm;
+  }
+
+  &__slot-groups {
+    @apply flex w-full flex-col gap-4;
+  }
+
+  &__slot-group {
+    @apply flex w-full min-w-0 flex-col gap-2;
+  }
+
+  &__slot-group-head {
+    @apply flex min-w-0 w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent p-1 text-left text-inherit transition-colors;
+    @apply hover:bg-base-200/40;
   }
 
   &__lane {

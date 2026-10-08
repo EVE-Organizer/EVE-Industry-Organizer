@@ -21,8 +21,9 @@ import {
   savePlanJobsLayout,
   type PlanJobsTableLayout,
 } from '@/pages/Plan/planJobsTableLayout'
+import type { PlanOwnerOption } from '@/components/plan/PlanOwnerPicker'
 import type { RootProfitRow } from '@/pages/Plan/planProfit'
-import type { PlanDurationMode, TypeInfo } from '@/types'
+import type { PlanCharacterKey, PlanDurationMode, TypeInfo } from '@/types'
 
 export type { BuildBlueprintRow } from '@/pages/Plan/planJobsTableTypes'
 
@@ -48,6 +49,8 @@ interface PlanRootListProps {
   onReorder?: (fromRootId: string, toRootId: string) => void
   onSetBpos?: (productTypeId: number, copies: number) => void
   onSetCopyBpos?: (productTypeId: number, copies: number) => void
+  ownerOptions?: PlanOwnerOption[]
+  onSetOwner?: (target: { rootId?: string; productTypeId: number }, key?: PlanCharacterKey) => void
   planWindowHours?: number
   typeMap: Map<number, TypeInfo>
   /** Search / price controls rendered above the jobs header in the same card. */
@@ -72,6 +75,8 @@ export function PlanRootList({
   onReorder,
   onSetBpos,
   onSetCopyBpos,
+  ownerOptions = [],
+  onSetOwner,
   planWindowHours,
   typeMap,
   compose,
@@ -217,7 +222,7 @@ export function PlanRootList({
           visibleRows={visibleRows}
           layout={layout}
           setLayout={setLayoutCore}
-          showOwner={false}
+          showOwner={!!onSetOwner}
           showProgress={false}
           typeVolumes={typeVolumes}
           totalRuns={totalRuns}
@@ -226,7 +231,7 @@ export function PlanRootList({
           readOnly={readOnly}
           canReorder={canReorder}
           profitByRootId={profitByRootId}
-          ownerOptions={[]}
+          ownerOptions={ownerOptions}
           collapsed={collapsed}
           onOpenGraph={onOpenGraph}
           onOpenMeTe={onOpenMeTe}
@@ -235,6 +240,7 @@ export function PlanRootList({
           onChange={onChange}
           onSetBpos={onSetBpos}
           onSetCopyBpos={onSetCopyBpos}
+          onSetOwner={onSetOwner}
           onDuplicate={onDuplicate}
           onRemove={onRemove}
           onToggleEnabled={onToggleEnabled}

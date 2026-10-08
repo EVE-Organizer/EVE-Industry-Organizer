@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { settingsWithPlanSellerFees } from '@/lib/planCharacters'
 import {
   computePlanProfitSummary,
   computeRootProfitBreakdown,
@@ -93,6 +94,49 @@ describe('planProfit', () => {
     expect(row.netProfit).toBe(row.netRevenue - row.setupCost)
     expect(row.margin).toBeCloseTo((row.netProfit / row.setupCost) * 100, 5)
     expect(row.iph).toBeCloseTo(row.netProfit / 10, 5)
+  })
+
+  it('uses seller fee skills from expandInput settings overlay', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 }]
+    const baseSettings = {
+      ...DEFAULT_SETTINGS,
+      skills: { ...DEFAULT_SETTINGS.skills, accounting: 0, brokerRelations: 0 },
+      priceMethod: 'sell_orders' as const,
+    }
+    const expandInput: ExpandPlanInput = {
+      template,
+      blueprints,
+      typeMap,
+      prices: sellPrices,
+      settings: settingsWithPlanSellerFees(
+        baseSettings,
+        'sso:9',
+        [
+          {
+            characterId: 9,
+            characterName: 'Trader',
+            skills: { ...DEFAULT_SETTINGS.skills, accounting: 5, brokerRelations: 5 },
+          },
+        ],
+        [],
+      ),
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+
+    const breakdown = computeRootProfitBreakdown(
+      template.roots[0],
+      widget,
+      expandInput,
+      sellPrices,
+      buyPrices,
+      10,
+      'Widget',
+    )
+
+    expect(breakdown.salesTaxPercent).toBeCloseTo(3.375, 3)
+    expect(breakdown.brokerFeePercent).toBeCloseTo(1.5, 5)
   })
 
   it('exposes Accounting and Broker Relations percents on the profit breakdown', () => {

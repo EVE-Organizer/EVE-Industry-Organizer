@@ -12,7 +12,13 @@ export interface PlanOwnerOption {
 
 function ShuffleIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className={className}
+      aria-hidden
+    >
       <path d="M13.5 3a.75.75 0 000 1.5h1.19l-3.2 3.2.9.9L15.5 5.4v1.1a.75.75 0 001.5 0V3.75A.75.75 0 0016.25 3H13.5zM3.5 5a.75.75 0 000 1.5h1.8c.4 0 .78.2 1 .53l5.3 7.94a2.75 2.75 0 002.29 1.23h1.6l-1.2 1.2.9.9 2.6-2.6-2.6-2.6-.9.9 1.2 1.2h-1.6c-.4 0-.78-.2-1-.53L7.6 6.1A2.75 2.75 0 005.3 4.87H3.5z" />
     </svg>
   )
@@ -26,6 +32,7 @@ export function PlanOwnerPicker({
   disabled = false,
   size = 28,
   label,
+  emptyLabel = 'Auto',
 }: {
   options: PlanOwnerOption[]
   value?: PlanCharacterKey
@@ -33,6 +40,8 @@ export function PlanOwnerPicker({
   disabled?: boolean
   size?: number
   label: string
+  /** Shown when no character is selected (e.g. Settings for seller fees). */
+  emptyLabel?: string
 }) {
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLUListElement>(null)
@@ -71,7 +80,7 @@ export function PlanOwnerPicker({
     setOpen(false)
   }
 
-  const triggerName = selected ? selected.name : 'Auto'
+  const triggerName = selected ? selected.name : emptyLabel
   return (
     <div className="inline-flex" onClick={(event) => event.stopPropagation()}>
       <Tooltip text={`${label}: ${triggerName}`} placement="top">
@@ -87,7 +96,11 @@ export function PlanOwnerPicker({
           onClick={toggle}
         >
           {selected ? (
-            <CharacterAvatar characterId={selected.characterId} name={selected.name} size={size - 2} />
+            <CharacterAvatar
+              characterId={selected.characterId}
+              name={selected.name}
+              size={size - 2}
+            />
           ) : (
             <ShuffleIcon />
           )}
@@ -111,7 +124,7 @@ export function PlanOwnerPicker({
               <span className="inline-flex items-center justify-center size-6 rounded-full border border-eve-border/60">
                 <ShuffleIcon className="w-3.5 h-3.5" />
               </span>
-              <span>Auto</span>
+              <span>{emptyLabel}</span>
             </button>
           </li>
           {options.map((option) => (

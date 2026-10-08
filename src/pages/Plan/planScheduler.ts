@@ -47,6 +47,7 @@ interface CharacterSlotPools {
   character: SchedulerCharacter
   mfg: number[]
   rxn: number[]
+  sci: number[]
 }
 
 interface ScheduleEvent {
@@ -145,17 +146,44 @@ function earliestStartWithDependencies(
   return start
 }
 
+function pickScienceSlot(
+  slotFreeAt: number[],
+  depEnd: number,
+  laneReady: number | undefined,
+): { slot: number; startHour: number } {
+  let slot = 0
+  let startHour = Infinity
+  for (let s = 0; s < slotFreeAt.length; s++) {
+    const ready = laneReady ?? depEnd
+    const start = Math.max(slotFreeAt[s] ?? 0, ready)
+    if (start < startHour) {
+      startHour = start
+      slot = s
+    }
+  }
+  if (!Number.isFinite(startHour)) {
+    slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
+    startHour = Math.max(slotFreeAt[slot] ?? 0, depEnd)
+  }
+  return { slot, startHour }
+}
+
 function scheduleScienceStages(
   stages: PlanPipelineStage[],
   scienceSlots: number,
   copyBposByProduct?: Map<number, number>,
+  multi?: {
+    characters: SchedulerCharacter[]
+    ownerByProduct: Map<number, PlanCharacterKey | 'auto'>
+  },
 ): {
   jobs: ScheduledPlanJob[]
   readyByProduct: Map<number, number>
   stageEnd: Map<string, number>
 } {
   const scienceStages = stages.filter((s) => s.pool === 'science')
-  const slotFreeAt = Array.from({ length: Math.max(1, scienceSlots) }, () => 0)
+  const sharedFreeAt = Array.from({ length: Math.max(1, scienceSlots) }, () => 0)
+  const characterPools = multi ? buildCharacterSlotPools(multi.characters) : null
   const jobs: ScheduledPlanJob[] = []
   const stageEnd = new Map<string, number>()
   const attemptEndsByStage = new Map<string, number[]>()
@@ -168,6 +196,7 @@ function scheduleScienceStages(
     const copyDepId = stage.dependsOn.find((id) => id.startsWith('copy-'))
     const copyAttemptEnds = copyDepId ? attemptEndsByStage.get(copyDepId) : undefined
     const attemptEnds: number[] = []
+    const owner = multi?.ownerByProduct.get(stage.productTypeId)
 
     for (let i = 0; i < attempts; i++) {
       let depEnd = 0
@@ -178,10 +207,9 @@ function scheduleScienceStages(
           depEnd = Math.max(depEnd, stageEnd.get(dep) ?? 0)
         }
       }
-      let slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
-      let startHour = Math.max(slotFreeAt[slot] ?? 0, depEnd)
       let laneEnds: number[] | undefined
       let lane = 0
+      let laneReady: number | undefined
       if (stage.activity === 'copy') {
         const lanes = Math.max(1, copyBposByProduct?.get(stage.productTypeId) ?? 1)
         laneEnds = copyLaneFreeAt.get(stage.productTypeId)
@@ -191,16 +219,39 @@ function scheduleScienceStages(
         }
         lane = laneEnds.indexOf(Math.min(...laneEnds))
         // Hold the BPO lane, then the science slot that is free by then — don't pin an idle slot.
-        const laneReady = Math.max(depEnd, laneEnds[lane] ?? 0)
-        startHour = Infinity
-        for (let s = 0; s < slotFreeAt.length; s++) {
-          const start = Math.max(slotFreeAt[s] ?? 0, laneReady)
-          if (start < startHour) {
-            startHour = start
-            slot = s
+        laneReady = Math.max(depEnd, laneEnds[lane] ?? 0)
+      }
+
+      let slot: number
+      let startHour: number
+      let characterKey: PlanCharacterKey | undefined
+      let slotFreeAt: number[]
+
+      if (characterPools && characterPools.length > 0) {
+        const candidates = scienceOwnerCandidates(owner, characterPools)
+        let best: { state: CharacterSlotPools; slot: number; startHour: number } | null = null
+        for (const state of candidates) {
+          const picked = pickScienceSlot(state.sci, depEnd, laneReady)
+          if (
+            !best ||
+            picked.startHour < best.startHour - 1e-9 ||
+            (Math.abs(picked.startHour - best.startHour) < 1e-9 && picked.slot < best.slot)
+          ) {
+            best = { state, slot: picked.slot, startHour: picked.startHour }
           }
         }
+        const picked = best!
+        slot = picked.slot
+        startHour = picked.startHour
+        characterKey = picked.state.key
+        slotFreeAt = picked.state.sci
+      } else {
+        const picked = pickScienceSlot(sharedFreeAt, depEnd, laneReady)
+        slot = picked.slot
+        startHour = picked.startHour
+        slotFreeAt = sharedFreeAt
       }
+
       const endHour = startHour + stage.durationHours
       if (laneEnds) laneEnds[lane] = endHour
       slotFreeAt[slot] = endHour
@@ -214,6 +265,7 @@ function scheduleScienceStages(
         outputQty: 1,
         activity: stage.activity,
         pool: 'science',
+        characterKey,
       })
       attemptEnds.push(endHour)
     }
@@ -243,11 +295,25 @@ function buildCharacterSlotPools(characters: SchedulerCharacter[]): CharacterSlo
     character,
     mfg: Array.from({ length: Math.max(1, character.slots.manufacturing) }, () => 0),
     rxn: Array.from({ length: Math.max(1, character.slots.reactions) }, () => 0),
+    sci: Array.from({ length: Math.max(1, character.slots.research) }, () => 0),
   }))
 }
 
 function slotFreeAtForPool(state: CharacterSlotPools, pool: PlanJobPool): number[] {
-  return pool === 'reaction' ? state.rxn : state.mfg
+  if (pool === 'reaction') return state.rxn
+  if (pool === 'science') return state.sci
+  return state.mfg
+}
+
+function scienceOwnerCandidates(
+  owner: PlanCharacterKey | 'auto' | undefined,
+  pools: CharacterSlotPools[],
+): CharacterSlotPools[] {
+  if (owner && owner !== 'auto') {
+    const pinned = pools.find((pool) => pool.key === owner)
+    return pinned ? [pinned] : pools
+  }
+  return pools
 }
 
 function ownerCandidates(
@@ -402,9 +468,16 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
   const { nodes, slots, windowHours, pipeline, blueprints, characters, ownerByProduct } = input
   const scienceSlots = input.scienceSlots ?? 1
   const reactionSlots = input.reactionSlots ?? 1
+  const multi =
+    characters && characters.length > 0
+      ? {
+          characters,
+          ownerByProduct: ownerByProduct ?? new Map<number, PlanCharacterKey | 'auto'>(),
+        }
+      : undefined
 
   const scienceResult = pipeline
-    ? scheduleScienceStages(pipeline.stages, scienceSlots, input.copyBposByProduct)
+    ? scheduleScienceStages(pipeline.stages, scienceSlots, input.copyBposByProduct, multi)
     : {
         jobs: [] as ScheduledPlanJob[],
         readyByProduct: new Map<number, number>(),
@@ -414,11 +487,6 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
   const nodesById = new Map(nodes.map((node) => [node.productTypeId, node]))
   const mfgSlotFreeAt = Array.from({ length: Math.max(1, slots) }, () => 0)
   const rxnSlotFreeAt = Array.from({ length: Math.max(1, reactionSlots) }, () => 0)
-
-  const multi =
-    characters && characters.length > 0 && ownerByProduct
-      ? { characters, ownerByProduct }
-      : undefined
 
   const production = scheduleProductionNodes(
     nodes,

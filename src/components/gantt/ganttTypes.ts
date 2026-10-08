@@ -17,6 +17,12 @@ export interface GanttLane {
   jobCount: number
   busyHours: number
   endHour: number
+  /** EVE portrait for SSO characters; manual characters show initials. */
+  characterId?: number
+  characterName?: string
+  /** Consecutive lanes with the same group share one character header. */
+  groupId?: string
+  groupLabel?: string
 }
 
 export interface GanttBarLayout {

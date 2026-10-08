@@ -1,30 +1,12 @@
 import { useMemo } from 'react'
 import { useAppStore } from '@/stores/appStore'
 import { useAuthStore } from '@/stores/authStore'
-import {
-  buildOwnerByProduct,
-  buildSchedulerCharacters,
-  resolvePlanCharacters,
-} from '@/lib/planCharacters'
-import { expandManufacturingPlan } from '@/lib/manufacturingPlan'
-import { activePlanRoots } from '@/lib/planRootEnabled'
-import { buildPlanPipeline } from '@/pages/Plan/planPipeline'
-import { schedulePlanJobs, windowHoursFromJobs } from '@/pages/Plan/planScheduler'
-import { simulatePlanFlow } from '@/pages/Plan/planSimulator'
+import { buildManufacturingPlanSchedule } from '@/pages/Plan/buildManufacturingPlanSchedule'
 import {
   effectivePlanSlots,
   planSlotBonusesFromManufacturingTemplate,
 } from '@/lib/manufacturingSlots'
 import type { GlobalSettings, ManufacturingPlanTemplate, SystemInfo } from '@/types'
-
-function copyBposByProductFromTemplate(template: ManufacturingPlanTemplate): Map<number, number> {
-  const map = new Map<number, number>()
-  for (const [key, override] of Object.entries(template.nodeOverrides ?? {})) {
-    if (override.copyBpos == null) continue
-    map.set(Number(key), Math.max(1, Math.floor(override.copyBpos)))
-  }
-  return map
-}
 
 export interface UseManufacturingPlanOptions {
   /** When false, skips flow simulation (graph tab only). */
@@ -54,7 +36,7 @@ export function useManufacturingPlan(
       reactions: reactionSlots,
     } = effectivePlanSlots(settings.skills, slotBonuses)
 
-    if (!template || activePlanRoots(template.roots).length === 0) {
+    if (!template) {
       return {
         nodes: [],
         jobs: [],
@@ -71,7 +53,16 @@ export function useManufacturingPlan(
       }
     }
 
-    const expanded = expandManufacturingPlan({
+    const skillSources = {
+      sso: authCharacters.map((c) => ({
+        characterId: c.characterId,
+        characterName: c.characterName,
+        skills: c.skills ?? c.trainedSkills,
+      })),
+      manual: manualCharacters ?? [],
+    }
+
+    return buildManufacturingPlanSchedule({
       template,
       blueprints,
       typeMap,
@@ -80,90 +71,9 @@ export function useManufacturingPlan(
       systemCostIndex,
       reactionCostIndex,
       systems,
+      skillSources,
+      includeSimulation,
     })
-    const pipeline = buildPlanPipeline({
-      nodes: expanded.nodes,
-      blueprints,
-      settings,
-      scienceSlots: expanded.scienceSlots,
-      manufacturingSlots: expanded.slots,
-      reactionSlots: expanded.reactionSlots,
-    })
-
-    const planCharacterKeys = template.characters ?? []
-    const multiCharacterSchedule =
-      planCharacterKeys.length > 0
-        ? (() => {
-            const resolved = resolvePlanCharacters({
-              keys: planCharacterKeys,
-              sso: authCharacters.map((c) => ({
-                characterId: c.characterId,
-                characterName: c.characterName,
-                skills: c.skills ?? c.trainedSkills,
-              })),
-              manual: manualCharacters ?? [],
-              settingsSkills: settings.skills,
-              bonuses: template.characterSlotBonus,
-            })
-            const blueprintByProduct = new Map(blueprints.map((bp) => [bp.productTypeId, bp]))
-            return {
-              characters: buildSchedulerCharacters(resolved, settings.skills, blueprintByProduct),
-              ownerByProduct: buildOwnerByProduct(
-                expanded.nodes,
-                template.roots,
-                template.nodeOverrides,
-                planCharacterKeys,
-              ),
-            }
-          })()
-        : undefined
-
-    const scheduleExtras = multiCharacterSchedule ?? {}
-    const copyBposByProduct = copyBposByProductFromTemplate(template)
-    const jobs = schedulePlanJobs({
-      nodes: expanded.nodes,
-      slots: expanded.slots,
-      scienceSlots: expanded.scienceSlots,
-      reactionSlots: expanded.reactionSlots,
-      windowHours: Number.POSITIVE_INFINITY,
-      pipeline,
-      blueprints,
-      copyBposByProduct,
-      ...scheduleExtras,
-    })
-    const productionJobs = schedulePlanJobs({
-      nodes: expanded.nodes,
-      slots: expanded.slots,
-      reactionSlots: expanded.reactionSlots,
-      windowHours: Number.POSITIVE_INFINITY,
-      blueprints,
-      copyBposByProduct,
-      ...scheduleExtras,
-    })
-    const windowHours = Math.max(1, windowHoursFromJobs(jobs))
-    const productionWindowHours = Math.max(1, windowHoursFromJobs(productionJobs))
-    const simulations = includeSimulation
-      ? simulatePlanFlow({
-          nodes: expanded.nodes,
-          jobs,
-          windowHours,
-        })
-      : new Map()
-
-    return {
-      nodes: expanded.nodes,
-      jobs,
-      productionJobs,
-      pipeline,
-      simulations,
-      slots: expanded.slots,
-      scienceSlots: expanded.scienceSlots,
-      reactionSlots: expanded.reactionSlots,
-      windowHours,
-      productionWindowHours,
-      missingPriceTypeIds: expanded.missingPriceTypeIds,
-      hasReliablePrices: expanded.missingPriceTypeIds.length === 0,
-    }
   }, [
     template,
     blueprints,

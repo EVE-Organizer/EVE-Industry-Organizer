@@ -3,6 +3,8 @@ import { effectivePlanSlots } from '@/lib/manufacturingSlots'
 import type { SchedulerCharacter } from '@/pages/Plan/planScheduler'
 import type {
   BlueprintInfo,
+  GlobalSettings,
+  ManufacturingPlanTemplate,
   PlanCharacterKey,
   PlanNode,
   PlanNodeOverride,
@@ -75,6 +77,7 @@ export function buildSchedulerCharacters(
   characters: ResolvedPlanCharacter[],
   base: SkillLevels,
   blueprintByProduct: Map<number, BlueprintInfo>,
+  ownerByProduct?: Map<number, PlanCharacterKey | 'auto'>,
 ): SchedulerCharacter[] {
   return characters.map((character) => ({
     key: character.key,
@@ -83,12 +86,67 @@ export function buildSchedulerCharacters(
       reactions: character.slots.reactions,
       research: character.slots.research,
     },
-    durationFactor: (node) => characterDurationFactor(character.skills, base, node),
+    durationFactor: (node) => {
+      const owner = ownerByProduct?.get(node.productTypeId)
+      if (owner && owner !== 'auto' && owner === character.key) return 1
+      return characterDurationFactor(character.skills, base, node)
+    },
     canRun: (node) => {
       const blueprint = blueprintByProduct.get(node.productTypeId)
       return !blueprint || meetsBuildRequirements(blueprint, character.skills)
     },
   }))
+}
+
+export function sumPlanCrewSlots(characters: ResolvedPlanCharacter[]): {
+  manufacturing: number
+  reactions: number
+  research: number
+} {
+  return characters.reduce(
+    (totals, character) => ({
+      manufacturing: totals.manufacturing + character.slots.manufacturing,
+      reactions: totals.reactions + character.slots.reactions,
+      research: totals.research + character.slots.research,
+    }),
+    { manufacturing: 0, reactions: 0, research: 0 },
+  )
+}
+
+type PlanSkillSources = {
+  sso: Array<{
+    characterId: number
+    characterName: string
+    skills?: SkillLevels
+    trainedSkills?: SkillLevels
+  }>
+  manual: Array<{ id: string; name: string; skills: SkillLevels }>
+}
+
+/** Job timers for a pinned or inherited owner — expand uses this instead of global Settings skills. */
+export function settingsWithOwnerTimeSkills(
+  settings: GlobalSettings,
+  ownerKey: PlanCharacterKey,
+  sources: PlanSkillSources,
+): GlobalSettings {
+  const ownerSkills = skillsForPlanCharacterKey(
+    ownerKey,
+    sources.sso,
+    sources.manual,
+    settings.skills,
+  )
+  return {
+    ...settings,
+    skills: {
+      ...settings.skills,
+      industry: ownerSkills.industry,
+      advancedIndustry: ownerSkills.advancedIndustry,
+      reactions: ownerSkills.reactions,
+      laboratoryOperation: ownerSkills.laboratoryOperation,
+      advancedLaboratoryOperation: ownerSkills.advancedLaboratoryOperation,
+      science: ownerSkills.science,
+    },
+  }
 }
 
 /**
@@ -137,4 +195,83 @@ export function buildOwnerByProduct(
     result.set(node.productTypeId, only ?? 'auto')
   }
   return result
+}
+
+/** Keys that may appear as owners (crew, pins, and every selectable character). */
+export function planOwnerValidKeys(
+  template: Pick<ManufacturingPlanTemplate, 'roots' | 'nodeOverrides' | 'characters'>,
+  selectableKeys: PlanCharacterKey[],
+): PlanCharacterKey[] {
+  const keys = new Set<PlanCharacterKey>(selectableKeys)
+  for (const key of template.characters ?? []) keys.add(key)
+  for (const root of template.roots) {
+    if (root.characterKey) keys.add(root.characterKey)
+  }
+  for (const override of Object.values(template.nodeOverrides)) {
+    if (override?.characterKey) keys.add(override.characterKey)
+  }
+  return [...keys]
+}
+
+/** Owner shown in the jobs table: root pin, child pin, or inherited from root chain. */
+export function displayOwnerForProduct(
+  productTypeId: number,
+  isRoot: boolean,
+  root: Pick<PlanRootEntry, 'characterKey'> | undefined,
+  override: PlanNodeOverride | undefined,
+  ownerByProduct: Map<number, PlanCharacterKey | 'auto'>,
+): { characterKey?: PlanCharacterKey; inherited: boolean } {
+  if (isRoot) return { characterKey: root?.characterKey, inherited: false }
+  if (override?.characterKey) return { characterKey: override.characterKey, inherited: false }
+  const resolved = ownerByProduct.get(productTypeId)
+  if (resolved && resolved !== 'auto') return { characterKey: resolved, inherited: true }
+  return { characterKey: undefined, inherited: false }
+}
+
+export function skillsForPlanCharacterKey(
+  key: PlanCharacterKey,
+  sso: Array<{
+    characterId: number
+    characterName: string
+    skills?: SkillLevels
+    trainedSkills?: SkillLevels
+  }>,
+  manual: Array<{ id: string; name: string; skills: SkillLevels }>,
+  settingsSkills: SkillLevels,
+): SkillLevels {
+  const [character] = resolvePlanCharacters({
+    keys: [key],
+    sso: sso.map((c) => ({
+      characterId: c.characterId,
+      characterName: c.characterName,
+      skills: c.skills ?? c.trainedSkills,
+    })),
+    manual,
+    settingsSkills,
+  })
+  return character?.skills ?? settingsSkills
+}
+
+/** Plan profit fees only — manufacturing skills stay on global Settings / job owners. */
+export function settingsWithPlanSellerFees(
+  settings: GlobalSettings,
+  sellerKey: PlanCharacterKey | undefined,
+  sso: Array<{
+    characterId: number
+    characterName: string
+    skills?: SkillLevels
+    trainedSkills?: SkillLevels
+  }>,
+  manual: Array<{ id: string; name: string; skills: SkillLevels }>,
+): GlobalSettings {
+  if (!sellerKey) return settings
+  const sellerSkills = skillsForPlanCharacterKey(sellerKey, sso, manual, settings.skills)
+  return {
+    ...settings,
+    skills: {
+      ...settings.skills,
+      accounting: sellerSkills.accounting,
+      brokerRelations: sellerSkills.brokerRelations,
+    },
+  }
 }

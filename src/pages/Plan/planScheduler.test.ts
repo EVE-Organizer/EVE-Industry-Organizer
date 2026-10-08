@@ -449,6 +449,137 @@ describe('windowHoursFromJobs', () => {
   })
 })
 
+describe('multi-character science and reaction slots', () => {
+  const crew = [
+    {
+      key: 'sso:1' as const,
+      slots: { manufacturing: 1, reactions: 1, research: 1 },
+      durationFactor: () => 1,
+      canRun: () => true,
+    },
+    {
+      key: 'sso:2' as const,
+      slots: { manufacturing: 1, reactions: 2, research: 1 },
+      durationFactor: () => 1,
+      canRun: () => true,
+    },
+  ]
+
+  it('runs copy and invention on the product owner’s research slots', () => {
+    const jobs = schedulePlanJobs({
+      nodes: [mockNode({ productTypeId: 1, name: 'T2', isRoot: true, depth: 0, runs: 1 })],
+      slots: 2,
+      scienceSlots: 2,
+      windowHours: 500,
+      characters: crew,
+      ownerByProduct: new Map([[1, 'sso:2']]),
+      pipeline: {
+        scienceSlots: 2,
+        manufacturingSlots: 2,
+        reactionSlots: 3,
+        stages: [
+          {
+            id: 'copy-1',
+            productTypeId: 1,
+            name: 'Copy',
+            activity: 'copy',
+            pool: 'science',
+            runs: 2,
+            durationHours: 5,
+            dependsOn: [],
+          },
+          {
+            id: 'invent-1',
+            productTypeId: 1,
+            name: 'Invent',
+            activity: 'invention',
+            pool: 'science',
+            runs: 2,
+            durationHours: 5,
+            dependsOn: ['copy-1'],
+          },
+        ],
+      },
+    })
+    const science = jobs.filter((j) => j.pool === 'science')
+    expect(science.every((j) => j.characterKey === 'sso:2')).toBe(true)
+    expect(science.every((j) => j.slot === 0)).toBe(true)
+  })
+
+  it('packs auto science jobs across each character’s research slots', () => {
+    const jobs = schedulePlanJobs({
+      nodes: [
+        mockNode({ productTypeId: 1, name: 'A', isRoot: true, depth: 0, runs: 1 }),
+        mockNode({ productTypeId: 2, name: 'B', isRoot: true, depth: 0, runs: 1 }),
+      ],
+      slots: 2,
+      scienceSlots: 2,
+      windowHours: 500,
+      characters: crew,
+      ownerByProduct: new Map([
+        [1, 'auto'],
+        [2, 'auto'],
+      ]),
+      pipeline: {
+        scienceSlots: 2,
+        manufacturingSlots: 2,
+        reactionSlots: 3,
+        stages: [
+          {
+            id: 'invent-1',
+            productTypeId: 1,
+            name: 'Invent A',
+            activity: 'invention',
+            pool: 'science',
+            runs: 1,
+            durationHours: 10,
+            dependsOn: [],
+          },
+          {
+            id: 'invent-2',
+            productTypeId: 2,
+            name: 'Invent B',
+            activity: 'invention',
+            pool: 'science',
+            runs: 1,
+            durationHours: 10,
+            dependsOn: [],
+          },
+        ],
+      },
+    })
+    const invent = jobs.filter((j) => j.activity === 'invention')
+    expect(new Set(invent.map((j) => j.characterKey))).toEqual(new Set(['sso:1', 'sso:2']))
+    expect(Math.max(...invent.map((j) => j.endHour))).toBeCloseTo(10, 5)
+  })
+
+  it('uses the owner’s reaction slots instead of manufacturing slots', () => {
+    const jobs = schedulePlanJobs({
+      nodes: [
+        mockNode({
+          productTypeId: 8,
+          name: 'Fuel',
+          recipeKind: 'reaction',
+          isRoot: true,
+          depth: 0,
+          runs: 2,
+          concurrentCopies: 2,
+          jobTimeSeconds: 7200,
+        }),
+      ],
+      slots: 1,
+      reactionSlots: 3,
+      windowHours: 100,
+      blueprints: [],
+      characters: crew,
+      ownerByProduct: new Map([[8, 'sso:2']]),
+    })
+    expect(jobs.every((j) => j.pool === 'reaction')).toBe(true)
+    expect(jobs.every((j) => j.characterKey === 'sso:2')).toBe(true)
+    expect(new Set(jobs.map((j) => j.slot))).toEqual(new Set([0, 1]))
+  })
+})
+
 describe('detectOverUnder', () => {
   it('flags under-production vs demand', () => {
     const warnings = detectOverUnder([

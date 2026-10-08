@@ -304,20 +304,26 @@ function renderDataCell(
           {renderBpos(row, rowKey, meta)}
         </div>,
       )
-    case 'owner':
+    case 'owner': {
+      const ownerLabel = row.ownerInherited
+        ? `Owner of ${row.name} (inherits from root)`
+        : !row.isRoot && row.characterKey
+          ? `Owner of ${row.name} (pinned)`
+          : `Owner of ${row.name}`
       return wrapCell(
         <div className="flex w-full justify-center" onClick={stopRowToggle}>
           <PlanOwnerPicker
             options={meta.ownerOptions}
             value={row.characterKey}
             disabled={meta.readOnly || !meta.onSetOwner}
-            label={`Owner of ${row.name}`}
+            label={ownerLabel}
             onChange={(key) =>
               meta.onSetOwner?.({ rootId: row.rootId, productTypeId: row.productTypeId }, key)
             }
           />
         </div>,
       )
+    }
     case 'progress':
       return wrapCell(
         row.progress ? (
