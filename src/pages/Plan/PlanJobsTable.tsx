@@ -460,8 +460,8 @@ export function PlanJobsTable({
   return (
     <div className="plan-jobs-table-scroll w-full min-w-0 max-w-full overflow-x-auto">
       <table
-        className="table table-compact plan-jobs-table"
-        style={{ width: tableWidth, minWidth: tableWidth }}
+        className="table table-compact plan-jobs-table w-full"
+        style={{ width: '100%', minWidth: tableWidth }}
       >
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (

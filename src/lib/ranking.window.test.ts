@@ -368,7 +368,7 @@ describe('market-aware blueprint ranking', () => {
     expect(ammo!.setupBreakdown.blueprintCost.mode).toBe('bpo')
   })
 
-  it('excludes haul cost when includeHaulCost is off', () => {
+  it('never includes haul cost in setup or profit', () => {
     const settings: ManufacturingSettings = {
       ...DEFAULT_SETTINGS,
       batchSize: DEFAULT_BATCH_SIZE,
@@ -383,7 +383,7 @@ describe('market-aware blueprint ranking', () => {
       productGroups: ['Projectile Ammo'],
     }
 
-    const rowsWithHaul = rankBlueprintsFromMarket(
+    const rows = rankBlueprintsFromMarket(
       registry,
       market,
       regions,
@@ -393,26 +393,13 @@ describe('market-aware blueprint ranking', () => {
       settings,
       { ...baseFilters, includeHaulCost: true },
     )
-    const rowsWithoutHaul = rankBlueprintsFromMarket(
-      registry,
-      market,
-      regions,
-      typeMap,
-      'jita',
-      '1w',
-      settings,
-      { ...baseFilters, includeHaulCost: false },
-    )
 
-    const withRow = rowsWithHaul.find((r) => r.blueprint.productTypeId === PROJECTILE_AMMO)
-    const withoutRow = rowsWithoutHaul.find((r) => r.blueprint.productTypeId === PROJECTILE_AMMO)
-    expect(withRow).toBeDefined()
-    expect(withoutRow).toBeDefined()
-    expect(withoutRow!.haulIn).toBe(0)
-    expect(withoutRow!.haulOut).toBe(0)
-    expect(withoutRow!.setupBreakdown.haulExcluded).toBe(true)
-    expect(withoutRow!.setupCost).toBeLessThan(withRow!.setupCost)
-    expect(withoutRow!.netProfit).toBeGreaterThan(withRow!.netProfit)
+    const row = rows.find((r) => r.blueprint.productTypeId === PROJECTILE_AMMO)
+    expect(row).toBeDefined()
+    expect(row!.haulIn).toBe(0)
+    expect(row!.haulOut).toBe(0)
+    expect(row!.setupBreakdown.haulExcluded).toBe(true)
+    expect(row!.setupCost).toBe(row!.setupBreakdown.materialCost + row!.setupBreakdown.jobCost)
   })
 
   it('uses sell hub for product revenue when sellHubId differs from primaryHub', () => {

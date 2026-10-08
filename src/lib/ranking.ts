@@ -724,15 +724,9 @@ export function rankBlueprintsFromMarket(
   )
   const productBuyPrices = buildBuyPriceMap(sellHubMarket)
   const sellSpotPrices = buildPriceMap(sellHubMarket)
-  const buyMarketSystemId = buyHubMarket.marketSystemId
-  const sellMarketSystemId = sellHubMarket.marketSystemId
-  const includeHaulCost = filters.includeHaulCost ?? settings.includeHaulCost ?? true
-  const { haulInIskPerM3, haulOutIskPerM3 } = resolveHubHaulRates(
-    market.haulRates,
-    buyMarketSystemId,
-    buildSystemId,
-    sellMarketSystemId,
-  )
+  const includeHaulCost = false
+  const haulInIskPerM3 = 0
+  const haulOutIskPerM3 = 0
 
   const typeVolumes = new Map<number, number>()
   for (const [id, type] of typeMap) {

@@ -211,7 +211,7 @@ export function BlueprintsPage() {
         buildableOnly: deferredRankingQuery.buildableOnly,
         requireBlueprintPrice: deferredRankingQuery.requireBlueprintPrice,
         recipeKinds: deferredRankingQuery.recipeKinds,
-        includeHaulCost: deferredRankingQuery.includeHaul,
+        includeHaulCost: false,
         minVolume: deferredRankingQuery.minVolume,
         tiers: deferredRankingQuery.tiers,
         productGroups:
@@ -235,7 +235,6 @@ export function BlueprintsPage() {
     deferredRankingQuery.buildableOnly,
     deferredRankingQuery.requireBlueprintPrice,
     deferredRankingQuery.recipeKinds,
-    deferredRankingQuery.includeHaul,
     deferredRankingQuery.minVolume,
     deferredRankingQuery.tiers,
     deferredRankingQuery.groups,
@@ -259,7 +258,7 @@ export function BlueprintsPage() {
         maxSetupCost: Number.POSITIVE_INFINITY,
         buildableOnly: false,
         recipeKinds: ['manufacturing', 'reaction'],
-        includeHaulCost: deferredRankingQuery.includeHaul,
+        includeHaulCost: false,
         minVolume: 0,
         productTypeIds,
         limit: productTypeIds.length,
@@ -279,7 +278,6 @@ export function BlueprintsPage() {
     typeMap,
     deferredRankingQuery.hub,
     deferredRankingQuery.window,
-    deferredRankingQuery.includeHaul,
     manufacturingSettings,
   ])
 

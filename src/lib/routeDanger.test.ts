@@ -110,6 +110,6 @@ describe('normalizeGlobalSettings', () => {
       primaryHub: 'jita',
     })
     expect(settings.priceWindow).toBe(DEFAULT_SETTINGS.priceWindow)
-    expect(settings.includeHaulCost).toBe(true)
+    expect(settings.includeHaulCost).toBe(false)
   })
 })

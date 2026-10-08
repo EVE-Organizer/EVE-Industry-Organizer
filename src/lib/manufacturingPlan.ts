@@ -480,8 +480,12 @@ function expandMaterials(
     const buyCost = unitPrice * mat.quantity
     const override = modeOverrides.get(mat.typeId)
     const canBuild = canBuildMaterial(subBp, mat.typeId, settings, depth, maxDepth)
+    // User override still expands the chain (e.g. reactions before refinery is picked).
+    const effectiveCanBuild =
+      canBuild ||
+      (override === 'build' && !!subBp && !isRawMaterial(mat.typeId) && depth < maxDepth)
 
-    if (!canBuild) {
+    if (!effectiveCanBuild) {
       const leaf = ensureNode(nodeMap, mat.typeId, typeMap, subBp)
       if (!leaf.isRoot) leaf.mode = 'buy'
       leaf.isLeaf = true
@@ -516,7 +520,7 @@ function expandMaterials(
       unitPrice,
       buyCost,
       buildCost: subBuildCost,
-      canBuild: true,
+      canBuild: effectiveCanBuild,
     })
 
     const child = ensureNode(nodeMap, mat.typeId, typeMap, subBp)

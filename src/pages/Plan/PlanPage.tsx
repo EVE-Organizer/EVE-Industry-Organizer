@@ -31,7 +31,7 @@ import {
   buildBuyPriceMap,
   resolveBuildSystem,
 } from '@/services/data/sdeLoader'
-import { buildHubWindowMaps, buildWindowPriceMap, resolveHubHaulRates } from '@/lib/ranking'
+import { buildHubWindowMaps, buildWindowPriceMap } from '@/lib/ranking'
 import { mergePlanBuyPrices, applyPlanBuyPriceSource } from '@/pages/Plan/planBuyPrices'
 import { pickHubMaps, sanitizeBuyPriceMap } from '@/lib/hubPriceSanity'
 import type { PlanBuyPriceSource } from '@/pages/Plan/planBuyPrices'
@@ -335,16 +335,6 @@ export function PlanPage() {
     if (!data || !buyHubMarket) return mfgSystemId
     return resolveBuildSystem(data.systems, data.regions, buyHubMarket, mfgSystemId).buildSystemId
   }, [data, buyHubMarket, mfgSystemId])
-  const planHaulRates = useMemo(() => {
-    if (!data || !buyHubMarket) return undefined
-    const sellMarketSystemId = sellHubMarket?.marketSystemId ?? buyHubMarket.marketSystemId
-    return resolveHubHaulRates(
-      data.market.haulRates,
-      buyHubMarket.marketSystemId,
-      buildSystemId,
-      sellMarketSystemId,
-    )
-  }, [data, buyHubMarket, sellHubMarket, buildSystemId])
   const haulApplicable = useMemo(() => {
     if (!buyHubMarket) return false
     const sellMarketSystemId = sellHubMarket?.marketSystemId ?? buyHubMarket.marketSystemId
@@ -416,17 +406,13 @@ export function PlanPage() {
       hasReliablePrices: plan.hasReliablePrices,
       scheduledWindowHours:
         activeTemplate?.durationMode === 'overall' ? plan.productionWindowHours : undefined,
-      haulInIskPerM3: planHaulRates?.haulInIskPerM3,
-      haulOutIskPerM3: planHaulRates?.haulOutIskPerM3,
-      includeHaulCost: activeSettings.includeHaulCost ?? true,
+      includeHaulCost: false,
       priceMethod: activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
     }),
     [
       plan.hasReliablePrices,
       plan.productionWindowHours,
       activeTemplate?.durationMode,
-      planHaulRates,
-      activeSettings.includeHaulCost,
       activeSettings.priceMethod,
     ],
   )
@@ -1254,7 +1240,7 @@ export function PlanPage() {
             buyHubName={buyHubName}
             sellHubName={sellHubName}
             priceMethod={activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod}
-            includeHaulCost={activeSettings.includeHaulCost ?? true}
+            includeHaulCost={false}
             haulApplicable={haulApplicable}
             skills={activeSettings.skills ?? DEFAULT_SETTINGS.skills}
           />
@@ -1280,10 +1266,14 @@ export function PlanPage() {
                   />
                 </div>
               ) : null}
-              {!isSharedView ? (
-                <div className="plan-build-card__compose">
-                  <div className="plan-build-card__search">
-                    <p className="plan-build-card__search-label">Add a blueprint</p>
+            </div>
+          </section>
+
+          <PlanRootList
+            compose={
+              !isSharedView ? (
+                <div className="plan-jobs-compose">
+                  <div className="plan-jobs-compose__search">
                     <BlueprintSearchPicker
                       blueprints={blueprints}
                       typeMap={typeMap}
@@ -1291,175 +1281,158 @@ export function PlanPage() {
                       onSelect={addRoot}
                       autoFocus
                       prominent
-                      placeholder="Type a product name to add…"
+                      placeholder="Add a blueprint by product name…"
                     />
                   </div>
-                  <div className="plan-price-bar">
-                    <EconomicsFilterSection
-                      layout="bar"
-                      barVariant="plan"
-                      values={{
-                        priceMethod: activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
-                        priceWindow: activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow,
-                        includeHaulCost: activeSettings.includeHaulCost ?? true,
-                      }}
-                      onChange={onPlanEconomicsChange}
-                    />
-                  </div>
-                  <p className="plan-build-card__hint">
-                    Search by product name, or add from Blueprints ranking (+ Plan). Pricing syncs
-                    to Settings.
-                  </p>
+                  <EconomicsFilterSection
+                    layout="bar"
+                    barVariant="plan"
+                    values={{
+                      priceMethod: activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
+                      priceWindow: activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow,
+                    }}
+                    onChange={onPlanEconomicsChange}
+                  />
                 </div>
-              ) : null}
-              <PlanRootList
-                rows={buildRows}
-                typeMap={typeMap}
-                profitByRootId={profitByRootId}
-                readOnly={isSharedView}
-                durationMode={activeTemplate.durationMode === 'overall' ? 'overall' : 'production'}
-                onDurationModeChange={isSharedView ? undefined : applyStoredDurationMode}
-                planWindowHours={plan.productionWindowHours}
-                onOpenSetup={setSetupDetailRootId}
-                onOpenProfit={setProfitDetailRootId}
-                onOpenGraph={openGraph}
-                onOpenMeTe={isSharedView ? undefined : openMeTe}
-                onChange={
-                  isSharedView
-                    ? undefined
-                    : (rootId, productTypeId, patch) => {
-                        const template = selectedPlanTemplateFromStore()
-                        if (!template) return
+              ) : undefined
+            }
+            rows={buildRows}
+            typeMap={typeMap}
+            profitByRootId={profitByRootId}
+            readOnly={isSharedView}
+            durationMode={activeTemplate.durationMode === 'overall' ? 'overall' : 'production'}
+            onDurationModeChange={isSharedView ? undefined : applyStoredDurationMode}
+            planWindowHours={plan.productionWindowHours}
+            onOpenSetup={setSetupDetailRootId}
+            onOpenProfit={setProfitDetailRootId}
+            onOpenGraph={openGraph}
+            onOpenMeTe={isSharedView ? undefined : openMeTe}
+            onChange={
+              isSharedView
+                ? undefined
+                : (rootId, productTypeId, patch) => {
+                    const template = selectedPlanTemplateFromStore()
+                    if (!template) return
 
-                        if (
-                          patch.productionDurationHours != null &&
-                          rootId &&
-                          template.durationMode === 'overall'
-                        ) {
-                          fitRootsToReadyDeadlines([
-                            { rootId, deadlineHours: patch.productionDurationHours },
-                          ])
-                          return
-                        }
+                    if (
+                      patch.productionDurationHours != null &&
+                      rootId &&
+                      template.durationMode === 'overall'
+                    ) {
+                      fitRootsToReadyDeadlines([
+                        { rootId, deadlineHours: patch.productionDurationHours },
+                      ])
+                      return
+                    }
 
-                        if (rootId) {
-                          if (
-                            template.durationMode === 'overall' &&
-                            patch.runs != null &&
-                            patch.productionDurationHours == null
-                          ) {
-                            return
-                          }
-                          updatePlanTemplate(template.id, {
-                            roots: template.roots.map((r) => {
-                              if (r.id !== rootId) return r
-                              const bp = getBlueprintForProduct(blueprints, r.productTypeId)
-                              const override = template.nodeOverrides[r.productTypeId]
-                              return applyRootEntryPatch(r, patch, bp, storeSettings, override, {
-                                syncDurationFromRuns:
-                                  patch.runs != null && patch.productionDurationHours == null,
-                                durationMode:
-                                  template.durationMode === 'overall' ? 'overall' : 'production',
-                                readyHours: readyHoursByProductIdFromJobs(plan.productionJobs).get(
-                                  r.productTypeId,
-                                ),
-                              })
-                            }),
-                          })
-                          return
-                        }
-
-                        const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
-                        if (!node) return
-                        const bp = getBlueprintForProduct(blueprints, productTypeId)
-                        const override = template.nodeOverrides[productTypeId]
-                        const nextOverride = applyNodeOverridePatch(
-                          override,
-                          patch,
-                          bp,
-                          storeSettings,
-                        )
-
-                        updatePlanTemplate(template.id, {
-                          nodeOverrides: {
-                            ...template.nodeOverrides,
-                            [productTypeId]: nextOverride,
-                          },
-                        })
+                    if (rootId) {
+                      if (
+                        template.durationMode === 'overall' &&
+                        patch.runs != null &&
+                        patch.productionDurationHours == null
+                      ) {
+                        return
                       }
-                }
-                onSetAllDuration={
-                  isSharedView
-                    ? undefined
-                    : (hours, mode) => {
-                        const template = selectedPlanTemplateFromStore()
-                        if (!template) return
-                        if (mode === 'overall') {
-                          fitRootsToReadyDeadlines(
-                            template.roots
-                              .filter((r) => r.enabled !== false)
-                              .map((r) => ({ rootId: r.id, deadlineHours: hours })),
-                          )
-                          return
-                        }
-                        const patch = { productionDurationHours: hours }
-                        const roots = template.roots.map((r) => {
+                      updatePlanTemplate(template.id, {
+                        roots: template.roots.map((r) => {
+                          if (r.id !== rootId) return r
                           const bp = getBlueprintForProduct(blueprints, r.productTypeId)
-                          return applyRootEntryPatch(
-                            r,
-                            patch,
-                            bp,
-                            storeSettings,
-                            template.nodeOverrides[r.productTypeId],
-                          )
-                        })
-                        updatePlanTemplate(template.id, { roots })
-                      }
-                }
-                onToggleEnabled={
-                  isSharedView
-                    ? undefined
-                    : (rootId, enabled) => {
-                        const template = selectedPlanTemplateFromStore()
-                        if (!template) return
-                        updatePlanTemplate(template.id, {
-                          roots: template.roots.map((r) =>
-                            r.id === rootId ? { ...r, enabled } : r,
-                          ),
-                        })
-                      }
-                }
-                onDuplicate={
-                  isSharedView
-                    ? undefined
-                    : (rootId) => {
-                        const template = selectedPlanTemplateFromStore()
-                        if (!template) return
-                        updatePlanTemplate(template.id, {
-                          roots: duplicatePlanRootAfter(template.roots, rootId, createPlanRootId()),
-                        })
-                      }
-                }
-                onRemove={
-                  isSharedView
-                    ? undefined
-                    : (rootId) =>
-                        storeTemplate && removeRootFromPlanTemplate(storeTemplate.id, rootId)
-                }
-                onReorder={
-                  isSharedView
-                    ? undefined
-                    : (fromId, toId) => {
-                        const template = selectedPlanTemplateFromStore()
-                        if (!template) return
-                        updatePlanTemplate(template.id, {
-                          roots: movePlanRootById(template.roots, fromId, toId),
-                        })
-                      }
-                }
-              />
-            </div>
-          </section>
+                          const override = template.nodeOverrides[r.productTypeId]
+                          return applyRootEntryPatch(r, patch, bp, storeSettings, override, {
+                            syncDurationFromRuns:
+                              patch.runs != null && patch.productionDurationHours == null,
+                            durationMode:
+                              template.durationMode === 'overall' ? 'overall' : 'production',
+                            readyHours: readyHoursByProductIdFromJobs(plan.productionJobs).get(
+                              r.productTypeId,
+                            ),
+                          })
+                        }),
+                      })
+                      return
+                    }
+
+                    const node = plan.nodes.find((n) => n.productTypeId === productTypeId)
+                    if (!node) return
+                    const bp = getBlueprintForProduct(blueprints, productTypeId)
+                    const override = template.nodeOverrides[productTypeId]
+                    const nextOverride = applyNodeOverridePatch(override, patch, bp, storeSettings)
+
+                    updatePlanTemplate(template.id, {
+                      nodeOverrides: {
+                        ...template.nodeOverrides,
+                        [productTypeId]: nextOverride,
+                      },
+                    })
+                  }
+            }
+            onSetAllDuration={
+              isSharedView
+                ? undefined
+                : (hours, mode) => {
+                    const template = selectedPlanTemplateFromStore()
+                    if (!template) return
+                    if (mode === 'overall') {
+                      fitRootsToReadyDeadlines(
+                        template.roots
+                          .filter((r) => r.enabled !== false)
+                          .map((r) => ({ rootId: r.id, deadlineHours: hours })),
+                      )
+                      return
+                    }
+                    const patch = { productionDurationHours: hours }
+                    const roots = template.roots.map((r) => {
+                      const bp = getBlueprintForProduct(blueprints, r.productTypeId)
+                      return applyRootEntryPatch(
+                        r,
+                        patch,
+                        bp,
+                        storeSettings,
+                        template.nodeOverrides[r.productTypeId],
+                      )
+                    })
+                    updatePlanTemplate(template.id, { roots })
+                  }
+            }
+            onToggleEnabled={
+              isSharedView
+                ? undefined
+                : (rootId, enabled) => {
+                    const template = selectedPlanTemplateFromStore()
+                    if (!template) return
+                    updatePlanTemplate(template.id, {
+                      roots: template.roots.map((r) => (r.id === rootId ? { ...r, enabled } : r)),
+                    })
+                  }
+            }
+            onDuplicate={
+              isSharedView
+                ? undefined
+                : (rootId) => {
+                    const template = selectedPlanTemplateFromStore()
+                    if (!template) return
+                    updatePlanTemplate(template.id, {
+                      roots: duplicatePlanRootAfter(template.roots, rootId, createPlanRootId()),
+                    })
+                  }
+            }
+            onRemove={
+              isSharedView
+                ? undefined
+                : (rootId) => storeTemplate && removeRootFromPlanTemplate(storeTemplate.id, rootId)
+            }
+            onReorder={
+              isSharedView
+                ? undefined
+                : (fromId, toId) => {
+                    const template = selectedPlanTemplateFromStore()
+                    if (!template) return
+                    updatePlanTemplate(template.id, {
+                      roots: movePlanRootById(template.roots, fromId, toId),
+                    })
+                  }
+            }
+          />
 
           <PlanTimelinePanel
             windowHours={plan.productionWindowHours}

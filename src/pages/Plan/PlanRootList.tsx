@@ -1,6 +1,13 @@
-import { useCallback, useEffect, useMemo, useState, type SetStateAction } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+  type SetStateAction,
+} from 'react'
 import { Tooltip } from '@/components/Tooltip'
-import { PlanChainSection, PlanSectionExpandActions } from '@/pages/Plan/PlanChainSection'
+import { PlanSectionExpandActions } from '@/pages/Plan/PlanChainSection'
 import { expandableCollapseKeys, isExpandableRowVisible } from '@/pages/Plan/planTreeLines'
 import { formatDecimal, formatDurationHms, formatVolumeM3 } from '@/lib/profit'
 import { volumeM3 } from '@/pages/Plan/planHaulVolume'
@@ -41,6 +48,8 @@ interface PlanRootListProps {
   onReorder?: (fromRootId: string, toRootId: string) => void
   planWindowHours?: number
   typeMap: Map<number, TypeInfo>
+  /** Search / price controls rendered above the jobs header in the same card. */
+  compose?: ReactNode
 }
 
 export function PlanRootList({
@@ -61,6 +70,7 @@ export function PlanRootList({
   onReorder,
   planWindowHours,
   typeMap,
+  compose,
 }: PlanRootListProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
   const overallMode = durationMode === 'overall'
@@ -141,16 +151,17 @@ export function PlanRootList({
   }
 
   return (
-    <PlanChainSection
-      tone="info"
-      title="Production jobs"
-      count={rootCount}
-      summary={rootCount > 0 ? summary : undefined}
-      embedded
-      actions={
-        rows.length > 0 ? (
-          <>
-            <div className="join mr-1">
+    <section className="plan-build-card min-w-0 w-full">
+      {compose}
+      <div className="plan-build-card__header">
+        <h2 className="plan-build-card__title">Production jobs</h2>
+        <span className="plan-build-card__badge">{rootCount}</span>
+        {rootCount > 0 ? (
+          <p className="text-[11px] leading-none text-base-content/50 tabular-nums">{summary}</p>
+        ) : null}
+        {rows.length > 0 ? (
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <div className="join">
               <button
                 type="button"
                 className={`btn btn-ghost btn-xs join-item ${!overallMode ? 'btn-active' : ''}`}
@@ -167,7 +178,7 @@ export function PlanRootList({
               </button>
             </div>
             {onSetAllDuration && !readOnly ? (
-              <label className="flex items-center gap-1.5 mr-1">
+              <label className="flex items-center gap-1.5">
                 <Tooltip
                   text={
                     overallMode
@@ -188,10 +199,9 @@ export function PlanRootList({
               </label>
             ) : null}
             <PlanSectionExpandActions onExpandAll={expandAll} onCollapseAll={collapseAll} />
-          </>
-        ) : undefined
-      }
-    >
+          </div>
+        ) : null}
+      </div>
       {rows.length === 0 ? (
         <p className="text-sm text-base-content/50 px-4 py-8 text-center sm:px-5">
           No blueprints yet. Search above to add a root product.
@@ -231,6 +241,6 @@ export function PlanRootList({
           ? 'Overall uses your stored duration as the ready-by deadline and shrinks runs if the chain would finish late. The duration number stays put. Copy and invention are not counted.'
           : "Production uses your stored duration as this job's industry timer and sets runs from that. The duration number stays put."}
       </p>
-    </PlanChainSection>
+    </section>
   )
 }

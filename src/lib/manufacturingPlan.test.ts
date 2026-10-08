@@ -32,12 +32,65 @@ describe('expandManufacturingPlan', () => {
   const shipB = mockBlueprint(201, 'Ship B', [{ typeId: 100, quantity: 20 }])
   const blueprints = [capBp, shipA, shipB]
   const typeMap = new Map([
-    [34, { typeId: 34, name: 'Tritanium', group: '', category: '', volume: 0, iconUrl: '', renderUrl: '', bpIconUrl: '' }],
-    [100, { typeId: 100, name: 'Cap Recharger', group: '', category: '', volume: 0, iconUrl: '', renderUrl: '', bpIconUrl: '' }],
-    [200, { typeId: 200, name: 'Ship A', group: '', category: '', volume: 0, iconUrl: '', renderUrl: '', bpIconUrl: '' }],
-    [201, { typeId: 201, name: 'Ship B', group: '', category: '', volume: 0, iconUrl: '', renderUrl: '', bpIconUrl: '' }],
+    [
+      34,
+      {
+        typeId: 34,
+        name: 'Tritanium',
+        group: '',
+        category: '',
+        volume: 0,
+        iconUrl: '',
+        renderUrl: '',
+        bpIconUrl: '',
+      },
+    ],
+    [
+      100,
+      {
+        typeId: 100,
+        name: 'Cap Recharger',
+        group: '',
+        category: '',
+        volume: 0,
+        iconUrl: '',
+        renderUrl: '',
+        bpIconUrl: '',
+      },
+    ],
+    [
+      200,
+      {
+        typeId: 200,
+        name: 'Ship A',
+        group: '',
+        category: '',
+        volume: 0,
+        iconUrl: '',
+        renderUrl: '',
+        bpIconUrl: '',
+      },
+    ],
+    [
+      201,
+      {
+        typeId: 201,
+        name: 'Ship B',
+        group: '',
+        category: '',
+        volume: 0,
+        iconUrl: '',
+        renderUrl: '',
+        bpIconUrl: '',
+      },
+    ],
   ])
-  const prices = new Map([[34, 5], [100, 1000], [200, 50000], [201, 60000]])
+  const prices = new Map([
+    [34, 5],
+    [100, 1000],
+    [200, 50000],
+    [201, 60000],
+  ])
 
   it('merges shared intermediate from two roots', () => {
     const template = createDefaultPlanTemplate('test')
@@ -171,9 +224,7 @@ describe('expandManufacturingPlan', () => {
 
   it('builds buildable intermediates when hub sell price is zero', () => {
     const template = createDefaultPlanTemplate('test')
-    template.roots = [
-      { id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 24 },
-    ]
+    template.roots = [{ id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 24 }]
     const pricesNoIntermediate = new Map([
       [34, 5],
       [200, 50_000],
@@ -192,6 +243,67 @@ describe('expandManufacturingPlan', () => {
     const cap = nodes.find((n) => n.productTypeId === 100)
     expect(cap?.mode).toBe('build')
     expect(cap?.buyCost).toBe(0)
+  })
+
+  it('honors modeOverrides build for reactions when refinery is none', () => {
+    const reactionBp: BlueprintInfo = {
+      ...mockBlueprint(300, 'Reaction Out', [{ typeId: 34, quantity: 50 }]),
+      kind: 'reaction',
+    }
+    const rootBp = mockBlueprint(400, 'Root Item', [{ typeId: 300, quantity: 10 }])
+    const reactionBlueprints = [rootBp, reactionBp]
+    const reactionTypeMap = new Map([
+      ...typeMap,
+      [
+        300,
+        {
+          typeId: 300,
+          name: 'Reaction Out',
+          group: '',
+          category: '',
+          volume: 0,
+          iconUrl: '',
+          renderUrl: '',
+          bpIconUrl: '',
+        },
+      ],
+      [
+        400,
+        {
+          typeId: 400,
+          name: 'Root Item',
+          group: '',
+          category: '',
+          volume: 0,
+          iconUrl: '',
+          renderUrl: '',
+          bpIconUrl: '',
+        },
+      ],
+    ])
+    const reactionPrices = new Map([...prices, [300, 100], [400, 50_000]])
+
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-r', productTypeId: 400, runs: 10, productionDurationHours: 24 }]
+    template.modeOverrides[300] = 'build'
+
+    const settings = {
+      ...DEFAULT_SETTINGS,
+      reactionFacility: { ...DEFAULT_SETTINGS.reactionFacility, refineryType: 'none' as const },
+    }
+
+    const { nodes } = expandManufacturingPlan({
+      template,
+      blueprints: reactionBlueprints,
+      typeMap: reactionTypeMap,
+      prices: reactionPrices,
+      settings,
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    })
+
+    const reaction = nodes.find((n) => n.productTypeId === 300)
+    expect(reaction?.mode).toBe('build')
   })
 })
 

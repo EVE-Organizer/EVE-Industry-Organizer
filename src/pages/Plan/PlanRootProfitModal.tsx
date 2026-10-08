@@ -149,17 +149,13 @@ export function PlanRootProfitModal({ breakdown, onClose }: PlanRootProfitModalP
                   value={formatIsk(breakdown.setup.packagedBuyCost)}
                 />
               ) : null}
-              <Line
-                label={breakdown.haulExcluded ? 'Haul in (excluded)' : 'Haul in (in setup)'}
-                value={formatIsk(breakdown.haulExcluded ? 0 : breakdown.haulIn)}
-              />
+              {breakdown.haulExcluded ? null : (
+                <Line label="Haul in (in setup)" value={formatIsk(breakdown.haulIn)} />
+              )}
               <Line label="Total setup" value={formatIsk(breakdown.setupCost)} />
-              <Line
-                label={
-                  breakdown.haulExcluded ? 'Haul out (excluded)' : 'Haul out (products to hub)'
-                }
-                value={formatIsk(haulOutCharged)}
-              />
+              {breakdown.haulExcluded ? null : (
+                <Line label="Haul out (products to hub)" value={formatIsk(haulOutCharged)} />
+              )}
             </div>
             {breakdown.setup.buildJobs.length > 0 ? (
               <div className="overflow-x-auto border border-eve-border rounded-lg mt-3">

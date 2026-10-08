@@ -83,7 +83,7 @@ export function defaultQuery(settings: GlobalSettings): BlueprintQuery {
     buildableOnly: false,
     requireBlueprintPrice: true,
     recipeKinds: [...DEFAULT_RECIPE_KINDS],
-    includeHaul: settings.includeHaulCost ?? true,
+    includeHaul: false,
     minVolume: 0,
     rankingTimeHours: DEFAULT_RANKING_TIME_HOURS,
     sortBy: 'netProfit',
@@ -111,7 +111,6 @@ export function queryToSearchParams(q: BlueprintQuery, settings: GlobalSettings)
   if (!recipeKindsEqual(q.recipeKinds, def.recipeKinds)) {
     p.set('recipe', q.recipeKinds.join(','))
   }
-  if (q.includeHaul !== def.includeHaul) p.set('haul', q.includeHaul ? '1' : '0')
   if (q.minVolume !== def.minVolume) p.set('vmin', String(q.minVolume))
   if (q.rankingTimeHours !== def.rankingTimeHours) p.set('time', String(q.rankingTimeHours))
   if (q.sortBy !== def.sortBy) p.set('sort', q.sortBy)
@@ -166,8 +165,7 @@ export function searchParamsToQuery(
     recipeKinds = ['manufacturing']
   }
 
-  const rawHaul = params.get('haul')
-  const includeHaul = rawHaul === null ? def.includeHaul : rawHaul === '1'
+  const includeHaul = false
 
   const rawVmin = params.get('vmin')
   const minVolume = rawVmin ? clampMinVolume(parseFloat(rawVmin)) : def.minVolume

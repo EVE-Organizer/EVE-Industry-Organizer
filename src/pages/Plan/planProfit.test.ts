@@ -275,7 +275,7 @@ describe('planProfit', () => {
     expect(withoutPackaged).toBeLessThan(row.setupCost)
   })
 
-  it('includes haul in setup and haul out in profit when enabled', () => {
+  it('does not add haul to setup or profit', () => {
     const template = createDefaultPlanTemplate('test')
     template.roots = [{ id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 }]
     const expandInput: ExpandPlanInput = {
@@ -337,9 +337,9 @@ describe('planProfit', () => {
       haulOptions,
     )
 
-    expect(withHaul.setupCost).toBeGreaterThan(withoutHaul.setupCost)
-    expect(withHaul.netProfit).toBeLessThan(withoutHaul.netProfit)
-    expect(withHaul.netProfit).toBe(withHaul.netRevenue - withHaul.setupCost - 100 * 1 * 200)
+    expect(withHaul.setupCost).toBe(withoutHaul.setupCost)
+    expect(withHaul.netProfit).toBe(withoutHaul.netProfit)
+    expect(withHaul.netProfit).toBe(withHaul.netRevenue - withHaul.setupCost)
   })
 
   it('uses buy-hub prices for setup and sell-hub prices for revenue', () => {
@@ -445,8 +445,8 @@ describe('planProfit', () => {
     })
 
     expect(breakdown.haulExcluded).toBe(true)
-    expect(breakdown.haulIn).toBeGreaterThan(0)
-    expect(breakdown.haulOut).toBeGreaterThan(0)
+    expect(breakdown.haulIn).toBe(0)
+    expect(breakdown.haulOut).toBe(0)
     const chainOnly =
       breakdown.buyLines.reduce((s, l) => s + l.cost, 0) +
       breakdown.buildChainCost +

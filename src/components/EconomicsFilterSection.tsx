@@ -56,7 +56,6 @@ function FilterChip({
 export interface EconomicsFilterValues {
   priceMethod: GlobalSettings['priceMethod']
   priceWindow: TimeRange
-  includeHaulCost: boolean
 }
 
 interface EconomicsFilterSectionProps {
@@ -69,7 +68,7 @@ interface EconomicsFilterSectionProps {
   className?: string
   /** `stack` = card layout; `bar` = compact horizontal strip. */
   layout?: 'stack' | 'bar'
-  /** Plan bar: window first, buy/sell select grouped left of Include hauling. */
+  /** Plan bar: window first, then buy/sell method. */
   barVariant?: 'default' | 'plan'
 }
 
@@ -132,36 +131,13 @@ function PriceWindowChips({
   )
 }
 
-function IncludeHaulToggle({
-  checked,
-  onChange,
-}: {
-  checked: boolean
-  onChange: (includeHaulCost: boolean) => void
-}) {
-  return (
-    <label className="economics-filter-bar__haul">
-      <input
-        type="checkbox"
-        className="toggle toggle-sm toggle-primary"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-      />
-      <span className="economics-filter-bar__haul-text">
-        Include hauling
-        <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.includeHaulCost} />
-      </span>
-    </label>
-  )
-}
-
-/** Shared price method / window / haul controls for Blueprints and Plan. */
+/** Shared price method / window controls for Blueprints and Plan. */
 export function EconomicsFilterSection({
   values,
   onChange,
   children,
   title = 'Where & prices',
-  hint = 'Buy and sell hubs are in the navbar. Market data and haul below.',
+  hint = 'Buy and sell hubs are in the navbar. Market window and method below.',
   className,
   layout = 'stack',
   barVariant = 'default',
@@ -169,7 +145,9 @@ export function EconomicsFilterSection({
   if (layout === 'bar') {
     if (barVariant === 'plan') {
       return (
-        <div className={`economics-filter-bar economics-filter-bar--plan ${className ?? ''}`.trim()}>
+        <div
+          className={`economics-filter-bar economics-filter-bar--plan ${className ?? ''}`.trim()}
+        >
           {children}
           <div className="economics-filter-bar__window">
             <span className="economics-filter-bar__label">
@@ -202,10 +180,6 @@ export function EconomicsFilterSection({
                 <option value="buy_orders">Buy</option>
               </select>
             </label>
-            <IncludeHaulToggle
-              checked={values.includeHaulCost}
-              onChange={(includeHaulCost) => onChange({ includeHaulCost })}
-            />
           </div>
         </div>
       )
@@ -235,11 +209,6 @@ export function EconomicsFilterSection({
             onChange={(priceWindow) => onChange({ priceWindow })}
           />
         </div>
-
-        <IncludeHaulToggle
-          checked={values.includeHaulCost}
-          onChange={(includeHaulCost) => onChange({ includeHaulCost })}
-        />
       </div>
     )
   }
@@ -289,24 +258,6 @@ export function EconomicsFilterSection({
               {r}
             </FilterChip>
           ))}
-        </div>
-      </div>
-
-      <div className="form-control w-full min-w-0">
-        <FormFieldLabel label="Availability" size="sm" />
-        <div className="rounded-md border border-eve-border bg-base-300/10 px-3 py-2.5 flex flex-col gap-2">
-          <label className="label cursor-pointer gap-2 justify-start py-0 min-h-0">
-            <input
-              type="checkbox"
-              className="checkbox checkbox-sm"
-              checked={values.includeHaulCost}
-              onChange={(e) => onChange({ includeHaulCost: e.target.checked })}
-            />
-            <span className="label-text text-sm inline-flex items-center gap-1.5">
-              Include hauling
-              <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.includeHaulCost} />
-            </span>
-          </label>
         </div>
       </div>
     </FilterSection>

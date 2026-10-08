@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { Layout } from '@/components/layout/Layout'
@@ -11,7 +11,6 @@ import { PlanPage } from '@/pages/Plan/PlanPage'
 import { JobsPage } from '@/pages/Jobs/JobsPage'
 import { SettingsPage } from '@/pages/Settings/SettingsPage'
 import { MiningIskHrPage } from '@/pages/Mining/MiningIskHrPage'
-import { RouteRiskPage } from '@/pages/RouteRisk/RouteRiskPage'
 import { FitSkillsPage } from '@/pages/FitSkills/FitSkillsPage'
 import { SkillsPage } from '@/pages/Skills/SkillsPage'
 import { AuthCallbackPage } from '@/pages/Auth/AuthCallbackPage'
@@ -20,11 +19,6 @@ import { useAuthStore } from '@/stores/authStore'
 function LegacyBlueprintRedirect() {
   const { typeId } = useParams()
   return <Navigate to={`/item/${typeId}`} replace />
-}
-
-function LegacyGateCheckRedirect() {
-  const { search } = useLocation()
-  return <Navigate to={`/tools/route-risk${search}`} replace />
 }
 
 function AppRoutes() {
@@ -58,10 +52,10 @@ function AppRoutes() {
         <Route path="/stations" element={<Navigate to="/" replace />} />
         <Route path="/plan" element={<PlanPage />} />
         <Route path="/jobs" element={<JobsPage />} />
-        <Route path="/tools/route-risk" element={<RouteRiskPage />} />
         <Route path="/skills" element={<SkillsPage />} />
         <Route path="/tools/fit-skills" element={<FitSkillsPage />} />
-        <Route path="/tools/gate-check" element={<LegacyGateCheckRedirect />} />
+        <Route path="/tools/route-risk" element={<Navigate to="/" replace />} />
+        <Route path="/tools/gate-check" element={<Navigate to="/" replace />} />
         <Route path="/tools/mining" element={<MiningIskHrPage />} />
         <Route path="/isk-hr" element={<Navigate to="/tools/mining" replace />} />
         <Route path="/isk-hr/mining" element={<Navigate to="/tools/mining" replace />} />

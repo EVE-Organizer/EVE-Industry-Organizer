@@ -1,6 +1,11 @@
 import { useMemo } from 'react'
 import { useAppStore } from '@/stores/appStore'
 import { useAuthStore } from '@/stores/authStore'
+import {
+  buildOwnerByProduct,
+  buildSchedulerCharacters,
+  resolvePlanCharacters,
+} from '@/lib/planCharacters'
 import { expandManufacturingPlan } from '@/lib/manufacturingPlan'
 import { activePlanRoots } from '@/lib/planRootEnabled'
 import { buildPlanPipeline } from '@/pages/Plan/planPipeline'
@@ -29,6 +34,8 @@ export function useManufacturingPlan(
   options: UseManufacturingPlanOptions = {},
 ) {
   const includeSimulation = options.includeSimulation !== false
+  const authCharacters = useAuthStore((s) => s.characters)
+  const manualCharacters = useAppStore((s) => s.userData.manualCharacters)
 
   return useMemo(() => {
     const slotBonuses = planSlotBonusesFromManufacturingTemplate(template ?? undefined)
@@ -73,6 +80,36 @@ export function useManufacturingPlan(
       manufacturingSlots: expanded.slots,
       reactionSlots: expanded.reactionSlots,
     })
+
+    const planCharacterKeys = template.characters ?? []
+    const multiCharacterSchedule =
+      planCharacterKeys.length > 0
+        ? (() => {
+            const resolved = resolvePlanCharacters({
+              keys: planCharacterKeys,
+              sso: authCharacters.map((c) => ({
+                characterId: c.characterId,
+                characterName: c.characterName,
+                skills: c.skills ?? c.trainedSkills,
+              })),
+              manual: manualCharacters ?? [],
+              settingsSkills: settings.skills,
+              bonuses: template.characterSlotBonus,
+            })
+            const blueprintByProduct = new Map(blueprints.map((bp) => [bp.productTypeId, bp]))
+            return {
+              characters: buildSchedulerCharacters(resolved, settings.skills, blueprintByProduct),
+              ownerByProduct: buildOwnerByProduct(
+                expanded.nodes,
+                template.roots,
+                template.nodeOverrides,
+                planCharacterKeys,
+              ),
+            }
+          })()
+        : undefined
+
+    const scheduleExtras = multiCharacterSchedule ?? {}
     const jobs = schedulePlanJobs({
       nodes: expanded.nodes,
       slots: expanded.slots,
@@ -81,6 +118,7 @@ export function useManufacturingPlan(
       windowHours: Number.POSITIVE_INFINITY,
       pipeline,
       blueprints,
+      ...scheduleExtras,
     })
     const productionJobs = schedulePlanJobs({
       nodes: expanded.nodes,
@@ -88,6 +126,7 @@ export function useManufacturingPlan(
       reactionSlots: expanded.reactionSlots,
       windowHours: Number.POSITIVE_INFINITY,
       blueprints,
+      ...scheduleExtras,
     })
     const windowHours = Math.max(1, windowHoursFromJobs(jobs))
     const productionWindowHours = Math.max(1, windowHoursFromJobs(productionJobs))
@@ -123,6 +162,8 @@ export function useManufacturingPlan(
     reactionCostIndex,
     systems,
     includeSimulation,
+    authCharacters,
+    manualCharacters,
   ])
 }
 

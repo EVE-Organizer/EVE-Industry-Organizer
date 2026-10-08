@@ -99,7 +99,6 @@ export function BlueprintFilterBar({
   function onEconomicsChange(patch: {
     priceMethod?: BlueprintQuery['priceMethod']
     priceWindow?: BlueprintQuery['window']
-    includeHaulCost?: boolean
   }) {
     const queryPatch: Partial<BlueprintQuery> = {}
     const settingsPatch: Partial<GlobalSettings> = {}
@@ -110,10 +109,6 @@ export function BlueprintFilterBar({
     if (patch.priceWindow != null) {
       queryPatch.window = patch.priceWindow
       settingsPatch.priceWindow = patch.priceWindow
-    }
-    if (patch.includeHaulCost != null) {
-      queryPatch.includeHaul = patch.includeHaulCost
-      settingsPatch.includeHaulCost = patch.includeHaulCost
     }
     if (Object.keys(queryPatch).length) onChange(queryPatch)
     if (Object.keys(settingsPatch).length) updateSettings(settingsPatch)
@@ -164,7 +159,6 @@ export function BlueprintFilterBar({
             values={{
               priceMethod: query.priceMethod,
               priceWindow: query.window,
-              includeHaulCost: query.includeHaul,
             }}
             onChange={onEconomicsChange}
           />

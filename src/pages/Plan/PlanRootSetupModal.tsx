@@ -241,7 +241,7 @@ export function PlanRootSetupModal({ breakdown, onClose }: PlanRootSetupModalPro
             </section>
           ) : null}
 
-          {breakdown.haulIn > 0 || breakdown.haulExcluded ? (
+          {breakdown.haulIn > 0 && !breakdown.haulExcluded ? (
             <section>
               <h4 className="font-semibold text-sm mb-2">
                 Haul in

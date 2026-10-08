@@ -1215,7 +1215,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   inventionFacility: defaultScienceFacility(30000144),
   priceMethod: 'sell_orders',
   priceWindow: '1m',
-  includeHaulCost: true,
+  includeHaulCost: false,
   inventionSkillLevel: 4,
   includeBlueprintCost: true,
   skills: { ...DEFAULT_SKILLS },

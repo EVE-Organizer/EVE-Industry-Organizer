@@ -22,8 +22,6 @@ import {
 import { skillLevel } from '@/lib/skillFields'
 import { tradingFeeRates } from '@/lib/tradingFees'
 import { getBlueprintForProduct } from '@/services/data/sdeLoader'
-import { rootHaulVolumesFromNodes } from '@/pages/Plan/planHaulVolume'
-
 export interface PlanProfitOptions {
   hasReliablePrices?: boolean
   scheduledWindowHours?: number
@@ -176,37 +174,8 @@ function typeVolumesFromMap(typeMap: Map<number, TypeInfo>): Map<number, number>
   return map
 }
 
-function rootHaulIsk(
-  root: PlanRootEntry,
-  blueprint: BlueprintInfo,
-  expandInput: ExpandPlanInput,
-  outputQty: number,
-  options?: PlanProfitOptions,
-): { haulIn: number; haulOut: number; haulExcluded: boolean } {
-  const { settings, template } = expandInput
-  const includeHaulCost = options?.includeHaulCost ?? settings.includeHaulCost ?? true
-  const haulExcluded = !includeHaulCost
-  const rootMode = template.modeOverrides[root.productTypeId] ?? 'build'
-  if (rootMode === 'buy' || options?.haulInIskPerM3 == null || options?.haulOutIskPerM3 == null) {
-    return { haulIn: 0, haulOut: 0, haulExcluded }
-  }
-
-  const isolated = isolatedExpandInput(expandInput, root)
-  const { nodes } = expandManufacturingPlan(isolated)
-  const typeVolumes = typeVolumesFromMap(expandInput.typeMap)
-  const { haulInM3, haulOutM3 } = rootHaulVolumesFromNodes(
-    nodes,
-    rootMode,
-    blueprint.productTypeId,
-    outputQty,
-    typeVolumes,
-  )
-
-  return {
-    haulIn: haulInM3 * options.haulInIskPerM3,
-    haulOut: haulOutM3 * options.haulOutIskPerM3,
-    haulExcluded,
-  }
+function rootHaulIsk(): { haulIn: number; haulOut: number; haulExcluded: boolean } {
+  return { haulIn: 0, haulOut: 0, haulExcluded: true }
 }
 
 export function computeRootProfitRow(
@@ -234,13 +203,7 @@ export function computeRootProfitRow(
       chainCost + packagedSelfBuyCost(blueprint, root.runs, buyHubPrices, settings, meTeOverride)
   }
 
-  const { haulIn, haulOut, haulExcluded } = rootHaulIsk(
-    root,
-    blueprint,
-    expandInput,
-    outputQty,
-    options,
-  )
+  const { haulIn, haulOut, haulExcluded } = rootHaulIsk()
   if (!haulExcluded) setupCost += haulIn
 
   const sellPricePerUnit = sellPriceForProduct(
@@ -427,13 +390,7 @@ export function computeRootSetupBreakdown(
   )
   const chainSetupCost =
     computePlanRootBuildCost(blueprint, root.runs, expandInput) + packagedBuyCost
-  const { haulIn, haulOut, haulExcluded } = rootHaulIsk(
-    root,
-    blueprint,
-    expandInput,
-    outputQty,
-    options,
-  )
+  const { haulIn, haulOut, haulExcluded } = rootHaulIsk()
   const totalSetupCost = chainSetupCost + (haulExcluded ? 0 : haulIn)
 
   /* ----- Line items ----- */

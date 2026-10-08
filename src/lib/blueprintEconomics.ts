@@ -351,7 +351,6 @@ export function computeFlatSetup(input: FlatSetupInput): FlatSetupResult {
     priceCtx,
     haulInIskPerM3 = 0,
     haulOutIskPerM3 = 0,
-    includeHaulCost = settings.includeHaulCost ?? true,
     typeVolumes = new Map(),
     avgVolume = 0,
     volumeCapDays = 7,
@@ -381,9 +380,9 @@ export function computeFlatSetup(input: FlatSetupInput): FlatSetupResult {
     0,
   )
   const productVolume = (typeVolumes.get(blueprint.productTypeId) ?? product.volume) * outputQty
-  const haulExcluded = !includeHaulCost
-  const haulIn = haulExcluded ? 0 : materialVolume * haulInIskPerM3
-  const haulOut = haulExcluded ? 0 : productVolume * haulOutIskPerM3
+  const haulExcluded = true
+  const haulIn = 0
+  const haulOut = 0
 
   const bpCost = computeBlueprintAcquisition(
     blueprint,

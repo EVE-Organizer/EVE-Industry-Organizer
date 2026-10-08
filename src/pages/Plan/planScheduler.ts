@@ -1,8 +1,28 @@
-import type { PlanJobActivity, PlanJobPool, PlanNode, ScheduledPlanJob } from '@/types'
+import type {
+  PlanCharacterKey,
+  PlanJobActivity,
+  PlanJobPool,
+  PlanNode,
+  ScheduledPlanJob,
+} from '@/types'
 import type { PlanPipeline, PlanPipelineStage } from '@/pages/Plan/planPipeline'
 import { isReactionRecipe } from '@/lib/recipes'
 import { getBlueprintForProduct } from '@/services/data/sdeLoader'
 import type { BlueprintInfo } from '@/types'
+
+export interface SchedulerCharacter {
+  key: PlanCharacterKey
+  slots: { manufacturing: number; reactions: number; research: number }
+  durationFactor: (node: PlanNode) => number
+  canRun: (node: PlanNode) => boolean
+}
+
+export interface FixedPlanJob {
+  stepKey: string
+  startHour: number
+  endHour: number
+  characterKey?: PlanCharacterKey
+}
 
 export interface SchedulePlanInput {
   nodes: PlanNode[]
@@ -15,6 +35,16 @@ export interface SchedulePlanInput {
   /** Optional pre-built pipeline; when present, science stages are scheduled too. */
   pipeline?: PlanPipeline
   blueprints?: BlueprintInfo[]
+  /** When set, production jobs use per-character slot pools and owners. */
+  characters?: SchedulerCharacter[]
+  ownerByProduct?: Map<number, PlanCharacterKey | 'auto'>
+}
+
+interface CharacterSlotPools {
+  key: PlanCharacterKey
+  character: SchedulerCharacter
+  mfg: number[]
+  rxn: number[]
 }
 
 interface ScheduleEvent {
@@ -177,6 +207,32 @@ function activityForNode(node: PlanNode, blueprints?: BlueprintInfo[]): PlanJobA
   return 'manufacture'
 }
 
+function buildCharacterSlotPools(characters: SchedulerCharacter[]): CharacterSlotPools[] {
+  return characters.map((character) => ({
+    key: character.key,
+    character,
+    mfg: Array.from({ length: Math.max(1, character.slots.manufacturing) }, () => 0),
+    rxn: Array.from({ length: Math.max(1, character.slots.reactions) }, () => 0),
+  }))
+}
+
+function slotFreeAtForPool(state: CharacterSlotPools, pool: PlanJobPool): number[] {
+  return pool === 'reaction' ? state.rxn : state.mfg
+}
+
+function ownerCandidates(
+  owner: PlanCharacterKey | 'auto' | undefined,
+  pools: CharacterSlotPools[],
+  node: PlanNode,
+): CharacterSlotPools[] {
+  if (owner && owner !== 'auto') {
+    const pinned = pools.find((pool) => pool.key === owner)
+    return pinned ? [pinned] : pools
+  }
+  const eligible = pools.filter((pool) => pool.character.canRun(node))
+  return eligible.length > 0 ? eligible : pools
+}
+
 function scheduleProductionNodes(
   nodes: PlanNode[],
   nodesById: Map<number, PlanNode>,
@@ -185,37 +241,116 @@ function scheduleProductionNodes(
   scienceReadyByProduct: Map<number, number>,
   windowHours: number,
   blueprints?: BlueprintInfo[],
+  multi?: {
+    characters: SchedulerCharacter[]
+    ownerByProduct: Map<number, PlanCharacterKey | 'auto'>
+  },
 ): { jobs: ScheduledPlanJob[]; supplies: ScheduleEvent[]; demands: ScheduleEvent[] } {
   const buildNodes = nodes.filter((n) => n.mode === 'build' && n.runs > 0)
   const byDepth = [...buildNodes].sort((a, b) => b.depth - a.depth)
   const jobs: ScheduledPlanJob[] = []
   const supplies: ScheduleEvent[] = []
   const demands: ScheduleEvent[] = []
+  const characterPools = multi ? buildCharacterSlotPools(multi.characters) : null
 
   for (const node of byDepth) {
     const activity = activityForNode(node, blueprints)
     const pool: PlanJobPool = activity === 'reaction' ? 'reaction' : 'manufacturing'
-    const slotFreeAt = pool === 'reaction' ? rxnSlotFreeAt : mfgSlotFreeAt
+    const aggregateSlotFreeAt = pool === 'reaction' ? rxnSlotFreeAt : mfgSlotFreeAt
 
     let remainingRuns = node.runs
     const runsPerJob = Math.max(1, Math.ceil(node.runs / Math.max(1, node.concurrentCopies)))
 
     while (remainingRuns > 0) {
-      const slot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
       const runsThisJob = Math.min(remainingRuns, runsPerJob)
-      const slotMinStart = slotFreeAt[slot] ?? 0
-      const startHour = earliestStartWithDependencies(
-        node,
-        runsThisJob,
-        slotMinStart,
-        nodesById,
-        supplies,
-        demands,
-        scienceReadyByProduct,
-      )
-      const jobDurationHours =
+      const baseJobDurationHours =
         runsPerJob > 0 ? (node.jobTimeSeconds * runsThisJob) / runsPerJob / 3600 : 0
-      const endHour = startHour + jobDurationHours
+
+      let slot: number
+      let startHour: number
+      let endHour: number
+      let characterKey: PlanCharacterKey | undefined
+
+      if (characterPools && characterPools.length > 0) {
+        const owner = multi!.ownerByProduct.get(node.productTypeId)
+        const candidates = ownerCandidates(owner, characterPools, node)
+        let best: {
+          state: CharacterSlotPools
+          slot: number
+          startHour: number
+          endHour: number
+        } | null = null
+
+        for (const state of candidates) {
+          const slotFreeAt = slotFreeAtForPool(state, pool)
+          const candidateSlot = slotFreeAt.indexOf(Math.min(...slotFreeAt))
+          const slotMinStart = slotFreeAt[candidateSlot] ?? 0
+          const candidateStart = earliestStartWithDependencies(
+            node,
+            runsThisJob,
+            slotMinStart,
+            nodesById,
+            supplies,
+            demands,
+            scienceReadyByProduct,
+          )
+          const candidateEnd =
+            candidateStart + baseJobDurationHours * state.character.durationFactor(node)
+          if (
+            !best ||
+            candidateStart < best.startHour - 1e-9 ||
+            (Math.abs(candidateStart - best.startHour) < 1e-9 && candidateEnd < best.endHour)
+          ) {
+            best = {
+              state,
+              slot: candidateSlot,
+              startHour: candidateStart,
+              endHour: candidateEnd,
+            }
+          }
+        }
+
+        const picked = best ?? {
+          state: characterPools[0]!,
+          slot: 0,
+          startHour: earliestStartWithDependencies(
+            node,
+            runsThisJob,
+            0,
+            nodesById,
+            supplies,
+            demands,
+            scienceReadyByProduct,
+          ),
+          endHour: 0,
+        }
+        if (best == null) {
+          picked.endHour =
+            picked.startHour + baseJobDurationHours * picked.state.character.durationFactor(node)
+        }
+
+        slot = picked.slot
+        startHour = picked.startHour
+        endHour = picked.endHour
+        characterKey = picked.state.key
+        const slotFreeAt = slotFreeAtForPool(picked.state, pool)
+        slotFreeAt[slot] = endHour
+      } else {
+        slot = aggregateSlotFreeAt.indexOf(Math.min(...aggregateSlotFreeAt))
+        const slotMinStart = aggregateSlotFreeAt[slot] ?? 0
+        startHour = earliestStartWithDependencies(
+          node,
+          runsThisJob,
+          slotMinStart,
+          nodesById,
+          supplies,
+          demands,
+          scienceReadyByProduct,
+        )
+        endHour = startHour + baseJobDurationHours
+        aggregateSlotFreeAt[slot] = endHour
+      }
+
       const outputQty = runsThisJob * (node.outputQty / Math.max(1, node.runs))
 
       jobs.push({
@@ -228,6 +363,7 @@ function scheduleProductionNodes(
         outputQty,
         activity,
         pool,
+        characterKey,
       })
 
       supplies.push({ productTypeId: node.productTypeId, hour: endHour, qty: outputQty })
@@ -241,7 +377,6 @@ function scheduleProductionNodes(
         }
       }
 
-      slotFreeAt[slot] = endHour
       remainingRuns -= runsThisJob
     }
   }
@@ -251,7 +386,7 @@ function scheduleProductionNodes(
 
 /** Greedy slot packing with build dependencies: parents wait for child supply + science. */
 export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
-  const { nodes, slots, windowHours, pipeline, blueprints } = input
+  const { nodes, slots, windowHours, pipeline, blueprints, characters, ownerByProduct } = input
   const scienceSlots = input.scienceSlots ?? 1
   const reactionSlots = input.reactionSlots ?? 1
 
@@ -263,6 +398,11 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
   const mfgSlotFreeAt = Array.from({ length: Math.max(1, slots) }, () => 0)
   const rxnSlotFreeAt = Array.from({ length: Math.max(1, reactionSlots) }, () => 0)
 
+  const multi =
+    characters && characters.length > 0 && ownerByProduct
+      ? { characters, ownerByProduct }
+      : undefined
+
   const production = scheduleProductionNodes(
     nodes,
     nodesById,
@@ -271,6 +411,7 @@ export function schedulePlanJobs(input: SchedulePlanInput): ScheduledPlanJob[] {
     scienceResult.readyByProduct,
     windowHours,
     blueprints,
+    multi,
   )
 
   return [...scienceResult.jobs, ...production.jobs]
