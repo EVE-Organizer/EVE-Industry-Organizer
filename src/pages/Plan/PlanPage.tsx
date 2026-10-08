@@ -71,6 +71,9 @@ import {
   pruneUnpinnedPlanCharacters,
   setNodeCopies,
   setNodeOwner,
+  resolvePlanMarketHubs,
+  setPlanBuyHub,
+  setPlanSellHub,
   setRootOwner,
   setSellerCharacterKey,
   setT2Options,
@@ -87,6 +90,7 @@ import {
   sumPlanCrewSlots,
 } from '@/lib/planCharacters'
 import { PlanOwnerPicker } from '@/components/plan/PlanOwnerPicker'
+import { PlanMarketHubSelects } from '@/pages/Plan/PlanMarketHubSelects'
 import { usePlanCharacters, useRememberPlanCharacterNames } from '@/pages/Plan/usePlanCharacters'
 import type { PlanGanttCrewMember } from '@/pages/Plan/planGanttAdapter'
 import { suggestBlueprintLines } from '@/lib/blueprintLineSuggestion'
@@ -319,8 +323,12 @@ export function PlanPage() {
 
   const blueprints = useMemo(() => (data ? getAllBlueprints(data.registry) : []), [data])
   const typeMap = useMemo(() => (data ? buildTypeMap(data.types) : new Map()), [data])
-  const buyHubId = activeSettings.primaryHub
-  const sellHubId = activeSettings.sellHubId ?? buyHubId
+  const navbarBuyHub = activeSettings.primaryHub
+  const navbarSellHub = activeSettings.sellHubId ?? navbarBuyHub
+  const { buyHub: buyHubId, sellHub: sellHubId } = resolvePlanMarketHubs(
+    activeTemplate,
+    activeSettings,
+  )
   const hubWindowMaps = useMemo(() => {
     if (!data) {
       return {
@@ -1632,37 +1640,58 @@ export function PlanPage() {
                     />
                   </div>
                 ) : null}
-                {!isSharedView ? (
-                  <div className="mt-4 flex flex-col gap-2 border-t border-eve-border/40 pt-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[11px] uppercase tracking-wide opacity-50">Seller</span>
-                      {planCharacterOptions.length === 0 ? (
+                <div className="mt-4 flex flex-col gap-3 border-t border-eve-border/40 pt-4">
+                  <PlanMarketHubSelects
+                    buyHub={activeTemplate.buyHub}
+                    sellHub={activeTemplate.sellHub}
+                    navbarBuyHub={navbarBuyHub}
+                    navbarSellHub={navbarSellHub}
+                    disabled={isSharedView}
+                    onBuyHubChange={(hub) => {
+                      const template = selectedPlanTemplateFromStore()
+                      if (!template) return
+                      updatePlanTemplate(template.id, setPlanBuyHub(template, hub))
+                    }}
+                    onSellHubChange={(hub) => {
+                      const template = selectedPlanTemplateFromStore()
+                      if (!template) return
+                      updatePlanTemplate(template.id, setPlanSellHub(template, hub))
+                    }}
+                  />
+                  {!isSharedView ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] uppercase tracking-wide opacity-50">
+                          Seller
+                        </span>
+                        {planCharacterOptions.length === 0 ? (
+                          <p className="text-xs opacity-60">
+                            Sign in with EVE or add a manual character in Settings to pick who pays
+                            sales tax and broker fees.
+                          </p>
+                        ) : (
+                          <PlanOwnerPicker
+                            options={planCharacterOptions}
+                            value={activeTemplate.sellerCharacterKey}
+                            emptyLabel="Settings"
+                            label="Seller for trading fees"
+                            onChange={(key) => {
+                              const template = selectedPlanTemplateFromStore()
+                              if (!template) return
+                              updatePlanTemplate(template.id, setSellerCharacterKey(template, key))
+                            }}
+                          />
+                        )}
+                      </div>
+                      {planCharacterOptions.length > 0 ? (
                         <p className="text-xs opacity-60">
-                          Sign in with EVE or add a manual character in Settings to pick who pays
-                          sales tax and broker fees.
+                          Uses this character&apos;s Accounting and Broker Relations for plan profit
+                          only. Job owners still use their Industry skills for scheduling.
                         </p>
-                      ) : (
-                        <PlanOwnerPicker
-                          options={planCharacterOptions}
-                          value={activeTemplate.sellerCharacterKey}
-                          emptyLabel="Settings"
-                          label="Seller for trading fees"
-                          onChange={(key) => {
-                            const template = selectedPlanTemplateFromStore()
-                            if (!template) return
-                            updatePlanTemplate(template.id, setSellerCharacterKey(template, key))
-                          }}
-                        />
-                      )}
+                      ) : null}
                     </div>
-                    {planCharacterOptions.length > 0 ? (
-                      <p className="text-xs opacity-60">
-                        Uses this character&apos;s Accounting and Broker Relations for plan profit
-                        only. Job owners still use their Industry skills for scheduling.
-                      </p>
-                    ) : null}
-                  </div>
-                ) : null}
+                  ) : null}
+                </div>
               </div>
             </details>
           </section>

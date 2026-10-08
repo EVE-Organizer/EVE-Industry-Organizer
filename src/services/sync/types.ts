@@ -71,6 +71,12 @@ function migrateHubId(hub: HubId | 'xhq7v' | undefined): HubId | undefined {
   return hub
 }
 
+function knownPlanHubId(hub: unknown): HubId | undefined {
+  if (hub === 'xhq7v') return 'ympwl'
+  if (typeof hub !== 'string') return undefined
+  return HUBS.some((h) => h.id === hub) ? (hub as HubId) : undefined
+}
+
 /** Fill missing keys. Legacy all-zero saves (pre-SSO) map to default 3. */
 export function normalizeSkillLevels(
   skills: Partial<SkillLevels> | undefined,
@@ -346,15 +352,22 @@ export function ensurePlanRootIds(roots: PlanRootEntry[] | undefined): PlanRootE
 export function migratePlanTemplates(
   templates: ManufacturingPlanTemplate[] | undefined,
 ): ManufacturingPlanTemplate[] {
-  return (templates ?? []).map((t) => ({
-    ...t,
-    roots: ensurePlanRootIds(t.roots),
-    modeOverrides: t.modeOverrides ?? {},
-    nodeOverrides: t.nodeOverrides ?? {},
-    manufacturingSlotBonus: Math.max(0, t.manufacturingSlotBonus ?? 0) || undefined,
-    reactionSlotBonus: Math.max(0, t.reactionSlotBonus ?? 0) || undefined,
-    researchSlotBonus: Math.max(0, t.researchSlotBonus ?? 0) || undefined,
-  }))
+  return (templates ?? []).map((t) => {
+    const { buyHub: rawBuyHub, sellHub: rawSellHub, ...rest } = t
+    const buyHub = knownPlanHubId(rawBuyHub)
+    const sellHub = knownPlanHubId(rawSellHub)
+    return {
+      ...rest,
+      roots: ensurePlanRootIds(t.roots),
+      modeOverrides: t.modeOverrides ?? {},
+      nodeOverrides: t.nodeOverrides ?? {},
+      manufacturingSlotBonus: Math.max(0, t.manufacturingSlotBonus ?? 0) || undefined,
+      reactionSlotBonus: Math.max(0, t.reactionSlotBonus ?? 0) || undefined,
+      researchSlotBonus: Math.max(0, t.researchSlotBonus ?? 0) || undefined,
+      ...(buyHub ? { buyHub } : {}),
+      ...(sellHub ? { sellHub } : {}),
+    }
+  })
 }
 
 export function createDefaultPlanTemplate(name = 'New plan'): ManufacturingPlanTemplate {

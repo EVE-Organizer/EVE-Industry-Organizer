@@ -7,6 +7,7 @@ import {
 import { DEFAULT_SETTINGS } from '@/types'
 import type {
   GlobalSettings,
+  HubId,
   ManufacturingPlanTemplate,
   PlanBuildMode,
   PlanNodeOverride,
@@ -27,6 +28,8 @@ export interface PlanShareTemplate {
   roots: PlanShareRoot[]
   modeOverrides: Record<string, PlanBuildMode>
   nodeOverrides: Record<string, PlanNodeOverride>
+  buyHub?: HubId
+  sellHub?: HubId
 }
 
 export interface PlanSharePayload {
@@ -120,6 +123,8 @@ export function buildPlanSharePayload(
       })),
       modeOverrides,
       nodeOverrides,
+      ...(template.buyHub ? { buyHub: template.buyHub } : {}),
+      ...(template.sellHub ? { sellHub: template.sellHub } : {}),
     },
     settings: { ...settings },
   }
@@ -145,6 +150,8 @@ export function sharedPayloadToTemplate(payload: PlanSharePayload): Manufacturin
     })),
     modeOverrides: toNumericRecord(payload.template.modeOverrides ?? {}),
     nodeOverrides: toNumericRecord(payload.template.nodeOverrides ?? {}),
+    ...(payload.template.buyHub ? { buyHub: payload.template.buyHub } : {}),
+    ...(payload.template.sellHub ? { sellHub: payload.template.sellHub } : {}),
   }
 }
 

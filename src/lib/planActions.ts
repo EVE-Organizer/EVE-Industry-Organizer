@@ -14,6 +14,7 @@ import { readyHoursByProductId as readyHoursByProductIdFromJobs } from '@/pages/
 import type {
   BlueprintInfo,
   GlobalSettings,
+  HubId,
   ManufacturingPlanTemplate,
   PlanBuildMode,
   PlanCharacterKey,
@@ -191,6 +192,30 @@ export function setSellerCharacterKey(
   key: PlanCharacterKey | undefined,
 ): TemplatePatch {
   return { sellerCharacterKey: key }
+}
+
+/** Buy/sell hubs for this plan. Missing fields follow navbar settings. */
+export function resolvePlanMarketHubs(
+  template: Pick<ManufacturingPlanTemplate, 'buyHub' | 'sellHub'> | null | undefined,
+  settings: Pick<GlobalSettings, 'primaryHub' | 'sellHubId'>,
+): { buyHub: HubId; sellHub: HubId } {
+  const buyHub = template?.buyHub ?? settings.primaryHub
+  const sellHub = template?.sellHub ?? settings.sellHubId ?? buyHub
+  return { buyHub, sellHub }
+}
+
+export function setPlanBuyHub(
+  _template: ManufacturingPlanTemplate,
+  hub: HubId | undefined,
+): TemplatePatch {
+  return { buyHub: hub }
+}
+
+export function setPlanSellHub(
+  _template: ManufacturingPlanTemplate,
+  hub: HubId | undefined,
+): TemplatePatch {
+  return { sellHub: hub }
 }
 
 export function setNodeCopies(

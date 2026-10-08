@@ -730,6 +730,10 @@ export interface ManufacturingPlanTemplate {
   characterNames?: Record<string, string>
   characterSlotBonus?: Record<string, PlanSlotBonuses>
   sellerCharacterKey?: PlanCharacterKey
+  /** Plan buy hub; omit to follow navbar primaryHub. */
+  buyHub?: HubId
+  /** Plan sell hub; omit to follow navbar sellHubId. */
+  sellHub?: HubId
   stepProgress?: Record<string, PlanStepProgress>
   startedAt?: string
   stepSnapshot?: Record<string, { runs: number; characterKey?: PlanCharacterKey }>

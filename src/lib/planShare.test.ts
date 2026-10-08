@@ -21,6 +21,8 @@ describe('planShare', () => {
     template.modeOverrides = { 587: 'build', 34: 'buy' }
     template.nodeOverrides = { 587: { me: 10, te: 20 } }
     template.defaultRunsPerBpc = 25
+    template.buyHub = 'amarr'
+    template.sellHub = 'hek'
 
     const settings = {
       ...DEFAULT_SETTINGS,
@@ -39,7 +41,12 @@ describe('planShare', () => {
     expect(parsed?.template.roots).toHaveLength(2)
     expect(parsed?.template.modeOverrides['587']).toBe('build')
     expect(parsed?.template.nodeOverrides['587']).toEqual({ me: 10, te: 20 })
+    expect(parsed?.template.buyHub).toBe('amarr')
+    expect(parsed?.template.sellHub).toBe('hek')
     expect(parsed?.settings.primaryHub).toBe('amarr')
+    const restored = sharedPayloadToTemplate(parsed!)
+    expect(restored.buyHub).toBe('amarr')
+    expect(restored.sellHub).toBe('hek')
     expect(parsed?.settings.manufacturingSystemId).toBe(30002187)
   })
 

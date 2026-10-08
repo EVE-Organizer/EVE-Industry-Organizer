@@ -8,7 +8,10 @@ import {
   pruneUnpinnedPlanCharacters,
   removePlanCharacter,
   resetPlanPatch,
+  resolvePlanMarketHubs,
   setNodeCopies,
+  setPlanBuyHub,
+  setPlanSellHub,
   setAllReadyBy,
   setReadyBy,
   setRootOwner,
@@ -60,6 +63,41 @@ describe('planActions', () => {
       'sso:2124647639': 'Zoe Mills 2nd',
     })
     expect(mergePlanCharacterNames(t, { 'sso:1': 'Character 1' })).toEqual({})
+  })
+
+  it('falls back to navbar hubs when the plan has none', () => {
+    expect(resolvePlanMarketHubs(template(), DEFAULT_SETTINGS)).toEqual({
+      buyHub: DEFAULT_SETTINGS.primaryHub,
+      sellHub: DEFAULT_SETTINGS.sellHubId ?? DEFAULT_SETTINGS.primaryHub,
+    })
+    expect(
+      resolvePlanMarketHubs(null, { ...DEFAULT_SETTINGS, primaryHub: 'amarr', sellHubId: 'hek' }),
+    ).toEqual({ buyHub: 'amarr', sellHub: 'hek' })
+  })
+
+  it('uses stored plan hubs even when they match the navbar', () => {
+    const t = template()
+    t.buyHub = 'amarr'
+    t.sellHub = 'jita'
+    expect(
+      resolvePlanMarketHubs(t, { ...DEFAULT_SETTINGS, primaryHub: 'jita', sellHubId: 'jita' }),
+    ).toEqual({ buyHub: 'amarr', sellHub: 'jita' })
+    expect(setPlanBuyHub(t, 'dodixie')).toEqual({ buyHub: 'dodixie' })
+    expect(setPlanSellHub(t, 'rens')).toEqual({ sellHub: 'rens' })
+  })
+
+  it('clears a hub so the plan follows the navbar again', () => {
+    const t = template()
+    t.buyHub = 'amarr'
+    t.sellHub = 'hek'
+    expect(setPlanBuyHub(t, undefined)).toEqual({ buyHub: undefined })
+    expect(setPlanSellHub(t, undefined)).toEqual({ sellHub: undefined })
+    expect(
+      resolvePlanMarketHubs(
+        { ...t, ...setPlanBuyHub(t, undefined), ...setPlanSellHub(t, undefined) },
+        { ...DEFAULT_SETTINGS, primaryHub: 'jita', sellHubId: 'dodixie' },
+      ),
+    ).toEqual({ buyHub: 'jita', sellHub: 'dodixie' })
   })
 
   it('keeps at least one BPO and merges into the existing override', () => {
