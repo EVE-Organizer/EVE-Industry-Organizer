@@ -53,6 +53,8 @@ export type BuildManufacturingPlanScheduleInput = {
   reactionCostIndex: number
   systems?: SystemInfo[]
   skillSources: PlanSkillSources
+  /** Pooled hangar at production station when settings.includeInventory. */
+  pooledStock?: Map<number, number>
   includeSimulation?: boolean
 }
 
@@ -68,6 +70,7 @@ export function buildManufacturingPlanSchedule(input: BuildManufacturingPlanSche
     reactionCostIndex,
     systems,
     skillSources,
+    pooledStock,
     includeSimulation = false,
   } = input
 
@@ -104,6 +107,7 @@ export function buildManufacturingPlanSchedule(input: BuildManufacturingPlanSche
     systemCostIndex,
     reactionCostIndex,
     systems,
+    ...(pooledStock && settings.includeInventory ? { pooledStock } : {}),
   }
 
   const draftNodes = expandManufacturingPlan(expandBase).nodes

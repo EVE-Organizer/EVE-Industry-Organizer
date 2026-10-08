@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { EveNavAuth } from '@/components/layout/EveNavAuth'
+import { ToastHost } from '@/components/Toast'
 import { NavbarHubSelect } from '@/components/layout/NavbarHubSelect'
 import { NavbarItemSearch } from '@/components/layout/NavbarItemSearch'
 import { NavbarMobileShell } from '@/components/layout/NavbarMobileShell'
@@ -48,6 +49,7 @@ export function Layout() {
       <main className="flex-1 min-w-0 min-h-0 w-full max-w-7xl mx-auto p-3 sm:p-4 lg:p-8 flex flex-col">
         <Outlet />
       </main>
+      <ToastHost />
     </div>
   )
 }

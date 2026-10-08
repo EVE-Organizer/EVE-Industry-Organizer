@@ -22,6 +22,7 @@ export function useManufacturingPlan(
   systemCostIndex: number,
   reactionCostIndex: number,
   systems?: SystemInfo[],
+  pooledStock: Map<number, number> | null | undefined = undefined,
   options: UseManufacturingPlanOptions = {},
 ) {
   const includeSimulation = options.includeSimulation !== false
@@ -72,6 +73,7 @@ export function useManufacturingPlan(
       reactionCostIndex,
       systems,
       skillSources,
+      pooledStock: pooledStock ?? undefined,
       includeSimulation,
     })
   }, [
@@ -83,6 +85,7 @@ export function useManufacturingPlan(
     systemCostIndex,
     reactionCostIndex,
     systems,
+    pooledStock,
     includeSimulation,
     authCharacters,
     manualCharacters,

@@ -12,6 +12,10 @@ export type BuildBlueprintRow = ExpandablePlanRow & {
   jobTimeHours: number
   durationHours?: number
   outputQty: number
+  /** Units in hangar at production station; undefined when inventory is not loaded. */
+  haveQty?: number
+  /** Target before stock (progress denominator). */
+  grossDemandQty?: number
   isRoot: boolean
   enabled?: boolean
   bpos?: number

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Tooltip } from '@/components/Tooltip'
 import { PlanOwnerPicker, type PlanOwnerOption } from '@/components/plan/PlanOwnerPicker'
 import { stopRowToggle } from '@/components/plan/PlanTreeLines'
+import { PlanStockProgressBar } from '@/pages/Plan/PlanStockProgressBar'
 import { ScoreBar } from '@/pages/Plan/ScoreBar'
 import {
   BposInput,
@@ -72,6 +73,10 @@ const COLUMN_META: Record<PlanJobsColumnId, { label: string; tooltip?: string }>
     tooltip: 'Steps done from ESI jobs and stock since the plan started',
   },
   output: { label: 'Output' },
+  have: {
+    label: 'Have',
+    tooltip: "Units in assigned characters' hangar at the production station",
+  },
   volume: {
     label: 'Volume',
     tooltip: 'Packed cargo volume of scheduled output (SDE m³ × output units)',
@@ -221,6 +226,10 @@ function wrapCell(content: ReactNode) {
   return <div className="plan-jobs-table__cell-inner">{content}</div>
 }
 
+function PlanJobsStockProgressBar({ row }: { row: BuildBlueprintRow }) {
+  return <PlanStockProgressBar have={row.haveQty} gross={row.grossDemandQty ?? row.outputQty} />
+}
+
 function renderDataCell(
   id: PlanJobsColumnId,
   row: BuildBlueprintRow,
@@ -350,6 +359,22 @@ function renderDataCell(
       return wrapCell(
         <span className={`${numClass} opacity-80`}>{formatGraphQuantity(row.outputQty)}</span>,
       )
+    case 'have': {
+      if (row.haveQty == null) {
+        return wrapCell(<span className="opacity-30">—</span>)
+      }
+      const gross = row.grossDemandQty ?? row.outputQty
+      const still = Math.max(0, gross - row.haveQty)
+      const tip =
+        still > 0
+          ? `${formatGraphQuantity(row.haveQty)} on hand · ${formatGraphQuantity(still)} still to build`
+          : `${formatGraphQuantity(row.haveQty)} on hand · fully covered`
+      return wrapCell(
+        <Tooltip text={tip} placement="top">
+          <span className={`${numClass} cursor-help`}>{formatGraphQuantity(row.haveQty)}</span>
+        </Tooltip>,
+      )
+    }
     case 'volume':
       return wrapCell(
         <VolumeCell
@@ -626,40 +651,45 @@ export function buildPlanJobsColumns(input: {
       enableSorting: false,
       cell: ({ row, table }) => {
         const meta = tableMeta(table)
-        if (!row.original.isRoot || !row.original.rootId || meta.readOnly) return null
-        if (!meta.onDuplicate && !meta.onRemove) return null
+        const isRoot = row.original.isRoot && row.original.rootId
+        const showToolbar = isRoot && !meta.readOnly && (meta.onDuplicate || meta.onRemove)
+        const bar = <PlanJobsStockProgressBar row={row.original} />
+        if (!showToolbar && !bar) return null
         return (
           <div className="plan-jobs-table__actions-cell" onClick={stopRowToggle}>
-            <div
-              className="plan-jobs-table__actions-toolbar"
-              role="group"
-              aria-label={`Actions for ${row.original.name}`}
-            >
-              {meta.onDuplicate ? (
-                <Tooltip text="Duplicate job" placement="left">
-                  <button
-                    type="button"
-                    className="plan-jobs-table__action-btn"
-                    aria-label={`Duplicate ${row.original.name}`}
-                    onClick={() => meta.onDuplicate!(row.original.rootId!)}
-                  >
-                    <DuplicateIcon />
-                  </button>
-                </Tooltip>
-              ) : null}
-              {meta.onRemove ? (
-                <Tooltip text="Remove root" placement="left">
-                  <button
-                    type="button"
-                    className="plan-jobs-table__action-btn plan-jobs-table__action-btn--danger"
-                    aria-label={`Remove ${row.original.name}`}
-                    onClick={() => meta.onRemove!(row.original.rootId!)}
-                  >
-                    <RemoveIcon />
-                  </button>
-                </Tooltip>
-              ) : null}
-            </div>
+            {showToolbar ? (
+              <div
+                className="plan-jobs-table__actions-toolbar plan-jobs-table__actions-toolbar--with-progress"
+                role="group"
+                aria-label={`Actions for ${row.original.name}`}
+              >
+                {meta.onDuplicate ? (
+                  <Tooltip text="Duplicate job" placement="left">
+                    <button
+                      type="button"
+                      className="plan-jobs-table__action-btn"
+                      aria-label={`Duplicate ${row.original.name}`}
+                      onClick={() => meta.onDuplicate!(row.original.rootId!)}
+                    >
+                      <DuplicateIcon />
+                    </button>
+                  </Tooltip>
+                ) : null}
+                {meta.onRemove ? (
+                  <Tooltip text="Remove root" placement="left">
+                    <button
+                      type="button"
+                      className="plan-jobs-table__action-btn plan-jobs-table__action-btn--danger"
+                      aria-label={`Remove ${row.original.name}`}
+                      onClick={() => meta.onRemove!(row.original.rootId!)}
+                    >
+                      <RemoveIcon />
+                    </button>
+                  </Tooltip>
+                ) : null}
+              </div>
+            ) : null}
+            {bar}
           </div>
         )
       },

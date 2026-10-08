@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type RefreshScope = 'characters' | 'prices-live' | 'static' | 'all'
+export type RefreshScope = 'characters' | 'prices-live' | 'static' | 'all' | 'plan'
 
 export type SourceRefreshStatus =
   | 'loading'
@@ -40,6 +40,7 @@ const EMPTY_REFRESHING: Record<RefreshScope, boolean> = {
   'prices-live': false,
   static: false,
   all: false,
+  plan: false,
 }
 
 interface DataStatusStore {

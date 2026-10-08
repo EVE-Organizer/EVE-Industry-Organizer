@@ -11,6 +11,8 @@ export const GLOBAL_SETTING_TOOLTIPS = {
     'Market history window for material costs at the buy hub and (when selling via sell orders) product revenue at the sell hub. All uses current sell listings; 1d–1y use history averages. Spot fills gaps when history is missing.',
   includeHaulCost:
     'Haul in (materials from buy hub to build system) is added to setup cost; haul out (products to sell hub) is subtracted from profit. Turn off if you build and sell locally or haul on your own.',
+  includeInventory:
+    'When on, items already in the assigned characters\' hangar at the production station reduce component runs and market buys. Root runs stay as entered.',
   includeBlueprintCost:
     'Include blueprint cost in profit and budget. T1 BPOs count as upfront capital only (reusable forever). When no BPO is listed at your hub, BPC contract prices are used (Jita fallback). T2 charges full invention per batch. Charges (ammo, scripts) are excluded. Turn off to compare operating profit only.',
   inventionSkillLevel:

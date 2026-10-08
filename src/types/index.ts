@@ -467,6 +467,8 @@ export interface GlobalSettings {
   priceWindow: TimeRange
   /** Include haul in/out in setup and profit (Plan + Blueprints default). */
   includeHaulCost: boolean
+  /** Subtract assigned characters' station inventory from component/buy demand on Plan. */
+  includeInventory: boolean
   /** Assumed level (0-5) for invention encryption + datacore skills, used to estimate T2 success chance. */
   inventionSkillLevel: number
   /** Include blueprint acquisition cost (BPO upfront / BPC per batch / invention) in profit and budget. */
@@ -742,6 +744,8 @@ export interface PlanNode {
   recipeKind?: RecipeKind
   mode: PlanBuildMode
   totalDemandQty: number
+  /** Demand before station stock (for progress); equals totalDemandQty when inventory is off. */
+  grossDemandQty?: number
   demandByParent: { parentProductTypeId: number; qty: number }[]
   parentProductTypeIds: number[]
   childProductTypeIds: number[]
@@ -1252,6 +1256,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   priceMethod: 'sell_orders',
   priceWindow: '1m',
   includeHaulCost: false,
+  includeInventory: false,
   inventionSkillLevel: 4,
   includeBlueprintCost: true,
   skills: { ...DEFAULT_SKILLS },

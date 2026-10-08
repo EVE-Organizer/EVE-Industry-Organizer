@@ -5,6 +5,7 @@ export type PlanJobsColumnId =
   | 'owner'
   | 'progress'
   | 'output'
+  | 'have'
   | 'volume'
   | 'setup'
   | 'profit'
@@ -53,6 +54,7 @@ export const PLAN_JOBS_COLUMN_SPECS: Record<PlanJobsColumnId, PlanJobsColumnSpec
   owner: { defaultWidth: 60, minWidth: 60, maxWidth: 60, align: 'center' },
   progress: { defaultWidth: 136, minWidth: 120, maxWidth: 200, align: 'left' },
   output: { defaultWidth: 92, minWidth: 80, maxWidth: 140, align: 'right' },
+  have: { defaultWidth: 88, minWidth: 72, maxWidth: 120, align: 'right' },
   volume: { defaultWidth: 100, minWidth: 88, maxWidth: 140, align: 'right' },
   setup: { defaultWidth: 112, minWidth: 96, maxWidth: 180, align: 'right' },
   profit: { defaultWidth: 140, minWidth: 120, maxWidth: 225, align: 'right' },
@@ -99,6 +101,7 @@ export const DEFAULT_PLAN_JOBS_SCROLL_ORDER: PlanJobsColumnId[] = [
   'owner',
   'progress',
   'output',
+  'have',
   'volume',
   'setup',
   'profit',
@@ -111,6 +114,7 @@ export const CORE_PLAN_JOBS_SCROLL_ORDER: PlanJobsColumnId[] = [
   'bpos',
   'owner',
   'output',
+  'have',
   'volume',
   'setup',
   'profit',

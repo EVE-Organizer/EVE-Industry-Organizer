@@ -18,11 +18,13 @@ import { PlanProfitSummaryPanel } from '@/pages/Plan/PlanProfitSummaryPanel'
 import { PlanRootSetupModal } from '@/pages/Plan/PlanRootSetupModal'
 import { PlanRootProfitModal } from '@/pages/Plan/PlanRootProfitModal'
 import { useAppStore } from '@/stores/appStore'
+import { refreshData } from '@/lib/refreshCharacterData'
 import { useAuthStore } from '@/stores/authStore'
+import { useDataStatusStore } from '@/stores/dataStatusStore'
 import { useSdeData } from '@/hooks/useSdeData'
 import { buildManufacturingPlanSchedule } from '@/pages/Plan/buildManufacturingPlanSchedule'
 import { useManufacturingPlan } from '@/pages/Plan/useManufacturingPlan'
-import { useLocationInventory } from '@/hooks/useCharacterIndustryData'
+import { useCharactersLocationInventory } from '@/hooks/useCharacterIndustryData'
 import {
   buildTypeMap,
   getAllBlueprints,
@@ -447,6 +449,25 @@ export function PlanPage() {
     [activeSettings, data?.systems],
   )
 
+  const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
+
+  const planSsoCharacterIds = useMemo(() => {
+    const fromPlan = (activeTemplate?.characters ?? [])
+      .filter((key): key is `sso:${number}` => key.startsWith('sso:'))
+      .map((key) => Number(key.slice(4)))
+    if (fromPlan.length > 0) return fromPlan
+    if (activeCharacterId != null) return [activeCharacterId]
+    return []
+  }, [activeTemplate?.characters, activeCharacterId])
+
+  const productionLocationId = activeSettings.productionLocationId ?? null
+  const planLocationInventory = useCharactersLocationInventory(
+    planSsoCharacterIds,
+    productionLocationId,
+  )
+  const locationInventory = planLocationInventory.pooled
+  const inventoryLoaded = productionLocationId != null && planSsoCharacterIds.length > 0
+
   const plan = useManufacturingPlan(
     activeTemplate,
     blueprints,
@@ -456,6 +477,7 @@ export function PlanPage() {
     systemCostIndex,
     reactionCostIndex,
     data?.systems,
+    activeSettings.includeInventory ? locationInventory : undefined,
     { includeSimulation: tab === 'graph' },
   )
 
@@ -500,11 +522,14 @@ export function PlanPage() {
           ),
         ),
       slotTotals,
+      ...(activeSettings.includeInventory ? { pooledStock: locationInventory } : {}),
     }
   }, [
     expandInput,
     activeTemplate,
     activeSettings.skills,
+    activeSettings.includeInventory,
+    locationInventory,
     ownerByProduct,
     planSkillSources,
     planResolvedCrew,
@@ -597,23 +622,14 @@ export function PlanPage() {
 
   const slots = plan.slots
 
-  const activeCharacterId = useAuthStore((s) => s.activeCharacterId)
-  const refreshCharacter = useAuthStore((s) => s.refreshCharacter)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const { data: locationInventory } = useLocationInventory(
-    activeCharacterId,
-    activeSettings.productionLocationId,
-  )
+  const planRefreshing = useDataStatusStore((s) => s.refreshing.plan || s.refreshing.characters)
 
   const handlePlanRefresh = useCallback(async () => {
-    if (activeCharacterId == null) return
-    setIsRefreshing(true)
-    try {
-      await refreshCharacter(activeCharacterId)
-    } finally {
-      setIsRefreshing(false)
-    }
-  }, [activeCharacterId, refreshCharacter])
+    if (planSsoCharacterIds.length === 0) return
+    await refreshData('plan', planSsoCharacterIds, {
+      productionLocationId,
+    })
+  }, [planSsoCharacterIds, productionLocationId])
 
   const profitSummary = useMemo(() => {
     if (!activeTemplate || !profitExpandInput) {
@@ -753,12 +769,18 @@ export function PlanPage() {
     }
     const rootSeen = new Map<number, number>()
 
+    const stockRowFields = (productTypeId: number, grossDemandQty: number) => ({
+      grossDemandQty,
+      haveQty: inventoryLoaded ? (locationInventory.get(productTypeId) ?? 0) : undefined,
+    })
+
     const rootRows = activeTemplate.roots.flatMap((root) => {
       const bp = getBlueprintForProduct(blueprints, root.productTypeId)
       if (!bp) return []
       const name = typeMap.get(root.productTypeId)?.name ?? `Type ${root.productTypeId}`
       const node = displayNodeForRoot(root, name, bp, planNodesByProductId.get(root.productTypeId))
       const override = nodeOverrides[root.productTypeId]
+      const rootOutput = root.runs * bp.productQuantity
 
       const instance = (rootSeen.get(root.productTypeId) ?? 0) + 1
       rootSeen.set(root.productTypeId, instance)
@@ -789,7 +811,8 @@ export function PlanPage() {
           jobTimeHours: bp
             ? rootJobTimeHours(root, bp, settingsForRootJobTime(root.productTypeId), override)
             : root.productionDurationHours,
-          outputQty: root.runs * bp.productQuantity,
+          outputQty: rootOutput,
+          ...stockRowFields(root.productTypeId, rootOutput),
           isRoot: true,
           enabled: root.enabled !== false,
           bpos: 1,
@@ -838,6 +861,7 @@ export function PlanPage() {
         runs: row.node.runs,
         jobTimeHours: row.node.jobTimeSeconds / 3600,
         outputQty: row.node.outputQty,
+        ...stockRowFields(productTypeId, row.node.grossDemandQty ?? row.node.outputQty),
         isRoot: false,
         depth: row.depth + 1,
         bpos,
@@ -868,6 +892,8 @@ export function PlanPage() {
     buyPrices,
     ownerByProduct,
     settingsForRootJobTime,
+    inventoryLoaded,
+    locationInventory,
   ])
 
   const handleSetPlanOwner = useCallback(
@@ -935,6 +961,7 @@ export function PlanPage() {
           reactionCostIndex,
           systems: data.systems,
           skillSources,
+          ...(storeSettings.includeInventory ? { pooledStock: locationInventory } : {}),
         })
         Object.assign(
           patch,
@@ -964,6 +991,7 @@ export function PlanPage() {
       prices,
       systemCostIndex,
       reactionCostIndex,
+      locationInventory,
     ],
   )
 
@@ -1557,7 +1585,7 @@ export function PlanPage() {
                       systems={data.systems}
                       regions={data.regions}
                       onRefresh={isSharedView ? undefined : () => void handlePlanRefresh()}
-                      isRefreshing={isRefreshing}
+                      isRefreshing={planRefreshing}
                     />
                   </div>
                 ) : null}
@@ -1614,9 +1642,14 @@ export function PlanPage() {
                   <EconomicsFilterSection
                     layout="bar"
                     barVariant="plan"
+                    showPlanRefresh
+                    planRefreshCharacterIds={planSsoCharacterIds}
+                    planProductionLocationId={productionLocationId}
                     values={{
                       priceMethod: activeSettings.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
                       priceWindow: activeSettings.priceWindow ?? DEFAULT_SETTINGS.priceWindow,
+                      includeInventory:
+                        activeSettings.includeInventory ?? DEFAULT_SETTINGS.includeInventory,
                     }}
                     onChange={onPlanEconomicsChange}
                   />
@@ -1825,7 +1858,8 @@ export function PlanPage() {
                 onOpenMeTe={openMeTe}
                 blueprintTypeIdByProduct={blueprintTypeIdByProduct}
                 typeMap={typeMap}
-                inventoryByTypeId={locationInventory ?? null}
+                inventoryByTypeId={inventoryLoaded ? locationInventory : null}
+                inventoryNettedInExpand={activeSettings.includeInventory === true}
               />
             ) : null}
 

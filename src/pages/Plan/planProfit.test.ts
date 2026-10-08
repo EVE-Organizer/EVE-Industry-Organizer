@@ -256,6 +256,64 @@ describe('planProfit', () => {
     expect(parts).toBeCloseTo(breakdown.totalSetupCost, 5)
   })
 
+  it('nets packaged self-input from hangar in setup cost', () => {
+    const selfRef = mockBlueprint(200, [
+      { typeId: 200, quantity: 1 },
+      { typeId: 34, quantity: 5 },
+    ])
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-1', productTypeId: 200, runs: 100, productionDurationHours: 10 }]
+    const typeMapSelf = new Map([
+      [
+        34,
+        {
+          typeId: 34,
+          name: 'Tritanium',
+          group: '',
+          category: '',
+          volume: 0,
+          iconUrl: '',
+          renderUrl: '',
+          bpIconUrl: '',
+        },
+      ],
+      [
+        200,
+        {
+          typeId: 200,
+          name: 'Kit',
+          group: '',
+          category: '',
+          volume: 0,
+          iconUrl: '',
+          renderUrl: '',
+          bpIconUrl: '',
+        },
+      ],
+    ])
+    const prices = new Map([
+      [34, 5],
+      [200, 1_000_000],
+    ])
+    const base: ExpandPlanInput = {
+      template,
+      blueprints: [selfRef],
+      typeMap: typeMapSelf,
+      prices,
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+    const withStock: ExpandPlanInput = {
+      ...base,
+      settings: { ...DEFAULT_SETTINGS, includeInventory: true },
+      pooledStock: new Map([[200, 40]]),
+    }
+    const row = computeRootProfitRow(template.roots[0], selfRef, base, prices, prices, 10)
+    const stocked = computeRootProfitRow(template.roots[0], selfRef, withStock, prices, prices, 10)
+    expect(row.setupCost - stocked.setupCost).toBe(40 * 1_000_000)
+  })
+
   it('does not double-count packaged self-input in setup cost', () => {
     const selfRef = mockBlueprint(200, [
       { typeId: 200, quantity: 1 },
@@ -395,5 +453,71 @@ describe('planProfit', () => {
       breakdown.buildChainCost +
       breakdown.packagedBuyCost
     expect(chainOnly).toBeCloseTo(breakdown.totalSetupCost, 5)
+  })
+
+  it('subtracts station stock from setup cost when includeInventory is on', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 }]
+    const base: ExpandPlanInput = {
+      template,
+      blueprints,
+      typeMap,
+      prices: sellPrices,
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+    const withStock: ExpandPlanInput = {
+      ...base,
+      settings: { ...DEFAULT_SETTINGS, includeInventory: true },
+      pooledStock: new Map([[34, 500]]),
+    }
+    const row = computeRootProfitRow(template.roots[0], widget, base, sellPrices, buyPrices, 10)
+    const stocked = computeRootProfitRow(
+      template.roots[0],
+      widget,
+      withStock,
+      sellPrices,
+      buyPrices,
+      10,
+    )
+    const breakdown = computeRootSetupBreakdown(template.roots[0], widget, withStock, 'Widget')
+    expect(stocked.setupCost).toBe(row.setupCost - 500 * 5)
+    expect(breakdown.totalSetupCost).toBe(stocked.setupCost)
+    expect(breakdown.buyLines[0]?.qty).toBeLessThan(900)
+  })
+
+  it('consumes shared hangar stock once across profit summary roots', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [
+      { id: 'root-1', productTypeId: 100, runs: 100, productionDurationHours: 10 },
+      { id: 'root-2', productTypeId: 100, runs: 100, productionDurationHours: 10 },
+    ]
+    const hours = new Map([
+      ['root-1', 10],
+      ['root-2', 10],
+    ])
+    const base: ExpandPlanInput = {
+      template,
+      blueprints,
+      typeMap,
+      prices: sellPrices,
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+    const noStock = computePlanProfitSummary(template, base, sellPrices, buyPrices, hours)
+    const withStock = computePlanProfitSummary(
+      template,
+      {
+        ...base,
+        settings: { ...DEFAULT_SETTINGS, includeInventory: true },
+        pooledStock: new Map([[34, 1500]]),
+      },
+      sellPrices,
+      buyPrices,
+      hours,
+    )
+    expect(withStock.setupCost).toBe(noStock.setupCost - 1500 * 5)
   })
 })

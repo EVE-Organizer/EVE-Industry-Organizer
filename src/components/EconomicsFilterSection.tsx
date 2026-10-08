@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { GlobalSettings, TimeRange } from '@/types'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
 import { InfoTooltip } from '@/components/InfoTooltip'
+import { RefreshButton } from '@/components/RefreshButton'
 import { GLOBAL_SETTING_TOOLTIPS } from '@/lib/globalSettingsFields'
 
 const TIME_WINDOWS: TimeRange[] = ['1d', '1w', '1m', '1y', 'all']
@@ -56,6 +57,7 @@ function FilterChip({
 export interface EconomicsFilterValues {
   priceMethod: GlobalSettings['priceMethod']
   priceWindow: TimeRange
+  includeInventory?: boolean
 }
 
 interface EconomicsFilterSectionProps {
@@ -70,6 +72,10 @@ interface EconomicsFilterSectionProps {
   layout?: 'stack' | 'bar'
   /** Plan bar: window first, then buy/sell method. */
   barVariant?: 'default' | 'plan'
+  /** Plan bar: refresh prices + ESI for these characters. */
+  planRefreshCharacterIds?: number[]
+  planProductionLocationId?: number | null
+  showPlanRefresh?: boolean
 }
 
 function PriceMethodChips({
@@ -141,6 +147,9 @@ export function EconomicsFilterSection({
   className,
   layout = 'stack',
   barVariant = 'default',
+  planRefreshCharacterIds = [],
+  planProductionLocationId = null,
+  showPlanRefresh = false,
 }: EconomicsFilterSectionProps) {
   if (layout === 'bar') {
     if (barVariant === 'plan') {
@@ -154,10 +163,24 @@ export function EconomicsFilterSection({
               Price window
               <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.priceWindow} />
             </span>
-            <PriceWindowChips
-              value={values.priceWindow}
-              onChange={(priceWindow) => onChange({ priceWindow })}
-            />
+            <div className="flex min-w-0 flex-wrap items-center gap-1">
+              <PriceWindowChips
+                value={values.priceWindow}
+                onChange={(priceWindow) => onChange({ priceWindow })}
+              />
+              {showPlanRefresh ? (
+                <RefreshButton
+                  scope="plan"
+                  characterIds={planRefreshCharacterIds}
+                  iconOnly
+                  size="xs"
+                  className="btn btn-ghost btn-xs shrink-0"
+                  label="Refresh prices and stock"
+                  loadingLabel="Refreshing prices and stock…"
+                  planProductionLocationId={planProductionLocationId}
+                />
+              ) : null}
+            </div>
           </div>
 
           <div className="economics-filter-bar__trail">
@@ -178,6 +201,21 @@ export function EconomicsFilterSection({
               >
                 <option value="sell_orders">Sell</option>
                 <option value="buy_orders">Buy</option>
+              </select>
+            </label>
+            <label className="economics-filter-bar__method-select">
+              <span className="economics-filter-bar__label">
+                Inventory
+                <InfoTooltip text={GLOBAL_SETTING_TOOLTIPS.includeInventory} />
+              </span>
+              <select
+                className="select select-bordered select-xs economics-filter-bar__select"
+                value={values.includeInventory ? 'on' : 'off'}
+                aria-label="Inventory"
+                onChange={(e) => onChange({ includeInventory: e.target.value === 'on' })}
+              >
+                <option value="off">Off</option>
+                <option value="on">Use stock</option>
               </select>
             </label>
           </div>

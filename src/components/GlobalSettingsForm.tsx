@@ -231,6 +231,21 @@ export function CommonSettingsSection({ settings, onChange, size = 'md' }: Setti
         </select>
       </SettingField>
 
+      <SettingField
+        label="Plan inventory"
+        tooltip={GLOBAL_SETTING_TOOLTIPS.includeInventory}
+        size={size}
+      >
+        <select
+          className={selectClass}
+          value={settings.includeInventory ? 'on' : 'off'}
+          onChange={(e) => onChange({ includeInventory: e.target.value === 'on' })}
+        >
+          <option value="off">Off</option>
+          <option value="on">Use stock</option>
+        </select>
+      </SettingField>
+
       <div className={`grid grid-cols-2 ${gap}`}>
         <SettingField
           label="Default ME"

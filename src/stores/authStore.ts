@@ -17,12 +17,10 @@ import {
   mapEsiSkillsToSkillLevels,
 } from '@/services/character/characterSkillsService'
 import { useAppStore } from '@/stores/appStore'
-import {
-  mergeAssumedWithTrainedSkillLevels,
-  normalizeImportedSkillLevels,
-} from '@/lib/skillFields'
+import { mergeAssumedWithTrainedSkillLevels, normalizeImportedSkillLevels } from '@/lib/skillFields'
 import { queryClient } from '@/lib/queryClient'
 import { refreshCharacterApiCaches } from '@/lib/refreshCharacterData'
+import { useDataStatusStore } from '@/stores/dataStatusStore'
 import { ZERO_SKILLS, type SkillLevels } from '@/types'
 
 function applyAssumedSkills(skills: SkillLevels): void {
@@ -94,7 +92,7 @@ interface AuthStore {
   switchCharacter: (characterId: number) => void
   persistActiveSkillsFromSettings: () => void
   resetAssumedToTrained: () => void
-  syncSkills: (characterId?: number) => Promise<void>
+  syncSkills: (characterId?: number, opts?: { silent?: boolean }) => Promise<void>
   refreshCharacter: (characterId?: number) => Promise<void>
   logoutCharacter: (characterId?: number) => void
   logoutAll: () => void
@@ -130,7 +128,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       hydrated: true,
     })
     activateCharacterSkills(snapshot.character, (id) => {
-      void get().syncSkills(id).catch(() => {})
+      void get()
+        .syncSkills(id)
+        .catch(() => {})
     })
   },
 
@@ -187,7 +187,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ ...snapshot, error: null })
 
     activateCharacterSkills(snapshot.character, (id) => {
-      void get().syncSkills(id).catch(() => {})
+      void get()
+        .syncSkills(id)
+        .catch(() => {})
     })
   },
 
@@ -211,23 +213,25 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ ...readAuthSnapshot(), error: null })
   },
 
-  syncSkills: async (characterId) => {
+  syncSkills: async (characterId, opts) => {
     const targetId = characterId ?? get().activeCharacterId ?? get().character?.characterId
     if (!targetId) {
-      set({ error: 'Sign in with EVE first' })
+      if (!opts?.silent) set({ error: 'Sign in with EVE first' })
       return
     }
 
-    set({ error: null, isBusy: true })
+    if (!opts?.silent) set({ error: null, isBusy: true })
     try {
       const accessToken = await getValidAccessToken(targetId)
       if (!accessToken) {
         const snapshot = readAuthSnapshot()
-        set({
-          ...snapshot,
-          isBusy: false,
-          error: 'Session expired. Sign in again.',
-        })
+        if (!opts?.silent) {
+          set({
+            ...snapshot,
+            isBusy: false,
+            error: 'Session expired. Sign in again.',
+          })
+        }
         return
       }
 
@@ -237,17 +241,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       const updated = persistEsiSkillSync(targetId, trainedSkills, syncedAt)
 
       const snapshot = readAuthSnapshot()
-      set({ ...snapshot, isBusy: false })
+      if (!opts?.silent) set({ ...snapshot, isBusy: false })
 
       if (snapshot.activeCharacterId === targetId && updated) {
         const assumed = assumedLevelsForCharacter(updated)
         if (assumed) applyAssumedSkills(assumed)
       }
     } catch (err) {
-      set({
-        isBusy: false,
-        error: err instanceof Error ? err.message : 'Failed to sync skills',
-      })
+      if (!opts?.silent) {
+        set({
+          isBusy: false,
+          error: err instanceof Error ? err.message : 'Failed to sync skills',
+        })
+      }
       throw err
     }
   },
@@ -259,6 +265,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return
     }
 
+    const { beginRefresh, endRefresh } = useDataStatusStore.getState()
+    const toastId = beginRefresh('characters')
+
     set({ error: null, isBusy: true })
     try {
       const accessToken = await getValidAccessToken(targetId)
@@ -269,6 +278,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           isBusy: false,
           error: 'Session expired. Sign in again.',
         })
+        endRefresh('characters', toastId, {
+          parts: ['Session expired'],
+          statuses: ['failed'],
+        })
         return
       }
 
@@ -277,7 +290,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       const syncedAt = new Date().toISOString()
       const updated = persistEsiSkillSync(targetId, trainedSkills, syncedAt)
 
-      await refreshCharacterApiCaches(queryClient, targetId)
+      await refreshCharacterApiCaches(queryClient, targetId, { skipSkillsFetch: true })
 
       const snapshot = readAuthSnapshot()
       set({ ...snapshot, isBusy: false })
@@ -286,10 +299,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         const assumed = assumedLevelsForCharacter(updated)
         if (assumed) applyAssumedSkills(assumed)
       }
+
+      endRefresh('characters', toastId, {
+        parts: [snapshot.character?.characterName ?? 'Character data'],
+        statuses: ['updated'],
+      })
     } catch (err) {
       set({
         isBusy: false,
         error: err instanceof Error ? err.message : 'Failed to refresh character data',
+      })
+      endRefresh('characters', toastId, {
+        parts: [err instanceof Error ? err.message : 'Refresh failed'],
+        statuses: ['failed'],
       })
       throw err
     }
@@ -303,7 +325,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     const snapshot = readAuthSnapshot()
     set({ ...snapshot, error: null })
     activateCharacterSkills(snapshot.character, (nextId) => {
-      void get().syncSkills(nextId).catch(() => {})
+      void get()
+        .syncSkills(nextId)
+        .catch(() => {})
     })
   },
 

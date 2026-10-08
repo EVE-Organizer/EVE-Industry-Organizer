@@ -5,7 +5,13 @@ describe('dataStatusStore', () => {
   beforeEach(() => {
     useDataStatusStore.setState({
       sources: {},
-      refreshing: { characters: false, 'prices-live': false, static: false, all: false },
+      refreshing: {
+        characters: false,
+        'prices-live': false,
+        static: false,
+        all: false,
+        plan: false,
+      },
       toasts: [],
       changedPrices: {},
     })

@@ -45,6 +45,7 @@ interface NodeAccum {
   blueprint?: BlueprintInfo
   mode: PlanBuildMode
   demandByParent: { parentProductTypeId: number; qty: number }[]
+  grossDemandByParent: { parentProductTypeId: number; qty: number }[]
   parentProductTypeIds: Set<number>
   childProductTypeIds: Set<number>
   isRoot: boolean
@@ -57,6 +58,8 @@ interface NodeAccum {
 
 export interface ExpandPlanInput {
   template: ManufacturingPlanTemplate
+  /** Station inventory pooled across plan characters; consumed when settings.includeInventory. */
+  pooledStock?: Map<number, number>
   blueprints: BlueprintInfo[]
   typeMap: Map<number, TypeInfo>
   prices: Map<number, number>
@@ -230,8 +233,9 @@ export function computePlanBuildCostForRuns(
   maxDepth: number,
   cache?: BuildCostCache,
   systems?: SystemInfo[],
+  stock?: Map<number, number>,
 ): number {
-  const cached = cachedBuildCost(cache, blueprint.productTypeId, runs, depth)
+  const cached = stock ? undefined : cachedBuildCost(cache, blueprint.productTypeId, runs, depth)
   if (cached !== undefined) return cached
 
   const { me } = resolveBlueprintMeTe(
@@ -256,12 +260,14 @@ export function computePlanBuildCostForRuns(
 
   let childBuild = 0
   for (const mat of mats) {
-    const unitPrice = prices.get(mat.typeId) ?? 0
-    const buyCost = unitPrice * mat.quantity
     if (mat.typeId === blueprint.productTypeId) {
       // Packaged self-input is charged separately in planProfit.packagedSelfBuyCost.
       continue
     }
+    const { net } = netMaterialNeed(stock, mat.typeId, mat.quantity)
+    if (net <= 0) continue
+    const unitPrice = prices.get(mat.typeId) ?? 0
+    const buyCost = unitPrice * net
     const subBp = getBlueprintForProduct(blueprints, mat.typeId)
     const override = modeOverrides.get(mat.typeId)
 
@@ -275,7 +281,7 @@ export function computePlanBuildCostForRuns(
       continue
     }
 
-    const subRuns = runsForDemand(subBp.productQuantity, mat.quantity)
+    const subRuns = runsForDemand(subBp.productQuantity, net)
     const subBuildCost = computePlanBuildCostForRuns(
       subBp,
       subRuns,
@@ -292,6 +298,7 @@ export function computePlanBuildCostForRuns(
       maxDepth,
       cache,
       systems,
+      stock,
     )
     const mode: PlanBuildMode = override ?? (subBuildCost <= buyCost ? 'build' : 'buy')
     childBuild += mode === 'build' ? subBuildCost : buyCost
@@ -316,7 +323,7 @@ export function computePlanBuildCostForRuns(
   )
 
   const total = childBuild + (buildTotal - buyTotal) + inventionCost
-  storeBuildCost(cache, blueprint.productTypeId, runs, depth, total)
+  if (!stock) storeBuildCost(cache, blueprint.productTypeId, runs, depth, total)
   return total
 }
 
@@ -335,6 +342,7 @@ function ensureNode(
       blueprint,
       mode: 'build',
       demandByParent: [],
+      grossDemandByParent: [],
       parentProductTypeIds: new Set(),
       childProductTypeIds: new Set(),
       isRoot: false,
@@ -348,13 +356,47 @@ function ensureNode(
   return node
 }
 
-function addDemand(node: NodeAccum, parentProductTypeId: number, qty: number, depth: number): void {
+function addDemand(
+  node: NodeAccum,
+  parentProductTypeId: number,
+  qty: number,
+  depth: number,
+  grossQty = qty,
+): void {
   const existing = node.demandByParent.find((d) => d.parentProductTypeId === parentProductTypeId)
   if (existing) existing.qty += qty
   else node.demandByParent.push({ parentProductTypeId, qty })
+  const existingGross = node.grossDemandByParent.find(
+    (d) => d.parentProductTypeId === parentProductTypeId,
+  )
+  if (existingGross) existingGross.qty += grossQty
+  else node.grossDemandByParent.push({ parentProductTypeId, qty: grossQty })
   node.parentProductTypeIds.add(parentProductTypeId)
   node.depth = Math.max(node.depth, depth)
-  node.isLeaf = false
+  if (qty > 0 || grossQty > 0) node.isLeaf = false
+}
+
+/** Take up to `need` from pooled stock; returns net need and original gross. */
+function netMaterialNeed(
+  stock: Map<number, number> | undefined,
+  typeId: number,
+  need: number,
+): { net: number; gross: number } {
+  const gross = need
+  if (!stock || need <= 0) return { net: need, gross }
+  const have = stock.get(typeId) ?? 0
+  const take = Math.min(have, need)
+  stock.set(typeId, have - take)
+  return { net: need - take, gross }
+}
+
+export function clonePooledStock(input: ExpandPlanInput): Map<number, number> | undefined {
+  if (!input.settings.includeInventory || !input.pooledStock?.size) return undefined
+  return new Map(input.pooledStock)
+}
+
+function activePooledStock(input: ExpandPlanInput): Map<number, number> | undefined {
+  return input.settings.includeInventory ? input.pooledStock : undefined
 }
 
 function expandInventionPrereqs(
@@ -383,13 +425,16 @@ function expandInventionPrereqs(
   const attempts = Math.max(1, Math.ceil(runs / Math.max(1, invCost.expectedRunsPerAttempt)))
 
   const parentNode = ensureNode(nodeMap, blueprint.productTypeId, typeMap, blueprint)
+  const stock = activePooledStock(input)
   for (const dc of inv.datacores) {
+    const need = dc.quantity * attempts
+    const { net, gross } = netMaterialNeed(stock, dc.typeId, need)
     const leaf = ensureNode(nodeMap, dc.typeId, typeMap)
     leaf.mode = 'buy'
     leaf.isLeaf = true
     const unitPrice = prices.get(dc.typeId) ?? 0
     if (unitPrice <= 0) leaf.missingPrice = true
-    addDemand(leaf, blueprint.productTypeId, dc.quantity * attempts, parentNode.depth + 1)
+    addDemand(leaf, blueprint.productTypeId, net, parentNode.depth + 1, gross)
     parentNode.childProductTypeIds.add(dc.typeId)
   }
 
@@ -472,6 +517,7 @@ function expandMaterials(
   const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
   const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
   const parentNode = ensureNode(nodeMap, blueprint.productTypeId, typeMap, blueprint)
+  const stock = activePooledStock(input)
 
   if (blueprint.tier === 't2' && blueprint.invention) {
     expandInventionPrereqs(blueprint, runs, input, nodeMap, modeOverrides, maxDepth, cache)
@@ -479,13 +525,16 @@ function expandMaterials(
 
   for (const mat of mats) {
     if (mat.typeId === blueprint.productTypeId) {
-      parentNode.selfBuyQty += mat.quantity
+      parentNode.selfBuyQty += netMaterialNeed(stock, mat.typeId, mat.quantity).net
       continue
     }
 
+    const { net: matQty, gross: matGross } = netMaterialNeed(stock, mat.typeId, mat.quantity)
+    if (matGross <= 0) continue
+
     const subBp = getBlueprintForProduct(blueprints, mat.typeId)
     const unitPrice = prices.get(mat.typeId) ?? 0
-    const buyCost = unitPrice * mat.quantity
+    const buyCost = unitPrice * matQty
     const override = modeOverrides.get(mat.typeId)
     const canBuild = canBuildMaterial(subBp, mat.typeId, settings, depth, maxDepth)
     // User override still expands the chain (e.g. reactions before refinery is picked).
@@ -498,12 +547,19 @@ function expandMaterials(
       if (!leaf.isRoot) leaf.mode = 'buy'
       leaf.isLeaf = true
       if (unitPrice <= 0) leaf.missingPrice = true
-      addDemand(leaf, blueprint.productTypeId, mat.quantity, depth + 1)
+      addDemand(leaf, blueprint.productTypeId, matQty, depth + 1, matGross)
       parentNode.childProductTypeIds.add(mat.typeId)
       continue
     }
 
-    const subRuns = runsForDemand(subBp!.productQuantity, mat.quantity)
+    if (matQty <= 0) {
+      const child = ensureNode(nodeMap, mat.typeId, typeMap, subBp)
+      addDemand(child, blueprint.productTypeId, 0, depth + 1, matGross)
+      parentNode.childProductTypeIds.add(mat.typeId)
+      continue
+    }
+
+    const subRuns = runsForDemand(subBp!.productQuantity, matQty)
     const subBuildCost = computePlanBuildCostForRuns(
       subBp!,
       subRuns,
@@ -534,10 +590,10 @@ function expandMaterials(
     const child = ensureNode(nodeMap, mat.typeId, typeMap, subBp)
     child.mode = mode
     if (missingPrice) child.missingPrice = true
-    addDemand(child, blueprint.productTypeId, mat.quantity, depth + 1)
+    addDemand(child, blueprint.productTypeId, matQty, depth + 1, matGross)
     parentNode.childProductTypeIds.add(mat.typeId)
 
-    if (mode === 'build') {
+    if (mode === 'build' && matQty > 0) {
       expandMaterials(
         subBp!,
         subRuns,
@@ -578,7 +634,9 @@ function finalizeNodes(
             .filter((r) => r.productTypeId === accum.productTypeId)
             .reduce((s, r) => s + r.runs, 0) || MIN_BATCH_SIZE
         : blueprint
-          ? runsForDemand(blueprint.productQuantity, totalDemandQty)
+          ? totalDemandQty <= 0
+            ? 0
+            : runsForDemand(blueprint.productQuantity, totalDemandQty)
           : 0
 
     if (override?.runs != null) runs = override.runs
@@ -606,6 +664,8 @@ function finalizeNodes(
         : 0
 
     const outputQty = blueprint ? runs * blueprint.productQuantity : totalDemandQty
+    const grossFromParents = accum.grossDemandByParent.reduce((s, d) => s + d.qty, 0)
+    const grossDemandQty = accum.isRoot ? outputQty : grossFromParents || totalDemandQty
     // Roots are always built; buy vs build is only for supply-chain intermediates.
     const canToggle = !!(blueprint && !accum.isRoot && !isRawMaterial(accum.productTypeId))
 
@@ -649,6 +709,7 @@ function finalizeNodes(
       recipeKind: blueprint?.kind ?? (blueprint ? 'manufacturing' : undefined),
       mode: accum.mode,
       totalDemandQty: accum.isRoot ? outputQty : totalDemandQty,
+      grossDemandQty,
       demandByParent: [...accum.demandByParent],
       parentProductTypeIds: [...accum.parentProductTypeIds],
       childProductTypeIds: [...accum.childProductTypeIds],
@@ -682,9 +743,11 @@ export function computePlanRootBuildCost(
   runs: number,
   input: ExpandPlanInput,
   cache?: BuildCostCache,
+  stock?: Map<number, number>,
 ): number {
   const modeOverrides = modeOverridesMap(input.template)
   const costCache = cache ?? createBuildCostCache()
+  const useStock = stock ?? clonePooledStock(input)
   return computePlanBuildCostForRuns(
     blueprint,
     runs,
@@ -701,12 +764,15 @@ export function computePlanRootBuildCost(
     10,
     costCache,
     input.systems,
+    useStock,
   )
 }
 
 export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResult {
   const template = templateWithActiveRoots(input.template)
   const { settings } = input
+  const stockMut = clonePooledStock(input)
+  const expandInput: ExpandPlanInput = stockMut ? { ...input, pooledStock: stockMut } : input
   const modeOverrides = modeOverridesMap(template)
   const nodeMap = new Map<number, NodeAccum>()
   const slotBonuses = planSlotBonusesFromManufacturingTemplate(template)
@@ -730,7 +796,7 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
       root.runs,
       root.productTypeId,
       0,
-      input,
+      expandInput,
       nodeMap,
       modeOverrides,
       10,
@@ -739,8 +805,8 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
   }
 
   const windowFromRoots = template.roots.reduce((m, r) => {
-    const blueprint = getBlueprintForProduct(input.blueprints, r.productTypeId)
-    const rootSettings = input.settingsForProductTime?.(r.productTypeId) ?? settings
+    const blueprint = getBlueprintForProduct(expandInput.blueprints, r.productTypeId)
+    const rootSettings = expandInput.settingsForProductTime?.(r.productTypeId) ?? settings
     const hours = blueprint
       ? inGameDurationHoursFromRuns(
           blueprint,
@@ -758,7 +824,7 @@ export function expandManufacturingPlan(input: ExpandPlanInput): ExpandPlanResul
     template,
     settings,
     slots,
-    input,
+    expandInput,
     modeOverrides,
     buildCostCache,
   )

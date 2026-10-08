@@ -220,6 +220,7 @@ export function normalizeGlobalSettings(parsed: LegacySettings): GlobalSettings 
     priceMethod: rest.priceMethod ?? DEFAULT_SETTINGS.priceMethod,
     priceWindow: rest.priceWindow ?? DEFAULT_SETTINGS.priceWindow,
     includeHaulCost: rest.includeHaulCost ?? DEFAULT_SETTINGS.includeHaulCost,
+    includeInventory: rest.includeInventory ?? DEFAULT_SETTINGS.includeInventory,
     skills: normalizeSkillLevels(parsedSkills),
     productionCharacterId: rest.productionCharacterId ?? null,
     productionLocationId: rest.productionLocationId ?? null,

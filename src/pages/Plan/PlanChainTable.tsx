@@ -50,19 +50,24 @@ import {
   formatIsk,
   formatVolumeM3,
 } from '@/lib/profit'
+import { PlanStockProgressBar } from '@/pages/Plan/PlanStockProgressBar'
 import type { ManufactureDisplayRow } from '@/pages/Plan/planManufactureDisplay'
 import type { PlanBuyPriceSource } from '@/pages/Plan/planBuyPrices'
 import type { HubId, PlanNode, PlanNodeOverride, PlanRootEntry, TypeInfo } from '@/types'
 
 const ROW_ICON_SIZE = PLAN_ROW_ICON_SIZE
-const UNIT_COL_CLASS = 'w-24 text-right'
-const HAVE_COL_CLASS = 'w-24 text-right'
-const TOBUY_COL_CLASS = 'w-24 text-right'
-const VOLUME_COL_CLASS = 'w-24 text-right'
+/** Widths/alignment follow Production jobs (runs, duration, BPOs, output, have, volume). */
+const RUNS_COL_CLASS = 'w-[6.875rem] text-center'
+const DURATION_COL_CLASS = 'w-[6.5rem] text-left whitespace-nowrap'
+const BPOS_COL_CLASS = 'w-[6.5rem] text-center'
+const SLOTS_COL_CLASS = 'w-[3.75rem] min-w-[3.75rem] text-center'
+const OUTPUT_COL_CLASS = 'w-[5.75rem] text-right'
+const UNIT_COL_CLASS = 'w-[5.75rem] text-right'
+const HAVE_COL_CLASS = 'w-[5.5rem] text-right'
+const TOBUY_COL_CLASS = 'w-[5.75rem] text-right'
+const VOLUME_COL_CLASS = 'w-[6.25rem] text-right'
 const PRICE_COL_CLASS = 'w-32 text-right'
-const SOURCE_COL_CLASS = 'w-28 text-right'
-const DURATION_COL_CLASS = 'w-[6.5rem] text-right whitespace-nowrap'
-const SLOTS_COL_CLASS = 'w-[3.5rem] min-w-[3rem] text-right'
+const SOURCE_COL_CLASS = 'w-[5.5rem] text-center'
 
 function ConcurrentSlotsCell({
   isRoot,
@@ -214,6 +219,8 @@ interface PlanChainTableProps {
   blueprintTypeIdByProduct: Map<number, number>
   typeMap: Map<number, TypeInfo>
   inventoryByTypeId?: Map<number, number> | null
+  /** When true, buy demand was already reduced in expand — do not subtract hangar again. */
+  inventoryNettedInExpand?: boolean
 }
 
 function ChevronIcon({ open }: { open: boolean }) {
@@ -354,7 +361,7 @@ function ModeCell({
 
     return (
       <Tooltip text="No blueprint or raw mineral. Always purchased from market." placement="left">
-        <span className="inline-flex justify-end w-[6rem]">
+        <span className="inline-flex justify-center w-full">
           <PlanModeLockedMarket lockIcon={<LockIcon />} />
         </span>
       </Tooltip>
@@ -363,15 +370,37 @@ function ModeCell({
 
   if (!onToggleMode) {
     return (
-      <div className="inline-flex justify-end w-[6rem]">
+      <div className="inline-flex justify-center w-full">
         <span className="text-xs font-semibold uppercase opacity-70">{node.mode}</span>
       </div>
     )
   }
 
   return (
-    <div className="inline-flex justify-end w-[6rem]" onClick={stopRowToggle}>
+    <div className="inline-flex justify-center w-full" onClick={stopRowToggle}>
       <PlanModeToggle mode={node.mode} onClick={() => onToggleMode(node.productTypeId)} />
+    </div>
+  )
+}
+
+function SourceWithProgress({
+  node,
+  onToggleMode,
+  have,
+  showInventory,
+  gross,
+}: {
+  node: PlanNode
+  onToggleMode?: (productTypeId: number) => void
+  have: number
+  showInventory: boolean
+  gross: number
+}) {
+  const bar = showInventory ? <PlanStockProgressBar have={have} gross={gross} /> : null
+  return (
+    <div className="flex flex-col items-center justify-center gap-1.5 px-1 py-1">
+      <ModeCell node={node} onToggleMode={onToggleMode} />
+      {bar}
     </div>
   )
 }
@@ -439,6 +468,10 @@ function ManufactureItemCell({
   )
 }
 
+function nodeGrossDemand(node: PlanNode): number {
+  return node.grossDemandQty ?? (node.isRoot ? node.outputQty : node.totalDemandQty)
+}
+
 function BuildSection({
   nodes,
   manufactureRows,
@@ -449,6 +482,8 @@ function BuildSection({
   onOpenMeTe,
   blueprintTypeIdByProduct,
   typeVolumes,
+  inventoryByTypeId,
+  showInventory,
 }: {
   nodes: PlanNode[]
   manufactureRows?: ManufactureDisplayRow[]
@@ -459,6 +494,8 @@ function BuildSection({
   onOpenMeTe?: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
   typeVolumes: Map<number, number>
+  inventoryByTypeId?: Map<number, number> | null
+  showInventory: boolean
 }) {
   const tableRows = useMemo(
     () => manufactureRows ?? flattenPlanNodesExpandable(nodes, 'manufacture'),
@@ -513,26 +550,15 @@ function BuildSection({
         <thead>
           <tr className="text-[11px] uppercase tracking-wide opacity-50">
             <th>Item</th>
-            <th className="text-right w-[4.5rem]">
-              <Tooltip text="Units required by parent jobs in the chain" placement="top">
-                <span className="cursor-help border-b border-dotted border-current/40">Need</span>
+            <th className={RUNS_COL_CLASS}>Runs</th>
+            <th className={DURATION_COL_CLASS}>
+              <Tooltip text="Total job duration (hours:minutes:seconds)" placement="top">
+                <span className="cursor-help border-b border-dotted border-current/40">
+                  Duration
+                </span>
               </Tooltip>
             </th>
-            <th className="text-right w-[4.5rem]">
-              <Tooltip text="Units produced by the scheduled runs" placement="top">
-                <span className="cursor-help border-b border-dotted border-current/40">Output</span>
-              </Tooltip>
-            </th>
-            <th className={VOLUME_COL_CLASS}>
-              <Tooltip
-                text="Packed cargo volume of scheduled output (SDE m³ × output units)"
-                placement="top"
-              >
-                <span className="cursor-help border-b border-dotted border-current/40">Volume</span>
-              </Tooltip>
-            </th>
-            <th className="text-right w-[3.5rem]">Runs</th>
-            <th className="text-right w-[3.5rem]">
+            <th className={BPOS_COL_CLASS}>
               <Tooltip text="Blueprint copies needed for the run count" placement="top">
                 <span className="cursor-help border-b border-dotted border-current/40">BPC</span>
               </Tooltip>
@@ -545,14 +571,33 @@ function BuildSection({
                 <span className="cursor-help border-b border-dotted border-current/40">Slots</span>
               </Tooltip>
             </th>
-            <th className={DURATION_COL_CLASS}>
-              <Tooltip text="Total job duration (hours:minutes:seconds)" placement="top">
-                <span className="cursor-help border-b border-dotted border-current/40">
-                  Duration
-                </span>
+            <th className={OUTPUT_COL_CLASS}>
+              <Tooltip text="Units produced by the scheduled runs" placement="top">
+                <span className="cursor-help border-b border-dotted border-current/40">Output</span>
               </Tooltip>
             </th>
-            <th className="w-[6.5rem] text-right">Source</th>
+            <th className={HAVE_COL_CLASS}>
+              <Tooltip
+                text="Units in assigned characters' hangar at the production station"
+                placement="top"
+              >
+                <span className="cursor-help border-b border-dotted border-current/40">Have</span>
+              </Tooltip>
+            </th>
+            <th className={VOLUME_COL_CLASS}>
+              <Tooltip
+                text="Packed cargo volume of scheduled output (SDE m³ × output units)"
+                placement="top"
+              >
+                <span className="cursor-help border-b border-dotted border-current/40">Volume</span>
+              </Tooltip>
+            </th>
+            <th className={UNIT_COL_CLASS}>
+              <Tooltip text="Units required by parent jobs in the chain" placement="top">
+                <span className="cursor-help border-b border-dotted border-current/40">Need</span>
+              </Tooltip>
+            </th>
+            <th className={SOURCE_COL_CLASS}>Source</th>
           </tr>
         </thead>
         <tbody>
@@ -568,6 +613,8 @@ function BuildSection({
               'rowKey' in row && typeof row.rowKey === 'string'
                 ? row.rowKey
                 : `manufacture/${node.productTypeId}`
+            const have = inventoryByTypeId?.get(node.productTypeId) ?? 0
+            const gross = nodeGrossDemand(node)
 
             return (
               <tr
@@ -584,25 +631,17 @@ function BuildSection({
                     blueprintTypeIdByProduct={blueprintTypeIdByProduct}
                   />
                 </td>
-                <td className="text-right tabular-nums text-sm align-top py-2">
-                  <NeedQtyCell node={node} />
+                <td className={`${RUNS_COL_CLASS} tabular-nums text-sm align-top py-2`}>
+                  {node.runs}
                 </td>
-                <td className="text-right tabular-nums text-sm align-top py-2">
-                  {formatGraphQuantity(node.outputQty)}
-                  {!node.isRoot && node.outputQty > node.totalDemandQty ? (
-                    <span className="block text-[10px] text-success opacity-80">
-                      +{formatGraphQuantity(node.outputQty - node.totalDemandQty)} spare
-                    </span>
-                  ) : null}
+                <td
+                  className={`${DURATION_COL_CLASS} tabular-nums text-sm text-info align-top py-2`}
+                >
+                  {node.jobTimeSeconds > 0 ? formatDurationHms(node.jobTimeSeconds) : '—'}
                 </td>
-                <td className={`${VOLUME_COL_CLASS} align-top py-2`}>
-                  <VolumeCell
-                    volumeM3={nodeHaulOutVolumeM3(node, typeVolumes)}
-                    unitVolumeM3={typeVolumes.get(node.productTypeId) ?? 0}
-                  />
+                <td className={`${BPOS_COL_CLASS} tabular-nums text-sm align-top py-2`}>
+                  {node.bpcCount}
                 </td>
-                <td className="text-right tabular-nums text-sm align-top py-2">{node.runs}</td>
-                <td className="text-right tabular-nums text-sm align-top py-2">{node.bpcCount}</td>
                 <td className={`${SLOTS_COL_CLASS} align-top py-2`}>
                   <ConcurrentSlotsCell
                     isRoot={node.isRoot}
@@ -613,13 +652,39 @@ function BuildSection({
                     totalRootRuns={totalRuns}
                   />
                 </td>
-                <td
-                  className={`${DURATION_COL_CLASS} tabular-nums text-sm text-info align-top py-2`}
-                >
-                  {node.jobTimeSeconds > 0 ? formatDurationHms(node.jobTimeSeconds) : '—'}
+                <td className={`${OUTPUT_COL_CLASS} tabular-nums text-sm align-top py-2`}>
+                  {formatGraphQuantity(node.outputQty)}
+                  {!node.isRoot && node.outputQty > node.totalDemandQty ? (
+                    <span className="block text-[10px] text-success opacity-80">
+                      +{formatGraphQuantity(node.outputQty - node.totalDemandQty)} spare
+                    </span>
+                  ) : null}
                 </td>
-                <td className="text-right align-top py-2">
-                  <ModeCell node={node} onToggleMode={onToggleMode} />
+                <td className={`${HAVE_COL_CLASS} align-top py-2`}>
+                  <HaveQtyCell
+                    have={have}
+                    showInventory={showInventory}
+                    gross={gross}
+                    remainingVerb="still to produce"
+                  />
+                </td>
+                <td className={`${VOLUME_COL_CLASS} align-top py-2`}>
+                  <VolumeCell
+                    volumeM3={nodeHaulOutVolumeM3(node, typeVolumes)}
+                    unitVolumeM3={typeVolumes.get(node.productTypeId) ?? 0}
+                  />
+                </td>
+                <td className={`${UNIT_COL_CLASS} tabular-nums text-sm align-top py-2`}>
+                  <NeedQtyCell node={node} />
+                </td>
+                <td className={`${SOURCE_COL_CLASS} align-top py-2`}>
+                  <SourceWithProgress
+                    node={node}
+                    onToggleMode={onToggleMode}
+                    have={have}
+                    showInventory={showInventory}
+                    gross={gross}
+                  />
                 </td>
               </tr>
             )
@@ -628,16 +693,17 @@ function BuildSection({
         <tfoot>
           <tr className="border-t border-eve-border text-sm font-medium">
             <td className="py-2 opacity-70">Total</td>
-            <td />
-            <td />
+            <td className={`${RUNS_COL_CLASS} tabular-nums py-2`}>{formatDecimal(totalRuns, 0)}</td>
+            <td className={DURATION_COL_CLASS} />
+            <td className={BPOS_COL_CLASS} />
+            <td className={SLOTS_COL_CLASS} />
+            <td className={OUTPUT_COL_CLASS} />
+            <td className={HAVE_COL_CLASS} />
             <td className={`${VOLUME_COL_CLASS} tabular-nums py-2`}>
               {formatVolumeM3(totalVolumeM3)}
             </td>
-            <td className="tabular-nums py-2">{formatDecimal(totalRuns, 0)}</td>
-            <td />
-            <td />
-            <td />
-            <td />
+            <td className={UNIT_COL_CLASS} />
+            <td className={SOURCE_COL_CLASS} />
           </tr>
         </tfoot>
       </table>
@@ -656,13 +722,15 @@ function InventoryQtyCell({
   need,
   have,
   showInventory,
+  subtractStock = true,
 }: {
   need: number
   have: number
   showInventory: boolean
+  subtractStock?: boolean
 }) {
   if (!showInventory) return <span className="text-sm opacity-40">—</span>
-  const toBuy = toBuyQuantity(need, have)
+  const toBuy = subtractStock ? toBuyQuantity(need, have) : need
   return (
     <span className={`tabular-nums text-sm${toBuy > 0 ? ' text-warning' : ''}`}>
       {formatGraphQuantity(toBuy)}
@@ -670,9 +738,31 @@ function InventoryQtyCell({
   )
 }
 
-function HaveQtyCell({ have, showInventory }: { have: number; showInventory: boolean }) {
+function HaveQtyCell({
+  have,
+  showInventory,
+  gross,
+  remainingVerb = 'still needed',
+}: {
+  have: number
+  showInventory: boolean
+  gross?: number
+  remainingVerb?: string
+}) {
   if (!showInventory) return <span className="text-sm opacity-40">—</span>
-  return <span className="tabular-nums text-sm">{formatGraphQuantity(have)}</span>
+  if (gross == null) {
+    return <span className="tabular-nums text-sm">{formatGraphQuantity(have)}</span>
+  }
+  const still = Math.max(0, gross - have)
+  const tip =
+    still > 0
+      ? `${formatGraphQuantity(have)} on hand · ${formatGraphQuantity(still)} ${remainingVerb}`
+      : `${formatGraphQuantity(have)} on hand · fully covered`
+  return (
+    <Tooltip text={tip} placement="top">
+      <span className="tabular-nums text-sm cursor-help">{formatGraphQuantity(have)}</span>
+    </Tooltip>
+  )
 }
 
 function VolumeCell({ volumeM3, unitVolumeM3 }: { volumeM3: number; unitVolumeM3?: number }) {
@@ -723,7 +813,8 @@ function BuyTableRow({
   blueprintTypeIdByProduct,
   nodesById,
   inventoryByTypeId,
-  showInventory,
+  showInventoryColumn,
+  useInventoryForBuy,
   hubPricesByHub,
   hubVolumesByHub,
   defaultBuyHub,
@@ -741,7 +832,8 @@ function BuyTableRow({
   blueprintTypeIdByProduct: Map<number, number>
   nodesById: Map<number, PlanNode>
   inventoryByTypeId?: Map<number, number> | null
-  showInventory: boolean
+  showInventoryColumn: boolean
+  useInventoryForBuy: boolean
   hubPricesByHub: Map<HubId, Map<number, number>>
   hubVolumesByHub: Map<HubId, Map<number, number>>
   defaultBuyHub: HubId
@@ -804,7 +896,7 @@ function BuyTableRow({
         <td className={`${PRICE_COL_CLASS} tabular-nums text-sm align-top py-2 pr-1`}>
           {row.totalCost > 0 ? formatIsk(row.totalCost) : <span className="opacity-40">—</span>}
         </td>
-        <td className={`${SOURCE_COL_CLASS} align-top py-2 pr-2`} />
+        <td className={`${SOURCE_COL_CLASS} align-top py-2`} />
       </tr>
     )
   }
@@ -836,14 +928,17 @@ function BuyTableRow({
         <td className={`${HAVE_COL_CLASS} align-top py-2`}>
           <HaveQtyCell
             have={inventoryByTypeId?.get(row.node.productTypeId) ?? 0}
-            showInventory={showInventory}
+            showInventory={showInventoryColumn}
+            gross={nodeGrossDemand(row.node)}
+            remainingVerb="still to buy"
           />
         </td>
         <td className={`${TOBUY_COL_CLASS} align-top py-2`}>
           <InventoryQtyCell
             need={row.node.totalDemandQty}
             have={inventoryByTypeId?.get(row.node.productTypeId) ?? 0}
-            showInventory={showInventory}
+            showInventory={showInventoryColumn}
+            subtractStock={useInventoryForBuy}
           />
         </td>
         <td className={`${VOLUME_COL_CLASS} align-top py-2`}>
@@ -851,7 +946,7 @@ function BuyTableRow({
             volumeM3={nodeHaulInVolumeM3(
               row.node,
               inventoryByTypeId?.get(row.node.productTypeId) ?? 0,
-              showInventory,
+              useInventoryForBuy,
               typeVolumes,
             )}
             unitVolumeM3={typeVolumes.get(row.node.productTypeId) ?? 0}
@@ -867,8 +962,14 @@ function BuyTableRow({
             onSetBuyPriceSource={onSetBuyPriceSource}
           />
         </td>
-        <td className={`${SOURCE_COL_CLASS} align-top py-2 pr-2`}>
-          <ModeCell node={row.node} onToggleMode={onToggleMode} />
+        <td className={`${SOURCE_COL_CLASS} align-top py-2`}>
+          <SourceWithProgress
+            node={row.node}
+            onToggleMode={onToggleMode}
+            have={inventoryByTypeId?.get(row.node.productTypeId) ?? 0}
+            showInventory={showInventoryColumn}
+            gross={nodeGrossDemand(row.node)}
+          />
         </td>
       </tr>
     )
@@ -892,18 +993,24 @@ function BuyTableRow({
         <NeedQtyCell node={row.node} />
       </td>
       <td className={`${HAVE_COL_CLASS} align-top py-2`}>
-        <HaveQtyCell have={have} showInventory={showInventory} />
+        <HaveQtyCell
+          have={have}
+          showInventory={showInventoryColumn}
+          gross={nodeGrossDemand(row.node)}
+          remainingVerb="still to buy"
+        />
       </td>
       <td className={`${TOBUY_COL_CLASS} align-top py-2`}>
         <InventoryQtyCell
           need={row.node.totalDemandQty}
           have={have}
-          showInventory={showInventory}
+          showInventory={showInventoryColumn}
+          subtractStock={useInventoryForBuy}
         />
       </td>
       <td className={`${VOLUME_COL_CLASS} align-top py-2`}>
         <VolumeCell
-          volumeM3={nodeHaulInVolumeM3(row.node, have, showInventory, typeVolumes)}
+          volumeM3={nodeHaulInVolumeM3(row.node, have, useInventoryForBuy, typeVolumes)}
           unitVolumeM3={typeVolumes.get(row.node.productTypeId) ?? 0}
         />
       </td>
@@ -917,8 +1024,14 @@ function BuyTableRow({
           onSetBuyPriceSource={onSetBuyPriceSource}
         />
       </td>
-      <td className={`${SOURCE_COL_CLASS} align-top py-2 pr-2`}>
-        <ModeCell node={row.node} onToggleMode={onToggleMode} />
+      <td className={`${SOURCE_COL_CLASS} align-top py-2`}>
+        <SourceWithProgress
+          node={row.node}
+          onToggleMode={onToggleMode}
+          have={have}
+          showInventory={showInventoryColumn}
+          gross={nodeGrossDemand(row.node)}
+        />
       </td>
     </tr>
   )
@@ -932,7 +1045,8 @@ function BuySection({
   onOpenGraph,
   blueprintTypeIdByProduct,
   inventoryByTypeId,
-  showInventory,
+  showInventoryColumn,
+  useInventoryForBuy,
   hubPricesByHub,
   hubVolumesByHub,
   defaultBuyHub,
@@ -946,7 +1060,8 @@ function BuySection({
   onOpenGraph: (productTypeId: number) => void
   blueprintTypeIdByProduct: Map<number, number>
   inventoryByTypeId?: Map<number, number> | null
-  showInventory: boolean
+  showInventoryColumn: boolean
+  useInventoryForBuy: boolean
   hubPricesByHub: Map<HubId, Map<number, number>>
   hubVolumesByHub: Map<HubId, Map<number, number>>
   defaultBuyHub: HubId
@@ -969,8 +1084,8 @@ function BuySection({
   )
 
   const totalVolumeM3 = useMemo(
-    () => sumBuyHaulVolumeM3(buyNodes, inventoryByTypeId, showInventory, typeVolumes),
-    [buyNodes, inventoryByTypeId, showInventory, typeVolumes],
+    () => sumBuyHaulVolumeM3(buyNodes, inventoryByTypeId, useInventoryForBuy, typeVolumes),
+    [buyNodes, inventoryByTypeId, useInventoryForBuy, typeVolumes],
   )
 
   const groupVolumeByKey = useMemo(() => {
@@ -978,15 +1093,15 @@ function BuySection({
     for (const group of buyGroups) {
       map.set(
         group.key,
-        sumBuyHaulVolumeM3(group.nodes, inventoryByTypeId, showInventory, typeVolumes),
+        sumBuyHaulVolumeM3(group.nodes, inventoryByTypeId, useInventoryForBuy, typeVolumes),
       )
     }
     return map
-  }, [buyGroups, inventoryByTypeId, showInventory, typeVolumes])
+  }, [buyGroups, inventoryByTypeId, useInventoryForBuy, typeVolumes])
 
   const multibuyText = useMemo(
-    () => eveMultibuyTextFromBuyNodes(buyNodes, inventoryByTypeId, showInventory),
-    [buyNodes, inventoryByTypeId, showInventory],
+    () => eveMultibuyTextFromBuyNodes(buyNodes, inventoryByTypeId, useInventoryForBuy),
+    [buyNodes, inventoryByTypeId, useInventoryForBuy],
   )
 
   if (buyNodes.length === 0) return null
@@ -1046,7 +1161,7 @@ function BuySection({
             </th>
             <th className={HAVE_COL_CLASS}>
               <Tooltip
-                text="Quantity in hangar at the selected production station for this character"
+                text="Units in assigned characters' hangar at the production station"
                 placement="top"
               >
                 <span className="cursor-help border-b border-dotted border-current/40">Have</span>
@@ -1073,7 +1188,7 @@ function BuySection({
                 <span className="cursor-help border-b border-dotted border-current/40">Price</span>
               </Tooltip>
             </th>
-            <th className={`${SOURCE_COL_CLASS} pr-2`}>Source</th>
+            <th className={SOURCE_COL_CLASS}>Source</th>
           </tr>
         </thead>
         <tbody>
@@ -1089,7 +1204,8 @@ function BuySection({
               blueprintTypeIdByProduct={blueprintTypeIdByProduct}
               nodesById={nodesById}
               inventoryByTypeId={inventoryByTypeId}
-              showInventory={showInventory}
+              showInventoryColumn={showInventoryColumn}
+              useInventoryForBuy={useInventoryForBuy}
               hubPricesByHub={hubPricesByHub}
               hubVolumesByHub={hubVolumesByHub}
               defaultBuyHub={defaultBuyHub}
@@ -1135,6 +1251,7 @@ export function PlanChainTable({
   blueprintTypeIdByProduct,
   typeMap,
   inventoryByTypeId = null,
+  inventoryNettedInExpand = false,
 }: PlanChainTableProps) {
   const buildNodes = useMemo(() => nodes.filter((n) => n.mode === 'build'), [nodes])
   const buyNodes = useMemo(() => nodes.filter((n) => n.mode === 'buy'), [nodes])
@@ -1143,7 +1260,8 @@ export function PlanChainTable({
     () => [...buyNodes, ...packagedBuyNodes],
     [buyNodes, packagedBuyNodes],
   )
-  const showInventory = inventoryByTypeId != null
+  const showInventoryColumn = inventoryByTypeId != null
+  const useInventoryForBuy = showInventoryColumn && !inventoryNettedInExpand
   const typeVolumes = useMemo(() => {
     const map = new Map<number, number>()
     for (const [id, type] of typeMap) map.set(id, type.volume)
@@ -1172,6 +1290,8 @@ export function PlanChainTable({
           onOpenMeTe={onOpenMeTe}
           blueprintTypeIdByProduct={blueprintTypeIdByProduct}
           typeVolumes={typeVolumes}
+          inventoryByTypeId={inventoryByTypeId}
+          showInventory={showInventoryColumn}
         />
       ) : null}
 
@@ -1184,7 +1304,8 @@ export function PlanChainTable({
           onOpenGraph={onOpenGraph}
           blueprintTypeIdByProduct={blueprintTypeIdByProduct}
           inventoryByTypeId={inventoryByTypeId}
-          showInventory={showInventory}
+          showInventoryColumn={showInventoryColumn}
+          useInventoryForBuy={useInventoryForBuy}
           hubPricesByHub={hubPricesByHub}
           hubVolumesByHub={hubVolumesByHub}
           defaultBuyHub={defaultBuyHub}

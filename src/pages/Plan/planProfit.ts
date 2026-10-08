@@ -12,6 +12,7 @@ import { applyME, resolveBlueprintMeTe, revenueFromSale, totalManufacturingCost 
 import { resolveRecipeModifiers } from '@/lib/facilityModifiers'
 import { isReactionRecipe } from '@/lib/recipes'
 import {
+  clonePooledStock,
   computePlanRootBuildCost,
   createBuildCostCache,
   expandManufacturingPlan,
@@ -150,16 +151,44 @@ function packagedSelfBuyCost(
   prices: Map<number, number>,
   settings: GlobalSettings,
   meTeOverride?: { me?: number; te?: number },
+  stock?: Map<number, number>,
 ): number {
   const { me } = resolveBlueprintMeTe(blueprint.tier, settings, meTeOverride, blueprint)
   const effectiveMe = isReactionRecipe(blueprint) ? 0 : me
   const structure = resolveRecipeModifiers(settings, blueprint)
   const mats = applyME(blueprint.materials, effectiveMe, runs, structure.meBonusPercent)
-  const selfQty = mats
+  let selfQty = mats
     .filter((m) => m.typeId === blueprint.productTypeId)
     .reduce((sum, m) => sum + m.quantity, 0)
   if (selfQty <= 0) return 0
+  if (stock) {
+    const have = stock.get(blueprint.productTypeId) ?? 0
+    const take = Math.min(have, selfQty)
+    stock.set(blueprint.productTypeId, have - take)
+    selfQty -= take
+    if (selfQty <= 0) return 0
+  }
   return (prices.get(blueprint.productTypeId) ?? 0) * selfQty
+}
+
+function rootChainSetup(
+  blueprint: BlueprintInfo,
+  root: PlanRootEntry,
+  expandInput: ExpandPlanInput,
+  cache?: BuildCostCache,
+  stock?: Map<number, number>,
+): { chainCost: number; packagedBuyCost: number } {
+  const useStock = stock ?? clonePooledStock(expandInput)
+  const chainCost = computePlanRootBuildCost(blueprint, root.runs, expandInput, cache, useStock)
+  const packagedBuyCost = packagedSelfBuyCost(
+    blueprint,
+    root.runs,
+    expandInput.prices,
+    expandInput.settings,
+    expandInput.template.nodeOverrides[root.productTypeId],
+    useStock,
+  )
+  return { chainCost, packagedBuyCost }
 }
 
 export function computeRootProfitRow(
@@ -171,9 +200,9 @@ export function computeRootProfitRow(
   jobTimeHours: number,
   buildCostCache?: BuildCostCache,
   options?: PlanProfitOptions,
+  stock?: Map<number, number>,
 ): RootProfitRow {
   const { settings, template } = expandInput
-  const meTeOverride = template.nodeOverrides[root.productTypeId]
   const rootMode = template.modeOverrides[root.productTypeId] ?? 'build'
   const outputQty = root.runs * blueprint.productQuantity
 
@@ -182,9 +211,14 @@ export function computeRootProfitRow(
   if (rootMode === 'buy') {
     setupCost = (buyHubPrices.get(blueprint.productTypeId) ?? 0) * outputQty
   } else {
-    const chainCost = computePlanRootBuildCost(blueprint, root.runs, expandInput, buildCostCache)
-    setupCost =
-      chainCost + packagedSelfBuyCost(blueprint, root.runs, buyHubPrices, settings, meTeOverride)
+    const { chainCost, packagedBuyCost } = rootChainSetup(
+      blueprint,
+      root,
+      expandInput,
+      buildCostCache,
+      stock ?? clonePooledStock(expandInput),
+    )
+    setupCost = chainCost + packagedBuyCost
   }
 
   const sellPricePerUnit = sellPriceForProduct(
@@ -306,12 +340,14 @@ function rootMaterialLines(
 }
 
 function isolatedExpandInput(input: ExpandPlanInput, root: PlanRootEntry): ExpandPlanInput {
+  const pooledStock = clonePooledStock(input)
   return {
     ...input,
     template: {
       ...input.template,
       roots: [root],
     },
+    ...(pooledStock ? { pooledStock } : {}),
   }
 }
 
@@ -362,15 +398,8 @@ export function computeRootSetupBreakdown(
 
   const isolated = isolatedExpandInput(expandInput, root)
   const { nodes } = expandManufacturingPlan(isolated)
-  const packagedBuyCost = packagedSelfBuyCost(
-    blueprint,
-    root.runs,
-    expandInput.prices,
-    settings,
-    meTeOverride,
-  )
-  const chainSetupCost =
-    computePlanRootBuildCost(blueprint, root.runs, expandInput) + packagedBuyCost
+  const { chainCost, packagedBuyCost } = rootChainSetup(blueprint, root, isolated)
+  const chainSetupCost = chainCost + packagedBuyCost
   const totalSetupCost = chainSetupCost
 
   /* ----- Line items ----- */
@@ -485,6 +514,7 @@ export function computePlanProfitSummary(
 ): PlanProfitSummary {
   const rootRows: RootProfitRow[] = []
   const buildCostCache = createBuildCostCache()
+  const sharedStock = clonePooledStock(expandInput)
 
   for (const root of template.roots) {
     if (!isPlanRootEnabled(root)) continue
@@ -500,6 +530,7 @@ export function computePlanProfitSummary(
         jobTimeHoursByRootId.get(root.id) ?? root.productionDurationHours,
         buildCostCache,
         options,
+        sharedStock,
       ),
     )
   }

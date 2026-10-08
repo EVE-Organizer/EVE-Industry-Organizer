@@ -1,3 +1,4 @@
+import { RefreshIcon } from '@/components/EveAuthIcons'
 import { defaultScienceFacility } from '@/types'
 import type { GlobalSettings, RegionsData, SystemInfo } from '@/types'
 import { FormFieldLabel } from '@/components/FormFieldLabel'
@@ -91,7 +92,10 @@ export function PlanFacilityControls({
                         Refreshing…
                       </>
                     ) : (
-                      'Refresh'
+                      <>
+                        <RefreshIcon className="size-3.5" />
+                        Refresh
+                      </>
                     )}
                   </button>
                 ) : null}
@@ -218,11 +222,7 @@ export function PlanFacilityControls({
                     inventionFacility: scienceFacilityForSystem(
                       inventionFacility,
                       systemId,
-                      securityForSystem(
-                        systems,
-                        systemId,
-                        inventionFacility.systemSecurity ?? 1,
-                      ),
+                      securityForSystem(systems, systemId, inventionFacility.systemSecurity ?? 1),
                     ),
                   })
                 }

@@ -305,6 +305,150 @@ describe('expandManufacturingPlan', () => {
     const reaction = nodes.find((n) => n.productTypeId === 300)
     expect(reaction?.mode).toBe('build')
   })
+
+  it('ignores pooled stock when includeInventory is off', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 24 }]
+    const expandInput = {
+      template,
+      blueprints,
+      typeMap,
+      prices,
+      settings: DEFAULT_SETTINGS,
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    }
+    const baseline = expandManufacturingPlan(expandInput).nodes.find(
+      (n) => n.productTypeId === 100,
+    )!
+    const withStock = expandManufacturingPlan({
+      ...expandInput,
+      pooledStock: new Map([[100, 999]]),
+    }).nodes.find((n) => n.productTypeId === 100)!
+    expect(withStock.totalDemandQty).toBe(baseline.totalDemandQty)
+  })
+
+  it('subtracts station stock from component demand when includeInventory is on', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 24 }]
+    const { nodes } = expandManufacturingPlan({
+      template,
+      blueprints,
+      typeMap,
+      prices,
+      settings: { ...DEFAULT_SETTINGS, includeInventory: true },
+      pooledStock: new Map([[100, 40]]),
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    })
+    const cap = nodes.find((n) => n.productTypeId === 100)!
+    expect(cap.grossDemandQty).toBe(90)
+    expect(cap.totalDemandQty).toBe(50)
+    expect(nodes.find((n) => n.productTypeId === 200)!.runs).toBe(10)
+  })
+
+  it('zero-runs fully covered components', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 24 }]
+    const { nodes } = expandManufacturingPlan({
+      template,
+      blueprints,
+      typeMap,
+      prices,
+      settings: { ...DEFAULT_SETTINGS, includeInventory: true },
+      pooledStock: new Map([[100, 90]]),
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    })
+    const cap = nodes.find((n) => n.productTypeId === 100)!
+    expect(cap.totalDemandQty).toBe(0)
+    expect(cap.runs).toBe(0)
+  })
+
+  it('nets buy-leaf demand from stock', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 24 }]
+    const without = expandManufacturingPlan({
+      template,
+      blueprints,
+      typeMap,
+      prices,
+      settings: { ...DEFAULT_SETTINGS, includeInventory: true },
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    })
+    const withStock = expandManufacturingPlan({
+      template,
+      blueprints,
+      typeMap,
+      prices,
+      settings: { ...DEFAULT_SETTINGS, includeInventory: true },
+      pooledStock: new Map([[34, 500]]),
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    })
+    const triBase = without.nodes.find((n) => n.productTypeId === 34)!
+    const tri = withStock.nodes.find((n) => n.productTypeId === 34)!
+    expect(tri.totalDemandQty).toBeLessThan(triBase.totalDemandQty)
+    expect(tri.grossDemandQty).toBe(triBase.totalDemandQty)
+  })
+
+  it('consumes shared stock once across two roots', () => {
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [
+      { id: 'root-a', productTypeId: 200, runs: 10, productionDurationHours: 24 },
+      { id: 'root-b', productTypeId: 201, runs: 10, productionDurationHours: 24 },
+    ]
+    const { nodes } = expandManufacturingPlan({
+      template,
+      blueprints,
+      typeMap,
+      prices,
+      settings: { ...DEFAULT_SETTINGS, includeInventory: true },
+      pooledStock: new Map([[100, 250]]),
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    })
+    const cap = nodes.find((n) => n.productTypeId === 100)!
+    expect(cap.grossDemandQty).toBe(270)
+    expect(cap.totalDemandQty).toBe(20)
+  })
+
+  it('nets packaged self-input from station stock', () => {
+    const kit = mockBlueprint(300, 'Kit', [
+      { typeId: 300, quantity: 1 },
+      { typeId: 34, quantity: 10 },
+    ])
+    const template = createDefaultPlanTemplate('test')
+    template.roots = [{ id: 'root-k', productTypeId: 300, runs: 10, productionDurationHours: 24 }]
+    const { nodes } = expandManufacturingPlan({
+      template,
+      blueprints: [...blueprints, kit],
+      typeMap: new Map([
+        ...typeMap,
+        [
+          300,
+          {
+            typeId: 300,
+            name: 'Kit',
+            group: '',
+            category: '',
+            volume: 0,
+            iconUrl: '',
+            renderUrl: '',
+            bpIconUrl: '',
+          },
+        ],
+      ]),
+      prices: new Map([...prices, [300, 1000]]),
+      settings: { ...DEFAULT_SETTINGS, includeInventory: true },
+      pooledStock: new Map([[300, 4]]),
+      systemCostIndex: 0.01,
+      reactionCostIndex: 0.01,
+    })
+    const root = nodes.find((n) => n.productTypeId === 300)!
+    expect(root.packagedBuyQty).toBe(6)
+  })
 })
 
 describe('manufacturingSlotsFromSkills', () => {

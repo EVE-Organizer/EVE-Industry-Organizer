@@ -2403,15 +2403,35 @@
   }
 
   &__actions-cell {
-    @apply flex justify-center px-1 py-1.5;
+    @apply flex flex-col items-center justify-center gap-0 px-1 py-1;
   }
 
   &__actions-toolbar {
     @apply inline-flex items-center gap-0.5 rounded-lg border border-eve-border/70 bg-base-300/30 p-0.5 shadow-sm;
+
+    &--with-progress {
+      @apply mb-1.5;
+    }
+  }
+
+  &__stock-stepper {
+    @apply flex h-1 w-full min-w-[4.5rem] gap-0.5;
+  }
+
+  &__stock-stepper-seg {
+    @apply h-1 min-w-0 flex-1 rounded-sm bg-base-content/15;
+
+    &--filled {
+      @apply bg-primary;
+    }
+
+    &--full {
+      @apply bg-success;
+    }
   }
 
   &__action-btn {
-    @apply inline-flex size-7 shrink-0 items-center justify-center rounded-md text-base-content/75 transition-colors;
+    @apply inline-flex size-5 shrink-0 items-center justify-center rounded-md text-base-content/75 transition-colors;
     @apply hover:bg-base-content/10 hover:text-base-content;
 
     &--danger {
