@@ -94,3 +94,44 @@ export function planSlotBonusesFromManufacturingTemplate(
     research: template?.researchSlotBonus,
   })
 }
+
+const PLAN_WIDE_SLOT_BONUS_KEY = {
+  manufacturing: 'manufacturingSlotBonus',
+  reactions: 'reactionSlotBonus',
+  research: 'researchSlotBonus',
+} as const
+
+/** Extra rings beyond skill slots for one crew character. Empty result is omitted. */
+export function bumpCharacterSlotBonus(
+  current: Record<string, PlanSlotBonuses> | undefined,
+  characterKey: string,
+  pool: keyof PlanSlotBonuses,
+  delta: number,
+): Record<string, PlanSlotBonuses> | undefined {
+  const prev = current?.[characterKey] ?? {}
+  const nextCount = Math.max(0, (prev[pool] ?? 0) + delta)
+  const nextForKey: PlanSlotBonuses = { ...prev, [pool]: nextCount || undefined }
+  const hasBonus =
+    (nextForKey.manufacturing ?? 0) > 0 ||
+    (nextForKey.reactions ?? 0) > 0 ||
+    (nextForKey.research ?? 0) > 0
+  if (!hasBonus) {
+    const { [characterKey]: _removed, ...rest } = current ?? {}
+    return Object.keys(rest).length > 0 ? rest : undefined
+  }
+  return { ...current, [characterKey]: nextForKey }
+}
+
+export function bumpPlanWideSlotBonus(
+  template: {
+    manufacturingSlotBonus?: number
+    reactionSlotBonus?: number
+    researchSlotBonus?: number
+  },
+  pool: keyof PlanSlotBonuses,
+  delta: number,
+): { manufacturingSlotBonus?: number; reactionSlotBonus?: number; researchSlotBonus?: number } {
+  const key = PLAN_WIDE_SLOT_BONUS_KEY[pool]
+  const next = Math.max(0, (template[key] ?? 0) + delta)
+  return { [key]: next || undefined }
+}

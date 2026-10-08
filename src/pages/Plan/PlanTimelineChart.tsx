@@ -12,7 +12,7 @@ import {
 } from '@/pages/Plan/planGanttAdapter'
 import { formatDecimal } from '@/lib/profit'
 import { ChevronIcon } from '@/pages/Plan/planJobsTableCells'
-import type { PlanNode, ScheduledPlanJob } from '@/types'
+import type { PlanCharacterKey, PlanNode, PlanSlotBonuses, ScheduledPlanJob } from '@/types'
 
 type TimelineTab = 'manufacturing' | 'reactions' | 'research'
 
@@ -50,6 +50,7 @@ export function PlanTimelinePanel({
   onAddSlot,
   onRemoveSlot,
   slotBonuses = { manufacturing: 0, reactions: 0, research: 0 },
+  characterSlotBonuses,
   planCrew = [],
 }: {
   windowHours: number
@@ -62,9 +63,10 @@ export function PlanTimelinePanel({
   reactionSlots?: number
   blueprintTypeIdByProduct: Map<number, number>
   embedded?: boolean
-  onAddSlot?: (pool: TimelineTab) => void
-  onRemoveSlot?: (pool: TimelineTab) => void
+  onAddSlot?: (pool: TimelineTab, characterKey?: PlanCharacterKey) => void
+  onRemoveSlot?: (pool: TimelineTab, characterKey?: PlanCharacterKey) => void
   slotBonuses?: { manufacturing: number; reactions: number; research: number }
+  characterSlotBonuses?: Record<string, PlanSlotBonuses>
   planCrew?: PlanGanttCrewMember[]
 }) {
   const [tab, setTab] = useState<TimelineTab>('manufacturing')
@@ -327,8 +329,12 @@ export function PlanTimelinePanel({
             aria-labelledby={`plan-timeline-tab-${tab}`}
           >
             <div className="plan-timeline__slot-groups">
-              {slotRingGroups.map((group, groupIndex) => {
+              {slotRingGroups.map((group) => {
                 const slotsExpanded = !group.label || !collapsedSlotGroups.has(group.key)
+                const crewKey = group.label ? (group.key as PlanCharacterKey) : undefined
+                const groupBonus = crewKey
+                  ? (characterSlotBonuses?.[crewKey]?.[tab] ?? 0)
+                  : activeBonus
                 return (
                   <div key={group.key} className="plan-timeline__slot-group">
                     {group.label ? (
@@ -356,17 +362,9 @@ export function PlanTimelinePanel({
                         slots={group.slots}
                         selectedLaneId={focusedLaneId}
                         onSelectSlot={handleSelectSlot}
-                        onAddSlot={
-                          groupIndex === slotRingGroups.length - 1 && onAddSlot
-                            ? () => onAddSlot(tab)
-                            : undefined
-                        }
-                        onRemoveSlot={
-                          groupIndex === slotRingGroups.length - 1 && onRemoveSlot
-                            ? () => onRemoveSlot(tab)
-                            : undefined
-                        }
-                        canRemoveSlot={activeBonus > 0}
+                        onAddSlot={onAddSlot ? () => onAddSlot(tab, crewKey) : undefined}
+                        onRemoveSlot={onRemoveSlot ? () => onRemoveSlot(tab, crewKey) : undefined}
+                        canRemoveSlot={groupBonus > 0}
                         addSlotLabel={
                           tab === 'research'
                             ? 'Add research slot'

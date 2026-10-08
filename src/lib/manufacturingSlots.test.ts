@@ -5,6 +5,7 @@ import {
   effectiveReactionSlots,
   effectiveResearchSlots,
   manufacturingSlotsFromSkills,
+  bumpCharacterSlotBonus,
   planSlotBonusesFromManufacturingTemplate,
   planSlotBonusesFromTemplate,
   reactionSlotsFromSkills,
@@ -103,5 +104,13 @@ describe('manufacturingSlots', () => {
         planSlotBonusesFromTemplate({ manufacturing: 3, reactions: 1, research: 2 }),
       ),
     ).toEqual({ manufacturing: 6, reactions: 2, research: 3 })
+  })
+
+  it('bumps a character slot bonus and drops empty keys', () => {
+    const once = bumpCharacterSlotBonus(undefined, 'sso:1', 'reactions', 1)
+    expect(once).toEqual({ 'sso:1': { reactions: 1 } })
+    const twice = bumpCharacterSlotBonus(once, 'sso:1', 'reactions', 1)
+    expect(twice).toEqual({ 'sso:1': { reactions: 2 } })
+    expect(bumpCharacterSlotBonus(twice, 'sso:1', 'reactions', -2)).toBeUndefined()
   })
 })

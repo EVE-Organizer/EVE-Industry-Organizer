@@ -39,6 +39,8 @@ import { mergePlanBuyPrices, applyPlanBuyPriceSource } from '@/pages/Plan/planBu
 import { pickHubMaps, sanitizeBuyPriceMap } from '@/lib/hubPriceSanity'
 import type { PlanBuyPriceSource } from '@/pages/Plan/planBuyPrices'
 import {
+  bumpCharacterSlotBonus,
+  bumpPlanWideSlotBonus,
   effectivePlanSlots,
   planSlotBonusesFromManufacturingTemplate,
 } from '@/lib/manufacturingSlots'
@@ -567,50 +569,41 @@ export function PlanPage() {
   )
 
   const handleAddPlanSlot = useCallback(
-    (pool: 'manufacturing' | 'reactions' | 'research') => {
+    (pool: 'manufacturing' | 'reactions' | 'research', characterKey?: string) => {
       if (isSharedView || !storeTemplate) return
-      if (pool === 'manufacturing') {
+      if (characterKey) {
         updatePlanTemplate(storeTemplate.id, {
-          manufacturingSlotBonus: slotBonuses.manufacturing + 1,
+          characterSlotBonus: bumpCharacterSlotBonus(
+            storeTemplate.characterSlotBonus,
+            characterKey,
+            pool,
+            1,
+          ),
         })
         return
       }
-      if (pool === 'reactions') {
-        updatePlanTemplate(storeTemplate.id, {
-          reactionSlotBonus: slotBonuses.reactions + 1,
-        })
-        return
-      }
-      updatePlanTemplate(storeTemplate.id, {
-        researchSlotBonus: slotBonuses.research + 1,
-      })
+      updatePlanTemplate(storeTemplate.id, bumpPlanWideSlotBonus(storeTemplate, pool, 1))
     },
-    [isSharedView, storeTemplate, slotBonuses, updatePlanTemplate],
+    [isSharedView, storeTemplate, updatePlanTemplate],
   )
 
   const handleRemovePlanSlot = useCallback(
-    (pool: 'manufacturing' | 'reactions' | 'research') => {
+    (pool: 'manufacturing' | 'reactions' | 'research', characterKey?: string) => {
       if (isSharedView || !storeTemplate) return
-      if (pool === 'manufacturing') {
-        const next = Math.max(0, slotBonuses.manufacturing - 1)
+      if (characterKey) {
         updatePlanTemplate(storeTemplate.id, {
-          manufacturingSlotBonus: next || undefined,
+          characterSlotBonus: bumpCharacterSlotBonus(
+            storeTemplate.characterSlotBonus,
+            characterKey,
+            pool,
+            -1,
+          ),
         })
         return
       }
-      if (pool === 'reactions') {
-        const next = Math.max(0, slotBonuses.reactions - 1)
-        updatePlanTemplate(storeTemplate.id, {
-          reactionSlotBonus: next || undefined,
-        })
-        return
-      }
-      const next = Math.max(0, slotBonuses.research - 1)
-      updatePlanTemplate(storeTemplate.id, {
-        researchSlotBonus: next || undefined,
-      })
+      updatePlanTemplate(storeTemplate.id, bumpPlanWideSlotBonus(storeTemplate, pool, -1))
     },
-    [isSharedView, storeTemplate, slotBonuses, updatePlanTemplate],
+    [isSharedView, storeTemplate, updatePlanTemplate],
   )
 
   const onPlanEconomicsChange = useCallback(
@@ -1827,6 +1820,7 @@ export function PlanPage() {
             scienceSlots={plan.scienceSlots}
             reactionSlots={plan.reactionSlots}
             slotBonuses={slotBonuses}
+            characterSlotBonuses={activeTemplate.characterSlotBonus}
             onAddSlot={isSharedView ? undefined : handleAddPlanSlot}
             onRemoveSlot={isSharedView ? undefined : handleRemovePlanSlot}
             blueprintTypeIdByProduct={blueprintTypeIdByProduct}
