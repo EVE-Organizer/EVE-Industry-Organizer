@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-08T11:02:38.102Z",
+  "generatedAt": "2026-10-09T11:01:22.915Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0207,
+      "reactionCostIndex": 0.0206,
       "marketSystemId": 30004552
     },
     {
