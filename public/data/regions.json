@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-10T10:15:51.446Z",
+  "generatedAt": "2026-10-11T10:26:30.730Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -544,12 +544,12 @@
       "regionId": 10000039,
       "name": "Esoteria",
       "securityClass": "nullsec",
-      "buildSystemId": 30003140,
-      "buildSystemName": "IR-FDV",
-      "buildSystemSecurity": -0.02318,
+      "buildSystemId": 30003146,
+      "buildSystemName": "Q1-R7K",
+      "buildSystemSecurity": -0.008621,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30003140
+      "marketSystemId": 30003146
     },
     {
       "regionId": 10000064,
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0205,
+      "reactionCostIndex": 0.0203,
       "marketSystemId": 30004552
     },
     {
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0305,
+      "costIndex": 0.0307,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
