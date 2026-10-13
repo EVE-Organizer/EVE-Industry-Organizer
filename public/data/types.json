@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T11:29:01.716Z",
+  "generatedAt": "2026-10-13T11:18:04.911Z",
   "types": [
     {
       "typeId": 18,
@@ -103426,7 +103426,7 @@
     },
     {
       "typeId": 97710,
-      "name": "Sarikusa’s Capital Energy Nosferatu",
+      "name": "Sarikusa's Capital Energy Nosferatu",
       "group": "Energy Nosferatu",
       "category": "Module",
       "volume": 4000,
@@ -103438,7 +103438,7 @@
     },
     {
       "typeId": 97711,
-      "name": "Horm’s Capital Energy Neutralizer",
+      "name": "Horm's Capital Energy Neutralizer",
       "group": "Energy Neutralizer",
       "category": "Module",
       "volume": 4000,
@@ -103450,7 +103450,7 @@
     },
     {
       "typeId": 97712,
-      "name": "Zorya’s Ultratidal Entropic Disintegrator",
+      "name": "Zorya's Ultratidal Entropic Disintegrator",
       "group": "Precursor Weapon",
       "category": "Module",
       "volume": 1600,
