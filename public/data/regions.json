@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-26T09:30:02.365Z",
+  "generatedAt": "2026-10-27T09:27:13.263Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0115,
+      "reactionCostIndex": 0.0119,
       "marketSystemId": 30000621
     },
     {
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.044,
+      "reactionCostIndex": 0.0448,
       "marketSystemId": 30004552
     },
     {
@@ -1149,9 +1149,9 @@
       "regionId": 10000003,
       "name": "Vale of the Silent",
       "securityClass": "nullsec",
-      "buildSystemId": 30000315,
-      "buildSystemName": "WMBZ-U",
-      "buildSystemSecurity": -0.086599,
+      "buildSystemId": 30000272,
+      "buildSystemName": "MA-XAP",
+      "buildSystemSecurity": -0.09721,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30000240
