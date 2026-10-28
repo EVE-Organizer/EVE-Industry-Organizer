@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T09:27:13.263Z",
+  "generatedAt": "2026-10-28T10:09:35.368Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0119,
+      "reactionCostIndex": 0.0121,
       "marketSystemId": 30000621
     },
     {
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0448,
+      "reactionCostIndex": 0.0451,
       "marketSystemId": 30004552
     },
     {
