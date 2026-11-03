@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02T11:50:58.432Z",
+  "generatedAt": "2026-11-03T11:29:03.861Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0123,
+      "reactionCostIndex": 0.0125,
       "marketSystemId": 30000621
     },
     {
@@ -302,12 +302,12 @@
       "regionId": 10000053,
       "name": "Cobalt Edge",
       "securityClass": "nullsec",
-      "buildSystemId": 30004197,
-      "buildSystemName": "FV1-RQ",
-      "buildSystemSecurity": -0.086176,
+      "buildSystemId": 30004196,
+      "buildSystemName": "VAF1-P",
+      "buildSystemSecurity": -0.100412,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30004197
+      "marketSystemId": 30004196
     },
     {
       "regionId": 10000012,
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0484,
+      "reactionCostIndex": 0.0496,
       "marketSystemId": 30004552
     },
     {
@@ -724,7 +724,7 @@
       "buildSystemName": "F76-8Q",
       "buildSystemSecurity": -0.060216,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0281,
+      "reactionCostIndex": 0.0299,
       "marketSystemId": 30002152
     },
     {
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0255,
+      "costIndex": 0.0253,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
