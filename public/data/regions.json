@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T11:43:37.658Z",
+  "generatedAt": "2026-11-06T11:41:36.934Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0505,
+      "reactionCostIndex": 0.0509,
       "marketSystemId": 30004552
     },
     {
@@ -724,7 +724,7 @@
       "buildSystemName": "F76-8Q",
       "buildSystemSecurity": -0.060216,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0327,
+      "reactionCostIndex": 0.0341,
       "marketSystemId": 30002152
     },
     {
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0264,
+      "costIndex": 0.0271,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
