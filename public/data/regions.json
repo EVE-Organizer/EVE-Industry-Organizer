@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T12:20:14.463Z",
+  "generatedAt": "2026-11-10T11:56:55.899Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -273,7 +273,7 @@
       "buildSystemName": "YE1-9S",
       "buildSystemSecurity": -0.050546,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0125,
+      "reactionCostIndex": 0.0014,
       "marketSystemId": 30000621
     },
     {
@@ -467,9 +467,9 @@
       "regionId": 10000043,
       "name": "Domain",
       "securityClass": "highsec",
-      "buildSystemId": 30003549,
-      "buildSystemName": "Lashkai",
-      "buildSystemSecurity": 0.917045,
+      "buildSystemId": 30002190,
+      "buildSystemName": "Mabnen",
+      "buildSystemSecurity": 0.940368,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30002187
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0531,
+      "reactionCostIndex": 0.0507,
       "marketSystemId": 30004552
     },
     {
@@ -720,12 +720,12 @@
       "regionId": 10000025,
       "name": "Immensea",
       "securityClass": "nullsec",
-      "buildSystemId": 30002152,
-      "buildSystemName": "F76-8Q",
-      "buildSystemSecurity": -0.060216,
+      "buildSystemId": 30002106,
+      "buildSystemName": "PPFB-U",
+      "buildSystemSecurity": -0.074166,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0438,
-      "marketSystemId": 30002152
+      "reactionCostIndex": 0.0014,
+      "marketSystemId": 30002106
     },
     {
       "regionId": 10000031,
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0293,
+      "costIndex": 0.0296,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
