@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T11:57:42.694Z",
+  "generatedAt": "2026-11-11T11:35:40.678Z",
   "blueprints": [
     {
       "blueprintTypeId": 879,
@@ -199221,6 +199221,222 @@
       "productRenderUrl": "https://images.evetech.net/types/95529/render?size=128"
     },
     {
+      "blueprintTypeId": 95634,
+      "productTypeId": 95629,
+      "productQuantity": 1,
+      "manufacturingTime": 15000,
+      "materials": [
+        {
+          "typeId": 57486,
+          "quantity": 65
+        },
+        {
+          "typeId": 57478,
+          "quantity": 130
+        },
+        {
+          "typeId": 40,
+          "quantity": 520
+        },
+        {
+          "typeId": 39,
+          "quantity": 2600
+        },
+        {
+          "typeId": 38,
+          "quantity": 10400
+        },
+        {
+          "typeId": 37,
+          "quantity": 26000
+        },
+        {
+          "typeId": 36,
+          "quantity": 234000
+        },
+        {
+          "typeId": 35,
+          "quantity": 1300000
+        },
+        {
+          "typeId": 34,
+          "quantity": 3640000
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Attack Battlecruiser",
+      "bpIconUrl": "https://images.evetech.net/types/95634/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/95629/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/95629/render?size=128",
+      "copyTime": 12000
+    },
+    {
+      "blueprintTypeId": 95635,
+      "productTypeId": 95630,
+      "productQuantity": 1,
+      "manufacturingTime": 15000,
+      "materials": [
+        {
+          "typeId": 57486,
+          "quantity": 65
+        },
+        {
+          "typeId": 57478,
+          "quantity": 130
+        },
+        {
+          "typeId": 40,
+          "quantity": 520
+        },
+        {
+          "typeId": 39,
+          "quantity": 2600
+        },
+        {
+          "typeId": 38,
+          "quantity": 10400
+        },
+        {
+          "typeId": 37,
+          "quantity": 26000
+        },
+        {
+          "typeId": 36,
+          "quantity": 234000
+        },
+        {
+          "typeId": 35,
+          "quantity": 1300000
+        },
+        {
+          "typeId": 34,
+          "quantity": 3640000
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Attack Battlecruiser",
+      "bpIconUrl": "https://images.evetech.net/types/95635/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/95630/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/95630/render?size=128",
+      "copyTime": 12000
+    },
+    {
+      "blueprintTypeId": 95636,
+      "productTypeId": 95631,
+      "productQuantity": 1,
+      "manufacturingTime": 15000,
+      "materials": [
+        {
+          "typeId": 57486,
+          "quantity": 65
+        },
+        {
+          "typeId": 57478,
+          "quantity": 130
+        },
+        {
+          "typeId": 40,
+          "quantity": 520
+        },
+        {
+          "typeId": 39,
+          "quantity": 2600
+        },
+        {
+          "typeId": 38,
+          "quantity": 10400
+        },
+        {
+          "typeId": 37,
+          "quantity": 26000
+        },
+        {
+          "typeId": 36,
+          "quantity": 234000
+        },
+        {
+          "typeId": 35,
+          "quantity": 1300000
+        },
+        {
+          "typeId": 34,
+          "quantity": 3640000
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Attack Battlecruiser",
+      "bpIconUrl": "https://images.evetech.net/types/95636/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/95631/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/95631/render?size=128",
+      "copyTime": 12000
+    },
+    {
+      "blueprintTypeId": 95637,
+      "productTypeId": 95632,
+      "productQuantity": 1,
+      "manufacturingTime": 15000,
+      "materials": [
+        {
+          "typeId": 57486,
+          "quantity": 65
+        },
+        {
+          "typeId": 57478,
+          "quantity": 130
+        },
+        {
+          "typeId": 40,
+          "quantity": 520
+        },
+        {
+          "typeId": 39,
+          "quantity": 2600
+        },
+        {
+          "typeId": 38,
+          "quantity": 10400
+        },
+        {
+          "typeId": 37,
+          "quantity": 26000
+        },
+        {
+          "typeId": 36,
+          "quantity": 234000
+        },
+        {
+          "typeId": 35,
+          "quantity": 1300000
+        },
+        {
+          "typeId": 34,
+          "quantity": 3640000
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Attack Battlecruiser",
+      "bpIconUrl": "https://images.evetech.net/types/95637/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/95632/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/95632/render?size=128",
+      "copyTime": 12000
+    },
+    {
       "blueprintTypeId": 95742,
       "productTypeId": 95741,
       "productQuantity": 1,
@@ -199277,6 +199493,1431 @@
       "productIconUrl": "https://images.evetech.net/types/95741/icon?size=32",
       "productRenderUrl": "https://images.evetech.net/types/95741/render?size=128",
       "copyTime": 12000
+    },
+    {
+      "blueprintTypeId": 96152,
+      "productTypeId": 95809,
+      "productQuantity": 1,
+      "manufacturingTime": 1500,
+      "materials": [
+        {
+          "typeId": 28363,
+          "quantity": 3
+        },
+        {
+          "typeId": 25601,
+          "quantity": 5
+        },
+        {
+          "typeId": 25604,
+          "quantity": 5
+        },
+        {
+          "typeId": 25590,
+          "quantity": 6
+        },
+        {
+          "typeId": 25595,
+          "quantity": 6
+        },
+        {
+          "typeId": 28362,
+          "quantity": 9
+        },
+        {
+          "typeId": 28364,
+          "quantity": 9
+        },
+        {
+          "typeId": 25591,
+          "quantity": 12
+        },
+        {
+          "typeId": 25599,
+          "quantity": 12
+        },
+        {
+          "typeId": 25597,
+          "quantity": 15
+        },
+        {
+          "typeId": 28361,
+          "quantity": 15
+        },
+        {
+          "typeId": 28365,
+          "quantity": 15
+        },
+        {
+          "typeId": 30304,
+          "quantity": 100
+        },
+        {
+          "typeId": 30305,
+          "quantity": 100
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96152/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/95809/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/95809/render?size=128",
+      "copyTime": 1200
+    },
+    {
+      "blueprintTypeId": 96153,
+      "productTypeId": 96128,
+      "productQuantity": 1,
+      "manufacturingTime": 3000,
+      "materials": [
+        {
+          "typeId": 28363,
+          "quantity": 15
+        },
+        {
+          "typeId": 25601,
+          "quantity": 25
+        },
+        {
+          "typeId": 25604,
+          "quantity": 25
+        },
+        {
+          "typeId": 25590,
+          "quantity": 30
+        },
+        {
+          "typeId": 25595,
+          "quantity": 30
+        },
+        {
+          "typeId": 28362,
+          "quantity": 45
+        },
+        {
+          "typeId": 28364,
+          "quantity": 45
+        },
+        {
+          "typeId": 25591,
+          "quantity": 60
+        },
+        {
+          "typeId": 25599,
+          "quantity": 60
+        },
+        {
+          "typeId": 25597,
+          "quantity": 75
+        },
+        {
+          "typeId": 28361,
+          "quantity": 75
+        },
+        {
+          "typeId": 28365,
+          "quantity": 75
+        },
+        {
+          "typeId": 30304,
+          "quantity": 500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96153/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96128/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96128/render?size=128",
+      "copyTime": 2400
+    },
+    {
+      "blueprintTypeId": 96154,
+      "productTypeId": 96129,
+      "productQuantity": 1,
+      "manufacturingTime": 4500,
+      "materials": [
+        {
+          "typeId": 28363,
+          "quantity": 75
+        },
+        {
+          "typeId": 25601,
+          "quantity": 125
+        },
+        {
+          "typeId": 25604,
+          "quantity": 125
+        },
+        {
+          "typeId": 25590,
+          "quantity": 150
+        },
+        {
+          "typeId": 25595,
+          "quantity": 150
+        },
+        {
+          "typeId": 28362,
+          "quantity": 225
+        },
+        {
+          "typeId": 28364,
+          "quantity": 225
+        },
+        {
+          "typeId": 25591,
+          "quantity": 300
+        },
+        {
+          "typeId": 25599,
+          "quantity": 300
+        },
+        {
+          "typeId": 25597,
+          "quantity": 375
+        },
+        {
+          "typeId": 28361,
+          "quantity": 375
+        },
+        {
+          "typeId": 28365,
+          "quantity": 375
+        },
+        {
+          "typeId": 30304,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 2500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96154/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96129/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96129/render?size=128",
+      "copyTime": 3600
+    },
+    {
+      "blueprintTypeId": 96146,
+      "productTypeId": 96130,
+      "productQuantity": 1,
+      "manufacturingTime": 1500,
+      "materials": [
+        {
+          "typeId": 25601,
+          "quantity": 5
+        },
+        {
+          "typeId": 25604,
+          "quantity": 5
+        },
+        {
+          "typeId": 25603,
+          "quantity": 6
+        },
+        {
+          "typeId": 25605,
+          "quantity": 6
+        },
+        {
+          "typeId": 25592,
+          "quantity": 12
+        },
+        {
+          "typeId": 25599,
+          "quantity": 12
+        },
+        {
+          "typeId": 25597,
+          "quantity": 15
+        },
+        {
+          "typeId": 30252,
+          "quantity": 30
+        },
+        {
+          "typeId": 30019,
+          "quantity": 90
+        },
+        {
+          "typeId": 30024,
+          "quantity": 90
+        },
+        {
+          "typeId": 30304,
+          "quantity": 100
+        },
+        {
+          "typeId": 30305,
+          "quantity": 100
+        },
+        {
+          "typeId": 30021,
+          "quantity": 150
+        },
+        {
+          "typeId": 30254,
+          "quantity": 150
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96146/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96130/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96130/render?size=128",
+      "copyTime": 1200
+    },
+    {
+      "blueprintTypeId": 96147,
+      "productTypeId": 96131,
+      "productQuantity": 1,
+      "manufacturingTime": 3000,
+      "materials": [
+        {
+          "typeId": 25601,
+          "quantity": 25
+        },
+        {
+          "typeId": 25604,
+          "quantity": 25
+        },
+        {
+          "typeId": 25603,
+          "quantity": 30
+        },
+        {
+          "typeId": 25605,
+          "quantity": 30
+        },
+        {
+          "typeId": 25592,
+          "quantity": 60
+        },
+        {
+          "typeId": 25599,
+          "quantity": 60
+        },
+        {
+          "typeId": 25597,
+          "quantity": 75
+        },
+        {
+          "typeId": 30252,
+          "quantity": 150
+        },
+        {
+          "typeId": 30019,
+          "quantity": 450
+        },
+        {
+          "typeId": 30024,
+          "quantity": 450
+        },
+        {
+          "typeId": 30304,
+          "quantity": 500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 500
+        },
+        {
+          "typeId": 30021,
+          "quantity": 750
+        },
+        {
+          "typeId": 30254,
+          "quantity": 750
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96147/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96131/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96131/render?size=128",
+      "copyTime": 2400
+    },
+    {
+      "blueprintTypeId": 96148,
+      "productTypeId": 96132,
+      "productQuantity": 1,
+      "manufacturingTime": 4500,
+      "materials": [
+        {
+          "typeId": 25601,
+          "quantity": 125
+        },
+        {
+          "typeId": 25604,
+          "quantity": 125
+        },
+        {
+          "typeId": 25603,
+          "quantity": 150
+        },
+        {
+          "typeId": 25605,
+          "quantity": 150
+        },
+        {
+          "typeId": 25592,
+          "quantity": 300
+        },
+        {
+          "typeId": 25599,
+          "quantity": 300
+        },
+        {
+          "typeId": 25597,
+          "quantity": 375
+        },
+        {
+          "typeId": 30252,
+          "quantity": 750
+        },
+        {
+          "typeId": 30019,
+          "quantity": 2250
+        },
+        {
+          "typeId": 30024,
+          "quantity": 2250
+        },
+        {
+          "typeId": 30304,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30021,
+          "quantity": 3750
+        },
+        {
+          "typeId": 30254,
+          "quantity": 3750
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96148/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96132/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96132/render?size=128",
+      "copyTime": 3600
+    },
+    {
+      "blueprintTypeId": 96155,
+      "productTypeId": 96136,
+      "productQuantity": 1,
+      "manufacturingTime": 1500,
+      "materials": [
+        {
+          "typeId": 25601,
+          "quantity": 5
+        },
+        {
+          "typeId": 25604,
+          "quantity": 5
+        },
+        {
+          "typeId": 25589,
+          "quantity": 6
+        },
+        {
+          "typeId": 25602,
+          "quantity": 6
+        },
+        {
+          "typeId": 25593,
+          "quantity": 12
+        },
+        {
+          "typeId": 25599,
+          "quantity": 12
+        },
+        {
+          "typeId": 25597,
+          "quantity": 15
+        },
+        {
+          "typeId": 30252,
+          "quantity": 30
+        },
+        {
+          "typeId": 30019,
+          "quantity": 90
+        },
+        {
+          "typeId": 30024,
+          "quantity": 90
+        },
+        {
+          "typeId": 30304,
+          "quantity": 100
+        },
+        {
+          "typeId": 30305,
+          "quantity": 100
+        },
+        {
+          "typeId": 30021,
+          "quantity": 150
+        },
+        {
+          "typeId": 30254,
+          "quantity": 150
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96155/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96136/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96136/render?size=128",
+      "copyTime": 1200
+    },
+    {
+      "blueprintTypeId": 96156,
+      "productTypeId": 96137,
+      "productQuantity": 1,
+      "manufacturingTime": 3000,
+      "materials": [
+        {
+          "typeId": 25601,
+          "quantity": 25
+        },
+        {
+          "typeId": 25604,
+          "quantity": 25
+        },
+        {
+          "typeId": 25589,
+          "quantity": 30
+        },
+        {
+          "typeId": 25602,
+          "quantity": 30
+        },
+        {
+          "typeId": 25593,
+          "quantity": 60
+        },
+        {
+          "typeId": 25599,
+          "quantity": 60
+        },
+        {
+          "typeId": 25597,
+          "quantity": 75
+        },
+        {
+          "typeId": 30252,
+          "quantity": 150
+        },
+        {
+          "typeId": 30019,
+          "quantity": 450
+        },
+        {
+          "typeId": 30024,
+          "quantity": 450
+        },
+        {
+          "typeId": 30304,
+          "quantity": 500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 500
+        },
+        {
+          "typeId": 30021,
+          "quantity": 750
+        },
+        {
+          "typeId": 30254,
+          "quantity": 750
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96156/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96137/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96137/render?size=128",
+      "copyTime": 2400
+    },
+    {
+      "blueprintTypeId": 96157,
+      "productTypeId": 96138,
+      "productQuantity": 1,
+      "manufacturingTime": 4500,
+      "materials": [
+        {
+          "typeId": 25601,
+          "quantity": 125
+        },
+        {
+          "typeId": 25604,
+          "quantity": 125
+        },
+        {
+          "typeId": 25589,
+          "quantity": 150
+        },
+        {
+          "typeId": 25602,
+          "quantity": 150
+        },
+        {
+          "typeId": 25593,
+          "quantity": 300
+        },
+        {
+          "typeId": 25599,
+          "quantity": 300
+        },
+        {
+          "typeId": 25597,
+          "quantity": 375
+        },
+        {
+          "typeId": 30252,
+          "quantity": 750
+        },
+        {
+          "typeId": 30019,
+          "quantity": 2250
+        },
+        {
+          "typeId": 30024,
+          "quantity": 2250
+        },
+        {
+          "typeId": 30304,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30021,
+          "quantity": 3750
+        },
+        {
+          "typeId": 30254,
+          "quantity": 3750
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96157/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96138/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96138/render?size=128",
+      "copyTime": 3600
+    },
+    {
+      "blueprintTypeId": 96149,
+      "productTypeId": 96139,
+      "productQuantity": 1,
+      "manufacturingTime": 1500,
+      "materials": [
+        {
+          "typeId": 25601,
+          "quantity": 5
+        },
+        {
+          "typeId": 25604,
+          "quantity": 5
+        },
+        {
+          "typeId": 25600,
+          "quantity": 6
+        },
+        {
+          "typeId": 25606,
+          "quantity": 6
+        },
+        {
+          "typeId": 25588,
+          "quantity": 12
+        },
+        {
+          "typeId": 25599,
+          "quantity": 12
+        },
+        {
+          "typeId": 25597,
+          "quantity": 15
+        },
+        {
+          "typeId": 30252,
+          "quantity": 30
+        },
+        {
+          "typeId": 30019,
+          "quantity": 90
+        },
+        {
+          "typeId": 30024,
+          "quantity": 90
+        },
+        {
+          "typeId": 30304,
+          "quantity": 100
+        },
+        {
+          "typeId": 30305,
+          "quantity": 100
+        },
+        {
+          "typeId": 30021,
+          "quantity": 150
+        },
+        {
+          "typeId": 30254,
+          "quantity": 150
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96149/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96139/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96139/render?size=128",
+      "copyTime": 1200
+    },
+    {
+      "blueprintTypeId": 96150,
+      "productTypeId": 96144,
+      "productQuantity": 1,
+      "manufacturingTime": 3000,
+      "materials": [
+        {
+          "typeId": 25601,
+          "quantity": 25
+        },
+        {
+          "typeId": 25604,
+          "quantity": 25
+        },
+        {
+          "typeId": 25600,
+          "quantity": 30
+        },
+        {
+          "typeId": 25606,
+          "quantity": 30
+        },
+        {
+          "typeId": 25588,
+          "quantity": 60
+        },
+        {
+          "typeId": 25599,
+          "quantity": 60
+        },
+        {
+          "typeId": 25597,
+          "quantity": 75
+        },
+        {
+          "typeId": 30252,
+          "quantity": 150
+        },
+        {
+          "typeId": 30019,
+          "quantity": 450
+        },
+        {
+          "typeId": 30024,
+          "quantity": 450
+        },
+        {
+          "typeId": 30304,
+          "quantity": 500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 500
+        },
+        {
+          "typeId": 30021,
+          "quantity": 750
+        },
+        {
+          "typeId": 30254,
+          "quantity": 750
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96150/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96144/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96144/render?size=128",
+      "copyTime": 2400
+    },
+    {
+      "blueprintTypeId": 96151,
+      "productTypeId": 96145,
+      "productQuantity": 1,
+      "manufacturingTime": 4500,
+      "materials": [
+        {
+          "typeId": 25601,
+          "quantity": 125
+        },
+        {
+          "typeId": 25604,
+          "quantity": 125
+        },
+        {
+          "typeId": 25600,
+          "quantity": 150
+        },
+        {
+          "typeId": 25606,
+          "quantity": 150
+        },
+        {
+          "typeId": 25588,
+          "quantity": 300
+        },
+        {
+          "typeId": 25599,
+          "quantity": 300
+        },
+        {
+          "typeId": 25597,
+          "quantity": 375
+        },
+        {
+          "typeId": 30252,
+          "quantity": 750
+        },
+        {
+          "typeId": 30019,
+          "quantity": 2250
+        },
+        {
+          "typeId": 30024,
+          "quantity": 2250
+        },
+        {
+          "typeId": 30304,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30021,
+          "quantity": 3750
+        },
+        {
+          "typeId": 30254,
+          "quantity": 3750
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96151/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96145/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96145/render?size=128",
+      "copyTime": 3600
+    },
+    {
+      "blueprintTypeId": 96774,
+      "productTypeId": 96541,
+      "productQuantity": 1,
+      "manufacturingTime": 1500,
+      "materials": [
+        {
+          "typeId": 96130,
+          "quantity": 1
+        },
+        {
+          "typeId": 96136,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 100
+        },
+        {
+          "typeId": 30305,
+          "quantity": 100
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96774/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96541/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96541/render?size=128",
+      "copyTime": 1200
+    },
+    {
+      "blueprintTypeId": 96775,
+      "productTypeId": 96559,
+      "productQuantity": 1,
+      "manufacturingTime": 3000,
+      "materials": [
+        {
+          "typeId": 96131,
+          "quantity": 1
+        },
+        {
+          "typeId": 96137,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96775/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96559/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96559/render?size=128",
+      "copyTime": 2400
+    },
+    {
+      "blueprintTypeId": 96776,
+      "productTypeId": 96564,
+      "productQuantity": 1,
+      "manufacturingTime": 4500,
+      "materials": [
+        {
+          "typeId": 96132,
+          "quantity": 1
+        },
+        {
+          "typeId": 96138,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 2500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96776/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96564/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96564/render?size=128",
+      "copyTime": 3600
+    },
+    {
+      "blueprintTypeId": 96777,
+      "productTypeId": 96587,
+      "productQuantity": 1,
+      "manufacturingTime": 1500,
+      "materials": [
+        {
+          "typeId": 96130,
+          "quantity": 1
+        },
+        {
+          "typeId": 96139,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 100
+        },
+        {
+          "typeId": 30305,
+          "quantity": 100
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96777/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96587/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96587/render?size=128",
+      "copyTime": 1200
+    },
+    {
+      "blueprintTypeId": 96778,
+      "productTypeId": 96594,
+      "productQuantity": 1,
+      "manufacturingTime": 3000,
+      "materials": [
+        {
+          "typeId": 96131,
+          "quantity": 1
+        },
+        {
+          "typeId": 96144,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96778/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96594/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96594/render?size=128",
+      "copyTime": 2400
+    },
+    {
+      "blueprintTypeId": 96779,
+      "productTypeId": 96595,
+      "productQuantity": 1,
+      "manufacturingTime": 4500,
+      "materials": [
+        {
+          "typeId": 96132,
+          "quantity": 1
+        },
+        {
+          "typeId": 96145,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 2500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96779/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96595/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96595/render?size=128",
+      "copyTime": 3600
+    },
+    {
+      "blueprintTypeId": 96783,
+      "productTypeId": 96625,
+      "productQuantity": 1,
+      "manufacturingTime": 1500,
+      "materials": [
+        {
+          "typeId": 95809,
+          "quantity": 1
+        },
+        {
+          "typeId": 96136,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 100
+        },
+        {
+          "typeId": 30305,
+          "quantity": 100
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96783/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96625/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96625/render?size=128",
+      "copyTime": 1200
+    },
+    {
+      "blueprintTypeId": 96784,
+      "productTypeId": 96640,
+      "productQuantity": 1,
+      "manufacturingTime": 3000,
+      "materials": [
+        {
+          "typeId": 96128,
+          "quantity": 1
+        },
+        {
+          "typeId": 96137,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96784/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96640/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96640/render?size=128",
+      "copyTime": 2400
+    },
+    {
+      "blueprintTypeId": 96785,
+      "productTypeId": 96641,
+      "productQuantity": 1,
+      "manufacturingTime": 4500,
+      "materials": [
+        {
+          "typeId": 96129,
+          "quantity": 1
+        },
+        {
+          "typeId": 96138,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 2500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96785/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96641/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96641/render?size=128",
+      "copyTime": 3600
+    },
+    {
+      "blueprintTypeId": 96780,
+      "productTypeId": 96696,
+      "productQuantity": 1,
+      "manufacturingTime": 1500,
+      "materials": [
+        {
+          "typeId": 95809,
+          "quantity": 1
+        },
+        {
+          "typeId": 96139,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 100
+        },
+        {
+          "typeId": 30305,
+          "quantity": 100
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96780/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96696/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96696/render?size=128",
+      "copyTime": 1200
+    },
+    {
+      "blueprintTypeId": 96781,
+      "productTypeId": 96719,
+      "productQuantity": 1,
+      "manufacturingTime": 3000,
+      "materials": [
+        {
+          "typeId": 96128,
+          "quantity": 1
+        },
+        {
+          "typeId": 96144,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96781/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96719/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96719/render?size=128",
+      "copyTime": 2400
+    },
+    {
+      "blueprintTypeId": 96782,
+      "productTypeId": 96720,
+      "productQuantity": 1,
+      "manufacturingTime": 4500,
+      "materials": [
+        {
+          "typeId": 96129,
+          "quantity": 1
+        },
+        {
+          "typeId": 96145,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 2500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96782/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96720/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96720/render?size=128",
+      "copyTime": 3600
+    },
+    {
+      "blueprintTypeId": 96786,
+      "productTypeId": 96723,
+      "productQuantity": 1,
+      "manufacturingTime": 1500,
+      "materials": [
+        {
+          "typeId": 95809,
+          "quantity": 1
+        },
+        {
+          "typeId": 96136,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 100
+        },
+        {
+          "typeId": 30305,
+          "quantity": 100
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96786/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96723/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96723/render?size=128",
+      "copyTime": 1200
+    },
+    {
+      "blueprintTypeId": 96787,
+      "productTypeId": 96725,
+      "productQuantity": 1,
+      "manufacturingTime": 3000,
+      "materials": [
+        {
+          "typeId": 96128,
+          "quantity": 1
+        },
+        {
+          "typeId": 96137,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96787/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96725/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96725/render?size=128",
+      "copyTime": 2400
+    },
+    {
+      "blueprintTypeId": 96788,
+      "productTypeId": 96726,
+      "productQuantity": 1,
+      "manufacturingTime": 4500,
+      "materials": [
+        {
+          "typeId": 96129,
+          "quantity": 1
+        },
+        {
+          "typeId": 96138,
+          "quantity": 1
+        },
+        {
+          "typeId": 30304,
+          "quantity": 2500
+        },
+        {
+          "typeId": 30305,
+          "quantity": 2500
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Synchronization Rigging": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Rig Synchronizer",
+      "bpIconUrl": "https://images.evetech.net/types/96788/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/96726/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/96726/render?size=128",
+      "copyTime": 3600
     },
     {
       "blueprintTypeId": 97676,
@@ -199688,6 +201329,136 @@
       "bpIconUrl": "https://images.evetech.net/types/97718/bp?size=32",
       "productIconUrl": "https://images.evetech.net/types/97712/icon?size=32",
       "productRenderUrl": "https://images.evetech.net/types/97712/render?size=128"
+    },
+    {
+      "blueprintTypeId": 97995,
+      "productTypeId": 97955,
+      "productQuantity": 1,
+      "manufacturingTime": 1800,
+      "materials": [
+        {
+          "typeId": 36,
+          "quantity": 529
+        },
+        {
+          "typeId": 35,
+          "quantity": 792
+        },
+        {
+          "typeId": 34,
+          "quantity": 862
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Stasis Web",
+      "bpIconUrl": "https://images.evetech.net/types/97995/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97955/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97955/render?size=128",
+      "copyTime": 1440
+    },
+    {
+      "blueprintTypeId": 97994,
+      "productTypeId": 97956,
+      "productQuantity": 1,
+      "manufacturingTime": 1800,
+      "materials": [
+        {
+          "typeId": 39,
+          "quantity": 4
+        },
+        {
+          "typeId": 37,
+          "quantity": 197
+        },
+        {
+          "typeId": 35,
+          "quantity": 297
+        },
+        {
+          "typeId": 36,
+          "quantity": 334
+        },
+        {
+          "typeId": 34,
+          "quantity": 502
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Warp Scrambler",
+      "bpIconUrl": "https://images.evetech.net/types/97994/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97956/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97956/render?size=128",
+      "copyTime": 1440
+    },
+    {
+      "blueprintTypeId": 97993,
+      "productTypeId": 97957,
+      "productQuantity": 1,
+      "manufacturingTime": 1800,
+      "materials": [
+        {
+          "typeId": 39,
+          "quantity": 4
+        },
+        {
+          "typeId": 37,
+          "quantity": 197
+        },
+        {
+          "typeId": 35,
+          "quantity": 297
+        },
+        {
+          "typeId": 36,
+          "quantity": 334
+        },
+        {
+          "typeId": 34,
+          "quantity": 502
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Warp Scrambler",
+      "bpIconUrl": "https://images.evetech.net/types/97993/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/97957/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/97957/render?size=128",
+      "copyTime": 1440
+    },
+    {
+      "blueprintTypeId": 98143,
+      "productTypeId": 98142,
+      "productQuantity": 1,
+      "manufacturingTime": 12000,
+      "materials": [
+        {
+          "typeId": 58904,
+          "quantity": 1
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1,
+        "Graviton Physics": 4,
+        "Electromagnetic Physics": 4
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Mobile Observatory",
+      "bpIconUrl": "https://images.evetech.net/types/98143/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/98142/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/98142/render?size=128",
+      "copyTime": 9600
     }
   ]
 }

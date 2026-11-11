@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T11:57:42.694Z",
+  "generatedAt": "2026-11-11T11:35:40.678Z",
   "types": [
     {
       "typeId": 18,
@@ -13196,7 +13196,7 @@
       "category": "Ship",
       "volume": 252000,
       "mass": 15000000,
-      "description": "The Naga was designed in YC 109 by Corporate Police Force as an anti-Guristas ship, sacrificing the usual robust Caldari Navy standards in favor of supporting battleship-class weaponry. It was rejected by Hyasyoda management for being overspecialized.\n\nThe Naga design remained in the Hyasyoda archives, forgotten (save for a cameo in the Gallente holo-series CPF Blue). In YC 113 the Caldari Navy entertained contracts for a new tier of gunboat battlecruiser. Hyasyoda quickly submitted and won with the Naga, underbidding both Kaalakiota and Ishukone.",
+      "description": "Faced with the prospect of maintaining order in Syndicate in YC128, a region beyond the reach of CONCORD, the Caldari Navy needed a new hard-hitting solution that would establish State authority through its intimidating presence alone. The Naga Navy Issue was commissioned in partnership with the megacorporations of the Mountain faction to ensure that the newly controlled region would witness the uncompromisable honor and strength of the Caldari.",
       "iconUrl": "https://images.evetech.net/types/4306/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/4306/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/4306/bp?size=32"
@@ -38253,7 +38253,7 @@
       "category": "Module",
       "volume": 20,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/25970/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/25970/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/25970/bp?size=32"
@@ -38407,7 +38407,7 @@
       "category": "Module",
       "volume": 20,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/25998/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/25998/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/25998/bp?size=32"
@@ -38671,7 +38671,7 @@
       "category": "Module",
       "volume": 20,
       "mass": 200,
-      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/26038/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/26038/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/26038/bp?size=32"
@@ -40343,7 +40343,7 @@
       "category": "Module",
       "volume": 20,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/26386/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/26386/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/26386/bp?size=32"
@@ -40497,7 +40497,7 @@
       "category": "Module",
       "volume": 20,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/26400/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/26400/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/26400/bp?size=32"
@@ -40717,7 +40717,7 @@
       "category": "Module",
       "volume": 20,
       "mass": 200,
-      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/26428/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/26428/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/26428/bp?size=32"
@@ -55355,7 +55355,7 @@
       "category": "Module",
       "volume": 5,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31430/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31430/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31430/bp?size=32"
@@ -55377,7 +55377,7 @@
       "category": "Module",
       "volume": 10,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31432/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31432/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31432/bp?size=32"
@@ -55399,7 +55399,7 @@
       "category": "Module",
       "volume": 40,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31434/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31434/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31434/bp?size=32"
@@ -55421,7 +55421,7 @@
       "category": "Module",
       "volume": 5,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31436/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31436/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31436/bp?size=32"
@@ -55443,7 +55443,7 @@
       "category": "Module",
       "volume": 10,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31438/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31438/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31438/bp?size=32"
@@ -55465,7 +55465,7 @@
       "category": "Module",
       "volume": 40,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's energy turrets at the expense of increased power grid need for them.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Energy Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31440/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31440/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31440/bp?size=32"
@@ -56279,7 +56279,7 @@
       "category": "Module",
       "volume": 5,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31514/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31514/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31514/bp?size=32"
@@ -56301,7 +56301,7 @@
       "category": "Module",
       "volume": 10,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31516/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31516/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31516/bp?size=32"
@@ -56323,7 +56323,7 @@
       "category": "Module",
       "volume": 40,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31518/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31518/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31518/bp?size=32"
@@ -56345,7 +56345,7 @@
       "category": "Module",
       "volume": 5,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31520/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31520/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31520/bp?size=32"
@@ -56367,7 +56367,7 @@
       "category": "Module",
       "volume": 10,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31522/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31522/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31522/bp?size=32"
@@ -56389,7 +56389,7 @@
       "category": "Module",
       "volume": 40,
       "mass": 200,
-      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase the accuracy falloff range of a ship's hybrid turrets at the expense of increased power grid need for hybrid weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Hybrid Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31524/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31524/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31524/bp?size=32"
@@ -57841,7 +57841,7 @@
       "category": "Module",
       "volume": 5,
       "mass": 200,
-      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31656/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31656/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31656/bp?size=32"
@@ -57863,7 +57863,7 @@
       "category": "Module",
       "volume": 10,
       "mass": 200,
-      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31658/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31658/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31658/bp?size=32"
@@ -57885,7 +57885,7 @@
       "category": "Module",
       "volume": 40,
       "mass": 200,
-      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31660/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31660/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31660/bp?size=32"
@@ -57907,7 +57907,7 @@
       "category": "Module",
       "volume": 5,
       "mass": 200,
-      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31662/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31662/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31662/bp?size=32"
@@ -57929,7 +57929,7 @@
       "category": "Module",
       "volume": 10,
       "mass": 200,
-      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31664/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31664/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31664/bp?size=32"
@@ -57951,7 +57951,7 @@
       "category": "Module",
       "volume": 40,
       "mass": 200,
-      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
+      "description": "This ship modification is designed to increase a ship's projectile turret accuracy falloff range at the expense of increased power grid need for projectile weapons.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe drawbacks of fitting this rig may be reduced by training the Projectile Weapon Rigging skill.",
       "iconUrl": "https://images.evetech.net/types/31666/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/31666/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/31666/bp?size=32"
@@ -102718,18 +102718,18 @@
     },
     {
       "typeId": 93143,
-      "name": "Prototype 'Pluto' Mining Drone",
+      "name": "'Pluto' Mining Drone",
       "group": "Mining Drone",
       "category": "Drone",
       "volume": 1100,
-      "description": "A prototype drone developed by CreoDron based on ORE's 'Excavator' mining drone design by incorporating experimental rogue drone technology. The harvesting protocols have been altered to behave much more like a Rogue Drone would when salvaging and recycling materials to be brought back to a rogue drone hive. The result is a far more efficient mining process creating less residue, albeit a slower one resulting in lower mining yields over time. \n\nCurrently this drone is unsuitable for mass production due to a high rejection rate with the rogue drone technology. CreoDron is hoping to improve their understanding of this process from knowledge gained from the Gallente Federation Military Campaign operation 'Rogue Edge'.",
+      "description": "Developed by CreoDron, this drone has integrated Rogue Drone advancements. These integrations have resulted in an intelligent meticulousness, greatly reducing residue waste at the cost of slower mining cycles.\n\nThe Rogue Drone integration is the result of the Gallente Federation’s successful Rogue Edge research campaign. 17,129 capsuleers contributed towards the campaign during its duration.",
       "iconUrl": "https://images.evetech.net/types/93143/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/93143/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/93143/bp?size=32"
     },
     {
       "typeId": 93144,
-      "name": "Prototype 'Pluto' Mining Drone Blueprint",
+      "name": "'Pluto' Mining Drone Blueprint",
       "group": "Mining Drone Blueprint",
       "category": "Blueprint",
       "volume": 0.01,
@@ -102739,18 +102739,18 @@
     },
     {
       "typeId": 93145,
-      "name": "Prototype 'Pluto' Ice Harvesting Drone",
+      "name": "'Pluto' Ice Harvesting Drone",
       "group": "Mining Drone",
       "category": "Drone",
       "volume": 1100,
-      "description": "A prototype drone developed by CreoDron based on ORE's 'Excavator' mining drone design by incorporating experimental rogue drone technology. The harvesting protocols have been altered to behave much more like a Rogue Drone would when salvaging and recycling materials to be brought back to a rogue drone hive. The result is a far more efficient mining process creating less residue, albeit a slower one resulting in lower mining yields over time. \n\nCurrently this drone is unsuitable for mass production due to a high rejection rate with the rogue drone technology. CreoDron is hoping to improve their understanding of this process from knowledge gained from the Gallente Federation Military Campaign operation 'Rogue Edge'.",
+      "description": "An Ice harvesting variant of the 'Pluto” Mining Drone.\n\nDeveloped by CreoDron, this drone has integrated Rogue Drone advancements. These integrations have resulted in an intelligent meticulousness, greatly reducing residue waste at the cost of slower mining cycles.\n\nThe Rogue Drone integration is the result of the Gallente Federation’s successful Rogue Edge research campaign. 17,129 capsuleers contributed towards the campaign during its duration.",
       "iconUrl": "https://images.evetech.net/types/93145/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/93145/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/93145/bp?size=32"
     },
     {
       "typeId": 93146,
-      "name": "Prototype 'Pluto' Ice Harvesting Drone Blueprint",
+      "name": "'Pluto' Ice Harvesting Drone Blueprint",
       "group": "Mining Drone Blueprint",
       "category": "Blueprint",
       "volume": 0.01,
@@ -102995,6 +102995,94 @@
       "bpIconUrl": "https://images.evetech.net/types/95530/bp?size=32"
     },
     {
+      "typeId": 95629,
+      "name": "Oracle Navy Issue",
+      "group": "Attack Battlecruiser",
+      "category": "Ship",
+      "volume": 234000,
+      "mass": 14760000,
+      "description": "In YC128, rising tensions between the empires became one of the arguments made for economic reform within the Amarr Empire. Funding levied from holders as part of this reform was used by the Imperial Navy to develop the Oracle Navy Issue, a superior, more efficient version of the original design.",
+      "iconUrl": "https://images.evetech.net/types/95629/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95629/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95629/bp?size=32"
+    },
+    {
+      "typeId": 95630,
+      "name": "Naga Navy Issue",
+      "group": "Attack Battlecruiser",
+      "category": "Ship",
+      "volume": 252000,
+      "mass": 15000000,
+      "description": "Faced with the prospect of maintaining order in Syndicate in YC128, a region beyond the reach of CONCORD, the Caldari Navy needed a new hard-hitting solution that would establish State authority through its intimidating presence alone. The Naga Navy Issue was commissioned in partnership with the megacorporations of the Mountain faction to ensure that the newly controlled region would witness the uncompromisable honor and strength of the Caldari.",
+      "iconUrl": "https://images.evetech.net/types/95630/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95630/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95630/bp?size=32"
+    },
+    {
+      "typeId": 95631,
+      "name": "Talos Navy Issue",
+      "group": "Attack Battlecruiser",
+      "category": "Ship",
+      "volume": 270000,
+      "mass": 15552000,
+      "description": "The industrial innovations unlocked by Operation Rogue Edge in YC128 allowed the Federation Navy to explore new frontiers of iterative and creative development. The Talos Navy Issue is the result of that design and development program, a sturdier and more damage-efficient version of the basic design.",
+      "iconUrl": "https://images.evetech.net/types/95631/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95631/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95631/bp?size=32"
+    },
+    {
+      "typeId": 95632,
+      "name": "Tornado Fleet Issue",
+      "group": "Attack Battlecruiser",
+      "category": "Ship",
+      "volume": 216000,
+      "mass": 15228000,
+      "description": "With the specter of Conquest technology on the horizon in YC128, the Republic Fleet issued a request for a new Battlecruiser that might help provide some edge to the strike teams expected to be a part of that conflict. Though Conquest technology had been restricted by agreement with CONCORD, many felt that its deployment was inevitable, and the Minmatar wished to be proactive in their fear.\n\nThe result was the Tornado Fleet Issue, an advanced Republic Fleet vessel. Despite its proud suite of improvements over the original model, detractors claimed that this vessel was merely a conventional weapon that could in no way match the awesome power of the Conquest Engines.",
+      "iconUrl": "https://images.evetech.net/types/95632/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95632/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95632/bp?size=32"
+    },
+    {
+      "typeId": 95634,
+      "name": "Oracle Navy Issue Blueprint",
+      "group": "Battlecruiser Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95634/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95634/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95634/bp?size=32"
+    },
+    {
+      "typeId": 95635,
+      "name": "Naga Navy Issue Blueprint",
+      "group": "Battlecruiser Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95635/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95635/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95635/bp?size=32"
+    },
+    {
+      "typeId": 95636,
+      "name": "Talos Navy Issue Blueprint",
+      "group": "Battlecruiser Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95636/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95636/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95636/bp?size=32"
+    },
+    {
+      "typeId": 95637,
+      "name": "Tornado Fleet Issue Blueprint",
+      "group": "Battlecruiser Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/95637/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95637/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95637/bp?size=32"
+    },
+    {
       "typeId": 95741,
       "name": "Akoman",
       "group": "Attack Battlecruiser",
@@ -103015,6 +103103,600 @@
       "iconUrl": "https://images.evetech.net/types/95742/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/95742/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/95742/bp?size=32"
+    },
+    {
+      "typeId": 95809,
+      "name": "Small Federation Navy Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Federation Navy, this rig improves hybrid turret, armor repair, and structure hitpoints. It also integrates the pathways between Federation Navy technology. This unlocks even greater performance the more Federation Navy modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/95809/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/95809/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/95809/bp?size=32"
+    },
+    {
+      "typeId": 96128,
+      "name": "Medium Federation Navy Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Federation Navy, this rig improves hybrid turret, armor repair, and structure hitpoints. It also integrates the pathways between Federation Navy technology. This unlocks even greater performance the more Federation Navy modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96128/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96128/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96128/bp?size=32"
+    },
+    {
+      "typeId": 96129,
+      "name": "Large Federation Navy Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Federation Navy, this rig improves hybrid turret, armor repair, and structure hitpoints. It also integrates the pathways between Federation Navy technology. This unlocks even greater performance the more Federation Navy modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96129/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96129/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96129/bp?size=32"
+    },
+    {
+      "typeId": 96130,
+      "name": "Small Imperial Navy Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Amarr Navy, this rig improves energy turrets, armor, and the ship’s capacitor. It also integrates the pathways between Imperial Navy technology. This unlocks even greater performance the more Imperial Navy modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96130/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96130/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96130/bp?size=32"
+    },
+    {
+      "typeId": 96131,
+      "name": "Medium Imperial Navy Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Amarr Navy, this rig improves energy turrets, armor, and the ship’s capacitor. It also integrates the pathways between Imperial Navy technology. This unlocks even greater performance the more Imperial Navy modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96131/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96131/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96131/bp?size=32"
+    },
+    {
+      "typeId": 96132,
+      "name": "Large Imperial Navy Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Amarr Navy, this rig improves energy turrets, armor, and the ship’s capacitor. It also integrates the pathways between Imperial Navy technology. This unlocks even greater performance the more Imperial Navy modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96132/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96132/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96132/bp?size=32"
+    },
+    {
+      "typeId": 96136,
+      "name": "Small Republic Fleet Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Republic Fleet, this rig improves projectile turret, shield boosters, and maximum velocity. It also integrates the pathways between Republic Fleet technology. This unlocks even greater performance the more Republic Fleet modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96136/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96136/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96136/bp?size=32"
+    },
+    {
+      "typeId": 96137,
+      "name": "Medium Republic Fleet Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Republic Fleet, this rig improves projectile turret, shield boosters, and maximum velocity. It also integrates the pathways between Republic Fleet technology. This unlocks even greater performance the more Republic Fleet modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96137/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96137/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96137/bp?size=32"
+    },
+    {
+      "typeId": 96138,
+      "name": "Large Republic Fleet Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Republic Fleet, this rig improves projectile turret, shield boosters, and maximum velocity. It also integrates the pathways between Republic Fleet technology. This unlocks even greater performance the more Republic Fleet modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96138/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96138/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96138/bp?size=32"
+    },
+    {
+      "typeId": 96139,
+      "name": "Small Caldari Navy Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Caldari Navy, this rig improves missiles, shields, and targeting. It also integrates the pathways between Caldari Navy technology. This unlocks even greater performance the more Caldari Navy modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96139/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96139/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96139/bp?size=32"
+    },
+    {
+      "typeId": 96144,
+      "name": "Medium Caldari Navy Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Caldari Navy, this rig improves missiles, shields, and targeting. It also integrates the pathways between Caldari Navy technology. This unlocks even greater performance the more Caldari Navy modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96144/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96144/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96144/bp?size=32"
+    },
+    {
+      "typeId": 96145,
+      "name": "Large Caldari Navy Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Developed by the Caldari Navy, this rig improves missiles, shields, and targeting. It also integrates the pathways between Caldari Navy technology. This unlocks even greater performance the more Caldari Navy modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawback of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96145/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96145/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96145/bp?size=32"
+    },
+    {
+      "typeId": 96146,
+      "name": "Small Imperial Navy Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96146/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96146/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96146/bp?size=32"
+    },
+    {
+      "typeId": 96147,
+      "name": "Medium Imperial Navy Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96147/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96147/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96147/bp?size=32"
+    },
+    {
+      "typeId": 96148,
+      "name": "Large Imperial Navy Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96148/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96148/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96148/bp?size=32"
+    },
+    {
+      "typeId": 96149,
+      "name": "Small Caldari Navy Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96149/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96149/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96149/bp?size=32"
+    },
+    {
+      "typeId": 96150,
+      "name": "Medium Caldari Navy Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96150/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96150/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96150/bp?size=32"
+    },
+    {
+      "typeId": 96151,
+      "name": "Large Caldari Navy Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96151/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96151/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96151/bp?size=32"
+    },
+    {
+      "typeId": 96152,
+      "name": "Small Federation Navy Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96152/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96152/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96152/bp?size=32"
+    },
+    {
+      "typeId": 96153,
+      "name": "Medium Federation Navy Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96153/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96153/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96153/bp?size=32"
+    },
+    {
+      "typeId": 96154,
+      "name": "Large Federation Navy Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96154/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96154/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96154/bp?size=32"
+    },
+    {
+      "typeId": 96155,
+      "name": "Small Republic Fleet Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96155/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96155/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96155/bp?size=32"
+    },
+    {
+      "typeId": 96156,
+      "name": "Medium Republic Fleet Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96156/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96156/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96156/bp?size=32"
+    },
+    {
+      "typeId": 96157,
+      "name": "Large Republic Fleet Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96157/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96157/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96157/bp?size=32"
+    },
+    {
+      "typeId": 96541,
+      "name": "Small Dark Blood Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Built by Blood Raider engineers from combined Amarr and Minmatar synchronizers, this rig improves Energy Nosferatu, Energy Neutralizer and Energy Turret performance. However, the brute force combination that powers this synchronizer takes a significant toll on its capacitor recharge. It also integrates the pathways between Dark Blood technology. This unlocks even greater performance the more Dark Blood modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96541/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96541/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96541/bp?size=32"
+    },
+    {
+      "typeId": 96559,
+      "name": "Medium Dark Blood Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Built by Blood Raider engineers from combined Amarr and Minmatar synchronizers, this rig improves Energy Nosferatu, Energy Neutralizer and Energy Turret performance. However, the brute force combination that powers this synchronizer takes a significant toll on its capacitor recharge. It also integrates the pathways between Dark Blood technology. This unlocks even greater performance the more Dark Blood modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96559/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96559/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96559/bp?size=32"
+    },
+    {
+      "typeId": 96564,
+      "name": "Large Dark Blood Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Built by Blood Raider engineers from combined Amarr and Minmatar synchronizers, this rig improves Energy Nosferatu, Energy Neutralizer and Energy Turret performance. However, the brute force combination that powers this synchronizer takes a significant toll on its capacitor recharge. It also integrates the pathways between Dark Blood technology. This unlocks even greater performance the more Dark Blood modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96564/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96564/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96564/bp?size=32"
+    },
+    {
+      "typeId": 96587,
+      "name": "Small True Sansha Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Reverse-engineered by True Creations' finest minds from Amarr and Caldari synchronizers, this rig improves Afterburner and Energy Turret performance. However, the extreme conditions its powerful design creates significantly increase Afterburner activation costs. It also integrates the pathways between True Sansha technology. This unlocks even greater performance the more True Sansha modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96587/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96587/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96587/bp?size=32"
+    },
+    {
+      "typeId": 96594,
+      "name": "Medium True Sansha Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Reverse-engineered by True Creations' finest minds from Amarr and Caldari synchronizers, this rig improves Afterburner and Energy Turret performance. However, the extreme conditions its powerful design creates significantly increase Afterburner activation costs. It also integrates the pathways between True Sansha technology. This unlocks even greater performance the more True Sansha modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96594/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96594/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96594/bp?size=32"
+    },
+    {
+      "typeId": 96595,
+      "name": "Large True Sansha Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Reverse-engineered by True Creations' finest minds from Amarr and Caldari synchronizers, this rig improves Afterburner and Energy Turret performance. However, the extreme conditions its powerful design creates significantly increase Afterburner activation costs. It also integrates the pathways between True Sansha technology. This unlocks even greater performance the more True Sansha modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96595/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96595/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96595/bp?size=32"
+    },
+    {
+      "typeId": 96625,
+      "name": "Small Shadow Serpentis Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Serpentis developed this synchronizer from stolen Gallente and Minmatar technology. It improves hybrid turret performance, ship maximum velocity, and web resistance. However, Serpentis R&D was unable to recreate the clean signal of the originals, and this rig significantly reduces targeting range. It also integrates the pathways between Shadow Serpentis technology. This unlocks even greater performance the more Shadow Serpentis modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96625/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96625/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96625/bp?size=32"
+    },
+    {
+      "typeId": 96640,
+      "name": "Medium Shadow Serpentis Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Serpentis developed this synchronizer from stolen Gallente and Minmatar technology. It improves hybrid turret performance, ship maximum velocity, and web resistance. However, Serpentis R&D was unable to recreate the clean signal of the originals, and this rig significantly reduces targeting range. It also integrates the pathways between Shadow Serpentis technology. This unlocks even greater performance the more Shadow Serpentis modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96640/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96640/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96640/bp?size=32"
+    },
+    {
+      "typeId": 96641,
+      "name": "Large Shadow Serpentis Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Serpentis developed this synchronizer from stolen Gallente and Minmatar technology. It improves hybrid turret performance, ship maximum velocity, and web resistance. However, Serpentis R&D was unable to recreate the clean signal of the originals, and this rig significantly reduces targeting range. It also integrates the pathways between Shadow Serpentis technology. This unlocks even greater performance the more Shadow Serpentis modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96641/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96641/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96641/bp?size=32"
+    },
+    {
+      "typeId": 96696,
+      "name": "Small Dread Guristas Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Built from Caldari synchronizers hacked to accommodate Gallente software, this rig improves drones, ECM modules, and shield resistances. However, the incompatibility of the Gallente firmware with Caldari technology results in greatly reduced drone control ranges. It also integrates the pathways between Dread Guristas technology. This unlocks even greater performance the more Dread Guristas modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96696/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96696/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96696/bp?size=32"
+    },
+    {
+      "typeId": 96719,
+      "name": "Medium Dread Guristas Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Built from Caldari synchronizers hacked to accommodate Gallente software, this rig improves drones, ECM modules, and shield resistances. However, the incompatibility of the Gallente firmware with Caldari technology results in greatly reduced drone control ranges. It also integrates the pathways between Dread Guristas technology. This unlocks even greater performance the more Dread Guristas modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96719/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96719/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96719/bp?size=32"
+    },
+    {
+      "typeId": 96720,
+      "name": "Large Dread Guristas Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "Built from Caldari synchronizers hacked to accommodate Gallente software, this rig improves drones, ECM modules, and shield resistances. However, the incompatibility of the Gallente firmware with Caldari technology results in greatly reduced drone control ranges. It also integrates the pathways between Dread Guristas technology. This unlocks even greater performance the more Dread Guristas modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96720/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96720/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96720/bp?size=32"
+    },
+    {
+      "typeId": 96723,
+      "name": "Small Domination Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "This rig uses Jovian-inspired interfaced to connect Gallente and Minmatar synchronizers. It improves projectile turrets, signature radius, and warp speed. However, as its builders do not fully understand the technology they used, it also reduces the integrity of the ship's shields, armor, and structure. It also integrates the pathways between Domination technology. This unlocks even greater performance the more Domination modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96723/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96723/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96723/bp?size=32"
+    },
+    {
+      "typeId": 96725,
+      "name": "Medium Domination Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "This rig uses Jovian-inspired interfaced to connect Gallente and Minmatar synchronizers. It improves projectile turrets, signature radius, and warp speed. However, as its builders do not fully understand the technology they used, it also reduces the integrity of the ship's shields, armor, and structure. It also integrates the pathways between Domination technology. This unlocks even greater performance the more Domination modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96725/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96725/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96725/bp?size=32"
+    },
+    {
+      "typeId": 96726,
+      "name": "Large Domination Synchronizer",
+      "group": "Rig Synchronizer",
+      "category": "Module",
+      "volume": 5,
+      "mass": 200,
+      "description": "This rig uses Jovian-inspired interfaced to connect Gallente and Minmatar synchronizers. It improves projectile turrets, signature radius, and warp speed. However, as its builders do not fully understand the technology they used, it also reduces the integrity of the ship's shields, armor, and structure. It also integrates the pathways between Domination technology. This unlocks even greater performance the more Domination modules are installed.\n\nPenalty: Using more than one type of this module or similar modules that affect the same attribute on the ship will be penalized.\n\nThe CPU drawbacks of fitting this rig may be reduced by training the Synchronization Rigging skill.",
+      "iconUrl": "https://images.evetech.net/types/96726/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96726/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96726/bp?size=32"
+    },
+    {
+      "typeId": 96774,
+      "name": "Small Dark Blood Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96774/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96774/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96774/bp?size=32"
+    },
+    {
+      "typeId": 96775,
+      "name": "Medium Dark Blood Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96775/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96775/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96775/bp?size=32"
+    },
+    {
+      "typeId": 96776,
+      "name": "Large Dark Blood Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96776/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96776/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96776/bp?size=32"
+    },
+    {
+      "typeId": 96777,
+      "name": "Small True Sansha Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96777/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96777/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96777/bp?size=32"
+    },
+    {
+      "typeId": 96778,
+      "name": "Medium True Sansha Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96778/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96778/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96778/bp?size=32"
+    },
+    {
+      "typeId": 96779,
+      "name": "Large True Sansha Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96779/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96779/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96779/bp?size=32"
+    },
+    {
+      "typeId": 96780,
+      "name": "Small Dread Guristas Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96780/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96780/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96780/bp?size=32"
+    },
+    {
+      "typeId": 96781,
+      "name": "Medium Dread Guristas Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96781/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96781/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96781/bp?size=32"
+    },
+    {
+      "typeId": 96782,
+      "name": "Large Dread Guristas Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96782/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96782/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96782/bp?size=32"
+    },
+    {
+      "typeId": 96783,
+      "name": "Small Shadow Serpentis Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96783/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96783/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96783/bp?size=32"
+    },
+    {
+      "typeId": 96784,
+      "name": "Medium Shadow Serpentis Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96784/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96784/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96784/bp?size=32"
+    },
+    {
+      "typeId": 96785,
+      "name": "Large Shadow Serpentis Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96785/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96785/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96785/bp?size=32"
+    },
+    {
+      "typeId": 96786,
+      "name": "Small Domination Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96786/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96786/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96786/bp?size=32"
+    },
+    {
+      "typeId": 96787,
+      "name": "Medium Domination Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96787/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96787/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96787/bp?size=32"
+    },
+    {
+      "typeId": 96788,
+      "name": "Large Domination Synchronizer Blueprint",
+      "group": "Rig Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/96788/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/96788/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/96788/bp?size=32"
     },
     {
       "typeId": 97638,
@@ -103509,6 +104191,91 @@
       "iconUrl": "https://images.evetech.net/types/97718/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/97718/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/97718/bp?size=32"
+    },
+    {
+      "typeId": 97955,
+      "name": "Imperial Navy Stasis Webifier",
+      "group": "Stasis Web",
+      "category": "Module",
+      "volume": 5,
+      "description": "Reduces the maximum speed of a ship by employing micro energy streams that effectively entangle the target temporarily, thereby slowing it down.\n\nIn YC128, 14,161 capsuleers contributed to the Blessed Exchange campaign. It is thanks to that campaign’s economic reforms that the Imperial Navy was able to finance the development of its own Stasis Webifier version.",
+      "iconUrl": "https://images.evetech.net/types/97955/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/97955/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/97955/bp?size=32"
+    },
+    {
+      "typeId": 97956,
+      "name": "Imperial Navy Warp Scrambler",
+      "group": "Warp Scrambler",
+      "category": "Module",
+      "volume": 5,
+      "description": "Disrupts the target ship's navigation computer, disabling warping, jumping, microwarpdrives and micro jump drives.\n\nIn YC128, 14,161 capsuleers contributed to the Blessed Exchange campaign. It is thanks to that campaign’s economic reforms that the Imperial Navy was able to finance the development of its own Warp Scrambler version.",
+      "iconUrl": "https://images.evetech.net/types/97956/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/97956/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/97956/bp?size=32"
+    },
+    {
+      "typeId": 97957,
+      "name": "Imperial Navy Warp Disruptor",
+      "group": "Warp Scrambler",
+      "category": "Module",
+      "volume": 5,
+      "description": "Disrupts the target ship's navigation computer, which prevents it from warping.\n\nIn YC128, 14,161 capsuleers contributed to the Blessed Exchange campaign. It is thanks to that campaign’s economic reforms that the Imperial Navy was able to finance the development of its own Warp Disruptor version.",
+      "iconUrl": "https://images.evetech.net/types/97957/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/97957/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/97957/bp?size=32"
+    },
+    {
+      "typeId": 97993,
+      "name": "Imperial Navy Warp Disruptor Blueprint",
+      "group": "Warp Scrambler Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/97993/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/97993/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/97993/bp?size=32"
+    },
+    {
+      "typeId": 97994,
+      "name": "Imperial Navy Warp Scrambler Blueprint",
+      "group": "Warp Scrambler Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/97994/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/97994/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/97994/bp?size=32"
+    },
+    {
+      "typeId": 97995,
+      "name": "Imperial Navy Stasis Webifier Blueprint",
+      "group": "Stasis Web Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/97995/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/97995/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/97995/bp?size=32"
+    },
+    {
+      "typeId": 98142,
+      "name": "SARO Mobile Observatory",
+      "group": "Mobile Observatory",
+      "category": "Deployable",
+      "volume": 100,
+      "mass": 10000,
+      "description": "This structure, once deployed and having completed its automatic activation process, will periodically scan the solar system for cloaked objects and reveal them.",
+      "iconUrl": "https://images.evetech.net/types/98142/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/98142/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/98142/bp?size=32"
+    },
+    {
+      "typeId": 98143,
+      "name": "SARO Mobile Observatory Blueprint",
+      "group": "Mobile Observatory Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/98143/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/98143/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/98143/bp?size=32"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T11:56:56.021Z",
+  "generatedAt": "2026-11-11T11:34:54.454Z",
   "smartBombTypeIds": [
     1547,
     1549,
@@ -15472,7 +15472,7 @@
     },
     "50004261": {
       "systemId": 30002959,
-      "name": "Stargate (Arzad)"
+      "name": "Stargate (Starkman)"
     },
     "50004262": {
       "systemId": 30002959,
@@ -25376,7 +25376,7 @@
     },
     "50006885": {
       "systemId": 30002962,
-      "name": "Stargate (Arzad)"
+      "name": "Stargate (Starkman)"
     },
     "50006886": {
       "systemId": 30003285,
@@ -51804,7 +51804,7 @@
     },
     "50013561": {
       "systemId": 30002979,
-      "name": "Stargate (Arzad)"
+      "name": "Stargate (Starkman)"
     },
     "50013562": {
       "systemId": 30002960,
@@ -56065,6 +56065,22 @@
     "50017735": {
       "systemId": 30002992,
       "name": "Stargate (Mehatoor)"
+    },
+    "50017736": {
+      "systemId": 30003299,
+      "name": "Stargate (Ienakkamon)"
+    },
+    "50017737": {
+      "systemId": 30045313,
+      "name": "Stargate (T-LIWS)"
+    },
+    "50017738": {
+      "systemId": 30004970,
+      "name": "Stargate (Jufvitte)"
+    },
+    "50017739": {
+      "systemId": 30005308,
+      "name": "Stargate (Renyn)"
     }
   }
 }

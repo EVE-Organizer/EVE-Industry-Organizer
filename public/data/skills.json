@@ -5979,6 +5979,20 @@
     "iconUrl": "https://images.evetech.net/types/3551/icon?size=32"
   },
   {
+    "skillId": 96100,
+    "name": "Synchronization Rigging",
+    "rank": 5,
+    "prerequisites": [
+      {
+        "skillId": 26252,
+        "level": 5
+      }
+    ],
+    "primaryAttribute": "intelligence",
+    "secondaryAttribute": "memory",
+    "iconUrl": "https://images.evetech.net/types/96100/icon?size=32"
+  },
+  {
     "skillId": 27906,
     "name": "Tactical Logistics Reconfiguration",
     "rank": 8,
