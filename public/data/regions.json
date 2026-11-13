@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T11:59:23.823Z",
+  "generatedAt": "2026-11-13T11:43:00.615Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.0488,
+      "reactionCostIndex": 0.049,
       "marketSystemId": 30004552
     },
     {
@@ -995,9 +995,9 @@
       "regionId": 10000032,
       "name": "Sinq Laison",
       "securityClass": "highsec",
-      "buildSystemId": 30002639,
-      "buildSystemName": "Adreland",
-      "buildSystemSecurity": 0.872502,
+      "buildSystemId": 30002709,
+      "buildSystemName": "Auberulle",
+      "buildSystemSecurity": 0.83441,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30002659
@@ -1171,12 +1171,12 @@
       "regionId": 10000068,
       "name": "Verge Vendor",
       "securityClass": "highsec",
-      "buildSystemId": 30005303,
-      "buildSystemName": "Merolles",
-      "buildSystemSecurity": 0.884628,
+      "buildSystemId": 30005314,
+      "buildSystemName": "Theruesse",
+      "buildSystemSecurity": 0.879221,
       "costIndex": 0.0014,
       "reactionCostIndex": 0.0014,
-      "marketSystemId": 30005303
+      "marketSystemId": 30005314
     },
     {
       "regionId": 14000001,
