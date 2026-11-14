@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T11:43:00.615Z",
+  "generatedAt": "2026-11-14T11:05:23.078Z",
   "regions": [
     {
       "regionId": 11000001,
@@ -636,7 +636,7 @@
       "buildSystemName": "XF-TQL",
       "buildSystemSecurity": -0.011665,
       "costIndex": 0.0014,
-      "reactionCostIndex": 0.049,
+      "reactionCostIndex": 0.0488,
       "marketSystemId": 30004552
     },
     {
@@ -1251,7 +1251,7 @@
       "buildSystemId": 30100000,
       "buildSystemName": "Zarzakh",
       "buildSystemSecurity": -1,
-      "costIndex": 0.0305,
+      "costIndex": 0.0307,
       "reactionCostIndex": 0.0014,
       "marketSystemId": 30100000
     }
