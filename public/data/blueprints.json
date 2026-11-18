@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T12:39:27.452Z",
+  "generatedAt": "2026-11-18T12:29:35.350Z",
   "blueprints": [
     {
       "blueprintTypeId": 879,
@@ -201459,6 +201459,36 @@
       "productIconUrl": "https://images.evetech.net/types/98142/icon?size=32",
       "productRenderUrl": "https://images.evetech.net/types/98142/render?size=128",
       "copyTime": 9600
+    },
+    {
+      "blueprintTypeId": 98846,
+      "productTypeId": 98845,
+      "productQuantity": 1,
+      "manufacturingTime": 1800,
+      "materials": [
+        {
+          "typeId": 36,
+          "quantity": 529
+        },
+        {
+          "typeId": 35,
+          "quantity": 792
+        },
+        {
+          "typeId": 34,
+          "quantity": 862
+        }
+      ],
+      "requiredSkills": {
+        "Industry": 1
+      },
+      "tier": "faction",
+      "kind": "manufacturing",
+      "productGroup": "Stasis Web",
+      "bpIconUrl": "https://images.evetech.net/types/98846/bp?size=32",
+      "productIconUrl": "https://images.evetech.net/types/98845/icon?size=32",
+      "productRenderUrl": "https://images.evetech.net/types/98845/render?size=128",
+      "copyTime": 1440
     }
   ]
 }

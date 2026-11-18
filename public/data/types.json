@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T12:39:27.452Z",
+  "generatedAt": "2026-11-18T12:29:35.350Z",
   "types": [
     {
       "typeId": 18,
@@ -48447,7 +48447,7 @@
       "category": "Charge",
       "volume": 1,
       "mass": 1,
-      "description": "Originally used by the adolescent hacker group 'The Fendahlian Collective' to break past high tech security firmware, these script packs contain intricate code which modify the inherent behavior of certain modules by directly inserting commands into the firmware. The applications of such technology was not lost on the major players and the kids who invented it now head their own research divisions.\n\nThis script can be loaded into a warp disruption field generator to focus its effect upon a single ship much like a standard warp disruptor. This allows the module to disrupt ships of any size, including ships normally immune to all forms of electronic warfare.",
+      "description": "Originally used by the adolescent hacker group The 'Fendahlian Collective' to break past high tech security firmware, these script packs contain intricate code which modify the inherent behavior of certain modules by directly inserting commands into the firmware. The applications of such technology was not lost on the major players and the kids who invented it now head their own research divisions.\n\nThis script can be loaded into a warp disruption field generator to focus its effect upon a single ship much like a standard warp disruptor. This allows the module to disrupt ships of any size, including ships normally immune to all forms of electronic warfare.",
       "iconUrl": "https://images.evetech.net/types/29003/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/29003/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/29003/bp?size=32"
@@ -48535,7 +48535,7 @@
       "category": "Charge",
       "volume": 1,
       "mass": 1,
-      "description": "Originally used by the adolescent hacker group 'The Fendahlian Collective' to break past high tech security firmware, these script packs contain intricate code which modify the inherent behavior of certain modules by directly inserting commands into the firmware. The applications of such technology was not lost on the major players and the kids who invented it now head their own research divisions.\n\nThis script can be loaded into a sensor booster or remote sensor booster module to increase the module's locking speed bonus at the expense of the targeting range and sensor strength bonuses.",
+      "description": "Originally used by the adolescent hacker group The 'Fendahlian Collective' to break past high tech security firmware, these script packs contain intricate code which modify the inherent behavior of certain modules by directly inserting commands into the firmware. The applications of such technology was not lost on the major players and the kids who invented it now head their own research divisions.\n\nThis script can be loaded into a sensor booster or remote sensor booster module to increase the module's locking speed bonus at the expense of the targeting range and sensor strength bonuses.",
       "iconUrl": "https://images.evetech.net/types/29011/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/29011/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/29011/bp?size=32"
@@ -50647,7 +50647,7 @@
       "category": "Ship",
       "volume": 5000,
       "mass": 1600000,
-      "description": "InterBus commissioned Duvolle Laboratories to design them an upgraded shuttlecraft in YC 106. The result was this vessel, which combines compact size with a surprisingly large cargo hold - ideal for the multipurpose transportation that InterBus specializes in.\n\nThe ship remained a closely-guarded Interbus asset for many years, but in YC111 it was made available to select capsuleer pilots as part of an outreach programme intended to raise awareness of the InterBus brand among the growing capsuleer population. It remains, however, a very rare sight among the spacelanes and is considered by many to be a valuable collector's item.",
+      "description": "InterBus commissioned Duvolle Laboratories to design them an upgraded shuttlecraft in YC 106. The result was this vessel, which combines compact size with a surprisingly large cargo hold - ideal for the multipurpose transportation that InterBus specializes in.\n\nThe ship remained a closely-guarded InterBus asset for many years, but in YC111 it was made available to select capsuleer pilots as part of an outreach programme intended to raise awareness of the InterBus brand among the growing capsuleer population. It remains, however, a very rare sight among the spacelanes and is considered by many to be a valuable collector's item.",
       "iconUrl": "https://images.evetech.net/types/30842/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/30842/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/30842/bp?size=32"
@@ -71592,7 +71592,7 @@
       "category": "Charge",
       "volume": 1,
       "mass": 1,
-      "description": "Originally used by the adolescent hacker group 'The Fendahlian Collective' to break past high tech security firmware, these script packs contain intricate code which modify the inherent behavior of certain modules by directly inserting commands into the firmware. The applications of such technology was not lost on the major players and the kids who invented it now head their own research divisions.\n\nThis script can be loaded into a sensor booster or remote sensor booster module to increase the module's sensor strength bonus at the expense of the targeting range and locking speed bonuses.",
+      "description": "Originally used by the adolescent hacker group The 'Fendahlian Collective' to break past high tech security firmware, these script packs contain intricate code which modify the inherent behavior of certain modules by directly inserting commands into the firmware. The applications of such technology was not lost on the major players and the kids who invented it now head their own research divisions.\n\nThis script can be loaded into a sensor booster or remote sensor booster module to increase the module's sensor strength bonus at the expense of the targeting range and locking speed bonuses.",
       "iconUrl": "https://images.evetech.net/types/41155/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/41155/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/41155/bp?size=32"
@@ -104194,7 +104194,7 @@
     },
     {
       "typeId": 97955,
-      "name": "Imperial Navy Stasis Webifier",
+      "name": "Compact Imperial Navy Stasis Webifier",
       "group": "Stasis Web",
       "category": "Module",
       "volume": 5,
@@ -104247,7 +104247,7 @@
     },
     {
       "typeId": 97995,
-      "name": "Imperial Navy Stasis Webifier Blueprint",
+      "name": "Compact Imperial Navy Stasis Webifier Blueprint",
       "group": "Stasis Web Blueprint",
       "category": "Blueprint",
       "volume": 0.01,
@@ -104276,6 +104276,27 @@
       "iconUrl": "https://images.evetech.net/types/98143/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/98143/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/98143/bp?size=32"
+    },
+    {
+      "typeId": 98845,
+      "name": "Imperial Navy Stasis Webifier",
+      "group": "Stasis Web",
+      "category": "Module",
+      "volume": 5,
+      "description": "Reduces the maximum speed of a ship by employing micro energy streams that effectively entangle the target temporarily, thereby slowing it down.\n\nIn YC128, 14,161 capsuleers contributed to the Blessed Exchange campaign. It is thanks to that campaign’s economic reforms that the Imperial Navy was able to finance the development of its own Stasis Webifier version.",
+      "iconUrl": "https://images.evetech.net/types/98845/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/98845/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/98845/bp?size=32"
+    },
+    {
+      "typeId": 98846,
+      "name": "Imperial Navy Stasis Webifier Blueprint",
+      "group": "Stasis Web Blueprint",
+      "category": "Blueprint",
+      "volume": 0.01,
+      "iconUrl": "https://images.evetech.net/types/98846/icon?size=32",
+      "renderUrl": "https://images.evetech.net/types/98846/render?size=128",
+      "bpIconUrl": "https://images.evetech.net/types/98846/bp?size=32"
     }
   ]
 }
