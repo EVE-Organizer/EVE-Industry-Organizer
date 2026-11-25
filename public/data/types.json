@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-24T14:26:13.382Z",
+  "generatedAt": "2026-11-25T13:44:46.898Z",
   "types": [
     {
       "typeId": 18,
@@ -26612,7 +26612,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by Blood Raider scientists for use by their elite officers. \n\nPrimary Effect: +4 bonus to Perception\n\nSecondary Effect: 1% reduction in the duration of modules requiring the Capacitor Emission Systems skill\n\nSet Effect: 15% bonus to the strength of all Talisman implant secondary effects",
+      "description": "This ocular filter has been modified by Blood Raider scientists for use by their elite officers. \n\nPrimary Effect: +4 bonus to Perception\nSecondary Effect: 1% reduction in the duration of modules requiring the Capacitor Emission Systems skill\nSet Effect: 15% bonus to the strength of all Talisman implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/19534/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/19534/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/19534/bp?size=32"
@@ -63595,7 +63595,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by Sisters of EVE scientists for use by their elite officers.\n\nPrimary Effect: +4 bonus to Perception\n\nSecondary Effect: 1% bonus to warp speed\n\nSet Effect: 15% bonus to the strength of all Ascendancy implant secondary effects",
+      "description": "This ocular filter has been modified by Sisters of EVE scientists for use by their elite officers.\n\nPrimary Effect: +4 bonus to Perception\nSecondary Effect: 1% bonus to warp speed\nSet Effect: 15% bonus to the strength of all Ascendancy implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/33516/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/33516/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/33516/bp?size=32"
@@ -63829,7 +63829,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by Sisters of EVE scientists for use by their elite officers.\n\nPrimary Effect: +3 bonus to Perception\n\nSecondary Effect: 1% bonus to warp speed\n\nSet Effect: 10% bonus to the strength of all Ascendancy implant secondary effects",
+      "description": "This ocular filter has been modified by Sisters of EVE scientists for use by their elite officers.\n\nPrimary Effect: +3 bonus to Perception\nSecondary Effect: 1% bonus to warp speed\nSet Effect: 10% bonus to the strength of all Ascendancy implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/33555/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/33555/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/33555/bp?size=32"
@@ -86721,7 +86721,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter is listed in the DED inventory as a modification by CONCORD weapons technologists of standard capsuleer implant templates with control routines that mimic methods of enhancing the firepower of reverse-engineered Triglavian weaponry, at the cost of a slower build up to maximum particle stream output.\n\nHowever, persistent rumors among New Eden's capsuleer, transhuman and wirehead communities suggest that the research and development group that created these implants was lead by a Society of Conscious Thought team with special expertise in so-called \"restricted artificial intelligences\". The possibility that these implants are based on RAI technology raises startling questions about the nature of the \"mimesis\" involved in these augmentations.\n\nPrimary Effect: +2 bonus to Perception\n\nSecondary Effect: 1% bonus to maximum damage output of entropic disintegrators\n\nTertiary Effect: -33% penalty to damage multiplier increase per cycle of entropic disintegrators\n\nSet Effect: 20% bonus to the strength of all Mimesis implant secondary effects",
+      "description": "This ocular filter is listed in the DED inventory as a modification by CONCORD weapons technologists of standard capsuleer implant templates with control routines that mimic methods of enhancing the firepower of reverse-engineered Triglavian weaponry, at the cost of a slower build up to maximum particle stream output.\n\nHowever, persistent rumors among New Eden's capsuleer, transhuman and wirehead communities suggest that the research and development group that created these implants was lead by a Society of Conscious Thought team with special expertise in so-called \"restricted artificial intelligences\". The possibility that these implants are based on RAI technology raises startling questions about the nature of the \"mimesis\" involved in these augmentations.\n\nPrimary Effect: +2 bonus to Perception\nSecondary Effect: 1% bonus to maximum damage output of entropic disintegrators\nTertiary Effect: -33% penalty to damage multiplier increase per cycle of entropic disintegrators\n\nSet Effect: 20% bonus to the strength of all Mimesis implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/52674/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/52674/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/52674/bp?size=32"
@@ -86868,7 +86868,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter is listed in the DED inventory as a modification by CONCORD weapons technologists of standard capsuleer implant templates with control routines that mimic methods of enhancing the firepower of reverse-engineered Triglavian weaponry, at the cost of a slower build up to maximum particle stream output.\n\nHowever, persistent rumors among New Eden's capsuleer, transhuman and wirehead communities suggest that the research and development group that created these implants was lead by a Society of Conscious Thought team with special expertise in so-called \"restricted artificial intelligences\". The possibility that these implants are based on RAI technology raises startling questions about the nature of the \"mimesis\" involved in these augmentations.\n\nPrimary Effect: +3 bonus to Perception\n\nSecondary Effect: 1.25% bonus to maximum damage output of entropic disintegrators\n\nTertiary Effect: 0.33% penalty to damage multiplier increase per cycle of entropic disintegrators\n\nSet Effect: 20% bonus to the strength of all Mimesis implant secondary effects",
+      "description": "This ocular filter is listed in the DED inventory as a modification by CONCORD weapons technologists of standard capsuleer implant templates with control routines that mimic methods of enhancing the firepower of reverse-engineered Triglavian weaponry, at the cost of a slower build up to maximum particle stream output.\n\nHowever, persistent rumors among New Eden's capsuleer, transhuman and wirehead communities suggest that the research and development group that created these implants was lead by a Society of Conscious Thought team with special expertise in so-called \"restricted artificial intelligences\". The possibility that these implants are based on RAI technology raises startling questions about the nature of the \"mimesis\" involved in these augmentations.\n\nPrimary Effect: +3 bonus to Perception\nSecondary Effect: 1.25% bonus to maximum damage output of entropic disintegrators\nTertiary Effect: 0.33% penalty to damage multiplier increase per cycle of entropic disintegrators\n\nSet Effect: 20% bonus to the strength of all Mimesis implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/52785/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/52785/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/52785/bp?size=32"
@@ -87030,7 +87030,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter is listed in the DED inventory as a modification by CONCORD weapons technologists of standard capsuleer implant templates with control routines that mimic methods of enhancing the firepower of reverse-engineered Triglavian weaponry, at the cost of a slower build up to maximum particle stream output.\n\nHowever, persistent rumors among New Eden's capsuleer, transhuman and wirehead communities suggest that the research and development group that created these implants was lead by a Society of Conscious Thought team with special expertise in so-called \"restricted artificial intelligences\". The possibility that these implants are based on RAI technology raises startling questions about the nature of the \"mimesis\" involved in these augmentations.\n\nPrimary Effect: +4 bonus to Perception\n\nSecondary Effect: 1.5% bonus to maximum damage output of entropic disintegrators\n\nTertiary Effect: 0.33% penalty to damage multiplier increase per cycle of entropic disintegrators\n\nSet Effect: 20% bonus to the strength of all Mimesis implant secondary effects",
+      "description": "This ocular filter is listed in the DED inventory as a modification by CONCORD weapons technologists of standard capsuleer implant templates with control routines that mimic methods of enhancing the firepower of reverse-engineered Triglavian weaponry, at the cost of a slower build up to maximum particle stream output.\n\nHowever, persistent rumors among New Eden's capsuleer, transhuman and wirehead communities suggest that the research and development group that created these implants was lead by a Society of Conscious Thought team with special expertise in so-called \"restricted artificial intelligences\". The possibility that these implants are based on RAI technology raises startling questions about the nature of the \"mimesis\" involved in these augmentations.\n\nPrimary Effect: +4 bonus to Perception\nSecondary Effect: 1.5% bonus to maximum damage output of entropic disintegrators\nTertiary Effect: 0.33% penalty to damage multiplier increase per cycle of entropic disintegrators\n\nSet Effect: 20% bonus to the strength of all Mimesis implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/52917/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/52917/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/52917/bp?size=32"
@@ -87332,7 +87332,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of Nation and related factions. It provides increasing shield hitpoint bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +3 bonus to Perception\n\nSecondary Effect: 1% bonus to shield hitpoints\n\nSet Effect: 10% bonus to the strength of all Nirvana implant secondary effects",
+      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of Nation and related factions. It provides increasing shield hitpoint bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +3 bonus to Perception\nSecondary Effect: 1% bonus to shield hitpoints\nSet Effect: 10% bonus to the strength of all Nirvana implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/53704/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/53704/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/53704/bp?size=32"
@@ -87398,7 +87398,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of Nation and related factions. It provides increasing shield hitpoint bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +4 bonus to Perception\n\nSecondary Effect: 1% bonus to shield hitpoints\n\nSet Effect: 15% bonus to the strength of all Nirvana implant secondary effects",
+      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of Nation and related factions. It provides increasing shield hitpoint bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +4 bonus to Perception\nSecondary Effect: 1% bonus to shield hitpoints\nSet Effect: 15% bonus to the strength of all Nirvana implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/53710/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/53710/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/53710/bp?size=32"
@@ -87595,7 +87595,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of Nation and related factions. It provides increasing shield hitpoint bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +2 bonus to Perception\n\nSecondary Effect: 1% bonus to shield hitpoints\n\nSet Effect: 2.5% bonus to the strength of all Nirvana implant secondary effects",
+      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of Nation and related factions. It provides increasing shield hitpoint bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +2 bonus to Perception\nSecondary Effect: 1% bonus to shield hitpoints\nSet Effect: 2.5% bonus to the strength of all Nirvana implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/53853/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/53853/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/53853/bp?size=32"
@@ -87710,7 +87710,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by Angel scientists for use by their elite officers.\n\nPrimary Effect: +4 Bonus to Perception\n\nSecondary Effect: 1% reduction in the cycle time and capacitor activation cost of subcapital remote armor repairers and remote shield boosters\n\nSet Effect: 15% bonus to the strength of all Savior implant secondary effects",
+      "description": "This ocular filter has been modified by Angel scientists for use by their elite officers.\n\nPrimary Effect: +4 Bonus to Perception\nSecondary Effect: 1% reduction in the cycle time and capacitor activation cost of subcapital remote armor repairers and remote shield boosters\nSet Effect: 15% bonus to the strength of all Savior implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/53890/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/53890/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/53890/bp?size=32"
@@ -87776,7 +87776,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by Angel scientists for use by their elite officers.\n\nPrimary Effect: +3 Bonus to Perception\n\nSecondary Effect: 1% reduction in the cycle time and capacitor activation cost of subcapital remote armor repairers and remote shield boosters\n\nSet Effect: 10% bonus to the strength of all Savior implant secondary effects",
+      "description": "This ocular filter has been modified by Angel scientists for use by their elite officers.\n\nPrimary Effect: +3 Bonus to Perception\nSecondary Effect: 1% reduction in the cycle time and capacitor activation cost of subcapital remote armor repairers and remote shield boosters\nSet Effect: 10% bonus to the strength of all Savior implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/53896/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/53896/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/53896/bp?size=32"
@@ -87842,7 +87842,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by Angel scientists for use by their elite officers.\n\nPrimary Effect: +2 Bonus to Perception\n\nSecondary Effect: 1% reduction in the cycle time and capacitor activation cost of subcapital remote armor repairers and remote shield boosters\n\nSet Effect: 2.5% bonus to the strength of all Savior implant secondary effects",
+      "description": "This ocular filter has been modified by Angel scientists for use by their elite officers.\n\nPrimary Effect: +2 Bonus to Perception\nSecondary Effect: 1% reduction in the cycle time and capacitor activation cost of subcapital remote armor repairers and remote shield boosters\nSet Effect: 2.5% bonus to the strength of all Savior implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/53902/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/53902/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/53902/bp?size=32"
@@ -88194,7 +88194,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by Guristas scientists for use by their elite officers.\n\nPrimary Effect: +4 Bonus to Perception\n\nSecondary Effects: 1% bonus to drone tracking speed, drone optimal range, drone falloff range, missile flight time, and missile explosion velocity\n\nSet Effect: 15% bonus to the strength of all Hydra implant secondary effects\n\nNote: Has no effect on fighters",
+      "description": "This ocular filter has been modified by Guristas scientists for use by their elite officers.\n\nPrimary Effect: +4 Bonus to Perception\nSecondary Effects: 1% bonus to drone tracking speed, drone optimal range, drone falloff range, missile flight time, and missile explosion velocity\nSet Effect: 15% bonus to the strength of all Hydra implant secondary effects\n\nNote: Has no effect on fighters",
       "iconUrl": "https://images.evetech.net/types/54392/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/54392/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/54392/bp?size=32"
@@ -88260,7 +88260,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by Guristas scientists for use by their elite officers.\n\nPrimary Effect: +3 Bonus to Perception\n\nSecondary Effects: 1% bonus to drone tracking speed, drone optimal range, drone falloff range, missile flight time, and missile explosion velocity\n\nSet Effect: 10% bonus to the strength of all Hydra implant secondary effects\n\nNote: Has no effect on fighters",
+      "description": "This ocular filter has been modified by Guristas scientists for use by their elite officers.\n\nPrimary Effect: +3 Bonus to Perception\nSecondary Effects: 1% bonus to drone tracking speed, drone optimal range, drone falloff range, missile flight time, and missile explosion velocity\nSet Effect: 10% bonus to the strength of all Hydra implant secondary effects\n\nNote: Has no effect on fighters",
       "iconUrl": "https://images.evetech.net/types/54398/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/54398/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/54398/bp?size=32"
@@ -88326,7 +88326,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by Guristas scientists for use by their elite officers.\n\nPrimary Effect: +2 Bonus to Perception\n\nSecondary Effects: 1% bonus to drone tracking speed, drone optimal range, drone falloff range, missile flight time, and missile explosion velocity\n\nSet Effect: 2.5% bonus to the strength of all Hydra implant secondary effects\n\nNote: Has no effect on fighters",
+      "description": "This ocular filter has been modified by Guristas scientists for use by their elite officers.\n\nPrimary Effect: +2 Bonus to Perception\nSecondary Effects: 1% bonus to drone tracking speed, drone optimal range, drone falloff range, missile flight time, and missile explosion velocity\nSet Effect: 2.5% bonus to the strength of all Hydra implant secondary effects\n\nNote: Has no effect on fighters",
       "iconUrl": "https://images.evetech.net/types/54404/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/54404/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/54404/bp?size=32"
@@ -89992,7 +89992,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of the Nation and related factions. It provides increasing capacitor recharge rate bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +2 bonus to Perception\n\nSecondary Effect: 1% reduction to capacitor recharge time\n\nSet Effect: 2.5% bonus to the strength of all Rapture implant secondary effects",
+      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of the Nation and related factions. It provides increasing capacitor recharge rate bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +2 bonus to Perception\nSecondary Effect: 1% reduction to capacitor recharge time\nSet Effect: 2.5% bonus to the strength of all Rapture implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/57110/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/57110/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/57110/bp?size=32"
@@ -90058,7 +90058,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of the Nation and related factions. It provides increasing capacitor recharge rate bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +3 bonus to Perception\n\nSecondary Effect: 1% reduction to capacitor recharge time\n\nSet Effect: 10% bonus to the strength of all Rapture implant secondary effects",
+      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of the Nation and related factions. It provides increasing capacitor recharge rate bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +3 bonus to Perception\nSecondary Effect: 1% reduction to capacitor recharge time\nSet Effect: 10% bonus to the strength of all Rapture implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/57117/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/57117/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/57117/bp?size=32"
@@ -90124,7 +90124,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of the Nation and related factions. It provides increasing capacitor recharge rate bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +4 bonus to Perception\n\nSecondary Effect: 1% reduction to capacitor recharge time\n\nSet Effect: 15% bonus to the strength of all Rapture implant secondary effects",
+      "description": "This ocular filter appears to have been developed using Sansha's Nation technology and is likely to be used by elite pilots of the Nation and related factions. It provides increasing capacitor recharge rate bonuses when plugged in alongside other implants from the same set.\n\nPrimary Effect: +4 bonus to Perception\nSecondary Effect: 1% reduction to capacitor recharge time\nSet Effect: 15% bonus to the strength of all Rapture implant secondary effects",
       "iconUrl": "https://images.evetech.net/types/57123/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/57123/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/57123/bp?size=32"
@@ -100984,7 +100984,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by the Upwell Consortium for use by their elite security experts.\n\nPrimary Effect: +2 Bonus to Perception\n\nSecondary Effect: Adds an additional 1 point of Virus Coherence for Data and Relic Analyzers fitted to piloted ship",
+      "description": "This ocular filter has been modified by the Upwell Consortium for use by their elite security experts.\n\nPrimary Effect: +2 Bonus to Perception\nSecondary Effect: Adds an additional 1 point of Virus Coherence for Data and Relic Analyzers fitted to piloted ship",
       "iconUrl": "https://images.evetech.net/types/88119/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/88119/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/88119/bp?size=32"
@@ -101050,7 +101050,7 @@
       "group": "Cyberimplant",
       "category": "Implant",
       "volume": 1,
-      "description": "This ocular filter has been modified by the Upwell Consortium for use by their elite security experts.\n\nPrimary Effect: +3 Bonus to Perception\n\nSecondary Effect: Adds an additional 2 points of Virus Coherence for Data and Relic Analyzers fitted to piloted ship",
+      "description": "This ocular filter has been modified by the Upwell Consortium for use by their elite security experts.\n\nPrimary Effect: +3 Bonus to Perception\nSecondary Effect: Adds an additional 2 points of Virus Coherence for Data and Relic Analyzers fitted to piloted ship",
       "iconUrl": "https://images.evetech.net/types/88125/icon?size=32",
       "renderUrl": "https://images.evetech.net/types/88125/render?size=128",
       "bpIconUrl": "https://images.evetech.net/types/88125/bp?size=32"
